@@ -1,66 +1,231 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🚀 Work Tracking - Guide Développeur
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## 📋 Vue d'ensemble
 
-## About Laravel
+**Work Tracking** est une application web de suivi des travaux et projets avec une hiérarchie **Projet → Activité → Tâches**. L'objectif est de centraliser la gestion, faciliter la collaboration et permettre un suivi précis de l'avancement des activités.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Stack Technique
+- **Backend** : Laravel 10 + PostgreSQL/MySQL
+- **Frontend** : Vue.js 3 + AdminLTE3 + TailwindCSS
+- **Authentification** : Laravel Fortify + Sanctum
+- **Notifications** : Laravel Notifications + Mail
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🏗️ Architecture du Projet
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+```
+work-tracking/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── Auth/
+│   │   │   ├── ProjetController.php
+│   │   │   ├── ActiviteController.php
+│   │   │   ├── TacheController.php
+│   │   │   ├── UserController.php
+│   │   │   ├── NotificationController.php
+│   │   │   └── ReportingController.php
+│   │   ├── Middleware/
+│   │   │   └── RoleMiddleware.php
+│   │   └── Requests/
+│   │       ├── ProjetRequest.php
+│   │       ├── ActiviteRequest.php
+│   │       └── TacheRequest.php
+│   ├── Models/
+│   │   ├── User.php
+│   │   ├── Projet.php
+│   │   ├── Activite.php
+│   │   ├── Tache.php
+│   │   ├── Commentaire.php
+│   │   ├── Document.php
+│   │   └── Notification.php
+│   ├── Services/
+│   │   ├── ProjetService.php
+│   │   ├── TacheService.php
+│   │   ├── NotificationService.php
+│   │   └── ReportingService.php
+│   └── Enums/
+│       ├── StatusTache.php
+│       ├── Priorite.php
+│       └── Role.php
+├── database/
+│   ├── migrations/
+│   │   ├── 2024_01_01_create_users_table.php
+│   │   ├── 2024_01_02_create_projets_table.php
+│   │   ├── 2024_01_03_create_activites_table.php
+│   │   ├── 2024_01_04_create_taches_table.php
+│   │   ├── 2024_01_05_create_commentaires_table.php
+│   │   ├── 2024_01_06_create_documents_table.php
+│   │   └── 2024_01_07_create_notifications_table.php
+│   ├── seeders/
+│   │   ├── UserSeeder.php
+│   │   ├── ProjetSeeder.php
+│   │   └── RoleSeeder.php
+│   └── factories/
+├── resources/
+│   ├── js/
+│   │   ├── app.js
+│   │   ├── components/
+│   │   │   ├── auth/
+│   │   │   │   ├── Login.vue
+│   │   │   │   └── Register.vue
+│   │   │   ├── dashboard/
+│   │   │   │   ├── Dashboard.vue
+│   │   │   │   ├── StatCard.vue
+│   │   │   │   └── ChartComponent.vue
+│   │   │   ├── projet/
+│   │   │   │   ├── ProjetIndex.vue
+│   │   │   │   ├── ProjetCreate.vue
+│   │   │   │   ├── ProjetEdit.vue
+│   │   │   │   └── ProjetShow.vue
+│   │   │   ├── activite/
+│   │   │   │   ├── ActiviteIndex.vue
+│   │   │   │   ├── ActiviteCreate.vue
+│   │   │   │   └── ActiviteEdit.vue
+│   │   │   ├── tache/
+│   │   │   │   ├── TacheIndex.vue
+│   │   │   │   ├── TacheCreate.vue
+│   │   │   │   ├── TacheEdit.vue
+│   │   │   │   ├── TacheKanban.vue
+│   │   │   │   └── TacheCalendar.vue
+│   │   │   ├── shared/
+│   │   │   │   ├── Navbar.vue
+│   │   │   │   ├── Sidebar.vue
+│   │   │   │   ├── Modal.vue
+│   │   │   │   ├── FileUpload.vue
+│   │   │   │   └── CommentSection.vue
+│   │   │   └── reporting/
+│   │   │       ├── ReportDashboard.vue
+│   │   │       └── ReportExport.vue
+│   │   ├── stores/
+│   │   │   ├── auth.js
+│   │   │   ├── projet.js
+│   │   │   ├── tache.js
+│   │   │   └── notification.js
+│   │   └── utils/
+│   │       ├── api.js
+│   │       ├── helpers.js
+│   │       └── constants.js
+│   └── views/
+│       └── app.blade.php
+├── routes/
+│   ├── web.php
+│   └── api.php
+└── tests/
+    ├── Feature/
+    │   ├── ProjetTest.php
+    │   ├── ActiviteTest.php
+    │   └── TacheTest.php
+    └── Unit/
+        └── UserTest.php
+```
 
-## Learning Laravel
+## 🗄️ Modèles de Données
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Relations Principales
+```php
+// Projet (1) → Activités (n) → Tâches (n)
+// Utilisateur (n) ↔ Tâches (n) [Many-to-Many]
+// Tâche (1) → Commentaires (n)
+// Tâche (1) → Documents (n)
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Migrations Prioritaires
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+#### 1. Users Table
+```php
+Schema::create('users', function (Blueprint $table) {
+    $table->id();
+    $table->string('nom');
+    $table->string('email')->unique();
+    $table->string('password');
+    $table->enum('role', ['super_admin', 'manager', 'responsable_n1', 'responsable_n2', 'cadre', 'stagiaire']);
+    $table->string('fonction')->nullable();
+    $table->string('avatar')->nullable();
+    $table->timestamps();
+});
+```
 
-## Laravel Sponsors
+#### 2. Projets Table
+```php
+Schema::create('projets', function (Blueprint $table) {
+    $table->id();
+    $table->string('nom');
+    $table->text('description');
+    $table->date('date_debut');
+    $table->date('date_fin');
+    $table->foreignId('responsable_id')->constrained('users');
+    $table->timestamps();
+});
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+#### 3. Activites Table
+```php
+Schema::create('activites', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('projet_id')->constrained()->onDelete('cascade');
+    $table->string('nom');
+    $table->text('description');
+    $table->foreignId('responsable_id')->constrained('users');
+    $table->date('date_debut');
+    $table->date('date_fin');
+    $table->timestamps();
+});
+```
 
-### Premium Partners
+#### 4. Taches Table
+```php
+Schema::create('taches', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('activite_id')->constrained()->onDelete('cascade');
+    $table->string('titre');
+    $table->text('description');
+    $table->text('objectif')->nullable();
+    $table->text('indicateurs_resultats')->nullable();
+    $table->enum('statut', ['a_faire', 'en_cours', 'termine'])->default('a_faire');
+    $table->enum('priorite', ['faible', 'moyenne', 'elevee', 'critique'])->default('moyenne');
+    $table->date('echeance');
+    $table->integer('taux_realisation')->default(0); // 0-100%
+    $table->boolean('validation_superieur')->default(false);
+    $table->boolean('verrou_reevaluation')->default(false);
+    $table->text('commentaire')->nullable();
+    $table->timestamps();
+});
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+#### 5. Tache_User Pivot Table
+```php
+Schema::create('tache_user', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('tache_id')->constrained()->onDelete('cascade');
+    $table->foreignId('user_id')->constrained()->onDelete('cascade');
+    $table->boolean('is_responsable')->default(false);
+    $table->timestamps();
+});
+```
 
-## Contributing
+## 📦 Installation & Configuration
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Prérequis
+- PHP 8.1+
+- Composer
+- Node.js 16+
+- PostgreSQL ou MySQL
 
-## Code of Conduct
+### Installation
+```bash
+# 1. Cloner le repository
+git clone https://github.com/votre-org/work-tracking.git
+cd work-tracking
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# 2. Installer les dépendances PHP
+composer install
 
-## Security Vulnerabilities
+# 3. Installer les dépendances Node.js
+npm install
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# 4. Configurer l'environnement
+cp .env.example .env
+php artisan key:generate
 
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# 5. Configuration base de données (.env)
+DB_CONNECTION=mysql  # ou
