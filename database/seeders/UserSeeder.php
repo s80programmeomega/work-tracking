@@ -13,67 +13,62 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Super Admin
-        User::create([
-            'nom' => 'Super Administrateur',
-            'email' => 'admin@worktracking.com',
-            'password' => Hash::make('password123'),
-            'role' => 'super_admin',
-            'fonction' => 'Administrateur Système',
-        ]);
+        $users = [
+            [
+                'nom' => 'Super Administrateur',
+                'email' => 'admin@worktracking.com',
+                'password' => Hash::make('password123'),
+                'role' => 'super_admin',
+                'fonction' => 'Administrateur Système',
+            ],
+            [
+                'nom' => 'Manager Principal',
+                'email' => 'manager@worktracking.com',
+                'password' => Hash::make('password123'),
+                'role' => 'manager',
+                'fonction' => 'Chef de Projet',
+            ],
+            [
+                'nom' => 'Responsable N1',
+                'email' => 'resp1@worktracking.com',
+                'password' => Hash::make('password123'),
+                'role' => 'responsable_n1',
+                'fonction' => 'Chef d\'Équipe',
+            ],
+            [
+                'nom' => 'Responsable N2',
+                'email' => 'resp2@worktracking.com',
+                'password' => Hash::make('password123'),
+                'role' => 'responsable_n2',
+                'fonction' => 'Superviseur',
+            ],
+            [
+                'nom' => 'Jean Cadre',
+                'email' => 'cadre@worktracking.com',
+                'password' => Hash::make('password123'),
+                'role' => 'cadre',
+                'fonction' => 'Ingénieur Senior',
+            ],
+            [
+                'nom' => 'Marie Stagiaire',
+                'email' => 'stagiaire@worktracking.com',
+                'password' => Hash::make('password123'),
+                'role' => 'stagiaire',
+                'fonction' => 'Stagiaire Développeur',
+            ],
+            [
+                'nom' => 'Utilisateur Test',
+                'email' => 'test@test.com',
+                'password' => Hash::make('password'),
+                'role' => 'cadre',
+                'fonction' => 'Développeur',
+            ]
+        ];
 
-        // Manager
-        User::create([
-            'nom' => 'Manager Principal',
-            'email' => 'manager@worktracking.com',
-            'password' => Hash::make('password123'),
-            'role' => 'manager',
-            'fonction' => 'Chef de Projet',
-        ]);
-
-        // Responsable N1
-        User::create([
-            'nom' => 'Responsable N1',
-            'email' => 'resp1@worktracking.com',
-            'password' => Hash::make('password123'),
-            'role' => 'responsable_n1',
-            'fonction' => 'Chef d\'Équipe',
-        ]);
-
-        // Responsable N2
-        User::create([
-            'nom' => 'Responsable N2',
-            'email' => 'resp2@worktracking.com',
-            'password' => Hash::make('password123'),
-            'role' => 'responsable_n2',
-            'fonction' => 'Superviseur',
-        ]);
-
-        // Cadre
-        User::create([
-            'nom' => 'Jean Cadre',
-            'email' => 'cadre@worktracking.com',
-            'password' => Hash::make('password123'),
-            'role' => 'cadre',
-            'fonction' => 'Ingénieur Senior',
-        ]);
-
-        // Stagiaire
-        User::create([
-            'nom' => 'Marie Stagiaire',
-            'email' => 'stagiaire@worktracking.com',
-            'password' => Hash::make('password123'),
-            'role' => 'stagiaire',
-            'fonction' => 'Stagiaire Développeur',
-        ]);
-
-        // Utilisateur de test simple
-        User::create([
-            'nom' => 'Utilisateur Test',
-            'email' => 'test@test.com',
-            'password' => Hash::make('password'),
-            'role' => 'cadre',
-            'fonction' => 'Développeur',
-        ]);
+        foreach ($users as $userData) {
+            $user = User::create($userData);
+            // Assign the Spatie role
+            $user->assignRole($userData['role']);
+        }
     }
 }
