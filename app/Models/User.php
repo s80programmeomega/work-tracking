@@ -8,6 +8,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -25,6 +27,8 @@ class User extends Authenticatable
         'role',
         'fonction',
         'avatar',
+        'numero_telephone',
+        'team_id',
     ];
 
     /**
@@ -57,6 +61,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the user's team
+     */
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
+    }
+
+    /**
+     * Get teams where user is the responsible/manager
+     */
+    public function teamsAsResponsable(): HasMany
+    {
+        return $this->hasMany(Team::class, 'responsable_id');
+    }
+
+    /**
      * Check if user has a specific role
      */
     public function hasRoleLevel(string $role): bool
@@ -74,5 +94,21 @@ class User extends Authenticatable
         $requiredLevel = $roleHierarchy[$role] ?? 0;
 
         return $userLevel >= $requiredLevel;
+    }
+
+    /**
+     * Check if user can manage teams
+     */
+    public function canManageTeams(): bool
+    {
+        return $this->hasRoleLevel('manager');
+    }
+
+    /**
+     * Check if user is team leader
+     */
+    public function isTeamLeader(): bool
+    {
+        return $this->teamsAsResponsable()->exists();
     }
 }

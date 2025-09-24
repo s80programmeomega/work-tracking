@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\TeamController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,5 +28,18 @@ Route::post('/reset-password', [App\Http\Controllers\Auth\ResetPasswordControlle
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
+    // User profile routes
     Route::get('/user', [AuthController::class, 'user']);
+    Route::get('/profile', [UserController::class, 'profile']);
+    Route::put('/profile', [UserController::class, 'updateProfile']);
+    Route::put('/profile/password', [UserController::class, 'changePassword']);
+
+    // User management routes (admin)
+    Route::apiResource('users', UserController::class)->except(['show']);
+
+    // Team management routes
+    Route::apiResource('teams', TeamController::class);
+    Route::post('/teams/{team}/members', [TeamController::class, 'addMember']);
+    Route::delete('/teams/{team}/members', [TeamController::class, 'removeMember']);
+    Route::get('/teams/members/available', [TeamController::class, 'availableUsers']);
 });

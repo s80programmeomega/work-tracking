@@ -30,6 +30,68 @@ export const useAuthStore = defineStore('auth', {
       const requiredLevel = roleHierarchy[role] || 0
 
       return userLevel >= requiredLevel
+    },
+    hasPermission: (state) => (permission) => {
+      if (!state.user) return false
+
+      // Super admin has all permissions
+      if (state.user.role === 'super_admin') return true
+
+      // Check if user has specific permission via Spatie Permission
+      if (state.user.permissions && state.user.permissions.length > 0) {
+        return state.user.permissions.some(perm => perm.name === permission)
+      }
+
+      // Fallback: Check permissions based on role hierarchy
+      return state.hasPermissionByRole(permission)
+    },
+    hasPermissionByRole: (state) => (permission) => {
+      if (!state.user) return false
+
+      const rolePermissions = {
+        'super_admin': ['*'], // All permissions
+        'manager': [
+          'auth.login', 'auth.logout', 'profile.view', 'profile.edit', 'profile.change_password',
+          'team.view', 'team.create', 'team.edit', 'team.delete', 'team.manage_members', 'team.invite_members',
+          'user.view', 'user.create', 'user.edit', 'user.assign_role',
+          'projet.view', 'projet.create', 'projet.edit', 'projet.delete', 'projet.assign',
+          'tache.view', 'tache.create', 'tache.edit', 'tache.assign', 'tache.validate', 'tache.change_status',
+          'rapport.view', 'rapport.create', 'rapport.export',
+        ],
+        'responsable_n1': [
+          'auth.login', 'auth.logout', 'profile.view', 'profile.edit', 'profile.change_password',
+          'team.view', 'team.manage_members',
+          'user.view',
+          'projet.view', 'projet.edit',
+          'tache.view', 'tache.create', 'tache.edit', 'tache.assign', 'tache.validate', 'tache.change_status',
+          'rapport.view', 'rapport.create',
+        ],
+        'responsable_n2': [
+          'auth.login', 'auth.logout', 'profile.view', 'profile.edit', 'profile.change_password',
+          'team.view',
+          'user.view',
+          'projet.view', 'projet.edit',
+          'tache.view', 'tache.create', 'tache.edit', 'tache.assign', 'tache.change_status',
+          'rapport.view',
+        ],
+        'cadre': [
+          'auth.login', 'auth.logout', 'profile.view', 'profile.edit', 'profile.change_password',
+          'team.view',
+          'user.view',
+          'projet.view',
+          'tache.view', 'tache.edit', 'tache.change_status',
+          'rapport.view',
+        ],
+        'stagiaire': [
+          'auth.login', 'auth.logout', 'profile.view', 'profile.edit', 'profile.change_password',
+          'team.view',
+          'projet.view',
+          'tache.view', 'tache.change_status',
+        ],
+      }
+
+      const userPermissions = rolePermissions[state.user.role] || []
+      return userPermissions.includes('*') || userPermissions.includes(permission)
     }
   },
 
