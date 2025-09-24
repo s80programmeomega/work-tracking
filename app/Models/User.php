@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -18,9 +19,12 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'nom',
         'email',
         'password',
+        'role',
+        'fonction',
+        'avatar',
     ];
 
     /**
@@ -41,5 +45,34 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'role' => 'string',
     ];
+
+    /**
+     * Get the user's full name.
+     */
+    public function getNameAttribute()
+    {
+        return $this->nom;
+    }
+
+    /**
+     * Check if user has a specific role
+     */
+    public function hasRoleLevel(string $role): bool
+    {
+        $roleHierarchy = [
+            'stagiaire' => 1,
+            'cadre' => 2,
+            'responsable_n2' => 3,
+            'responsable_n1' => 4,
+            'manager' => 5,
+            'super_admin' => 6,
+        ];
+
+        $userLevel = $roleHierarchy[$this->role] ?? 0;
+        $requiredLevel = $roleHierarchy[$role] ?? 0;
+
+        return $userLevel >= $requiredLevel;
+    }
 }
