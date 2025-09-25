@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\ProjetController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -42,4 +43,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/teams/{team}/members', [TeamController::class, 'addMember']);
     Route::delete('/teams/{team}/members', [TeamController::class, 'removeMember']);
     Route::get('/teams/members/available', [TeamController::class, 'availableUsers']);
+
+    // Projet management routes
+    Route::apiResource('projets', ProjetController::class);
+    Route::get('/projets-dashboard', [ProjetController::class, 'dashboard']);
+    Route::get('/responsables', [ProjetController::class, 'responsables']);
 });
