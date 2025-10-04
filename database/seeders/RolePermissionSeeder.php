@@ -1,0 +1,115 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
+use App\Enums\Role as RoleEnum;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+
+class RolePermissionSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        // Reset cached roles and permissions
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
+        // Create permissions
+        $permissions = [
+            // Projets
+            'projets.view',
+            'projets.create',
+            'projets.update',
+            'projets.delete',
+
+            // Activités
+            'activites.view',
+            'activites.create',
+            'activites.update',
+            'activites.delete',
+
+            // Tâches
+            'taches.view',
+            'taches.create',
+            'taches.update',
+            'taches.delete',
+            'taches.validate',
+            'taches.comment',
+
+            // Users
+            'users.view',
+            'users.create',
+            'users.update',
+            'users.delete',
+            'users.assign',
+
+            // Reports
+            'reports.view',
+            'reports.create',
+        ];
+
+        foreach ($permissions as $permission) {
+            Permission::create(['name' => $permission, 'guard_name' => 'web']);
+        }
+
+        // Create roles and assign permissions
+        foreach (RoleEnum::cases() as $roleEnum) {
+            $role = Role::create([
+                'name' => $roleEnum->value,
+                'guard_name' => 'web'
+            ]);
+
+            $rolePermissions = $roleEnum->permissions();
+
+            if (in_array('*', $rolePermissions)) {
+                // Super admin gets all permissions
+                $role->givePermissionTo(Permission::all());
+            } else {
+                $role->givePermissionTo($rolePermissions);
+            }
+        }
+
+        // Create a super admin user
+        $superAdmin = User::create([
+            'name' => 'Super Admin',
+            'email' => 'admin@worktracking.com',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
+            'is_active' => true,
+        ]);
+        $superAdmin->assignRole(RoleEnum::SUPER_ADMIN->value);
+
+        // Create a manager user
+        $manager = User::create([
+            'name' => 'Manager User',
+            'email' => 'manager@worktracking.com',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
+            'is_active' => true,
+        ]);
+        $manager->assignRole(RoleEnum::MANAGER->value);
+
+        // Create a regular user (cadre)
+        $cadre = User::create([
+            'name' => 'Cadre User',
+            'email' => 'cadre@worktracking.com',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
+            'is_active' => true,
+        ]);
+        $cadre->assignRole(RoleEnum::CADRE->value);
+
+        $this->command->info('Roles and permissions seeded successfully!');
+        $this->command->info('');
+        $this->command->info('Default users created:');
+        $this->command->info('- admin@worktracking.com (password: password)');
+        $this->command->info('- manager@worktracking.com (password: password)');
+        $this->command->info('- cadre@worktracking.com (password: password)');
+    }
+}

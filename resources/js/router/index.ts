@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/authStore'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -12,6 +13,7 @@ const router = createRouter({
       component: () => import('../pages/Ecommerce.vue'),
       meta: {
         title: 'eCommerce Dashboard',
+        requiresAuth: true,
       },
     },
     {
@@ -20,6 +22,7 @@ const router = createRouter({
       component: () => import('../pages/Others/Calendar.vue'),
       meta: {
         title: 'Calendar',
+        requiresAuth: true,
       },
     },
     {
@@ -28,6 +31,7 @@ const router = createRouter({
       component: () => import('../pages/Others/UserProfile.vue'),
       meta: {
         title: 'Profile',
+        requiresAuth: true,
       },
     },
     {
@@ -36,6 +40,7 @@ const router = createRouter({
       component: () => import('../pages/Forms/FormElements.vue'),
       meta: {
         title: 'Form Elements',
+        requiresAuth: true,
       },
     },
     {
@@ -44,6 +49,7 @@ const router = createRouter({
       component: () => import('../pages/Tables/BasicTables.vue'),
       meta: {
         title: 'Basic Tables',
+        requiresAuth: true,
       },
     },
     {
@@ -130,6 +136,7 @@ const router = createRouter({
       component: () => import('../pages/Auth/Signin.vue'),
       meta: {
         title: 'Signin',
+        guest: true,
       },
     },
     {
@@ -138,6 +145,33 @@ const router = createRouter({
       component: () => import('../pages/Auth/Signup.vue'),
       meta: {
         title: 'Signup',
+        guest: true,
+      },
+    },
+    {
+      path: '/forgot-password',
+      name: 'ForgotPassword',
+      component: () => import('../pages/Auth/ForgotPassword.vue'),
+      meta: {
+        title: 'Forgot Password',
+        guest: true,
+      },
+    },
+    {
+      path: '/reset-password',
+      name: 'ResetPassword',
+      component: () => import('../pages/Auth/ResetPassword.vue'),
+      meta: {
+        title: 'Reset Password',
+        guest: true,
+      },
+    },
+    {
+      path: '/unauthorized',
+      name: 'Unauthorized',
+      component: () => import('../pages/Errors/FourZeroFour.vue'),
+      meta: {
+        title: 'Unauthorized',
       },
     },
   ],
@@ -145,7 +179,32 @@ const router = createRouter({
 
 export default router
 
-router.beforeEach((to, from, next) => {
-  document.title = `Vue.js ${to.meta.title} | TailAdmin - Vue.js Tailwind CSS Dashboard Template`
+// Global navigation guards
+router.beforeEach(async (to, from, next) => {
+  const authStore = useAuthStore()
+
+  // Set document title
+  document.title = `${to.meta.title || 'Dashboard'} | Work Tracking`
+
+  // Check if route requires authentication
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    return next({ name: 'Signin', query: { redirect: to.fullPath } })
+  }
+
+  // Check if route is for guests only (signin, signup)
+  if (to.meta.guest && authStore.isAuthenticated) {
+    return next({ name: 'Ecommerce' })
+  }
+
+  // Check role requirements
+  if (to.meta.roles && !authStore.hasAnyRole(to.meta.roles)) {
+    return next({ name: 'Unauthorized' })
+  }
+
+  // Check permission requirements
+  if (to.meta.permissions && !authStore.hasAnyPermission(to.meta.permissions)) {
+    return next({ name: 'Unauthorized' })
+  }
+
   next()
 })
