@@ -22,7 +22,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'nom',
         'email',
         'password',
         'profile_photo_path',
@@ -54,6 +54,7 @@ class User extends Authenticatable
         'last_login_at' => 'datetime',
         'is_active' => 'boolean',
         'password' => 'hashed',
+        'role' => 'string',
     ];
 
     /**
