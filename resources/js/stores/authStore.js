@@ -88,7 +88,18 @@ export const useAuthStore = defineStore('auth', {
                 router.push('/');
                 return response.data;
             } catch (error) {
-                this.error = error.response?.data?.message || error.response?.data?.error || 'Login failed';
+                // Set error message
+                const errorMessage = error.response?.status === 401
+                    ? 'Invalid email or password'
+                    : error.response?.data?.message || error.response?.data?.error || 'Login failed';
+
+                this.error = errorMessage;
+
+                // Clear error after 5 seconds
+                setTimeout(() => {
+                    this.error = null;
+                }, 5000);
+
                 throw error;
             } finally {
                 this.loading = false;

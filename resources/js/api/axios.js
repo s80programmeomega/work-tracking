@@ -28,8 +28,13 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
-        // 401 Unauthorized - Token expired
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        // Skip token refresh for auth routes (login, register, etc.)
+        const isAuthRoute = originalRequest.url?.includes('/auth/login') ||
+                           originalRequest.url?.includes('/auth/register') ||
+                           originalRequest.url?.includes('/auth/refresh');
+
+        // 401 Unauthorized - Token expired (but not for auth routes)
+        if (error.response?.status === 401 && !originalRequest._retry && !isAuthRoute) {
             originalRequest._retry = true;
 
             try {

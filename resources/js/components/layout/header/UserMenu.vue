@@ -8,7 +8,7 @@
         <img src="@images/user/owner.jpg" alt="User" />
       </span>
 
-      <span class="block mr-1 font-medium text-theme-sm">Musharof </span>
+      <span class="block mr-1 font-medium text-theme-sm">{{ userName }}</span>
 
       <ChevronDownIcon :class="{ 'rotate-180': dropdownOpen }" />
     </button>
@@ -20,10 +20,10 @@
     >
       <div>
         <span class="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
-          Musharof Chowdhury
+          {{ userName }}
         </span>
         <span class="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
-          randomuser@pimjo.com
+          {{ userEmail }}
         </span>
       </div>
 
@@ -59,11 +59,18 @@
 
 <script setup>
 import { UserCircleIcon, ChevronDownIcon, LogoutIcon, SettingsIcon, InfoCircleIcon } from '@/icons'
-import { RouterLink } from 'vue-router'
-import { ref, onMounted, onUnmounted } from 'vue'
+import { RouterLink, useRouter } from 'vue-router'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { useAuth } from '@/composables/useAuth'
+
+const router = useRouter()
+const { logout, user } = useAuth()
 
 const dropdownOpen = ref(false)
 const dropdownRef = ref(null)
+
+const userName = computed(() => user.value?.name || 'Utilisateur')
+const userEmail = computed(() => user.value?.email || '')
 
 const menuItems = [
   { href: '/profile', icon: UserCircleIcon, text: 'Edit profile' },
@@ -79,10 +86,14 @@ const closeDropdown = () => {
   dropdownOpen.value = false
 }
 
-const signOut = () => {
-  // Implement sign out logic here
-  console.log('Signing out...')
-  closeDropdown()
+const signOut = async () => {
+  try {
+    await logout()
+    closeDropdown()
+    router.push('/signin')
+  } catch (error) {
+    console.error('Erreur lors de la déconnexion:', error)
+  }
 }
 
 const handleClickOutside = (event) => {
