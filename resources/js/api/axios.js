@@ -1,0 +1,57 @@
+import axios from 'axios';
+import router from '@/router';
+
+const api = axios.create({
+    baseURL: import.meta.env.VITE_API_URL || '/api',
+    withCredentials: true,
+    headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+    },
+});
+
+// Request interceptor - Add auth token
+api.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('auth_token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
+
+// Response interceptor - Handle errors
+api.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        const originalRequest = error.config;
+
+        // 401 Unauthorized - Token expired
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
+
+            try {
+                const { data } = await api.post('/auth/refresh');
+                localStorage.setItem('auth_token', data.data.token);
+                originalRequest.headers.Authorization = `Bearer ${data.data.token}`;
+                return api(originalRequest);
+            } catch (refreshError) {
+                localStorage.removeItem('auth_token');
+                localStorage.removeItem('user');
+                router.push('/signin');
+                return Promise.reject(refreshError);
+            }
+        }
+
+        // 403 Forbidden - Insufficient permissions
+        if (error.response?.status === 403) {
+            router.push('/unauthorized');
+        }
+
+        return Promise.reject(error);
+    }
+);
+
+export default api;

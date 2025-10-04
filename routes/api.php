@@ -1,9 +1,6 @@
 <?php
 
-use App\Http\Controllers\Auth\AuthController;
-use App\Http\Controllers\ProjetController;
-use App\Http\Controllers\TeamController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\Api\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -18,34 +15,18 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Authentication routes
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
-
-// Password reset routes
-Route::post('/forgot-password', [App\Http\Controllers\Auth\ResetPasswordController::class, 'sendResetLink']);
-Route::post('/reset-password', [App\Http\Controllers\Auth\ResetPasswordController::class, 'reset']);
+// Public routes
+Route::prefix('auth')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
+});
 
 // Protected routes
-Route::middleware('auth:sanctum')->group(function () {
-    // User profile routes
-    Route::get('/user', [AuthController::class, 'user']);
-    Route::get('/profile', [UserController::class, 'profile']);
-    Route::put('/profile', [UserController::class, 'updateProfile']);
-    Route::put('/profile/password', [UserController::class, 'changePassword']);
-
-    // User management routes (admin)
-    Route::apiResource('users', UserController::class)->except(['show']);
-
-    // Team management routes
-    Route::apiResource('teams', TeamController::class);
-    Route::post('/teams/{team}/members', [TeamController::class, 'addMember']);
-    Route::delete('/teams/{team}/members', [TeamController::class, 'removeMember']);
-    Route::get('/teams/members/available', [TeamController::class, 'availableUsers']);
-
-    // Projet management routes
-    Route::apiResource('projets', ProjetController::class);
-    Route::get('/projets-dashboard', [ProjetController::class, 'dashboard']);
-    Route::get('/responsables', [ProjetController::class, 'responsables']);
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::prefix('auth')->group(function () {
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::get('/me', [AuthController::class, 'me']);
+        Route::post('/refresh', [AuthController::class, 'refresh']);
+        Route::post('/verify-email', [AuthController::class, 'verifyEmail']);
+    });
 });

@@ -4,16 +4,17 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles, LogsActivity, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -24,11 +25,10 @@ class User extends Authenticatable
         'nom',
         'email',
         'password',
-        'role',
-        'fonction',
-        'avatar',
-        'numero_telephone',
-        'team_id',
+        'profile_photo_path',
+        'is_active',
+        'last_login_at',
+        'last_login_ip',
     ];
 
     /**
@@ -39,6 +39,8 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
     ];
 
     /**
@@ -48,67 +50,29 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'two_factor_confirmed_at' => 'datetime',
+        'last_login_at' => 'datetime',
+        'is_active' => 'boolean',
         'password' => 'hashed',
         'role' => 'string',
     ];
 
     /**
-     * Get the user's full name.
+     * Activity logging configuration
      */
-    public function getNameAttribute()
+    public function getActivitylogOptions(): LogOptions
     {
-        return $this->nom;
+        return LogOptions::defaults()
+            ->logOnly(['name', 'email', 'is_active'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
     }
 
     /**
-     * Get the user's team
+     * Scope for active users
      */
-    public function team(): BelongsTo
+    public function scopeActive($query)
     {
-        return $this->belongsTo(Team::class);
-    }
-
-    /**
-     * Get teams where user is the responsible/manager
-     */
-    public function teamsAsResponsable(): HasMany
-    {
-        return $this->hasMany(Team::class, 'responsable_id');
-    }
-
-    /**
-     * Check if user has a specific role
-     */
-    public function hasRoleLevel(string $role): bool
-    {
-        $roleHierarchy = [
-            'stagiaire' => 1,
-            'cadre' => 2,
-            'responsable_n2' => 3,
-            'responsable_n1' => 4,
-            'manager' => 5,
-            'super_admin' => 6,
-        ];
-
-        $userLevel = $roleHierarchy[$this->role] ?? 0;
-        $requiredLevel = $roleHierarchy[$role] ?? 0;
-
-        return $userLevel >= $requiredLevel;
-    }
-
-    /**
-     * Check if user can manage teams
-     */
-    public function canManageTeams(): bool
-    {
-        return $this->hasRoleLevel('manager');
-    }
-
-    /**
-     * Check if user is team leader
-     */
-    public function isTeamLeader(): bool
-    {
-        return $this->teamsAsResponsable()->exists();
+        return $query->where('is_active', true);
     }
 }

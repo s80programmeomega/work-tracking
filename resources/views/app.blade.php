@@ -7,14 +7,9 @@
 
     <title>{{ config('app.name', 'Work Tracking') }}</title>
 
-    <!-- Google Font: Source Sans Pro -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="hold-transition sidebar-mini layout-fixed">
+<body>
     <div id="app"></div>
 </body>
 </html>

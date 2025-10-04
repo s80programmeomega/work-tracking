@@ -12,11 +12,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Run seeders in correct order due to foreign key dependencies
         $this->call([
             RolePermissionSeeder::class,
-            UserSeeder::class,
-            TeamSeeder::class,
         ]);
     }
 }
