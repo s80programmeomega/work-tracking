@@ -3,16 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\UserService;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
+use App\Http\Requests\UpdateProfileRequest;
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
-    public function __construct()
-    {
+    public function __construct(
+        protected UserService $userService
+    ) {
         $this->middleware('auth:sanctum');
     }
 
@@ -21,19 +24,45 @@ class UserController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $user = $request->user();
+        $this->authorize('viewAny', User::class);
 
-        if (!$user->can('user.view')) {
-            return response()->json(['message' => 'Non autorisé'], 403);
-        }
+        $filters = $request->only([
+            'search',
+            'role',
+            'team_id',
+            'is_active',
+            'sort_by',
+            'sort_direction',
+            'per_page',
+        ]);
 
-        $users = User::with(['team', 'roles', 'permissions'])
-                    ->select('id', 'nom', 'email', 'role', 'fonction', 'avatar', 'numero_telephone', 'team_id', 'created_at')
-                    ->get();
+        $users = $this->userService->getUsers($filters);
 
         return response()->json([
             'success' => true,
-            'users' => $users
+            'data' => UserResource::collection($users),
+            'meta' => [
+                'current_page' => $users->currentPage(),
+                'last_page' => $users->lastPage(),
+                'per_page' => $users->perPage(),
+                'total' => $users->total(),
+            ],
+        ]);
+    }
+
+    /**
+     * Display the specified user
+     */
+    public function show(User $user): JsonResponse
+    {
+        $this->authorize('view', $user);
+
+        $user->load(['team', 'roles', 'permissions']);
+        $stats = $this->userService->getUserStats($user);
+
+        return response()->json([
+            'success' => true,
+            'data' => new UserResource($user->setAttribute('stats', $stats)),
         ]);
     }
 
@@ -43,208 +72,154 @@ class UserController extends Controller
     public function profile(Request $request): JsonResponse
     {
         $user = $request->user()->load(['team', 'roles', 'permissions']);
+        $stats = $this->userService->getUserStats($user);
 
         return response()->json([
             'success' => true,
-            'user' => $user
+            'data' => new UserResource($user->setAttribute('stats', $stats)),
         ]);
     }
 
     /**
-     * Update user profile
+     * Update current user profile
      */
-    public function updateProfile(Request $request): JsonResponse
+    public function updateProfile(UpdateProfileRequest $request): JsonResponse
     {
-        $user = $request->user();
-
-        $validator = Validator::make($request->all(), [
-            'nom' => 'sometimes|string|max:255',
-            'fonction' => 'sometimes|string|max:255',
-            'numero_telephone' => 'sometimes|string|max:20',
-            'avatar' => 'sometimes|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $updateData = $validator->validated();
-
-        // Handle avatar upload
-        if ($request->hasFile('avatar')) {
-            // Delete old avatar if exists
-            if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
-                Storage::disk('public')->delete($user->avatar);
-            }
-
-            $avatarPath = $request->file('avatar')->store('avatars', 'public');
-            $updateData['avatar'] = $avatarPath;
-        }
-
-        $user->update($updateData);
+        $user = $this->userService->updateProfile(
+            $request->user(),
+            $request->validated()
+        );
 
         return response()->json([
             'success' => true,
-            'user' => $user->fresh(),
-            'message' => 'Profil mis à jour avec succès'
+            'message' => 'Profile updated successfully',
+            'data' => new UserResource($user),
         ]);
     }
 
     /**
-     * Change user password
+     * Change password
      */
     public function changePassword(Request $request): JsonResponse
     {
-        $user = $request->user();
-
-        $validator = Validator::make($request->all(), [
-            'current_password' => 'required',
-            'new_password' => 'required|min:8|confirmed',
+        $request->validate([
+            'current_password' => ['required', 'string'],
+            'new_password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
-        }
+        try {
+            $this->userService->changePassword(
+                $request->user(),
+                $request->current_password,
+                $request->new_password
+            );
 
-        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Password changed successfully',
+            ]);
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Le mot de passe actuel est incorrect'
+                'message' => $e->getMessage(),
             ], 400);
         }
-
-        $user->update([
-            'password' => Hash::make($request->new_password)
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Mot de passe changé avec succès'
-        ]);
     }
 
     /**
-     * Create a new user (admin only)
+     * Store a newly created user
      */
-    public function store(Request $request): JsonResponse
+    public function store(StoreUserRequest $request): JsonResponse
     {
-        $user = $request->user();
-
-        if (!$user->can('user.create')) {
-            return response()->json(['message' => 'Non autorisé'], 403);
-        }
-
-        $validator = Validator::make($request->all(), [
-            'nom' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:8',
-            'role' => 'required|in:super_admin,manager,responsable_n1,responsable_n2,cadre,stagiaire',
-            'fonction' => 'nullable|string|max:255',
-            'numero_telephone' => 'nullable|string|max:20',
-            'team_id' => 'nullable|exists:teams,id'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $userData = $validator->validated();
-        $userData['password'] = Hash::make($userData['password']);
-
-        $newUser = User::create($userData);
-
-        // Assign role using Spatie Permission
-        $newUser->assignRole($userData['role']);
+        $user = $this->userService->createUser($request->validated());
 
         return response()->json([
             'success' => true,
-            'user' => $newUser->fresh(['team', 'roles']),
-            'message' => 'Utilisateur créé avec succès'
+            'message' => 'User created successfully',
+            'data' => new UserResource($user),
         ], 201);
     }
 
     /**
-     * Update a user (admin only)
+     * Update the specified user
      */
-    public function update(Request $request, User $targetUser): JsonResponse
+    public function update(UpdateUserRequest $request, User $user): JsonResponse
     {
-        $user = $request->user();
+        $this->authorize('update', $user);
 
-        if (!$user->can('user.edit')) {
-            return response()->json(['message' => 'Non autorisé'], 403);
-        }
-
-        $validator = Validator::make($request->all(), [
-            'nom' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|unique:users,email,' . $targetUser->id,
-            'role' => 'sometimes|in:super_admin,manager,responsable_n1,responsable_n2,cadre,stagiaire',
-            'fonction' => 'sometimes|string|max:255',
-            'numero_telephone' => 'sometimes|string|max:20',
-            'team_id' => 'sometimes|nullable|exists:teams,id'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $updateData = $validator->validated();
-
-        // Handle role update
-        if (isset($updateData['role']) && $user->can('user.assign_role')) {
-            $targetUser->syncRoles([$updateData['role']]);
-            $targetUser->update(['role' => $updateData['role']]);
-        }
-
-        $targetUser->update($updateData);
+        $user = $this->userService->updateUser($user, $request->validated());
 
         return response()->json([
             'success' => true,
-            'user' => $targetUser->fresh(['team', 'roles']),
-            'message' => 'Utilisateur mis à jour avec succès'
+            'message' => 'User updated successfully',
+            'data' => new UserResource($user),
         ]);
     }
 
     /**
-     * Delete a user (admin only)
+     * Remove the specified user
      */
-    public function destroy(Request $request, User $targetUser): JsonResponse
+    public function destroy(User $user): JsonResponse
     {
-        $user = $request->user();
+        $this->authorize('delete', $user);
 
-        if (!$user->can('user.delete')) {
-            return response()->json(['message' => 'Non autorisé'], 403);
-        }
-
-        // Prevent self-deletion
-        if ($user->id === $targetUser->id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Vous ne pouvez pas supprimer votre propre compte'
-            ], 400);
-        }
-
-        // Remove avatar if exists
-        if ($targetUser->avatar && Storage::disk('public')->exists($targetUser->avatar)) {
-            Storage::disk('public')->delete($targetUser->avatar);
-        }
-
-        $targetUser->delete();
+        $this->userService->deleteUser($user);
 
         return response()->json([
             'success' => true,
-            'message' => 'Utilisateur supprimé avec succès'
+            'message' => 'User deleted successfully',
+        ]);
+    }
+
+    /**
+     * Toggle user active status
+     */
+    public function toggleActive(User $user): JsonResponse
+    {
+        $this->authorize('update', $user);
+
+        $user = $this->userService->toggleActiveStatus($user);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User status updated successfully',
+            'data' => new UserResource($user),
+        ]);
+    }
+
+    /**
+     * Get user activity log
+     */
+    public function activity(User $user): JsonResponse
+    {
+        $this->authorize('view', $user);
+
+        $activities = $this->userService->getUserActivity($user);
+
+        return response()->json([
+            'success' => true,
+            'data' => $activities,
+        ]);
+    }
+
+    /**
+     * Search users
+     */
+    public function search(Request $request): JsonResponse
+    {
+        $request->validate([
+            'q' => ['required', 'string', 'min:2'],
+            'limit' => ['nullable', 'integer', 'min:1', 'max:50'],
+        ]);
+
+        $users = $this->userService->searchUsers(
+            $request->q,
+            $request->limit ?? 10
+        );
+
+        return response()->json([
+            'success' => true,
+            'data' => UserResource::collection($users),
         ]);
     }
 }

@@ -122,6 +122,17 @@ const router = createRouter({
     },
 
     {
+      path: '/users',
+      name: 'Users',
+      component: () => import('../pages/Users/Index.vue'),
+      meta: {
+        title: 'Gestion des Utilisateurs',
+        requiresAuth: true,
+        roles: ['super_admin', 'manager'],
+      },
+    },
+
+    {
       path: '/error-404',
       name: '404 Error',
       component: () => import('../pages/Errors/FourZeroFour.vue'),
