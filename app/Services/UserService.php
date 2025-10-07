@@ -15,7 +15,7 @@ class UserService
      */
     public function getUsers(array $filters = []): LengthAwarePaginator
     {
-        $query = User::with(['team', 'roles', 'permissions'])
+        $query = User::with(['roles', 'permissions'])
             ->when($filters['search'] ?? null, function ($q, $search) {
                 $q->search($search);
             })
@@ -55,7 +55,7 @@ class UserService
             ->causedBy(auth()->user())
             ->log('User created');
 
-        return $user->fresh(['team', 'roles']);
+        return $user->fresh(['roles']);
     }
 
     /**
@@ -82,7 +82,7 @@ class UserService
             ->causedBy(auth()->user())
             ->log('User updated');
 
-        return $user->fresh(['team', 'roles']);
+        return $user->fresh(['roles']);
     }
 
     /**
@@ -188,14 +188,25 @@ class UserService
      */
     public function getUserStats(User $user): array
     {
+        // TODO: Implement when Projet, Activite, Tache models are created
         return [
-            'total_projets' => $user->projets()->count(),
-            'total_activites' => $user->activites()->count(),
-            'total_taches' => $user->taches()->count(),
-            'taches_completed' => $user->taches()->where('statut', 'termine')->count(),
-            'taches_in_progress' => $user->taches()->where('statut', 'en_cours')->count(),
-            'taches_pending' => $user->taches()->where('statut', 'a_faire')->count(),
+            'total_projets' => 0,
+            'total_activites' => 0,
+            'total_taches' => 0,
+            'taches_completed' => 0,
+            'taches_in_progress' => 0,
+            'taches_pending' => 0,
         ];
+
+        // Will be implemented later:
+        // return [
+        //     'total_projets' => $user->projets()->count(),
+        //     'total_activites' => $user->activites()->count(),
+        //     'total_taches' => $user->taches()->count(),
+        //     'taches_completed' => $user->taches()->where('statut', 'termine')->count(),
+        //     'taches_in_progress' => $user->taches()->where('statut', 'en_cours')->count(),
+        //     'taches_pending' => $user->taches()->where('statut', 'a_faire')->count(),
+        // ];
     }
 
     /**

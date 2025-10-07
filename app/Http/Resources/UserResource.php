@@ -29,10 +29,12 @@ class UserResource extends JsonResource
             'updated_at' => $this->updated_at->toISOString(),
 
             // Relationships
-            'team' => $this->whenLoaded('team', fn() => [
-                'id' => $this->team->id,
-                'nom' => $this->team->nom,
-            ]),
+            // TODO: Uncomment when Team model exists
+            // 'team' => $this->whenLoaded('team', fn() => [
+            //     'id' => $this->team->id,
+            //     'nom' => $this->team->nom,
+            // ]),
+            'team' => null,
 
             'roles' => $this->whenLoaded('roles', fn() =>
                 $this->roles->pluck('name')
