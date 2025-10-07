@@ -84,32 +84,34 @@ class User extends Authenticatable
     }
 
     // Relationships
-    public function team()
-    {
-        return $this->belongsTo(Team::class);
-    }
+    // TODO: Uncomment when Team model is created
+    // public function team()
+    // {
+    //     return $this->belongsTo(Team::class);
+    // }
 
-    public function projets()
-    {
-        return $this->hasMany(Projet::class, 'responsable_id');
-    }
+    // TODO: Uncomment when Projet, Activite, Tache models are created
+    // public function projets()
+    // {
+    //     return $this->hasMany(Projet::class, 'responsable_id');
+    // }
 
-    public function activites()
-    {
-        return $this->hasMany(Activite::class, 'responsable_id');
-    }
+    // public function activites()
+    // {
+    //     return $this->hasMany(Activite::class, 'responsable_id');
+    // }
 
-    public function taches()
-    {
-        return $this->belongsToMany(Tache::class, 'tache_user')
-            ->withPivot('role')
-            ->withTimestamps();
-    }
+    // public function taches()
+    // {
+    //     return $this->belongsToMany(Tache::class, 'tache_user')
+    //         ->withPivot('role')
+    //         ->withTimestamps();
+    // }
 
-    public function comments()
-    {
-        return $this->hasMany(Comment::class);
-    }
+    // public function comments()
+    // {
+    //     return $this->hasMany(Comment::class);
+    // }
 
     // Accessors
     public function getInitialsAttribute(): string

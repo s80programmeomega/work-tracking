@@ -10,12 +10,12 @@
           <div class="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
             <div>
               <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">First Name</p>
-              <p class="text-sm font-medium text-gray-800 dark:text-white/90">Musharof</p>
+              <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ firstName || 'Non renseigné' }}</p>
             </div>
 
             <div>
               <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Last Name</p>
-              <p class="text-sm font-medium text-gray-800 dark:text-white/90">Chowdhury</p>
+              <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ lastName || 'Non renseigné' }}</p>
             </div>
 
             <div>
@@ -23,18 +23,18 @@
                 Email address
               </p>
               <p class="text-sm font-medium text-gray-800 dark:text-white/90">
-                randomuser@pimjo.com
+                {{ user.email }}
               </p>
             </div>
 
             <div>
               <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Phone</p>
-              <p class="text-sm font-medium text-gray-800 dark:text-white/90">+09 363 398 46</p>
+              <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ user.numero_telephone || 'Non renseigné' }}</p>
             </div>
 
             <div>
               <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Bio</p>
-              <p class="text-sm font-medium text-gray-800 dark:text-white/90">Team Manager</p>
+              <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ user.bio || 'Non renseigné' }}</p>
             </div>
           </div>
         </div>
@@ -168,7 +168,7 @@
                     </label>
                     <input
                       type="text"
-                      value="Musharof"
+                      v-model="formData.firstName"
                       class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                     />
                   </div>
@@ -181,7 +181,7 @@
                     </label>
                     <input
                       type="text"
-                      value="Chowdhury"
+                      v-model="formData.lastName"
                       class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                     />
                   </div>
@@ -194,7 +194,7 @@
                     </label>
                     <input
                       type="text"
-                      value="emirhanboruch55@gmail.com"
+                      v-model="formData.email"
                       class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                     />
                   </div>
@@ -207,7 +207,7 @@
                     </label>
                     <input
                       type="text"
-                      value="+09 363 398 46"
+                      v-model="formData.phone"
                       class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                     />
                   </div>
@@ -220,7 +220,7 @@
                     </label>
                     <input
                       type="text"
-                      value="Team Manager"
+                      v-model="formData.bio"
                       class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                     />
                   </div>
@@ -251,14 +251,60 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import Modal from './Modal.vue'
+
+const props = defineProps({
+  user: {
+    type: Object,
+    required: true
+  }
+})
+
+const emit = defineEmits(['refresh'])
 
 const isProfileInfoModal = ref(false)
 
+// Split name into first and last name
+const firstName = computed(() => {
+  const names = props.user?.nom?.split(' ') || []
+  return names[0] || ''
+})
+
+const lastName = computed(() => {
+  const names = props.user?.nom?.split(' ') || []
+  return names.slice(1).join(' ') || ''
+})
+
+// Form data
+const formData = ref({
+  firstName: '',
+  lastName: '',
+  email: '',
+  phone: '',
+  bio: '',
+  facebook: '',
+  twitter: '',
+  linkedin: '',
+  instagram: ''
+})
+
+// Watch for user changes and populate form
+watch(() => props.user, (newUser) => {
+  if (newUser) {
+    const names = newUser.nom?.split(' ') || []
+    formData.value.firstName = names[0] || ''
+    formData.value.lastName = names.slice(1).join(' ') || ''
+    formData.value.email = newUser.email || ''
+    formData.value.phone = newUser.numero_telephone || ''
+    formData.value.bio = newUser.bio || ''
+  }
+}, { immediate: true })
+
 const saveProfile = () => {
   // Implement save profile logic here
-  console.log('Profile saved')
+  console.log('Profile saved', formData.value)
   isProfileInfoModal.value = false
+  emit('refresh')
 }
 </script>

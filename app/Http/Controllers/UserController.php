@@ -57,7 +57,7 @@ class UserController extends Controller
     {
         $this->authorize('view', $user);
 
-        $user->load(['team', 'roles', 'permissions']);
+        $user->load(['roles', 'permissions']);
         $stats = $this->userService->getUserStats($user);
 
         return response()->json([
@@ -71,7 +71,7 @@ class UserController extends Controller
      */
     public function profile(Request $request): JsonResponse
     {
-        $user = $request->user()->load(['team', 'roles', 'permissions']);
+        $user = $request->user()->load(['roles', 'permissions']);
         $stats = $this->userService->getUserStats($user);
 
         return response()->json([
