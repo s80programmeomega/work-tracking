@@ -112,13 +112,8 @@ export default {
 
         await authStore.login(form)
 
-        // Redirect based on user role
-        const user = authStore.user
-        if (user.role === 'super_admin' || user.role === 'manager') {
-          router.push('/admin/dashboard')
-        } else {
-          router.push('/dashboard')
-        }
+        // Redirect to dashboard
+        router.push('/')
 
       } catch (error) {
         if (error.response?.data?.errors) {

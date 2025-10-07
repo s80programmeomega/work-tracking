@@ -103,7 +103,7 @@ export const useAuthStore = defineStore('auth', {
         // Get CSRF token first
         await axios.get('/sanctum/csrf-cookie')
 
-        const response = await axios.post('/api/login', credentials)
+        const response = await axios.post('/api/auth/login', credentials)
 
         if (response.data.token) {
           this.token = response.data.token
@@ -170,7 +170,7 @@ export const useAuthStore = defineStore('auth', {
         this.user = response.data
         this.isAuthenticated = true
 
-        return response.data
+        return this.user
       } catch (error) {
         this.logout()
         throw error
