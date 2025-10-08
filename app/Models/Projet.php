@@ -5,99 +5,303 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Carbon\Carbon;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class Projet extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'nom',
         'description',
+        'code',
         'date_debut',
         'date_fin',
         'responsable_id',
-        'budget',
         'status',
-        'priorite',
+        'visibility',
+        'couleur',
+        'budget',
+        'progression',
+        'is_template',
+        'is_favorite',
+        'objectifs',
+        'metadata',
+        'archived_at',
     ];
 
     protected $casts = [
         'date_debut' => 'date',
         'date_fin' => 'date',
         'budget' => 'decimal:2',
+        'progression' => 'integer',
+        'is_template' => 'boolean',
+        'is_favorite' => 'boolean',
+        'metadata' => 'array',
+        'archived_at' => 'datetime',
     ];
 
     protected $appends = [
-        'duree_jours',
-        'jours_restants',
-        'progression_temporelle',
+        'is_overdue',
+        'days_remaining',
+        'member_count',
     ];
 
+    /**
+     * Boot the model.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($projet) {
+            if (empty($projet->code)) {
+                $projet->code = static::generateUniqueCode();
+            }
+        });
+    }
+
+    /**
+     * Generate unique project code.
+     */
+    public static function generateUniqueCode(): string
+    {
+        do {
+            $latestProjet = static::withTrashed()->latest('id')->first();
+            $nextId = $latestProjet ? $latestProjet->id + 1 : 1;
+            $code = 'PROJ-' . str_pad($nextId, 4, '0', STR_PAD_LEFT);
+        } while (static::where('code', $code)->exists());
+
+        return $code;
+    }
+
+    /**
+     * Relationships
+     */
     public function responsable(): BelongsTo
     {
         return $this->belongsTo(User::class, 'responsable_id');
     }
 
-    public function activites(): HasMany
+    public function members(): BelongsToMany
     {
-        return $this->hasMany(Activite::class);
+        return $this->belongsToMany(User::class, 'projet_user')
+            ->withPivot(['role', 'can_edit', 'can_delete', 'can_invite'])
+            ->withTimestamps();
     }
 
-    public function getDureeJoursAttribute(): int
+    public function tags(): BelongsToMany
     {
-        return $this->date_debut->diffInDays($this->date_fin);
+        return $this->belongsToMany(ProjetTag::class, 'projet_projet_tag')
+            ->withTimestamps();
     }
 
-    public function getJoursRestantsAttribute(): int
+    // TODO: Uncomment when Activite model is created
+    // public function activites(): HasMany
+    // {
+    //     return $this->hasMany(Activite::class);
+    // }
+
+    // TODO: Uncomment when Tache model is created
+    // public function taches(): HasManyThrough
+    // {
+    //     return $this->hasManyThrough(Tache::class, Activite::class);
+    // }
+
+    /**
+     * Calculate project progression based on tasks
+     * Returns percentage of completed tasks
+     */
+    public function calculateProgression(): int
     {
-        $now = Carbon::now();
-        if ($now > $this->date_fin) {
-            return 0;
+        // TODO: Implement when Tache model is created
+        // For now, return the manual progression value
+        return $this->progression ?? 0;
+
+        // Future implementation:
+        // $totalTaches = $this->taches()->count();
+        // if ($totalTaches === 0) {
+        //     return 0;
+        // }
+        // $completedTaches = $this->taches()->where('statut', 'termine')->count();
+        // return (int) round(($completedTaches / $totalTaches) * 100);
+    }
+
+    /**
+     * Update project progression automatically
+     */
+    public function updateProgression(): void
+    {
+        $this->update(['progression' => $this->calculateProgression()]);
+    }
+
+    /**
+     * Scopes
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+
+    public function scopeArchived($query)
+    {
+        return $query->where('status', 'archived');
+    }
+
+    public function scopeCompleted($query)
+    {
+        return $query->where('status', 'completed');
+    }
+
+    public function scopePublic($query)
+    {
+        return $query->where('visibility', 'public');
+    }
+
+    public function scopePrivate($query)
+    {
+        return $query->where('visibility', 'private');
+    }
+
+    public function scopeTeam($query)
+    {
+        return $query->where('visibility', 'team');
+    }
+
+    public function scopeTemplate($query)
+    {
+        return $query->where('is_template', true);
+    }
+
+    public function scopeFavorite($query)
+    {
+        return $query->where('is_favorite', true);
+    }
+
+    public function scopeOverdue($query)
+    {
+        return $query->where('date_fin', '<', now())
+            ->whereNotIn('status', ['completed', 'archived']);
+    }
+
+    public function scopeForUser($query, $userId)
+    {
+        return $query->where(function ($q) use ($userId) {
+            $q->where('responsable_id', $userId)
+                ->orWhereHas('members', function ($q) use ($userId) {
+                    $q->where('user_id', $userId);
+                });
+        });
+    }
+
+    public function scopeSearch($query, $term)
+    {
+        return $query->where(function ($q) use ($term) {
+            $q->where('nom', 'like', "%{$term}%")
+                ->orWhere('description', 'like', "%{$term}%")
+                ->orWhere('code', 'like', "%{$term}%");
+        });
+    }
+
+    /**
+     * Accessors
+     */
+    public function getIsOverdueAttribute(): bool
+    {
+        if (!$this->date_fin || in_array($this->status, ['completed', 'archived'])) {
+            return false;
         }
-        return $now->diffInDays($this->date_fin);
+
+        return $this->date_fin->isPast();
     }
 
-    public function getProgressionTemporelleAttribute(): float
+    public function getDaysRemainingAttribute(): ?int
     {
-        $now = Carbon::now();
-        $total = $this->date_debut->diffInDays($this->date_fin);
-        $ecoule = $this->date_debut->diffInDays($now);
-
-        if ($total <= 0) return 100;
-
-        return min(100, max(0, ($ecoule / $total) * 100));
-    }
-
-    public function getProgressionGlobaleAttribute(): float
-    {
-        $activites = $this->activites()->get();
-        if ($activites->isEmpty()) {
-            return 0;
+        if (!$this->date_fin || in_array($this->status, ['completed', 'archived'])) {
+            return null;
         }
 
-        $totalProgression = $activites->sum('taux_realisation');
-        return $totalProgression / $activites->count();
+        return now()->diffInDays($this->date_fin, false);
     }
 
-    public function scopeActifs($query)
+    public function getMemberCountAttribute(): int
     {
-        return $query->whereIn('status', ['planifie', 'en_cours']);
+        return $this->members()->count();
     }
 
-    public function scopeParResponsable($query, $userId)
+    /**
+     * Helper Methods
+     */
+    public function isResponsable(User $user): bool
     {
-        return $query->where('responsable_id', $userId);
+        return $this->responsable_id === $user->id;
     }
 
-    public function scopeParPriorite($query, $priorite)
+    public function isMember(User $user): bool
     {
-        return $query->where('priorite', $priorite);
+        return $this->members()->where('user_id', $user->id)->exists();
     }
 
-    public function scopeParStatus($query, $status)
+    public function getMemberRole(User $user): ?string
     {
-        return $query->where('status', $status);
+        $member = $this->members()->where('user_id', $user->id)->first();
+        return $member?->pivot->role;
+    }
+
+    public function canUserEdit(User $user): bool
+    {
+        if ($this->isResponsable($user)) {
+            return true;
+        }
+
+        $member = $this->members()->where('user_id', $user->id)->first();
+        return $member?->pivot->can_edit ?? false;
+    }
+
+    public function canUserDelete(User $user): bool
+    {
+        if ($this->isResponsable($user)) {
+            return true;
+        }
+
+        $member = $this->members()->where('user_id', $user->id)->first();
+        return $member?->pivot->can_delete ?? false;
+    }
+
+    public function canUserInvite(User $user): bool
+    {
+        if ($this->isResponsable($user)) {
+            return true;
+        }
+
+        $member = $this->members()->where('user_id', $user->id)->first();
+        return $member?->pivot->can_invite ?? false;
+    }
+
+    public function archive(): void
+    {
+        $this->update([
+            'status' => 'archived',
+            'archived_at' => now(),
+        ]);
+    }
+
+    public function unarchive(): void
+    {
+        $this->update([
+            'status' => 'active',
+            'archived_at' => null,
+        ]);
+    }
+
+    public function complete(): void
+    {
+        $this->update([
+            'status' => 'completed',
+            'progression' => 100,
+        ]);
     }
 }

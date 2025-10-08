@@ -53,4 +53,30 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/{user}/toggle-active', [UserController::class, 'toggleActive']);
         Route::get('/{user}/activity', [UserController::class, 'activity']);
     });
+
+    // Project Management Routes
+    Route::prefix('projets')->group(function () {
+        // List and stats
+        Route::get('/', [\App\Http\Controllers\ProjetController::class, 'index']);
+        Route::get('/my-projets', [\App\Http\Controllers\ProjetController::class, 'myProjets']);
+        Route::get('/dashboard-stats', [\App\Http\Controllers\ProjetController::class, 'dashboardStats']);
+
+        // CRUD
+        Route::post('/', [\App\Http\Controllers\ProjetController::class, 'store']);
+        Route::get('/{projet}', [\App\Http\Controllers\ProjetController::class, 'show']);
+        Route::put('/{projet}', [\App\Http\Controllers\ProjetController::class, 'update']);
+        Route::delete('/{projet}', [\App\Http\Controllers\ProjetController::class, 'destroy']);
+
+        // Actions
+        Route::post('/{projet}/archive', [\App\Http\Controllers\ProjetController::class, 'archive']);
+        Route::post('/{projet}/unarchive', [\App\Http\Controllers\ProjetController::class, 'unarchive']);
+        Route::post('/{projet}/complete', [\App\Http\Controllers\ProjetController::class, 'complete']);
+        Route::post('/{projet}/clone', [\App\Http\Controllers\ProjetController::class, 'clone']);
+        Route::post('/{projet}/toggle-favorite', [\App\Http\Controllers\ProjetController::class, 'toggleFavorite']);
+
+        // Members management
+        Route::post('/{projet}/members', [\App\Http\Controllers\ProjetController::class, 'addMember']);
+        Route::put('/{projet}/members/{userId}', [\App\Http\Controllers\ProjetController::class, 'updateMember']);
+        Route::delete('/{projet}/members/{userId}', [\App\Http\Controllers\ProjetController::class, 'removeMember']);
+    });
 });

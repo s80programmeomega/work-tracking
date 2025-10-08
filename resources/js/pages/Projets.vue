@@ -1,45 +1,79 @@
 <template>
-  <div class="container mx-auto py-6">
-    <!-- Navigation Tabs -->
-    <Tabs v-model="activeTab" class="w-full">
-      <TabsList class="grid w-full grid-cols-3">
-        <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-        <TabsTrigger value="list">Liste des projets</TabsTrigger>
-        <TabsTrigger value="detail" :disabled="!selectedProjetId">Détail projet</TabsTrigger>
-      </TabsList>
+  <AdminLayout>
+    <PageBreadcrumb :pageTitle="'Gestion des Projets'" />
 
-      <TabsContent value="dashboard" class="mt-6">
-        <ProjetDashboard
-          @view-all="activeTab = 'list'"
-          @view-projet="viewProjet"
-        />
-      </TabsContent>
+    <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
+      <!-- Navigation Tabs -->
+      <div class="mb-6">
+        <div class="border-b border-gray-200 dark:border-gray-700">
+          <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+          <button
+            @click="activeTab = 'dashboard'"
+            :class="[
+              activeTab === 'dashboard'
+                ? 'border-brand-500 text-brand-600 dark:text-brand-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
+              'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
+            ]"
+          >
+            Dashboard
+          </button>
+          <button
+            @click="activeTab = 'list'"
+            :class="[
+              activeTab === 'list'
+                ? 'border-brand-500 text-brand-600 dark:text-brand-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
+              'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
+            ]"
+          >
+            Liste des projets
+          </button>
+          <button
+            v-if="selectedProjetId"
+            @click="activeTab = 'detail'"
+            :class="[
+              activeTab === 'detail'
+                ? 'border-brand-500 text-brand-600 dark:text-brand-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
+              'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
+            ]"
+          >
+            Détail projet
+          </button>
+        </nav>
+      </div>
+    </div>
 
-      <TabsContent value="list" class="mt-6">
-        <ProjetList
-          @view-projet="viewProjet"
-        />
-      </TabsContent>
+    <!-- Tab Contents -->
+    <div class="mt-6">
+      <ProjetDashboard
+        v-if="activeTab === 'dashboard'"
+        @view-all="activeTab = 'list'"
+        @view-projet="viewProjet"
+      />
 
-      <TabsContent value="detail" class="mt-6">
-        <ProjetDetail
-          v-if="selectedProjetId"
-          :projet-id="selectedProjetId"
-          @back="backToList"
-          @create-activity="createActivity"
-          @view-activity="viewActivity"
-        />
-      </TabsContent>
-    </Tabs>
-  </div>
+      <ProjetList
+        v-if="activeTab === 'list'"
+        @view-projet="viewProjet"
+      />
+
+      <ProjetDetail
+        v-if="activeTab === 'detail' && selectedProjetId"
+        :projet-id="selectedProjetId"
+        @back="backToList"
+        @create-activity="createActivity"
+        @view-activity="viewActivity"
+      />
+      </div>
+    </div>
+  </AdminLayout>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import Tabs from '@/components/ui/tabs/Tabs.vue'
-import TabsList from '@/components/ui/tabs/TabsList.vue'
-import TabsTrigger from '@/components/ui/tabs/TabsTrigger.vue'
-import TabsContent from '@/components/ui/tabs/TabsContent.vue'
+import AdminLayout from '@/components/layout/AdminLayout.vue'
+import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 
 import {
   ProjetDashboard,
