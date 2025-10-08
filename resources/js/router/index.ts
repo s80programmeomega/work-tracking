@@ -143,6 +143,16 @@ const router = createRouter({
     },
 
     {
+      path: '/activites',
+      name: 'Activites',
+      component: () => import('../pages/Activites.vue'),
+      meta: {
+        title: 'Gestion des Activités',
+        requiresAuth: true,
+      },
+    },
+
+    {
       path: '/error-404',
       name: '404 Error',
       component: () => import('../pages/Errors/FourZeroFour.vue'),

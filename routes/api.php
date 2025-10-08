@@ -79,4 +79,24 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('/{projet}/members/{userId}', [\App\Http\Controllers\ProjetController::class, 'updateMember']);
         Route::delete('/{projet}/members/{userId}', [\App\Http\Controllers\ProjetController::class, 'removeMember']);
     });
+
+    // Activity Management Routes
+    Route::prefix('activites')->group(function () {
+        // List and filter
+        Route::get('/', [\App\Http\Controllers\ActiviteController::class, 'index']);
+        Route::get('/my-activites', [\App\Http\Controllers\ActiviteController::class, 'myActivites']);
+        Route::get('/projet/{projetId}', [\App\Http\Controllers\ActiviteController::class, 'forProjet']);
+
+        // CRUD
+        Route::post('/', [\App\Http\Controllers\ActiviteController::class, 'store']);
+        Route::get('/{activite}', [\App\Http\Controllers\ActiviteController::class, 'show']);
+        Route::put('/{activite}', [\App\Http\Controllers\ActiviteController::class, 'update']);
+        Route::delete('/{activite}', [\App\Http\Controllers\ActiviteController::class, 'destroy']);
+
+        // Actions
+        Route::post('/{activite}/archive', [\App\Http\Controllers\ActiviteController::class, 'archive']);
+        Route::post('/{activite}/unarchive', [\App\Http\Controllers\ActiviteController::class, 'unarchive']);
+        Route::post('/{activite}/duplicate', [\App\Http\Controllers\ActiviteController::class, 'duplicate']);
+        Route::post('/reorder', [\App\Http\Controllers\ActiviteController::class, 'reorder']);
+    });
 });

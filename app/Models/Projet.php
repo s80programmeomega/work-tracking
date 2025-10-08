@@ -99,11 +99,10 @@ class Projet extends Model
             ->withTimestamps();
     }
 
-    // TODO: Uncomment when Activite model is created
-    // public function activites(): HasMany
-    // {
-    //     return $this->hasMany(Activite::class);
-    // }
+    public function activites(): HasMany
+    {
+        return $this->hasMany(Activite::class);
+    }
 
     // TODO: Uncomment when Tache model is created
     // public function taches(): HasManyThrough
