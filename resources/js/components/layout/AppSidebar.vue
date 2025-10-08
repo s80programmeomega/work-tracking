@@ -310,6 +310,11 @@ const menuGroups = [
                 path: "/users",
             },
             {
+                icon: BoxCubeIcon,
+                name: "Projets",
+                path: "/projets",
+            },
+            {
                 name: "Forms",
                 icon: ListIcon,
                 subItems: [

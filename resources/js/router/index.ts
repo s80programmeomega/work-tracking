@@ -133,6 +133,16 @@ const router = createRouter({
     },
 
     {
+      path: '/projets',
+      name: 'Projets',
+      component: () => import('../pages/Projets.vue'),
+      meta: {
+        title: 'Gestion des Projets',
+        requiresAuth: true,
+      },
+    },
+
+    {
       path: '/error-404',
       name: '404 Error',
       component: () => import('../pages/Errors/FourZeroFour.vue'),
