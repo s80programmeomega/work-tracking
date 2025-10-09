@@ -320,6 +320,11 @@ const menuGroups = [
                 path: "/activites",
             },
             {
+                icon: ListIcon,
+                name: "Tâches",
+                path: "/taches",
+            },
+            {
                 name: "Forms",
                 icon: ListIcon,
                 subItems: [

@@ -99,4 +99,28 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/{activite}/duplicate', [\App\Http\Controllers\ActiviteController::class, 'duplicate']);
         Route::post('/reorder', [\App\Http\Controllers\ActiviteController::class, 'reorder']);
     });
+
+    // Task Management Routes
+    Route::prefix('taches')->group(function () {
+        // List and filter
+        Route::get('/', [\App\Http\Controllers\TacheController::class, 'index']);
+        Route::get('/my-taches', [\App\Http\Controllers\TacheController::class, 'myTaches']);
+        Route::get('/activite/{activiteId}', [\App\Http\Controllers\TacheController::class, 'forActivite']);
+
+        // CRUD
+        Route::post('/', [\App\Http\Controllers\TacheController::class, 'store']);
+        Route::get('/{tache}', [\App\Http\Controllers\TacheController::class, 'show']);
+        Route::put('/{tache}', [\App\Http\Controllers\TacheController::class, 'update']);
+        Route::delete('/{tache}', [\App\Http\Controllers\TacheController::class, 'destroy']);
+
+        // Actions
+        Route::post('/{tache}/move', [\App\Http\Controllers\TacheController::class, 'move']);
+        Route::post('/{tache}/reorder', [\App\Http\Controllers\TacheController::class, 'reorder']);
+        Route::post('/{tache}/duplicate', [\App\Http\Controllers\TacheController::class, 'duplicate']);
+        Route::post('/{tache}/archive', [\App\Http\Controllers\TacheController::class, 'archive']);
+        Route::post('/{tache}/validate', [\App\Http\Controllers\TacheController::class, 'validateTask']);
+        Route::post('/{tache}/assign', [\App\Http\Controllers\TacheController::class, 'assignUser']);
+        Route::post('/{tache}/unassign', [\App\Http\Controllers\TacheController::class, 'unassignUser']);
+        Route::post('/{tache}/progress', [\App\Http\Controllers\TacheController::class, 'updateProgress']);
+    });
 });
