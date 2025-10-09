@@ -15,7 +15,7 @@ class TacheService
      */
     public function getAllTaches(array $filters = []): Collection
     {
-        $query = Tache::query()->with(['activite', 'assignees', 'validateur']);
+        $query = Tache::query()->with(['activite', 'assignees', 'validateur', 'labels']);
 
         if (isset($filters['activite_id'])) {
             $query->forActivite($filters['activite_id']);
@@ -46,7 +46,7 @@ class TacheService
     public function getKanbanForActivite(int $activiteId): array
     {
         $taches = Tache::forActivite($activiteId)
-            ->with(['assignees', 'validateur'])
+            ->with(['assignees', 'validateur', 'labels'])
             ->ordered()
             ->get();
 
@@ -63,7 +63,7 @@ class TacheService
     public function getMyTaches(int $userId): Collection
     {
         return Tache::assignedTo($userId)
-            ->with(['activite', 'assignees', 'validateur'])
+            ->with(['activite', 'assignees', 'validateur', 'labels'])
             ->ordered()
             ->get();
     }
@@ -74,9 +74,10 @@ class TacheService
     public function createTache(array $data): Tache
     {
         return DB::transaction(function () use ($data) {
-            // Extract assignees
+            // Extract assignees and labels
             $assigneeIds = $data['assignee_ids'] ?? [];
-            unset($data['assignee_ids']);
+            $labelIds = $data['label_ids'] ?? [];
+            unset($data['assignee_ids'], $data['label_ids']);
 
             // Set default order if not provided
             if (!isset($data['ordre'])) {
@@ -94,7 +95,12 @@ class TacheService
                 $tache->assignees()->attach($assigneeIds);
             }
 
-            return $tache->load(['activite', 'assignees', 'validateur']);
+            // Attach labels
+            if (!empty($labelIds)) {
+                $tache->labels()->attach($labelIds);
+            }
+
+            return $tache->load(['activite', 'assignees', 'validateur', 'labels']);
         });
     }
 
@@ -104,9 +110,10 @@ class TacheService
     public function updateTache(Tache $tache, array $data): Tache
     {
         return DB::transaction(function () use ($tache, $data) {
-            // Extract assignees if provided
+            // Extract assignees and labels if provided
             $assigneeIds = $data['assignee_ids'] ?? null;
-            unset($data['assignee_ids']);
+            $labelIds = $data['label_ids'] ?? null;
+            unset($data['assignee_ids'], $data['label_ids']);
 
             // Update task
             $tache->update($data);
@@ -116,7 +123,12 @@ class TacheService
                 $tache->assignees()->sync($assigneeIds);
             }
 
-            return $tache->fresh(['activite', 'assignees', 'validateur']);
+            // Sync labels if provided
+            if ($labelIds !== null) {
+                $tache->labels()->sync($labelIds);
+            }
+
+            return $tache->fresh(['activite', 'assignees', 'validateur', 'labels']);
         });
     }
 

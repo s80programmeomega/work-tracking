@@ -41,6 +41,8 @@ class StoreTacheRequest extends FormRequest
             'metadata' => ['nullable', 'array'],
             'assignee_ids' => ['nullable', 'array'],
             'assignee_ids.*' => ['exists:users,id'],
+            'label_ids' => ['nullable', 'array'],
+            'label_ids.*' => ['exists:labels,id'],
         ];
     }
 

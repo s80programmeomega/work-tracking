@@ -44,7 +44,7 @@ class Tache extends Model
         'taux_realisation' => 'integer',
     ];
 
-    protected $with = ['activite', 'assignees', 'validateur'];
+    protected $with = ['activite', 'assignees', 'validateur', 'labels'];
 
     /**
      * Get the activity that owns the task
@@ -95,6 +95,15 @@ class Tache extends Model
             'depends_on_tache_id',
             'tache_id'
         )->withTimestamps();
+    }
+
+    /**
+     * Get labels associated with this task
+     */
+    public function labels(): BelongsToMany
+    {
+        return $this->belongsToMany(Label::class, 'label_tache')
+            ->withTimestamps();
     }
 
     /**

@@ -91,6 +91,23 @@
       {{ tache.description }}
     </p>
 
+    <!-- Labels -->
+    <div v-if="tache.labels?.length > 0" class="mb-3 flex flex-wrap gap-1">
+      <span
+        v-for="label in tache.labels"
+        :key="label.id"
+        class="px-2 py-1 text-xs font-medium rounded-md"
+        :style="{
+          backgroundColor: label.couleur + '20',
+          color: label.couleur,
+          border: `1px solid ${label.couleur}`
+        }"
+        :title="label.description"
+      >
+        {{ label.nom }}
+      </span>
+    </div>
+
     <!-- Progress bar -->
     <div v-if="tache.taux_realisation > 0" class="mb-3">
       <div class="flex justify-between text-xs text-gray-600 dark:text-gray-400 mb-1">
@@ -171,6 +188,9 @@ const props = defineProps({
 })
 
 defineEmits(['view', 'edit', 'duplicate', 'archive', 'delete', 'validate'])
+
+// Debug: Log labels
+console.log('TacheCard - tache:', props.tache.titre, 'labels:', JSON.parse(JSON.stringify(props.tache.labels)))
 
 const showMenu = ref(false)
 

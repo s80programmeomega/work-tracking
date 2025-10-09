@@ -73,7 +73,7 @@ class TacheController extends Controller
      */
     public function show(Tache $tache): TacheResource
     {
-        return new TacheResource($tache->load(['activite', 'assignees', 'validateur', 'dependencies', 'dependents']));
+        return new TacheResource($tache->load(['activite', 'assignees', 'validateur', 'labels', 'dependencies', 'dependents']));
     }
 
     /**

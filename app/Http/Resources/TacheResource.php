@@ -52,6 +52,7 @@ class TacheResource extends JsonResource
                     'avatar' => $user->avatar,
                 ];
             }),
+            'labels' => LabelResource::collection($this->whenLoaded('labels')),
             'ordre' => $this->ordre,
             'couleur' => $this->couleur,
             'image_couverture' => $this->image_couverture,

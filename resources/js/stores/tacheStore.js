@@ -60,6 +60,8 @@ export const useTacheStore = defineStore('tache', () => {
         en_cours: data.en_cours || [],
         termine: data.termine || []
       }
+      // Debug: Check if labels are in the data
+      console.log('Kanban data loaded, first task labels:', kanban.value.a_faire[0]?.labels)
       return kanban.value
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to fetch kanban'

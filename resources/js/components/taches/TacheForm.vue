@@ -131,6 +131,34 @@
           <p class="mt-1 text-xs text-gray-500">Maintenez Ctrl/Cmd pour sélectionner plusieurs utilisateurs</p>
         </div>
 
+        <!-- Labels -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Labels
+          </label>
+          <div class="flex flex-wrap gap-2">
+            <button
+              v-for="label in labels"
+              :key="label.id"
+              type="button"
+              @click="toggleLabel(label.id)"
+              class="px-3 py-1.5 text-sm font-medium rounded-lg transition-all"
+              :class="formData.label_ids.includes(label.id) ? 'ring-2 ring-offset-2' : 'opacity-60 hover:opacity-100'"
+              :style="{
+                backgroundColor: label.couleur + (formData.label_ids.includes(label.id) ? '' : '20'),
+                color: formData.label_ids.includes(label.id) ? '#ffffff' : label.couleur,
+                borderColor: label.couleur,
+                ringColor: label.couleur
+              }"
+              style="border-width: 1px;"
+              :title="label.description"
+            >
+              {{ label.nom }}
+            </button>
+          </div>
+          <p v-if="labels.length === 0" class="mt-1 text-xs text-gray-500">Aucun label disponible</p>
+        </div>
+
         <!-- Due Date and Progress -->
         <div class="grid grid-cols-2 gap-4">
           <div>
@@ -217,6 +245,7 @@
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useTaches } from '@/composables/useTaches'
+import { useLabels } from '@/composables/useLabels'
 import api from '@/api/axios'
 
 const props = defineProps({
@@ -238,6 +267,7 @@ const emit = defineEmits(['close', 'saved'])
 
 const authStore = useAuthStore()
 const { createTache, updateTache } = useTaches()
+const { labels, fetchLabels } = useLabels()
 
 const loading = ref(false)
 const users = ref([])
@@ -257,8 +287,18 @@ const formData = ref({
   taux_realisation: 0,
   couleur: '#3B82F6',
   commentaire: '',
-  assignee_ids: []
+  assignee_ids: [],
+  label_ids: []
 })
+
+const toggleLabel = (labelId) => {
+  const index = formData.value.label_ids.indexOf(labelId)
+  if (index > -1) {
+    formData.value.label_ids.splice(index, 1)
+  } else {
+    formData.value.label_ids.push(labelId)
+  }
+}
 
 const loadUsers = async () => {
   try {
@@ -282,6 +322,10 @@ const handleSubmit = async () => {
   loading.value = true
   errorMessage.value = ''
   validationErrors.value = []
+
+  // Debug: Log data being sent
+  console.log('Submitting tache with data:', formData.value)
+  console.log('Label IDs:', formData.value.label_ids)
 
   try {
     if (props.tache) {
@@ -319,7 +363,11 @@ const handleSubmit = async () => {
 }
 
 onMounted(async () => {
-  await Promise.all([loadUsers(), loadActivites()])
+  try {
+    await Promise.all([loadUsers(), loadActivites(), fetchLabels()])
+  } catch (error) {
+    console.error('Error loading form data:', error)
+  }
 
   if (props.tache) {
     formData.value = {
@@ -334,7 +382,8 @@ onMounted(async () => {
       taux_realisation: props.tache.taux_realisation || 0,
       couleur: props.tache.couleur || '#3B82F6',
       commentaire: props.tache.commentaire || '',
-      assignee_ids: props.tache.assignees?.map(a => a.id) || []
+      assignee_ids: props.tache.assignees?.map(a => a.id) || [],
+      label_ids: props.tache.labels?.map(l => l.id) || []
     }
   }
 })
