@@ -153,6 +153,16 @@ const router = createRouter({
     },
 
     {
+      path: '/taches',
+      name: 'Taches',
+      component: () => import('../pages/Taches.vue'),
+      meta: {
+        title: 'Gestion des Tâches',
+        requiresAuth: true,
+      },
+    },
+
+    {
       path: '/error-404',
       name: '404 Error',
       component: () => import('../pages/Errors/FourZeroFour.vue'),
