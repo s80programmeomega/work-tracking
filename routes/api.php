@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\LabelController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -122,5 +123,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/{tache}/assign', [\App\Http\Controllers\TacheController::class, 'assignUser']);
         Route::post('/{tache}/unassign', [\App\Http\Controllers\TacheController::class, 'unassignUser']);
         Route::post('/{tache}/progress', [\App\Http\Controllers\TacheController::class, 'updateProgress']);
+    });
+
+    // Labels routes
+    Route::prefix('labels')->group(function () {
+        Route::get('/', [LabelController::class, 'index']);
+        Route::post('/', [LabelController::class, 'store']);
+        Route::get('/{label}', [LabelController::class, 'show']);
+        Route::put('/{label}', [LabelController::class, 'update']);
+        Route::delete('/{label}', [LabelController::class, 'destroy']);
+        Route::post('/reorder', [LabelController::class, 'reorder']);
     });
 });
