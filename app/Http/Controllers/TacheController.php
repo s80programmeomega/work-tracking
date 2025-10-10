@@ -25,7 +25,7 @@ class TacheController extends Controller
      */
     public function index(Request $request): AnonymousResourceCollection
     {
-        $filters = $request->only(['activite_id', 'statut', 'priorite', 'user_id', 'overdue']);
+        $filters = $request->only(['activite_id', 'statut', 'priorite', 'user_id', 'overdue', 'archive_status']);
         $taches = $this->tacheService->getAllTaches($filters);
 
         return TacheResource::collection($taches);
@@ -108,13 +108,13 @@ class TacheController extends Controller
     {
         $request->validate([
             'statut' => ['required', 'in:' . implode(',', TacheStatut::values())],
-            'ordre' => ['required', 'integer', 'min:0'],
+            'position' => ['required', 'integer', 'min:0'],
         ]);
 
         $tache = $this->tacheService->moveTache(
             $tache,
             TacheStatut::from($request->statut),
-            $request->ordre
+            $request->position
         );
 
         return response()->json([
@@ -129,13 +129,13 @@ class TacheController extends Controller
     public function reorder(Request $request, Tache $tache): JsonResponse
     {
         $request->validate([
-            'ordre' => ['required', 'integer', 'min:0'],
+            'position' => ['required', 'integer', 'min:0'],
         ]);
 
         $tache = $this->tacheService->moveTache(
             $tache,
             $tache->statut,
-            $request->ordre
+            $request->position
         );
 
         return response()->json([
@@ -166,6 +166,20 @@ class TacheController extends Controller
 
         return response()->json([
             'message' => 'Tâche archivée avec succès.',
+            'data' => new TacheResource($tache),
+        ]);
+    }
+
+    /**
+     * Unarchive a task
+     */
+    public function unarchive(Tache $tache): JsonResponse
+    {
+        $tache = $this->tacheService->unarchiveTache($tache);
+
+        return response()->json([
+            'message' => 'Tâche désarchivée avec succès.',
+            'data' => new TacheResource($tache),
         ]);
     }
 

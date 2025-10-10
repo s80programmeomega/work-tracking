@@ -119,6 +119,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/{tache}/reorder', [\App\Http\Controllers\TacheController::class, 'reorder']);
         Route::post('/{tache}/duplicate', [\App\Http\Controllers\TacheController::class, 'duplicate']);
         Route::post('/{tache}/archive', [\App\Http\Controllers\TacheController::class, 'archive']);
+        Route::post('/{tache}/unarchive', [\App\Http\Controllers\TacheController::class, 'unarchive']);
         Route::post('/{tache}/validate', [\App\Http\Controllers\TacheController::class, 'validateTask']);
         Route::post('/{tache}/assign', [\App\Http\Controllers\TacheController::class, 'assignUser']);
         Route::post('/{tache}/unassign', [\App\Http\Controllers\TacheController::class, 'unassignUser']);

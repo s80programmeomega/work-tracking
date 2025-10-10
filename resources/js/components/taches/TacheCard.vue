@@ -3,9 +3,26 @@
     class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-move border border-gray-200 dark:border-gray-700"
     :style="{ borderLeftColor: tache.couleur, borderLeftWidth: '4px' }"
   >
+    <!-- Cover Image -->
+    <div v-if="tache.cover_image" class="mb-3 -mx-4 -mt-4">
+      <img
+        :src="tache.cover_image"
+        alt="Cover"
+        class="w-full h-32 object-cover rounded-t-lg"
+      />
+    </div>
+
     <!-- Header with priority and menu -->
     <div class="flex items-start justify-between mb-2">
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 flex-wrap">
+        <!-- Task Code -->
+        <span
+          v-if="tache.code"
+          class="px-2 py-1 text-xs font-mono font-medium rounded bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+        >
+          {{ tache.code }}
+        </span>
+
         <!-- Priority badge -->
         <span
           class="px-2 py-1 text-xs font-medium rounded"
@@ -20,6 +37,14 @@
           class="px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
         >
           En retard
+        </span>
+
+        <!-- Archived indicator -->
+        <span
+          v-if="tache.archive_status === 'archived'"
+          class="px-2 py-1 text-xs font-medium rounded bg-gray-500 text-white"
+        >
+          Archivée
         </span>
       </div>
 
@@ -42,33 +67,52 @@
         >
           <button
             @click.stop="$emit('edit', tache)"
-            class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600"
+            class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2"
           >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
             Modifier
           </button>
           <button
             @click.stop="$emit('duplicate', tache)"
-            class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600"
+            class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2"
           >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
             Dupliquer
           </button>
           <button
             v-if="!tache.validation_superieur"
             @click.stop="$emit('validate', tache)"
-            class="w-full px-4 py-2 text-left text-sm text-green-600 hover:bg-gray-100 dark:hover:bg-gray-600"
+            class="w-full px-4 py-2 text-left text-sm text-green-600 hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2"
           >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
             Valider
           </button>
           <button
             @click.stop="$emit('archive', tache)"
-            class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600"
+            class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2"
+            :class="{ 'text-blue-600': tache.archive_status === 'archived' }"
           >
-            Archiver
+            <svg v-if="tache.archive_status === 'archived'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+            </svg>
+            <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+            </svg>
+            {{ tache.archive_status === 'archived' ? 'Désarchiver' : 'Archiver' }}
           </button>
           <button
             @click.stop="$emit('delete', tache)"
-            class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-600"
+            class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2"
           >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
             Supprimer
           </button>
         </div>
@@ -120,6 +164,22 @@
           :style="{ width: `${tache.taux_realisation}%` }"
         ></div>
       </div>
+    </div>
+
+    <!-- Time Tracking -->
+    <div
+      v-if="tache.estimated_hours || tache.actual_hours"
+      class="mb-3 flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span v-if="tache.estimated_hours">
+        Est: {{ tache.estimated_hours }}h
+      </span>
+      <span v-if="tache.actual_hours" :class="getTimeVarianceClass()">
+        / Réel: {{ tache.actual_hours }}h
+      </span>
     </div>
 
     <!-- Footer with assignees and due date -->
@@ -215,6 +275,15 @@ const formatDate = (date) => {
   if (diffDays === -1) return 'Hier'
 
   return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+}
+
+const getTimeVarianceClass = () => {
+  if (!props.tache.estimated_hours || !props.tache.actual_hours) return ''
+
+  const variance = props.tache.actual_hours - props.tache.estimated_hours
+  if (variance > 0) return 'text-red-600 dark:text-red-400 font-medium' // Over budget
+  if (variance < 0) return 'text-green-600 dark:text-green-400 font-medium' // Under budget
+  return '' // On budget
 }
 
 // Click outside directive

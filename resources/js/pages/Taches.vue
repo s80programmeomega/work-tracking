@@ -37,6 +37,17 @@
 
       <!-- Actions -->
       <div class="flex gap-3">
+        <!-- Show Archived Toggle -->
+        <button
+          @click="showArchived = !showArchived"
+          class="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+          :class="{ 'bg-gray-100 dark:bg-gray-700': showArchived }"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+          </svg>
+          {{ showArchived ? 'Masquer archivées' : 'Voir archivées' }}
+        </button>
         <button
           @click="showForm = true"
           class="px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 flex items-center gap-2"
@@ -74,8 +85,34 @@
 
     <!-- Kanban Content -->
     <div v-else>
-      <!-- Kanban Board -->
-      <div class="mt-6">
+      <!-- Archived Tasks View -->
+      <div v-if="showArchived" class="mt-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Tâches Archivées</h3>
+
+        <div v-if="archivedTasks.length === 0" class="text-center py-12 text-gray-500">
+          <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+          </svg>
+          <p>Aucune tâche archivée</p>
+        </div>
+
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div v-for="tache in archivedTasks" :key="tache.id" class="opacity-75">
+            <TacheCard
+              :tache="tache"
+              @view="handleViewTask"
+              @edit="handleEditTask"
+              @duplicate="handleDuplicateTask"
+              @archive="handleUnarchiveTask"
+              @delete="handleDeleteTask"
+              @validate="handleValidateTask"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Kanban Board (Active Tasks) -->
+      <div v-else class="mt-6">
         <KanbanBoard
           :kanban="localKanban"
           @add-task="handleAddTask"
@@ -213,12 +250,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useTaches } from '@/composables/useTaches'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import KanbanBoard from '@/components/taches/KanbanBoardSimple.vue'
 import TacheForm from '@/components/taches/TacheForm.vue'
+import TacheCard from '@/components/taches/TacheCard.vue'
 import api from '@/api/axios'
 
 const {
@@ -238,6 +276,7 @@ const activites = ref([])
 const selectedActiviteId = ref(null)
 const showForm = ref(false)
 const showViewModal = ref(false)
+const showArchived = ref(false)
 const currentTache = ref(null)
 const currentStatut = ref('a_faire')
 
@@ -247,6 +286,9 @@ const localKanban = ref({
   en_cours: [],
   termine: []
 })
+
+// Archived tasks
+const archivedTasks = ref([])
 
 const loadActivites = async () => {
   try {
@@ -315,6 +357,25 @@ const handleDuplicateTask = async (tache) => {
   }
 }
 
+const loadArchivedTasks = async () => {
+  if (!selectedActiviteId.value) return
+
+  try {
+    console.log('Loading archived tasks for activity:', selectedActiviteId.value)
+    const { data } = await api.get(`/taches`, {
+      params: {
+        activite_id: selectedActiviteId.value,
+        archive_status: 'archived'
+      }
+    })
+    console.log('Archived tasks loaded:', data.data)
+    archivedTasks.value = data.data || []
+    console.log('archivedTasks.value set to:', archivedTasks.value)
+  } catch (err) {
+    console.error('Error loading archived tasks:', err)
+  }
+}
+
 const handleArchiveTask = async (tache) => {
   if (!confirm('Voulez-vous archiver cette tâche ?')) {
     return
@@ -323,9 +384,25 @@ const handleArchiveTask = async (tache) => {
   try {
     await archiveTache(tache.id)
     await loadKanban()
+    await loadArchivedTasks()
   } catch (err) {
     console.error('Error archiving task:', err)
     alert('Erreur lors de l\'archivage de la tâche')
+  }
+}
+
+const handleUnarchiveTask = async (tache) => {
+  if (!confirm('Voulez-vous désarchiver cette tâche ?')) {
+    return
+  }
+
+  try {
+    await api.post(`/taches/${tache.id}/unarchive`)
+    await loadKanban()
+    await loadArchivedTasks()
+  } catch (err) {
+    console.error('Error unarchiving task:', err)
+    alert('Erreur lors de la désarchivage de la tâche')
   }
 }
 
@@ -379,6 +456,13 @@ const closeForm = () => {
   showForm.value = false
   currentTache.value = null
 }
+
+// Watch for showArchived toggle
+watch(showArchived, async (newValue) => {
+  if (newValue && selectedActiviteId.value) {
+    await loadArchivedTasks()
+  }
+})
 
 onMounted(async () => {
   await loadActivites()

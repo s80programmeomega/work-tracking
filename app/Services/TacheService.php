@@ -37,6 +37,18 @@ class TacheService
             $query->overdue();
         }
 
+        // Filter by archive status
+        if (isset($filters['archive_status'])) {
+            if ($filters['archive_status'] === 'archived') {
+                $query->archived();
+            } else {
+                $query->active();
+            }
+        } else {
+            // Default: only show active tasks
+            $query->active();
+        }
+
         return $query->ordered()->get();
     }
 
@@ -46,6 +58,7 @@ class TacheService
     public function getKanbanForActivite(int $activiteId): array
     {
         $taches = Tache::forActivite($activiteId)
+            ->active() // Only show active (non-archived) tasks
             ->with(['assignees', 'validateur', 'labels'])
             ->ordered()
             ->get();
@@ -80,11 +93,11 @@ class TacheService
             unset($data['assignee_ids'], $data['label_ids']);
 
             // Set default order if not provided
-            if (!isset($data['ordre'])) {
-                $maxOrdre = Tache::where('activite_id', $data['activite_id'])
+            if (!isset($data['position'])) {
+                $maxPosition = Tache::where('activite_id', $data['activite_id'])
                     ->where('statut', $data['statut'] ?? TacheStatut::A_FAIRE->value)
-                    ->max('ordre');
-                $data['ordre'] = ($maxOrdre ?? -1) + 1;
+                    ->max('position');
+                $data['position'] = ($maxPosition ?? -1) + 1;
             }
 
             // Create task
@@ -143,34 +156,34 @@ class TacheService
     /**
      * Move task to a different status (Kanban)
      */
-    public function moveTache(Tache $tache, TacheStatut $newStatut, int $newOrdre): Tache
+    public function moveTache(Tache $tache, TacheStatut $newStatut, int $newPosition): Tache
     {
-        return DB::transaction(function () use ($tache, $newStatut, $newOrdre) {
+        return DB::transaction(function () use ($tache, $newStatut, $newPosition) {
             $oldStatut = $tache->statut;
-            $oldOrdre = $tache->ordre;
+            $oldPosition = $tache->position;
 
             // If moving to same status, just reorder
             if ($oldStatut === $newStatut) {
-                $this->reorderTachesInStatus($tache->activite_id, $newStatut, $oldOrdre, $newOrdre);
+                $this->reorderTachesInStatus($tache->activite_id, $newStatut, $oldPosition, $newPosition);
             } else {
                 // Moving to different status
                 // Adjust order in old status
                 Tache::forActivite($tache->activite_id)
                     ->where('statut', $oldStatut)
-                    ->where('ordre', '>', $oldOrdre)
-                    ->decrement('ordre');
+                    ->where('position', '>', $oldPosition)
+                    ->decrement('position');
 
                 // Adjust order in new status
                 Tache::forActivite($tache->activite_id)
                     ->where('statut', $newStatut)
-                    ->where('ordre', '>=', $newOrdre)
-                    ->increment('ordre');
+                    ->where('position', '>=', $newPosition)
+                    ->increment('position');
             }
 
             // Update task
             $tache->update([
                 'statut' => $newStatut,
-                'ordre' => $newOrdre,
+                'position' => $newPosition,
             ]);
 
             return $tache->fresh(['activite', 'assignees', 'validateur']);
@@ -180,26 +193,26 @@ class TacheService
     /**
      * Reorder tasks within the same status
      */
-    protected function reorderTachesInStatus(int $activiteId, TacheStatut $statut, int $oldOrdre, int $newOrdre): void
+    protected function reorderTachesInStatus(int $activiteId, TacheStatut $statut, int $oldPosition, int $newPosition): void
     {
-        if ($oldOrdre === $newOrdre) {
+        if ($oldPosition === $newPosition) {
             return;
         }
 
-        if ($oldOrdre < $newOrdre) {
+        if ($oldPosition < $newPosition) {
             // Moving down: decrement tasks between old and new position
             Tache::forActivite($activiteId)
                 ->where('statut', $statut)
-                ->where('ordre', '>', $oldOrdre)
-                ->where('ordre', '<=', $newOrdre)
-                ->decrement('ordre');
+                ->where('position', '>', $oldPosition)
+                ->where('position', '<=', $newPosition)
+                ->decrement('position');
         } else {
             // Moving up: increment tasks between new and old position
             Tache::forActivite($activiteId)
                 ->where('statut', $statut)
-                ->where('ordre', '>=', $newOrdre)
-                ->where('ordre', '<', $oldOrdre)
-                ->increment('ordre');
+                ->where('position', '>=', $newPosition)
+                ->where('position', '<', $oldPosition)
+                ->increment('position');
         }
     }
 
@@ -218,11 +231,11 @@ class TacheService
             $newTache->taux_realisation = 0;
             $newTache->statut = TacheStatut::A_FAIRE;
 
-            // Set ordre to end of list
-            $maxOrdre = Tache::where('activite_id', $tache->activite_id)
+            // Set position to end of list
+            $maxPosition = Tache::where('activite_id', $tache->activite_id)
                 ->where('statut', TacheStatut::A_FAIRE)
-                ->max('ordre');
-            $newTache->ordre = ($maxOrdre ?? -1) + 1;
+                ->max('position');
+            $newTache->position = ($maxPosition ?? -1) + 1;
 
             $newTache->save();
 
@@ -239,18 +252,17 @@ class TacheService
      */
     public function archiveTache(Tache $tache): Tache
     {
-        $tache->delete(); // Soft delete
-        return $tache;
+        $tache->archive();
+        return $tache->load(['activite', 'assignees', 'validateur', 'labels']);
     }
 
     /**
      * Restore archived task
      */
-    public function restoreTache(int $tacheId): Tache
+    public function unarchiveTache(Tache $tache): Tache
     {
-        $tache = Tache::withTrashed()->findOrFail($tacheId);
-        $tache->restore();
-        return $tache->load(['activite', 'assignees', 'validateur']);
+        $tache->unarchive();
+        return $tache->load(['activite', 'assignees', 'validateur', 'labels']);
     }
 
     /**
