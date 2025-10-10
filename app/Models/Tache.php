@@ -17,34 +17,77 @@ class Tache extends Model
     protected $fillable = [
         'activite_id',
         'titre',
+        'code',
         'description',
         'objectif',
         'indicateurs_resultats',
         'statut',
         'priorite',
         'echeance',
+        'date_debut',
+        'date_fin_reelle',
         'taux_realisation',
         'validation_superieur',
         'verrou_reevaluation',
         'commentaire',
         'validateur_id',
-        'ordre',
+        'validated_at',
+        'position',
         'couleur',
-        'image_couverture',
+        'cover_image',
         'metadata',
+        'estimated_hours',
+        'actual_hours',
+        'archive_status',
+        'archived_at',
     ];
 
     protected $casts = [
         'statut' => TacheStatut::class,
         'priorite' => TachePriorite::class,
         'echeance' => 'date',
+        'date_debut' => 'date',
+        'date_fin_reelle' => 'date',
         'validation_superieur' => 'boolean',
         'verrou_reevaluation' => 'boolean',
+        'validated_at' => 'datetime',
         'metadata' => 'array',
         'taux_realisation' => 'integer',
+        'estimated_hours' => 'integer',
+        'actual_hours' => 'integer',
+        'archived_at' => 'datetime',
     ];
 
     protected $with = ['activite', 'assignees', 'validateur', 'labels'];
+
+    /**
+     * Boot the model
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($tache) {
+            // Auto-generate unique code if not provided
+            if (!$tache->code) {
+                $tache->code = static::generateUniqueCode();
+            }
+        });
+    }
+
+    /**
+     * Generate unique task code (TASK-0001 format)
+     */
+    public static function generateUniqueCode(): string
+    {
+        do {
+            $latest = static::withTrashed()->latest('id')->first();
+            $nextId = $latest ? $latest->id + 1 : 1;
+            $code = 'TASK-' . str_pad($nextId, 4, '0', STR_PAD_LEFT);
+        } while (static::withTrashed()->where('code', $code)->exists());
+
+        return $code;
+    }
 
     /**
      * Get the activity that owns the task
@@ -152,6 +195,7 @@ class Tache extends Model
     {
         $this->validation_superieur = true;
         $this->validateur_id = $validator->id;
+        $this->validated_at = now();
         $this->save();
     }
 
@@ -191,10 +235,50 @@ class Tache extends Model
     }
 
     /**
-     * Scope to order by custom order
+     * Scope to order by position
      */
     public function scopeOrdered($query)
     {
-        return $query->orderBy('ordre')->orderBy('created_at');
+        return $query->orderBy('position')->orderBy('created_at');
+    }
+
+    /**
+     * Scope to filter only active (non-archived) tasks
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('archive_status', 'active');
+    }
+
+    /**
+     * Scope to filter only archived tasks
+     */
+    public function scopeArchived($query)
+    {
+        return $query->where('archive_status', 'archived');
+    }
+
+    /**
+     * Archive the task
+     */
+    public function archive(): self
+    {
+        $this->archive_status = 'archived';
+        $this->archived_at = now();
+        $this->save();
+
+        return $this;
+    }
+
+    /**
+     * Unarchive the task
+     */
+    public function unarchive(): self
+    {
+        $this->archive_status = 'active';
+        $this->archived_at = null;
+        $this->save();
+
+        return $this;
     }
 }

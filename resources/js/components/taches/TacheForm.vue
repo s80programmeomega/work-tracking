@@ -159,8 +159,19 @@
           <p v-if="labels.length === 0" class="mt-1 text-xs text-gray-500">Aucun label disponible</p>
         </div>
 
-        <!-- Due Date and Progress -->
-        <div class="grid grid-cols-2 gap-4">
+        <!-- Dates: Start, Due, and End -->
+        <div class="grid grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Date de début
+            </label>
+            <input
+              v-model="formData.date_debut"
+              type="date"
+              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+            />
+          </div>
+
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Date d'échéance
@@ -174,6 +185,20 @@
 
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Date de fin réelle
+            </label>
+            <input
+              v-model="formData.date_fin_reelle"
+              type="date"
+              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+            />
+          </div>
+        </div>
+
+        <!-- Progress and Time Tracking -->
+        <div class="grid grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Progression (%)
             </label>
             <input
@@ -183,6 +208,47 @@
               max="100"
               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
             />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Heures estimées
+            </label>
+            <input
+              v-model.number="formData.estimated_hours"
+              type="number"
+              min="0"
+              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Heures réelles
+            </label>
+            <input
+              v-model.number="formData.actual_hours"
+              type="number"
+              min="0"
+              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+            />
+          </div>
+        </div>
+
+        <!-- Cover Image -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Image de couverture
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            @change="handleCoverImageUpload"
+            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+          />
+          <p class="mt-1 text-xs text-gray-500">PNG, JPG, GIF jusqu'à 2 Mo</p>
+          <div v-if="coverImagePreview" class="mt-2">
+            <img :src="coverImagePreview" alt="Preview" class="h-32 rounded-lg object-cover" />
           </div>
         </div>
 
@@ -284,12 +350,19 @@ const formData = ref({
   statut: props.initialStatut || 'a_faire',
   priorite: 'moyenne',
   echeance: '',
+  date_debut: '',
+  date_fin_reelle: '',
   taux_realisation: 0,
+  estimated_hours: null,
+  actual_hours: null,
+  cover_image: null,
   couleur: '#3B82F6',
   commentaire: '',
   assignee_ids: [],
   label_ids: []
 })
+
+const coverImagePreview = ref(null)
 
 const toggleLabel = (labelId) => {
   const index = formData.value.label_ids.indexOf(labelId)
@@ -297,6 +370,19 @@ const toggleLabel = (labelId) => {
     formData.value.label_ids.splice(index, 1)
   } else {
     formData.value.label_ids.push(labelId)
+  }
+}
+
+const handleCoverImageUpload = (event) => {
+  const file = event.target.files[0]
+  if (file) {
+    formData.value.cover_image = file
+    // Create preview
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      coverImagePreview.value = e.target.result
+    }
+    reader.readAsDataURL(file)
   }
 }
 
@@ -323,15 +409,28 @@ const handleSubmit = async () => {
   errorMessage.value = ''
   validationErrors.value = []
 
-  // Debug: Log data being sent
-  console.log('Submitting tache with data:', formData.value)
-  console.log('Label IDs:', formData.value.label_ids)
-
   try {
+    // Prepare data as FormData if there's a cover image
+    let dataToSend = formData.value
+
+    if (formData.value.cover_image instanceof File) {
+      const formDataObj = new FormData()
+      Object.keys(formData.value).forEach(key => {
+        if (key === 'assignee_ids' || key === 'label_ids') {
+          formData.value[key].forEach(id => {
+            formDataObj.append(`${key}[]`, id)
+          })
+        } else if (formData.value[key] !== null && formData.value[key] !== '') {
+          formDataObj.append(key, formData.value[key])
+        }
+      })
+      dataToSend = formDataObj
+    }
+
     if (props.tache) {
-      await updateTache(props.tache.id, formData.value)
+      await updateTache(props.tache.id, dataToSend)
     } else {
-      await createTache(formData.value)
+      await createTache(dataToSend)
     }
     emit('saved')
   } catch (error) {
@@ -379,11 +478,21 @@ onMounted(async () => {
       statut: props.tache.statut || 'a_faire',
       priorite: props.tache.priorite || 'moyenne',
       echeance: props.tache.echeance || '',
+      date_debut: props.tache.date_debut || '',
+      date_fin_reelle: props.tache.date_fin_reelle || '',
       taux_realisation: props.tache.taux_realisation || 0,
+      estimated_hours: props.tache.estimated_hours || null,
+      actual_hours: props.tache.actual_hours || null,
+      cover_image: null,
       couleur: props.tache.couleur || '#3B82F6',
       commentaire: props.tache.commentaire || '',
       assignee_ids: props.tache.assignees?.map(a => a.id) || [],
       label_ids: props.tache.labels?.map(l => l.id) || []
+    }
+
+    // Show existing cover image if available
+    if (props.tache.cover_image) {
+      coverImagePreview.value = props.tache.cover_image
     }
   }
 })
