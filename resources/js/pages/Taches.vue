@@ -289,6 +289,16 @@
                 <p class="text-gray-700 dark:text-gray-300 leading-relaxed">{{ currentTache.commentaire }}</p>
               </div>
 
+              <!-- Documents Section -->
+              <div class="mt-6">
+                <DocumentSection
+                  v-if="currentTache?.id"
+                  documentable-type="App\Models\Tache"
+                  :documentable-id="currentTache.id"
+                  :current-user-id="currentUser?.id"
+                />
+              </div>
+
             </div>
           </div>
 
@@ -361,6 +371,7 @@ import KanbanBoard from '@/components/taches/KanbanBoardSimple.vue'
 import TacheForm from '@/components/taches/TacheForm.vue'
 import TacheCard from '@/components/taches/TacheCard.vue'
 import CommentSection from '@/components/comments/CommentSection.vue'
+import DocumentSection from '@/components/common/DocumentSection.vue'
 import api from '@/api/axios'
 
 const {

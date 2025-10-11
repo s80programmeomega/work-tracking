@@ -182,4 +182,32 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Get activity statistics
         Route::get('/stats', [\App\Http\Controllers\ActivityController::class, 'stats']);
     });
+
+    // Document Management Routes
+    Route::prefix('documents')->group(function () {
+        // List and search
+        Route::get('/', [\App\Http\Controllers\DocumentController::class, 'index']);
+        Route::get('/search', [\App\Http\Controllers\DocumentController::class, 'search']);
+
+        // Upload documents
+        Route::post('/', [\App\Http\Controllers\DocumentController::class, 'store']);
+
+        // Document operations
+        Route::get('/{document}', [\App\Http\Controllers\DocumentController::class, 'show']);
+        Route::put('/{document}', [\App\Http\Controllers\DocumentController::class, 'update']);
+        Route::delete('/{document}', [\App\Http\Controllers\DocumentController::class, 'destroy']);
+
+        // Download document
+        Route::get('/{document}/download', [\App\Http\Controllers\DocumentController::class, 'download']);
+
+        // Versioning
+        Route::post('/{document}/versions', [\App\Http\Controllers\DocumentController::class, 'createVersion']);
+
+        // Statistics
+        Route::get('/{document}/stats', [\App\Http\Controllers\DocumentController::class, 'stats']);
+
+        // Permissions
+        Route::post('/{document}/permissions/grant', [\App\Http\Controllers\DocumentController::class, 'grantPermission']);
+        Route::post('/{document}/permissions/revoke', [\App\Http\Controllers\DocumentController::class, 'revokePermission']);
+    });
 });
