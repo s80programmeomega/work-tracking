@@ -135,4 +135,51 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('/{label}', [LabelController::class, 'destroy']);
         Route::post('/reorder', [LabelController::class, 'reorder']);
     });
+
+    // Comment Management Routes
+    Route::prefix('comments')->group(function () {
+        // List comments for an entity
+        Route::get('/', [\App\Http\Controllers\CommentController::class, 'index']);
+
+        // CRUD operations
+        Route::post('/', [\App\Http\Controllers\CommentController::class, 'store']);
+        Route::get('/{comment}', [\App\Http\Controllers\CommentController::class, 'show']);
+        Route::put('/{comment}', [\App\Http\Controllers\CommentController::class, 'update']);
+        Route::delete('/{comment}', [\App\Http\Controllers\CommentController::class, 'destroy']);
+
+        // Reactions
+        Route::post('/{comment}/reactions', [\App\Http\Controllers\CommentController::class, 'toggleReaction']);
+
+        // Attachments
+        Route::post('/{comment}/attachments', [\App\Http\Controllers\CommentController::class, 'addAttachment']);
+        Route::delete('/{comment}/attachments/{attachment}', [\App\Http\Controllers\CommentController::class, 'deleteAttachment']);
+
+        // Mentions
+        Route::get('/mentions/unread', [\App\Http\Controllers\CommentController::class, 'unreadMentions']);
+        Route::post('/mentions/mark-read', [\App\Http\Controllers\CommentController::class, 'markMentionsAsRead']);
+    });
+
+    // Activity Log Routes
+    Route::prefix('activities')->group(function () {
+        // Get activity feed for dashboard
+        Route::get('/feed', [\App\Http\Controllers\ActivityController::class, 'feed']);
+
+        // Get recent activities
+        Route::get('/recent', [\App\Http\Controllers\ActivityController::class, 'recent']);
+
+        // Get activities for a specific subject
+        Route::get('/subject', [\App\Http\Controllers\ActivityController::class, 'forSubject']);
+
+        // Get activities by user
+        Route::get('/user', [\App\Http\Controllers\ActivityController::class, 'byUser']);
+
+        // Get activities by log name
+        Route::get('/log-name', [\App\Http\Controllers\ActivityController::class, 'byLogName']);
+
+        // Get activities by date range
+        Route::get('/date-range', [\App\Http\Controllers\ActivityController::class, 'byDateRange']);
+
+        // Get activity statistics
+        Route::get('/stats', [\App\Http\Controllers\ActivityController::class, 'stats']);
+    });
 });
