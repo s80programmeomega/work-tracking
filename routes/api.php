@@ -228,4 +228,49 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/', [\App\Http\Controllers\NotificationPreferenceController::class, 'show']);
         Route::put('/', [\App\Http\Controllers\NotificationPreferenceController::class, 'update']);
     });
+
+    // Team Management Routes
+    Route::prefix('teams')->group(function () {
+        // List and my teams
+        Route::get('/', [\App\Http\Controllers\TeamController::class, 'index']);
+        Route::get('/my-teams', [\App\Http\Controllers\TeamController::class, 'myTeams']);
+
+        // CRUD
+        Route::post('/', [\App\Http\Controllers\TeamController::class, 'store']);
+        Route::get('/{uuid}', [\App\Http\Controllers\TeamController::class, 'show']);
+        Route::put('/{uuid}', [\App\Http\Controllers\TeamController::class, 'update']);
+        Route::delete('/{uuid}', [\App\Http\Controllers\TeamController::class, 'destroy']);
+
+        // Actions
+        Route::post('/{uuid}/archive', [\App\Http\Controllers\TeamController::class, 'archive']);
+        Route::post('/{uuid}/restore', [\App\Http\Controllers\TeamController::class, 'restore']);
+        Route::post('/{uuid}/avatar', [\App\Http\Controllers\TeamController::class, 'uploadAvatar']);
+
+        // Stats and activity
+        Route::get('/{uuid}/stats', [\App\Http\Controllers\TeamController::class, 'stats']);
+        Route::get('/{uuid}/activities', [\App\Http\Controllers\TeamController::class, 'activities']);
+        Route::get('/{uuid}/online-members', [\App\Http\Controllers\TeamController::class, 'onlineMembers']);
+        Route::post('/{uuid}/presence', [\App\Http\Controllers\TeamController::class, 'updatePresence']);
+
+        // Members
+        Route::post('/{uuid}/members', [\App\Http\Controllers\TeamMemberController::class, 'store']);
+        Route::put('/{uuid}/members/{userId}/role', [\App\Http\Controllers\TeamMemberController::class, 'updateRole']);
+        Route::put('/{uuid}/members/{userId}/permissions', [\App\Http\Controllers\TeamMemberController::class, 'updatePermissions']);
+        Route::delete('/{uuid}/members/{userId}', [\App\Http\Controllers\TeamMemberController::class, 'destroy']);
+        Route::post('/{uuid}/transfer-ownership', [\App\Http\Controllers\TeamMemberController::class, 'transferOwnership']);
+
+        // Messages
+        Route::get('/{uuid}/messages', [\App\Http\Controllers\TeamMessageController::class, 'index']);
+        Route::get('/{uuid}/messages/pinned', [\App\Http\Controllers\TeamMessageController::class, 'pinned']);
+        Route::post('/{uuid}/messages', [\App\Http\Controllers\TeamMessageController::class, 'store']);
+        Route::post('/messages/{uuid}/reactions', [\App\Http\Controllers\TeamMessageController::class, 'addReaction']);
+
+        // Announcements
+        Route::get('/{uuid}/announcements', [\App\Http\Controllers\TeamAnnouncementController::class, 'index']);
+        Route::post('/{uuid}/announcements', [\App\Http\Controllers\TeamAnnouncementController::class, 'store']);
+
+        // Resources
+        Route::get('/{uuid}/resources', [\App\Http\Controllers\TeamResourceController::class, 'index']);
+        Route::post('/{uuid}/resources', [\App\Http\Controllers\TeamResourceController::class, 'store']);
+    });
 });
