@@ -210,4 +210,22 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/{document}/permissions/grant', [\App\Http\Controllers\DocumentController::class, 'grantPermission']);
         Route::post('/{document}/permissions/revoke', [\App\Http\Controllers\DocumentController::class, 'revokePermission']);
     });
+
+    // Notification routes
+    Route::prefix('notifications')->group(function () {
+        Route::get('/', [\App\Http\Controllers\NotificationController::class, 'index']);
+        Route::get('/all', [\App\Http\Controllers\NotificationController::class, 'all']);
+        Route::get('/grouped', [\App\Http\Controllers\NotificationController::class, 'grouped']);
+        Route::get('/statistics', [\App\Http\Controllers\NotificationController::class, 'statistics']);
+        Route::post('/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead']);
+        Route::post('/{id}/mark-read', [\App\Http\Controllers\NotificationController::class, 'markAsRead']);
+        Route::delete('/delete-all-read', [\App\Http\Controllers\NotificationController::class, 'deleteAllRead']);
+        Route::delete('/{id}', [\App\Http\Controllers\NotificationController::class, 'destroy']);
+    });
+
+    // Notification preferences
+    Route::prefix('notification-preferences')->group(function () {
+        Route::get('/', [\App\Http\Controllers\NotificationPreferenceController::class, 'show']);
+        Route::put('/', [\App\Http\Controllers\NotificationPreferenceController::class, 'update']);
+    });
 });

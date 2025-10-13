@@ -163,6 +163,26 @@ const router = createRouter({
     },
 
     {
+      path: '/notifications',
+      name: 'Notifications',
+      component: () => import('../pages/Notifications.vue'),
+      meta: {
+        title: 'Notifications',
+        requiresAuth: true,
+      },
+    },
+
+    {
+      path: '/notification-preferences',
+      name: 'NotificationPreferences',
+      component: () => import('../pages/NotificationPreferences.vue'),
+      meta: {
+        title: 'Préférences de notification',
+        requiresAuth: true,
+      },
+    },
+
+    {
       path: '/error-404',
       name: '404 Error',
       component: () => import('../pages/Errors/FourZeroFour.vue'),
