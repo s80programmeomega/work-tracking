@@ -113,6 +113,46 @@ class User extends Authenticatable
     //     return $this->hasMany(Comment::class);
     // }
 
+    /**
+     * Notification preferences
+     */
+    public function notificationPreference()
+    {
+        return $this->hasOne(NotificationPreference::class);
+    }
+
+    /**
+     * Push subscriptions
+     */
+    public function pushSubscriptions()
+    {
+        return $this->hasMany(PushSubscription::class);
+    }
+
+    /**
+     * Get or create notification preferences
+     */
+    public function getOrCreateNotificationPreference(): NotificationPreference
+    {
+        return $this->notificationPreference()->firstOrCreate([
+            'user_id' => $this->id,
+        ]);
+    }
+
+    /**
+     * Check if user should receive notification
+     */
+    public function shouldReceiveNotification(string $type, string $channel): bool
+    {
+        $preferences = $this->notificationPreference;
+
+        if (!$preferences) {
+            return true; // Default to sending if no preferences set
+        }
+
+        return $preferences->shouldReceive($type, $channel);
+    }
+
     // Accessors
     public function getInitialsAttribute(): string
     {

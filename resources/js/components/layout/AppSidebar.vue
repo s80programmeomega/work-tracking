@@ -292,7 +292,7 @@ const menuGroups = [
             {
                 icon: GridIcon,
                 name: "Dashboard",
-                subItems: [{ name: "Ecommerce", path: "/", pro: false }],
+                path: "/",
             },
             {
                 icon: CalenderIcon,
@@ -325,31 +325,36 @@ const menuGroups = [
                 path: "/taches",
             },
             {
-                name: "Forms",
-                icon: ListIcon,
-                subItems: [
-                    {
-                        name: "Form Elements",
-                        path: "/form-elements",
-                        pro: false,
-                    },
-                ],
+                icon: MailIcon,
+                name: "Notifications",
+                path: "/notifications",
             },
-            {
-                name: "Tables",
-                icon: TableIcon,
-                subItems: [
-                    { name: "Basic Tables", path: "/basic-tables", pro: false },
-                ],
-            },
-            {
-                name: "Pages",
-                icon: PageIcon,
-                subItems: [
-                    { name: "Black Page", path: "/blank", pro: false },
-                    { name: "404 Page", path: "/error-404", pro: false },
-                ],
-            },
+            // {
+            //     name: "Forms",
+            //     icon: ListIcon,
+            //     subItems: [
+            //         {
+            //             name: "Form Elements",
+            //             path: "/form-elements",
+            //             pro: false,
+            //         },
+            //     ],
+            // },
+            // {
+            //     name: "Tables",
+            //     icon: TableIcon,
+            //     subItems: [
+            //         { name: "Basic Tables", path: "/basic-tables", pro: false },
+            //     ],
+            // },
+            // {
+            //     name: "Pages",
+            //     icon: PageIcon,
+            //     subItems: [
+            //         { name: "Black Page", path: "/blank", pro: false },
+            //         { name: "404 Page", path: "/error-404", pro: false },
+            //     ],
+            // },
         ],
     },
     {
