@@ -84,11 +84,80 @@ class User extends Authenticatable
     }
 
     // Relationships
-    // TODO: Uncomment when Team model is created
-    // public function team()
-    // {
-    //     return $this->belongsTo(Team::class);
-    // }
+
+    /**
+     * User's primary team
+     */
+    public function team()
+    {
+        return $this->belongsTo(Team::class);
+    }
+
+    /**
+     * Teams where user is owner
+     */
+    public function ownedTeams()
+    {
+        return $this->hasMany(Team::class, 'owner_id');
+    }
+
+    /**
+     * Teams where user is a member
+     */
+    public function teams()
+    {
+        return $this->belongsToMany(Team::class, 'team_members')
+            ->withPivot(['role', 'permissions', 'joined_at', 'last_active_at', 'notifications_enabled'])
+            ->withTimestamps();
+    }
+
+    /**
+     * Team member records
+     */
+    public function teamMemberships()
+    {
+        return $this->hasMany(TeamMember::class);
+    }
+
+    /**
+     * Team messages sent by user
+     */
+    public function teamMessages()
+    {
+        return $this->hasMany(TeamMessage::class);
+    }
+
+    /**
+     * Team announcements created by user
+     */
+    public function teamAnnouncements()
+    {
+        return $this->hasMany(TeamAnnouncement::class);
+    }
+
+    /**
+     * Team resources created by user
+     */
+    public function teamResources()
+    {
+        return $this->hasMany(TeamResource::class);
+    }
+
+    /**
+     * Team activities performed by user
+     */
+    public function teamActivities()
+    {
+        return $this->hasMany(TeamActivity::class);
+    }
+
+    /**
+     * User's team presence records
+     */
+    public function teamPresence()
+    {
+        return $this->hasMany(TeamPresence::class);
+    }
 
     // TODO: Uncomment when Projet, Activite, Tache models are created
     // public function projets()

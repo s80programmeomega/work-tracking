@@ -3,16 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\Team;
-use App\Models\User;
+use App\Services\TeamService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 
 class TeamController extends Controller
 {
-    public function __construct()
+    protected TeamService $teamService;
+
+    public function __construct(TeamService $teamService)
     {
         $this->middleware('auth:sanctum');
+        $this->teamService = $teamService;
     }
 
     /**
@@ -20,27 +23,49 @@ class TeamController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $user = $request->user();
+        try {
+            $filters = [
+                'visibility' => $request->input('visibility'),
+                'is_active' => $request->input('is_active', true),
+                'project_id' => $request->input('project_id'),
+                'search' => $request->input('search'),
+                'per_page' => $request->input('per_page', 15),
+            ];
 
-        // Check permission
-        if (!$user->can('team.view')) {
-            return response()->json(['message' => 'Non autorisé'], 403);
+            $teams = $this->teamService->getTeams($filters);
+
+            return response()->json([
+                'success' => true,
+                'teams' => $teams,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la récupération des équipes',
+                'error' => $e->getMessage(),
+            ], 500);
         }
+    }
 
-        $query = Team::with(['responsable', 'membres']);
+    /**
+     * Get teams for authenticated user
+     */
+    public function myTeams(Request $request): JsonResponse
+    {
+        try {
+            $teams = $this->teamService->getUserTeams($request->user());
 
-        // Filter based on user role
-        if (!$user->hasRoleLevel('manager')) {
-            // Non-managers can only see their own team
-            $query->where('id', $user->team_id);
+            return response()->json([
+                'success' => true,
+                'teams' => $teams,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la récupération de vos équipes',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        $teams = $query->get();
-
-        return response()->json([
-            'success' => true,
-            'teams' => $teams
-        ]);
     }
 
     /**
@@ -48,217 +73,294 @@ class TeamController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        $user = $request->user();
-
-        if (!$user->can('team.create')) {
-            return response()->json(['message' => 'Non autorisé'], 403);
-        }
-
         $validator = Validator::make($request->all(), [
-            'nom' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'responsable_id' => 'required|exists:users,id'
+            'project_id' => 'nullable|exists:projets,id',
+            'visibility' => 'nullable|in:public,private,secret',
+            'settings' => 'nullable|array',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
-        $team = Team::create($validator->validated());
-        $team->load(['responsable', 'membres']);
+        try {
+            $team = $this->teamService->createTeam($request->user(), $validator->validated());
 
-        return response()->json([
-            'success' => true,
-            'team' => $team,
-            'message' => 'Équipe créée avec succès'
-        ], 201);
+            return response()->json([
+                'success' => true,
+                'team' => $team,
+                'message' => 'Équipe créée avec succès',
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la création de l\'équipe',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
-     * Display the specified team
+     * Display the specified team by UUID
      */
-    public function show(Request $request, Team $team): JsonResponse
+    public function show(string $uuid): JsonResponse
     {
-        $user = $request->user();
+        try {
+            $team = $this->teamService->getTeamByUuid($uuid);
 
-        if (!$user->can('team.view')) {
-            return response()->json(['message' => 'Non autorisé'], 403);
+            return response()->json([
+                'success' => true,
+                'team' => $team,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Équipe non trouvée',
+                'error' => $e->getMessage(),
+            ], 404);
         }
-
-        // Check if user can view this specific team
-        if (!$user->hasRoleLevel('manager') && $user->team_id !== $team->id) {
-            return response()->json(['message' => 'Non autorisé'], 403);
-        }
-
-        $team->load(['responsable', 'membres']);
-
-        return response()->json([
-            'success' => true,
-            'team' => $team
-        ]);
     }
 
     /**
      * Update the specified team
      */
-    public function update(Request $request, Team $team): JsonResponse
+    public function update(Request $request, string $uuid): JsonResponse
     {
-        $user = $request->user();
-
-        if (!$user->can('team.edit')) {
-            return response()->json(['message' => 'Non autorisé'], 403);
-        }
-
         $validator = Validator::make($request->all(), [
-            'nom' => 'sometimes|string|max:255',
+            'name' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
-            'responsable_id' => 'sometimes|exists:users,id'
+            'visibility' => 'sometimes|in:public,private,secret',
+            'settings' => 'sometimes|array',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
-        $team->update($validator->validated());
-        $team->load(['responsable', 'membres']);
+        try {
+            $team = $this->teamService->getTeamByUuid($uuid);
+            $updatedTeam = $this->teamService->updateTeam($team, $validator->validated());
 
-        return response()->json([
-            'success' => true,
-            'team' => $team,
-            'message' => 'Équipe mise à jour avec succès'
-        ]);
+            return response()->json([
+                'success' => true,
+                'team' => $updatedTeam,
+                'message' => 'Équipe mise à jour avec succès',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la mise à jour de l\'équipe',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Archive the specified team
+     */
+    public function archive(string $uuid): JsonResponse
+    {
+        try {
+            $team = $this->teamService->getTeamByUuid($uuid);
+            $this->teamService->archiveTeam($team);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Équipe archivée avec succès',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de l\'archivage de l\'équipe',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Restore archived team
+     */
+    public function restore(string $uuid): JsonResponse
+    {
+        try {
+            $team = $this->teamService->getTeamByUuid($uuid);
+            $this->teamService->restoreTeam($team);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Équipe restaurée avec succès',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la restauration de l\'équipe',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
      * Remove the specified team
      */
-    public function destroy(Request $request, Team $team): JsonResponse
+    public function destroy(string $uuid): JsonResponse
     {
-        $user = $request->user();
+        try {
+            $team = $this->teamService->getTeamByUuid($uuid);
+            $this->teamService->deleteTeam($team);
 
-        if (!$user->can('team.delete')) {
-            return response()->json(['message' => 'Non autorisé'], 403);
-        }
-
-        // Check if team has members
-        if ($team->membres()->exists()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Équipe supprimée avec succès',
+            ]);
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Impossible de supprimer une équipe qui contient des membres'
-            ], 400);
+                'message' => 'Erreur lors de la suppression de l\'équipe',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        $team->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Équipe supprimée avec succès'
-        ]);
     }
 
     /**
-     * Add member to team
+     * Upload team avatar
      */
-    public function addMember(Request $request, Team $team): JsonResponse
+    public function uploadAvatar(Request $request, string $uuid): JsonResponse
     {
-        $user = $request->user();
-
-        if (!$user->can('team.manage_members')) {
-            return response()->json(['message' => 'Non autorisé'], 403);
-        }
-
         $validator = Validator::make($request->all(), [
-            'user_id' => 'required|exists:users,id'
+            'avatar' => 'required|image|max:2048',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
-        $member = User::find($request->user_id);
+        try {
+            $team = $this->teamService->getTeamByUuid($uuid);
+            $path = $this->teamService->uploadAvatar($team, $request->file('avatar'));
 
-        // Check if user is already in a team
-        if ($member->team_id) {
+            return response()->json([
+                'success' => true,
+                'path' => $path,
+                'url' => asset('storage/' . $path),
+                'message' => 'Avatar téléchargé avec succès',
+            ]);
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'L\'utilisateur fait déjà partie d\'une équipe'
-            ], 400);
+                'message' => 'Erreur lors du téléchargement de l\'avatar',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        $member->update(['team_id' => $team->id]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Membre ajouté à l\'équipe avec succès'
-        ]);
     }
 
     /**
-     * Remove member from team
+     * Get team statistics
      */
-    public function removeMember(Request $request, Team $team): JsonResponse
+    public function stats(string $uuid): JsonResponse
     {
-        $user = $request->user();
+        try {
+            $team = $this->teamService->getTeamByUuid($uuid);
+            $stats = $this->teamService->getTeamStats($team);
 
-        if (!$user->can('team.manage_members')) {
-            return response()->json(['message' => 'Non autorisé'], 403);
+            return response()->json([
+                'success' => true,
+                'stats' => $stats,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la récupération des statistiques',
+                'error' => $e->getMessage(),
+            ], 500);
         }
+    }
 
+    /**
+     * Get team activity feed
+     */
+    public function activities(Request $request, string $uuid): JsonResponse
+    {
+        try {
+            $team = $this->teamService->getTeamByUuid($uuid);
+            $limit = $request->input('limit', 50);
+            $activities = $this->teamService->getActivityFeed($team, $limit);
+
+            return response()->json([
+                'success' => true,
+                'activities' => $activities,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la récupération des activités',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Get online members
+     */
+    public function onlineMembers(string $uuid): JsonResponse
+    {
+        try {
+            $team = $this->teamService->getTeamByUuid($uuid);
+            $onlineMembers = $this->teamService->getOnlineMembers($team);
+
+            return response()->json([
+                'success' => true,
+                'online_members' => $onlineMembers,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la récupération des membres en ligne',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Update user presence in team
+     */
+    public function updatePresence(Request $request, string $uuid): JsonResponse
+    {
         $validator = Validator::make($request->all(), [
-            'user_id' => 'required|exists:users,id'
+            'status' => 'required|in:online,away,busy,offline',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
-        $member = User::find($request->user_id);
+        try {
+            $team = $this->teamService->getTeamByUuid($uuid);
+            $this->teamService->updateMemberPresence($team, $request->user(), $request->input('status'));
 
-        if ($member->team_id !== $team->id) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Présence mise à jour avec succès',
+            ]);
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'L\'utilisateur ne fait pas partie de cette équipe'
-            ], 400);
+                'message' => 'Erreur lors de la mise à jour de la présence',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        $member->update(['team_id' => null]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Membre retiré de l\'équipe avec succès'
-        ]);
-    }
-
-    /**
-     * Get available users for team assignment
-     */
-    public function availableUsers(Request $request): JsonResponse
-    {
-        $user = $request->user();
-
-        if (!$user->can('team.manage_members')) {
-            return response()->json(['message' => 'Non autorisé'], 403);
-        }
-
-        $users = User::whereNull('team_id')
-                    ->select('id', 'nom', 'email', 'role', 'fonction')
-                    ->get();
-
-        return response()->json([
-            'success' => true,
-            'users' => $users
-        ]);
     }
 }

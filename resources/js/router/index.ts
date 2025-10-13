@@ -183,6 +183,26 @@ const router = createRouter({
     },
 
     {
+      path: '/teams',
+      name: 'teams.index',
+      component: () => import('../pages/Teams.vue'),
+      meta: {
+        title: 'Équipes',
+        requiresAuth: true,
+      },
+    },
+
+    {
+      path: '/teams/:uuid',
+      name: 'teams.show',
+      component: () => import('../pages/Teams/Show.vue'),
+      meta: {
+        title: 'Détails de l\'équipe',
+        requiresAuth: true,
+      },
+    },
+
+    {
       path: '/error-404',
       name: '404 Error',
       component: () => import('../pages/Errors/FourZeroFour.vue'),
