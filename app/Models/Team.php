@@ -119,6 +119,14 @@ class Team extends Model
     }
 
     /**
+     * Get team events
+     */
+    public function events(): HasMany
+    {
+        return $this->hasMany(TeamEvent::class);
+    }
+
+    /**
      * Get online members
      */
     public function onlineMembers()
@@ -171,5 +179,35 @@ class Team extends Model
             ->wherePivot('user_id', $user->id)
             ->wherePivot('role', $role)
             ->exists();
+    }
+
+    /**
+     * Get all users who should be notified about team activities
+     * Includes: team members + project members (if team is linked to a project)
+     */
+    public function getNotifiableUsers(bool $includeProjectMembers = true): \Illuminate\Support\Collection
+    {
+        $users = collect();
+
+        // Add all team members
+        $users = $users->merge($this->members);
+
+        // Add project members if team is linked to a project and option is enabled
+        if ($includeProjectMembers && $this->project_id) {
+            $projectMembers = $this->project->members()->get();
+            $users = $users->merge($projectMembers);
+        }
+
+        // Remove duplicates based on user id
+        return $users->unique('id');
+    }
+
+    /**
+     * Get all users who should be notified excluding specific user
+     */
+    public function getNotifiableUsersExcept(int $excludeUserId, bool $includeProjectMembers = true): \Illuminate\Support\Collection
+    {
+        return $this->getNotifiableUsers($includeProjectMembers)
+            ->reject(fn($user) => $user->id === $excludeUserId);
     }
 }
