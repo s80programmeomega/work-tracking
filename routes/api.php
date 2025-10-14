@@ -268,9 +268,20 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Announcements
         Route::get('/{uuid}/announcements', [\App\Http\Controllers\TeamAnnouncementController::class, 'index']);
         Route::post('/{uuid}/announcements', [\App\Http\Controllers\TeamAnnouncementController::class, 'store']);
+        Route::put('/{uuid}/announcements/{announcement}', [\App\Http\Controllers\TeamAnnouncementController::class, 'update']);
+        Route::delete('/{uuid}/announcements/{announcement}', [\App\Http\Controllers\TeamAnnouncementController::class, 'destroy']);
 
         // Resources
         Route::get('/{uuid}/resources', [\App\Http\Controllers\TeamResourceController::class, 'index']);
         Route::post('/{uuid}/resources', [\App\Http\Controllers\TeamResourceController::class, 'store']);
+        Route::put('/{uuid}/resources/{resource}', [\App\Http\Controllers\TeamResourceController::class, 'update']);
+        Route::delete('/{uuid}/resources/{resource}', [\App\Http\Controllers\TeamResourceController::class, 'destroy']);
+
+        // Events
+        Route::get('/{uuid}/events', [\App\Http\Controllers\TeamEventController::class, 'index']);
+        Route::post('/{uuid}/events', [\App\Http\Controllers\TeamEventController::class, 'store']);
+        Route::get('/{uuid}/events/{event}', [\App\Http\Controllers\TeamEventController::class, 'show']);
+        Route::put('/{uuid}/events/{event}', [\App\Http\Controllers\TeamEventController::class, 'update']);
+        Route::delete('/{uuid}/events/{event}', [\App\Http\Controllers\TeamEventController::class, 'destroy']);
     });
 });

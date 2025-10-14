@@ -18,6 +18,7 @@ class TeamResource extends Model
         'user_id',
         'type',
         'name',
+        'title',
         'description',
         'content',
         'file_path',

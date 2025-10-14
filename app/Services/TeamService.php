@@ -7,6 +7,8 @@ use App\Models\TeamMember;
 use App\Models\TeamActivity;
 use App\Models\TeamPresence;
 use App\Models\User;
+use App\Notifications\TeamMemberAddedNotification;
+use App\Notifications\TeamMemberJoinedNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -192,6 +194,15 @@ class TeamService
             'user_id' => $user->id,
             'role' => $role,
         ]);
+
+        // Send notification to the new member
+        $user->notify(new TeamMemberAddedNotification($team, $addedBy ?? auth()->user(), $role));
+
+        // Notify existing team members + project members about the new member
+        $existingMembers = $team->getNotifiableUsersExcept($user->id, true);
+        foreach ($existingMembers as $member) {
+            $member->notify(new TeamMemberJoinedNotification($team, $user, $role));
+        }
 
         return $team->teamMembers()->where('user_id', $user->id)->first();
     }
