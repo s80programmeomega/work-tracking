@@ -309,32 +309,11 @@
               </div>
 
               <!-- Labels -->
-              <div>
-                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Labels
-                </label>
-                <div v-if="labels.length > 0" class="flex flex-wrap gap-2">
-                  <button
-                    v-for="label in labels"
-                    :key="label.id"
-                    type="button"
-                    @click="toggleLabel(label.id)"
-                    class="px-4 py-2 text-sm font-medium rounded-lg transition-all transform hover:scale-105"
-                    :class="formData.label_ids.includes(label.id) ? 'ring-2 ring-offset-2 shadow-lg' : 'opacity-70 hover:opacity-100'"
-                    :style="{
-                      backgroundColor: label.couleur + (formData.label_ids.includes(label.id) ? '' : '30'),
-                      color: formData.label_ids.includes(label.id) ? '#ffffff' : label.couleur,
-                      borderColor: label.couleur,
-                      ringColor: label.couleur
-                    }"
-                    style="border-width: 2px;"
-                    :title="label.description"
-                  >
-                    {{ label.nom }}
-                  </button>
-                </div>
-                <p v-else class="text-sm text-gray-500 dark:text-gray-400">Aucun label disponible</p>
-              </div>
+              <TaskLabelsSelector
+                v-model="formData.label_ids"
+                :show-create-button="true"
+                @create-label="showLabelModal = true"
+              />
             </div>
 
             <!-- Section Apparence -->
@@ -433,6 +412,13 @@
       </div>
 
     </div>
+
+    <!-- Label Modal -->
+    <LabelModal
+      v-if="showLabelModal"
+      @saved="handleLabelCreated"
+      @close="showLabelModal = false"
+    />
   </div>
 </template>
 
@@ -441,6 +427,7 @@ import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useTaches } from '@/composables/useTaches'
 import { useLabels } from '@/composables/useLabels'
+import { TaskLabelsSelector, LabelModal } from '@/components/labels'
 import api from '@/api/axios'
 
 const props = defineProps({
@@ -469,6 +456,7 @@ const users = ref([])
 const activites = ref([])
 const errorMessage = ref('')
 const validationErrors = ref([])
+const showLabelModal = ref(false)
 
 const formData = ref({
   activite_id: props.activiteId || '',
@@ -506,13 +494,9 @@ const prioriteOptions = [
   { value: 'critique', label: 'Critique', icon: '🔴' }
 ]
 
-const toggleLabel = (labelId) => {
-  const index = formData.value.label_ids.indexOf(labelId)
-  if (index > -1) {
-    formData.value.label_ids.splice(index, 1)
-  } else {
-    formData.value.label_ids.push(labelId)
-  }
+const handleLabelCreated = async () => {
+  showLabelModal.value = false
+  await fetchLabels()
 }
 
 const handleCoverImageUpload = (event) => {

@@ -203,6 +203,26 @@ const router = createRouter({
     },
 
     {
+      path: '/labels',
+      name: 'labels.index',
+      component: () => import('../pages/labels/LabelsManagement.vue'),
+      meta: {
+        title: 'Gestion des Labels',
+        requiresAuth: true,
+      },
+    },
+
+    {
+      path: '/labels/templates',
+      name: 'labels.templates',
+      component: () => import('../pages/labels/LabelTemplates.vue'),
+      meta: {
+        title: 'Templates de Labels',
+        requiresAuth: true,
+      },
+    },
+
+    {
       path: '/error-404',
       name: '404 Error',
       component: () => import('../pages/Errors/FourZeroFour.vue'),
