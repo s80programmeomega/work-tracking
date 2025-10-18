@@ -129,11 +129,36 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Labels routes
     Route::prefix('labels')->group(function () {
         Route::get('/', [LabelController::class, 'index']);
+        Route::get('/stats', [LabelController::class, 'stats']);
         Route::post('/', [LabelController::class, 'store']);
         Route::get('/{label}', [LabelController::class, 'show']);
         Route::put('/{label}', [LabelController::class, 'update']);
         Route::delete('/{label}', [LabelController::class, 'destroy']);
         Route::post('/reorder', [LabelController::class, 'reorder']);
+        Route::post('/{label}/duplicate', [LabelController::class, 'duplicate']);
+    });
+
+    // Label Templates routes
+    Route::prefix('label-templates')->group(function () {
+        Route::get('/', [\App\Http\Controllers\LabelTemplateController::class, 'index']);
+        Route::get('/default', [\App\Http\Controllers\LabelTemplateController::class, 'getDefault']);
+        Route::get('/predefined', [\App\Http\Controllers\LabelTemplateController::class, 'predefined']);
+        Route::post('/', [\App\Http\Controllers\LabelTemplateController::class, 'store']);
+        Route::get('/{labelTemplate}', [\App\Http\Controllers\LabelTemplateController::class, 'show']);
+        Route::put('/{labelTemplate}', [\App\Http\Controllers\LabelTemplateController::class, 'update']);
+        Route::delete('/{labelTemplate}', [\App\Http\Controllers\LabelTemplateController::class, 'destroy']);
+        Route::post('/{labelTemplate}/apply', [\App\Http\Controllers\LabelTemplateController::class, 'apply']);
+        Route::post('/{labelTemplate}/duplicate', [\App\Http\Controllers\LabelTemplateController::class, 'duplicate']);
+        Route::post('/{labelTemplate}/set-default', [\App\Http\Controllers\LabelTemplateController::class, 'setDefault']);
+    });
+
+    // Task Labels routes (attach/detach labels to tasks)
+    Route::prefix('taches/{tache}/labels')->group(function () {
+        Route::get('/', [\App\Http\Controllers\TacheLabelController::class, 'index']);
+        Route::post('/sync', [\App\Http\Controllers\TacheLabelController::class, 'sync']);
+        Route::post('/attach', [\App\Http\Controllers\TacheLabelController::class, 'attach']);
+        Route::post('/detach', [\App\Http\Controllers\TacheLabelController::class, 'detach']);
+        Route::delete('/detach-all', [\App\Http\Controllers\TacheLabelController::class, 'detachAll']);
     });
 
     // Comment Management Routes
