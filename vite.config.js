@@ -11,6 +11,11 @@ export default defineConfig({
         }),
         vue(),
     ],
+     server: {
+        hmr: {
+            overlay: false // Désactive l'overlay d'erreur
+        }
+    },
     resolve: {
         alias: {
             '@': fileURLToPath(new URL('./resources/js', import.meta.url)),
