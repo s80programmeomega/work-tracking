@@ -4,14 +4,14 @@
       class="relative flex items-center justify-center text-gray-500 transition-colors bg-white border border-gray-200 rounded-full hover:text-dark-900 h-11 w-11 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
       @click="toggleDropdown"
     >
+      <!-- Badge with count -->
       <span
-        :class="{ hidden: !notifying, flex: notifying }"
-        class="absolute right-0 top-0.5 z-1 h-2 w-2 rounded-full bg-orange-400"
+        v-if="unreadCount > 0"
+        class="absolute -right-1 -top-1 z-10 flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold text-white bg-red-500 rounded-full"
       >
-        <span
-          class="absolute inline-flex w-full h-full bg-orange-400 rounded-full opacity-75 -z-1 animate-ping"
-        ></span>
+        {{ unreadCount > 99 ? '99+' : unreadCount }}
       </span>
+
       <svg
         class="fill-current"
         width="20"
@@ -37,169 +37,119 @@
       <div
         class="flex items-center justify-between pb-3 mb-3 border-b border-gray-100 dark:border-gray-800"
       >
-        <h5 class="text-lg font-semibold text-gray-800 dark:text-white/90">Notification</h5>
+        <h5 class="text-lg font-semibold text-gray-800 dark:text-white/90">
+          Notifications
+          <span v-if="unreadCount > 0" class="ml-2 text-sm font-medium text-blue-600 dark:text-blue-400">
+            ({{ unreadCount }})
+          </span>
+        </h5>
 
-        <button @click="closeDropdown" class="text-gray-500 dark:text-gray-400">
-          <svg
-            class="fill-current"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
+        <div class="flex items-center gap-2">
+          <button
+            v-if="unreadCount > 0"
+            @click="handleMarkAllAsRead"
+            class="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+            title="Tout marquer comme lu"
           >
-            <path
-              fill-rule="evenodd"
-              clip-rule="evenodd"
-              d="M6.21967 7.28131C5.92678 6.98841 5.92678 6.51354 6.21967 6.22065C6.51256 5.92775 6.98744 5.92775 7.28033 6.22065L11.999 10.9393L16.7176 6.22078C17.0105 5.92789 17.4854 5.92788 17.7782 6.22078C18.0711 6.51367 18.0711 6.98855 17.7782 7.28144L13.0597 12L17.7782 16.7186C18.0711 17.0115 18.0711 17.4863 17.7782 17.7792C17.4854 18.0721 17.0105 18.0721 16.7176 17.7792L11.999 13.0607L7.28033 17.7794C6.98744 18.0722 6.51256 18.0722 6.21967 17.7794C5.92678 17.4865 5.92678 17.0116 6.21967 16.7187L10.9384 12L6.21967 7.28131Z"
-              fill=""
-            />
-          </svg>
-        </button>
+            <i class="fas fa-check-double"></i>
+          </button>
+          <button @click="closeDropdown" class="text-gray-500 dark:text-gray-400">
+            <svg
+              class="fill-current"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+                d="M6.21967 7.28131C5.92678 6.98841 5.92678 6.51354 6.21967 6.22065C6.51256 5.92775 6.98744 5.92775 7.28033 6.22065L11.999 10.9393L16.7176 6.22078C17.0105 5.92789 17.4854 5.92788 17.7782 6.22078C18.0711 6.51367 18.0711 6.98855 17.7782 7.28144L13.0597 12L17.7782 16.7186C18.0711 17.0115 18.0711 17.4863 17.7782 17.7792C17.4854 18.0721 17.0105 18.0721 16.7176 17.7792L11.999 13.0607L7.28033 17.7794C6.98744 18.0722 6.51256 18.0722 6.21967 17.7794C5.92678 17.4865 5.92678 17.0116 6.21967 16.7187L10.9384 12L6.21967 7.28131Z"
+                fill=""
+              />
+            </svg>
+          </button>
+        </div>
       </div>
 
-      <ul class="flex flex-col h-auto overflow-y-auto custom-scrollbar">
-        <li v-for="notification in notifications" :key="notification.id" @click="handleItemClick">
-          <a
-            class="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
-            href="#"
-          >
-            <span class="relative block w-full h-10 rounded-full z-1 max-w-10">
-              <img :src="notification.userImage" alt="User" class="overflow-hidden rounded-full" />
-              <span
-                :class="notification.status === 'online' ? 'bg-success-500' : 'bg-error-500'"
-                class="absolute bottom-0 right-0 z-10 h-2.5 w-full max-w-2.5 rounded-full border-[1.5px] border-white dark:border-gray-900"
-              ></span>
-            </span>
+      <!-- Loading state -->
+      <div v-if="loading" class="flex items-center justify-center py-8">
+        <i class="fas fa-spinner fa-spin text-2xl text-gray-400"></i>
+      </div>
 
-            <span class="block">
-              <span class="mb-1.5 block text-theme-sm text-gray-500 dark:text-gray-400">
-                <span class="font-medium text-gray-800 dark:text-white/90">
-                  {{ notification.userName }}
-                </span>
-                {{ notification.action }}
-                <span class="font-medium text-gray-800 dark:text-white/90">
-                  {{ notification.project }}
-                </span>
-              </span>
+      <!-- Empty state -->
+      <div v-else-if="displayedNotifications.length === 0" class="flex flex-col items-center justify-center py-8">
+        <i class="fas fa-bell-slash text-4xl text-gray-400 mb-3"></i>
+        <p class="text-gray-600 dark:text-gray-400">Aucune notification</p>
+      </div>
 
-              <span class="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
-                <span>{{ notification.type }}</span>
-                <span class="w-1 h-1 bg-gray-400 rounded-full"></span>
-                <span>{{ notification.time }}</span>
-              </span>
-            </span>
-          </a>
-        </li>
-      </ul>
+      <!-- Notifications List -->
+      <div v-else class="flex flex-col h-auto overflow-y-auto custom-scrollbar">
+        <NotificationItem
+          v-for="notification in displayedNotifications"
+          :key="notification.id"
+          :notification="notification"
+          @click="handleNotificationClick"
+          @mark-read="handleMarkAsRead"
+          @delete="handleDelete"
+        />
+      </div>
 
       <router-link
-        to="#"
+        to="/notifications"
         class="mt-3 flex justify-center rounded-lg border border-gray-300 bg-white p-3 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-        @click="handleViewAllClick"
+        @click="closeDropdown"
       >
-        View All Notification
+        Voir toutes les notifications
       </router-link>
     </div>
     <!-- Dropdown End -->
+
+    <!-- Notification Detail Modal -->
+    <NotificationDetailModal
+      :is-open="showDetailModal"
+      :notification="selectedNotification"
+      @close="closeDetailModal"
+      @mark-read="handleMarkAsRead"
+      @delete="handleDelete"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-import { RouterLink } from 'vue-router'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { RouterLink, useRouter } from 'vue-router'
+import { useNotifications } from '@/composables/useNotifications'
+import NotificationItem from './NotificationItem.vue'
+import NotificationDetailModal from './NotificationDetailModal.vue'
 
+const router = useRouter()
 const dropdownOpen = ref(false)
-const notifying = ref(true)
 const dropdownRef = ref(null)
+const maxDisplayed = 5
+const showDetailModal = ref(false)
+const selectedNotification = ref(null)
 
-const notifications = ref([
-  {
-    id: 1,
-    userName: 'Terry Franci',
-    userImage: '/images/user/user-02.jpg',
-    action: 'requests permission to change',
-    project: 'Project - Nganter App',
-    type: 'Project',
-    time: '5 min ago',
-    status: 'online',
-  },
-  {
-    id: 2,
-    userName: 'Terry Franci',
-    userImage: '/images/user/user-03.jpg',
-    action: 'requests permission to change',
-    project: 'Project - Nganter App',
-    type: 'Project',
-    time: '5 min ago',
-    status: 'offline',
-  },
-  {
-    id: 3,
-    userName: 'Terry Franci',
-    userImage: '/images/user/user-04.jpg',
-    action: 'requests permission to change',
-    project: 'Project - Nganter App',
-    type: 'Project',
-    time: '5 min ago',
-    status: 'online',
-  },
-  {
-    id: 4,
-    userName: 'Terry Franci',
-    userImage: '/images/user/user-05.jpg',
-    action: 'requests permission to change',
-    project: 'Project - Nganter App',
-    type: 'Project',
-    time: '5 min ago',
-    status: 'online',
-  },
-  {
-    id: 5,
-    userName: 'Terry Franci',
-    userImage: '/images/user/user-06.jpg',
-    action: 'requests permission to change',
-    project: 'Project - Nganter App',
-    type: 'Project',
-    time: '5 min ago',
-    status: 'offline',
-  },
-  {
-    id: 6,
-    userName: 'Terry Franci',
-    userImage: '/images/user/user-07.jpg',
-    action: 'requests permission to change',
-    project: 'Project - Nganter App',
-    type: 'Project',
-    time: '5 min ago',
-    status: 'online',
-  },
-  {
-    id: 7,
-    userName: 'Terry Franci',
-    userImage: '/images/user/user-08.jpg',
-    action: 'requests permission to change',
-    project: 'Project - Nganter App',
-    type: 'Project',
-    time: '5 min ago',
-    status: 'online',
-  },
-  {
-    id: 7,
-    userName: 'Terry Franci',
-    userImage: '/images/user/user-09.jpg',
-    action: 'requests permission to change',
-    project: 'Project - Nganter App',
-    type: 'Project',
-    time: '5 min ago',
-    status: 'online',
-  },
-  // Add more notifications here...
-])
+const {
+  notifications,
+  unreadCount,
+  loading,
+  fetchUnread,
+  markAsRead,
+  markAllAsRead,
+  deleteNotification,
+} = useNotifications()
 
-const toggleDropdown = () => {
+const notifying = computed(() => unreadCount.value > 0)
+const displayedNotifications = computed(() => notifications.value.slice(0, maxDisplayed))
+
+const toggleDropdown = async () => {
   dropdownOpen.value = !dropdownOpen.value
-  notifying.value = false
+
+  if (dropdownOpen.value && notifications.value.length === 0) {
+    await fetchUnread()
+  }
 }
 
 const closeDropdown = () => {
@@ -212,22 +162,55 @@ const handleClickOutside = (event) => {
   }
 }
 
-const handleItemClick = (event) => {
-  event.preventDefault()
-  // Handle the item click action here
-  console.log('Notification item clicked')
+const handleNotificationClick = (notification) => {
+  selectedNotification.value = notification
+  showDetailModal.value = true
   closeDropdown()
 }
 
-const handleViewAllClick = (event) => {
-  event.preventDefault()
-  // Handle the "View All Notification" action here
-  console.log('View All Notifications clicked')
-  closeDropdown()
+const closeDetailModal = () => {
+  showDetailModal.value = false
+  selectedNotification.value = null
+}
+
+const handleMarkAsRead = async (notificationId) => {
+  try {
+    await markAsRead(notificationId)
+  } catch (error) {
+    console.error('Error marking as read:', error)
+  }
+}
+
+const handleMarkAllAsRead = async () => {
+  try {
+    await markAllAsRead()
+  } catch (error) {
+    console.error('Error marking all as read:', error)
+  }
+}
+
+const handleDelete = async (notificationId) => {
+  try {
+    await deleteNotification(notificationId)
+  } catch (error) {
+    console.error('Error deleting notification:', error)
+  }
 }
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
+
+  // Fetch unread notifications on mount
+  fetchUnread()
+
+  // Refresh every 30 seconds
+  const interval = setInterval(() => {
+    fetchUnread()
+  }, 30000)
+
+  onUnmounted(() => {
+    clearInterval(interval)
+  })
 })
 
 onUnmounted(() => {

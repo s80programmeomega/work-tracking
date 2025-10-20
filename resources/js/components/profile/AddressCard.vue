@@ -6,28 +6,23 @@
           <h4 class="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">Address</h4>
 
           <div class="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
-            <div>
-              <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Country</p>
-              <p class="text-sm font-medium text-gray-800 dark:text-white/90">United States</p>
+            <div class="col-span-2">
+              <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Adresse complète</p>
+              <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ user.adresse || 'Non renseigné' }}</p>
             </div>
 
             <div>
-              <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">City/State</p>
+              <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Langue</p>
               <p class="text-sm font-medium text-gray-800 dark:text-white/90">
-                Phoenix, United States
+                {{ user.language === 'fr' ? 'Français' : user.language === 'en' ? 'English' : 'Non renseigné' }}
               </p>
             </div>
 
             <div>
               <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Postal Code
+                Fuseau horaire
               </p>
-              <p class="text-sm font-medium text-gray-800 dark:text-white/90">ERT 2489</p>
-            </div>
-
-            <div>
-              <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">TAX ID</p>
-              <p class="text-sm font-medium text-gray-800 dark:text-white/90">AS4568384</p>
+              <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ user.timezone || 'Non renseigné' }}</p>
             </div>
           </div>
         </div>
@@ -92,46 +87,37 @@
           <form class="flex flex-col">
             <div class="px-2 overflow-y-auto custom-scrollbar">
               <div class="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                <div>
+                <div class="col-span-2">
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                    Country
+                    Adresse complète
                   </label>
-                  <input
-                    type="text"
-                    value="United States"
-                    class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                  />
+                  <textarea
+                    v-model="formData.adresse"
+                    rows="3"
+                    class="dark:bg-dark-900 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                  ></textarea>
                 </div>
 
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                    City/State
+                    Langue
                   </label>
-                  <input
-                    type="text"
-                    value="Poenix, Arizona, United States"
+                  <select
+                    v-model="formData.language"
                     class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                  />
+                  >
+                    <option value="fr">Français</option>
+                    <option value="en">English</option>
+                  </select>
                 </div>
 
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                    Postal Code
+                    Fuseau horaire
                   </label>
                   <input
                     type="text"
-                    value="ERT 2489"
-                    class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                  />
-                </div>
-
-                <div>
-                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                    TAX ID
-                  </label>
-                  <input
-                    type="text"
-                    value="AS4568384"
+                    v-model="formData.timezone"
                     class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                   />
                 </div>
@@ -161,15 +147,41 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import Modal from './Modal.vue'
+
+const props = defineProps({
+  user: {
+    type: Object,
+    required: true
+  }
+})
+
+const emit = defineEmits(['refresh'])
 
 const isProfileAddressModal = ref(false)
 
+// Form data
+const formData = ref({
+  adresse: '',
+  language: 'fr',
+  timezone: 'UTC'
+})
+
+// Watch for user changes and populate form
+watch(() => props.user, (newUser) => {
+  if (newUser) {
+    formData.value.adresse = newUser.adresse || ''
+    formData.value.language = newUser.language || 'fr'
+    formData.value.timezone = newUser.timezone || 'UTC'
+  }
+}, { immediate: true })
+
 const saveProfile = () => {
   // Implement save profile logic here
-  console.log('Profile saved')
-  isProfileInfoModal.value = false
+  console.log('Profile saved', formData.value)
+  isProfileAddressModal.value = false
+  emit('refresh')
 }
 </script>
 

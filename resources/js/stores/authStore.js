@@ -14,7 +14,13 @@ export const useAuthStore = defineStore('auth', {
     getters: {
         currentUser: (state) => state.user,
 
-        userRoles: (state) => state.user?.roles?.map(r => r.name) || [],
+        userRoles: (state) => {
+            // Support both role field (string) and roles collection (Spatie)
+            if (state.user?.role) {
+                return [state.user.role];
+            }
+            return state.user?.roles?.map(r => r.name) || [];
+        },
 
         userPermissions: (state) => {
             const rolePerms = state.user?.roles?.flatMap(r => r.permissions) || [];
@@ -23,10 +29,15 @@ export const useAuthStore = defineStore('auth', {
         },
 
         hasRole: (state) => (role) => {
+            // Check both role field and roles collection
+            if (state.user?.role === role) return true;
             return state.user?.roles?.some(r => r.name === role) || false;
         },
 
         hasAnyRole: (state) => (roles) => {
+            // Check role field first
+            if (state.user?.role && roles.includes(state.user.role)) return true;
+            // Then check roles collection
             return roles.some(role => state.user?.roles?.some(r => r.name === role));
         },
 

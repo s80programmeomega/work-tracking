@@ -35,6 +35,7 @@
         "vue-flatpickr-component": "^12.0.0",
         "vue-router": "^4.5.1",
         "vue3-apexcharts": "^1.8.0",
+        "vuedraggable": "^4.1.0",
         "vuevectormap": "^2.1.1"
     }
 }

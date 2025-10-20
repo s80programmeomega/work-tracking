@@ -1,378 +1,408 @@
 <template>
-  <Dialog :open="open" @update:open="$emit('close')">
-    <DialogContent class="sm:max-w-[600px]">
-      <DialogHeader>
-        <DialogTitle>
-          {{ isEditing ? 'Modifier le projet' : 'Créer un nouveau projet' }}
-        </DialogTitle>
-        <DialogDescription>
-          {{ isEditing ? 'Modifiez les informations du projet.' : 'Remplissez les informations pour créer un nouveau projet.' }}
-        </DialogDescription>
-      </DialogHeader>
-
-      <form @submit.prevent="handleSubmit" class="space-y-4">
-        <!-- Nom du projet -->
-        <div class="space-y-2">
-          <Label for="nom">Nom du projet *</Label>
-          <Input
-            id="nom"
-            v-model="form.nom"
-            placeholder="Nom du projet"
-            :class="{ 'border-destructive': errors.nom }"
-          />
-          <p v-if="errors.nom" class="text-sm text-destructive">{{ errors.nom[0] }}</p>
-        </div>
-
-        <!-- Description -->
-        <div class="space-y-2">
-          <Label for="description">Description</Label>
-          <Textarea
-            id="description"
-            v-model="form.description"
-            placeholder="Description détaillée du projet"
-            rows="4"
-            :class="{ 'border-destructive': errors.description }"
-          />
-          <p v-if="errors.description" class="text-sm text-destructive">{{ errors.description[0] }}</p>
-        </div>
-
-        <!-- Dates -->
-        <div class="grid grid-cols-2 gap-4">
-          <div class="space-y-2">
-            <Label for="date_debut">Date de début *</Label>
-            <Input
-              id="date_debut"
-              v-model="form.date_debut"
-              type="date"
-              :class="{ 'border-destructive': errors.date_debut }"
-            />
-            <p v-if="errors.date_debut" class="text-sm text-destructive">{{ errors.date_debut[0] }}</p>
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" @click.self="$emit('close')">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+      <!-- Header -->
+      <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
           </div>
+          <div class="flex-1">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+              {{ projet ? 'Modifier le projet' : 'Nouveau projet' }}
+            </h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              {{ projet ? 'Mettre à jour les informations du projet' : 'Créer un nouveau projet pour votre organisation' }}
+            </p>
+          </div>
+          <button
+            @click="$emit('close')"
+            class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          >
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
 
-          <div class="space-y-2">
-            <Label for="date_fin">Date de fin *</Label>
-            <Input
-              id="date_fin"
-              v-model="form.date_fin"
-              type="date"
-              :class="{ 'border-destructive': errors.date_fin }"
-            />
-            <p v-if="errors.date_fin" class="text-sm text-destructive">{{ errors.date_fin[0] }}</p>
+      <!-- Error Alert -->
+      <div v-if="errorMessage" class="mx-8 mt-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+        <div class="flex items-start gap-3">
+          <svg class="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div class="flex-1">
+            <p class="font-medium text-red-800 dark:text-red-200">{{ errorMessage }}</p>
           </div>
         </div>
+      </div>
 
-        <!-- Responsable -->
-        <div class="space-y-2">
-          <Label for="responsable">Responsable du projet *</Label>
-          <Select v-model="form.responsable_id">
-            <SelectTrigger :class="{ 'border-destructive': errors.responsable_id }">
-              <SelectValue placeholder="Sélectionner un responsable" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem
-                v-for="responsable in responsables"
-                :key="responsable.id"
-                :value="responsable.id.toString()"
-              >
-                {{ responsable.nom }} ({{ responsable.email }})
-              </SelectItem>
-            </SelectContent>
-          </Select>
-          <p v-if="errors.responsable_id" class="text-sm text-destructive">{{ errors.responsable_id[0] }}</p>
-        </div>
+      <!-- Form Body -->
+      <div class="flex-1 overflow-y-auto px-8 py-6">
+        <form @submit.prevent="handleSubmit" class="space-y-6">
+          <!-- Section 1: Informations générales -->
+          <div class="space-y-4">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Informations générales
+            </h3>
 
-        <!-- Status et Priorité -->
-        <div class="grid grid-cols-2 gap-4">
-          <div class="space-y-2">
-            <Label for="status">Statut *</Label>
-            <Select v-model="form.status">
-              <SelectTrigger :class="{ 'border-destructive': errors.status }">
-                <SelectValue placeholder="Sélectionner un statut" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="planifie">
-                  <div class="flex items-center space-x-2">
-                    <Badge variant="secondary" class="text-xs">Planifié</Badge>
-                  </div>
-                </SelectItem>
-                <SelectItem value="en_cours">
-                  <div class="flex items-center space-x-2">
-                    <Badge variant="default" class="text-xs">En cours</Badge>
-                  </div>
-                </SelectItem>
-                <SelectItem value="suspendu">
-                  <div class="flex items-center space-x-2">
-                    <Badge variant="destructive" class="text-xs">Suspendu</Badge>
-                  </div>
-                </SelectItem>
-                <SelectItem value="termine">
-                  <div class="flex items-center space-x-2">
-                    <Badge variant="outline" class="text-xs">Terminé</Badge>
-                  </div>
-                </SelectItem>
-                <SelectItem value="annule">
-                  <div class="flex items-center space-x-2">
-                    <Badge variant="destructive" class="text-xs">Annulé</Badge>
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <p v-if="errors.status" class="text-sm text-destructive">{{ errors.status[0] }}</p>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Nom du projet <span class="text-red-500">*</span>
+              </label>
+              <input
+                v-model="formData.nom"
+                type="text"
+                required
+                placeholder="Ex: Transformation digitale 2025"
+                class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Description
+              </label>
+              <textarea
+                v-model="formData.description"
+                rows="3"
+                placeholder="Décrivez les objectifs et le contexte du projet..."
+                class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all resize-none"
+              ></textarea>
+            </div>
           </div>
 
-          <div class="space-y-2">
-            <Label for="priorite">Priorité *</Label>
-            <Select v-model="form.priorite">
-              <SelectTrigger :class="{ 'border-destructive': errors.priorite }">
-                <SelectValue placeholder="Sélectionner une priorité" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="basse">
-                  <div class="flex items-center space-x-2">
-                    <Badge variant="secondary" class="text-xs">Basse</Badge>
-                  </div>
-                </SelectItem>
-                <SelectItem value="normale">
-                  <div class="flex items-center space-x-2">
-                    <Badge variant="outline" class="text-xs">Normale</Badge>
-                  </div>
-                </SelectItem>
-                <SelectItem value="haute">
-                  <div class="flex items-center space-x-2">
-                    <Badge variant="default" class="text-xs">Haute</Badge>
-                  </div>
-                </SelectItem>
-                <SelectItem value="critique">
-                  <div class="flex items-center space-x-2">
-                    <Badge variant="destructive" class="text-xs">Critique</Badge>
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <p v-if="errors.priorite" class="text-sm text-destructive">{{ errors.priorite[0] }}</p>
+          <!-- Section 2: Planification -->
+          <div class="space-y-4">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              Planification
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Date de début <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model="formData.date_debut"
+                  type="date"
+                  required
+                  class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all"
+                />
+              </div>
+
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Date de fin
+                </label>
+                <input
+                  v-model="formData.date_fin"
+                  type="date"
+                  class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all"
+                />
+              </div>
+            </div>
           </div>
-        </div>
 
-        <!-- Budget -->
-        <div class="space-y-2">
-          <Label for="budget">Budget (€)</Label>
-          <Input
-            id="budget"
-            v-model.number="form.budget"
-            type="number"
-            step="0.01"
-            min="0"
-            placeholder="0.00"
-            :class="{ 'border-destructive': errors.budget }"
-          />
-          <p v-if="errors.budget" class="text-sm text-destructive">{{ errors.budget[0] }}</p>
-          <p class="text-xs text-muted-foreground">Laissez vide si aucun budget n'est défini</p>
-        </div>
+          <!-- Section 3: Responsable & Progression -->
+          <div class="space-y-4">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              Responsable & Progression
+            </h3>
 
-        <!-- Objectifs stratégiques (si édition) -->
-        <div v-if="isEditing" class="space-y-2">
-          <Label for="objectifs">Objectifs stratégiques</Label>
-          <Textarea
-            id="objectifs"
-            v-model="form.objectifs"
-            placeholder="Définissez les objectifs stratégiques du projet"
-            rows="3"
-          />
-        </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Responsable <span class="text-red-500">*</span>
+                </label>
+                <select
+                  v-model="formData.responsable_id"
+                  required
+                  class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all"
+                >
+                  <option value="">Sélectionner un responsable</option>
+                  <option v-for="user in users" :key="user.id" :value="user.id">
+                    {{ user.nom }}
+                  </option>
+                </select>
+              </div>
 
-        <DialogFooter>
-          <Button type="button" variant="outline" @click="$emit('close')" :disabled="loading">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Progression ({{ formData.progression }}%)
+                </label>
+                <input
+                  v-model.number="formData.progression"
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="5"
+                  class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full appearance-none cursor-pointer accent-blue-500"
+                />
+                <div class="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                  <div
+                    class="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-300"
+                    :style="{ width: `${formData.progression}%` }"
+                  ></div>
+                </div>
+                <div class="flex justify-between mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  <span>0%</span>
+                  <span>50%</span>
+                  <span>100%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 4: Statut & Visibilité -->
+          <div class="space-y-4">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              Statut & Visibilité
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Statut
+                </label>
+                <div class="space-y-2">
+                  <label
+                    v-for="statut in statusOptions"
+                    :key="statut.value"
+                    class="relative flex items-center gap-3 p-3 border-2 rounded-xl cursor-pointer transition-all hover:shadow-md"
+                    :class="formData.status === statut.value
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                      : 'border-gray-300 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-700'"
+                  >
+                    <input
+                      type="radio"
+                      v-model="formData.status"
+                      :value="statut.value"
+                      class="sr-only"
+                    />
+                    <span
+                      :class="statut.color"
+                      class="w-3 h-3 rounded-full flex-shrink-0"
+                    ></span>
+                    <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                      {{ statut.label }}
+                    </span>
+                    <svg
+                      v-if="formData.status === statut.value"
+                      class="absolute right-3 w-5 h-5 text-blue-500"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Visibilité
+                </label>
+                <div class="space-y-2">
+                  <label
+                    v-for="visibility in visibilityOptions"
+                    :key="visibility.value"
+                    class="relative flex items-center gap-3 p-3 border-2 rounded-xl cursor-pointer transition-all hover:shadow-md"
+                    :class="formData.visibility === visibility.value
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                      : 'border-gray-300 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-700'"
+                  >
+                    <input
+                      type="radio"
+                      v-model="formData.visibility"
+                      :value="visibility.value"
+                      class="sr-only"
+                    />
+                    <svg :class="visibility.iconColor" class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="visibility.icon" />
+                    </svg>
+                    <div class="flex-1">
+                      <div class="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        {{ visibility.label }}
+                      </div>
+                      <div class="text-xs text-gray-500 dark:text-gray-400">
+                        {{ visibility.description }}
+                      </div>
+                    </div>
+                    <svg
+                      v-if="formData.visibility === visibility.value"
+                      class="absolute right-3 w-5 h-5 text-blue-500"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Footer -->
+      <div class="px-8 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+        <div class="flex justify-end gap-3">
+          <button
+            type="button"
+            @click="$emit('close')"
+            class="px-6 py-2.5 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+          >
             Annuler
-          </Button>
-          <Button type="submit" :disabled="loading">
-            <Loader2 v-if="loading" class="w-4 h-4 mr-2 animate-spin" />
-            {{ isEditing ? 'Mettre à jour' : 'Créer le projet' }}
-          </Button>
-        </DialogFooter>
-      </form>
-    </DialogContent>
-  </Dialog>
+          </button>
+          <button
+            type="submit"
+            @click="handleSubmit"
+            :disabled="loading"
+            class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transition-all"
+          >
+            <span v-if="loading" class="flex items-center gap-2">
+              <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Enregistrement...
+            </span>
+            <span v-else>Enregistrer</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, watch } from 'vue'
-import { Loader2 } from 'lucide-vue-next'
-
-import Dialog from '@/components/ui/dialog/Dialog.vue'
-import DialogContent from '@/components/ui/dialog/DialogContent.vue'
-import DialogHeader from '@/components/ui/dialog/DialogHeader.vue'
-import DialogTitle from '@/components/ui/dialog/DialogTitle.vue'
-import DialogDescription from '@/components/ui/dialog/DialogDescription.vue'
-import DialogFooter from '@/components/ui/dialog/DialogFooter.vue'
-import Button from '@/components/ui/button/Button.vue'
-import Input from '@/components/ui/input/Input.vue'
-import Textarea from '@/components/ui/textarea/Textarea.vue'
-import Label from '@/components/ui/label/Label.vue'
-import Select from '@/components/ui/select/Select.vue'
-import SelectContent from '@/components/ui/select/SelectContent.vue'
-import SelectItem from '@/components/ui/select/SelectItem.vue'
-import SelectTrigger from '@/components/ui/select/SelectTrigger.vue'
-import SelectValue from '@/components/ui/select/SelectValue.vue'
-import Badge from '@/components/ui/badge/Badge.vue'
-
-import { projetApi } from '@/services/api'
+import { ref, onMounted } from 'vue'
+import { useAuthStore } from '@/stores/authStore'
+import { useProjets } from '@/composables/useProjets'
+import api from '@/api/axios'
 
 const props = defineProps({
-  open: {
-    type: Boolean,
-    required: true
-  },
   projet: {
     type: Object,
     default: null
   }
 })
 
-const emit = defineEmits(['close', 'created', 'updated'])
+const emit = defineEmits(['close', 'saved'])
+
+const authStore = useAuthStore()
+const { createProjet, updateProjet } = useProjets()
 
 const loading = ref(false)
-const responsables = ref([])
-const errors = ref({})
+const users = ref([])
+const errorMessage = ref('')
 
-const isEditing = computed(() => !!props.projet)
+const statusOptions = [
+  { value: 'active', label: 'Actif', color: 'bg-green-500' },
+  { value: 'completed', label: 'Terminé', color: 'bg-blue-500' },
+  { value: 'archived', label: 'Archivé', color: 'bg-gray-500' }
+]
 
-const form = reactive({
+const visibilityOptions = [
+  {
+    value: 'private',
+    label: 'Privé',
+    description: 'Visible par vous uniquement',
+    icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z',
+    iconColor: 'text-red-500'
+  },
+  {
+    value: 'team',
+    label: 'Équipe',
+    description: 'Visible par les membres',
+    icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z',
+    iconColor: 'text-blue-500'
+  },
+  {
+    value: 'public',
+    label: 'Public',
+    description: 'Visible par tous',
+    icon: 'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+    iconColor: 'text-green-500'
+  }
+]
+
+const formData = ref({
   nom: '',
   description: '',
-  date_debut: new Date().toISOString().split('T')[0],
+  date_debut: '',
   date_fin: '',
-  responsable_id: '',
-  budget: null,
-  status: 'planifie',
-  priorite: 'normale',
-  objectifs: ''
+  responsable_id: authStore.user?.id,
+  progression: 0,
+  status: 'active',
+  visibility: 'team'
 })
 
-const resetForm = () => {
-  form.nom = ''
-  form.description = ''
-  form.date_debut = new Date().toISOString().split('T')[0]
-  form.date_fin = ''
-  form.responsable_id = ''
-  form.budget = null
-  form.status = 'planifie'
-  form.priorite = 'normale'
-  form.objectifs = ''
-  errors.value = {}
-}
-
-const loadFormData = () => {
-  if (props.projet) {
-    form.nom = props.projet.nom || ''
-    form.description = props.projet.description || ''
-    form.date_debut = props.projet.date_debut || ''
-    form.date_fin = props.projet.date_fin || ''
-    form.responsable_id = props.projet.responsable_id?.toString() || ''
-    form.budget = props.projet.budget
-    form.status = props.projet.status || 'planifie'
-    form.priorite = props.projet.priorite || 'normale'
-    form.objectifs = props.projet.objectifs || ''
-  } else {
-    resetForm()
-  }
-}
-
-const fetchResponsables = async () => {
+const loadUsers = async () => {
   try {
-    const response = await projetApi.getResponsables()
-    responsables.value = response.data
+    const { data } = await api.get('/users')
+    users.value = data.data || []
   } catch (error) {
-    console.error('Erreur lors du chargement des responsables:', error)
+    console.error('Error loading users:', error)
   }
-}
-
-const validateForm = () => {
-  const newErrors = {}
-
-  if (!form.nom.trim()) {
-    newErrors.nom = ['Le nom du projet est requis']
-  }
-
-  if (!form.date_debut) {
-    newErrors.date_debut = ['La date de début est requise']
-  }
-
-  if (!form.date_fin) {
-    newErrors.date_fin = ['La date de fin est requise']
-  }
-
-  if (form.date_debut && form.date_fin && new Date(form.date_debut) >= new Date(form.date_fin)) {
-    newErrors.date_fin = ['La date de fin doit être postérieure à la date de début']
-  }
-
-  if (!form.responsable_id) {
-    newErrors.responsable_id = ['Le responsable est requis']
-  }
-
-  if (!form.status) {
-    newErrors.status = ['Le statut est requis']
-  }
-
-  if (!form.priorite) {
-    newErrors.priorite = ['La priorité est requise']
-  }
-
-  if (form.budget !== null && form.budget < 0) {
-    newErrors.budget = ['Le budget doit être positif']
-  }
-
-  errors.value = newErrors
-  return Object.keys(newErrors).length === 0
 }
 
 const handleSubmit = async () => {
-  if (!validateForm()) {
-    return
-  }
-
   loading.value = true
-  try {
-    const formData = {
-      ...form,
-      responsable_id: parseInt(form.responsable_id),
-      budget: form.budget || null
-    }
+  errorMessage.value = ''
 
-    if (isEditing.value) {
-      await projetApi.update(props.projet.id, formData)
-      emit('updated')
+  try {
+    if (props.projet) {
+      await updateProjet(props.projet.id, formData.value)
     } else {
-      await projetApi.create(formData)
-      emit('created')
+      await createProjet(formData.value)
     }
+    emit('saved')
   } catch (error) {
-    if (error.response?.data?.errors) {
-      errors.value = error.response.data.errors
+    console.error(error)
+
+    if (error.response && error.response.data && error.response.data.message) {
+      errorMessage.value = error.response.data.message
+    } else if (error.message === 'Network Error') {
+      errorMessage.value = 'Erreur de connexion. Veuillez vérifier votre connexion internet.'
     } else {
-      console.error('Erreur lors de la soumission:', error)
+      errorMessage.value = 'Une erreur s\'est produite lors de l\'enregistrement du projet.'
     }
   } finally {
     loading.value = false
   }
 }
 
-// Watch for prop changes
-watch(() => props.open, (newVal) => {
-  if (newVal) {
-    loadFormData()
-  }
-})
+onMounted(async () => {
+  await loadUsers()
 
-watch(() => props.projet, () => {
-  if (props.open) {
-    loadFormData()
-  }
-})
-
-onMounted(() => {
-  fetchResponsables()
-  if (props.open) {
-    loadFormData()
+  if (props.projet) {
+    formData.value = {
+      nom: props.projet.nom || '',
+      description: props.projet.description || '',
+      date_debut: props.projet.date_debut || '',
+      date_fin: props.projet.date_fin || '',
+      responsable_id: props.projet.responsable_id || authStore.user?.id,
+      progression: props.projet.progression || 0,
+      status: props.projet.status || 'active',
+      visibility: props.projet.visibility || 'team'
+    }
   }
 })
 </script>

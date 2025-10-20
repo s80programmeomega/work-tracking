@@ -122,6 +122,107 @@ const router = createRouter({
     },
 
     {
+      path: '/users',
+      name: 'Users',
+      component: () => import('../pages/Users/Index.vue'),
+      meta: {
+        title: 'Gestion des Utilisateurs',
+        requiresAuth: true,
+        roles: ['super_admin', 'manager'],
+      },
+    },
+
+    {
+      path: '/projets',
+      name: 'Projets',
+      component: () => import('../pages/Projets.vue'),
+      meta: {
+        title: 'Gestion des Projets',
+        requiresAuth: true,
+      },
+    },
+
+    {
+      path: '/activites',
+      name: 'Activites',
+      component: () => import('../pages/Activites.vue'),
+      meta: {
+        title: 'Gestion des Activités',
+        requiresAuth: true,
+      },
+    },
+
+    {
+      path: '/taches',
+      name: 'Taches',
+      component: () => import('../pages/Taches.vue'),
+      meta: {
+        title: 'Gestion des Tâches',
+        requiresAuth: true,
+      },
+    },
+
+    {
+      path: '/notifications',
+      name: 'Notifications',
+      component: () => import('../pages/Notifications.vue'),
+      meta: {
+        title: 'Notifications',
+        requiresAuth: true,
+      },
+    },
+
+    {
+      path: '/notification-preferences',
+      name: 'NotificationPreferences',
+      component: () => import('../pages/NotificationPreferences.vue'),
+      meta: {
+        title: 'Préférences de notification',
+        requiresAuth: true,
+      },
+    },
+
+    {
+      path: '/teams',
+      name: 'teams.index',
+      component: () => import('../pages/Teams.vue'),
+      meta: {
+        title: 'Équipes',
+        requiresAuth: true,
+      },
+    },
+
+    {
+      path: '/teams/:uuid',
+      name: 'teams.show',
+      component: () => import('../pages/Teams/Show.vue'),
+      meta: {
+        title: 'Détails de l\'équipe',
+        requiresAuth: true,
+      },
+    },
+
+    {
+      path: '/labels',
+      name: 'labels.index',
+      component: () => import('../pages/labels/LabelsManagement.vue'),
+      meta: {
+        title: 'Gestion des Labels',
+        requiresAuth: true,
+      },
+    },
+
+    {
+      path: '/labels/templates',
+      name: 'labels.templates',
+      component: () => import('../pages/labels/LabelTemplates.vue'),
+      meta: {
+        title: 'Templates de Labels',
+        requiresAuth: true,
+      },
+    },
+
+    {
       path: '/error-404',
       name: '404 Error',
       component: () => import('../pages/Errors/FourZeroFour.vue'),

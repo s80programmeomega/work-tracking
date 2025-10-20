@@ -11,12 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('teams', function (Blueprint $table) {
+        Schema::create('tache_user', function (Blueprint $table) {
             $table->id();
-            $table->string('nom');
-            $table->text('description')->nullable();
-            $table->foreignId('responsable_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('tache_id')->constrained('taches')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
+
+            // Ensure a user can only be assigned once to a task
+            $table->unique(['tache_id', 'user_id']);
         });
     }
 
@@ -25,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('teams');
+        Schema::dropIfExists('tache_user');
     }
 };
