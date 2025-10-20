@@ -77,9 +77,9 @@ class RolePermissionSeeder extends Seeder
 
         // Create a super admin user
         $superAdmin = User::create([
-            'name' => 'Super Admin',
+            'nom' => 'Super Admin',
             'email' => 'admin@worktracking.com',
-            'password' => Hash::make('password'),
+            'password' => Hash::make('123456789'),
             'email_verified_at' => now(),
             'is_active' => true,
         ]);
@@ -87,7 +87,7 @@ class RolePermissionSeeder extends Seeder
 
         // Create a manager user
         $manager = User::create([
-            'name' => 'Manager User',
+            'nom' => 'Manager User',
             'email' => 'manager@worktracking.com',
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
@@ -97,7 +97,7 @@ class RolePermissionSeeder extends Seeder
 
         // Create a regular user (cadre)
         $cadre = User::create([
-            'name' => 'Cadre User',
+            'nom' => 'Cadre User',
             'email' => 'cadre@worktracking.com',
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
