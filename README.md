@@ -202,6 +202,7 @@ Schema::create('tache_user', function (Blueprint $table) {
     $table->timestamps();
 });
 ```
+...
 
 ## 📦 Installation & Configuration
 
