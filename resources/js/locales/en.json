@@ -1,0 +1,79 @@
+{
+  "app": {
+    "name": "Uptiimun Work Tracking",
+    "description": "Task management and work tracking solution",
+    "tagline": "Improve individual performance and overall organizational productivity"
+  },
+  "auth": {
+    "signin": "Sign In",
+    "signin_title": "Sign in to your account",
+    "signin_description": "Enter your email and password to sign in!",
+    "email": "Email",
+    "password": "Password",
+    "keep_me_logged_in": "Keep me logged in",
+    "forgot_password": "Forgot password?",
+    "signin_button": "Sign In",
+    "signing_in": "Signing in...",
+    "dont_have_account": "Don't have an account?",
+    "signup": "Sign Up",
+    "or": "Or",
+    "signin_with_google": "Sign in with Google",
+    "signin_with_x": "Sign in with X",
+    "invalid_credentials": "Invalid email or password",
+    "login_failed": "Login failed",
+    "email_placeholder": "your@email.com",
+    "password_placeholder": "Enter your password"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "tasks": "Tasks",
+    "projects": "Projects",
+    "activities": "Activities",
+    "teams": "Teams",
+    "calendar": "Calendar",
+    "users": "Users",
+    "labels": "Labels",
+    "notifications": "Notifications"
+  },
+  "features": {
+    "dashboard": {
+      "title": "Dashboard",
+      "description": "Overview of your productivity and progress"
+    },
+    "task_management": {
+      "title": "Task Management",
+      "description": "Create, assign and track task progress"
+    },
+    "project_planning": {
+      "title": "Project Planning",
+      "description": "Organize and plan your projects with timelines"
+    },
+    "automation": {
+      "title": "Automation",
+      "description": "Automate repetitive processes"
+    },
+    "team_collaboration": {
+      "title": "Team Collaboration",
+      "description": "Work effectively with your teams"
+    }
+  },
+  "validation": {
+    "required": "The {attribute} field is required.",
+    "email": "The email must be a valid email address.",
+    "min": {
+      "string": "The {attribute} must be at least {min} characters."
+    }
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Information"
+  }
+}

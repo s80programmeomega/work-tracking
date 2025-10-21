@@ -1,0 +1,79 @@
+{
+  "app": {
+    "name": "Uptiimun Work Tracking",
+    "description": "Solution de gestion des tâches et suivi du travail",
+    "tagline": "Améliorez la performance individuelle et la productivité globale de votre organisation"
+  },
+  "auth": {
+    "signin": "Connexion",
+    "signin_title": "Connectez-vous à votre compte",
+    "signin_description": "Entrez votre email et mot de passe pour vous connecter !",
+    "email": "Adresse email",
+    "password": "Mot de passe",
+    "keep_me_logged_in": "Rester connecté",
+    "forgot_password": "Mot de passe oublié ?",
+    "signin_button": "Se connecter",
+    "signing_in": "Connexion...",
+    "dont_have_account": "Vous n'avez pas de compte ?",
+    "signup": "S'inscrire",
+    "or": "Ou",
+    "signin_with_google": "Se connecter avec Google",
+    "signin_with_x": "Se connecter avec X",
+    "invalid_credentials": "Email ou mot de passe incorrect",
+    "login_failed": "Échec de la connexion",
+    "email_placeholder": "votre@email.com",
+    "password_placeholder": "Entrez votre mot de passe"
+  },
+  "navigation": {
+    "dashboard": "Tableau de bord",
+    "tasks": "Tâches",
+    "projects": "Projets",
+    "activities": "Activités",
+    "teams": "Équipes",
+    "calendar": "Calendrier",
+    "users": "Utilisateurs",
+    "labels": "Labels",
+    "notifications": "Notifications"
+  },
+  "features": {
+    "dashboard": {
+      "title": "Tableau de bord",
+      "description": "Vue d'ensemble de votre productivité et progression"
+    },
+    "task_management": {
+      "title": "Gestion des tâches",
+      "description": "Créez, assignez et suivez l'avancement des tâches"
+    },
+    "project_planning": {
+      "title": "Planification de projet",
+      "description": "Organisez et planifiez vos projets avec des échéanciers"
+    },
+    "automation": {
+      "title": "Automatisations",
+      "description": "Automatisez les processus répétitifs"
+    },
+    "team_collaboration": {
+      "title": "Collaboration d'équipe",
+      "description": "Travaillez efficacement avec vos équipes"
+    }
+  },
+  "validation": {
+    "required": "Le champ {attribute} est obligatoire.",
+    "email": "L'adresse email doit être valide.",
+    "min": {
+      "string": "Le {attribute} doit contenir au moins {min} caractères."
+    }
+  },
+  "common": {
+    "save": "Sauvegarder",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "warning": "Attention",
+    "info": "Information"
+  }
+}
