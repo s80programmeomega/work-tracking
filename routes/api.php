@@ -1,3 +1,4 @@
+<!-- routes\api.php -->
 <?php
 
 use App\Http\Controllers\Api\AuthController;
@@ -30,6 +31,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/me', [AuthController::class, 'me']);
         Route::post('/refresh', [AuthController::class, 'refresh']);
         Route::post('/verify-email', [AuthController::class, 'verifyEmail']);
+
+                Route::put('/language', [AuthController::class, 'updateLanguage']);
+
     });
 
     // User Management Routes

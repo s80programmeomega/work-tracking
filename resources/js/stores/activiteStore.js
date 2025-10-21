@@ -1,3 +1,4 @@
+// resources\js\stores\activiteStore.js
 import { defineStore } from "pinia";
 import activitesApi from "@/api/activites";
 

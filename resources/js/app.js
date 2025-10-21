@@ -13,6 +13,7 @@ import { createPinia } from 'pinia';
 import App from './App.vue';
 import router from './router';
 import VueApexCharts from 'vue3-apexcharts';
+import { i18n } from './locales';
 
 const app = createApp(App);
 const pinia = createPinia();
@@ -20,5 +21,13 @@ const pinia = createPinia();
 app.use(pinia);
 app.use(router);
 app.use(VueApexCharts);
+app.use(i18n);
 
 app.mount('#app');
+
+/**
+ * Initialisation du store d'authentification
+ */
+import { useAuthStore } from './stores/authStore';
+const authStore = useAuthStore();
+authStore.initialize();

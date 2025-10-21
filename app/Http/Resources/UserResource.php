@@ -1,3 +1,4 @@
+<!-- app\Http\Resources\UserResource.php -->
 <?php
 
 namespace App\Http\Resources;
@@ -20,7 +21,7 @@ class UserResource extends JsonResource
             'bio' => $this->bio,
             'numero_telephone' => $this->numero_telephone,
             'adresse' => $this->adresse,
-            'language' => $this->language,
+            'language' => $this->language ?? 'fr',
             'timezone' => $this->timezone,
             'is_active' => $this->is_active,
             'last_login_at' => $this->last_login_at?->toISOString(),
