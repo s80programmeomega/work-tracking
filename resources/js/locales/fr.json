@@ -22,7 +22,29 @@
     "invalid_credentials": "Email ou mot de passe incorrect",
     "login_failed": "Échec de la connexion",
     "email_placeholder": "votre@email.com",
-    "password_placeholder": "Entrez votre mot de passe"
+    "password_placeholder": "Entrez votre mot de passe",
+
+     "signup_title": "Créez votre compte",
+    "signup_description": "Entrez vos informations pour créer votre compte !",
+    "signup_button": "S'inscrire",
+    "signing_up": "Inscription...",
+    "signup_with_google": "S'inscrire avec Google",
+    "first_name": "Prénom",
+    "last_name": "Nom",
+    "first_name_placeholder": "Votre prénom",
+    "last_name_placeholder": "Votre nom",
+    "confirm_password": "Confirmer le mot de passe",
+    "confirm_password_placeholder": "Confirmez votre mot de passe",
+    "already_have_account": "Vous avez déjà un compte ?",
+    "terms_text_1": "En créant un compte, vous acceptez les",
+    "terms_text_2": "Conditions d'utilisation",
+    "terms_text_3": "et notre",
+    "terms_text_4": "Politique de confidentialité",
+    "terms_required": "Vous devez accepter les conditions d'utilisation",
+    "password_mismatch": "La confirmation du mot de passe ne correspond pas",
+    "registration_failed": "Échec de l'inscription",
+    "name": "Nom complet"
+
   },
   "navigation": {
     "dashboard": "Tableau de bord",
