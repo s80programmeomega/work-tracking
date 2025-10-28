@@ -23,7 +23,7 @@ return [
     'login_failed' => 'Échec de la connexion',
     
     // Placeholders
-    'email_placeholder' => 'votre@email.com',
+    'email_placeholder' => 'votre email',
     'password_placeholder' => 'Entrez votre mot de passe',
 
     'tagline' => 'Solution gratuite et open-source de gestion de projets et suivi du travail',
