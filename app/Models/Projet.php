@@ -8,13 +8,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class Projet extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'workspace_id',
         'nom',
         'description',
         'code',
@@ -50,9 +51,6 @@ class Projet extends Model
         'member_count',
     ];
 
-    /**
-     * Boot the model.
-     */
     protected static function boot()
     {
         parent::boot();
@@ -64,9 +62,6 @@ class Projet extends Model
         });
     }
 
-    /**
-     * Generate unique project code.
-     */
     public static function generateUniqueCode(): string
     {
         do {
@@ -81,6 +76,11 @@ class Projet extends Model
     /**
      * Relationships
      */
+    public function workspace(): BelongsTo
+    {
+        return $this->belongsTo(Workspace::class);
+    }
+
     public function responsable(): BelongsTo
     {
         return $this->belongsTo(User::class, 'responsable_id');
@@ -104,34 +104,28 @@ class Projet extends Model
         return $this->hasMany(Activite::class);
     }
 
-    // TODO: Uncomment when Tache model is created
-    // public function taches(): HasManyThrough
-    // {
-    //     return $this->hasManyThrough(Tache::class, Activite::class);
-    // }
-
-    /**
-     * Calculate project progression based on tasks
-     * Returns percentage of completed tasks
-     */
-    public function calculateProgression(): int
+    public function taches()
     {
-        // TODO: Implement when Tache model is created
-        // For now, return the manual progression value
-        return $this->progression ?? 0;
-
-        // Future implementation:
-        // $totalTaches = $this->taches()->count();
-        // if ($totalTaches === 0) {
-        //     return 0;
-        // }
-        // $completedTaches = $this->taches()->where('statut', 'termine')->count();
-        // return (int) round(($completedTaches / $totalTaches) * 100);
+        return $this->hasManyThrough(Tache::class, Activite::class);
     }
 
     /**
-     * Update project progression automatically
+     * Calculate project progression based on tasks
      */
+    public function calculateProgression(): int
+    {
+        $totalTaches = $this->taches()->count();
+        if ($totalTaches === 0) {
+            return 0;
+        }
+        
+        $completedTaches = $this->taches()
+            ->where('statut', 'termine')
+            ->count();
+            
+        return (int) round(($completedTaches / $totalTaches) * 100);
+    }
+
     public function updateProgression(): void
     {
         $this->update(['progression' => $this->calculateProgression()]);
@@ -196,12 +190,33 @@ class Projet extends Model
         });
     }
 
+    public function scopeInWorkspace($query, $workspaceId)
+    {
+        return $query->where('workspace_id', $workspaceId);
+    }
+
     public function scopeSearch($query, $term)
     {
         return $query->where(function ($q) use ($term) {
             $q->where('nom', 'like', "%{$term}%")
                 ->orWhere('description', 'like', "%{$term}%")
                 ->orWhere('code', 'like', "%{$term}%");
+        });
+    }
+
+    public function scopeAccessibleBy($query, $userId)
+    {
+        return $query->where(function ($q) use ($userId) {
+            $q->where('responsable_id', $userId)
+                ->orWhereHas('members', function ($memberQuery) use ($userId) {
+                    $memberQuery->where('user_id', $userId);
+                })
+                ->orWhereHas('workspace', function ($workspaceQuery) use ($userId) {
+                    $workspaceQuery->where('owner_id', $userId)
+                        ->orWhereHas('members', function ($wsMemberQuery) use ($userId) {
+                            $wsMemberQuery->where('user_id', $userId);
+                        });
+                });
         });
     }
 
@@ -242,6 +257,26 @@ class Projet extends Model
     public function isMember(User $user): bool
     {
         return $this->members()->where('user_id', $user->id)->exists();
+    }
+
+    public function hasAccess(User $user): bool
+    {
+        // Owner has access
+        if ($this->isResponsable($user)) {
+            return true;
+        }
+
+        // Project member has access
+        if ($this->isMember($user)) {
+            return true;
+        }
+
+        // Workspace member has access
+        if ($this->workspace && $this->workspace->hasAccess($user)) {
+            return true;
+        }
+
+        return false;
     }
 
     public function getMemberRole(User $user): ?string
@@ -302,5 +337,52 @@ class Projet extends Model
             'status' => 'completed',
             'progression' => 100,
         ]);
+    }
+
+    /**
+     * Revoke user access to project and all related tasks/documents
+     */
+    public function revokeAccess(User $user): void
+    {
+        DB::transaction(function () use ($user) {
+            // Remove from project members
+            $this->members()->detach($user->id);
+            
+            // Remove from all tasks in this project
+            foreach ($this->activites as $activite) {
+                foreach ($activite->taches as $tache) {
+                    $tache->assignees()->detach($user->id);
+                }
+            }
+            
+            // Revoke document permissions
+            DocumentPermission::where('permissionable_type', User::class)
+                ->where('permissionable_id', $user->id)
+                ->whereHas('document', function($q) {
+                    $q->where('documentable_type', Projet::class)
+                      ->where('documentable_id', $this->id);
+                })
+                ->delete();
+            
+            // Log the action
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($this)
+                ->withProperties(['revoked_user' => $user->id])
+                ->log('access_revoked');
+        });
+    }
+
+    /**
+     * Get accessible tasks for a user
+     */
+    public function accessibleTachesFor(User $user)
+    {
+        return $this->taches()->where(function ($query) use ($user) {
+            $query->whereHas('assignees', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->orWhere('visibility', 'public');
+        });
     }
 }
