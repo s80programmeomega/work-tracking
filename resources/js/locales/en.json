@@ -21,7 +21,7 @@
     "signin_with_x": "Sign in with X",
     "invalid_credentials": "Invalid email or password",
     "login_failed": "Login failed",
-    "email_placeholder": "your@email.com",
+    "email_placeholder": "your email ",
     "password_placeholder": "Enter your password",
 
     "signup_title": "Create your account",
