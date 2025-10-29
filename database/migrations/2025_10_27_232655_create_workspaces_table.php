@@ -18,7 +18,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('code')->unique();
             $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
-            $table->json('settings')->nullable();
+            $table->json('settings')->nullable()->default('{}');
             $table->boolean('is_active')->default(true);
             $table->string('logo')->nullable();
             $table->timestamps();
