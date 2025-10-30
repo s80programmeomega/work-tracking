@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
@@ -87,13 +88,19 @@ class Workspace extends Model
     }
 
     /**
-     * Get all members of the workspace
+     * Accessor pour décoder automatiquement permissions
      */
     public function members(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'workspace_members')
             ->withPivot(['role', 'permissions', 'invited_at', 'invited_by'])
-            ->withTimestamps();
+            ->withTimestamps()
+            ->using(new class extends \Illuminate\Database\Eloquent\Relations\Pivot {
+            protected $casts = [
+                'permissions' => 'array', // ✅ Auto-decode JSON
+                'invited_at' => 'datetime',
+            ];
+            });
     }
 
     /**
@@ -104,6 +111,10 @@ class Workspace extends Model
         return $this->hasMany(Projet::class);
     }
 
+       public function invitations(): HasMany
+    {
+        return $this->hasMany(WorkspaceInvitation::class);
+    }
     /**
      * Get active projects
      */
@@ -136,6 +147,16 @@ class Workspace extends Model
         return $query->where('is_active', true);
     }
 
+     public function scopeForUser($query, $userId)
+    {
+        return $query->where(function($q) use ($userId) {
+            $q->where('owner_id', $userId)
+              ->orWhereHas('members', function($memberQuery) use ($userId) {
+                  $memberQuery->where('user_id', $userId);
+              });
+        });
+    }
+
     public function scopeOwnedBy($query, int $userId)
     {
         return $query->where('owner_id', $userId);
@@ -145,9 +166,9 @@ class Workspace extends Model
     {
         return $query->where(function ($q) use ($userId) {
             $q->where('owner_id', $userId)
-              ->orWhereHas('members', function ($memberQuery) use ($userId) {
-                  $memberQuery->where('user_id', $userId);
-              });
+                ->orWhereHas('members', function ($memberQuery) use ($userId) {
+                    $memberQuery->where('user_id', $userId);
+                });
         });
     }
 
@@ -155,8 +176,8 @@ class Workspace extends Model
     {
         return $query->where(function ($q) use ($term) {
             $q->where('nom', 'like', "%{$term}%")
-              ->orWhere('description', 'like', "%{$term}%")
-              ->orWhere('code', 'like', "%{$term}%");
+                ->orWhere('description', 'like', "%{$term}%")
+                ->orWhere('code', 'like', "%{$term}%");
         });
     }
 
@@ -166,7 +187,7 @@ class Workspace extends Model
     public function getLogoUrlAttribute(): ?string
     {
         if ($this->logo) {
-            return \Storage::url($this->logo);
+            return asset('storage/' . $this->logo);
         }
         return null;
     }
@@ -196,13 +217,99 @@ class Workspace extends Model
 
     public function hasAccess(User $user): bool
     {
-        return $this->isOwner($user) || $this->isMember($user);
+        // Owner has access
+        if ($this->owner_id === $user->id) {
+            return true;
+        }
+
+        // Member has access
+        return $this->hasMember($user->id);
     }
 
+    /**
+     * Check if user is a member of workspace.
+     */
+    public function hasMember($userId): bool
+    {
+        if ($userId instanceof User) {
+            $userId = $userId->id;
+        }
+
+        return $this->members()->where('user_id', $userId)->exists();
+    }
+
+    /**
+     * Get member role.
+     */
     public function getMemberRole(User $user): ?string
     {
+        if ($this->owner_id === $user->id) {
+            return 'owner';
+        }
+
         $member = $this->members()->where('user_id', $user->id)->first();
         return $member?->pivot->role;
+    }
+
+    /**
+     * Check if user can manage members.
+     */
+    public function canManageMembers(User $user): bool
+    {
+        // Owner can manage
+        if ($this->owner_id === $user->id) {
+            return true;
+        }
+
+        $member = $this->members()->where('user_id', $user->id)->first();
+        
+        if (!$member) {
+            return false;
+        }
+
+        return in_array($member->pivot->role, ['admin']) ||
+               ($member->pivot->can_invite_members ?? false);
+    }
+
+        /**
+     * Check if user can create projects.
+     */
+    public function canCreateProjects(User $user): bool
+    {
+        // Owner can create
+        if ($this->owner_id === $user->id) {
+            return true;
+        }
+
+        $member = $this->members()->where('user_id', $user->id)->first();
+        
+        if (!$member) {
+            return false;
+        }
+
+        return in_array($member->pivot->role, ['owner', 'admin']) ||
+               ($member->pivot->can_create_projects ?? false);
+    }
+
+    
+    /**
+     * Check if user can manage settings.
+     */
+    public function canManageSettings(User $user): bool
+    {
+        // Owner can manage
+        if ($this->owner_id === $user->id) {
+            return true;
+        }
+
+        $member = $this->members()->where('user_id', $user->id)->first();
+        
+        if (!$member) {
+            return false;
+        }
+
+        return in_array($member->pivot->role, ['admin']) ||
+               ($member->pivot->can_manage_settings ?? false);
     }
 
     public function canUserManageMembers(User $user): bool
@@ -227,17 +334,25 @@ class Workspace extends Model
         }
 
         $permissions = $member->pivot->permissions ?? [];
-        return in_array('manage_projects', $permissions) || 
-               in_array('all', $permissions) ||
-               in_array($member->pivot->role, ['owner', 'admin']);
+        return in_array('manage_projects', $permissions) ||
+            in_array('all', $permissions) ||
+            in_array($member->pivot->role, ['owner', 'admin']);
     }
 
+    /**
+     * Add a member to workspace
+     * 
+     * @param User $user
+     * @param string $role
+     * @param array $permissions
+     * @return void
+     */
     public function addMember(User $user, string $role = 'member', array $permissions = []): void
     {
         if (!$this->isMember($user)) {
             $this->members()->attach($user->id, [
                 'role' => $role,
-                'permissions' => $permissions,
+                'permissions' => json_encode($permissions), // ✅ Convertir en JSON
                 'invited_at' => now(),
                 'invited_by' => auth()->id(),
             ]);
@@ -251,12 +366,20 @@ class Workspace extends Model
         }
     }
 
+    /**
+     * Update member role
+     * 
+     * @param User $user
+     * @param string $role
+     * @param array $permissions
+     * @return void
+     */
     public function updateMemberRole(User $user, string $role, array $permissions = []): void
     {
         if ($this->isMember($user) && !$this->isOwner($user)) {
             $this->members()->updateExistingPivot($user->id, [
                 'role' => $role,
-                'permissions' => $permissions,
+                'permissions' => json_encode($permissions), // ✅ Convertir en JSON
             ]);
         }
     }
@@ -296,7 +419,7 @@ class Workspace extends Model
             'taches_terminees' => $taches->where('statut', 'termine')->count(),
             'taches_en_cours' => $taches->where('statut', 'en_cours')->count(),
             'taches_en_retard' => $taches->filter(fn($t) => $t->isOverdue())->count(),
-            'taux_completion' => $taches->count() > 0 
+            'taux_completion' => $taches->count() > 0
                 ? round(($taches->where('statut', 'termine')->count() / $taches->count()) * 100, 2)
                 : 0,
             'progression_moyenne' => $projets->count() > 0
@@ -311,7 +434,7 @@ class Workspace extends Model
     public function archive(): void
     {
         $this->update(['is_active' => false]);
-        
+
         // Optionally archive all projects
         $this->projets()->update(['status' => 'archived']);
     }
@@ -323,4 +446,40 @@ class Workspace extends Model
     {
         $this->update(['is_active' => true]);
     }
+ 
+    /**
+     * Mutator pour garantir que settings est toujours un array
+     */
+    public function setSettingsAttribute($value)
+    {
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            $this->attributes['settings'] = json_encode(
+                is_array($decoded) ? $decoded : []
+            );
+        } elseif (is_array($value)) {
+            $this->attributes['settings'] = json_encode($value);
+        } elseif (is_null($value)) {
+            $this->attributes['settings'] = json_encode([]);
+        } else {
+            // Si c'est un autre type, forcer un array vide
+            $this->attributes['settings'] = json_encode([]);
+        }
+    }
+
+    /**
+     * Accessor pour garantir que settings est toujours un array
+     */
+    public function getSettingsAttribute($value)
+    {
+        if (empty($value)) {
+            return [];
+        }
+
+        $decoded = json_decode($value, true);
+
+        // Si le décodage échoue ou ne retourne pas un array, retourner un array vide
+        return is_array($decoded) ? $decoded : [];
+    }
+
 }
