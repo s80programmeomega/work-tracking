@@ -23,7 +23,10 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'nom',
+        'prenom',
+        'nom_complet',
         'email',
+        'current_workspace_id',
         'password',
         'fonction',
         'avatar',
@@ -269,8 +272,8 @@ class User extends Authenticatable
     {
         return $query->where(function ($q) use ($search) {
             $q->where('nom', 'LIKE', "%{$search}%")
-              ->orWhere('email', 'LIKE', "%{$search}%")
-              ->orWhere('fonction', 'LIKE', "%{$search}%");
+                ->orWhere('email', 'LIKE', "%{$search}%")
+                ->orWhere('fonction', 'LIKE', "%{$search}%");
         });
     }
 
@@ -295,7 +298,7 @@ class User extends Authenticatable
             return true;
         }
 
-        if ($this->role === 'manager') {
+        if ($this->role === 'admin') {
             return $targetUser->role !== 'super_admin';
         }
 
@@ -309,4 +312,17 @@ class User extends Authenticatable
             'last_login_ip' => request()->ip(),
         ]);
     }
+
+    public function currentWorkspace()
+    {
+        return $this->belongsTo(Workspace::class, 'current_workspace_id');
+    }
+
+    public function workspaces()
+    {
+        return $this->belongsToMany(Workspace::class, 'workspace_members')
+            ->withPivot(['role', 'permissions', 'invited_at', 'invited_by'])
+            ->withTimestamps();
+    }
+
 }

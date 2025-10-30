@@ -1,3 +1,4 @@
+// resources\js\api\axios.js
 import axios from 'axios';
 import router from '@/router';
 
@@ -17,6 +18,12 @@ api.interceptors.request.use(
         const token = localStorage.getItem('auth_token');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
+        }
+
+        // ✅ IMPORTANT: Ne pas forcer Content-Type si c'est FormData
+        // Axios le détecte automatiquement et ajoute le boundary
+        if (!(config.data instanceof FormData)) {
+            config.headers['Content-Type'] = 'application/json';
         }
         return config;
     },

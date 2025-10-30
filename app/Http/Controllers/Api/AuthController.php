@@ -17,26 +17,9 @@ class AuthController extends Controller
         private AuthService $authService
     ) {
     }
-
-    public function register_(RegisterRequest $request): JsonResponse
-    {
-        try {
-            $user = $this->authService->register($request->validated());
-
-            return response()->json([
-                'message' => 'Registration successful',
-                'user' => new UserResource($user),
-            ], 201);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Registration failed',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
-
+  
     public function register(RegisterRequest $request): JsonResponse
-    {
+    { 
         try {
             $user = $this->authService->register($request->validated());
 
@@ -58,6 +41,8 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
+    
 
     public function login(LoginRequest $request): JsonResponse
     {

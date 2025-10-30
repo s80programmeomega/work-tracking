@@ -1,3 +1,4 @@
+// resources\js\stores\authStore.js
 import { defineStore } from 'pinia';
 import { authAPI } from '@/api/auth';
 import router from '@/router';
@@ -157,6 +158,8 @@ export const useAuthStore = defineStore('auth', {
 
             try {
                 const response = await authAPI.login(credentials);
+                console.log('Réponse API:', response.data);
+
                 const { user, token } = response.data.data;
 
                 // Met à jour l'état du store

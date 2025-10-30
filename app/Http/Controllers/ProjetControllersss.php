@@ -266,6 +266,8 @@ class ProjetController extends Controller
      */
     public function dashboardStats(Request $request): JsonResponse
     {
+        
+    
         $stats = $this->projetService->getDashboardStats($request->user());
 
         return response()->json([

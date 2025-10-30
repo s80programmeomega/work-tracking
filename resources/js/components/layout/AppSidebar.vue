@@ -13,6 +13,7 @@
         @mouseenter="!isExpanded && (isHovered = true)"
         @mouseleave="isHovered = false"
     >
+        <!-- Logo Section -->
         <div
             :class="[
                 'py-8 flex',
@@ -25,7 +26,7 @@
                 <img
                     v-if="isExpanded || isHovered || isMobileOpen"
                     class="dark:hidden"
-                    src="@images/logo/logo.svg"
+                    src="@images/logo/Logo.png"
                     alt="Logo"
                     width="150"
                     height="40"
@@ -47,9 +48,79 @@
                 />
             </router-link>
         </div>
+
+        <!-- Workspace Selector -->
         <div
-            class="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar"
-        >
+            v-if="isExpanded || isHovered || isMobileOpen"
+            class="mb-4 px-2" >
+            <button
+                @click="showWorkspaceSelector = !showWorkspaceSelector"
+                class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" >
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center text-white font-semibold text-sm">
+                    {{ currentWorkspaceInitials }}
+                </div>
+                <div class="flex-1 text-left overflow-hidden">
+                    <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                        {{ currentWorkspace?.nom || 'Mon Workspace' }}
+                    </p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                        {{ workspaceProjectCount }} projets
+                    </p>
+                </div>
+                <ChevronDownIcon
+                    :class="[
+                        'w-4 h-4 text-gray-400 transition-transform',
+                        { 'rotate-180': showWorkspaceSelector }
+                    ]"
+                />
+            </button>
+            
+            <!-- Workspace Dropdown -->
+            <transition name="fade-slide">
+                <div
+                    v-if="showWorkspaceSelector"
+                    class="mt-2 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700" >
+                    <div class="px-3 pb-2 mb-2 border-b border-gray-200 dark:border-gray-700">
+                        <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                            Mes Workspaces
+                        </p>
+                    </div>
+                    <button
+                        v-for="workspace in workspaces"
+                        :key="workspace.id"
+                        @click="selectWorkspace(workspace)"
+                        class="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" >
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white font-semibold text-sm">
+                            {{ getWorkspaceInitials(workspace.nom) }}
+                        </div>
+                        <div class="flex-1 text-left">
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                {{ workspace.nom }}
+                            </p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                {{ workspace.projets_count || 0 }} projets
+                            </p>
+                        </div>
+                        <CheckIcon
+                            v-if="currentWorkspace?.id === workspace.id"
+                            class="w-4 h-4 text-brand-500"
+                        />
+                    </button>
+                    <div class="px-3 pt-2 mt-2 border-t border-gray-200 dark:border-gray-700">
+                        <router-link
+                            to="/workspaces/create"
+                            class="flex items-center gap-2 text-sm text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300"
+                        >
+                            <PlusIcon class="w-4 h-4" />
+                            Créer un workspace
+                        </router-link>
+                    </div>
+                </div>
+            </transition>
+        </div>
+
+        <!-- Navigation Menu -->
+        <div class="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
             <nav class="mb-6">
                 <div class="flex flex-col gap-4">
                     <div
@@ -64,33 +135,25 @@
                                     : 'justify-start',
                             ]"
                         >
-                            <template
-                                v-if="isExpanded || isHovered || isMobileOpen"
-                            >
+                            <template v-if="isExpanded || isHovered || isMobileOpen">
                                 {{ menuGroup.title }}
                             </template>
                             <HorizontalDots v-else />
                         </h2>
-                        <ul class="flex flex-col gap-4">
+                        <ul class="flex flex-col gap-1.5">
                             <li
                                 v-for="(item, index) in menuGroup.items"
                                 :key="item.name"
                             >
+                                <!-- Item with submenu -->
                                 <button
                                     v-if="item.subItems"
                                     @click="toggleSubmenu(groupIndex, index)"
                                     :class="[
                                         'menu-item group w-full',
                                         {
-                                            'menu-item-active': isSubmenuOpen(
-                                                groupIndex,
-                                                index,
-                                            ),
-                                            'menu-item-inactive':
-                                                !isSubmenuOpen(
-                                                    groupIndex,
-                                                    index,
-                                                ),
+                                            'menu-item-active': isSubmenuOpen(groupIndex, index),
+                                            'menu-item-inactive': !isSubmenuOpen(groupIndex, index),
                                         },
                                         !isExpanded && !isHovered
                                             ? 'lg:justify-center'
@@ -107,44 +170,37 @@
                                         <component :is="item.icon" />
                                     </span>
                                     <span
-                                        v-if="
-                                            isExpanded ||
-                                            isHovered ||
-                                            isMobileOpen
-                                        "
-                                        class="menu-item-text"
-                                        >{{ item.name }}</span
+                                        v-if="isExpanded || isHovered || isMobileOpen"
+                                        class="menu-item-text flex-1"
                                     >
+                                        {{ item.name }}
+                                    </span>
+                                    <span
+                                        v-if="item.badge && (isExpanded || isHovered || isMobileOpen)"
+                                        class="ml-auto px-2 py-0.5 text-xs font-medium rounded-full bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400"
+                                    >
+                                        {{ item.badge }}
+                                    </span>
                                     <ChevronDownIcon
-                                        v-if="
-                                            isExpanded ||
-                                            isHovered ||
-                                            isMobileOpen
-                                        "
+                                        v-if="isExpanded || isHovered || isMobileOpen"
                                         :class="[
-                                            'ml-auto w-5 h-5 transition-transform duration-200',
+                                            'ml-2 w-4 h-4 transition-transform duration-200',
                                             {
-                                                'rotate-180 text-brand-500':
-                                                    isSubmenuOpen(
-                                                        groupIndex,
-                                                        index,
-                                                    ),
+                                                'rotate-180 text-brand-500': isSubmenuOpen(groupIndex, index),
                                             },
                                         ]"
                                     />
                                 </button>
+
+                                <!-- Simple link item -->
                                 <router-link
                                     v-else-if="item.path"
                                     :to="item.path"
                                     :class="[
                                         'menu-item group',
                                         {
-                                            'menu-item-active': isActive(
-                                                item.path,
-                                            ),
-                                            'menu-item-inactive': !isActive(
-                                                item.path,
-                                            ),
+                                            'menu-item-active': isActive(item.path),
+                                            'menu-item-inactive': !isActive(item.path),
                                         },
                                     ]"
                                 >
@@ -158,15 +214,20 @@
                                         <component :is="item.icon" />
                                     </span>
                                     <span
-                                        v-if="
-                                            isExpanded ||
-                                            isHovered ||
-                                            isMobileOpen
-                                        "
-                                        class="menu-item-text"
-                                        >{{ item.name }}</span
+                                        v-if="isExpanded || isHovered || isMobileOpen"
+                                        class="menu-item-text flex-1"
                                     >
+                                        {{ item.name }}
+                                    </span>
+                                    <span
+                                        v-if="item.badge && (isExpanded || isHovered || isMobileOpen)"
+                                        class="ml-auto px-2 py-0.5 text-xs font-medium rounded-full bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400"
+                                    >
+                                        {{ item.badge }}
+                                    </span>
                                 </router-link>
+
+                                <!-- Submenu items -->
                                 <transition
                                     @enter="startTransition"
                                     @after-enter="endTransition"
@@ -176,12 +237,10 @@
                                     <div
                                         v-show="
                                             isSubmenuOpen(groupIndex, index) &&
-                                            (isExpanded ||
-                                                isHovered ||
-                                                isMobileOpen)
+                                            (isExpanded || isHovered || isMobileOpen)
                                         "
                                     >
-                                        <ul class="mt-2 space-y-1 ml-9">
+                                        <ul class="mt-1 space-y-1 ml-9">
                                             <li
                                                 v-for="subItem in item.subItems"
                                                 :key="subItem.name"
@@ -191,56 +250,30 @@
                                                     :class="[
                                                         'menu-dropdown-item',
                                                         {
-                                                            'menu-dropdown-item-active':
-                                                                isActive(
-                                                                    subItem.path,
-                                                                ),
-                                                            'menu-dropdown-item-inactive':
-                                                                !isActive(
-                                                                    subItem.path,
-                                                                ),
+                                                            'menu-dropdown-item-active': isActive(subItem.path),
+                                                            'menu-dropdown-item-inactive': !isActive(subItem.path),
                                                         },
                                                     ]"
                                                 >
-                                                    {{ subItem.name }}
-                                                    <span
-                                                        class="flex items-center gap-1 ml-auto"
-                                                    >
+                                                    <span class="flex-1">{{ subItem.name }}</span>
+                                                    <span class="flex items-center gap-1 ml-auto">
                                                         <span
                                                             v-if="subItem.new"
                                                             :class="[
                                                                 'menu-dropdown-badge',
                                                                 {
-                                                                    'menu-dropdown-badge-active':
-                                                                        isActive(
-                                                                            subItem.path,
-                                                                        ),
-                                                                    'menu-dropdown-badge-inactive':
-                                                                        !isActive(
-                                                                            subItem.path,
-                                                                        ),
+                                                                    'menu-dropdown-badge-active': isActive(subItem.path),
+                                                                    'menu-dropdown-badge-inactive': !isActive(subItem.path),
                                                                 },
                                                             ]"
                                                         >
                                                             new
                                                         </span>
                                                         <span
-                                                            v-if="subItem.pro"
-                                                            :class="[
-                                                                'menu-dropdown-badge',
-                                                                {
-                                                                    'menu-dropdown-badge-active':
-                                                                        isActive(
-                                                                            subItem.path,
-                                                                        ),
-                                                                    'menu-dropdown-badge-inactive':
-                                                                        !isActive(
-                                                                            subItem.path,
-                                                                        ),
-                                                                },
-                                                            ]"
+                                                            v-if="subItem.count"
+                                                            class="px-1.5 py-0.5 text-xs font-medium rounded bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
                                                         >
-                                                            pro
+                                                            {{ subItem.count }}
                                                         </span>
                                                     </span>
                                                 </router-link>
@@ -253,143 +286,246 @@
                     </div>
                 </div>
             </nav>
-            <!-- <SidebarWidget v-if="isExpanded || isHovered || isMobileOpen" />/ -->
+        </div>
+
+        <!-- Bottom Actions -->
+        <div
+            v-if="isExpanded || isHovered || isMobileOpen"
+            class="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2"
+        >
+            <router-link
+                to="/settings"
+                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            >
+                <SettingsIcon class="w-5 h-5" />
+                <span>Paramètres</span>
+            </router-link>
         </div>
     </aside>
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
-import { useRoute } from "vue-router";
-
+import { ref, computed, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import {
     GridIcon,
     CalenderIcon,
     UserCircleIcon,
     ChatIcon,
     MailIcon,
-    DocsIcon,
-    PieChartIcon,
     ChevronDownIcon,
     HorizontalDots,
-    PageIcon,
-    TableIcon,
     ListIcon,
-    PlugInIcon,
-} from "../../icons";
-// import SidebarWidget from "./SidebarWidget.vue";
-import BoxCubeIcon from "@/icons/BoxCubeIcon.vue";
-import { useSidebar } from "@/composables/useSidebar";
+} from '../../icons';
+import BoxCubeIcon from '@/icons/BoxCubeIcon.vue';
+import CheckIcon from '@/icons/CheckIcon.vue';
+import PlusIcon from '@/icons/PlusIcon.vue';
+import SettingsIcon from '@/icons/SettingsIcon.vue';
+import FolderIcon from '@/icons/FolderIcon.vue';
+import TaskIcon from '@/icons/TaskIcon.vue';
+import ClipboardCheckIcon from '@/icons/ClipboardCheckIcon.vue';
+import UsersIcon from '@/icons/UsersIcon.vue';
+import { useSidebar } from '@/composables/useSidebar';
+
+import api from '@/api/axios'
+import { useAuthStore } from '@/stores/auth';  
+
 
 const route = useRoute();
-
 const { isExpanded, isMobileOpen, isHovered, openSubmenu } = useSidebar();
+const authStore = useAuthStore();
 
-const menuGroups = [
+// Workspace management
+const showWorkspaceSelector = ref(false);
+const currentWorkspace = ref(null);
+const workspaces = ref([]);
+const loading = ref(false);
+
+const currentWorkspaceInitials = computed(() => {
+    if (!currentWorkspace.value) return 'MW';
+    return getWorkspaceInitials(currentWorkspace.value.nom);
+});
+
+const workspaceProjectCount = computed(() => {
+    return currentWorkspace.value?.projets_count || 0;
+});
+
+const getWorkspaceInitials = (name) => {
+    return name
+        .split(' ')
+        .map(word => word[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
+};
+ 
+
+const selectWorkspace = async (workspace) => {
+    if (workspace.id === currentWorkspace.value?.id) {
+        showWorkspaceSelector.value = false;
+        return;
+    }
+
+    loading.value = true;
+    
+    try {
+        const response = await api.post(`/workspaces/switch/${workspace.id}`, {}, {
+            headers: { Authorization: `Bearer ${authStore.token}` }
+        });
+
+        // Mettre à jour le workspace courant localement
+        currentWorkspace.value = workspace;
+        
+        // Mettre à jour le store d'authentification
+        authStore.setCurrentWorkspace(workspace.id);
+        
+        showWorkspaceSelector.value = false;
+
+        // Émettre un événement global pour informer les autres composants
+        window.dispatchEvent(new CustomEvent('workspace-changed', {
+            detail: { 
+                workspace,
+                workspaceId: workspace.id 
+            }
+        }));
+
+        console.log('Workspace changé avec succès:', workspace.nom);
+
+    } catch (error) {
+        console.error('Erreur lors du changement de workspace :', error);
+        // Optionnel: Afficher un message d'erreur à l'utilisateur
+    } finally {
+        loading.value = false;
+    }
+};
+
+// Menu structure
+const menuGroups = computed(() => [
     {
-        title: "Menu",
+        title: 'Principal',
         items: [
             {
                 icon: GridIcon,
-                name: "Dashboard",
-                path: "/",
-            },
-            {
-                icon: CalenderIcon,
-                name: "Calendar",
-                path: "/calendar",
-            },
-            {
-                icon: UserCircleIcon,
-                name: "User Profile",
-                path: "/profile",
-            },
-            {
-                icon: UserCircleIcon,
-                name: "Users",
-                path: "/users",
+                name: 'Dashboard',
+                path: '/',
             },
             {
                 icon: BoxCubeIcon,
-                name: "Projets",
-                path: "/projets",
+                name: 'Workspaces',
+                path: '/workspaces',
+            },
+        ],
+    },
+    {
+        title: 'Gestion de Projets',
+        items: [
+            {
+                icon: FolderIcon,
+                name: 'Projets',
+                subItems: [
+                    { name: 'Tous les projets', path: '/projets' },
+                    { name: 'Mes projets', path: '/projets/mes-projets' },
+                    { name: 'Projets archivés', path: '/projets/archives' },
+                    { name: 'Créer un projet', path: '/projets/create', new: true },
+                ],
             },
             {
                 icon: ListIcon,
-                name: "Activités",
-                path: "/activites",
+                name: 'Activités',
+                subItems: [
+                    { name: 'Toutes les activités', path: '/activites' },
+                    { name: 'Mes activités', path: '/activites/mes-activites' },
+                    { name: 'En retard', path: '/activites/en-retard', count: 5 },
+                ],
             },
             {
-                icon: ListIcon,
-                name: "Tâches",
-                path: "/taches",
+                icon: TaskIcon,
+                name: 'Tâches',
+                subItems: [
+                    { name: 'Toutes les tâches', path: '/taches' },
+                    { name: 'Mes tâches', path: '/taches/mes-taches' },
+                    { name: 'Assignées à moi', path: '/taches/assignees' },
+                    { name: 'En attente', path: '/taches/en-attente', count: 12 },
+                    { name: 'En retard', path: '/taches/en-retard', count: 3 },
+                ],
+            },
+        ],
+    },
+    {
+        title: 'Évaluation & Validation',
+        items: [
+            {
+                icon: ClipboardCheckIcon,
+                name: 'Validations',
+                badge: '8',
+                subItems: [
+                    { name: 'En attente N1', path: '/validations/n1', count: 5 },
+                    { name: 'En attente N2', path: '/validations/n2', count: 3 },
+                    { name: 'Historique', path: '/validations/historique' },
+                ],
+            },
+            {
+                icon: ClipboardCheckIcon,
+                name: 'Évaluations',
+                subItems: [
+                    { name: 'Tableau de bord', path: '/evaluations/dashboard' },
+                    { name: 'Rapport hebdomadaire', path: '/evaluations/rapport-hebdomadaire' },
+                    { name: 'Fiches d\'évaluation', path: '/evaluations/fiches' },
+                    { name: 'Performance d\'équipe', path: '/evaluations/performance' },
+                ],
+            },
+        ],
+    },
+    {
+        title: 'Collaboration',
+        items: [
+            {
+                icon: ChatIcon,
+                name: 'Équipes',
+                subItems: [
+                    { name: 'Mes équipes', path: '/teams' },
+                    { name: 'Messages', path: '/teams/messages', count: 24 },
+                    { name: 'Annonces', path: '/teams/announcements' },
+                    { name: 'Ressources', path: '/teams/resources' },
+                ],
+            },
+            {
+                icon: UsersIcon,
+                name: 'Utilisateurs',
+                subItems: [
+                    { name: 'Tous les utilisateurs', path: '/users' },
+                    { name: 'Invitations', path: '/users/invitations', count: 2 },
+                    { name: 'Permissions', path: '/users/permissions' },
+                ],
             },
             {
                 icon: MailIcon,
-                name: "Notifications",
-                path: "/notifications",
+                name: 'Notifications',
+                path: '/notifications',
+                badge: '15',
             },
-            {
-                icon: ChatIcon,
-                name: "Équipes",
-                path: "/teams",
-            },
-            // {
-            //     name: "Forms",
-            //     icon: ListIcon,
-            //     subItems: [
-            //         {
-            //             name: "Form Elements",
-            //             path: "/form-elements",
-            //             pro: false,
-            //         },
-            //     ],
-            // },
-            // {
-            //     name: "Tables",
-            //     icon: TableIcon,
-            //     subItems: [
-            //         { name: "Basic Tables", path: "/basic-tables", pro: false },
-            //     ],
-            // },
-            // {
-            //     name: "Pages",
-            //     icon: PageIcon,
-            //     subItems: [
-            //         { name: "Black Page", path: "/blank", pro: false },
-            //         { name: "404 Page", path: "/error-404", pro: false },
-            //     ],
-            // },
         ],
     },
-    // {
-    //     title: "Others",
-    //     items: [
-    //         {
-    //             icon: PieChartIcon,
-    //             name: "Charts",
-    //             subItems: [
-    //                 { name: "Line Chart", path: "/line-chart", pro: false },
-    //                 { name: "Bar Chart", path: "/bar-chart", pro: false },
-    //             ],
-    //         },
-    //         {
-    //             icon: BoxCubeIcon,
-    //             name: "Ui Elements",
-    //             subItems: [
-    //                 { name: "Alerts", path: "/alerts", pro: false },
-    //                 { name: "Avatars", path: "/avatars", pro: false },
-    //                 { name: "Badge", path: "/badge", pro: false },
-    //                 { name: "Buttons", path: "/buttons", pro: false },
-    //                 { name: "Images", path: "/images", pro: false },
-    //                 { name: "Videos", path: "/videos", pro: false },
-    //             ],
-    //         },
-    //     ],
-    // },
-];
+    {
+        title: 'Autres',
+        items: [
+            {
+                icon: CalenderIcon,
+                name: 'Calendrier',
+                path: '/calendar',
+            },
+            {
+                icon: UserCircleIcon,
+                name: 'Mon Profil',
+                path: '/profile',
+            },
+        ],
+    },
+]);
 
-const isActive = (path) => route.path === path;
+const isActive = (path) => {
+    return route.path === path || route.path.startsWith(path + '/');
+};
 
 const toggleSubmenu = (groupIndex, itemIndex) => {
     const key = `${groupIndex}-${itemIndex}`;
@@ -397,12 +533,12 @@ const toggleSubmenu = (groupIndex, itemIndex) => {
 };
 
 const isAnySubmenuRouteActive = computed(() => {
-    return menuGroups.some((group) =>
+    return menuGroups.value.some((group) =>
         group.items.some(
             (item) =>
                 item.subItems &&
-                item.subItems.some((subItem) => isActive(subItem.path)),
-        ),
+                item.subItems.some((subItem) => isActive(subItem.path))
+        )
     );
 });
 
@@ -411,21 +547,60 @@ const isSubmenuOpen = (groupIndex, itemIndex) => {
     return (
         openSubmenu.value === key ||
         (isAnySubmenuRouteActive.value &&
-            menuGroups[groupIndex].items[itemIndex].subItems?.some((subItem) =>
-                isActive(subItem.path),
+            menuGroups.value[groupIndex].items[itemIndex].subItems?.some((subItem) =>
+                isActive(subItem.path)
             ))
     );
 };
 
 const startTransition = (el) => {
-    el.style.height = "auto";
+    el.style.height = 'auto';
     const height = el.scrollHeight;
-    el.style.height = "0px";
-    el.offsetHeight; // force reflow
-    el.style.height = height + "px";
+    el.style.height = '0px';
+    el.offsetHeight;
+    el.style.height = height + 'px';
 };
 
 const endTransition = (el) => {
-    el.style.height = "";
+    el.style.height = '';
 };
+
+onMounted(async () => {
+    await loadUserWorkspaces();
+});
+
+const loadUserWorkspaces = async () => {
+    try {
+        const response = await api.get('/workspaces/user-workspaces', {
+            headers: { Authorization: `Bearer ${authStore.token}` }
+        });
+        
+        workspaces.value = response.data.data;
+        
+        // Trouver le workspace courant
+        const currentWorkspaceId = authStore.user.current_workspace_id;
+        currentWorkspace.value = workspaces.value.find(w => w.id === currentWorkspaceId) || workspaces.value[0];
+        
+    } catch (error) {
+        console.error('Erreur lors du chargement des workspaces :', error);
+    }
+};
+
 </script>
+
+<style scoped>
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+    transition: all 0.2s ease;
+}
+
+.fade-slide-enter-from {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.fade-slide-leave-to {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+</style>

@@ -1,290 +1,394 @@
+// resources/js/composables/useProjets.js
 import { ref, computed } from 'vue'
-import { useProjetStore } from '@/stores/projetStore'
-import { useRouter } from 'vue-router'
+import { useToast } from '@/composables/useToast'
+import api from '@/api/axios'
 
 export function useProjets() {
-  const projetStore = useProjetStore()
-  const router = useRouter()
+  const { showSuccess, showError } = useToast()
 
-  const loading = computed(() => projetStore.loading)
-  const error = computed(() => projetStore.error)
-  const projets = computed(() => projetStore.projets)
-  const currentProjet = computed(() => projetStore.currentProjet)
-  const stats = computed(() => projetStore.stats)
-  const filters = computed(() => projetStore.filters)
-  const pagination = computed(() => projetStore.pagination)
+  const loading = ref(false)
+  const projets = ref([])
+  const stats = ref({
+    total_projets: 0,
+    projets_actifs: 0,
+    projets_termines: 0,
+    projets_archives: 0,
+    projets_en_retard: 0,
+    projets_favoris: 0,
+    total_activites: 0,
+    total_taches: 0,
+    taches_terminees: 0,
+    taux_completion: 0,
+    recent_activities: []
+  })
+  const pagination = ref({
+    current_page: 1,
+    last_page: 1,
+    per_page: 15,
+    total: 0
+  })
+  const errors = ref({})
 
-  // Getters
-  const activeProjets = computed(() => projetStore.activeProjets)
-  const archivedProjets = computed(() => projetStore.archivedProjets)
-  const completedProjets = computed(() => projetStore.completedProjets)
-  const favoriteProjets = computed(() => projetStore.favoriteProjets)
-  const overdueProjets = computed(() => projetStore.overdueProjets)
+  // Toast notifications helper
+  const showToast = (message, type = 'success') => {
+    // Utilisation d'une notification simple si useToast n'est pas disponible
+    const event = new CustomEvent('toast', {
+      detail: { message, type }
+    })
+    window.dispatchEvent(event)
 
-  // Fetch operations
-  const fetchProjets = async (filters = {}) => {
-    try {
-      await projetStore.fetchProjets(filters)
-    } catch (error) {
-      console.error('Error fetching projets:', error)
-      throw error
+    // Fallback console
+    if (type === 'success') {
+      console.log('✅', message)
+    } else if (type === 'error') {
+      console.error('❌', message)
     }
   }
 
-  const fetchMyProjets = async (filters = {}) => {
-    try {
-      await projetStore.fetchMyProjets(filters)
-    } catch (error) {
-      console.error('Error fetching my projets:', error)
-      throw error
-    }
-  }
-
+  // Fetch dashboard statistics
   const fetchDashboardStats = async () => {
+    loading.value = true
+    errors.value = {}
+
     try {
-      await projetStore.fetchDashboardStats()
+      const { data } = await api.get('/projets/dashboard-stats') 
+
+      if (data?.data) {
+        stats.value = { ...stats.value, ...data.data }
+        return data.data
+      } else if (data) {
+        // Fallback si la structure est différente
+        stats.value = { ...stats.value, ...data }
+        return data
+      }
     } catch (error) {
       console.error('Error fetching dashboard stats:', error)
+      errors.value.stats = error.response?.data?.message || 'Erreur lors du chargement des statistiques'
+
+      // Ne pas afficher d'erreur si c'est juste un workspace vide
+      if (error.response?.status !== 404) {
+        showToast('Impossible de charger les statistiques', 'error')
+      }
+    } finally {
+      loading.value = false
     }
   }
 
-  const fetchProjet = async (id) => {
+  // Fetch projects list
+  const fetchProjets = async (filters = {}) => {
+    loading.value = true
+    errors.value = {}
+
     try {
-      return await projetStore.fetchProjet(id)
+      const params = {
+        page: filters.page || 1,
+        per_page: filters.per_page || 15,
+        ...filters
+      }
+
+      const { data } = await api.get('/projets', { params })
+
+      if (data?.data) {
+        // Structure Laravel Resource Collection
+        projets.value = Array.isArray(data.data) ? data.data : []
+
+        if (data.meta) {
+          pagination.value = {
+            current_page: data.meta.current_page || 1,
+            last_page: data.meta.last_page || 1,
+            per_page: data.meta.per_page || 15,
+            total: data.meta.total || 0
+          }
+        }
+      } else if (Array.isArray(data)) {
+        // Fallback si c'est directement un array
+        projets.value = data
+      } else {
+        projets.value = []
+      }
+
+      return projets.value
+    } catch (error) {
+      console.error('Error fetching projets:', error)
+      projets.value = []
+      errors.value.fetch = error.response?.data?.message || 'Erreur lors du chargement des projets'
+      // Ne pas afficher d'erreur si c'est juste un workspace vide
+      if (error.response?.status !== 404) {
+        showToast('Impossible de charger les projets', 'error')
+      }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // Fetch single project
+  const fetchProjet = async (id) => {
+    loading.value = true
+    errors.value = {}
+
+    try {
+      const { data } = await api.get(`/projets/${id}`) 
+      return data?.data || data
     } catch (error) {
       console.error('Error fetching projet:', error)
+      errors.value.fetch = error.response?.data?.message || 'Erreur lors du chargement du projet'
+      showToast('Impossible de charger le projet', 'error')
       throw error
+    } finally {
+      loading.value = false
     }
   }
 
-  // CRUD operations
-  const createProjet = async (data) => {
+  // Create project
+  const createProjet = async (projetData) => {
+    loading.value = true
+    errors.value = {}
+
     try {
-      const projet = await projetStore.createProjet(data)
-      return projet
+      const { data } = await api.post('/projets', projetData)
+      showToast('Projet créé avec succès', 'success')
+
+      // Recharger les données après création
+      await Promise.all([
+        fetchProjets(),
+        fetchDashboardStats()
+      ])
+
+      return data?.data || data
     } catch (error) {
       console.error('Error creating projet:', error)
+      errors.value = error.response?.data?.errors || {}
+
+      const errorMessage = error.response?.data?.message || 'Erreur lors de la création du projet'
+      showToast(errorMessage, 'error')
+
       throw error
+    } finally {
+      loading.value = false
     }
   }
 
-  const updateProjet = async (id, data) => {
+  // Update project
+  const updateProjet = async (id, projetData) => {
+    loading.value = true
+    errors.value = {}
+
     try {
-      const projet = await projetStore.updateProjet(id, data)
-      return projet
+      const { data } = await api.put(`/projets/${id}`, projetData)
+      showToast('Projet mis à jour avec succès', 'success')
+      // Recharger les données après mise à jour
+      await Promise.all([
+        fetchProjets(),
+        fetchDashboardStats()
+      ])
+
+      return data?.data || data
     } catch (error) {
       console.error('Error updating projet:', error)
+      errors.value = error.response?.data?.errors || {}
+
+      const errorMessage = error.response?.data?.message || 'Erreur lors de la mise à jour du projet'
+      showToast(errorMessage, 'error')
+
       throw error
+    } finally {
+      loading.value = false
     }
   }
 
+  // Delete project
   const deleteProjet = async (id) => {
+    loading.value = true
+    errors.value = {}
+
     try {
-      await projetStore.deleteProjet(id)
+      await api.delete(`/projets/${id}`)
+      showToast('Projet supprimé avec succès', 'success')
+
+      // Refresh data
+      await Promise.all([
+        fetchProjets(),
+        fetchDashboardStats()
+      ])
     } catch (error) {
       console.error('Error deleting projet:', error)
+      showToast(error.response?.data?.message || 'Erreur lors de la suppression du projet', 'error')
       throw error
+    } finally {
+      loading.value = false
     }
   }
 
-  // Actions
+  // Archive project
   const archiveProjet = async (id) => {
+    loading.value = true
+
     try {
-      return await projetStore.archiveProjet(id)
+      const { data } = await api.post(`/projets/${id}/archive`) // Retiré /api
+      showToast('Projet archivé avec succès', 'success')
+      await fetchProjets()
+
+      return data.data
     } catch (error) {
       console.error('Error archiving projet:', error)
+      showToast(error.response?.data?.message || 'Erreur lors de l\'archivage du projet', 'error')
       throw error
+    } finally {
+      loading.value = false
     }
+
   }
 
+   // Unarchive project
   const unarchiveProjet = async (id) => {
+    loading.value = true
+
     try {
-      return await projetStore.unarchiveProjet(id)
+      const { data } = await api.post(`/projets/${id}/unarchive`)
+      showToast('Projet désarchivé avec succès', 'success')
+      
+      await fetchProjets()
+      return data?.data || data
     } catch (error) {
       console.error('Error unarchiving projet:', error)
+      showToast(error.response?.data?.message || 'Erreur lors du désarchivage du projet', 'error')
       throw error
+    } finally {
+      loading.value = false
     }
   }
 
+  // Complete project
   const completeProjet = async (id) => {
+    loading.value = true
+
     try {
-      return await projetStore.completeProjet(id)
+      const { data } = await api.post(`/projets/${id}/complete`)
+      showToast('Projet marqué comme terminé', 'success')
+      
+      await fetchProjets()
+      return data?.data || data
     } catch (error) {
       console.error('Error completing projet:', error)
+      showToast(error.response?.data?.message || 'Erreur lors de la finalisation du projet', 'error')
       throw error
+    } finally {
+      loading.value = false
     }
   }
 
+   // Clone project
   const cloneProjet = async (id, overrides = {}) => {
+    loading.value = true
+
     try {
-      return await projetStore.cloneProjet(id, overrides)
+      const { data } = await api.post(`/projets/${id}/clone`, overrides)
+      showToast('Projet cloné avec succès', 'success')
+      
+      await fetchProjets()
+      return data?.data || data
     } catch (error) {
       console.error('Error cloning projet:', error)
+      showToast(error.response?.data?.message || 'Erreur lors du clonage du projet', 'error')
       throw error
+    } finally {
+      loading.value = false
     }
   }
 
+// Toggle favorite
   const toggleFavorite = async (id) => {
     try {
-      return await projetStore.toggleFavorite(id)
+      const { data } = await api.post(`/projets/${id}/toggle-favorite`)
+      showToast(data?.message || 'Favoris mis à jour', 'success')
+      
+      await fetchProjets()
+      return data?.data || data
     } catch (error) {
       console.error('Error toggling favorite:', error)
+      showToast(error.response?.data?.message || 'Erreur lors de la mise à jour des favoris', 'error')
       throw error
     }
   }
 
-  // Member management
+// Add member
   const addMember = async (projetId, memberData) => {
+    loading.value = true
+
     try {
-      await projetStore.addMember(projetId, memberData)
+      await api.post(`/projets/${projetId}/members`, memberData)
+      showToast('Membre ajouté avec succès', 'success')
     } catch (error) {
       console.error('Error adding member:', error)
+      showToast(error.response?.data?.message || 'Erreur lors de l\'ajout du membre', 'error')
       throw error
+    } finally {
+      loading.value = false
     }
   }
 
+ // Update member
   const updateMember = async (projetId, userId, permissions) => {
+    loading.value = true
+
     try {
-      await projetStore.updateMember(projetId, userId, permissions)
+      await api.put(`/projets/${projetId}/members/${userId}`, permissions)
+      showToast('Permissions mises à jour avec succès', 'success')
     } catch (error) {
       console.error('Error updating member:', error)
+      showToast(error.response?.data?.message || 'Erreur lors de la mise à jour des permissions', 'error')
       throw error
+    } finally {
+      loading.value = false
     }
   }
 
+ // Remove member
   const removeMember = async (projetId, userId) => {
+    loading.value = true
+
     try {
-      await projetStore.removeMember(projetId, userId)
+      await api.delete(`/projets/${projetId}/members/${userId}`)
+      showToast('Membre retiré avec succès', 'success')
     } catch (error) {
       console.error('Error removing member:', error)
+      showToast(error.response?.data?.message || 'Erreur lors du retrait du membre', 'error')
       throw error
+    } finally {
+      loading.value = false
     }
   }
 
-  // Filter operations
-  const updateFilters = (newFilters) => {
-    projetStore.updateFilters(newFilters)
-  }
-
-  const resetFilters = () => {
-    projetStore.resetFilters()
-  }
-
-  // Navigation
-  const goToProjet = (id) => {
-    router.push({ name: 'projets.show', params: { id } })
-  }
-
-  const goToProjetEdit = (id) => {
-    router.push({ name: 'projets.edit', params: { id } })
-  }
-
-  const goToProjets = () => {
-    router.push({ name: 'projets.index' })
-  }
-
-  // Utility
-  const clearCurrentProjet = () => {
-    projetStore.clearCurrentProjet()
-  }
-
-  const clearError = () => {
-    projetStore.clearError()
-  }
-
-  // Status helpers
-  const getStatusColor = (status) => {
-    const colors = {
-      active: 'blue',
-      archived: 'gray',
-      completed: 'green',
-    }
-    return colors[status] || 'gray'
-  }
-
-  const getStatusLabel = (status) => {
-    const labels = {
-      active: 'Actif',
-      archived: 'Archivé',
-      completed: 'Terminé',
-    }
-    return labels[status] || status
-  }
-
-  const getVisibilityLabel = (visibility) => {
-    const labels = {
-      public: 'Public',
-      private: 'Privé',
-      team: 'Équipe',
-    }
-    return labels[visibility] || visibility
-  }
-
-  const getRoleLabel = (role) => {
-    const labels = {
-      owner: 'Propriétaire',
-      admin: 'Administrateur',
-      member: 'Membre',
-      viewer: 'Observateur',
-    }
-    return labels[role] || role
-  }
+  // Computed
+  const hasProjects = computed(() => projets.value.length > 0)
+  const hasStats = computed(() => stats.value.total_projets > 0)
 
   return {
     // State
     loading,
-    error,
     projets,
-    currentProjet,
     stats,
-    filters,
     pagination,
+    errors,
 
-    // Getters
-    activeProjets,
-    archivedProjets,
-    completedProjets,
-    favoriteProjets,
-    overdueProjets,
+    // Computed
+    hasProjects,
+    hasStats,
 
-    // Fetch operations
-    fetchProjets,
-    fetchMyProjets,
+    // Methods
     fetchDashboardStats,
+    fetchProjets,
     fetchProjet,
-
-    // CRUD operations
     createProjet,
     updateProjet,
     deleteProjet,
-
-    // Actions
     archiveProjet,
     unarchiveProjet,
     completeProjet,
     cloneProjet,
     toggleFavorite,
-
-    // Member management
     addMember,
     updateMember,
-    removeMember,
-
-    // Filter operations
-    updateFilters,
-    resetFilters,
-
-    // Navigation
-    goToProjet,
-    goToProjetEdit,
-    goToProjets,
-
-    // Utility
-    clearCurrentProjet,
-    clearError,
-    getStatusColor,
-    getStatusLabel,
-    getVisibilityLabel,
-    getRoleLabel,
+    removeMember
   }
 }

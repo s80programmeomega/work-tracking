@@ -4,6 +4,7 @@ export const authAPI = {
     // Get CSRF cookie first (for session-based auth)
     async getCsrfCookie() {
         await api.get('/sanctum/csrf-cookie');
+            // await axios.get('http://localhost:8000/sanctum/csrf-cookie', { withCredentials: true });
     },
 
     async register(data) {
@@ -30,5 +31,9 @@ export const authAPI = {
 
     async verifyEmail() {
         return api.post('/auth/verify-email');
+    },
+ 
+    async updateLanguage(data) {
+        return api.put('/auth/language', data);
     },
 };

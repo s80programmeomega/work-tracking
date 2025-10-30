@@ -440,8 +440,6 @@ const getStatusLabel = (status) => {
 }
 
 const getActivityStyle = (description) => {
-    if (!description) description = '' // <- s'assure que c'est une string
-
   if (description.includes('created') || description.includes('créé')) {
     return {
       icon: PlusIcon,
