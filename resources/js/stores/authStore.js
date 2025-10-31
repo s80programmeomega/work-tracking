@@ -44,10 +44,33 @@ export const useAuthStore = defineStore('auth', {
          * Gère à la fois le champ 'role' (string) et 'roles' (collection Spatie)
          */
         userRoles: (state) => {
+             // Si l'utilisateur a un champ 'role'  
             if (state.user?.role) {
-                return [state.user.role]; // Format string
+                return [state.user.role];
             }
-            return state.user?.roles?.map(r => r.name) || []; // Format collection
+            // Si l'utilisateur a une collection 'roles' (Spatie)
+            if (state.user?.roles) {
+                return state.user.roles.map(r => r.name || r);
+            }
+            return [];
+        },
+
+        /**
+         * NOUVEAU : Vérifie si l'utilisateur est super_admin
+         * Compatible avec les deux systèmes (role string et roles collection)
+         */
+        isSuperAdmin: (state) => {
+            // Vérifie le champ 'role' (votre nouvelle implémentation)
+            if (state.user?.role === 'super_admin') return true;
+            
+            // Vérifie la collection 'roles' (Spatie)
+            if (state.user?.roles) {
+                return state.user.roles.some(r => 
+                    (r.name || r) === 'super_admin'
+                );
+            }
+            
+            return false;
         },
 
         /**
@@ -64,10 +87,15 @@ export const useAuthStore = defineStore('auth', {
          * Vérifie si l'utilisateur a un rôle spécifique
          */
         hasRole: (state) => (role) => {
-            // Vérifie le champ 'role' (string)
+            // Vérifie le champ 'role'
             if (state.user?.role === role) return true;
-            // Vérifie la collection 'roles' (Spatie)
-            return state.user?.roles?.some(r => r.name === role) || false;
+            
+            // Vérifie la collection 'roles'
+            if (state.user?.roles) {
+                return state.user.roles.some(r => (r.name || r) === role);
+            }
+            
+            return false;
         },
 
         /**
@@ -76,8 +104,15 @@ export const useAuthStore = defineStore('auth', {
         hasAnyRole: (state) => (roles) => {
             // Vérifie d'abord le champ 'role'
             if (state.user?.role && roles.includes(state.user.role)) return true;
+            
             // Puis vérifie la collection 'roles'
-            return roles.some(role => state.user?.roles?.some(r => r.name === role));
+            if (state.user?.roles) {
+                return roles.some(role => 
+                    state.user.roles.some(r => (r.name || r) === role)
+                );
+            }
+            
+            return false;
         },
 
         /**
@@ -104,13 +139,7 @@ export const useAuthStore = defineStore('auth', {
             );
         },
 
-        /**
-         * Vérifie si l'utilisateur est super administrateur
-         */
-        isSuperAdmin: (state) => {
-            return state.user?.roles?.some(r => r.name === 'super_admin') || false;
-        },
-
+        
         /**
          * ✅ NOUVEAU : Retourne la langue de l'utilisateur
          */
@@ -325,7 +354,25 @@ export const useAuthStore = defineStore('auth', {
             if (this.isAuthenticated && !this.user) {
                 this.fetchUser();
             }
-        }
+        },
 
+         /**
+         * NOUVEAU : Met à jour le workspace courant
+         */
+        setCurrentWorkspace(workspaceId) {
+            if (this.user) {
+                this.user.current_workspace_id = workspaceId;
+                // Mettre à jour le localStorage
+                localStorage.setItem('user', JSON.stringify(this.user));
+            }
+        },
+
+        /**
+         * NOUVEAU : Met à jour les données utilisateur
+         */
+        setUser(userData) {
+            this.user = userData;
+            localStorage.setItem('user', JSON.stringify(userData));
+        }
     },
 });

@@ -51,7 +51,7 @@ export function useProjets() {
     errors.value = {}
 
     try {
-      const { data } = await api.get('/projets/dashboard-stats') 
+      const { data } = await api.get('/projets/dashboard-stats')
 
       if (data?.data) {
         stats.value = { ...stats.value, ...data.data }
@@ -127,8 +127,26 @@ export function useProjets() {
     errors.value = {}
 
     try {
-      const { data } = await api.get(`/projets/${id}`) 
-      return data?.data || data
+      const { data } = await api.get(`/projets/${id}`)
+      // Gestion robuste de la structure de réponse
+      let projetData = data.data || data
+      let statsData = data.stats || {}
+
+      // Si les activités ne sont pas chargées, essayez de les chercher ailleurs
+      if (!projetData.activites) {
+        console.log('⚠️ Activites not found in projetData, checking alternative locations')
+        // Parfois les données peuvent être à la racine
+        if (data.activites) {
+          console.log('✅ Found activites in data root')
+          projetData.activites = data.activites
+        }
+      }
+
+      return {
+        data: projetData,
+        stats: statsData
+      }
+
     } catch (error) {
       console.error('Error fetching projet:', error)
       errors.value.fetch = error.response?.data?.message || 'Erreur lors du chargement du projet'
@@ -239,14 +257,14 @@ export function useProjets() {
 
   }
 
-   // Unarchive project
+  // Unarchive project
   const unarchiveProjet = async (id) => {
     loading.value = true
 
     try {
       const { data } = await api.post(`/projets/${id}/unarchive`)
       showToast('Projet désarchivé avec succès', 'success')
-      
+
       await fetchProjets()
       return data?.data || data
     } catch (error) {
@@ -265,7 +283,7 @@ export function useProjets() {
     try {
       const { data } = await api.post(`/projets/${id}/complete`)
       showToast('Projet marqué comme terminé', 'success')
-      
+
       await fetchProjets()
       return data?.data || data
     } catch (error) {
@@ -277,14 +295,14 @@ export function useProjets() {
     }
   }
 
-   // Clone project
+  // Clone project
   const cloneProjet = async (id, overrides = {}) => {
     loading.value = true
 
     try {
       const { data } = await api.post(`/projets/${id}/clone`, overrides)
       showToast('Projet cloné avec succès', 'success')
-      
+
       await fetchProjets()
       return data?.data || data
     } catch (error) {
@@ -296,12 +314,12 @@ export function useProjets() {
     }
   }
 
-// Toggle favorite
+  // Toggle favorite
   const toggleFavorite = async (id) => {
     try {
       const { data } = await api.post(`/projets/${id}/toggle-favorite`)
       showToast(data?.message || 'Favoris mis à jour', 'success')
-      
+
       await fetchProjets()
       return data?.data || data
     } catch (error) {
@@ -311,7 +329,7 @@ export function useProjets() {
     }
   }
 
-// Add member
+  // Add member
   const addMember = async (projetId, memberData) => {
     loading.value = true
 
@@ -327,7 +345,7 @@ export function useProjets() {
     }
   }
 
- // Update member
+  // Update member
   const updateMember = async (projetId, userId, permissions) => {
     loading.value = true
 
@@ -343,7 +361,7 @@ export function useProjets() {
     }
   }
 
- // Remove member
+  // Remove member
   const removeMember = async (projetId, userId) => {
     loading.value = true
 
