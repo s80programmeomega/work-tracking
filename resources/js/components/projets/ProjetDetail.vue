@@ -8,30 +8,23 @@
 
     <template v-else-if="projet">
       <!-- Header -->
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div
+        class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <!-- Banner avec couleur du projet -->
-        <div
-          class="h-32"
-          :style="{ backgroundColor: projet.couleur || '#3B82F6' }"
-        ></div>
-        
+        <div class="h-32" :style="{ backgroundColor: projet.couleur || '#3B82F6' }"></div>
+
         <div class="px-6 py-4">
           <div class="flex items-start justify-between">
             <div class="flex-1">
               <div class="flex items-center gap-3 mb-2">
-                <button
-                  @click="$emit('back')"
-                  class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                >
+                <button @click="$emit('back')"
+                  class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                   <ChevronLeftIcon class="w-5 h-5" />
                 </button>
                 <span class="text-sm font-medium text-gray-500 dark:text-gray-400">
                   {{ projet.code }}
                 </span>
-                <StarIcon
-                  v-if="projet.is_favorite"
-                  class="w-5 h-5 fill-yellow-400 text-yellow-400"
-                />
+                <StarIcon v-if="projet.is_favorite" class="w-5 h-5 fill-yellow-400 text-yellow-400" />
               </div>
               <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                 {{ projet.nom }}
@@ -40,18 +33,15 @@
                 {{ projet.description }}
               </p>
             </div>
-            
+
             <div class="flex items-center gap-2 ml-4">
-              <button
-                @click="editProjet"
-                class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
-              >
+              <button @click="editProjet"
+                class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
                 <EditIcon class="w-4 h-4" />
                 Modifier
               </button>
               <button
-                class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
-              >
+                class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors">
                 <SettingsIcon class="w-4 h-4" />
                 Paramètres
               </button>
@@ -100,12 +90,10 @@
               <div>
                 <div class="text-xs text-gray-500 dark:text-gray-400">Statut</div>
                 <div>
-                  <span
-                    :class="[
-                      'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
-                      getStatusColor(projet.status)
-                    ]"
-                  >
+                  <span :class="[
+                    'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
+                    getStatusColor(projet.status)
+                  ]">
                     {{ getStatusLabel(projet.status) }}
                   </span>
                 </div>
@@ -119,28 +107,20 @@
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
         <div class="border-b border-gray-200 dark:border-gray-700">
           <nav class="flex space-x-8 px-6" aria-label="Tabs">
-            <button
-              v-for="tab in tabs"
-              :key="tab.id"
-              @click="activeTab = tab.id"
-              :class="[
-                activeTab === tab.id
-                  ? 'border-brand-500 text-brand-600 dark:text-brand-400'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
-                'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2'
-              ]"
-            >
+            <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id" :class="[
+              activeTab === tab.id
+                ? 'border-brand-500 text-brand-600 dark:text-brand-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
+              'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2'
+            ]">
               <component :is="tab.icon" class="w-5 h-5" />
               {{ tab.label }}
-              <span
-                v-if="tab.count"
-                :class="[
-                  'ml-2 py-0.5 px-2 rounded-full text-xs font-medium',
-                  activeTab === tab.id
-                    ? 'bg-brand-100 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400'
-                    : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
-                ]"
-              >
+              <span v-if="tab.count" :class="[
+                'ml-2 py-0.5 px-2 rounded-full text-xs font-medium',
+                activeTab === tab.id
+                  ? 'bg-brand-100 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400'
+                  : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+              ]">
                 {{ tab.count }}
               </span>
             </button>
@@ -198,10 +178,8 @@
                 </span>
               </div>
               <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-                <div
-                  class="bg-brand-600 h-3 rounded-full transition-all duration-500"
-                  :style="{ width: `${projet.progression || 0}%` }"
-                ></div>
+                <div class="bg-brand-600 h-3 rounded-full transition-all duration-500"
+                  :style="{ width: `${projet.progression || 0}%` }"></div>
               </div>
             </div>
 
@@ -216,7 +194,8 @@
             </div>
 
             <!-- Budget -->
-            <div v-if="projet.budget" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <div v-if="projet.budget"
+              class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
               <div class="flex items-center justify-between">
                 <span class="text-sm font-medium text-blue-900 dark:text-blue-300">
                   Budget alloué
@@ -234,16 +213,29 @@
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                 Liste des activités
               </h3>
-              <button
-                @click="$emit('create-activity')"
-                class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
-              >
-                <PlusIcon class="w-4 h-4" />
-                Nouvelle activité
-              </button>
+              <div class="flex items-center gap-4">
+                <span class="text-sm text-gray-500">
+                  {{ activities.length }} / {{ projectStats.activites_count || 0 }} activité(s)
+                </span>
+                <button @click="$emit('create-activity')"
+                  class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors">
+                  <PlusIcon class="w-4 h-4" />
+                  Nouvelle activité
+                </button>
+              </div>
             </div>
 
-            <div v-if="activities.length === 0" class="text-center py-12">
+            <!-- Message de débogage -->
+            <div v-if="projectStats.activites_count > 0 && activities.length === 0"
+              class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <p class="text-yellow-800 text-sm">
+                ⚠️ Les statistiques indiquent {{ projectStats.activites_count }} activité(s)
+                mais aucune n'est affichée.
+                <button @click="loadProjet" class="underline ml-2">Recharger</button>
+              </p>
+            </div>
+
+            <div v-if="activities.length === 0 && projectStats.activites_count === 0" class="text-center py-12">
               <ListIcon class="mx-auto h-12 w-12 text-gray-400" />
               <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
                 Aucune activité pour ce projet
@@ -251,18 +243,15 @@
             </div>
 
             <div v-else class="space-y-3">
-              <div
-                v-for="activity in activities"
-                :key="activity.id"
-                @click="$emit('view-activity', activity.id)"
-                class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
-              >
+              <div v-for="activity in activities" :key="activity.id" @click="$emit('view-activity', activity.id)"
+                class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors">
                 <div class="flex-1">
                   <h4 class="font-medium text-gray-900 dark:text-white">
-                    {{ activity.nom }}
+                    {{ activity.nom || 'Activité sans nom' }}
                   </h4>
                   <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    {{ activity.taches_count || 0 }} tâches
+                    {{ activity.tache_count || 0 }} tâche(s) •
+                    Progression: {{ activity.progression || 0 }}%
                   </p>
                 </div>
                 <div class="flex items-center gap-3">
@@ -283,16 +272,15 @@
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                 Membres du projet
               </h3>
-              <button
-                @click="showAddMemberModal = true"
-                class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
-              >
+              <button @click="showAddMemberModal = true"
+                class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors">
                 <PlusIcon class="w-4 h-4" />
                 Ajouter un membre
               </button>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+            <div
+              class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
               <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700">
                   <tr>
@@ -314,16 +302,11 @@
                   <tr v-for="member in members" :key="member.id">
                     <td class="px-6 py-4 whitespace-nowrap">
                       <div class="flex items-center gap-3">
-                        <div
-                          v-if="member.avatar"
-                          class="w-10 h-10 rounded-full overflow-hidden"
-                        >
+                        <div v-if="member.avatar" class="w-10 h-10 rounded-full overflow-hidden">
                           <img :src="member.avatar" :alt="member.nom" class="w-full h-full object-cover" />
                         </div>
-                        <div
-                          v-else
-                          class="w-10 h-10 rounded-full bg-brand-600 flex items-center justify-center text-white font-medium"
-                        >
+                        <div v-else
+                          class="w-10 h-10 rounded-full bg-brand-600 flex items-center justify-center text-white font-medium">
                           {{ getInitials(member.nom) }}
                         </div>
                         <div>
@@ -337,51 +320,37 @@
                       </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                      <span
-                        :class="[
-                          'px-2 py-1 rounded-full text-xs font-medium',
-                          getRoleColor(member.pivot?.role)
-                        ]"
-                      >
+                      <span :class="[
+                        'px-2 py-1 rounded-full text-xs font-medium',
+                        getRoleColor(member.pivot?.role)
+                      ]">
                         {{ getRoleLabel(member.pivot?.role) }}
                       </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                       <div class="flex items-center gap-2">
-                        <span
-                          v-if="member.pivot?.can_edit"
-                          class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                        >
+                        <span v-if="member.pivot?.can_edit"
+                          class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
                           Éditer
                         </span>
-                        <span
-                          v-if="member.pivot?.can_delete"
-                          class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
-                        >
+                        <span v-if="member.pivot?.can_delete"
+                          class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
                           Supprimer
                         </span>
-                        <span
-                          v-if="member.pivot?.can_invite"
-                          class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
-                        >
+                        <span v-if="member.pivot?.can_invite"
+                          class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
                           Inviter
                         </span>
                       </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right">
                       <div class="flex items-center justify-end gap-2">
-                        <button
-                          v-if="member.pivot?.role !== 'owner'"
-                          @click="editMember(member)"
-                          class="text-brand-600 hover:text-brand-900 dark:text-brand-400 text-sm"
-                        >
+                        <button v-if="member.pivot?.role !== 'owner'" @click="editMember(member)"
+                          class="text-brand-600 hover:text-brand-900 dark:text-brand-400 text-sm">
                           Modifier
                         </button>
-                        <button
-                          v-if="member.pivot?.role !== 'owner'"
-                          @click="removeMember(member)"
-                          class="text-red-600 hover:text-red-900 dark:text-red-400 text-sm"
-                        >
+                        <button v-if="member.pivot?.role !== 'owner'" @click="removeMember(member)"
+                          class="text-red-600 hover:text-red-900 dark:text-red-400 text-sm">
                           Retirer
                         </button>
                       </div>
@@ -396,32 +365,18 @@
     </template>
 
     <!-- Add Member Modal -->
-    <AddMemberModal
-      v-if="showAddMemberModal"
-      :projet-id="projetId"
-      @close="showAddMemberModal = false"
-      @added="handleMemberAdded"
-    />
+    <AddMemberModal v-if="showAddMemberModal" :projet-id="projetId" @close="showAddMemberModal = false"
+      @added="handleMemberAdded" />
 
     <!-- Edit Member Modal -->
-    <EditMemberModal
-      v-if="showEditMemberModal"
-      :membre="selectedMember"
-      :projet-id="projetId"
-      @close="showEditMemberModal = false"
-      @updated="handleMemberUpdated"
-    />
+    <EditMemberModal v-if="showEditMemberModal" :membre="selectedMember" :projet-id="projetId"
+      @close="showEditMemberModal = false" @updated="handleMemberUpdated" />
 
     <!-- Remove Member Confirmation -->
-    <ConfirmModal
-      v-if="showRemoveMemberModal"
-      title="Retirer le membre"
+    <ConfirmModal v-if="showRemoveMemberModal" title="Retirer le membre"
       :message="`Êtes-vous sûr de vouloir retirer ${memberToRemove?.nom} du projet ? Il perdra l'accès à toutes les tâches et documents du projet.`"
-      confirm-text="Retirer"
-      confirm-class="bg-red-600 hover:bg-red-700"
-      @confirm="confirmRemoveMember"
-      @cancel="showRemoveMemberModal = false"
-    />
+      confirm-text="Retirer" confirm-class="bg-red-600 hover:bg-red-700" @confirm="confirmRemoveMember"
+      @cancel="showRemoveMemberModal = false" />
   </div>
 </template>
 
@@ -459,10 +414,10 @@ const emit = defineEmits(['back', 'create-activity', 'view-activity'])
 const { fetchProjet, removeMember: removeMemberService } = useProjets()
 
 const loading = ref(false)
-const projet = ref(null)
-const projectStats = ref({})
-const activities = ref([])
-const members = ref([])
+// const projet = ref(null)
+// const projectStats = ref({})
+// const activities = ref([])
+// const members = ref([])
 
 const activeTab = ref('overview')
 const showAddMemberModal = ref(false)
@@ -477,16 +432,58 @@ const tabs = computed(() => [
   { id: 'members', label: 'Membres', icon: UsersIcon, count: members.value.length }
 ])
 
+const projet = ref({
+  activites: [],
+  members: [],
+  responsable: {},
+  progression: 0,
+  budget: 0
+})
+const projectStats = ref({})
+const activities = ref([])
+const members = ref([])
+
 const loadProjet = async () => {
   try {
     loading.value = true
     const response = await fetchProjet(props.projetId)
-    projet.value = response.data
-    projectStats.value = response.stats || {}
-    activities.value = response.data.activites || []
-    members.value = response.data.members || []
+
+    // Debug détaillé
+    console.log('🔍 API Response structure:', response)
+    console.log('📊 Response data:', response?.data)
+    console.log('🎯 Projet activites:', response?.data?.activites)
+    console.log('📈 Stats:', response?.stats)
+
+    // Gestion robuste de la structure de réponse
+    if (response && response.data) {
+      projet.value = response.data
+      projectStats.value = response.stats || {}
+
+      // Assurez-vous que les tableaux existent
+      activities.value = Array.isArray(response.data.activites)
+        ? response.data.activites
+        : []
+      members.value = Array.isArray(response.data.members)
+        ? response.data.members
+        : []
+    } else {
+      // Fallback si la structure est différente
+      projet.value = response || {}
+      projectStats.value = {}
+      activities.value = []
+      members.value = []
+    }
+
+    // Debug: vérifiez les données chargées
+    console.log('Projet loaded:', projet.value)
+    console.log('Activities:', activities.value)
+
   } catch (error) {
     console.error('Error loading projet:', error)
+    // Réinitialisez les données en cas d'erreur
+    projet.value = null
+    activities.value = []
+    members.value = []
   } finally {
     loading.value = false
   }
