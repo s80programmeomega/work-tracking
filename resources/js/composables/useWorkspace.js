@@ -214,6 +214,93 @@ const updateWorkspace = async (id, data) => {
     }
   };
 
+  const fetchInvitations = async (workspaceId) => {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const response = await api.get(`/workspaces/${workspaceId}/invitations`);
+      return response.data.data;
+    } catch (err) {
+      error.value = err.response?.data?.message || 'Erreur lors du chargement des invitations';
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  /**
+   * Invite members to workspace
+   */
+  const inviteMembers = async (workspaceId, inviteData) => {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const response = await api.post(`/workspaces/${workspaceId}/members/invite`, inviteData);
+      return response.data;
+    } catch (err) {
+      error.value = err.response?.data?.message || 'Erreur lors de l\'envoi des invitations';
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  /**
+   * Resend invitation
+   */
+  const resendInvitation = async (workspaceId, invitationId) => {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const response = await api.post(`/workspaces/${workspaceId}/invitations/${invitationId}/resend`);
+      return response.data;
+    } catch (err) {
+      error.value = err.response?.data?.message || 'Erreur lors du renvoi de l\'invitation';
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  /**
+   * Cancel invitation
+   */
+  const cancelInvitation = async (workspaceId, invitationId) => {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const response = await api.delete(`/workspaces/${workspaceId}/invitations/${invitationId}`);
+      return response.data;
+    } catch (err) {
+      error.value = err.response?.data?.message || 'Erreur lors de l\'annulation de l\'invitation';
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  /**
+   * Update workspace member role and permissions
+   */
+  const updateMemberRole = async (workspaceId, userId, memberData) => {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const response = await api.put(`/workspaces/${workspaceId}/members/${userId}`, memberData);
+      return response.data;
+    } catch (err) {
+      error.value = err.response?.data?.message || 'Erreur lors de la mise à jour du membre';
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  };
+
   /**
     * Add a member to workspace
     */
@@ -235,15 +322,17 @@ const updateWorkspace = async (id, data) => {
     }
   };
 
-  /**
- * Remove a member from workspace
- */
+
+/**
+   * Remove member from workspace
+   */
   const removeMember = async (workspaceId, userId) => {
     loading.value = true;
     error.value = null;
 
     try {
-      await api.delete(`/workspaces/${workspaceId}/members/${userId}`);
+      const response = await api.delete(`/workspaces/${workspaceId}/members/${userId}`);
+      return response.data;
     } catch (err) {
       error.value = err.response?.data?.message || 'Erreur lors du retrait du membre';
       throw err;
@@ -405,6 +494,105 @@ const updateWorkspace = async (id, data) => {
       }
     }
   };
+ 
+/**
+ * Get member permissions and role
+ */
+const getMemberPermissions = (member) => {
+    const pivot = member.pivot || {};
+    let permissions = {};
+    
+    // Si les permissions sont stockées dans un champ JSON
+    if (pivot.permissions) {
+        // Si c'est le format "all"
+        if ((pivot.permissions === '["all"]') || (pivot.permissions === ['all'])) {
+            permissions = {
+                can_create_projects: true,
+                can_invite_members: true,
+                can_manage_settings: true,
+            };
+        }
+        // Si c'est un objet de permissions
+        else if (typeof pivot.permissions === 'object') {
+            permissions = pivot.permissions;
+        }
+        // Si c'est une chaîne JSON
+        else if (typeof pivot.permissions === 'string') {
+            try {
+                const decoded = JSON.parse(pivot.permissions);
+                permissions = typeof decoded === 'object' ? decoded : {};
+            } catch (e) {
+                console.warn('Invalid permissions format:', pivot.permissions);
+                permissions = {};
+            }
+        }
+    }
+    
+    // Si les permissions sont stockées dans des champs séparés (fallback)
+    return {
+        can_create_projects: permissions.can_create_projects || pivot.can_create_projects || false,
+        can_invite_members: permissions.can_invite_members || pivot.can_invite_members || false,
+        can_manage_settings: permissions.can_manage_settings || pivot.can_manage_settings || false,
+    };
+};
+
+   /**
+   * Check if user can manage workspace members
+   */
+  const canManageMembers = (workspace, user) => {
+    if (!workspace || !user) return false;
+    
+    // Le propriétaire peut tout gérer
+    if (workspace.owner_id === user.id) {
+      return true;
+    }
+    
+    // Vérifier les permissions via le pivot
+    const member = workspace.members?.find(m => m.id === user.id);
+    if (!member || !member.pivot) return false;
+    
+    const role = member.pivot.role;
+    return ['owner', 'super_admin', 'admin'].includes(role);
+  };
+
+  /**
+   * Get available roles with labels
+   */
+  const getAvailableRoles = () => {
+    return [
+      { value: 'admin', label: 'Administrateur', description: 'Accès complet à la gestion du workspace' },
+      { value: 'member', label: 'Membre', description: 'Peut participer aux projets et activités' },
+      { value: 'viewer', label: 'Observateur', description: 'Accès en lecture seule' },
+    ];
+  };
+
+  /**
+   * Get role label
+   */
+  const getRoleLabel = (role) => {
+    const roles = {
+      owner: 'Propriétaire',
+      super_admin: 'Super Admin',
+      admin: 'Administrateur',
+      member: 'Membre',
+      viewer: 'Observateur',
+    };
+    return roles[role] || role;
+  };
+
+  /**
+   * Get role color classes
+   */
+  const getRoleColor = (role) => {
+    const colors = {
+      owner: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
+      super_admin: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+      admin: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+      member: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+      viewer: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+    };
+    return colors[role] || colors.viewer;
+  };
 
   // Computed properties
   const hasWorkspaces = computed(() => workspaces.value.length > 0);
@@ -449,5 +637,17 @@ const updateWorkspace = async (id, data) => {
     unarchiveWorkspace,
     transferOwnership,
     initializeWorkspace,
+
+    // Nouvelles méthodes pour la gestion des membres
+    fetchInvitations,
+    inviteMembers,
+    resendInvitation,
+    cancelInvitation,
+    updateMemberRole,
+    getMemberPermissions,
+    canManageMembers,
+    getAvailableRoles,
+    getRoleLabel,
+    getRoleColor,
   };
 }
