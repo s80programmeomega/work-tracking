@@ -1,3 +1,4 @@
+// resources\js\icons\index.ts
 import BoxCubeIcon from "./BoxCubeIcon.vue";
 import GridIcon from "./GridIcon.vue";
 import CalenderIcon from "./CalenderIcon.vue";
@@ -45,29 +46,34 @@ import LayoutDashboardIcon from "./LayoutDashboardIcon.vue";
 import UserGroupIcon from "./UserGroupIcon.vue";
 import BellIcon from "./BellIcon.vue";
 import BarChartIcon from "./BarChartIcon.vue";
-import AlertCircleIcon from './AlertCircleIcon.vue'
-import CheckCircleIcon from './CheckCircleIcon.vue'
-import StarIcon from './StarIcon.vue'
-import FolderOpenIcon from './FolderOpenIcon.vue'
-import TrendingUpIcon from './TrendingUpIcon.vue'
-import XIcon from './XIcon.vue'
+import AlertCircleIcon from './AlertCircleIcon.vue';
+import CheckCircleIcon from './CheckCircleIcon.vue';
+import StarIcon from './StarIcon.vue';
+import FolderOpenIcon from './FolderOpenIcon.vue';
+import TrendingUpIcon from './TrendingUpIcon.vue';
+import XIcon from './XIcon.vue';
+import BuildingOfficeIcon from './BuildingOfficeIcon.vue';
+import EyeIcon from './EyeIcon.vue';
 
 // Exemple d’index.ts corrigé 
-export { default as SearchIcon } from './SearchIcon.vue'   
+export { default as SearchIcon } from './SearchIcon.vue'
 export { default as MoreVerticalIcon } from './MoreVerticalIcon.vue'
 export { default as EditIcon } from './EditIcon.vue'
-export { default as CopyIcon } from './CopyIcon.vue' 
-export { default as CalendarIcon } from './CalendarIcon.vue' 
-export { default as ClockIcon } from './ClockIcon.vue' 
-export { default as ChevronLeftIcon } from './ChevronLeftIcon.vue' 
+export { default as CopyIcon } from './CopyIcon.vue'
+export { default as CalendarIcon } from './CalendarIcon.vue'
+export { default as ClockIcon } from './ClockIcon.vue'
+export { default as ChevronLeftIcon } from './ChevronLeftIcon.vue'
 
 
 // Nouvelles icônes 
 export { default as ClipboardCheckIcon } from './ClipboardCheckIcon.vue';
 export { default as UsersIcon } from './UsersIcon.vue';
+export { default as ShieldIcon } from './ShieldIcon.vue';
+export { default as UserPlusIcon } from './UserPlusIcon.vue';
 
 
 export {
+  EyeIcon,
   BellIcon,
   BarChartIcon,
   LayoutDashboardIcon,
@@ -120,7 +126,7 @@ export {
   StarIcon,
   FolderOpenIcon,
   TrendingUpIcon,
-  XIcon, 
-
+  XIcon,
+  BuildingOfficeIcon,
 
 };
