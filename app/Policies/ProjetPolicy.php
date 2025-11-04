@@ -48,6 +48,7 @@ class ProjetPolicy
         return in_array($user->role, [
             'super_admin',
             'manager',
+            'admin',
             'responsable_n1',
             'responsable_n2',
         ]);

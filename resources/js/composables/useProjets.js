@@ -1,10 +1,12 @@
 // resources/js/composables/useProjets.js
 import { ref, computed } from 'vue'
 import { useToast } from '@/composables/useToast'
+import { useAuthStore } from '@/stores/auth'
 import api from '@/api/axios'
 
 export function useProjets() {
   const { showSuccess, showError } = useToast()
+  const authStore = useAuthStore()
 
   const loading = ref(false)
   const projets = ref([])
@@ -19,7 +21,8 @@ export function useProjets() {
     total_taches: 0,
     taches_terminees: 0,
     taux_completion: 0,
-    recent_activities: []
+    recent_activities: [],
+    workspaces_count: 0 // ✅ Pour les super admins
   })
   const pagination = ref({
     current_page: 1,
@@ -29,15 +32,16 @@ export function useProjets() {
   })
   const errors = ref({})
 
+  // ✅ Vérifie si l'utilisateur est super admin
+  const isSuperAdmin = computed(() => authStore.isSuperAdmin)
+
   // Toast notifications helper
   const showToast = (message, type = 'success') => {
-    // Utilisation d'une notification simple si useToast n'est pas disponible
     const event = new CustomEvent('toast', {
       detail: { message, type }
     })
     window.dispatchEvent(event)
 
-    // Fallback console
     if (type === 'success') {
       console.log('✅', message)
     } else if (type === 'error') {
@@ -45,19 +49,32 @@ export function useProjets() {
     }
   }
 
-  // Fetch dashboard statistics
-  const fetchDashboardStats = async () => {
+  /**
+   * ✅ Fetch dashboard statistics
+   * Gère automatiquement workspace_id
+   */
+  const fetchDashboardStats = async (workspaceId = null) => {
     loading.value = true
     errors.value = {}
 
     try {
-      const { data } = await api.get('/projets/dashboard-stats')
+      const params = {}
+      
+      // ✅ Si workspace_id fourni, l'utiliser
+      if (workspaceId) {
+        params.workspace_id = workspaceId
+      } else if (authStore.user?.current_workspace_id) {
+        // Sinon utiliser le workspace courant
+        params.workspace_id = authStore.user.current_workspace_id
+      }
+      // Si super_admin sans workspace_id, params reste vide = stats globales
+
+      const { data } = await api.get('/projets/dashboard-stats', { params })
 
       if (data?.data) {
         stats.value = { ...stats.value, ...data.data }
         return data.data
       } else if (data) {
-        // Fallback si la structure est différente
         stats.value = { ...stats.value, ...data }
         return data
       }
@@ -65,7 +82,6 @@ export function useProjets() {
       console.error('Error fetching dashboard stats:', error)
       errors.value.stats = error.response?.data?.message || 'Erreur lors du chargement des statistiques'
 
-      // Ne pas afficher d'erreur si c'est juste un workspace vide
       if (error.response?.status !== 404) {
         showToast('Impossible de charger les statistiques', 'error')
       }
@@ -74,7 +90,11 @@ export function useProjets() {
     }
   }
 
-  // Fetch projects list
+  /**
+   * ✅ Fetch projects list
+   * Super admin : route /projets (tous les projets)
+   * Users : route /projets/mes-projets (projets où ils sont membres)
+   */
   const fetchProjets = async (filters = {}) => {
     loading.value = true
     errors.value = {}
@@ -86,10 +106,22 @@ export function useProjets() {
         ...filters
       }
 
-      const { data } = await api.get('/projets', { params })
+      // ✅ Si workspace_id fourni, l'utiliser
+      if (filters.workspace_id) {
+        params.workspace_id = filters.workspace_id
+      } else if (authStore.user?.current_workspace_id) {
+        // Sinon utiliser le workspace courant
+        params.workspace_id = authStore.user.current_workspace_id
+      }
+
+      // ✅ Route différente selon le rôle
+      const endpoint = isSuperAdmin.value && !params.workspace_id
+        ? '/projets' // Super admin voit tous les projets
+        : '/projets/mes-projets' // Users voient leurs projets
+
+      const { data } = await api.get(endpoint, { params })
 
       if (data?.data) {
-        // Structure Laravel Resource Collection
         projets.value = Array.isArray(data.data) ? data.data : []
 
         if (data.meta) {
@@ -101,7 +133,6 @@ export function useProjets() {
           }
         }
       } else if (Array.isArray(data)) {
-        // Fallback si c'est directement un array
         projets.value = data
       } else {
         projets.value = []
@@ -112,7 +143,7 @@ export function useProjets() {
       console.error('Error fetching projets:', error)
       projets.value = []
       errors.value.fetch = error.response?.data?.message || 'Erreur lors du chargement des projets'
-      // Ne pas afficher d'erreur si c'est juste un workspace vide
+      
       if (error.response?.status !== 404) {
         showToast('Impossible de charger les projets', 'error')
       }
@@ -121,21 +152,77 @@ export function useProjets() {
     }
   }
 
-  // Fetch single project
+  /**
+   * ✅ NOUVEAU : Fetch ALL projects (SUPER ADMIN ONLY)
+   */
+  const fetchAllProjets = async (filters = {}) => {
+    if (!isSuperAdmin.value) {
+      console.warn('fetchAllProjets is only available for super admins')
+      return []
+    }
+
+    loading.value = true
+    errors.value = {}
+
+    try {
+      const params = {
+        page: filters.page || 1,
+        per_page: filters.per_page || 15,
+        ...filters
+      }
+
+      const { data } = await api.get('/projets/list/all', { params })
+
+      if (data?.data) {
+        projets.value = Array.isArray(data.data) ? data.data : []
+
+        if (data.meta) {
+          pagination.value = {
+            current_page: data.meta.current_page || 1,
+            last_page: data.meta.last_page || 1,
+            per_page: data.meta.per_page || 15,
+            total: data.meta.total || 0
+          }
+        }
+      } else {
+        projets.value = []
+      }
+
+      return projets.value
+    } catch (error) {
+      console.error('Error fetching all projets:', error)
+      projets.value = []
+      errors.value.fetch = error.response?.data?.message || 'Erreur lors du chargement des projets'
+      showToast('Impossible de charger les projets', 'error')
+    } finally {
+      loading.value = false
+    }
+  }
+
+  /**
+   * ✅ Fetch projects for specific workspace
+   */
+  const fetchProjetsByWorkspace = async (workspaceId, filters = {}) => {
+    return await fetchProjets({
+      ...filters,
+      workspace_id: workspaceId
+    })
+  }
+
+  /**
+   * Fetch single project
+   */
   const fetchProjet = async (id) => {
     loading.value = true
     errors.value = {}
 
     try {
       const { data } = await api.get(`/projets/${id}`)
-      // Gestion robuste de la structure de réponse
       let projetData = data.data || data
       let statsData = data.stats || {}
 
-      // Si les activités ne sont pas chargées, essayez de les chercher ailleurs
       if (!projetData.activites) {
-        console.log('⚠️ Activites not found in projetData, checking alternative locations')
-        // Parfois les données peuvent être à la racine
+        console.log('⚠️ Activites not found in projetData')
         if (data.activites) {
           console.log('✅ Found activites in data root')
           projetData.activites = data.activites
@@ -146,7 +233,6 @@ export function useProjets() {
         data: projetData,
         stats: statsData
       }
-
     } catch (error) {
       console.error('Error fetching projet:', error)
       errors.value.fetch = error.response?.data?.message || 'Erreur lors du chargement du projet'
@@ -157,16 +243,23 @@ export function useProjets() {
     }
   }
 
-  // Create project
+  /**
+   * Create project
+   */
   const createProjet = async (projetData) => {
     loading.value = true
     errors.value = {}
 
     try {
+      // ✅ Ajoute automatiquement le workspace_id si non fourni
+      if (!projetData.workspace_id && authStore.user?.current_workspace_id) {
+        projetData.workspace_id = authStore.user.current_workspace_id
+      }
+
       const { data } = await api.post('/projets', projetData)
       showToast('Projet créé avec succès', 'success')
 
-      // Recharger les données après création
+      // Recharger les données
       await Promise.all([
         fetchProjets(),
         fetchDashboardStats()
@@ -186,7 +279,9 @@ export function useProjets() {
     }
   }
 
-  // Update project
+  /**
+   * Update project
+   */
   const updateProjet = async (id, projetData) => {
     loading.value = true
     errors.value = {}
@@ -194,7 +289,7 @@ export function useProjets() {
     try {
       const { data } = await api.put(`/projets/${id}`, projetData)
       showToast('Projet mis à jour avec succès', 'success')
-      // Recharger les données après mise à jour
+
       await Promise.all([
         fetchProjets(),
         fetchDashboardStats()
@@ -214,7 +309,9 @@ export function useProjets() {
     }
   }
 
-  // Delete project
+  /**
+   * Delete project
+   */
   const deleteProjet = async (id) => {
     loading.value = true
     errors.value = {}
@@ -223,7 +320,6 @@ export function useProjets() {
       await api.delete(`/projets/${id}`)
       showToast('Projet supprimé avec succès', 'success')
 
-      // Refresh data
       await Promise.all([
         fetchProjets(),
         fetchDashboardStats()
@@ -237,12 +333,14 @@ export function useProjets() {
     }
   }
 
-  // Archive project
+  /**
+   * Archive project
+   */
   const archiveProjet = async (id) => {
     loading.value = true
 
     try {
-      const { data } = await api.post(`/projets/${id}/archive`) // Retiré /api
+      const { data } = await api.post(`/projets/${id}/archive`)
       showToast('Projet archivé avec succès', 'success')
       await fetchProjets()
 
@@ -254,10 +352,11 @@ export function useProjets() {
     } finally {
       loading.value = false
     }
-
   }
 
-  // Unarchive project
+  /**
+   * Unarchive project
+   */
   const unarchiveProjet = async (id) => {
     loading.value = true
 
@@ -276,7 +375,9 @@ export function useProjets() {
     }
   }
 
-  // Complete project
+  /**
+   * Complete project
+   */
   const completeProjet = async (id) => {
     loading.value = true
 
@@ -295,7 +396,9 @@ export function useProjets() {
     }
   }
 
-  // Clone project
+  /**
+   * Clone project
+   */
   const cloneProjet = async (id, overrides = {}) => {
     loading.value = true
 
@@ -314,7 +417,9 @@ export function useProjets() {
     }
   }
 
-  // Toggle favorite
+  /**
+   * Toggle favorite
+   */
   const toggleFavorite = async (id) => {
     try {
       const { data } = await api.post(`/projets/${id}/toggle-favorite`)
@@ -329,7 +434,9 @@ export function useProjets() {
     }
   }
 
-  // Add member
+  /**
+   * Add member
+   */
   const addMember = async (projetId, memberData) => {
     loading.value = true
 
@@ -345,7 +452,9 @@ export function useProjets() {
     }
   }
 
-  // Update member
+  /**
+   * Update member
+   */
   const updateMember = async (projetId, userId, permissions) => {
     loading.value = true
 
@@ -361,7 +470,9 @@ export function useProjets() {
     }
   }
 
-  // Remove member
+  /**
+   * Remove member
+   */
   const removeMember = async (projetId, userId) => {
     loading.value = true
 
@@ -392,10 +503,13 @@ export function useProjets() {
     // Computed
     hasProjects,
     hasStats,
+    isSuperAdmin,
 
     // Methods
     fetchDashboardStats,
     fetchProjets,
+    fetchAllProjets, // ✅ NOUVEAU
+    fetchProjetsByWorkspace, // ✅ NOUVEAU
     fetchProjet,
     createProjet,
     updateProjet,

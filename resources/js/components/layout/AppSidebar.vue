@@ -13,7 +13,7 @@
         @mouseenter="!isExpanded && (isHovered = true)"
         @mouseleave="isHovered = false"
     >
-        <!-- Logo Section -->
+        <!-- Logo Section (inchangé) -->
         <div
             :class="[
                 'py-8 flex',
@@ -49,7 +49,7 @@
             </router-link>
         </div>
 
-        <!-- Workspace Selector -->
+        <!-- Workspace Selector (inchangé) -->
         <div
             v-if="isExpanded || isHovered || isMobileOpen"
             class="mb-4 px-2" >
@@ -119,12 +119,12 @@
             </transition>
         </div>
 
-        <!-- Navigation Menu -->
+        <!-- Navigation Menu avec gestion des permissions -->
         <div class="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
             <nav class="mb-6">
                 <div class="flex flex-col gap-4">
                     <div
-                        v-for="(menuGroup, groupIndex) in menuGroups"
+                        v-for="(menuGroup, groupIndex) in filteredMenuGroups"
                         :key="groupIndex"
                     >
                         <h2
@@ -227,7 +227,7 @@
                                     </span>
                                 </router-link>
 
-                                <!-- Submenu items -->
+                                <!-- Submenu items avec permissions -->
                                 <transition
                                     @enter="startTransition"
                                     @after-enter="endTransition"
@@ -242,7 +242,7 @@
                                     >
                                         <ul class="mt-1 space-y-1 ml-9">
                                             <li
-                                                v-for="subItem in item.subItems"
+                                                v-for="subItem in getFilteredSubItems(item.subItems)"
                                                 :key="subItem.name"
                                             >
                                                 <router-link
@@ -326,10 +326,8 @@ import TaskIcon from '@/icons/TaskIcon.vue';
 import ClipboardCheckIcon from '@/icons/ClipboardCheckIcon.vue';
 import UsersIcon from '@/icons/UsersIcon.vue';
 import { useSidebar } from '@/composables/useSidebar';
-
 import api from '@/api/axios'
 import { useAuthStore } from '@/stores/auth';  
-
 
 const route = useRoute();
 const { isExpanded, isMobileOpen, isHovered, openSubmenu } = useSidebar();
@@ -340,6 +338,11 @@ const showWorkspaceSelector = ref(false);
 const currentWorkspace = ref(null);
 const workspaces = ref([]);
 const loading = ref(false);
+
+// CORRECTION : Utiliser le getter isSuperAdmin du store
+const isSuperAdmin = computed(() => {
+    return authStore.isSuperAdmin;
+});
 
 const currentWorkspaceInitials = computed(() => {
     if (!currentWorkspace.value) return 'MW';
@@ -352,50 +355,29 @@ const workspaceProjectCount = computed(() => {
 
 const getWorkspaceInitials = (name) => {
     return name
-        .split(' ')
+        ?.split(' ')
         .map(word => word[0])
         .join('')
         .toUpperCase()
-        .slice(0, 2);
+        .slice(0, 2) || 'MW';
 };
- 
 
 const selectWorkspace = async (workspace) => {
-    if (workspace.id === currentWorkspace.value?.id) {
-        showWorkspaceSelector.value = false;
-        return;
-    }
-
-    loading.value = true;
-    
     try {
         const response = await api.post(`/workspaces/switch/${workspace.id}`, {}, {
             headers: { Authorization: `Bearer ${authStore.token}` }
         });
 
-        // Mettre à jour le workspace courant localement
-        currentWorkspace.value = workspace;
-        
-        // Mettre à jour le store d'authentification
-        authStore.setCurrentWorkspace(workspace.id);
-        
+        currentWorkspace.value = response.data.workspace;
+        authStore.setCurrentWorkspace(response.data.current_workspace_id);
         showWorkspaceSelector.value = false;
 
-        // Émettre un événement global pour informer les autres composants
         window.dispatchEvent(new CustomEvent('workspace-changed', {
-            detail: { 
-                workspace,
-                workspaceId: workspace.id 
-            }
+            detail: { workspace }
         }));
-
-        console.log('Workspace changé avec succès:', workspace.nom);
 
     } catch (error) {
         console.error('Erreur lors du changement de workspace :', error);
-        // Optionnel: Afficher un message d'erreur à l'utilisateur
-    } finally {
-        loading.value = false;
     }
 };
 
@@ -423,7 +405,7 @@ const menuGroups = computed(() => [
                 icon: FolderIcon,
                 name: 'Projets',
                 subItems: [
-                    { name: 'Tous les projets', path: '/projets' },
+                    { name: 'Tableau de bord', path: '/projets/list/all', superAdminOnly: true },
                     { name: 'Mes projets', path: '/projets/mes-projets' },
                     { name: 'Projets archivés', path: '/projets/archives' },
                     { name: 'Créer un projet', path: '/projets/create', new: true },
@@ -433,7 +415,7 @@ const menuGroups = computed(() => [
                 icon: ListIcon,
                 name: 'Activités',
                 subItems: [
-                    { name: 'Toutes les activités', path: '/activites' },
+                    { name: 'Toutes les activités', path: '/activites', superAdminOnly: true },
                     { name: 'Mes activités', path: '/activites/mes-activites' },
                     { name: 'En retard', path: '/activites/en-retard', count: 5 },
                 ],
@@ -493,9 +475,9 @@ const menuGroups = computed(() => [
                 icon: UsersIcon,
                 name: 'Utilisateurs',
                 subItems: [
-                    { name: 'Tous les utilisateurs', path: '/users' },
+                    { name: 'Tous les utilisateurs', path: '/users', superAdminOnly: true },
                     { name: 'Invitations', path: '/users/invitations', count: 2 },
-                    { name: 'Permissions', path: '/users/permissions' },
+                    { name: 'Permissions', path: '/users/permissions', superAdminOnly: true },
                 ],
             },
             {
@@ -523,6 +505,36 @@ const menuGroups = computed(() => [
     },
 ]);
 
+// CORRECTION : Filtrer les menus selon les permissions avec sécurité
+const filteredMenuGroups = computed(() => {
+    if (!menuGroups.value) return [];
+    
+    return menuGroups.value.map(group => ({
+        ...group,
+        items: (group.items || []).filter(item => {
+            if (!item) return false;
+            
+            // Si l'item a des subItems, on vérifie s'il en reste après filtrage
+            if (item.subItems) {
+                const filteredSubItems = getFilteredSubItems(item.subItems);
+                return filteredSubItems.length > 0;
+            }
+            // Pour les items simples, on vérifie la permission
+            return !item.superAdminOnly || isSuperAdmin.value;
+        })
+    })).filter(group => group.items && group.items.length > 0);
+});
+
+// CORRECTION : Filtrer les sous-items selon les permissions avec sécurité
+const getFilteredSubItems = (subItems) => {
+    if (!subItems || !Array.isArray(subItems)) return [];
+    
+    return subItems.filter(subItem => {
+        if (!subItem) return false;
+        return !subItem.superAdminOnly || isSuperAdmin.value;
+    });
+};
+
 const isActive = (path) => {
     return route.path === path || route.path.startsWith(path + '/');
 };
@@ -533,8 +545,10 @@ const toggleSubmenu = (groupIndex, itemIndex) => {
 };
 
 const isAnySubmenuRouteActive = computed(() => {
+    if (!menuGroups.value) return false;
+    
     return menuGroups.value.some((group) =>
-        group.items.some(
+        group.items?.some(
             (item) =>
                 item.subItems &&
                 item.subItems.some((subItem) => isActive(subItem.path))
@@ -544,6 +558,9 @@ const isAnySubmenuRouteActive = computed(() => {
 
 const isSubmenuOpen = (groupIndex, itemIndex) => {
     const key = `${groupIndex}-${itemIndex}`;
+    
+    if (!menuGroups.value[groupIndex]?.items?.[itemIndex]) return false;
+    
     return (
         openSubmenu.value === key ||
         (isAnySubmenuRouteActive.value &&
@@ -566,26 +583,21 @@ const endTransition = (el) => {
 };
 
 onMounted(async () => {
-    await loadUserWorkspaces();
-});
-
-const loadUserWorkspaces = async () => {
     try {
         const response = await api.get('/workspaces/user-workspaces', {
             headers: { Authorization: `Bearer ${authStore.token}` }
         });
+        workspaces.value = response.data.data || [];
         
-        workspaces.value = response.data.data;
-        
-        // Trouver le workspace courant
-        const currentWorkspaceId = authStore.user.current_workspace_id;
-        currentWorkspace.value = workspaces.value.find(w => w.id === currentWorkspaceId) || workspaces.value[0];
+        // CORRECTION : Gestion sécurisée du workspace courant
+        const currentWorkspaceId = authStore.user?.current_workspace_id;
+        currentWorkspace.value = workspaces.value.find(w => w.id === currentWorkspaceId) || workspaces.value[0] || null;
         
     } catch (error) {
         console.error('Erreur lors du chargement des workspaces :', error);
+        workspaces.value = [];
     }
-};
-
+});
 </script>
 
 <style scoped>

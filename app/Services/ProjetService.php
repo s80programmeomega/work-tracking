@@ -14,44 +14,253 @@ use Illuminate\Support\Facades\Log;
 
 class ProjetService
 {
-    /**
-     * Get all projects with filters and pagination.
+
+     /**
+     * Get ALL projects (SUPER ADMIN ONLY)
+     * @param array $filters
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
-    public function getAllProjets(array $filters = []): LengthAwarePaginator
+    public function getAllProjets(array $filters = [])
     {
         $query = Projet::query()
-            ->with(['responsable', 'workspace']);
- 
-        // Appliquer les filtres
-        // $this->applyFilters($query, $filters);
+            ->with(['responsable', 'members', 'tags', 'workspace'])
+            ->withCount(['activites', 'taches']);
 
-        // Ajouter les counts
-        // $query->withCount(['activites', 'members']);
+        // ✅ Filtre par workspace si spécifié
+        if (!empty($filters['workspace_id'])) {
+            $query->where('workspace_id', $filters['workspace_id']);
+        }
 
-        // $perPage = $filters['per_page'] ?? 15;
-        return $query->latest()->paginate(12);
+        // Recherche
+        if (!empty($filters['search'])) {
+            $query->search($filters['search']);
+        }
+
+        // Statut
+        if (!empty($filters['status']) && $filters['status'] !== 'all') {
+            $query->where('status', $filters['status']);
+        }
+
+        // Visibilité
+        if (!empty($filters['visibility']) && $filters['visibility'] !== 'all') {
+            $query->where('visibility', $filters['visibility']);
+        }
+
+        // Responsable
+        if (!empty($filters['responsable_id'])) {
+            $query->where('responsable_id', $filters['responsable_id']);
+        }
+
+        // Template
+        if (!empty($filters['is_template'])) {
+            $query->template();
+        }
+
+        // Favoris
+        if (!empty($filters['is_favorite'])) {
+            $query->favorite();
+        }
+
+        // En retard
+        if (!empty($filters['is_overdue'])) {
+            $query->overdue();
+        }
+
+        // Tags
+        if (!empty($filters['tags'])) {
+            $query->whereHas('tags', function ($q) use ($filters) {
+                $q->whereIn('projet_tags.id', (array) $filters['tags']);
+            });
+        }
+
+        return $query->latest()->paginate($filters['per_page'] ?? 15);
+    }
+
+     /**
+     * Get user's projects (where user is member or responsable)
+     * @param User $user
+     * @param array $filters
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function getUserProjets(User $user, array $filters = [])
+    {
+        $query = Projet::query()
+            ->with(['responsable', 'members', 'tags', 'workspace'])
+            ->withCount(['activites', 'taches'])
+            ->forUser($user->id);
+
+        // ✅ Filtre par workspace (OBLIGATOIRE pour les utilisateurs normaux)
+        if (!empty($filters['workspace_id'])) {
+            $query->where('workspace_id', $filters['workspace_id']);
+        }
+
+        // Recherche
+        if (!empty($filters['search'])) {
+            $query->search($filters['search']);
+        }
+
+        // Statut
+        if (!empty($filters['status']) && $filters['status'] !== 'all') {
+            $query->where('status', $filters['status']);
+        }
+
+        // Visibilité
+        if (!empty($filters['visibility']) && $filters['visibility'] !== 'all') {
+            $query->where('visibility', $filters['visibility']);
+        }
+
+        // Template
+        if (!empty($filters['is_template'])) {
+            $query->template();
+        }
+
+        // Favoris
+        if (!empty($filters['is_favorite'])) {
+            $query->favorite();
+        }
+
+        // En retard
+        if (!empty($filters['is_overdue'])) {
+            $query->overdue();
+        }
+
+        // Tags
+        if (!empty($filters['tags'])) {
+            $query->whereHas('tags', function ($q) use ($filters) {
+                $q->whereIn('projet_tags.id', (array) $filters['tags']);
+            });
+        }
+
+        return $query->latest()->paginate($filters['per_page'] ?? 15);
+    }
+
+    
+    /**
+     * ✅ NOUVEAU : Get global dashboard stats (ALL workspaces - SUPER ADMIN)
+     */
+    public function getGlobalDashboardStats(): array
+    {
+        return [
+            'total_projets' => Projet::count(),
+            'projets_actifs' => Projet::active()->count(),
+            'projets_termines' => Projet::completed()->count(),
+            'projets_archives' => Projet::archived()->count(),
+            'projets_en_retard' => Projet::overdue()->count(),
+            'projets_favoris' => Projet::favorite()->count(),
+            'total_activites' => DB::table('activites')->count(),
+            'total_taches' => DB::table('taches')->count(),
+            'taches_terminees' => DB::table('taches')->where('statut', 'termine')->count(),
+            'taux_completion' => $this->calculateGlobalCompletionRate(),
+            'recent_activities' => $this->getGlobalRecentActivities(),
+            'workspaces_count' => DB::table('workspaces')->count(),
+        ];
     }
 
     /**
-     * Get projects for a specific user.
+     * Get dashboard stats for a specific workspace
      */
-    public function getUserProjets(User $user, array $filters = []): LengthAwarePaginator
+    public function getWorkspaceDashboardStats(int $workspaceId): array
     {
-        $query = Projet::query()
-            ->with(['responsable', 'workspace'])
-            ->where(function ($q) use ($user) {
-                $q->where('responsable_id', $user->id)
-                    ->orWhereHas('members', function ($memberQuery) use ($user) {
-                        $memberQuery->where('user_id', $user->id);
-                    });
-            });
+        $totalProjets = Projet::where('workspace_id', $workspaceId)->count();
 
-        $this->applyFilters($query, $filters);
+        return [
+            'total_projets' => $totalProjets,
+            'projets_actifs' => Projet::where('workspace_id', $workspaceId)->active()->count(),
+            'projets_termines' => Projet::where('workspace_id', $workspaceId)->completed()->count(),
+            'projets_archives' => Projet::where('workspace_id', $workspaceId)->archived()->count(),
+            'projets_en_retard' => Projet::where('workspace_id', $workspaceId)->overdue()->count(),
+            'projets_favoris' => Projet::where('workspace_id', $workspaceId)->favorite()->count(),
+            'total_activites' => DB::table('activites')
+                ->join('projets', 'activites.projet_id', '=', 'projets.id')
+                ->where('projets.workspace_id', $workspaceId)
+                ->count(),
+            'total_taches' => DB::table('taches')
+                ->join('activites', 'taches.activite_id', '=', 'activites.id')
+                ->join('projets', 'activites.projet_id', '=', 'projets.id')
+                ->where('projets.workspace_id', $workspaceId)
+                ->count(),
+            'taches_terminees' => DB::table('taches')
+                ->join('activites', 'taches.activite_id', '=', 'activites.id')
+                ->join('projets', 'activites.projet_id', '=', 'projets.id')
+                ->where('projets.workspace_id', $workspaceId)
+                ->where('taches.statut', 'termine')
+                ->count(),
+            'taux_completion' => $this->calculateWorkspaceCompletionRate($workspaceId),
+            'recent_activities' => $this->getWorkspaceRecentActivities($workspaceId),
+        ];
+    }
+    
 
-        $query->withCount(['activites', 'members']);
+        /**
+     * ✅ Calculate global completion rate
+     */
+    private function calculateGlobalCompletionRate(): int
+    {
+        $totalTaches = DB::table('taches')->count();
 
-        $perPage = $filters['per_page'] ?? 15;
-        return $query->latest()->paginate($perPage);
+        if ($totalTaches === 0) {
+            return 0;
+        }
+
+        $completedTaches = DB::table('taches')->where('statut', 'termine')->count();
+
+        return (int) round(($completedTaches / $totalTaches) * 100);
+    }
+
+
+     /**
+     * Calculate workspace completion rate
+     */
+    private function calculateWorkspaceCompletionRate(int $workspaceId): int
+    {
+        $totalTaches = DB::table('taches')
+            ->join('activites', 'taches.activite_id', '=', 'activites.id')
+            ->join('projets', 'activites.projet_id', '=', 'projets.id')
+            ->where('projets.workspace_id', $workspaceId)
+            ->count();
+
+        if ($totalTaches === 0) {
+            return 0;
+        }
+
+        $completedTaches = DB::table('taches')
+            ->join('activites', 'taches.activite_id', '=', 'activites.id')
+            ->join('projets', 'activites.projet_id', '=', 'projets.id')
+            ->where('projets.workspace_id', $workspaceId)
+            ->where('taches.statut', 'termine')
+            ->count();
+
+        return (int) round(($completedTaches / $totalTaches) * 100);
+    }
+
+    /**
+     * ✅ Get global recent activities
+     */
+    private function getGlobalRecentActivities(int $limit = 10): array
+    {
+        return DB::table('activity_log')
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get()
+            ->toArray();
+    }
+
+    /**
+     * Get workspace recent activities
+     */
+    private function getWorkspaceRecentActivities(int $workspaceId, int $limit = 10): array
+    {
+        return DB::table('activity_log')
+            ->where('properties->workspace_id', $workspaceId)
+            ->orWhereIn('subject_id', function ($query) use ($workspaceId) {
+                $query->select('id')
+                    ->from('projets')
+                    ->where('workspace_id', $workspaceId);
+            })
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get()
+            ->toArray();
     }
 
     /**
@@ -324,89 +533,26 @@ class ProjetService
         return $projet->fresh(['responsable', 'members', 'tags']);
     }
 
-    /**
-     * Get project statistics.
+  /**
+     * Get project statistics
      */
     public function getProjetStats(Projet $projet): array
     {
-        $activitesCount = $projet->activites()->count();
-        $tachesCount = $projet->taches()->count();
-        $tachesTermineesCount = $projet->taches()->where('statut', 'termine')->count();
-
         return [
-            'activites_count' => $activitesCount,
-            'taches_count' => $tachesCount,
-            'taches_terminees' => $tachesTermineesCount,
+            'total_activites' => $projet->activites()->count(),
+            'total_taches' => $projet->taches()->count(),
+            'taches_terminees' => $projet->taches()->where('statut', 'termine')->count(),
             'taches_en_cours' => $projet->taches()->where('statut', 'en_cours')->count(),
             'taches_en_attente' => $projet->taches()->where('statut', 'en_attente')->count(),
-            'taches_en_retard' => $projet->taches()
-                ->where('echeance', '<', now())
-                ->whereNotIn('statut', ['termine', 'annule'])
-                ->count(),
-            'member_count' => $projet->members()->count(),
-            'progression_reelle' => $projet->progression ?? 0,
-            'progression_calculee' => $projet->calculateProgression(),
-            'budget_utilise' => 0, // À implémenter selon votre logique
-            'budget_restant' => $projet->budget ?? 0,
+            'progression' => $projet->progression,
+            'membre_count' => $projet->members()->count(),
+            'is_overdue' => $projet->is_overdue,
+            'days_remaining' => $projet->days_remaining,
         ];
     }
 
-    /**
-     * Get workspace dashboard statistics.
-     */
-    public function getWorkspaceDashboardStats(int $workspaceId): array
-    { 
-        $projetsQuery = Projet::where('workspace_id', $workspaceId);
 
-        $stats = [
-            'total_projets' => (clone $projetsQuery)->count(),
-            'projets_actifs' => (clone $projetsQuery)->where('status', 'active')->count(),
-            'projets_termines' => (clone $projetsQuery)->where('status', 'completed')->count(),
-            'projets_archives' => (clone $projetsQuery)->where('status', 'archived')->count(),
-            'projets_en_retard' => (clone $projetsQuery)
-                ->where('date_fin', '<', now())
-                ->whereNotIn('status', ['completed', 'archived'])
-                ->count(),
-            'projets_favoris' => (clone $projetsQuery)->where('is_favorite', true)->count(),
-        ];
- 
-        // Statistiques des activités
-        $stats['total_activites'] = Activite::whereHas('projet', function ($q) use ($workspaceId) {
-            $q->where('workspace_id', $workspaceId);
-        })->count();
-
-        // Statistiques des tâches
-        $tachesStats = Tache::whereHas('activite.projet', function ($q) use ($workspaceId) {
-            $q->where('workspace_id', $workspaceId);
-        })->selectRaw('
-            COUNT(*) as total,
-            SUM(CASE WHEN statut = "termine" THEN 1 ELSE 0 END) as terminees
-        ')->first();
-
-        $stats['total_taches'] = $tachesStats->total ?? 0;
-        $stats['taches_terminees'] = $tachesStats->terminees ?? 0;
-        $stats['taux_completion'] = $stats['total_taches'] > 0
-            ? round(($stats['taches_terminees'] / $stats['total_taches']) * 100, 1)
-            : 0;
-
-        // Activités récentes (dernières modifications de projets)
-        $stats['recent_activities'] = Projet::where('workspace_id', $workspaceId)
-            ->with('responsable')
-            ->latest('updated_at')
-            ->limit(5)
-            ->get()
-            ->map(function ($projet) {
-                return [
-                    'id' => $projet->id,
-                    'type' => 'projet_updated',
-                    'projet_nom' => $projet->nom,
-                    'responsable' => $projet->responsable->nom ?? 'N/A',
-                    'updated_at' => $projet->updated_at->diffForHumans(),
-                ];
-            });
-
-        return $stats;
-    }
+    
 
     /**
      * Generate performance report for weekly evaluation.
