@@ -332,18 +332,30 @@ class WorkspaceController extends Controller
       ], 403);
     }
 
-    $members = $workspace->members()
-      ->withPivot(['role', 'permissions', 'invited_at', 'invited_by'])
-      ->with([
-        'teamMemberships' => function ($query) use ($workspace) {
-          $query->whereHas('team', function ($q) use ($workspace) {
-            $q->whereHas('project', function ($p) use ($workspace) {
-              $p->where('workspace_id', $workspace->id);
-            });
-          });
-        }
-      ])
-      ->get();
+   $members = $workspace->members()
+        ->withPivot(['role', 'permissions', 'invited_at', 'invited_by'])
+        ->get()
+        ->map(function ($member) {
+            // ✅ Corriger le format des permissions
+            $permissions = $member->pivot->permissions;
+            
+            // Si c'est une chaîne JSON, la décoder
+            if (is_string($permissions)) {
+                $decoded = json_decode($permissions, true);
+                $member->pivot->permissions = is_array($decoded) ? $decoded : [];
+            }
+            
+            // Si c'est "all", convertir en permissions complètes
+            if ($member->pivot->permissions === ['all']) {
+                $member->pivot->permissions = [
+                    'can_create_projects' => true,
+                    'can_invite_members' => true,
+                    'can_manage_settings' => true,
+                ];
+            }
+            
+            return $member;
+        });
 
     return response()->json([
       'data' => $members,
