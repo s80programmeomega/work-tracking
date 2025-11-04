@@ -21,8 +21,28 @@
     "signin_with_x": "Se connecter avec X",
     "invalid_credentials": "Email ou mot de passe incorrect",
     "login_failed": "Échec de la connexion",
-    "email_placeholder": "votre@email.com",
-    "password_placeholder": "Entrez votre mot de passe"
+    "email_placeholder": "votre email",
+    "password_placeholder": "Entrez votre mot de passe",
+    "signup_title": "Créez votre compte",
+    "signup_description": "Entrez vos informations pour créer votre compte !",
+    "signup_button": "S'inscrire",
+    "signing_up": "Inscription...",
+    "signup_with_google": "S'inscrire avec Google",
+    "first_name": "Prénom",
+    "last_name": "Nom",
+    "first_name_placeholder": "Votre prénom",
+    "last_name_placeholder": "Votre nom",
+    "confirm_password": "Confirmer le mot de passe",
+    "confirm_password_placeholder": "Confirmez votre mot de passe",
+    "already_have_account": "Vous avez déjà un compte ?",
+    "terms_text_1": "En créant un compte, vous acceptez les",
+    "terms_text_2": "Conditions d'utilisation",
+    "terms_text_3": "et notre",
+    "terms_text_4": "Politique de confidentialité",
+    "terms_required": "Vous devez accepter les conditions d'utilisation",
+    "password_mismatch": "La confirmation du mot de passe ne correspond pas",
+    "registration_failed": "Échec de l'inscription",
+    "name": "Nom complet"
   },
   "navigation": {
     "dashboard": "Tableau de bord",
@@ -59,7 +79,10 @@
   },
   "validation": {
     "required": "Le champ {attribute} est obligatoire.",
-    "email": "L'adresse email doit être valide.",
+    "email": "L'adresse email doit être valide.",  
+    "max": "Maximum {max} caractères",
+    "image": "Le fichier doit être une image",
+    "size": "La taille maximale est de {size} Mo",
     "min": {
       "string": "Le {attribute} doit contenir au moins {min} caractères."
     }
@@ -70,10 +93,125 @@
     "delete": "Supprimer",
     "edit": "Modifier",
     "create": "Créer",
-    "loading": "Chargement...",
-    "error": "Erreur",
-    "success": "Succès",
     "warning": "Attention",
-    "info": "Information"
+    "info": "Information",
+    "view": "Voir",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "loading": "Chargement...",
+    "error": "Une erreur est survenue",
+    "success": "Opération réussie",
+    "confirm": "Confirmer",
+    "yes": "Oui",
+    "no": "Non",
+    "active": "Actif",
+    "archived": "Archivé",
+    "settings": "Paramètres"
+  },
+  "workspaces": {
+    "title": "Mes Workspaces",
+    "subtitle": "Gérez vos espaces de travail et projets",
+    "create": "Nouveau Workspace",
+    "create_title": "Créer un nouveau workspace",
+    "create_subtitle": "Organisez vos projets dans un espace de travail dédié",
+    "edit_title": "Modifier le workspace",
+    "no_description": "Aucune description",
+    "projects": "Projets",
+    "members": "Membres",
+    "search": "Rechercher un workspace...",
+    "empty": {
+      "title": "Aucun workspace",
+      "description": "Créez votre premier workspace pour organiser vos projets et collaborer avec votre équipe"
+    },
+    "filter": {
+      "all": "Tous les statuts",
+      "active": "Actifs",
+      "archived": "Archivés"
+    },
+    "status": {
+      "active": "Actif",
+      "archived": "Archivé"
+    },
+    "form": {
+      "name": "Nom du workspace",
+      "name_placeholder": "Ex: Entreprise XYZ - Projets 2024",
+      "name_required": "Le nom du workspace est requis",
+      "description": "Description",
+      "description_placeholder": "Décrivez l'objectif de ce workspace...",
+      "logo": "Logo du workspace",
+      "logo_choose": "Choisir un logo",
+      "logo_remove": "Supprimer",
+      "logo_format": "Format recommandé: PNG ou JPG, max 2 MB",
+      "settings": "Paramètres",
+      "visibility": "Visibilité par défaut des projets",
+      "visibility_public": "Public - Visible par tous les membres",
+      "visibility_team": "Équipe - Visible par les membres du workspace",
+      "visibility_private": "Privé - Visible uniquement par les membres du projet",
+      "permissions_title": "Permissions des membres",
+      "can_create_projects": "Créer des projets",
+      "can_create_projects_desc": "Les membres peuvent créer de nouveaux projets",
+      "can_invite": "Inviter des membres",
+      "can_invite_desc": "Les membres peuvent inviter d'autres utilisateurs",
+      "require_validation": "Validation des tâches requise",
+      "require_validation_desc": "Les nouvelles tâches nécessitent une validation"
+    },
+    "details": {
+      "overview": "Vue d'ensemble",
+      "projects": "Projets",
+      "members": "Membres",
+      "settings": "Paramètres",
+      "stats": {
+        "total_projects": "Total Projets",
+        "active_projects": "Projets Actifs",
+        "total_members": "Membres",
+        "completion_rate": "Taux de Complétion"
+      }
+    },
+    "members_management": {
+      "title": "Gestion des Membres",
+      "add_member": "Ajouter un membre",
+      "role": "Rôle",
+      "permissions": "Permissions",
+      "invited_at": "Invité le",
+      "actions": "Actions",
+      "roles": {
+        "owner": "Propriétaire",
+        "admin": "Administrateur",
+        "member": "Membre",
+        "viewer": "Observateur"
+      }
+    },
+    "actions": {
+      "archive": "Archiver",
+      "unarchive": "Restaurer",
+      "duplicate": "Dupliquer",
+      "transfer": "Transférer la propriété",
+      "delete": "Supprimer"
+    },
+    "messages": {
+      "created": "Workspace créé avec succès",
+      "updated": "Workspace mis à jour avec succès",
+      "deleted": "Workspace supprimé avec succès",
+      "archived": "Workspace archivé avec succès",
+      "unarchived": "Workspace restauré avec succès"
+    }
+  },
+  "projects": {
+    "title": "Projets",
+    "my_projects": "Mes Projets",
+    "all_projects": "Tous les Projets",
+    "archived": "Archivés",
+    "create": "Nouveau Projet"
+  },
+  "tasks": {
+    "title": "Tâches",
+    "my_tasks": "Mes Tâches",
+    "assigned_to_me": "Assignées à moi",
+    "pending": "En Attente",
+    "overdue": "En Retard"
   }
+   
 }

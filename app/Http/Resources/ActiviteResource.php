@@ -29,8 +29,8 @@ class ActiviteResource extends JsonResource
             'is_overdue' => $this->is_overdue,
             'days_remaining' => $this->days_remaining,
             'tache_count' => $this->tache_count,
-            'created_at' => $this->created_at->toDateTimeString(),
-            'updated_at' => $this->updated_at->toDateTimeString(),
+            'created_at' => $this->created_at?->toDateTimeString(),
+            'updated_at' => $this->updated_at?->toDateTimeString(),
         ];
     }
 }

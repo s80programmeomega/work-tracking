@@ -1,3 +1,4 @@
+<!-- resources\js\pages\Auth\Signin.vue -->
 <template>
     <FullScreenLayout>
         <div class="relative p-6 bg-white z-1 dark:bg-gray-900 sm:p-0">
@@ -13,10 +14,10 @@
                         <div>
                             <!-- En-tête -->
                             <div class="mb-5 sm:mb-8">
-                                <h1
+                                <h2
                                     class="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
                                     {{ $t('auth.signin_title') }}
-                                </h1>
+                                </h2>
                                 <p class="text-sm text-gray-500 dark:text-gray-400">
                                     {{ $t('auth.signin_description') }}
                                 </p>
@@ -24,7 +25,7 @@
 
                             <!-- Boutons de connexion sociale -->
                             <div>
-                                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5">
+                                <div class="grid grid-cols-1 gap-3 sm:grid-cols-1 sm:gap-5">
                                     <button
                                         class="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
                                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
@@ -45,16 +46,7 @@
                                         </svg>
                                         {{ $t('auth.signin_with_google') }}
                                     </button>
-                                    <button
-                                        class="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
-                                        <svg width="21" class="fill-current" height="20" viewBox="0 0 21 20" fill="none"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <!-- Icône X/Twitter -->
-                                            <path
-                                                d="M15.6705 1.875H18.4272L12.4047 8.75833L19.4897 18.125H13.9422L9.59717 12.4442L4.62554 18.125H1.86721L8.30887 10.7625L1.51221 1.875H7.20054L11.128 7.0675L15.6705 1.875ZM14.703 16.475H16.2305L6.37054 3.43833H4.73137L14.703 16.475Z" />
-                                        </svg>
-                                        {{ $t('auth.signin_with_x') }}
-                                    </button>
+                                    
                                 </div>
 
                                 <!-- Séparateur -->
@@ -144,16 +136,12 @@
                                                                 : 'bg-transparent border-gray-300 dark:border-gray-700'
                                                             "
                                                             class="mr-3 flex h-5 w-5 items-center justify-center rounded-md border-[1.25px]">
-                                                            <span :class="form.remember
-                                                                    ? ''
-                                                                    : 'opacity-0'
-                                                                ">
+                                                            <span :class="form.remember ? '' : 'opacity-0' ">
                                                                 <svg width="14" height="14" viewBox="0 0 14 14"
                                                                     fill="none" xmlns="http://www.w3.org/2000/svg">
                                                                     <path d="M11.6666 3.5L5.24992 9.91667L2.33325 7"
                                                                         stroke="white" stroke-width="1.94437"
-                                                                        stroke-linecap="round"
-                                                                        stroke-linejoin="round" />
+                                                                        stroke-linecap="round" stroke-linejoin="round" />
                                                                 </svg>
                                                             </span>
                                                         </div>
@@ -343,6 +331,11 @@ const handleSubmit = async () => {
     authStore.error = null;
 
     try {
+        // Test direct de l'API
+        const testResponse = await fetch('/sanctum/csrf-cookie', {
+            credentials: 'include'
+        });
+        console.log('✅ CSRF Cookie test:', testResponse.status);
         // Appeler l'action de connexion du store
         await authStore.login({
             email: form.email,

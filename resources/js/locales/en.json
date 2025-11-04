@@ -21,8 +21,29 @@
     "signin_with_x": "Sign in with X",
     "invalid_credentials": "Invalid email or password",
     "login_failed": "Login failed",
-    "email_placeholder": "your@email.com",
-    "password_placeholder": "Enter your password"
+    "email_placeholder": "your email ",
+    "password_placeholder": "Enter your password",
+
+    "signup_title": "Create your account",
+    "signup_description": "Enter your information to create your account!",
+    "signup_button": "Sign Up",
+    "signing_up": "Signing up...",
+    "signup_with_google": "Sign up with Google",
+    "first_name": "First Name",
+    "last_name": "Last Name",
+    "first_name_placeholder": "Your first name",
+    "last_name_placeholder": "Your last name",
+    "confirm_password": "Confirm Password",
+    "confirm_password_placeholder": "Confirm your password",
+    "already_have_account": "Already have an account?",
+    "terms_text_1": "By creating an account means you agree to the",
+    "terms_text_2": "Terms and Conditions",
+    "terms_text_3": "and our",
+    "terms_text_4": "Privacy Policy",
+    "terms_required": "You must agree to the terms and conditions",
+    "password_mismatch": "Password confirmation does not match",
+    "registration_failed": "Registration failed",
+    "name": "Full Name"
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -69,11 +90,113 @@
     "cancel": "Cancel",
     "delete": "Delete",
     "edit": "Edit",
-    "create": "Create",
-    "loading": "Loading...",
-    "error": "Error",
-    "success": "Success",
+    "create": "Create", 
     "warning": "Warning",
-    "info": "Information"
+    "info": "Information",
+
+ 
+    "view": "View",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "filter": "Filter",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Operation successful",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "active": "Active",
+    "archived": "Archived",
+    "settings": "Settings"
+  },
+  "workspaces": {
+    "title": "My Workspaces",
+    "subtitle": "Manage your workspaces and projects",
+    "create": "New Workspace",
+    "create_title": "Create a new workspace",
+    "create_subtitle": "Organize your projects in a dedicated workspace",
+    "edit_title": "Edit workspace",
+    "no_description": "No description",
+    "projects": "Projects",
+    "members": "Members",
+    "search": "Search workspace...",
+    "empty": {
+      "title": "No workspaces",
+      "description": "Create your first workspace to organize your projects and collaborate with your team"
+    },
+    "filter": {
+      "all": "All statuses",
+      "active": "Active",
+      "archived": "Archived"
+    },
+    "status": {
+      "active": "Active",
+      "archived": "Archived"
+    },
+    "form": {
+      "name": "Workspace name",
+      "name_placeholder": "Ex: Company XYZ - 2024 Projects",
+      "name_required": "Workspace name is required",
+      "description": "Description",
+      "description_placeholder": "Describe the purpose of this workspace...",
+      "logo": "Workspace logo",
+      "logo_choose": "Choose logo",
+      "logo_remove": "Remove",
+      "logo_format": "Recommended format: PNG or JPG, max 2 MB",
+      "settings": "Settings",
+      "visibility": "Default project visibility",
+      "visibility_public": "Public - Visible to all members",
+      "visibility_team": "Team - Visible to workspace members",
+      "visibility_private": "Private - Visible only to project members",
+      "permissions_title": "Member permissions",
+      "can_create_projects": "Create projects",
+      "can_create_projects_desc": "Members can create new projects",
+      "can_invite": "Invite members",
+      "can_invite_desc": "Members can invite other users",
+      "require_validation": "Task validation required",
+      "require_validation_desc": "New tasks require validation"
+    },
+    "details": {
+      "overview": "Overview",
+      "projects": "Projects",
+      "members": "Members",
+      "settings": "Settings",
+      "stats": {
+        "total_projects": "Total Projects",
+        "active_projects": "Active Projects",
+        "total_members": "Members",
+        "completion_rate": "Completion Rate"
+      }
+    },
+    "members_management": {
+      "title": "Members Management",
+      "add_member": "Add member",
+      "role": "Role",
+      "permissions": "Permissions",
+      "invited_at": "Invited on",
+      "actions": "Actions",
+      "roles": {
+        "owner": "Owner",
+        "admin": "Administrator",
+        "member": "Member",
+        "viewer": "Viewer"
+      }
+    },
+    "actions": {
+      "archive": "Archive",
+      "unarchive": "Restore",
+      "duplicate": "Duplicate",
+      "transfer": "Transfer ownership",
+      "delete": "Delete"
+    },
+    "messages": {
+      "created": "Workspace created successfully",
+      "updated": "Workspace updated successfully",
+      "deleted": "Workspace deleted successfully",
+      "archived": "Workspace archived successfully",
+      "unarchived": "Workspace restored successfully"
+    }
   }
 }

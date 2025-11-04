@@ -8,24 +8,137 @@ const router = createRouter({
     return savedPosition || { left: 0, top: 0 }
   },
   routes: [
+    // ==========================================
+    // DASHBOARD
+    // ==========================================
     {
       path: '/',
-      name: 'Ecommerce',
+      name: 'Dashboard',
       component: () => import('../pages/Ecommerce.vue'),
       meta: {
-        title: 'eCommerce Dashboard',
+        title: 'Dashboard',
+        requiresAuth: true,
+      },
+    },
+    
+    
+    // ==========================================
+    // WORKSPACES
+    // ==========================================
+    {
+      path: '/workspaces',
+      name: 'workspaces.index',
+      component: () => import('../pages/workspaces/Index.vue'),
+      meta: {
+        title: 'Mes Workspaces',
         requiresAuth: true,
       },
     },
     {
-      path: '/calendar',
-      name: 'Calendar',
-      component: () => import('../pages/Others/Calendar.vue'),
+      path: '/workspaces/create',
+      name: 'workspaces.create',
+      component: () => import('../pages/workspaces/Create.vue'),
       meta: {
-        title: 'Calendar',
+        title: 'Créer un Workspace',
         requiresAuth: true,
       },
     },
+    {
+      path: '/workspaces/:id',
+      name: 'workspaces.show',
+      component: () => import('../pages/workspaces/Show.vue'),
+      meta: {
+        title: 'Détails du Workspace',
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/workspaces/:id/edit',
+      name: 'workspaces.edit',
+      component: () => import('../pages/workspaces/Edit.vue'),
+      meta: {
+        title: 'Modifier le Workspace',
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/workspaces/:id/settings',
+      name: 'workspaces.settings',
+      component: () => import('../pages/workspaces/Settings.vue'),
+      meta: {
+        title: 'Paramètres du Workspace',
+        requiresAuth: true,
+      },
+    },
+    
+ // ==========================================
+    // PROJETS
+    // ==========================================
+    {
+      path: '/projets',
+      name: 'projets.index',
+      component: () => import('../pages/Projets.vue'),
+      meta: {
+        title: 'Tous les Projets',
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/projets/mes-projets',
+      name: 'projets.my',
+      component: () => import('../pages/projets/MyProjects.vue'),
+      meta: {
+        title: 'Mes Projets',
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/projets/archives',
+      name: 'projets.archived',
+      component: () => import('../pages/projets/Archived.vue'),
+      meta: {
+        title: 'Projets Archivés',
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/projets/create',
+      name: 'projets.create',
+      component: () => import('../pages/projets/Create.vue'),
+      meta: {
+        title: 'Créer un Projet',
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/projets/:id',
+      name: 'projets.show',
+      component: () => import('../pages/projets/Show.vue'),
+      meta: {
+        title: 'Détails du Projet',
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/projets/:id/edit',
+      name: 'projets.edit',
+      component: () => import('../pages/projets/Edit.vue'),
+      meta: {
+        title: 'Modifier le Projet',
+        requiresAuth: true,
+      },
+    },
+
+    //  {
+    //   path: '/projets',
+    //   name: 'Projets',
+    //   component: () => import('../pages/Projets.vue'),
+    //   meta: {
+    //     title: 'Gestion des Projets',
+    //     requiresAuth: true,
+    //   },
+    // },
+
     {
       path: '/profile',
       name: 'Profile',
@@ -133,15 +246,7 @@ const router = createRouter({
       },
     },
 
-    {
-      path: '/projets',
-      name: 'Projets',
-      component: () => import('../pages/Projets.vue'),
-      meta: {
-        title: 'Gestion des Projets',
-        requiresAuth: true,
-      },
-    },
+   
 
     {
       path: '/activites',

@@ -227,3 +227,10 @@ Une fois l'authentification fonctionnelle, vous pouvez :
 - Activez HTTPS en production
 - Configurez Redis pour les sessions et le cache
 - Mettez en place une stratégie de backup de la base de données
+
+
+🧠 4️⃣ Résumé clair
+Contexte	allowed_origins	supports_credentials	Explication
+Local	['http://localhost:8000', 'http://127.0.0.1:8000']	true	Permet à Vue (localhost) d’accéder à Laravel (127.0.0.1)
+Production	['https://app.worktracking.com']	true	Permet uniquement au vrai domaine front d’accéder à l’API
+Jamais faire	['*'] avec supports_credentials: true	❌	Bloqué par le navigateur, dangereux en sécurité
