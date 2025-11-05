@@ -5,12 +5,17 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreWorkspaceRequest;
 use App\Http\Requests\UpdateWorkspaceRequest;
+use App\Http\Resources\UserResource;
 use App\Models\Workspace;
 use App\Models\User;
 use App\Models\WorkspaceInvitation;
+use App\Notifications\WorkspaceInvitationNotification;
+use App\Notifications\WorkspaceMemberAddedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -149,14 +154,14 @@ class WorkspaceController extends Controller
   {
     $user = $request->user();
     $workspaces = Workspace::accessibleBy($user->id)
-        ->withCount('projets', 'members')
-        ->get();
+      ->withCount('projets', 'members')
+      ->get();
 
     return response()->json(['data' => $workspaces]);
   }
 
   /**
-   * Invite members to workspace
+   * Invite members to workspace - VERSION CORRIGÉE
    */
   public function inviteMembers(Request $request, Workspace $workspace)
   {
@@ -165,8 +170,8 @@ class WorkspaceController extends Controller
     $request->validate([
       'emails' => 'required|array|min:1',
       'emails.*' => 'required|email',
-      'role' => 'required|in:admin,member,viewer',
-      'message' => 'nullable|string',
+      'role' => 'required|in:admin,manager,member,viewer',
+      'message' => 'nullable|string|max:500',
       'permissions' => 'nullable|array',
       'permissions.can_create_projects' => 'boolean',
       'permissions.can_invite_members' => 'boolean',
@@ -176,6 +181,7 @@ class WorkspaceController extends Controller
 
     $invitations = [];
     $errors = [];
+    $sendEmail = $request->input('send_email', true);
 
     foreach ($request->emails as $email) {
       try {
@@ -192,22 +198,7 @@ class WorkspaceController extends Controller
             continue;
           }
 
-          // Add directly as member
-          $workspace->members()->attach($user->id, [
-            'role' => $request->role,
-            'can_create_projects' => $request->input('permissions.can_create_projects', false),
-            'can_invite_members' => $request->input('permissions.can_invite_members', false),
-            'can_manage_settings' => $request->input('permissions.can_manage_settings', false),
-            'invited_at' => now(),
-          ]);
-
-          $invitations[] = [
-            'email' => $email,
-            'status' => 'added',
-            'user_id' => $user->id,
-          ];
-        } else {
-          // Create invitation
+          // ✅ Créer une invitation même pour utilisateur existant
           $invitation = WorkspaceInvitation::create([
             'workspace_id' => $workspace->id,
             'email' => $email,
@@ -220,23 +211,75 @@ class WorkspaceController extends Controller
               'can_invite_members' => $request->input('permissions.can_invite_members', false),
               'can_manage_settings' => $request->input('permissions.can_manage_settings', false),
             ],
+            'status' => 'pending',
             'expires_at' => now()->addDays(7),
           ]);
 
-          // Send email if requested
-          if ($request->input('send_email', true)) {
-            // TODO: Send invitation email
-            // Notification::route('mail', $email)
-            //     ->notify(new WorkspaceInvitationNotification($invitation));
+          // ✅ Envoyer l'email d'invitation
+          if ($sendEmail) {
+            try {
+              $user->notify(new WorkspaceInvitationNotification($invitation));
+            } catch (\Exception $e) {
+              Log::error('Failed to send invitation email', [
+                'email' => $email,
+                'error' => $e->getMessage()
+              ]);
+            }
+          }
+
+          $invitations[] = [
+            'email' => $email,
+            'status' => 'invited',
+            'user_id' => $user->id,
+            'user_name' => $user->nom,
+            'invitation_id' => $invitation->id,
+            'expires_at' => $invitation->expires_at->toISOString(),
+          ];
+        } else {
+          // Create invitation for non-existing user
+          $invitation = WorkspaceInvitation::create([
+            'workspace_id' => $workspace->id,
+            'email' => $email,
+            'role' => $request->role,
+            'token' => Str::random(64),
+            'invited_by' => auth()->id(),
+            'message' => $request->message,
+            'permissions' => [
+              'can_create_projects' => $request->input('permissions.can_create_projects', false),
+              'can_invite_members' => $request->input('permissions.can_invite_members', false),
+              'can_manage_settings' => $request->input('permissions.can_manage_settings', false),
+            ],
+            'status' => 'pending',
+            'expires_at' => now()->addDays(7),
+          ]);
+
+          // Send invitation email
+          if ($sendEmail) {
+            try {
+              Notification::route('mail', $email)
+                ->notify(new WorkspaceInvitationNotification($invitation));
+            } catch (\Exception $e) {
+              Log::error('Failed to send invitation email', [
+                'email' => $email,
+                'error' => $e->getMessage()
+              ]);
+            }
           }
 
           $invitations[] = [
             'email' => $email,
             'status' => 'invited',
             'invitation_id' => $invitation->id,
+            'expires_at' => $invitation->expires_at->toISOString(),
           ];
         }
       } catch (\Exception $e) {
+        Log::error('Error inviting member', [
+          'email' => $email,
+          'workspace_id' => $workspace->id,
+          'error' => $e->getMessage()
+        ]);
+
         $errors[] = [
           'email' => $email,
           'message' => 'Erreur lors de l\'invitation: ' . $e->getMessage()
@@ -245,10 +288,244 @@ class WorkspaceController extends Controller
     }
 
     return response()->json([
-      'message' => 'Invitations envoyées avec succès',
-      'invitations' => $invitations,
-      'errors' => $errors,
-    ]);
+      'message' => count($invitations) > 0
+        ? 'Invitations envoyées avec succès' : 'Aucune invitation n\'a pu être envoyée',
+      'data' => [
+        'invitations' => $invitations,
+        'errors' => $errors,
+        'success_count' => count($invitations),
+        'error_count' => count($errors),
+      ],
+    ], count($invitations) > 0 ? 200 : 422);
+  }
+
+  /**
+   * ✅ NOUVEAU : Accepter une invitation
+   */
+  public function acceptInvitation(Request $request, string $token)
+  {
+    DB::beginTransaction();
+
+    try {
+      // Trouver l'invitation
+      $invitation = WorkspaceInvitation::where('token', $token)
+        ->where('status', 'pending')
+        ->where('expires_at', '>', now())
+        ->firstOrFail();
+
+      // Charger le workspace
+      $workspace = $invitation->workspace;
+
+      if (!$workspace->is_active) {
+        throw new \Exception('Ce workspace n\'est plus actif');
+      }
+
+      // Vérifier si l'utilisateur existe déjà
+      $user = User::where('email', $invitation->email)->first();
+
+      if ($user) {
+        // ✅ Utilisateur existant - Accepter l'invitation directement
+        return $this->acceptInvitationForExistingUser($invitation, $user);
+      } else {
+        // ✅ Nouvel utilisateur - Vérifier qu'il a créé son compte
+        $userData = $request->validate([
+          'prenom' => 'required|string|max:255',
+          'nom' => 'required|string|max:255',
+          'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        return $this->acceptInvitationForNewUser($invitation, $userData);
+      }
+
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+      return response()->json([
+        'message' => 'Invitation invalide ou expirée'
+      ], 404);
+    } catch (\Exception $e) {
+      DB::rollBack();
+      Log::error('Error accepting invitation', [
+        'token' => $token,
+        'error' => $e->getMessage()
+      ]);
+
+      return response()->json([
+        'message' => $e->getMessage()
+      ], 400);
+    }
+  }
+
+  /**
+   * ✅ Accepter l'invitation pour un utilisateur existant
+   */
+  private function acceptInvitationForExistingUser(WorkspaceInvitation $invitation, User $user)
+  {
+    try {
+      $workspace = $invitation->workspace;
+
+      // Vérifier si déjà membre
+      if ($workspace->members()->where('user_id', $user->id)->exists()) {
+        DB::rollBack();
+        return response()->json([
+          'message' => 'Vous êtes déjà membre de ce workspace'
+        ], 400);
+      }
+
+      // Ajouter comme membre
+      $workspace->members()->attach($user->id, [
+        'role' => $invitation->role,
+        'permissions' => json_encode($invitation->permissions ?? []),
+        'invited_at' => now(),
+        'invited_by' => $invitation->invited_by,
+      ]);
+
+      // Mettre à jour l'invitation
+      $invitation->update([
+        'status' => 'accepted',
+        'accepted_at' => now(),
+      ]);
+
+      // Log d'activité
+      activity()
+        ->causedBy($user)
+        ->performedOn($workspace)
+        ->withProperties([
+          'role' => $invitation->role,
+          'invited_by' => $invitation->invited_by
+        ])
+        ->log('User accepted workspace invitation');
+
+      DB::commit();
+
+      return response()->json([
+        'message' => 'Invitation acceptée avec succès',
+        'data' => [
+          'workspace' => $workspace,
+          'role' => $invitation->role,
+          'redirect_to' => "/workspaces/{$workspace->id}"
+        ]
+      ]);
+
+    } catch (\Exception $e) {
+      DB::rollBack();
+      throw $e;
+    }
+  }
+
+  /**
+   * ✅ Accepter l'invitation pour un nouvel utilisateur
+   */
+  private function acceptInvitationForNewUser(WorkspaceInvitation $invitation, array $userData)
+  {
+    try {
+      $workspace = $invitation->workspace;
+
+      // Créer le nouvel utilisateur
+      $user = User::create([
+        'nom' => $userData['nom'],
+        'prenom' => $userData['prenom'],
+        'nom_complet' => trim("{$userData['prenom']} {$userData['nom']}"),
+        'email' => $invitation->email,
+        'password' => Hash::make($userData['password']),
+        'is_active' => true,
+        'email_verified_at' => now(), // Vérification automatique via invitation
+      ]);
+
+      // Assigner le rôle par défaut
+      $user->assignRole('member');
+
+      // Ajouter au workspace invité
+      $workspace->members()->attach($user->id, [
+        'role' => $invitation->role,
+        'permissions' => json_encode($invitation->permissions ?? []),
+        'invited_at' => now(),
+        'invited_by' => $invitation->invited_by,
+      ]);
+
+      // Définir ce workspace comme courant
+      $user->update(['current_workspace_id' => $workspace->id]);
+
+      // Mettre à jour l'invitation
+      $invitation->update([
+        'status' => 'accepted',
+        'accepted_at' => now(),
+      ]);
+
+      // Générer le token
+      $token = $user->createToken('auth_token', ['*'])->plainTextToken;
+
+      // Log d'activité
+      activity()
+        ->causedBy($user)
+        ->performedOn($workspace)
+        ->withProperties([
+          'registered_via_invitation' => true,
+          'role' => $invitation->role,
+          'invited_by' => $invitation->invited_by
+        ])
+        ->log('User registered via invitation and joined workspace');
+
+      DB::commit();
+
+      return response()->json([
+        'message' => 'Compte créé et invitation acceptée avec succès',
+        'data' => [
+          'user' => new UserResource($user),
+          'token' => $token,
+          'token_type' => 'Bearer',
+          'workspace' => $workspace,
+          'redirect_to' => "/workspaces/{$workspace->id}"
+        ]
+      ], 201);
+
+    } catch (\Exception $e) {
+      DB::rollBack();
+      throw $e;
+    }
+  }
+
+  /**
+   * ✅ NOUVEAU : Vérifier une invitation (avant acceptation)
+   */
+  public function checkInvitation(string $token)
+  {
+    try {
+      $invitation = WorkspaceInvitation::where('token', $token)
+        ->where('status', 'pending')
+        ->where('expires_at', '>', now())
+        ->with(['workspace', 'invitedBy'])
+        ->firstOrFail();
+
+      // Vérifier si l'utilisateur existe déjà
+      $userExists = User::where('email', $invitation->email)->exists();
+
+      return response()->json([
+        'data' => [
+          'invitation' => [
+            'email' => $invitation->email,
+            'role' => $invitation->role,
+            'message' => $invitation->message,
+            'expires_at' => $invitation->expires_at->toISOString(),
+            'workspace' => [
+              'id' => $invitation->workspace->id,
+              'nom' => $invitation->workspace->nom,
+              'description' => $invitation->workspace->description,
+              'logo_url' => $invitation->workspace->logo_url,
+            ],
+            'inviter' => [
+              'nom' => $invitation->invitedBy->nom,
+              'email' => $invitation->invitedBy->email,
+            ]
+          ],
+          'user_exists' => $userExists,
+          'requires_registration' => !$userExists,
+        ]
+      ]);
+
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+      return response()->json([
+        'message' => 'Invitation invalide ou expirée'
+      ], 404);
+    }
   }
 
   /**
@@ -326,36 +603,38 @@ class WorkspaceController extends Controller
    */
   public function members(Request $request, Workspace $workspace)
   {
+    $this->authorize('viewMembers', $workspace);
+
     if (!$this->userHasAccess($request->user(), $workspace)) {
       return response()->json([
         'message' => 'Accès non autorisé'
       ], 403);
     }
 
-   $members = $workspace->members()
-        ->withPivot(['role', 'permissions', 'invited_at', 'invited_by'])
-        ->get()
-        ->map(function ($member) {
-            // ✅ Corriger le format des permissions
-            $permissions = $member->pivot->permissions;
-            
-            // Si c'est une chaîne JSON, la décoder
-            if (is_string($permissions)) {
-                $decoded = json_decode($permissions, true);
-                $member->pivot->permissions = is_array($decoded) ? $decoded : [];
-            }
-            
-            // Si c'est "all", convertir en permissions complètes
-            if ($member->pivot->permissions === ['all']) {
-                $member->pivot->permissions = [
-                    'can_create_projects' => true,
-                    'can_invite_members' => true,
-                    'can_manage_settings' => true,
-                ];
-            }
-            
-            return $member;
-        });
+    $members = $workspace->members()
+      ->withPivot(['role', 'permissions', 'invited_at', 'invited_by'])
+      ->get()
+      ->map(function ($member) {
+        // ✅ Corriger le format des permissions
+        $permissions = $member->pivot->permissions;
+
+        // Si c'est une chaîne JSON, la décoder
+        if (is_string($permissions)) {
+          $decoded = json_decode($permissions, true);
+          $member->pivot->permissions = is_array($decoded) ? $decoded : [];
+        }
+
+        // Si c'est "all", convertir en permissions complètes
+        if ($member->pivot->permissions === ['all']) {
+          $member->pivot->permissions = [
+            'can_create_projects' => true,
+            'can_invite_members' => true,
+            'can_manage_settings' => true,
+          ];
+        }
+
+        return $member;
+      });
 
     return response()->json([
       'data' => $members,

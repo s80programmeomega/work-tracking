@@ -423,7 +423,10 @@ const {
   fetchInvitations,
   removeMember: removeMemberService,
   resendInvitation: resendInvitationService,
-  cancelInvitation: cancelInvitationService
+  cancelInvitation: cancelInvitationService,
+    getRoleLabel,
+  getRoleColor,
+  canManageMembers
 } = useWorkspace()
 
 const members = ref([])
@@ -441,8 +444,7 @@ const showDetailsModal = ref(false)
 const showRemoveModal = ref(false)
 const selectedMember = ref(null)
 const memberToRemove = ref(null)
-
-const canManageMembers = ref(true) // TODO: Check permissions
+ 
 
 const tabs = computed(() => [
   { id: 'members', label: 'Membres', icon: UsersIcon, count: members.value.length },
@@ -479,27 +481,7 @@ const getInitials = (name) => {
     .toUpperCase()
     .slice(0, 2)
 }
-
-const getRoleColor = (role) => {
-  const colors = {
-    owner: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
-    admin: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-    member: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-    viewer: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-  }
-  return colors[role] || colors.viewer
-}
-
-const getRoleLabel = (role) => {
-  const labels = {
-    owner: 'Propriétaire',
-    admin: 'Administrateur',
-    member: 'Membre',
-    viewer: 'Observateur'
-  }
-  return labels[role] || role
-}
-
+  
 const formatDate = (date) => {
   if (!date) return 'Jamais'
   return new Date(date).toLocaleDateString('fr-FR', {
@@ -557,6 +539,7 @@ const cancelInvitation = async (invitation) => {
 const handleMemberInvited = () => {
   showInviteModal.value = false
   loadData()
+  emit('member-updated')
 }
 
 const handleMemberUpdated = () => {
@@ -581,18 +564,11 @@ const loadData = async () => {
       total_members: members.value.length,
       active_members: members.value.filter(m => m.is_active).length,
       pending_invitations: invitations.value.length,
-      admin_count: members.value.filter(m => ['owner', 'admin'].includes(m.pivot?.role)).length
+      admin_count: members.value.filter(m => ['owner', 'admin','manager'].includes(m.pivot?.role)).length
     }
 
-    // Mock recent activities
-    recentActivities.value = [
-      {
-        id: 1,
-        user: members.value[0],
-        description: 'a créé le projet "Système RH"',
-        created_at: new Date()
-      }
-    ]
+    // TODO: Charger les activités récentes depuis l'API
+    recentActivities.value = [] // À implémenter avec notre endpoint d'activités
   } catch (error) {
     console.error('Error loading data:', error)
   }
@@ -600,6 +576,8 @@ const loadData = async () => {
 
 onMounted(() => {
   loadData()
+  // TODO: Récupérer l'utilisateur courant et vérifier les permissions
+  // userCanManageMembers.value = canManageMembers(workspace, currentUser)
 })
 
 watch(() => props.workspaceId, () => {
