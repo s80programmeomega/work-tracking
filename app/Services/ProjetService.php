@@ -392,7 +392,7 @@ class ProjetService
                 $projet->updateProgression();
             }
 
-            return $projet->load(['responsable', 'members', 'tags', 'workspace']);
+            return $projet->load(['responsable', 'members', 'tags', 'workspace','activites']);
         });
     }
 

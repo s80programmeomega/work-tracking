@@ -476,22 +476,21 @@
     </div>
 
     <!-- Modal Create/Edit Projet -->
-    <ProjetFormModal
+    <!-- <ProjetFormModal
       v-if="showFormModal"
       :projet="selectedProjet"
       @close="closeFormModal"
       @saved="handleProjetSaved"
-    />
+    /> -->
 
     <!-- Project Form Modal -->
-      <!-- <ProjetFormModal 
-          v-if="showProjectModal" 
-          :workspace-id="workspace.id"
-          :workspace="workspace"
-          :can-create="canCreateProjects"
-          @close="closeProjectModal" 
-          @saved="handleProjectSaved" 
-      /> -->
+     <ProjetFormModal
+      v-if="showFormModal"
+      :projet="selectedProjet"
+      :workspace-id="workspaceId"  
+      @close="closeFormModal"
+      @saved="handleProjetSaved"
+    />
         
     <!-- Modal Confirmation Delete -->
     <ConfirmModal
