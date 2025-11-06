@@ -70,18 +70,22 @@ class WorkspaceInvitationNotification extends Notification implements ShouldQueu
      */
     public function toArray($notifiable): array
     {
-        return [
+           return [
             'type' => 'workspace_invitation',
             'title' => 'Nouvelle invitation workspace',
             'message' => "{$this->invitation->invitedBy->nom} vous invite à rejoindre {$this->invitation->workspace->nom}",
             'workspace_id' => $this->invitation->workspace_id,
             'workspace_name' => $this->invitation->workspace->nom,
+            'workspace_logo' => $this->invitation->workspace->logo_url,
             'inviter_name' => $this->invitation->invitedBy->nom,
+            'inviter_email' => $this->invitation->invitedBy->email,
             'role' => $this->invitation->role,
             'invitation_id' => $this->invitation->id,
-            'token' => $this->invitation->token,
+            'invitation_token' => $this->invitation->token,
+            'invitation_message' => $this->invitation->message,
             'expires_at' => $this->invitation->expires_at->toISOString(),
-            'action_url' => url('/workspaces/accept-invitation/' . $this->invitation->token),
+            'action_url' => '/accept-invitation/' . $this->invitation->token,
+            'is_pending' => $this->invitation->status === 'pending',
         ];
     }
 
