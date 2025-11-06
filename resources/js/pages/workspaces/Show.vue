@@ -377,8 +377,6 @@
                     </div>
                 </div>
             </template>
-
-           
         </div>
     </AdminLayout>
 </template>
