@@ -946,6 +946,8 @@ public function invitationStatistics(Request $request)
       ], 403);
     }
 
+    $user = $request->user();
+
     $projets = $workspace->projets()
       ->with(['responsable:id,nom,avatar', 'members:id,nom,avatar'])
       ->withCount(['activites', 'members'])
@@ -959,6 +961,18 @@ public function invitationStatistics(Request $request)
             ->orWhere('description', 'like', "%{$search}%");
         });
       })
+      // 🔥 NOUVEAU : Filtrer selon les permissions
+        ->where(function ($query) use ($user, $workspace) {
+            // Le propriétaire du workspace voit tous les projets
+            if ($workspace->owner_id === $user->id) {
+                return; // Pas de filtre supplémentaire
+            }
+
+            // Les autres utilisateurs ne voient que les projets où ils sont membres
+            $query->whereHas('members', function ($memberQuery) use ($user) {
+                $memberQuery->where('user_id', $user->id);
+            });
+        })
       ->orderBy('created_at', 'desc')
       ->paginate($request->per_page ?? 15);
 

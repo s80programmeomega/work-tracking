@@ -1,8 +1,8 @@
 <!-- resources/js/components/projets/ProjetList.vue -->
 <template>
   <div class="space-y-6">
-    <!-- Header avec actions -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <!-- Header avec actions - Conditionnel -->
+    <div v-if="showHeader" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
           Projets
@@ -14,15 +14,14 @@
       
       <button
         @click="openCreateModal"
-        class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
-      >
+        class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors" >
         <PlusIcon class="w-5 h-5" />
         Nouveau projet
       </button>
     </div>
 
-    <!-- Filtres et recherche -->
-    <div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 space-y-4">
+   <!-- Filtres et recherche - Conditionnel -->
+    <div v-if="showFilters" class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 space-y-4">
       <!-- Barre de recherche -->
       <div class="relative">
         <SearchIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -131,10 +130,8 @@
     </div>
 
     <!-- Empty state -->
-    <div
-      v-else-if="filteredProjets.length === 0"
-      class="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
-    >
+    <div v-else-if="filteredProjets.length === 0"
+      class="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700" >
       <FolderOpenIcon class="mx-auto h-12 w-12 text-gray-400" />
       <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">
         Aucun projet trouvé
@@ -142,11 +139,9 @@
       <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
         {{ searchTerm || hasActiveFilters ? 'Essayez de modifier vos critères de recherche' : 'Commencez par créer votre premier projet' }}
       </p>
-      <button
-        v-if="!searchTerm && !hasActiveFilters"
+      <button v-if="!searchTerm && !hasActiveFilters"
         @click="openCreateModal"
-        class="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
-      >
+        class="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors" >
         <PlusIcon class="w-5 h-5" />
         Créer un projet
       </button>
@@ -194,8 +189,7 @@
               <div class="relative">
                 <button
                   @click.stop="toggleMenu(projet.id)"
-                  class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
+                  class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700" >
                   <MoreVerticalIcon class="w-5 h-5 text-gray-500" />
                 </button>
                 
@@ -203,8 +197,7 @@
                 <div
                   v-if="activeMenuId === projet.id"
                   v-click-outside="() => activeMenuId = null"
-                  class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-10"
-                >
+                  class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-10" >
                   <button
                     @click.stop="editProjet(projet)"
                     class="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-t-lg" >
@@ -236,8 +229,7 @@
                   </button>
                   <button
                     @click.stop="deleteProjet(projet)"
-                    class="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-b-lg"
-                  >
+                    class="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-b-lg" >
                     <TrashIcon class="w-4 h-4" />
                     Supprimer
                   </button>
@@ -491,6 +483,16 @@
       @saved="handleProjetSaved"
     />
 
+    <!-- Project Form Modal -->
+      <!-- <ProjetFormModal 
+          v-if="showProjectModal" 
+          :workspace-id="workspace.id"
+          :workspace="workspace"
+          :can-create="canCreateProjects"
+          @close="closeProjectModal" 
+          @saved="handleProjectSaved" 
+      /> -->
+        
     <!-- Modal Confirmation Delete -->
     <ConfirmModal
       v-if="showDeleteModal"
@@ -530,6 +532,26 @@ import ProjetFormModal from './ProjetFormModal.vue'
 import ConfirmModal from '@/components/common/ConfirmModal.vue'
 
 const emit = defineEmits(['view-projet'])
+
+// Props
+const props = defineProps({
+  workspaceId: {
+    type: [Number, String],
+    default: null
+  },
+  limit: {
+    type: Number,
+    default: null
+  },
+  showHeader: {
+    type: Boolean,
+    default: true
+  },
+  showFilters: {
+    type: Boolean,
+    default: true
+  }
+})
 
 const {
   loading,
@@ -600,6 +622,21 @@ const filteredProjets = computed(() => {
   }
 
   return result
+})
+
+// Méthode fetchProjets exposée
+const fetchProjetsList = async () => {
+  const filters = {
+    workspace_id: props.workspaceId
+  }
+  await fetchProjets(filters)
+}
+
+// Watch workspaceId changes
+watch(() => props.workspaceId, (newWorkspaceId) => {
+  if (newWorkspaceId) {
+    fetchProjetsList()
+  }
 })
 
 // Methods
@@ -747,7 +784,12 @@ const getInitials = (name) => {
 
 // Lifecycle
 onMounted(() => {
-  fetchProjets()
+  fetchProjetsList()
+})
+
+// Exposer la méthode fetchProjets
+defineExpose({
+  fetchProjets: fetchProjetsList
 })
 
 // Click outside directive
