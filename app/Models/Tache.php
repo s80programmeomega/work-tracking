@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Tache extends Model
@@ -155,8 +156,8 @@ class Tache extends Model
     public function isOverdue(): bool
     {
         return $this->echeance &&
-               $this->echeance->isPast() &&
-               $this->statut !== TacheStatut::TERMINE;
+            $this->echeance->isPast() &&
+            $this->statut !== TacheStatut::TERMINE;
     }
 
     /**
@@ -281,4 +282,37 @@ class Tache extends Model
 
         return $this;
     }
+
+
+    // Ajouter dans Tache.php
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(Tache::class, 'parent_tache_id');
+    }
+
+    public function sousTaches(): HasMany
+    {
+        return $this->hasMany(Tache::class, 'parent_tache_id');
+    }
+
+    public function isSubtask(): bool
+    {
+        return !is_null($this->parent_tache_id);
+    }
+
+    // Calcul automatique de progression basé sur sous-tâches
+    public function calculateProgressionFromSubtasks(): int
+    {
+        $subtasks = $this->sousTaches;
+
+        if ($subtasks->isEmpty()) {
+            return $this->taux_realisation;
+        }
+
+        $total = $subtasks->count();
+        $completed = $subtasks->where('statut', TacheStatut::TERMINE)->count();
+
+        return (int) round(($completed / $total) * 100);
+    }
+
 }

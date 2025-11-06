@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Models\Workspace;
 use App\Enums\Role;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -10,30 +11,63 @@ use Illuminate\Support\Facades\DB;
 
 class AuthService
 {
+    /**
+     * Enregistre un nouvel utilisateur et crée son workspace par défaut
+     */
     public function register(array $data): User
     {
         return DB::transaction(function () use ($data) {
+            // 🔹 Construire le nom complet à partir de firstname et lastname
+            $nom = trim(
+                ($data['prenom'] ?? '') . ' ' . ($data['nom'] ?? '')
+            );
+            // 1. Création de l'utilisateur
             $user = User::create([
-                'name' => $data['name'],
+                'nom_complet' => $nom,
+                'nom' => $data['nom'],
+                'prenom' => $data['prenom'],
                 'email' => $data['email'],
                 'password' => Hash::make($data['password']),
                 'is_active' => true,
             ]);
 
-            // Assign default role
-            $defaultRole = $data['role'] ?? Role::CADRE->value;
+            // ✅ 2. Rôle par défaut
+            $defaultRole = $data['role'] ?? Role::ADMIN->value;
             $user->assignRole($defaultRole);
 
-            // Log activity
+            // ✅ 3. Création automatique du workspace personnel
+            $workspace = Workspace::create([
+                'nom' => "{$user->nom} Workspace",
+                'description' => 'Espace de travail personnel de ' . $user->nom,
+                'owner_id' => $user->id,
+                'is_active' => true,
+            ]);
+
+            // ✅ 4. Ajout dans la table pivot (membre propriétaire)
+            $workspace->members()->attach($user->id, [
+                'role' => 'owner',
+                'permissions' => json_encode(['all']),
+                'invited_at' => now(),
+                'invited_by' => $user->id,
+            ]);
+
+            // ✅ 5. Définir ce workspace comme courant
+            $user->update(['current_workspace_id' => $workspace->id]);
+
+            // ✅ 6. Log d'activité
             activity()
                 ->performedOn($user)
                 ->causedBy($user)
-                ->log('User registered');
+                ->withProperties(['workspace_id' => $workspace->id])
+                ->log('User registered and workspace created');
 
             return $user;
         });
     }
 
+    /**
+     * Authentifie l'utilisateur et gère le workspace courant
+     */
     public function login(array $credentials, bool $remember = false): array
     {
         if (!Auth::attempt($credentials, $remember)) {
@@ -47,40 +81,71 @@ class AuthService
             throw new \Exception('Account is inactive');
         }
 
-        // Update last login
+        // ✅ Mettre à jour les infos de connexion
         $user->update([
             'last_login_at' => now(),
             'last_login_ip' => request()->ip(),
         ]);
 
-        // Create API token
-        $token = $user->createToken('auth_token', ['*'], now()->addDays(7))->plainTextToken;
+        // ✅ Vérifier si un workspace courant existe
+        if (!$user->current_workspace_id) {
+            // Si l'utilisateur est déjà membre d'un workspace
+            $workspace = $user->workspaces()->first();
 
-        // Log activity
+            if (!$workspace) {
+                // Sinon, créer un workspace personnel
+                $workspace = Workspace::create([
+                    'nom' => "{$user->name} Workspace",
+                    'description' => 'Espace de travail personnel de ' . $user->name,
+                    'owner_id' => $user->id,
+                    'is_active' => true,
+                ]);
+
+                // Lier comme membre propriétaire
+                $workspace->members()->attach($user->id, [
+                    'role' => 'owner',
+                    'permissions' => json_encode(['all']),
+                    'invited_at' => now(),
+                    'invited_by' => $user->id,
+                ]);
+            }
+
+            // Mettre à jour le workspace courant
+            $user->update(['current_workspace_id' => $workspace->id]);
+        }
+
+        // ✅ Générer le token Sanctum
+        // $token = $user->createToken('auth_token', ['*'], now()->addDays(7))->plainTextToken;
+        $token = $user->createToken('auth_token', ['*'])->plainTextToken;
+
+        // ✅ Log d'activité
         activity()
             ->performedOn($user)
             ->causedBy($user)
-            ->withProperties(['ip' => request()->ip()])
-            ->log('User logged in');
+            ->withProperties([
+                'workspace_id' => $user->current_workspace_id,
+                'ip' => request()->ip(),
+            ])->log('User logged in');
 
         return [
-            'user' => $user->load('roles', 'permissions'),
+            'user' => $user->load('roles', 'permissions', 'currentWorkspace'),
             'token' => $token,
             'token_type' => 'Bearer',
             'expires_at' => now()->addDays(7)->toISOString(),
         ];
     }
 
+    /**
+     * Déconnexion
+     */
     public function logout(): void
     {
         $user = Auth::user();
 
-        // Revoke current token
-        if ($user->currentAccessToken()) {
+        if ($user && $user->currentAccessToken()) {
             $user->currentAccessToken()->delete();
         }
 
-        // Log activity
         activity()
             ->performedOn($user)
             ->causedBy($user)
@@ -89,16 +154,17 @@ class AuthService
         Auth::guard('web')->logout();
     }
 
+    /**
+     * Rafraîchir le token d’accès
+     */
     public function refreshToken(): array
     {
         $user = Auth::user();
 
-        // Revoke old token
         if ($user->currentAccessToken()) {
             $user->currentAccessToken()->delete();
         }
 
-        // Create new token
         $token = $user->createToken('auth_token', ['*'], now()->addDays(7))->plainTextToken;
 
         return [
@@ -108,6 +174,9 @@ class AuthService
         ];
     }
 
+    /**
+     * Validation de l'adresse e-mail
+     */
     public function verifyEmail(User $user): void
     {
         $user->markEmailAsVerified();

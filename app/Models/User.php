@@ -281,7 +281,8 @@ class User extends Authenticatable
     public function hasRoleLevel(string $role): bool
     {
         $hierarchy = [
-            'super_admin' => 6,
+            'super_admin' => 7,
+            'admin' => 6,
             'manager' => 5,
             'responsable_n1' => 4,
             'responsable_n2' => 3,
@@ -304,6 +305,39 @@ class User extends Authenticatable
 
         return false;
     }
+
+        /**
+     * Vérifie si l'utilisateur est super_admin
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === 'super_admin';
+    }
+
+    /**
+     * Vérifie si l'utilisateur est admin
+     */
+    public function isAdmin(): bool
+    {
+        return in_array($this->role, ['super_admin', 'admin']);
+    }
+
+    /**
+     * Vérifie si l'utilisateur a un rôle spécifique
+     */
+    public function hasRole(string $role): bool
+    {
+        return $this->role === $role;
+    }
+
+    /**
+     * Scope pour les super_admins
+     */
+    public function scopeSuperAdmins($query)
+    {
+        return $query->where('role', 'super_admin');
+    }
+    
 
     public function updateLoginInfo(): void
     {

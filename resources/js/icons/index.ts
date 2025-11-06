@@ -72,6 +72,9 @@ export { default as ShieldIcon } from './ShieldIcon.vue';
 export { default as UserPlusIcon } from './UserPlusIcon.vue';
 export { default as CogIcon } from './CogIcon.vue';
 
+export { default as PencilIcon } from './PencilIcon.vue';
+export { default as CubeIcon } from './CubeIcon.vue';
+
 
 export {
   EyeIcon,

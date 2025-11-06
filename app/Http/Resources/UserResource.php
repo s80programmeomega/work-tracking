@@ -1,4 +1,3 @@
-<!-- app\Http\Resources\UserResource.php -->
 <?php
 
 namespace App\Http\Resources;

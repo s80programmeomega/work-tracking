@@ -105,65 +105,65 @@ export function useWorkspace() {
   /**
    * Update a workspace
    */
-/**
- * Update a workspace (version corrigée)
- */
-const updateWorkspace = async (id, data) => {
-  loading.value = true;
-  error.value = null;
+  /**
+   * Update a workspace (version corrigée)
+   */
+  const updateWorkspace = async (id, data) => {
+    loading.value = true;
+    error.value = null;
 
-  try {
-    let response;
-    
-    // Si c'est FormData, utiliser POST avec _method
-    if (data instanceof FormData) {
-      data.append('_method', 'PUT');
-      
-      // ✅ Debug: Afficher le contenu du FormData
-      console.log('FormData envoyé:');
-      for (let [key, value] of data.entries()) {
-        if (value instanceof File) {
-          console.log(key, ':', value.name, value.type, value.size);
-        } else {
-          console.log(key, ':', value);
+    try {
+      let response;
+
+      // Si c'est FormData, utiliser POST avec _method
+      if (data instanceof FormData) {
+        data.append('_method', 'PUT');
+
+        // ✅ Debug: Afficher le contenu du FormData
+        console.log('FormData envoyé:');
+        for (let [key, value] of data.entries()) {
+          if (value instanceof File) {
+            console.log(key, ':', value.name, value.type, value.size);
+          } else {
+            console.log(key, ':', value);
+          }
         }
+
+        const config = {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        };
+
+        response = await api.post(`/workspaces/${id}`, data, config);
+      } else {
+        // Requête JSON normale
+        response = await api.put(`/workspaces/${id}`, data);
       }
-      
-      const config = {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      };
-      
-      response = await api.post(`/workspaces/${id}`, data, config);
-    } else {
-      // Requête JSON normale
-      response = await api.put(`/workspaces/${id}`, data);
-    }
-    
-    const updatedWorkspace = response.data.data;
 
-    // Update in list
-    const index = workspaces.value.findIndex(w => w.id === id);
-    if (index !== -1) {
-      workspaces.value[index] = updatedWorkspace;
-    }
+      const updatedWorkspace = response.data.data;
 
-    // Update current if it's the same
-    if (currentWorkspace.value?.id === id) {
-      currentWorkspace.value = updatedWorkspace;
-    }
+      // Update in list
+      const index = workspaces.value.findIndex(w => w.id === id);
+      if (index !== -1) {
+        workspaces.value[index] = updatedWorkspace;
+      }
 
-    return updatedWorkspace;
-  } catch (err) {
-    console.error('Erreur lors de la mise à jour:', err);
-    console.error('Response data:', err.response?.data);
-    error.value = err.response?.data?.message || 'Erreur lors de la mise à jour du workspace';
-    throw err;
-  } finally {
-    loading.value = false;
-  }
-};
+      // Update current if it's the same
+      if (currentWorkspace.value?.id === id) {
+        currentWorkspace.value = updatedWorkspace;
+      }
+
+      return updatedWorkspace;
+    } catch (err) {
+      console.error('Erreur lors de la mise à jour:', err);
+      console.error('Response data:', err.response?.data);
+      error.value = err.response?.data?.message || 'Erreur lors de la mise à jour du workspace';
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  };
 
   /**
    * Delete a workspace
@@ -217,7 +217,7 @@ const updateWorkspace = async (id, data) => {
   const fetchInvitations = async (workspaceId) => {
     loading.value = true;
     error.value = null;
-
+    // alert(  'fetchInvitations called');
     try {
       const response = await api.get(`/workspaces/${workspaceId}/invitations`);
       return response.data.data;
@@ -228,6 +228,37 @@ const updateWorkspace = async (id, data) => {
       loading.value = false;
     }
   };
+
+  /**
+ * Fetch all invitations across all workspaces (for admin/super_admin)
+ */
+  const fetchAllInvitations = async (filters = {}) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response = await api.get('/workspace-invitations/all', { params: filters })
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data?.message || 'Erreur lors du chargement des invitations'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  /**
+   * Get invitation statistics
+   */
+  const getInvitationStatistics = async () => {
+    try {
+      const response = await api.get('/workspace-invitations/statistics')
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data?.message || 'Erreur lors du chargement des statistiques'
+      throw err
+    }
+  }
 
   /**
    * Invite members to workspace
@@ -323,9 +354,9 @@ const updateWorkspace = async (id, data) => {
   };
 
 
-/**
-   * Remove member from workspace
-   */
+  /**
+     * Remove member from workspace
+     */
   const removeMember = async (workspaceId, userId) => {
     loading.value = true;
     error.value = null;
@@ -494,63 +525,63 @@ const updateWorkspace = async (id, data) => {
       }
     }
   };
- 
-/**
- * Get member permissions and role
- */
-const getMemberPermissions = (member) => {
+
+  /**
+   * Get member permissions and role
+   */
+  const getMemberPermissions = (member) => {
     const pivot = member.pivot || {};
     let permissions = {};
-    
+
     // Si les permissions sont stockées dans un champ JSON
     if (pivot.permissions) {
-        // Si c'est le format "all"
-        if ((pivot.permissions === '["all"]') || (pivot.permissions === ['all'])) {
-            permissions = {
-                can_create_projects: true,
-                can_invite_members: true,
-                can_manage_settings: true,
-            };
+      // Si c'est le format "all"
+      if ((pivot.permissions === '["all"]') || (pivot.permissions === ['all'])) {
+        permissions = {
+          can_create_projects: true,
+          can_invite_members: true,
+          can_manage_settings: true,
+        };
+      }
+      // Si c'est un objet de permissions
+      else if (typeof pivot.permissions === 'object') {
+        permissions = pivot.permissions;
+      }
+      // Si c'est une chaîne JSON
+      else if (typeof pivot.permissions === 'string') {
+        try {
+          const decoded = JSON.parse(pivot.permissions);
+          permissions = typeof decoded === 'object' ? decoded : {};
+        } catch (e) {
+          console.warn('Invalid permissions format:', pivot.permissions);
+          permissions = {};
         }
-        // Si c'est un objet de permissions
-        else if (typeof pivot.permissions === 'object') {
-            permissions = pivot.permissions;
-        }
-        // Si c'est une chaîne JSON
-        else if (typeof pivot.permissions === 'string') {
-            try {
-                const decoded = JSON.parse(pivot.permissions);
-                permissions = typeof decoded === 'object' ? decoded : {};
-            } catch (e) {
-                console.warn('Invalid permissions format:', pivot.permissions);
-                permissions = {};
-            }
-        }
+      }
     }
-    
+
     // Si les permissions sont stockées dans des champs séparés (fallback)
     return {
-        can_create_projects: permissions.can_create_projects || pivot.can_create_projects || false,
-        can_invite_members: permissions.can_invite_members || pivot.can_invite_members || false,
-        can_manage_settings: permissions.can_manage_settings || pivot.can_manage_settings || false,
+      can_create_projects: permissions.can_create_projects || pivot.can_create_projects || false,
+      can_invite_members: permissions.can_invite_members || pivot.can_invite_members || false,
+      can_manage_settings: permissions.can_manage_settings || pivot.can_manage_settings || false,
     };
-};
+  };
 
-   /**
-   * Check if user can manage workspace members
-   */
+  /**
+  * Check if user can manage workspace members
+  */
   const canManageMembers = (workspace, user) => {
     if (!workspace || !user) return false;
-    
+
     // Le propriétaire peut tout gérer
     if (workspace.owner_id === user.id) {
       return true;
     }
-    
+
     // Vérifier les permissions via le pivot
     const member = workspace.members?.find(m => m.id === user.id);
     if (!member || !member.pivot) return false;
-    
+
     const role = member.pivot.role;
     return ['owner', 'super_admin', 'admin'].includes(role);
   };
