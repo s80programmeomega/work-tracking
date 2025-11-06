@@ -161,6 +161,7 @@ export function useNotifications() {
             project_updated: 'fa-project-diagram',
             deadline_approaching: 'fa-exclamation-triangle',
             document_uploaded: 'fa-file-upload',
+            workspace_invitation: 'fa-envelope',
         };
 
         return icons[type] || 'fa-bell';
@@ -179,6 +180,7 @@ export function useNotifications() {
             project_updated: 'indigo',
             deadline_approaching: 'red',
             document_uploaded: 'yellow',
+            workspace_invitation: 'brand',
         };
 
         return colors[type] || 'gray';
@@ -202,6 +204,13 @@ export function useNotifications() {
             return new Date(n.created_at) > yesterday;
         });
     });
+
+    /**
+     *  Vérifier si une notification est une invitation
+     */
+    const isInvitationNotification = (notification) => {
+        return notification.type === 'workspace_invitation';
+    };
 
     return {
         // State
