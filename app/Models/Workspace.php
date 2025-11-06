@@ -287,7 +287,7 @@ class Workspace extends Model
             return false;
         }
 
-        return in_array($member->pivot->role, ['owner', 'admin']) ||
+        return in_array($member->pivot->role, ['owner', 'admin','manager']) ||
                ($member->pivot->can_create_projects ?? false);
     }
 

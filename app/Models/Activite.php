@@ -80,10 +80,10 @@ class Activite extends Model
     }
 
     // TODO: Uncomment when Tache model is created
-    // public function taches(): HasMany
-    // {
-    //     return $this->hasMany(Tache::class);
-    // }
+    public function taches(): HasMany
+    {
+        return $this->hasMany(Tache::class);
+    }
 
     /**
      * Scopes

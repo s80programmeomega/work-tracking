@@ -1,3 +1,4 @@
+<!-- resources\js\pages\Auth\Signup.vue -->
 <template>
     <FullScreenLayout>
         <div class="relative p-6 bg-white z-1 dark:bg-gray-900 sm:p-0">

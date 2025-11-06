@@ -44,6 +44,7 @@ class ProjetResource extends JsonResource
             // Relationships
             'members' => ProjetMemberResource::collection($this->whenLoaded('members')),
             'tags' => ProjetTagResource::collection($this->whenLoaded('tags')),
+            'activites' => ActiviteResource::collection($this->whenLoaded('activites')),
 
             // Timestamps
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),

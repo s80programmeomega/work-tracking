@@ -13,6 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProjetController extends Controller
 {
@@ -22,12 +23,13 @@ class ProjetController extends Controller
     ) {
     }
 
-
     /**
-     * Display a listing of projects for current workspace.
+     * Display a listing of ALL projects (SUPER ADMIN ONLY).
+     * Shows projects from ALL workspaces.
      */
     public function index(Request $request): AnonymousResourceCollection
     {
+        // Cette route est protégée par le middleware super_admin
         $filters = $request->only([
             'search',
             'status',
@@ -38,16 +40,13 @@ class ProjetController extends Controller
             'is_favorite',
             'is_overdue',
             'per_page',
+            'workspace_id', // ✅ Permet au super_admin de filtrer par workspace
         ]);
 
-        // Filtrer par workspace actuel de l'utilisateur
-        $workspaceId = $request->user()->current_workspace_id;
-
-        if (!$workspaceId) {
-            return ProjetResource::collection([]);
+        // Si le super_admin spécifie un workspace_id, on filtre par ce workspace
+        if ($request->has('workspace_id') && $request->workspace_id) {
+            $filters['workspace_id'] = $request->workspace_id;
         }
-
-        $filters['workspace_id'] = $workspaceId;
 
         $projets = $this->projetService->getAllProjets($filters);
 
@@ -55,7 +54,8 @@ class ProjetController extends Controller
     }
 
     /**
-     * Get current user's projects.
+     * Get current user's projects (FOR ALL USERS).
+     * Shows only projects where user is member or responsable.
      */
     public function myProjets(Request $request): AnonymousResourceCollection
     {
@@ -70,7 +70,8 @@ class ProjetController extends Controller
             'per_page',
         ]);
 
-        $workspaceId = $request->user()->current_workspace_id;
+        // ✅ Filtre par workspace actuel
+        $workspaceId = $request->input('workspace_id') ?? $request->user()->current_workspace_id;
 
         if (!$workspaceId) {
             return ProjetResource::collection([]);
@@ -88,17 +89,26 @@ class ProjetController extends Controller
      */
     public function archived(Request $request): AnonymousResourceCollection
     {
-        $workspaceId = $request->user()->current_workspace_id;
+        // ✅ Utilise le workspace fourni ou le workspace actuel
+        $workspaceId = $request->input('workspace_id') ?? $request->user()->current_workspace_id;
 
         if (!$workspaceId) {
             return ProjetResource::collection([]);
         }
 
-        $projets = Projet::where('workspace_id', $workspaceId)
+        $query = Projet::where('workspace_id', $workspaceId)
             ->archived()
             ->with(['responsable', 'members', 'tags'])
-            ->latest()
-            ->paginate($request->input('per_page', 15));
+            ->latest();
+
+        // ✅ Si super_admin sans workspace_id spécifié, voir tous les projets archivés
+        if ($request->user()->isSuperAdmin() && !$request->has('workspace_id')) {
+            $query = Projet::archived()
+                ->with(['responsable', 'members', 'tags', 'workspace'])
+                ->latest();
+        }
+
+        $projets = $query->paginate($request->input('per_page', 15));
 
         return ProjetResource::collection($projets);
     }
@@ -112,8 +122,7 @@ class ProjetController extends Controller
 
         $data = $request->validated();
 
-        // S'assurer que le workspace_id correspond au workspace actuel
-        $workspaceId = $request->user()->current_workspace_id;
+        // ✅ Utilise le workspace fourni ou le workspace actuel
         $workspaceId = $data['workspace_id'] ?? $request->user()->current_workspace_id;
 
         if (!$workspaceId) {
@@ -130,14 +139,15 @@ class ProjetController extends Controller
             ], 404);
         }
 
-        if (!$workspace->hasAccess($request->user())) {
+        // ✅ Super admin peut créer dans n'importe quel workspace
+        if (!$request->user()->isSuperAdmin() && !$workspace->hasAccess($request->user())) {
             return response()->json([
                 'message' => 'Vous n\'avez pas accès à ce workspace.',
             ], 403);
         }
 
         // Vérifier que l'utilisateur peut créer des projets dans ce workspace
-        if (!$workspace->canCreateProjects($request->user())) {
+        if (!$request->user()->isSuperAdmin() && !$workspace->canCreateProjects($request->user())) {
             return response()->json([
                 'message' => 'Vous n\'avez pas la permission de créer des projets dans ce workspace.',
             ], 403);
@@ -160,7 +170,6 @@ class ProjetController extends Controller
         }
     }
 
-
     /**
      * Display the specified project.
      */
@@ -172,18 +181,18 @@ class ProjetController extends Controller
             'responsable',
             'members',
             'tags',
+            'workspace', // ✅ Charge les infos du workspace
             'activites' => function ($query) {
                 $query->with([
                     'responsable',
                     'taches' => function ($q) {
                         $q->select('id', 'activite_id', 'titre', 'statut', 'priorite');
                     }
-                ]);
+                ])->withCount('taches');
             }
         ]);
 
         $stats = $this->projetService->getProjetStats($projet);
-
         return response()->json([
             'data' => new ProjetResource($projet),
             'stats' => $stats,
@@ -211,7 +220,6 @@ class ProjetController extends Controller
             ], 500);
         }
     }
-
 
     /**
      * Remove the specified project.
@@ -312,10 +320,13 @@ class ProjetController extends Controller
             'date_debut' => 'nullable|date',
             'date_fin' => 'nullable|date|after:date_debut',
             'responsable_id' => 'nullable|exists:users,id',
+            'workspace_id' => 'nullable|exists:workspaces,id', // ✅ Permet de cloner dans un autre workspace
         ]);
 
-        $overrides = $request->only(['nom', 'date_debut', 'date_fin', 'responsable_id']);
-        $overrides['workspace_id'] = $request->user()->current_workspace_id;
+        $overrides = $request->only(['nom', 'date_debut', 'date_fin', 'responsable_id', 'workspace_id']);
+        
+        // ✅ Par défaut, clone dans le même workspace que l'original
+        $overrides['workspace_id'] = $overrides['workspace_id'] ?? $projet->workspace_id;
 
         try {
             $newProjet = $this->projetService->cloneProjet($projet, $overrides);
@@ -417,7 +428,6 @@ class ProjetController extends Controller
             ], 500);
         }
     }
-
 
     /**
      * Update member permissions.
@@ -541,20 +551,35 @@ class ProjetController extends Controller
         }
     }
 
-    
-
     /**
      * Get dashboard statistics for current workspace.
+     * ✅ AMÉLIORÉ : Support multi-workspace
      */
     public function dashboardStats(Request $request): JsonResponse
     {
-        $workspaceId = $request->user()->current_workspace_id;
+        // ✅ Utilise le workspace fourni ou le workspace actuel
+        $workspaceId = $request->input('workspace_id') ?? $request->user()->current_workspace_id;
+
+        // ✅ Si super_admin sans workspace spécifié, stats globales
+        if ($request->user()->isSuperAdmin() && !$workspaceId) {
+            try {
+                $stats = $this->projetService->getGlobalDashboardStats();
+                return response()->json([
+                    'data' => $stats,
+                ]);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'message' => 'Erreur lors du chargement des statistiques globales.',
+                    'error' => $e->getMessage(),
+                    'data' => $this->getEmptyStats(),
+                ], 500);
+            }
+        }
 
         if (!$workspaceId) {
             return response()->json([
-                'message' => 'Aucun workspace sélectionné pour cet utilisateur',
                 'data' => $this->getEmptyStats(),
-            ], 400);
+            ]);
         }
 
         try {
@@ -571,7 +596,6 @@ class ProjetController extends Controller
             ], 500);
         }
     }
-
 
     /**
      * Get empty stats structure.

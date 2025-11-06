@@ -20,8 +20,8 @@ const router = createRouter({
         requiresAuth: true,
       },
     },
-    
-    
+
+
     // ==========================================
     // WORKSPACES
     // ==========================================
@@ -70,12 +70,20 @@ const router = createRouter({
         requiresAuth: true,
       },
     },
-    
+    {
+      path: '/accept-invitation/:token',
+      name: 'accept-invitation',
+      component: () => import('../pages/AcceptInvitation.vue'),
+      meta: {
+        requiresAuth: false,
+        title: 'Accepter l\'invitation'
+      }
+    },
  // ==========================================
     // PROJETS
     // ==========================================
     {
-      path: '/projets',
+      path: '/projets/list/all',
       name: 'projets.index',
       component: () => import('../pages/Projets.vue'),
       meta: {
@@ -246,7 +254,7 @@ const router = createRouter({
       },
     },
 
-   
+
 
     {
       path: '/activites',
@@ -287,7 +295,16 @@ const router = createRouter({
         requiresAuth: true,
       },
     },
-
+ 
+    {
+      path: '/users/invitations',
+      name: 'invitations',
+      component: () => import('../pages/Users/Invitations.vue'),
+      meta: {
+        title: 'invitations',
+        requiresAuth: true,
+      },
+    },
     {
       path: '/teams',
       name: 'teams.index',

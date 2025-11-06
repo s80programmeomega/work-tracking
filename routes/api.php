@@ -1,7 +1,9 @@
-<!-- routes\api.php -->
 <?php
 
+use App\Http\Controllers\Api\ActiviteController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\WorkspaceController;
+use App\Http\Controllers\Api\ProjetController;
 use App\Http\Controllers\LabelController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -24,6 +26,28 @@ Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
 });
 
+// Routes publiques pour les invitations (pas besoin d'authentification)
+Route::prefix('workspace-invitations')->group(function () {
+    // Vérifier une invitation
+    Route::get('/{token}', [WorkspaceController::class, 'checkInvitation']);
+    
+    // Accepter une invitation
+    Route::post('/{token}/accept', [WorkspaceController::class, 'acceptInvitation']);
+
+     // Routes admin (nécessitent une authentification)
+    Route::middleware('auth:sanctum')->group(function () {
+        // Récupérer toutes les invitations (pour les admins)
+        Route::get('/all', [WorkspaceController::class, 'allInvitations']);
+        
+        // ✅ Refuser une invitation (authentifié)
+        Route::delete('/workspace-invitations/{invitation}', [WorkspaceController::class, 'declineInvitation']);
+
+        // Statistiques des invitations
+        Route::get('/statistics', [WorkspaceController::class, 'invitationStatistics']);
+    });
+
+});
+
 // Protected routes
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('auth')->group(function () {
@@ -32,9 +56,291 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/refresh', [AuthController::class, 'refresh']);
         Route::post('/verify-email', [AuthController::class, 'verifyEmail']);
 
-                Route::put('/language', [AuthController::class, 'updateLanguage']);
+        Route::put('/language', [AuthController::class, 'updateLanguage']);
 
     });
+
+    // ========================================
+    // WORKSPACES
+    // ========================================
+    Route::prefix('workspaces')->group(function () {
+
+        Route::get('/', [WorkspaceController::class, 'index']);
+        Route::post('/', [WorkspaceController::class, 'store']);
+        Route::get('/user-workspaces', [WorkspaceController::class, 'getUserWorkspaces']);
+        Route::get('/{workspace}', [WorkspaceController::class, 'show']);
+        Route::put('/{workspace}', [WorkspaceController::class, 'update']);
+        Route::delete('/{workspace}', [WorkspaceController::class, 'destroy']);
+        Route::post('/switch/{workspace}', [WorkspaceController::class, 'switch'])->name('workspaces.switch');
+
+        // Workspace Members
+        Route::prefix('{workspace}/members')->group(function () {
+            Route::get('/', [WorkspaceController::class, 'members']);
+            Route::post('/', [WorkspaceController::class, 'addMember']);
+            Route::put('/{user}', [WorkspaceController::class, 'updateMember']);
+            Route::delete('/{user}', [WorkspaceController::class, 'removeMember']);
+
+            // Invitations
+            Route::post('/invite', [WorkspaceController::class, 'inviteMembers']);
+            Route::get('/invitations', [WorkspaceController::class, 'invitations']);
+            Route::post('/invitations/{invitation}/resend', [WorkspaceController::class, 'resendInvitation']);
+            Route::delete('/invitations/{invitation}', [WorkspaceController::class, 'cancelInvitation']);
+        });
+
+        // Workspace Projects
+        Route::get('/{workspace}/projets', [WorkspaceController::class, 'projets']);
+
+        // Workspace Statistics
+        Route::get('/{workspace}/statistics', [WorkspaceController::class, 'statistics']);
+    });
+    
+   // Accept invitation (public route with token)
+    // Route::post('/workspace-invitations/{token}/accept', [WorkspaceController::class, 'acceptInvitation']);
+
+
+  
+
+ 
+
+
+    // ========================================
+    // PROJETS
+    // ========================================
+    Route::prefix('projets')->group(function () {
+
+        // Dashboard & Statistics (routes spécifiques)
+        Route::get('/dashboard-stats', [ProjetController::class, 'dashboardStats']);
+        Route::get('/mes-projets', [ProjetController::class, 'myProjets']);
+        Route::get('/archives', [ProjetController::class, 'archived']);
+
+        Route::middleware(['super_admin'])->group(function () {
+            Route::get('/list/all', [ProjetController::class, 'index']); // Tous les projets
+            Route::get('/activites', [ActiviteController::class, 'index']); // Toutes les activités
+        });
+
+        // CRUD de base 
+        Route::post('/', [ProjetController::class, 'store']);
+        Route::get('/{projet}', [ProjetController::class, 'show']);
+        Route::put('/{projet}', [ProjetController::class, 'update']);
+        Route::delete('/{projet}', [ProjetController::class, 'destroy']);
+
+        // Project Actions
+        Route::post('/{projet}/archive', [ProjetController::class, 'archive']);
+        Route::post('/{projet}/unarchive', [ProjetController::class, 'unarchive']);
+        Route::post('/{projet}/complete', [ProjetController::class, 'complete']);
+        Route::post('/{projet}/clone', [ProjetController::class, 'clone']); // Changé de duplicate à clone
+        Route::post('/{projet}/toggle-favorite', [ProjetController::class, 'toggleFavorite']);
+
+
+        // Project Members Management
+        Route::prefix('{projet}/members')->group(function () {
+            Route::get('/', [ProjetController::class, 'getMembers']);
+            Route::post('/', [ProjetController::class, 'addMember']);
+            Route::put('/{user}', [ProjetController::class, 'updateMember']);
+            Route::delete('/{user}', [ProjetController::class, 'removeMember']);
+        });
+
+        // Project Relations
+        Route::get('/{projet}/activites', [ProjetController::class, 'getActivites']);
+        Route::get('/{projet}/taches', [ProjetController::class, 'getTaches']);
+
+        // Project Statistics & Reports
+        Route::get('/{projet}/statistics', [ProjetController::class, 'getStatistics']);
+        Route::get('/{projet}/performance-report', [ProjetController::class, 'performanceReport']);
+        Route::get('/{projet}/accessible-tasks', [ProjetController::class, 'accessibleTasks']);
+
+    });
+
+    //  // Project Management Routes
+    // Route::prefix('projets')->group(function () {
+    //     // List and stats
+    //     Route::get('/', [\App\Http\Controllers\ProjetController::class, 'index']);
+    //     Route::get('/my-projets', [\App\Http\Controllers\ProjetController::class, 'myProjets']);
+    //     Route::get('/dashboard-stats', [\App\Http\Controllers\ProjetController::class, 'dashboardStats']);
+
+    //     // CRUD
+    //     Route::post('/', [\App\Http\Controllers\ProjetController::class, 'store']);
+    //     Route::get('/{projet}', [\App\Http\Controllers\ProjetController::class, 'show']);
+    //     Route::put('/{projet}', [\App\Http\Controllers\ProjetController::class, 'update']);
+    //     Route::delete('/{projet}', [\App\Http\Controllers\ProjetController::class, 'destroy']);
+
+    //     // Actions
+    //     Route::post('/{projet}/archive', [\App\Http\Controllers\ProjetController::class, 'archive']);
+    //     Route::post('/{projet}/unarchive', [\App\Http\Controllers\ProjetController::class, 'unarchive']);
+    //     Route::post('/{projet}/complete', [\App\Http\Controllers\ProjetController::class, 'complete']);
+    //     Route::post('/{projet}/clone', [\App\Http\Controllers\ProjetController::class, 'clone']);
+    //     Route::post('/{projet}/toggle-favorite', [\App\Http\Controllers\ProjetController::class, 'toggleFavorite']);
+
+    //     // Members management
+    //     Route::post('/{projet}/members', [\App\Http\Controllers\ProjetController::class, 'addMember']);
+    //     Route::put('/{projet}/members/{userId}', [\App\Http\Controllers\ProjetController::class, 'updateMember']);
+    //     Route::delete('/{projet}/members/{userId}', [\App\Http\Controllers\ProjetController::class, 'removeMember']);
+    // });
+
+
+
+
+
+
+    // ========================================
+    // ACTIVITÉS
+    // ========================================
+    // Route::prefix('activites')->group(function () {
+    //     Route::get('/', [ActiviteController::class, 'index']);
+    //     Route::post('/', [ActiviteController::class, 'store']);
+    //     Route::get('/mes-activites', [ActiviteController::class, 'myActivities']);
+    //     Route::get('/en-retard', [ActiviteController::class, 'overdue']);
+    //     Route::get('/{activite}', [ActiviteController::class, 'show']);
+    //     Route::put('/{activite}', [ActiviteController::class, 'update']);
+    //     Route::delete('/{activite}', [ActiviteController::class, 'destroy']);
+
+    //     // Activity Actions
+    //     Route::post('/{activite}/archive', [ActiviteController::class, 'archive']);
+    //     Route::post('/{activite}/unarchive', [ActiviteController::class, 'unarchive']);
+    //     Route::post('/reorder', [ActiviteController::class, 'reorder']);
+
+    //     // Activity Tasks
+    //     Route::get('/{activite}/taches', [ActiviteController::class, 'taches']);
+
+    //     // Activity Statistics
+    //     Route::get('/{activite}/statistics', [ActiviteController::class, 'statistics']);
+    // });
+
+    // ========================================
+    // TÂCHES
+    // ========================================
+    // Route::prefix('taches')->group(function () {
+    //     Route::get('/', [TacheController::class, 'index']);
+    //     Route::post('/', [TacheController::class, 'store']);
+    //     Route::get('/mes-taches', [TacheController::class, 'myTasks']);
+    //     Route::get('/assignees', [TacheController::class, 'assignedToMe']);
+    //     Route::get('/en-attente', [TacheController::class, 'pending']);
+    //     Route::get('/en-retard', [TacheController::class, 'overdue']);
+    //     Route::get('/{tache}', [TacheController::class, 'show']);
+    //     Route::put('/{tache}', [TacheController::class, 'update']);
+    //     Route::delete('/{tache}', [TacheController::class, 'destroy']);
+
+    //     // Task Actions
+    //     Route::post('/{tache}/archive', [TacheController::class, 'archive']);
+    //     Route::post('/{tache}/unarchive', [TacheController::class, 'unarchive']);
+    //     Route::post('/{tache}/validate', [TacheController::class, 'validate']);
+    //     Route::post('/reorder', [TacheController::class, 'reorder']);
+
+    //     // Task Assignees
+    //     Route::post('/{tache}/assignees', [TacheController::class, 'assignUser']);
+    //     Route::delete('/{tache}/assignees/{user}', [TacheController::class, 'unassignUser']);
+
+    //     // Task Dependencies
+    //     Route::get('/{tache}/dependencies', [TacheController::class, 'dependencies']);
+    //     Route::post('/{tache}/dependencies', [TacheController::class, 'addDependency']);
+    //     Route::delete('/{tache}/dependencies/{dependencyId}', [TacheController::class, 'removeDependency']);
+
+    //     // Sub-tasks
+    //     Route::get('/{tache}/sous-taches', [TacheController::class, 'subTasks']);
+    //     Route::post('/{tache}/sous-taches', [TacheController::class, 'createSubTask']);
+
+    //     // Task Labels
+    //     Route::post('/{tache}/labels', [TacheController::class, 'attachLabel']);
+    //     Route::delete('/{tache}/labels/{label}', [TacheController::class, 'detachLabel']);
+
+    //     // Task Documents
+    //     Route::get('/{tache}/documents', [TacheController::class, 'documents']);
+    //     Route::post('/{tache}/documents', [TacheController::class, 'uploadDocument']);
+    // });
+
+    // ========================================
+    // RÉSULTATS DE TÂCHES
+    // ========================================
+    // Route::prefix('taches/{tache}/resultats')->group(function () {
+    //     Route::get('/', [TacheResultatController::class, 'index']);
+    //     Route::post('/', [TacheResultatController::class, 'store']);
+    //     Route::get('/{resultat}', [TacheResultatController::class, 'show']);
+    //     Route::put('/{resultat}', [TacheResultatController::class, 'update']);
+    //     Route::delete('/{resultat}', [TacheResultatController::class, 'destroy']);
+
+    //     // Validation Actions
+    //     Route::post('/{resultat}/validate-n1', [TacheResultatController::class, 'validateN1']);
+    //     Route::post('/{resultat}/validate-n2', [TacheResultatController::class, 'validateN2']);
+    //     Route::post('/{resultat}/reject', [TacheResultatController::class, 'reject']);
+
+    //     // Documents for results
+    //     Route::post('/{resultat}/documents', [TacheResultatController::class, 'uploadDocument']);
+    // });
+
+    // ========================================
+    // VALIDATIONS
+    // ========================================
+    // Route::prefix('validations')->group(function () {
+    //     Route::get('/n1', [TacheValidationController::class, 'pendingN1']);
+    //     Route::get('/n2', [TacheValidationController::class, 'pendingN2']);
+    //     Route::get('/historique', [TacheValidationController::class, 'history']);
+    //     Route::post('/{validation}/approve-n1', [TacheValidationController::class, 'approveN1']);
+    //     Route::post('/{validation}/approve-n2', [TacheValidationController::class, 'approveN2']);
+    //     Route::post('/{validation}/reject', [TacheValidationController::class, 'reject']);
+    // });
+
+    // ========================================
+    // ÉVALUATIONS
+    // ========================================
+    // Route::prefix('evaluations')->group(function () {
+    //     Route::get('/dashboard', [TacheResultatController::class, 'dashboard']);
+    //     Route::get('/rapport-hebdomadaire', [TacheResultatController::class, 'weeklyReport']);
+    //     Route::get('/fiches', [TacheResultatController::class, 'evaluationSheets']);
+    //     Route::get('/performance', [TacheResultatController::class, 'teamPerformance']);
+    //     Route::post('/export-pdf', [TacheResultatController::class, 'exportPdf']);
+    // });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     // User Management Routes
     Route::prefix('users')->group(function () {
@@ -59,31 +365,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/{user}/activity', [UserController::class, 'activity']);
     });
 
-    // Project Management Routes
-    Route::prefix('projets')->group(function () {
-        // List and stats
-        Route::get('/', [\App\Http\Controllers\ProjetController::class, 'index']);
-        Route::get('/my-projets', [\App\Http\Controllers\ProjetController::class, 'myProjets']);
-        Route::get('/dashboard-stats', [\App\Http\Controllers\ProjetController::class, 'dashboardStats']);
 
-        // CRUD
-        Route::post('/', [\App\Http\Controllers\ProjetController::class, 'store']);
-        Route::get('/{projet}', [\App\Http\Controllers\ProjetController::class, 'show']);
-        Route::put('/{projet}', [\App\Http\Controllers\ProjetController::class, 'update']);
-        Route::delete('/{projet}', [\App\Http\Controllers\ProjetController::class, 'destroy']);
-
-        // Actions
-        Route::post('/{projet}/archive', [\App\Http\Controllers\ProjetController::class, 'archive']);
-        Route::post('/{projet}/unarchive', [\App\Http\Controllers\ProjetController::class, 'unarchive']);
-        Route::post('/{projet}/complete', [\App\Http\Controllers\ProjetController::class, 'complete']);
-        Route::post('/{projet}/clone', [\App\Http\Controllers\ProjetController::class, 'clone']);
-        Route::post('/{projet}/toggle-favorite', [\App\Http\Controllers\ProjetController::class, 'toggleFavorite']);
-
-        // Members management
-        Route::post('/{projet}/members', [\App\Http\Controllers\ProjetController::class, 'addMember']);
-        Route::put('/{projet}/members/{userId}', [\App\Http\Controllers\ProjetController::class, 'updateMember']);
-        Route::delete('/{projet}/members/{userId}', [\App\Http\Controllers\ProjetController::class, 'removeMember']);
-    });
 
     // Activity Management Routes
     Route::prefix('activites')->group(function () {

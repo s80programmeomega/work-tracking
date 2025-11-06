@@ -58,7 +58,7 @@ return [
             // ],
         ],
 
-        'mailgun' => [
+        'mailgun' => [ 
             'transport' => 'mailgun',
             // 'client' => [
             //     'timeout' => 5,

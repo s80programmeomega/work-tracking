@@ -2,7 +2,7 @@
   <div
     class="notification-item flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5 cursor-pointer relative"
     :class="{ 'bg-blue-50 dark:bg-blue-900/10': !notification.read_at }"
-    @click="$emit('click', notification)"
+    @click="handleClick"
   >
     <!-- Icon -->
     <div
@@ -56,6 +56,7 @@
 
 <script setup>
 import { computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { useNotifications } from '@/composables/useNotifications';
 
 const props = defineProps({
@@ -67,6 +68,7 @@ const props = defineProps({
 
 const emit = defineEmits(['click', 'mark-read', 'delete']);
 
+const router = useRouter();
 const { getNotificationIcon, getNotificationColor } = useNotifications();
 
 const icon = computed(() => getNotificationIcon(props.notification.type));
@@ -75,6 +77,19 @@ const iconColor = computed(() => getNotificationColor(props.notification.type));
 const confirmDelete = () => {
   if (confirm('Supprimer cette notification ?')) {
     emit('delete', props.notification.id);
+  }
+};
+
+// ✅ Gérer le clic de manière plus intelligente
+const handleClick = () => {
+  // Si c'est une notification d'invitation, naviguer directement
+  if (props.notification.type === 'workspace_invitation' && props.notification.data?.action_url) {
+    const url = props.notification.data.action_url;
+    const path = url.startsWith('http') ? new URL(url).pathname : url;
+    router.push(path);
+  } else {
+    // Sinon, émettre l'événement click pour ouvrir le modal
+    emit('click', props.notification);
   }
 };
 </script>

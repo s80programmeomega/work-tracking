@@ -44,7 +44,7 @@ export const useAuthStore = defineStore('auth', {
          * Gère à la fois le champ 'role' (string) et 'roles' (collection Spatie)
          */
         userRoles: (state) => {
-             // Si l'utilisateur a un champ 'role'  
+            // Si l'utilisateur a un champ 'role'  
             if (state.user?.role) {
                 return [state.user.role];
             }
@@ -62,14 +62,14 @@ export const useAuthStore = defineStore('auth', {
         isSuperAdmin: (state) => {
             // Vérifie le champ 'role' (votre nouvelle implémentation)
             if (state.user?.role === 'super_admin') return true;
-            
+
             // Vérifie la collection 'roles' (Spatie)
             if (state.user?.roles) {
-                return state.user.roles.some(r => 
+                return state.user.roles.some(r =>
                     (r.name || r) === 'super_admin'
                 );
             }
-            
+
             return false;
         },
 
@@ -89,12 +89,12 @@ export const useAuthStore = defineStore('auth', {
         hasRole: (state) => (role) => {
             // Vérifie le champ 'role'
             if (state.user?.role === role) return true;
-            
+
             // Vérifie la collection 'roles'
             if (state.user?.roles) {
                 return state.user.roles.some(r => (r.name || r) === role);
             }
-            
+
             return false;
         },
 
@@ -104,14 +104,14 @@ export const useAuthStore = defineStore('auth', {
         hasAnyRole: (state) => (roles) => {
             // Vérifie d'abord le champ 'role'
             if (state.user?.role && roles.includes(state.user.role)) return true;
-            
+
             // Puis vérifie la collection 'roles'
             if (state.user?.roles) {
-                return roles.some(role => 
+                return roles.some(role =>
                     state.user.roles.some(r => (r.name || r) === role)
                 );
             }
-            
+
             return false;
         },
 
@@ -139,7 +139,7 @@ export const useAuthStore = defineStore('auth', {
             );
         },
 
-        
+
         /**
          * ✅ NOUVEAU : Retourne la langue de l'utilisateur
          */
@@ -205,8 +205,17 @@ export const useAuthStore = defineStore('auth', {
                     this.setLanguage(user.language);
                 }
 
-                // Redirige vers la page d'accueil
-                router.push('/');
+                
+                // ✅ Vérifier si on vient d'une invitation
+                const invitationToken = route.query.invitation;
+
+                if (invitationToken) {
+                    // Rediriger vers la page d'acceptation d'invitation
+                    router.push(`/accept-invitation/${invitationToken}`);
+                } else {
+                    // Redirige vers la page d'accueil
+                    router.push('/');
+                }
                 return response.data;
             } catch (error) {
                 // Messages d'erreur spécifiques selon le type d'erreur
@@ -356,9 +365,9 @@ export const useAuthStore = defineStore('auth', {
             }
         },
 
-         /**
-         * NOUVEAU : Met à jour le workspace courant
-         */
+        /**
+        * NOUVEAU : Met à jour le workspace courant
+        */
         setCurrentWorkspace(workspaceId) {
             if (this.user) {
                 this.user.current_workspace_id = workspaceId;
