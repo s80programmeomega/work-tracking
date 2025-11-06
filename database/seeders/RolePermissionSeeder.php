@@ -27,6 +27,9 @@ class RolePermissionSeeder extends Seeder
             'projets.create',
             'projets.update',
             'projets.delete',
+            'can_create_projects',
+            'can_invite_members',
+            'can_manage_settings',
 
             // Activités
             'activites.view',
@@ -87,8 +90,8 @@ class RolePermissionSeeder extends Seeder
 
         // Create a manager user
         $manager = User::create([
-            'nom' => 'Manager User',
-            'email' => 'manager@worktracking.com',
+            'nom' => 'Manager',
+            'email' => 'admin@worktracking.com',
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
             'is_active' => true,

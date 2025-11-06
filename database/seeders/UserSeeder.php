@@ -23,9 +23,9 @@ class UserSeeder extends Seeder
             ],
             [
                 'nom' => 'Manager Principal',
-                'email' => 'manager@worktracking.com',
+                'email' => 'admin@worktracking.com',
                 'password' => Hash::make('password123'),
-                'role' => 'manager',
+                'role' => 'admin',
                 'fonction' => 'Chef de Projet',
             ],
             [

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             // Add new columns for Work Tracking application
             $table->string('nom')->after('id')->nullable();
-            $table->enum('role', ['super_admin', 'manager', 'responsable_n1', 'responsable_n2', 'cadre', 'stagiaire'])
+            $table->enum('role', ['super_admin', 'manager', 'member','viewer', 'admin', 'cadre', 'stagiaire'])
                 ->default('stagiaire')->after('password');
             $table->string('fonction')->nullable()->after('role');
             $table->string('avatar')->nullable()->after('fonction');
