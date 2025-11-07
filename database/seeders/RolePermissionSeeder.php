@@ -82,7 +82,7 @@ class RolePermissionSeeder extends Seeder
         $superAdmin = User::create([
             'nom' => 'Super Admin',
             'email' => 'superadmin@worktracking.com',
-            'password' => Hash::make('123456789'),
+            'password' => Hash::make('password'),
             'email_verified_at' => now(),
             'is_active' => true,
         ]);
