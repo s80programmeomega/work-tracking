@@ -5,6 +5,7 @@ namespace App\Enums;
 enum TachePriorite: string
 {
     case FAIBLE = 'faible';
+    case NORMALE = 'normale';
     case MOYENNE = 'moyenne';
     case ELEVEE = 'elevee';
     case CRITIQUE = 'critique';
@@ -24,6 +25,7 @@ enum TachePriorite: string
     {
         return match($this) {
             self::FAIBLE => 'Faible',
+            self::NORMALE => 'Normale',
             self::MOYENNE => 'Moyenne',
             self::ELEVEE => 'Élevée',
             self::CRITIQUE => 'Critique',
@@ -37,6 +39,7 @@ enum TachePriorite: string
     {
         return match($this) {
             self::FAIBLE => '#10B981',     // Green
+            self::NORMALE => '#0babf5ff',    // Amber
             self::MOYENNE => '#F59E0B',    // Amber
             self::ELEVEE => '#F97316',     // Orange
             self::CRITIQUE => '#EF4444',   // Red
