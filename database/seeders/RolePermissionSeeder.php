@@ -96,23 +96,14 @@ class RolePermissionSeeder extends Seeder
             'email_verified_at' => now(),
             'is_active' => true,
         ]);
-        $manager->assignRole(RoleEnum::MANAGER->value);
+        $manager->assignRole(RoleEnum::ADMIN->value);
 
-        // Create a regular user (cadre)
-        $cadre = User::create([
-            'nom' => 'Cadre User',
-            'email' => 'cadre@worktracking.com',
-            'password' => Hash::make('password'),
-            'email_verified_at' => now(),
-            'is_active' => true,
-        ]);
-        $cadre->assignRole(RoleEnum::CADRE->value);
+        
 
         $this->command->info('Roles and permissions seeded successfully!');
         $this->command->info('');
         $this->command->info('Default users created:');
         $this->command->info('- admin@worktracking.com (password: password)');
-        $this->command->info('- manager@worktracking.com (password: password)');
-        $this->command->info('- cadre@worktracking.com (password: password)');
+        $this->command->info('- manager@worktracking.com (password: password)'); 
     }
 }
