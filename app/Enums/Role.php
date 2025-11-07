@@ -8,7 +8,7 @@ enum Role: string
     case ADMIN = 'admin';
     case MANAGER = 'manager';
     case MEMBER = 'member';
-    case RESPONSABLE_N2 = 'responsable_n2';
+    case VIEWER = 'viewer';
     case CADRE = 'cadre';
     case STAGIAIRE = 'stagiaire';
 
@@ -19,7 +19,7 @@ enum Role: string
             self::ADMIN => 'Administrateur',
             self::MANAGER => 'Manager',
             self::MEMBER => 'Member',
-            self::RESPONSABLE_N2 => 'Responsable N2',
+            self::VIEWER => 'viewer',
             self::CADRE => 'Cadre',
             self::STAGIAIRE => 'Stagiaire',
         };
@@ -49,8 +49,8 @@ enum Role: string
                 'taches.create', 'taches.update', 'taches.delete',
                 'taches.validate'
             ],
-            self::RESPONSABLE_N2 => [
-                'taches.view', 'taches.update', 'taches.validate'
+            self::VIEWER => [
+                'taches.view','activites.view','taches.comment'
             ],
             self::CADRE => [
                 'taches.view', 'taches.update', 'taches.comment'

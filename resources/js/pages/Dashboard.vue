@@ -180,8 +180,7 @@
                   <div class="flex items-center gap-2">
                     <div
                       class="h-3 w-3 rounded-full"
-                      :style="{ backgroundColor: item.color }"
-                    />
+                      :style="{ backgroundColor: item.color }" />
                     <span class="text-sm text-gray-600">{{ item.name }}</span>
                   </div>
                   <span class="text-sm font-semibold text-gray-900">{{ item.value }}</span>

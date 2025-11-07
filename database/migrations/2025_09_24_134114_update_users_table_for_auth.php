@@ -15,7 +15,7 @@ return new class extends Migration
             // Add new columns for Work Tracking application
             $table->string('nom')->after('id')->nullable();
             $table->enum('role', ['super_admin', 'manager', 'member','viewer', 'admin', 'cadre', 'stagiaire'])
-                ->default('stagiaire')->after('password');
+                ->default('admin')->after('password');
             $table->string('fonction')->nullable()->after('role');
             $table->string('avatar')->nullable()->after('fonction');
 
