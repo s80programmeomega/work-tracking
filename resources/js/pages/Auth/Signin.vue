@@ -219,7 +219,7 @@
                         <div class="flex flex-col items-center max-w-xs text-center">
                             <!-- Nouveau logo -->
                             <div class="block mb-6">
-                                <img width="80" height="80" src="@images/logo/Logo.png" alt="Uptiimun Work Tracking"
+                                <img width="200" height="180" src="@images/logo/Logo-dark.jpg" alt="Uptiimun Work Tracking"
                                     class="mx-auto rounded-lg" />
                             </div>
 

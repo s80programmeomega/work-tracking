@@ -21,6 +21,7 @@ return new class extends Migration
             $table->enum('statut', ['a_faire', 'en_cours', 'termine'])->default('a_faire');
             $table->enum('priorite', ['faible', 'moyenne', 'elevee', 'critique'])->default('moyenne');
             $table->date('echeance')->nullable();
+            $table->date('date_fin_reelle')->nullable();
             $table->integer('taux_realisation')->default(0); // 0-100%
             $table->boolean('validation_superieur')->default(false);
             $table->boolean('verrou_reevaluation')->default(false);

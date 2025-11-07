@@ -41,7 +41,7 @@ class RegisterRequest extends FormRequest
                     // ->numbers()
                     // ->symbols()
             ],
-            'role' => ['sometimes', 'string', 'in:super_admin,manager,responsable_n1,responsable_n2,cadre,stagiaire'],
+            'role' => ['sometimes', 'string', 'in:super_admin,admin,member,viewer,cadre'],
         ];
     }
 
@@ -86,7 +86,7 @@ class RegisterRequest extends FormRequest
             'prenom'   => $this->prenom ,
             'email'    => $this->email,
             'password' => bcrypt($this->password),
-            'role'     => $this->role ?? 'stagiaire',
+            'role'     => $this->role ?? 'admin',
         ];
     }
 }

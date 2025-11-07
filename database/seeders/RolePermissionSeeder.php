@@ -80,21 +80,27 @@ class RolePermissionSeeder extends Seeder
 
         // Create a super admin user
         $superAdmin = User::create([
-            'nom' => 'Super Admin',
+            'nom' => 'Super',
+            'prenom' => 'Admin',
+            'nom_complet' => 'Super Admin',
             'email' => 'superadmin@worktracking.com',
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
             'is_active' => true,
+            'role' => RoleEnum::SUPER_ADMIN->value,
         ]);
         $superAdmin->assignRole(RoleEnum::SUPER_ADMIN->value);
 
         // Create a manager user
         $manager = User::create([
             'nom' => 'Manager',
+            'prenom' => 'Admin',
+            'nom_complet' => 'Admin Manager',
             'email' => 'admin@worktracking.com',
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
             'is_active' => true,
+            'role' => RoleEnum::ADMIN->value,
         ]);
         $manager->assignRole(RoleEnum::ADMIN->value);
 
