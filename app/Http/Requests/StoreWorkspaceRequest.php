@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Log;
 
 class StoreWorkspaceRequest extends FormRequest
 {
@@ -14,32 +15,43 @@ class StoreWorkspaceRequest extends FormRequest
         return true;
     }
 
-    /**
+     /**
      * Prépare les données avant la validation
      */
     protected function prepareForValidation()
     {
-        // Décoder les settings JSON si elles existent
-        if ($this->has('settings') && is_string($this->settings)) {
-            $decoded = json_decode($this->settings, true);
+        // ✅ Gestion flexible des settings (objet ou string)
+        if ($this->has('settings')) {
+            $settings = $this->input('settings');
             
-            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            // Si c'est déjà un array (depuis JSON body ou form-data object)
+            if (is_array($settings)) {
                 $this->merge([
-                    'settings_array' => $decoded
+                    'settings_array' => $settings,
+                    'settings' => json_encode($settings) // Convertir en string pour validation
                 ]);
+            }
+            // Si c'est une string JSON
+            elseif (is_string($settings)) {
+                $decoded = json_decode($settings, true);
+                
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                    $this->merge([
+                        'settings_array' => $decoded
+                    ]);
+                }
             }
         }
  
-          // ✅ Debug: Log des fichiers uploadés
+        // ✅ Debug: Log des fichiers uploadés
         if ($this->hasFile('logo')) {
-            \Log::info('Fichier logo reçu', [
+            Log::info('Fichier logo reçu', [
                 'name' => $this->file('logo')->getClientOriginalName(),
                 'mime' => $this->file('logo')->getMimeType(),
                 'size' => $this->file('logo')->getSize(),
                 'extension' => $this->file('logo')->getClientOriginalExtension()
             ]);
         }
-
     }
 
     /**
@@ -51,14 +63,24 @@ class StoreWorkspaceRequest extends FormRequest
             'nom' => 'required|string|min:3|max:255',
             'description' => 'nullable|string|max:500',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'settings' => 'nullable|string', // Reçu comme JSON string
+            'settings' => 'nullable|string|json', // ✅ Accepter string JSON valide
             
             // Validation des settings décodées
             'settings_array' => 'nullable|array',
+            'settings_array.language' => 'nullable|string|in:fr,en',
+            'settings_array.timezone' => 'nullable|string',
+            'settings_array.visibility' => 'nullable|string|in:public,private,internal',
             'settings_array.default_project_visibility' => 'nullable|string|in:public,team,private',
             'settings_array.members_can_create_projects' => 'nullable|boolean',
             'settings_array.members_can_invite' => 'nullable|boolean',
+            'settings_array.members_can_delete_projects' => 'nullable|boolean',
             'settings_array.require_task_validation' => 'nullable|boolean',
+            'settings_array.require_approval_for_time_off' => 'nullable|boolean',
+            'settings_array.notify_on_new_member' => 'nullable|boolean',
+            'settings_array.notify_on_new_project' => 'nullable|boolean',
+            'settings_array.notify_on_task_assigned' => 'nullable|boolean',
+            'settings_array.notify_on_deadline_approaching' => 'nullable|boolean',
+            'settings_array.weekly_digest' => 'nullable|boolean',
         ];
     }
 
@@ -79,6 +101,7 @@ class StoreWorkspaceRequest extends FormRequest
             'logo.max' => 'L\'image ne peut pas dépasser 2 MB',
             
             'settings.string' => 'Le format des paramètres est invalide',
+            'settings.json' => 'Les paramètres doivent être au format JSON valide',
             'settings_array.default_project_visibility.in' => 'La visibilité doit être: public, team ou private',
         ];
     }
