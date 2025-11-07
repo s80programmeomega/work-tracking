@@ -51,7 +51,7 @@ export const useAuthStore = defineStore('auth', {
 
       const rolePermissions = {
         'super_admin': ['*'], // All permissions
-        'manager': [
+        'admin': [
           'auth.login', 'auth.logout', 'profile.view', 'profile.edit', 'profile.change_password',
           'team.view', 'team.create', 'team.edit', 'team.delete', 'team.manage_members', 'team.invite_members',
           'user.view', 'user.create', 'user.edit', 'user.assign_role',
@@ -59,7 +59,7 @@ export const useAuthStore = defineStore('auth', {
           'tache.view', 'tache.create', 'tache.edit', 'tache.assign', 'tache.validate', 'tache.change_status',
           'rapport.view', 'rapport.create', 'rapport.export',
         ],
-        'responsable_n1': [
+        'member': [
           'auth.login', 'auth.logout', 'profile.view', 'profile.edit', 'profile.change_password',
           'team.view', 'team.manage_members',
           'user.view',
@@ -67,7 +67,7 @@ export const useAuthStore = defineStore('auth', {
           'tache.view', 'tache.create', 'tache.edit', 'tache.assign', 'tache.validate', 'tache.change_status',
           'rapport.view', 'rapport.create',
         ],
-        'responsable_n2': [
+        'member': [
           'auth.login', 'auth.logout', 'profile.view', 'profile.edit', 'profile.change_password',
           'team.view',
           'user.view',

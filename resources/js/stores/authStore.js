@@ -204,10 +204,12 @@ export const useAuthStore = defineStore('auth', {
                 if (user.language) {
                     this.setLanguage(user.language);
                 }
-
-                
                 // ✅ Vérifier si on vient d'une invitation
-                const invitationToken = route.query.invitation;
+                // Avec Pinia + Vue Router 4, on récupère le query param comme ceci
+                const currentRoute = router.currentRoute.value;
+
+                // ✅ Vérifier si on vient d'une invitation
+                const invitationToken = currentRoute.query.invitation;
 
                 if (invitationToken) {
                     // Rediriger vers la page d'acceptation d'invitation

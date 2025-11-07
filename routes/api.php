@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\ActiviteController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\WorkspaceController;
 use App\Http\Controllers\Api\ProjetController;
 use App\Http\Controllers\LabelController;
@@ -30,15 +31,15 @@ Route::prefix('auth')->group(function () {
 Route::prefix('workspace-invitations')->group(function () {
     // Vérifier une invitation
     Route::get('/{token}', [WorkspaceController::class, 'checkInvitation']);
-    
+
     // Accepter une invitation
     Route::post('/{token}/accept', [WorkspaceController::class, 'acceptInvitation']);
 
-     // Routes admin (nécessitent une authentification)
+    // Routes admin (nécessitent une authentification)
     Route::middleware('auth:sanctum')->group(function () {
         // Récupérer toutes les invitations (pour les admins)
         Route::get('/all', [WorkspaceController::class, 'allInvitations']);
-        
+
         // ✅ Refuser une invitation (authentifié)
         Route::delete('/workspace-invitations/{invitation}', [WorkspaceController::class, 'declineInvitation']);
 
@@ -55,10 +56,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/me', [AuthController::class, 'me']);
         Route::post('/refresh', [AuthController::class, 'refresh']);
         Route::post('/verify-email', [AuthController::class, 'verifyEmail']);
-
         Route::put('/language', [AuthController::class, 'updateLanguage']);
-
     });
+
+    // Dashboard routes
+        Route::get('/dashboard', [DashboardController::class, 'index']);
+        Route::get('/dashboard/personal', [DashboardController::class, 'personalStats']);
+        Route::get('/dashboard/workspace/{workspace}', [DashboardController::class, 'tasksByWorkspace']);
 
     // ========================================
     // WORKSPACES
@@ -93,14 +97,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Workspace Statistics
         Route::get('/{workspace}/statistics', [WorkspaceController::class, 'statistics']);
     });
-    
-   // Accept invitation (public route with token)
+
+    // Accept invitation (public route with token)
     // Route::post('/workspace-invitations/{token}/accept', [WorkspaceController::class, 'acceptInvitation']);
 
 
-  
 
- 
+
+
 
 
     // ========================================

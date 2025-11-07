@@ -53,6 +53,7 @@ enum TachePriorite: string
     {
         return match($this) {
             self::FAIBLE => 'arrow-down',
+            self::NORMALE => 'minus',
             self::MOYENNE => 'minus',
             self::ELEVEE => 'arrow-up',
             self::CRITIQUE => 'exclamation',
@@ -66,9 +67,21 @@ enum TachePriorite: string
     {
         return match($this) {
             self::FAIBLE => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+            self::NORMALE => 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300',
             self::MOYENNE => 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300',
             self::ELEVEE => 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
             self::CRITIQUE => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+        };
+    }
+
+    public function sortOrder(): int
+    {
+        return match($this) {
+            self::CRITIQUE => 5,
+            self::ELEVEE => 4,
+            self::MOYENNE => 3,
+            self::NORMALE => 2,
+            self::FAIBLE => 1,
         };
     }
 }
