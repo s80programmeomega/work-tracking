@@ -3,16 +3,14 @@
   <Teleport to="body">
     <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden"
-        @click.stop >
+        @click.stop>
         <!-- Header -->
         <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
             {{ isEdit ? 'Modifier le projet' : 'Créer un nouveau projet' }}
           </h2>
-          <button
-            @click="$emit('close')"
-            class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-          >
+          <button @click="$emit('close')"
+            class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
             <XIcon class="w-5 h-5" />
           </button>
         </div>
@@ -25,20 +23,16 @@
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Workspace <span class="text-red-500">*</span>
               </label>
-              <select
-                v-model="form.workspace_id"
-                required
-                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-              >
+              <select v-model="form.workspace_id" required:disabled="!!workspaceId"
+                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed">
                 <option value="">Sélectionner un workspace</option>
-                <option
-                  v-for="workspace in workspaces"
-                  :key="workspace.id"
-                  :value="workspace.id"
-                >
+                <option v-for="workspace in workspaces" :key="workspace.id" :value="workspace.id">
                   {{ workspace.nom }}
                 </option>
               </select>
+              <p v-if="workspaceId" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Workspace prédéfini pour ce contexte
+              </p>
             </div>
 
             <!-- Nom du projet -->
@@ -46,13 +40,8 @@
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Nom du projet <span class="text-red-500">*</span>
               </label>
-              <input
-                v-model="form.nom"
-                type="text"
-                required
-                placeholder="Ex: Système de gestion RH"
-                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-              />
+              <input v-model="form.nom" type="text" required placeholder="Ex: Système de gestion RH"
+                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
             </div>
 
             <!-- Code (auto-généré ou manuel) -->
@@ -60,12 +49,8 @@
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Code du projet
               </label>
-              <input
-                v-model="form.code"
-                type="text"
-                placeholder="Auto-généré si vide"
-                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-              />
+              <input v-model="form.code" type="text" placeholder="Auto-généré si vide"
+                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 Laissez vide pour générer automatiquement
               </p>
@@ -76,78 +61,52 @@
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Description
               </label>
-              <textarea
-                v-model="form.description"
-                rows="4"
-                placeholder="Décrivez votre projet..."
-                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none"
-              ></textarea>
+              <textarea v-model="form.description" rows="4" placeholder="Décrivez votre projet..."
+                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none"></textarea>
             </div>
 
-             <!-- Dates avec DatePicker personnalisé -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Date de début <span class="text-red-500">*</span>
-            </label>
-            <DatePicker
-              v-model="form.date_debut"
-              required
-              :enable-time-picker="false"
-              :is-required="true"
-              auto-apply
-              :format="'yyyy-MM-dd'"
-              :locale="'fr'"
-              :dark="isDark"
-              class="w-full"
-            >
-              <template #input-icon>
-                <CalendarIcon class="w-5 h-5 text-gray-400" />
-              </template>
-            </DatePicker>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Date de fin <span class="text-red-500">*</span>
-            </label>
-            <DatePicker
-              v-model="form.date_fin"
-              required
-              :enable-time-picker="false"
-              :is-required="true"
-              auto-apply
-              :format="'yyyy-MM-dd'"
-              :locale="'fr'"
-              :dark="isDark"
-              :min-date="form.date_debut"
-              class="w-full"
-            >
-              <template #input-icon>
-                <CalendarIcon class="w-5 h-5 text-gray-400" />
-              </template>
-            </DatePicker>
-          </div>
-        </div>
+            <!-- Dates avec DatePicker personnalisé -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Date de début <span class="text-red-500">*</span>
+                </label>
+                <DatePicker v-model="form.date_debut" required :enable-time-picker="false" :is-required="true"
+                  auto-apply :format="'yyyy-MM-dd'" :locale="'fr'" :dark="isDark" class="w-full">
+                  <template #input-icon>
+                    <CalendarIcon class="w-5 h-5 text-gray-400" />
+                  </template>
+                </DatePicker>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Date de fin <span class="text-red-500">*</span>
+                </label>
+                <DatePicker v-model="form.date_fin" required :enable-time-picker="false" :is-required="true" auto-apply
+                  :format="'yyyy-MM-dd'" :locale="'fr'" :dark="isDark" :min-date="form.date_debut" class="w-full">
+                  <template #input-icon>
+                    <CalendarIcon class="w-5 h-5 text-gray-400" />
+                  </template>
+                </DatePicker>
+              </div>
+            </div>
 
             <!-- Responsable -->
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Responsable du projet <span class="text-red-500">*</span>
               </label>
-              <select
-                v-model="form.responsable_id"
-                required
-                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-              >
+              <select v-model="form.responsable_id" required
+                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent">
                 <option value="">Sélectionner un responsable</option>
-                <option
-                  v-for="user in users"
-                  :key="user.id"
-                  :value="user.id"
-                >
+                <option v-for="user in users" :key="user.id" :value="user.id">
                   {{ user.nom }} - {{ user.email }}
                 </option>
               </select>
+              <p v-if="users.length === 0 && form.workspace_id"
+                class="mt-1 text-xs text-yellow-600 dark:text-yellow-400">
+                Aucun membre trouvé dans ce workspace
+              </p>
             </div>
 
             <!-- Status et Visibilité -->
@@ -156,10 +115,8 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Statut
                 </label>
-                <select
-                  v-model="form.status"
-                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                >
+                <select v-model="form.status"
+                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent">
                   <option value="active">Actif</option>
                   <option value="pending">En attente</option>
                   <option value="completed">Terminé</option>
@@ -170,10 +127,8 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Visibilité
                 </label>
-                <select
-                  v-model="form.visibility"
-                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                >
+                <select v-model="form.visibility"
+                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent">
                   <option value="public">Public - Visible par tous</option>
                   <option value="team">Équipe - Visible par les membres</option>
                   <option value="private">Privé - Visible uniquement par le responsable</option>
@@ -187,14 +142,8 @@
                 Budget (optionnel)
               </label>
               <div class="relative">
-                <input
-                  v-model.number="form.budget"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="0.00"
-                  class="w-full px-4 py-2 pl-12 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                />
+                <input v-model.number="form.budget" type="number" step="0.01" min="0" placeholder="0.00"
+                  class="w-full px-4 py-2 pl-12 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">
                   XAF
                 </span>
@@ -207,30 +156,17 @@
                 Couleur du projet
               </label>
               <div class="flex items-center gap-4">
-                <input
-                  v-model="form.couleur"
-                  type="color"
-                  class="w-16 h-10 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer"
-                />
-                <input
-                  v-model="form.couleur"
-                  type="text"
-                  placeholder="#3B82F6"
-                  class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                />
+                <input v-model="form.couleur" type="color"
+                  class="w-16 h-10 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer" />
+                <input v-model="form.couleur" type="text" placeholder="#3B82F6"
+                  class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
               </div>
               <div class="flex gap-2 mt-3">
-                <button
-                  v-for="color in presetColors"
-                  :key="color"
-                  type="button"
-                  @click="form.couleur = color"
-                  :style="{ backgroundColor: color }"
-                  :class="[
+                <button v-for="color in presetColors" :key="color" type="button" @click="form.couleur = color"
+                  :style="{ backgroundColor: color }" :class="[
                     'w-8 h-8 rounded-lg border-2 transition-transform hover:scale-110',
                     form.couleur === color ? 'border-gray-900 dark:border-white scale-110' : 'border-transparent'
-                  ]"
-                ></button>
+                  ]"></button>
               </div>
             </div>
 
@@ -239,34 +175,22 @@
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Objectifs du projet
               </label>
-              <textarea
-                v-model="form.objectifs"
-                rows="3"
-                placeholder="Décrivez les objectifs principaux du projet..."
-                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none"
-              ></textarea>
+              <textarea v-model="form.objectifs" rows="3" placeholder="Décrivez les objectifs principaux du projet..."
+                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none"></textarea>
             </div>
 
             <!-- Options -->
             <div class="space-y-3">
               <div class="flex items-center gap-3">
-                <input
-                  v-model="form.is_template"
-                  type="checkbox"
-                  id="is_template"
-                  class="w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-brand-500 dark:focus:ring-brand-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                />
+                <input v-model="form.is_template" type="checkbox" id="is_template"
+                  class="w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-brand-500 dark:focus:ring-brand-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                 <label for="is_template" class="text-sm text-gray-700 dark:text-gray-300">
                   Utiliser comme modèle pour de futurs projets
                 </label>
               </div>
               <div class="flex items-center gap-3">
-                <input
-                  v-model="form.is_favorite"
-                  type="checkbox"
-                  id="is_favorite"
-                  class="w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-brand-500 dark:focus:ring-brand-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                />
+                <input v-model="form.is_favorite" type="checkbox" id="is_favorite"
+                  class="w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-brand-500 dark:focus:ring-brand-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                 <label for="is_favorite" class="text-sm text-gray-700 dark:text-gray-300">
                   Ajouter aux favoris
                 </label>
@@ -274,10 +198,8 @@
             </div>
 
             <!-- Error Message -->
-            <div
-              v-if="error"
-              class="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800"
-            >
+            <div v-if="error"
+              class="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
               <p class="text-sm text-red-800 dark:text-red-400">
                 {{ error }}
               </p>
@@ -286,19 +208,14 @@
         </div>
 
         <!-- Footer -->
-        <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-          <button
-            type="button"
-            @click="$emit('close')"
-            class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
-          >
+        <div
+          class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+          <button type="button" @click="$emit('close')"
+            class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
             Annuler
           </button>
-          <button
-            @click="handleSubmit"
-            :disabled="loading"
-            class="px-6 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-          >
+          <button @click="handleSubmit" :disabled="loading"
+            class="px-6 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
             <span v-if="loading" class="animate-spin">⏳</span>
             {{ isEdit ? 'Mettre à jour' : 'Créer le projet' }}
           </button>
@@ -312,6 +229,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useProjets } from '@/composables/useProjets'
 import { useWorkspace } from '@/composables/useWorkspace'
+import { useAuthStore } from '@/stores/auth'
 import { XIcon } from '@/icons'
 
 import DatePicker from '@vuepic/vue-datepicker'
@@ -322,9 +240,15 @@ const props = defineProps({
   projet: {
     type: Object,
     default: null
+  },
+  // ✅ NOUVEAU : Prop pour forcer un workspace spécifique
+  workspaceId: {
+    type: [Number, String],
+    default: null
   }
 })
 
+const authStore = useAuthStore()
 const isDark = computed(() => document.documentElement.classList.contains('dark'))
 
 const emit = defineEmits(['close', 'saved'])
@@ -367,8 +291,20 @@ const form = ref({
   is_favorite: false
 })
 
-// Initialize form with projet data if editing
-watch(() => props.projet, (newProjet) => {
+// ✅ NOUVELLE MÉTHODE : Charger les membres d'un workspace
+const loadWorkspaceMembers = async (workspaceId) => {
+  try {
+    const usersResponse = await fetchMembers(workspaceId)
+    users.value = usersResponse || []
+    console.log('Membres chargés:', users.value.length)
+  } catch (err) {
+    console.error('Error loading workspace members:', err)
+    users.value = []
+  }
+}
+
+// ✅ CORRECTION : Initialisation améliorée avec workspace forcé
+watch(() => props.projet, async (newProjet) => {
   if (newProjet) {
     form.value = {
       workspace_id: newProjet.workspace_id || '',
@@ -386,8 +322,28 @@ watch(() => props.projet, (newProjet) => {
       is_template: newProjet.is_template || false,
       is_favorite: newProjet.is_favorite || false
     }
+    // ✅ Charger les membres du workspace du projet
+    if (form.value.workspace_id) {
+      await loadWorkspaceMembers(form.value.workspace_id)
+    }
+  }
+  else {
+    // ✅ Nouveau projet : utiliser le workspace forcé ou le workspace courant
+    const defaultWorkspaceId = props.workspaceId || authStore.user?.current_workspace_id
+    if (defaultWorkspaceId) {
+      form.value.workspace_id = defaultWorkspaceId
+      await loadWorkspaceMembers(defaultWorkspaceId)
+    }
   }
 }, { immediate: true })
+
+// ✅ NOUVEAU : Watch pour recharger les membres quand le modal s'ouvre en mode édition
+watch(() => [props.projet, form.value.workspace_id], async ([newProjet, newWorkspaceId]) => {
+  if (newProjet && newWorkspaceId && users.value.length === 0) {
+    await loadWorkspaceMembers(newWorkspaceId)
+  }
+}, { immediate: false })
+
 
 const handleSubmit = async () => {
   try {
@@ -421,6 +377,18 @@ const handleSubmit = async () => {
       error.value = 'La date de fin doit être après la date de début'
       return
     }
+    // ✅ CORRECTION : Préparer les données pour l'API
+    const submitData = {
+      ...form.value,
+      // ✅ S'assurer que le code est null si vide (pour auto-génération)
+            code: form.value.code || (isEdit.value ? undefined : null)
+
+    }
+
+     // ✅ CORRECTION : Nettoyer les valeurs undefined pour l'update
+    if (isEdit.value && !submitData.code) {
+      delete submitData.code
+    }
 
     // Create or update
     if (isEdit.value) {
@@ -433,6 +401,16 @@ const handleSubmit = async () => {
   } catch (err) {
     error.value = err.response?.data?.message || 'Une erreur est survenue'
     console.error('Error saving projet:', err)
+
+    // ✅ Afficher les erreurs de validation détaillées
+    if (err.response?.data?.errors) {
+      const errors = err.response.data.errors
+      const firstError = Object.values(errors)[0]?.[0]
+      if (firstError) {
+        error.value = firstError
+      }
+    }
+
   } finally {
     loading.value = false
   }
@@ -445,15 +423,26 @@ onMounted(async () => {
     const workspacesResponse = await fetchWorkspaces()
     workspaces.value = workspacesResponse.data || []
 
-    // Load users (members of workspace)
-    if (form.value.workspace_id) {
-      const usersResponse = await fetchMembers(form.value.workspace_id)
-      users.value = usersResponse || []
+     // ✅ CORRECTION : Si édition, charger les membres du workspace
+    if (isEdit.value && props.projet?.workspace_id) {
+      form.value.workspace_id = props.projet.workspace_id
+      await loadWorkspaceMembers(props.projet.workspace_id)
     }
 
-    // Set default workspace if creating new
-    if (!isEdit.value && workspaces.value.length > 0) {
-      form.value.workspace_id = workspaces.value[0].id
+    // ✅ Si création et workspaceId fourni, l'utiliser
+    else if (!isEdit.value && props.workspaceId) {
+      form.value.workspace_id = props.workspaceId
+      await loadWorkspaceMembers(props.workspaceId)
+    }
+
+     // ✅ Sinon, utiliser le workspace courant de l'utilisateur
+    else if (!isEdit.value && !props.workspaceId && workspaces.value.length > 0) {
+      const currentWorkspaceId = authStore.user?.current_workspace_id
+      const defaultWorkspace = workspaces.value.find(w => w.id === currentWorkspaceId) || workspaces.value[0]
+      if (defaultWorkspace) {
+        form.value.workspace_id = defaultWorkspace.id
+        await loadWorkspaceMembers(defaultWorkspace.id)
+      }
     }
   } catch (err) {
     console.error('Error loading data:', err)
@@ -463,11 +452,11 @@ onMounted(async () => {
 // Watch workspace change to load members
 watch(() => form.value.workspace_id, async (newWorkspaceId) => {
   if (newWorkspaceId) {
-    try {
-      const usersResponse = await fetchMembers(newWorkspaceId)
-      users.value = usersResponse || []
-    } catch (err) {
-      console.error('Error loading workspace members:', err)
+    await loadWorkspaceMembers(newWorkspaceId)
+
+    // ✅ Réinitialiser le responsable si le workspace change
+    if (!isEdit.value) {
+      form.value.responsable_id = ''
     }
   }
 })

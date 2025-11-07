@@ -19,12 +19,19 @@ class UpdateWorkspaceRequest extends FormRequest
      */
     protected function prepareForValidation()
     {
-        // Décoder les settings JSON si elles existent
+         // ✅ Gestion flexible des settings (objet ou string)
         if ($this->has('settings')) {
             $settings = $this->input('settings');
             
+            // Si c'est déjà un array (depuis JSON body ou form-data object)
+            if (is_array($settings)) {
+                $this->merge([
+                    'settings_array' => $settings,
+                    'settings' => json_encode($settings) // Convertir en string pour validation
+                ]);
+            }
             // Si c'est une string JSON
-            if (is_string($settings)) {
+            elseif (is_string($settings)) {
                 $decoded = json_decode($settings, true);
                 
                 if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
@@ -32,12 +39,6 @@ class UpdateWorkspaceRequest extends FormRequest
                         'settings_array' => $decoded
                     ]);
                 }
-            }
-            // Si c'est déjà un array (cas rare mais possible)
-            elseif (is_array($settings)) {
-                $this->merge([
-                    'settings_array' => $settings
-                ]);
             }
         }
 
@@ -88,14 +89,24 @@ class UpdateWorkspaceRequest extends FormRequest
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'is_active' => 'sometimes|boolean',
             'remove_logo' => 'nullable|boolean',
-            'settings' => 'nullable|string',
+            'settings' => 'nullable|string|json', // ✅ Accepter string JSON valide
             
             // Validation des settings décodées
             'settings_array' => 'nullable|array',
+            'settings_array.language' => 'nullable|string|in:fr,en',
+            'settings_array.timezone' => 'nullable|string',
+            'settings_array.visibility' => 'nullable|string|in:public,private,internal',
             'settings_array.default_project_visibility' => 'nullable|string|in:public,team,private',
             'settings_array.members_can_create_projects' => 'nullable|boolean',
             'settings_array.members_can_invite' => 'nullable|boolean',
+            'settings_array.members_can_delete_projects' => 'nullable|boolean',
             'settings_array.require_task_validation' => 'nullable|boolean',
+            'settings_array.require_approval_for_time_off' => 'nullable|boolean',
+            'settings_array.notify_on_new_member' => 'nullable|boolean',
+            'settings_array.notify_on_new_project' => 'nullable|boolean',
+            'settings_array.notify_on_task_assigned' => 'nullable|boolean',
+            'settings_array.notify_on_deadline_approaching' => 'nullable|boolean',
+            'settings_array.weekly_digest' => 'nullable|boolean',
         ];
     }
 
@@ -116,6 +127,9 @@ class UpdateWorkspaceRequest extends FormRequest
             'logo.max' => 'L\'image ne peut pas dépasser 2 MB',
             
             'is_active.boolean' => 'Le statut doit être actif ou inactif',
+            
+            'settings.string' => 'Le format des paramètres est invalide',
+            'settings.json' => 'Les paramètres doivent être au format JSON valide',
         ];
     }
 

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Projet;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateProjetRequest extends FormRequest
 {
@@ -16,8 +17,16 @@ class UpdateProjetRequest extends FormRequest
         $projetId = $this->route('projet')->id;
 
         return [
+            'workspace_id' => ['sometimes', 'required', 'exists:workspaces,id'],
             'nom' => 'sometimes|required|string|max:255',
-            'code' => "nullable|string|max:50|unique:projets,code,{$projetId}",
+             'code' => [
+                'nullable',
+                'string',
+                'max:255',
+                Rule::unique('projets', 'code')
+                    ->ignore($projetId)
+                    ->whereNull('deleted_at')
+            ],
             'description' => 'nullable|string',
             'date_debut' => 'sometimes|required|date',
             'date_fin' => 'sometimes|required|date|after:date_debut',
@@ -41,19 +50,27 @@ class UpdateProjetRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'nom.required' => 'Le nom du projet est obligatoire.',
-            'nom.max' => 'Le nom ne peut pas dépasser 255 caractères.',
-            'code.unique' => 'Ce code de projet existe déjà.',
-            'date_debut.required' => 'La date de début est obligatoire.',
-            'date_fin.after' => 'La date de fin doit être après la date de début.',
+            'workspace_id.required' => 'Le workspace est requis.',
+            'workspace_id.exists' => 'Le workspace sélectionné n\'existe pas.',
+            'nom.required' => 'Le nom du projet est requis.',
+            'nom.max' => 'Le nom du projet ne peut pas dépasser 255 caractères.',
+            'code.unique' => 'Ce code projet existe déjà.',
+            'code.max' => 'Le code ne peut pas dépasser 255 caractères.',
+            'date_debut.required' => 'La date de début est requise.',
+            'date_debut.date' => 'La date de début doit être une date valide.',
+            'date_fin.required' => 'La date de fin est requise.',
+            'date_fin.date' => 'La date de fin doit être une date valide.',
+            'date_fin.after_or_equal' => 'La date de fin doit être après ou égale à la date de début.',
+            'responsable_id.required' => 'Le responsable du projet est requis.',
             'responsable_id.exists' => 'Le responsable sélectionné n\'existe pas.',
-            'status.in' => 'Le statut doit être: active, pending, completed ou archived.',
-            'visibility.in' => 'La visibilité doit être: public, team ou private.',
-            'progression.min' => 'La progression ne peut pas être négative.',
-            'progression.max' => 'La progression ne peut pas dépasser 100%.',
+            'status.in' => 'Le statut doit être : active, pending, completed ou archived.',
+            'visibility.in' => 'La visibilité doit être : public, private ou team.',
+            'couleur.max' => 'La couleur ne peut pas dépasser 7 caractères.',
             'budget.numeric' => 'Le budget doit être un nombre.',
             'budget.min' => 'Le budget ne peut pas être négatif.',
-            'tags.*.exists' => 'Un des tags sélectionnés n\'existe pas.',
+            'progression.integer' => 'La progression doit être un nombre entier.',
+            'progression.min' => 'La progression doit être au minimum 0%.',
+            'progression.max' => 'La progression ne peut pas dépasser 100%.',
         ];
     }
 }

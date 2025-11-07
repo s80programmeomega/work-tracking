@@ -40,6 +40,55 @@ class Workspace extends Model
         'projet_count',
     ];
 
+    protected $attributes = [
+        'is_active' => true,
+    ];
+
+
+
+    /**
+     * Boot method pour générer le code et initialiser les settings
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($workspace) {
+            // Générer un code unique
+            if (empty($workspace->code)) {
+                $workspace->code = static::generateUniqueCode();
+            }
+
+            // Initialiser les settings par défaut si vides
+            if (empty($workspace->settings)) {
+                $workspace->settings = static::getDefaultSettings();
+            }
+        });
+    }
+
+    /**
+     * Paramètres par défaut du workspace
+     */
+    public static function getDefaultSettings(): array
+    {
+        return [
+            'language' => 'fr',
+            'timezone' => 'Africa/Douala',
+            'visibility' => 'private',
+            'weekly_digest' => false,
+            'members_can_invite' => true,
+            'members_can_create_projects' => true,
+            'members_can_delete_projects' => false,
+            'notify_on_new_member' => true,
+            'notify_on_new_project' => true,
+            'notify_on_task_assigned' => true,
+            'notify_on_deadline_approaching' => true,
+            'require_task_validation' => true,
+            'require_approval_for_time_off' => true,
+            'default_project_visibility' => 'team',
+        ];
+    }
+
     /**
      * Activity logging configuration
      */
@@ -49,20 +98,6 @@ class Workspace extends Model
             ->logOnly(['nom', 'description', 'is_active'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
-    }
-
-    /**
-     * Boot the model
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($workspace) {
-            if (empty($workspace->code)) {
-                $workspace->code = static::generateUniqueCode();
-            }
-        });
     }
 
     /**
@@ -111,10 +146,49 @@ class Workspace extends Model
         return $this->hasMany(Projet::class);
     }
 
-       public function invitations(): HasMany
+    public function invitations(): HasMany
     {
         return $this->hasMany(WorkspaceInvitation::class);
     }
+
+    /**
+     * Accesseur pour obtenir une valeur de setting
+     */
+    public function getSetting(string $key, $default = null)
+    {
+        return data_get($this->settings, $key, $default);
+    }
+
+    /**
+     * Mutateur pour définir une valeur de setting
+     */
+    public function setSetting(string $key, $value): void
+    {
+        $settings = $this->settings ?? [];
+        data_set($settings, $key, $value);
+        $this->settings = $settings;
+        $this->save();
+    }
+
+    /**
+     * Mettre à jour plusieurs settings à la fois
+     */
+    public function updateSettings(array $newSettings): void
+    {
+        $currentSettings = $this->settings ?? [];
+        $this->settings = array_merge($currentSettings, $newSettings);
+        $this->save();
+    }
+
+    /**
+     * Réinitialiser les settings aux valeurs par défaut
+     */
+    public function resetSettings(): void
+    {
+        $this->settings = static::getDefaultSettings();
+        $this->save();
+    }
+
     /**
      * Get active projects
      */
@@ -147,13 +221,13 @@ class Workspace extends Model
         return $query->where('is_active', true);
     }
 
-     public function scopeForUser($query, $userId)
+    public function scopeForUser($query, $userId)
     {
-        return $query->where(function($q) use ($userId) {
+        return $query->where(function ($q) use ($userId) {
             $q->where('owner_id', $userId)
-              ->orWhereHas('members', function($memberQuery) use ($userId) {
-                  $memberQuery->where('user_id', $userId);
-              });
+                ->orWhereHas('members', function ($memberQuery) use ($userId) {
+                    $memberQuery->where('user_id', $userId);
+                });
         });
     }
 
@@ -217,26 +291,10 @@ class Workspace extends Model
 
     public function hasAccess(User $user): bool
     {
-        // Owner has access
-        if ($this->owner_id === $user->id) {
-            return true;
-        }
-
-        // Member has access
-        return $this->hasMember($user->id);
+        return $this->owner_id === $user->id
+            || $this->members()->where('user_id', $user->id)->exists();
     }
 
-    /**
-     * Check if user is a member of workspace.
-     */
-    public function hasMember($userId): bool
-    {
-        if ($userId instanceof User) {
-            $userId = $userId->id;
-        }
-
-        return $this->members()->where('user_id', $userId)->exists();
-    }
 
     /**
      * Get member role.
@@ -252,46 +310,32 @@ class Workspace extends Model
     }
 
     /**
-     * Check if user can manage members.
+     * Vérifier si un utilisateur peut gérer les membres
      */
     public function canManageMembers(User $user): bool
     {
-        // Owner can manage
-        if ($this->owner_id === $user->id) {
-            return true;
-        }
-
-        $member = $this->members()->where('user_id', $user->id)->first();
-        
-        if (!$member) {
-            return false;
-        }
-
-        return in_array($member->pivot->role, ['admin']) ||
-               ($member->pivot->can_invite_members ?? false);
+        $role = $this->getMemberRole($user);
+        return in_array($role, ['owner', 'admin']);
     }
 
-        /**
+    /**
      * Check if user can create projects.
      */
     public function canCreateProjects(User $user): bool
     {
-        // Owner can create
         if ($this->owner_id === $user->id) {
             return true;
         }
 
-        $member = $this->members()->where('user_id', $user->id)->first();
-        
-        if (!$member) {
+        if (!$this->getSetting('members_can_create_projects', true)) {
             return false;
         }
 
-        return in_array($member->pivot->role, ['owner', 'admin','manager']) ||
-               ($member->pivot->can_create_projects ?? false);
+        $role = $this->getMemberRole($user);
+        return in_array($role, ['owner', 'admin', 'member']);
     }
 
-    
+
     /**
      * Check if user can manage settings.
      */
@@ -303,13 +347,13 @@ class Workspace extends Model
         }
 
         $member = $this->members()->where('user_id', $user->id)->first();
-        
+
         if (!$member) {
             return false;
         }
 
         return in_array($member->pivot->role, ['admin']) ||
-               ($member->pivot->can_manage_settings ?? false);
+            ($member->pivot->can_manage_settings ?? false);
     }
 
     public function canUserManageMembers(User $user): bool
@@ -415,16 +459,15 @@ class Workspace extends Model
             'projets_actifs' => $projets->where('status', 'active')->count(),
             'projets_termines' => $projets->where('status', 'completed')->count(),
             'total_activites' => $activites->count(),
+            'total_members' => $this->members()->count() + 1, // +1 pour l'owner
             'total_taches' => $taches->count(),
             'taches_terminees' => $taches->where('statut', 'termine')->count(),
             'taches_en_cours' => $taches->where('statut', 'en_cours')->count(),
             'taches_en_retard' => $taches->filter(fn($t) => $t->isOverdue())->count(),
             'taux_completion' => $taches->count() > 0
-                ? round(($taches->where('statut', 'termine')->count() / $taches->count()) * 100, 2)
-                : 0,
+                ? round(($taches->where('statut', 'termine')->count() / $taches->count()) * 100, 2) : 0,
             'progression_moyenne' => $projets->count() > 0
-                ? round($projets->avg('progression'), 2)
-                : 0,
+                ? round($projets->avg('progression'), 2) : 0,
         ];
     }
 
@@ -446,7 +489,7 @@ class Workspace extends Model
     {
         $this->update(['is_active' => true]);
     }
- 
+
     /**
      * Mutator pour garantir que settings est toujours un array
      */

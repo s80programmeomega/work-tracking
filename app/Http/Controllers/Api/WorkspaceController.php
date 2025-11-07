@@ -599,86 +599,86 @@ class WorkspaceController extends Controller
 
 
   /**
- * Get all invitations across workspaces (admin only)
- */
-public function allInvitations(Request $request)
-{
+   * Get all invitations across workspaces (admin only)
+   */
+  public function allInvitations(Request $request)
+  {
     // Vérifier les permissions admin
     if (!$request->user()->hasRole(['super_admin', 'admin'])) {
-        abort(403, 'Accès non autorisé');
+      abort(403, 'Accès non autorisé');
     }
 
     $query = WorkspaceInvitation::with(['workspace', 'invitedBy'])
-        ->when($request->search, function ($q, $search) {
-            $q->where(function ($query) use ($search) {
-                $query->where('email', 'like', "%{$search}%")
-                    ->orWhereHas('workspace', function ($q) use ($search) {
-                        $q->where('nom', 'like', "%{$search}%");
-                    })
-                    ->orWhereHas('invitedBy', function ($q) use ($search) {
-                        $q->where('nom', 'like', "%{$search}%");
-                    });
+      ->when($request->search, function ($q, $search) {
+        $q->where(function ($query) use ($search) {
+          $query->where('email', 'like', "%{$search}%")
+            ->orWhereHas('workspace', function ($q) use ($search) {
+              $q->where('nom', 'like', "%{$search}%");
+            })
+            ->orWhereHas('invitedBy', function ($q) use ($search) {
+              $q->where('nom', 'like', "%{$search}%");
             });
-        })
-        ->when($request->status && $request->status !== 'all', function ($q, $status) {
-            $q->where('status', $status);
-        })
-        ->when($request->workspace_id && $request->workspace_id !== 'all', function ($q, $workspaceId) {
-            $q->where('workspace_id', $workspaceId);
-        })
-        ->latest();
+        });
+      })
+      ->when($request->status && $request->status !== 'all', function ($q, $status) {
+        $q->where('status', $status);
+      })
+      ->when($request->workspace_id && $request->workspace_id !== 'all', function ($q, $workspaceId) {
+        $q->where('workspace_id', $workspaceId);
+      })
+      ->latest();
 
     $invitations = $query->paginate($request->per_page ?? 20);
 
     // Statistiques
     $statistics = [
-        'total_invitations' => WorkspaceInvitation::count(),
-        'pending_invitations' => WorkspaceInvitation::where('status', 'pending')->count(),
-        'accepted_invitations' => WorkspaceInvitation::where('status', 'accepted')->count(),
-        'expired_invitations' => WorkspaceInvitation::where('status', 'pending')
-            ->where('expires_at', '<', now())
-            ->count(),
-        'cancelled_invitations' => WorkspaceInvitation::where('status', 'cancelled')->count(),
+      'total_invitations' => WorkspaceInvitation::count(),
+      'pending_invitations' => WorkspaceInvitation::where('status', 'pending')->count(),
+      'accepted_invitations' => WorkspaceInvitation::where('status', 'accepted')->count(),
+      'expired_invitations' => WorkspaceInvitation::where('status', 'pending')
+        ->where('expires_at', '<', now())
+        ->count(),
+      'cancelled_invitations' => WorkspaceInvitation::where('status', 'cancelled')->count(),
     ];
 
     return response()->json([
-        'data' => $invitations->items(),
-        'meta' => [
-            'current_page' => $invitations->currentPage(),
-            'last_page' => $invitations->lastPage(),
-            'per_page' => $invitations->perPage(),
-            'total' => $invitations->total(),
-            'from' => $invitations->firstItem(),
-            'to' => $invitations->lastItem(),
-        ],
-        'statistics' => $statistics
+      'data' => $invitations->items(),
+      'meta' => [
+        'current_page' => $invitations->currentPage(),
+        'last_page' => $invitations->lastPage(),
+        'per_page' => $invitations->perPage(),
+        'total' => $invitations->total(),
+        'from' => $invitations->firstItem(),
+        'to' => $invitations->lastItem(),
+      ],
+      'statistics' => $statistics
     ]);
-}
+  }
 
-/**
- * Get invitation statistics
- */
-public function invitationStatistics(Request $request)
-{
+  /**
+   * Get invitation statistics
+   */
+  public function invitationStatistics(Request $request)
+  {
     if (!$request->user()->hasRole(['super_admin', 'admin'])) {
-        abort(403, 'Accès non autorisé');
+      abort(403, 'Accès non autorisé');
     }
 
     $statistics = [
-        'total_invitations' => WorkspaceInvitation::count(),
-        'pending_invitations' => WorkspaceInvitation::where('status', 'pending')->count(),
-        'accepted_invitations' => WorkspaceInvitation::where('status', 'accepted')->count(),
-        'expired_invitations' => WorkspaceInvitation::where('status', 'pending')
-            ->where('expires_at', '<', now())
-            ->count(),
-        'cancelled_invitations' => WorkspaceInvitation::where('status', 'cancelled')->count(),
-        'recent_invitations' => WorkspaceInvitation::where('created_at', '>=', now()->subDays(7))->count(),
+      'total_invitations' => WorkspaceInvitation::count(),
+      'pending_invitations' => WorkspaceInvitation::where('status', 'pending')->count(),
+      'accepted_invitations' => WorkspaceInvitation::where('status', 'accepted')->count(),
+      'expired_invitations' => WorkspaceInvitation::where('status', 'pending')
+        ->where('expires_at', '<', now())
+        ->count(),
+      'cancelled_invitations' => WorkspaceInvitation::where('status', 'cancelled')->count(),
+      'recent_invitations' => WorkspaceInvitation::where('created_at', '>=', now()->subDays(7))->count(),
     ];
 
     return response()->json([
-        'data' => $statistics
+      'data' => $statistics
     ]);
-}
+  }
 
   /**
    * Get workspace members
@@ -962,17 +962,17 @@ public function invitationStatistics(Request $request)
         });
       })
       // 🔥 NOUVEAU : Filtrer selon les permissions
-        ->where(function ($query) use ($user, $workspace) {
-            // Le propriétaire du workspace voit tous les projets
-            if ($workspace->owner_id === $user->id) {
-                return; // Pas de filtre supplémentaire
-            }
+      ->where(function ($query) use ($user, $workspace) {
+        // Le propriétaire du workspace voit tous les projets
+        if ($workspace->owner_id === $user->id) {
+          return; // Pas de filtre supplémentaire
+        }
 
-            // Les autres utilisateurs ne voient que les projets où ils sont membres
-            $query->whereHas('members', function ($memberQuery) use ($user) {
-                $memberQuery->where('user_id', $user->id);
-            });
-        })
+        // Les autres utilisateurs ne voient que les projets où ils sont membres
+        $query->whereHas('members', function ($memberQuery) use ($user) {
+          $memberQuery->where('user_id', $user->id);
+        });
+      })
       ->orderBy('created_at', 'desc')
       ->paginate($request->per_page ?? 15);
 
@@ -1162,6 +1162,7 @@ public function invitationStatistics(Request $request)
           $dataToUpdate['settings'] = array_merge($currentSettings, $newSettings);
 
           Log::info('Settings fusionnées', [
+            'workspace_id' => $workspace->id,
             'current' => $currentSettings,
             'new' => $newSettings,
             'merged' => $dataToUpdate['settings']

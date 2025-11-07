@@ -375,6 +375,11 @@ class ProjetService
     public function updateProjet(Projet $projet, array $data): Projet
     {
         return DB::transaction(function () use ($projet, $data) {
+            // ✅ Si le code n'est pas fourni ou est null, ne pas le modifier
+        if (!isset($data['code']) || $data['code'] === null || $data['code'] === '') {
+            unset($data['code']);
+        }
+        
             // Extract relationships
             $tags = $data['tags'] ?? null;
             unset($data['tags']);
@@ -392,7 +397,7 @@ class ProjetService
                 $projet->updateProgression();
             }
 
-            return $projet->load(['responsable', 'members', 'tags', 'workspace']);
+            return $projet->load(['responsable', 'members', 'tags', 'workspace','activites']);
         });
     }
 
