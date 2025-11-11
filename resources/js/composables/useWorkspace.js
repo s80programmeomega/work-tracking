@@ -402,6 +402,8 @@ export function useWorkspace() {
 
     try {
       const response = await api.get(`/workspaces/${workspaceId}/projets`, { params });
+      console.log(response);
+      
       return response.data;
     } catch (err) {
       error.value = err.response?.data?.message || 'Erreur lors du chargement des projets';
