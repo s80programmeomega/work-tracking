@@ -462,10 +462,8 @@
                 >
                   Modifier
                 </button>
-                <button
-                  @click.stop="deleteProjet(projet)"
-                  class="text-red-600 hover:text-red-900 dark:text-red-400"
-                >
+                <button @click.stop="deleteProjet(projet)"
+                  class="text-red-600 hover:text-red-900 dark:text-red-400" >
                   Supprimer
                 </button>
               </div>
@@ -474,14 +472,6 @@
         </tbody>
       </table>
     </div>
-
-    <!-- Modal Create/Edit Projet -->
-    <!-- <ProjetFormModal
-      v-if="showFormModal"
-      :projet="selectedProjet"
-      @close="closeFormModal"
-      @saved="handleProjetSaved"
-    /> -->
 
     <!-- Project Form Modal -->
      <ProjetFormModal

@@ -192,42 +192,28 @@
                                     <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
                                         Projets récents
                                     </h2>
-                                    <button 
-                                        @click="activeTab = 'projects'"
-                                        class="text-brand-600 hover:text-brand-700 text-sm font-medium"
-                                    >
+                                    <button @click="activeTab = 'projects'"
+                                        class="text-brand-600 hover:text-brand-700 text-sm font-medium">
                                         Voir tout
                                     </button>
                                 </div>
                             </div>
                             <div class="p-6">
-                                <ProjetList 
-                                    ref="recentProjetsList"
-                                    :workspace-id="workspace.id"
-                                    :limit="5"
-                                    :show-header="false"
-                                    :show-filters="false"
-                                    @view-projet="navigateToProject"
-                                />
+                                <ProjetList ref="recentProjetsList" :workspace-id="workspace.id" :limit="5"
+                                    :show-header="false" :show-filters="false" @view-projet="navigateToProject" />
                             </div>
                         </div>
                     </div>
 
                     <!-- Projects Tab - Version complète avec ProjetList -->
                     <div v-if="activeTab === 'projects'" class="space-y-6">
-                        <ProjetList 
-                            ref="allProjetsList"
-                            :workspace-id="workspace.id"
-                            @view-projet="navigateToProject"
-                        />
+                        <ProjetList ref="allProjetsList" :workspace-id="workspace.id"
+                            @view-projet="navigateToProject" />
                     </div>
 
                     <!-- Members Tab -->
                     <div v-if="activeTab === 'members'" class="space-y-6">
-                        <WorkspaceMemberManagement 
-                            :workspace-id="workspace.id"
-                            @member-updated="handleMemberUpdated" 
-                        />
+                        <WorkspaceMemberManagement :workspace-id="workspace.id" @member-updated="handleMemberUpdated" />
                     </div>
                 </div>
             </template>
@@ -317,10 +303,10 @@ const loadWorkspaceData = async () => {
 // Recharger les projets quand on change d'onglet
 const handleTabChange = async (tabId: string) => {
     activeTab.value = tabId;
-    
+
     // Attendre que le composant soit rendu
     await nextTick();
-    
+
     if (tabId === 'projects' && allProjetsList.value) {
         // Recharger les projets complets
         allProjetsList.value.fetchProjets();

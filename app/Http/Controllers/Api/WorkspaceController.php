@@ -935,8 +935,9 @@ class WorkspaceController extends Controller
     ]);
   }
 
+
   /**
-   * Get workspace projects
+   * ✅ VERSION CORRIGÉE : Get workspace projects avec permissions correctes
    */
   public function projets(Request $request, Workspace $workspace)
   {
@@ -948,35 +949,59 @@ class WorkspaceController extends Controller
 
     $user = $request->user();
 
-    $projets = $workspace->projets()
+    $query = $workspace->projets()
       ->with(['responsable:id,nom,avatar', 'members:id,nom,avatar'])
-      ->withCount(['activites', 'members'])
-      ->when($request->status, function ($query, $status) {
-        $query->where('status', $status);
-      })
-      ->when($request->search, function ($query, $search) {
-        $query->where(function ($q) use ($search) {
-          $q->where('nom', 'like', "%{$search}%")
+      ->withCount(['activites', 'members']);
+
+    // Filtres de recherche/statut
+    $query->when($request->status, function ($q, $status) {
+      $q->where('status', $status);
+    })
+      ->when($request->search, function ($q, $search) {
+        $q->where(function ($subQuery) use ($search) {
+          $subQuery->where('nom', 'like', "%{$search}%")
             ->orWhere('code', 'like', "%{$search}%")
             ->orWhere('description', 'like', "%{$search}%");
         });
-      })
-      // 🔥 NOUVEAU : Filtrer selon les permissions
-      ->where(function ($query) use ($user, $workspace) {
-        // Le propriétaire du workspace voit tous les projets
-        if ($workspace->owner_id === $user->id) {
-          return; // Pas de filtre supplémentaire
-        }
+      });
 
-        // Les autres utilisateurs ne voient que les projets où ils sont membres
-        $query->whereHas('members', function ($memberQuery) use ($user) {
-          $memberQuery->where('user_id', $user->id);
-        });
-      })
-      ->orderBy('created_at', 'desc')
+    // 🔥 LOGIQUE DE PERMISSION
+    // Owner ou Admin du workspace → Voit TOUT
+    if (
+      $workspace->owner_id === $user->id ||
+      $this->isWorkspaceAdmin($user, $workspace)
+    ) {
+
+      // ✅ Aucun filtre supplémentaire : voir tous les projets
+
+    } else {
+      // ❌ Membre simple → Uniquement projets accessibles
+      $query->where(function ($q) use ($user) {
+        $q->where('responsable_id', $user->id)
+          ->orWhereHas('members', function ($memberQuery) use ($user) {
+            $memberQuery->where('user_id', $user->id);
+          });
+      });
+    }
+
+    $projets = $query->orderBy('created_at', 'desc')
       ->paginate($request->per_page ?? 15);
 
     return response()->json($projets);
+  }
+
+  /**
+   * ✅ HELPER : Vérifier si user est Admin du workspace
+   */
+  private function isWorkspaceAdmin(User $user, Workspace $workspace): bool
+  {
+    $member = $workspace->members()->where('user_id', $user->id)->first();
+
+    if (!$member) {
+      return false;
+    }
+
+    return in_array($member->pivot->role, ['super_admin', 'admin']);
   }
 
   /**

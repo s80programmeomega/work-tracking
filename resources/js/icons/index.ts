@@ -74,7 +74,11 @@ export { default as CogIcon } from './CogIcon.vue';
 
 export { default as PencilIcon } from './PencilIcon.vue';
 export { default as CubeIcon } from './CubeIcon.vue';
-
+export { default as ArrowRightIcon } from './ArrowRightIcon.vue';
+export { default as TrendingDownIcon } from './TrendingDownIcon.vue';
+export { default as FolderKanbanIcon } from './FolderKanbanIcon.vue';
+export { default as ListTodoIcon } from './ListTodoIcon.vue';
+export { default as TargetIcon } from './TargetIcon.vue';
 
 export {
   EyeIcon,

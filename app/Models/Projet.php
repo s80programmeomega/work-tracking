@@ -32,6 +32,7 @@ class Projet extends Model
         'objectifs',
         'metadata',
         'archived_at',
+        'created_by',
     ];
 
     protected $casts = [
@@ -118,11 +119,11 @@ class Projet extends Model
         if ($totalTaches === 0) {
             return 0;
         }
-        
+
         $completedTaches = $this->taches()
             ->where('statut', 'termine')
             ->count();
-            
+
         return (int) round(($completedTaches / $totalTaches) * 100);
     }
 
@@ -203,22 +204,55 @@ class Projet extends Model
                 ->orWhere('code', 'like', "%{$term}%");
         });
     }
-
     public function scopeAccessibleBy($query, $userId)
     {
         return $query->where(function ($q) use ($userId) {
+            // 1. Projets où l'user est responsable
             $q->where('responsable_id', $userId)
+
+                // 2. OU projets où l'user est membre direct
                 ->orWhereHas('members', function ($memberQuery) use ($userId) {
                     $memberQuery->where('user_id', $userId);
                 })
+
+                // 3. OU l'user est Owner/Admin du workspace
                 ->orWhereHas('workspace', function ($workspaceQuery) use ($userId) {
-                    $workspaceQuery->where('owner_id', $userId)
-                        ->orWhereHas('members', function ($wsMemberQuery) use ($userId) {
-                            $wsMemberQuery->where('user_id', $userId);
+                    $workspaceQuery->where(function ($wq) use ($userId) {
+                        // Owner du workspace
+                        $wq->where('owner_id', $userId)
+                            // OU Admin/Super Admin du workspace
+                            ->orWhereHas('members', function ($memberQuery) use ($userId) {
+                            $memberQuery->where('user_id', $userId)
+                                ->whereIn('role', ['owner', 'super_admin', 'admin']);
                         });
+                    });
                 });
         });
     }
+
+    /**
+     * ✅ NOUVEAU : Vérifier si user peut voir TOUS les projets du workspace
+     */
+    public function userCanSeeAllWorkspaceProjects(User $user): bool
+    {
+        if (!$this->workspace) {
+            return false;
+        }
+
+        // Owner du workspace
+        if ($this->workspace->owner_id === $user->id) {
+            return true;
+        }
+
+        // Admin du workspace
+        $member = $this->workspace->members()->where('user_id', $user->id)->first();
+        if ($member && in_array($member->pivot->role, ['super_admin', 'admin'])) {
+            return true;
+        }
+
+        return false;
+    }
+
 
     /**
      * Accessors
@@ -347,23 +381,23 @@ class Projet extends Model
         DB::transaction(function () use ($user) {
             // Remove from project members
             $this->members()->detach($user->id);
-            
+
             // Remove from all tasks in this project
             foreach ($this->activites as $activite) {
                 foreach ($activite->taches as $tache) {
                     $tache->assignees()->detach($user->id);
                 }
             }
-            
+
             // Revoke document permissions
             DocumentPermission::where('permissionable_type', User::class)
                 ->where('permissionable_id', $user->id)
-                ->whereHas('document', function($q) {
+                ->whereHas('document', function ($q) {
                     $q->where('documentable_type', Projet::class)
-                      ->where('documentable_id', $this->id);
+                        ->where('documentable_id', $this->id);
                 })
                 ->delete();
-            
+
             // Log the action
             activity()
                 ->causedBy(auth()->user())
@@ -382,7 +416,7 @@ class Projet extends Model
             $query->whereHas('assignees', function ($q) use ($user) {
                 $q->where('user_id', $user->id);
             })
-            ->orWhere('visibility', 'public');
+                ->orWhere('visibility', 'public');
         });
     }
 }

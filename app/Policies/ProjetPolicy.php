@@ -4,9 +4,22 @@ namespace App\Policies;
 
 use App\Models\Projet;
 use App\Models\User;
+use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ProjetPolicy
 {
+    use HandlesAuthorization;
+
+    /**
+     * Super Admin bypass
+     */
+    public function before(User $user, $ability)
+    {
+        if ($user->hasRole('super_admin')) {
+            return true;
+        }
+    }
+
     /**
      * Determine if the user can view any projects.
      */
@@ -15,81 +28,111 @@ class ProjetPolicy
         return true;
     }
 
+
     /**
-     * Determine if the user can view the project.
+     * ✅ VOIR un projet
      */
     public function view(User $user, Projet $projet): bool
     {
-        // Super admin can view all
-        if ($user->role === 'super_admin') {
+        // Responsable du projet
+        if ($projet->responsable_id === $user->id) {
             return true;
         }
 
-        // Public projects can be viewed by anyone
+        // Membre du projet
+        if ($projet->members()->where('user_id', $user->id)->exists()) {
+            return true;
+        }
+
+        // Owner ou Admin du workspace
+        if ($projet->workspace) {
+            $workspace = $projet->workspace;
+
+            // Owner
+            if ($workspace->owner_id === $user->id) {
+                return true;
+            }
+
+            // Admin
+            $member = $workspace->members()->where('user_id', $user->id)->first();
+            if ($member && in_array($member->pivot->role, ['super_admin', 'admin'])) {
+                return true;
+            }
+        }
+
+        // Projet public
         if ($projet->visibility === 'public') {
             return true;
         }
 
-        // Private projects can only be viewed by responsable
-        if ($projet->visibility === 'private') {
-            return $projet->isResponsable($user);
-        }
-
-        // Team projects can be viewed by responsable and members
-        return $projet->isResponsable($user) || $projet->isMember($user);
+        return false;
     }
 
+
     /**
-     * Determine if the user can create projects.
+     * ✅ CRÉER un projet
      */
     public function create(User $user): bool
     {
-        // Allow manager and above to create projects
-        return in_array($user->role, [
-            'super_admin',
-            'manager',
-            'admin',
-            'responsable_n1',
-            'responsable_n2',
-        ]);
+        // Vérifié dans le controller avec workspace->canCreateProjects()
+        return true;
     }
 
     /**
-     * Determine if the user can update the project.
+     * ✅ MODIFIER un projet
      */
     public function update(User $user, Projet $projet): bool
     {
-        // Super admin can update all
-        if ($user->role === 'super_admin') {
+        // Responsable
+        if ($projet->responsable_id === $user->id) {
             return true;
         }
 
-        // Responsable can always update
-        if ($projet->isResponsable($user)) {
+        // Owner/Admin du workspace
+        if ($projet->workspace) {
+            $workspace = $projet->workspace;
+            
+            if ($workspace->owner_id === $user->id) {
+                return true;
+            }
+            
+            $member = $workspace->members()->where('user_id', $user->id)->first();
+            if ($member && in_array($member->pivot->role, ['super_admin', 'admin'])) {
+                return true;
+            }
+        }
+
+        // Membre avec permission can_edit
+        $member = $projet->members()->where('user_id', $user->id)->first();
+        if ($member && $member->pivot->can_edit) {
             return true;
         }
 
-        // Check member permissions
-        return $projet->canUserEdit($user);
+        return false;
     }
 
     /**
-     * Determine if the user can delete the project.
+     * ✅ SUPPRIMER un projet
      */
     public function delete(User $user, Projet $projet): bool
     {
-        // Super admin can delete all
-        if ($user->role === 'super_admin') {
+        // Responsable
+        if ($projet->responsable_id === $user->id) {
             return true;
         }
 
-        // Responsable can always delete
-        if ($projet->isResponsable($user)) {
+        // Owner du workspace
+        if ($projet->workspace && $projet->workspace->owner_id === $user->id) {
             return true;
         }
 
-        // Check member permissions
-        return $projet->canUserDelete($user);
+        // Membre avec permission can_delete
+        $member = $projet->members()->where('user_id', $user->id)->first();
+        if ($member && $member->pivot->can_delete) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -123,23 +166,37 @@ class ProjetPolicy
         return $projet->isResponsable($user);
     }
 
-    /**
-     * Determine if the user can manage members.
+  /**
+     * ✅ GÉRER les membres du projet
      */
     public function manageMembers(User $user, Projet $projet): bool
     {
-        // Super admin can manage all
-        if ($user->role === 'super_admin') {
+        // Responsable
+        if ($projet->responsable_id === $user->id) {
             return true;
         }
 
-        // Responsable can always manage members
-        if ($projet->isResponsable($user)) {
+        // Owner/Admin du workspace
+        if ($projet->workspace) {
+            $workspace = $projet->workspace;
+            
+            if ($workspace->owner_id === $user->id) {
+                return true;
+            }
+            
+            $member = $workspace->members()->where('user_id', $user->id)->first();
+            if ($member && in_array($member->pivot->role, ['super_admin', 'admin'])) {
+                return true;
+            }
+        }
+
+        // Membre avec permission can_invite
+        $member = $projet->members()->where('user_id', $user->id)->first();
+        if ($member && $member->pivot->can_invite) {
             return true;
         }
 
-        // Check if member has invite permission
-        return $projet->canUserInvite($user);
+        return false;
     }
 
     /**
