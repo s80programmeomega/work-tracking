@@ -230,47 +230,28 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useProjets } from '@/composables/useProjets'
 import { useWorkspace } from '@/composables/useWorkspace'
 import { useAuthStore } from '@/stores/auth'
-import { XIcon } from '@/icons'
-
-import DatePicker from '@vuepic/vue-datepicker'
+import { XIcon, CalendarIcon } from '@/icons'
+import DatePicker from '@vuepic/vue-datepicker' 
 import '@vuepic/vue-datepicker/dist/main.css'
-import { CalendarIcon } from '@/icons'
 
 const props = defineProps({
-  projet: {
-    type: Object,
-    default: null
-  },
-  // ✅ NOUVEAU : Prop pour forcer un workspace spécifique
-  workspaceId: {
-    type: [Number, String],
-    default: null
-  }
+  projet: {type: Object, default: null},
+  workspaceId: { type: [Number, String],default: null}
 })
 
+const emit = defineEmits(['close', 'saved'])
 const authStore = useAuthStore()
 const isDark = computed(() => document.documentElement.classList.contains('dark'))
-
-const emit = defineEmits(['close', 'saved'])
 
 const { createProjet, updateProjet } = useProjets()
 const { fetchWorkspaces, fetchMembers } = useWorkspace()
 
-const loading = ref(false)
-const error = ref(null)
 const workspaces = ref([])
 const users = ref([])
+const loading = ref(false)
+const error = ref(null)
+const presetColors = ['#3B82F6','#10B981','#8B5CF6','#F59E0B','#EF4444','#EC4899','#14B8A6','#F97316']
 
-const presetColors = [
-  '#3B82F6', // Blue
-  '#10B981', // Green
-  '#8B5CF6', // Purple
-  '#F59E0B', // Amber
-  '#EF4444', // Red
-  '#EC4899', // Pink
-  '#14B8A6', // Teal
-  '#F97316'  // Orange
-]
 
 const isEdit = computed(() => !!props.projet)
 
@@ -294,8 +275,8 @@ const form = ref({
 // ✅ NOUVELLE MÉTHODE : Charger les membres d'un workspace
 const loadWorkspaceMembers = async (workspaceId) => {
   try {
-    const usersResponse = await fetchMembers(workspaceId)
-    users.value = usersResponse || []
+    const members = await fetchMembers(workspaceId)
+    users.value = members  || []
     console.log('Membres chargés:', users.value.length)
   } catch (err) {
     console.error('Error loading workspace members:', err)
@@ -303,47 +284,42 @@ const loadWorkspaceMembers = async (workspaceId) => {
   }
 }
 
-// ✅ CORRECTION : Initialisation améliorée avec workspace forcé
-watch(() => props.projet, async (newProjet) => {
-  if (newProjet) {
-    form.value = {
-      workspace_id: newProjet.workspace_id || '',
-      nom: newProjet.nom || '',
-      code: newProjet.code || '',
-      description: newProjet.description || '',
-      date_debut: newProjet.date_debut || '',
-      date_fin: newProjet.date_fin || '',
-      responsable_id: newProjet.responsable_id || '',
-      status: newProjet.status || 'active',
-      visibility: newProjet.visibility || 'team',
-      couleur: newProjet.couleur || '#3B82F6',
-      budget: newProjet.budget || null,
-      objectifs: newProjet.objectifs || '',
-      is_template: newProjet.is_template || false,
-      is_favorite: newProjet.is_favorite || false
-    }
-    // ✅ Charger les membres du workspace du projet
-    if (form.value.workspace_id) {
-      await loadWorkspaceMembers(form.value.workspace_id)
-    }
-  }
-  else {
-    // ✅ Nouveau projet : utiliser le workspace forcé ou le workspace courant
-    const defaultWorkspaceId = props.workspaceId || authStore.user?.current_workspace_id
-    if (defaultWorkspaceId) {
-      form.value.workspace_id = defaultWorkspaceId
-      await loadWorkspaceMembers(defaultWorkspaceId)
-    }
-  }
-}, { immediate: true })
+// Initialisation du formulaire pour création ou édition
+const initializeForm = async () => {
+  try {
+    const workspacesResponse = await fetchWorkspaces()
+    workspaces.value = workspacesResponse.data || []
 
-// ✅ NOUVEAU : Watch pour recharger les membres quand le modal s'ouvre en mode édition
-watch(() => [props.projet, form.value.workspace_id], async ([newProjet, newWorkspaceId]) => {
-  if (newProjet && newWorkspaceId && users.value.length === 0) {
+    // Déterminer le workspace à utiliser
+    const workspaceToUse = props.projet?.workspace_id || props.workspaceId || authStore.user?.current_workspace_id || (workspaces.value[0]?.id)
+    if (!workspaceToUse) return
+
+    form.value.workspace_id = workspaceToUse
+    await loadWorkspaceMembers(workspaceToUse)
+
+    // Si édition, pré-remplir les champs
+    if (props.projet) {
+      form.value = { ...form.value, ...props.projet }
+      // Assure que responsable est bien sélectionné
+      if (props.projet.responsable_id && !users.value.find(u => u.id === props.projet.responsable_id)) {
+        form.value.responsable_id = ''
+      }
+    }
+  } catch (err) {
+    console.error('Erreur initialisation formulaire:', err)
+  }
+}
+
+onMounted(() => initializeForm())
+
+// Recharger les membres si workspace change
+watch(() => form.value.workspace_id, async (newWorkspaceId) => {
+  if (newWorkspaceId) {
     await loadWorkspaceMembers(newWorkspaceId)
+    // Reset responsable si création
+    if (!isEdit.value) form.value.responsable_id = ''
   }
-}, { immediate: false })
-
+})
 
 const handleSubmit = async () => {
   try {
@@ -351,115 +327,32 @@ const handleSubmit = async () => {
     error.value = null
 
     // Validation
-    if (!form.value.workspace_id) {
-      error.value = 'Veuillez sélectionner un workspace'
-      return
-    }
-    if (!form.value.nom) {
-      error.value = 'Le nom du projet est requis'
-      return
-    }
-    if (!form.value.date_debut) {
-      error.value = 'La date de début est requise'
-      return
-    }
-    if (!form.value.date_fin) {
-      error.value = 'La date de fin est requise'
-      return
-    }
-    if (!form.value.responsable_id) {
-      error.value = 'Le responsable du projet est requis'
-      return
-    }
+    if (!form.value.workspace_id) throw new Error('Veuillez sélectionner un workspace')
+    if (!form.value.nom) throw new Error('Le nom du projet est requis')
+    if (!form.value.date_debut) throw new Error('La date de début est requise')
+    if (!form.value.date_fin) throw new Error('La date de fin est requise')
+    if (!form.value.responsable_id) throw new Error('Le responsable du projet est requis')
+    if (new Date(form.value.date_fin) < new Date(form.value.date_debut)) throw new Error('La date de fin doit être après la date de début')
 
-    // Check dates
-    if (new Date(form.value.date_fin) < new Date(form.value.date_debut)) {
-      error.value = 'La date de fin doit être après la date de début'
-      return
-    }
-    // ✅ CORRECTION : Préparer les données pour l'API
-    const submitData = {
-      ...form.value,
-      // ✅ S'assurer que le code est null si vide (pour auto-génération)
-            code: form.value.code || (isEdit.value ? undefined : null)
+    const submitData = { ...form.value, code: form.value.code || (isEdit.value ? undefined : null) }
+    if (isEdit.value && !submitData.code) delete submitData.code
 
-    }
-
-     // ✅ CORRECTION : Nettoyer les valeurs undefined pour l'update
-    if (isEdit.value && !submitData.code) {
-      delete submitData.code
-    }
-
-    // Create or update
     if (isEdit.value) {
-      await updateProjet(props.projet.id, form.value)
+      await updateProjet(props.projet.id, submitData)
     } else {
-      await createProjet(form.value)
+      await createProjet(submitData)
     }
 
     emit('saved')
   } catch (err) {
-    error.value = err.response?.data?.message || 'Une erreur est survenue'
-    console.error('Error saving projet:', err)
-
-    // ✅ Afficher les erreurs de validation détaillées
-    if (err.response?.data?.errors) {
-      const errors = err.response.data.errors
-      const firstError = Object.values(errors)[0]?.[0]
-      if (firstError) {
-        error.value = firstError
-      }
-    }
-
+    error.value = err.response?.data?.message || err.message || 'Une erreur est survenue'
+    console.error('Erreur sauvegarde projet:', err)
   } finally {
     loading.value = false
   }
 }
 
-// Load data
-onMounted(async () => {
-  try {
-    // Load workspaces
-    const workspacesResponse = await fetchWorkspaces()
-    workspaces.value = workspacesResponse.data || []
 
-     // ✅ CORRECTION : Si édition, charger les membres du workspace
-    if (isEdit.value && props.projet?.workspace_id) {
-      form.value.workspace_id = props.projet.workspace_id
-      await loadWorkspaceMembers(props.projet.workspace_id)
-    }
-
-    // ✅ Si création et workspaceId fourni, l'utiliser
-    else if (!isEdit.value && props.workspaceId) {
-      form.value.workspace_id = props.workspaceId
-      await loadWorkspaceMembers(props.workspaceId)
-    }
-
-     // ✅ Sinon, utiliser le workspace courant de l'utilisateur
-    else if (!isEdit.value && !props.workspaceId && workspaces.value.length > 0) {
-      const currentWorkspaceId = authStore.user?.current_workspace_id
-      const defaultWorkspace = workspaces.value.find(w => w.id === currentWorkspaceId) || workspaces.value[0]
-      if (defaultWorkspace) {
-        form.value.workspace_id = defaultWorkspace.id
-        await loadWorkspaceMembers(defaultWorkspace.id)
-      }
-    }
-  } catch (err) {
-    console.error('Error loading data:', err)
-  }
-})
-
-// Watch workspace change to load members
-watch(() => form.value.workspace_id, async (newWorkspaceId) => {
-  if (newWorkspaceId) {
-    await loadWorkspaceMembers(newWorkspaceId)
-
-    // ✅ Réinitialiser le responsable si le workspace change
-    if (!isEdit.value) {
-      form.value.responsable_id = ''
-    }
-  }
-})
 </script>
 
 <style scoped>

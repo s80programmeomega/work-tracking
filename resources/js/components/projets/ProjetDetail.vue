@@ -35,11 +35,17 @@
             </div>
 
             <div class="flex items-center gap-2 ml-4">
-              <button @click="editProjet"
+              <!-- <button @click="editProjet"
                 class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
                 <EditIcon class="w-4 h-4" />
                 Modifier
+              </button> -->
+              <button @click.stop="editProjet(projet)"
+                class="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-t-lg">
+                <EditIcon class="w-4 h-4" />
+                Modifier
               </button>
+
               <button
                 class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors">
                 <SettingsIcon class="w-4 h-4" />
@@ -377,6 +383,16 @@
       :message="`Êtes-vous sûr de vouloir retirer ${memberToRemove?.nom} du projet ? Il perdra l'accès à toutes les tâches et documents du projet.`"
       confirm-text="Retirer" confirm-class="bg-red-600 hover:bg-red-700" @confirm="confirmRemoveMember"
       @cancel="showRemoveMemberModal = false" />
+
+      <!-- Project Form Modal -->
+     <ProjetFormModal
+      v-if="showFormModal"
+      :projet="selectedProjet"
+      :workspace-id="workspaceId"  
+      @close="closeFormModal"
+      @saved="handleProjetSaved"
+    />
+
   </div>
 </template>
 
@@ -401,6 +417,7 @@ import {
 import AddMemberModal from './AddMemberModal.vue'
 import EditMemberModal from './EditMemberModal.vue'
 import ConfirmModal from '@/components/common/ConfirmModal.vue'
+import ProjetFormModal from './ProjetFormModal.vue'
 
 const props = defineProps({
   projetId: {
@@ -411,7 +428,7 @@ const props = defineProps({
 
 const emit = defineEmits(['back', 'create-activity', 'view-activity'])
 
-const { fetchProjet, removeMember: removeMemberService } = useProjets()
+const { fetchProjet, removeMember: removeMemberService,fetchProjets } = useProjets()
 
 const loading = ref(false)
 // const projet = ref(null)
@@ -425,6 +442,7 @@ const showEditMemberModal = ref(false)
 const showRemoveMemberModal = ref(false)
 const selectedMember = ref(null)
 const memberToRemove = ref(null)
+const activeMenuId = ref(null)
 
 const tabs = computed(() => [
   { id: 'overview', label: 'Vue d\'ensemble', icon: TrendingUpIcon },
@@ -442,6 +460,11 @@ const projet = ref({
 const projectStats = ref({})
 const activities = ref([])
 const members = ref([])
+
+const showFormModal = ref(false)
+const showDeleteModal = ref(false)
+const selectedProjet = ref(null)
+const projetToDelete = ref(null)
 
 const loadProjet = async () => {
   try {
@@ -489,9 +512,19 @@ const loadProjet = async () => {
   }
 }
 
-const editProjet = () => {
-  // TODO: Open edit modal or navigate to edit page
-  console.log('Edit projet:', projet.value.id)
+const editProjet = (projet) => {
+  selectedProjet.value = projet
+  showFormModal.value = true
+  activeMenuId.value = null
+}
+const closeFormModal = () => {
+  showFormModal.value = false
+  selectedProjet.value = null
+}
+
+const handleProjetSaved = () => {
+  fetchProjets()
+  closeFormModal()
 }
 
 const editMember = (member) => {
