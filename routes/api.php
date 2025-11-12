@@ -110,15 +110,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::prefix('{workspace}')->group(function () {
             // Obtenir les projets où l'user est responsable (pour UI de transfert)
             Route::get('/members/{user}/projects', [WorkspaceController::class, 'getUserProjects']);
-            
+
             // Obtenir les candidats pour le transfert
             Route::get('/transfer-candidates', [WorkspaceController::class, 'getTransferCandidates']);
-            
+
             // Retirer membre avec transfert optionnel
             Route::delete('/members/{user}/remove', [WorkspaceController::class, 'removeMemberWithTransfer']);
         });
     });
- 
+
 
 
 
