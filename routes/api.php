@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\WorkspaceController;
 use App\Http\Controllers\Api\ProjetController;
+use App\Http\Controllers\Api\ProjetInvitationController;
 use App\Http\Controllers\LabelController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -49,6 +50,12 @@ Route::prefix('workspace-invitations')->group(function () {
 
 });
 
+// Public routes (pas besoin d'authentification)
+Route::prefix('invitations/projet')->group(function () {
+    Route::get('/{token}/check', [ProjetInvitationController::class, 'check']);
+    Route::post('/{token}/accept', [ProjetInvitationController::class, 'accept']);
+});
+
 // Protected routes
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('auth')->group(function () {
@@ -60,9 +67,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     // Dashboard routes
-        Route::get('/dashboard', [DashboardController::class, 'index']);
-        Route::get('/dashboard/personal', [DashboardController::class, 'personalStats']);
-        Route::get('/dashboard/workspace/{workspace}', [DashboardController::class, 'tasksByWorkspace']);
+    Route::get('/dashboard', [DashboardController::class, 'index']);
+    Route::get('/dashboard/personal', [DashboardController::class, 'personalStats']);
+    Route::get('/dashboard/workspace/{workspace}', [DashboardController::class, 'tasksByWorkspace']);
 
     // ========================================
     // WORKSPACES
@@ -96,11 +103,21 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         // Workspace Statistics
         Route::get('/{workspace}/statistics', [WorkspaceController::class, 'statistics']);
+
+        // ========================================
+        // MEMBRE REMOVAL WITH TRANSFER
+        // ========================================
+        Route::prefix('{workspace}')->group(function () {
+            // Obtenir les projets où l'user est responsable (pour UI de transfert)
+            Route::get('/members/{user}/projects', [WorkspaceController::class, 'getUserProjects']);
+
+            // Obtenir les candidats pour le transfert
+            Route::get('/transfer-candidates', [WorkspaceController::class, 'getTransferCandidates']);
+
+            // Retirer membre avec transfert optionnel
+            Route::delete('/members/{user}/remove', [WorkspaceController::class, 'removeMemberWithTransfer']);
+        });
     });
-
-    // Accept invitation (public route with token)
-    // Route::post('/workspace-invitations/{token}/accept', [WorkspaceController::class, 'acceptInvitation']);
-
 
 
 
@@ -144,6 +161,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::delete('/{user}', [ProjetController::class, 'removeMember']);
         });
 
+        Route::prefix('{projet}/invitations')->group(function () {
+            Route::post('/', [ProjetInvitationController::class, 'invite']);
+            Route::get('/', [ProjetInvitationController::class, 'index']);
+            Route::post('/{invitation}/resend', [ProjetInvitationController::class, 'resend']);
+            Route::delete('/{invitation}', [ProjetInvitationController::class, 'cancel']);
+        });
+
         // Project Relations
         Route::get('/{projet}/activites', [ProjetController::class, 'getActivites']);
         Route::get('/{projet}/taches', [ProjetController::class, 'getTaches']);
@@ -152,6 +176,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/{projet}/statistics', [ProjetController::class, 'getStatistics']);
         Route::get('/{projet}/performance-report', [ProjetController::class, 'performanceReport']);
         Route::get('/{projet}/accessible-tasks', [ProjetController::class, 'accessibleTasks']);
+
+        Route::prefix('{projet}')->group(function () {
+            // Retirer membre avec transfert optionnel
+            Route::delete('/members/{user}/remove', [ProjetController::class, 'removeMemberWithTransfer']);
+        });
 
     });
 

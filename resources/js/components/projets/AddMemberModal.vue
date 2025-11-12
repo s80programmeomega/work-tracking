@@ -319,18 +319,26 @@ const handleSubmit = async () => {
   }
 }
 
-// Load available users
+// ✅ Charger les membres du workspace
 onMounted(async () => {
   try {
     loading.value = true
-    // TODO: Load users from workspace or organization
-    // For now, mock data
-    users.value = [
-      { id: 1, nom: 'Jean Dupont', email: 'jean.dupont@example.com', avatar: null },
-      { id: 2, nom: 'Marie Martin', email: 'marie.martin@example.com', avatar: null },
-      { id: 3, nom: 'Pierre Dubois', email: 'pierre.dubois@example.com', avatar: null },
-      { id: 4, nom: 'Sophie Laurent', email: 'sophie.laurent@example.com', avatar: null },
-    ]
+    
+    // Récupérer le workspace_id du projet
+    const projetResponse = await api.get(`/projets/${props.projetId}`)
+    const workspaceId = projetResponse.data.data.workspace_id
+    
+    if (workspaceId) {
+      // Charger les membres du workspace
+      const { fetchMembers } = useWorkspace()
+      const workspaceMembers = await fetchMembers(workspaceId)
+      
+      // Exclure les membres déjà dans le projet
+      const projetMembers = projetResponse.data.data.members || []
+      const projetMemberIds = projetMembers.map(m => m.id)
+      
+      users.value = workspaceMembers.filter(m => !projetMemberIds.includes(m.id))
+    }
   } catch (err) {
     console.error('Error loading users:', err)
   } finally {
