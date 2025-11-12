@@ -1,6 +1,7 @@
 // resources\js\router\index.ts
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
+import AcceptProjetInvitation from '@/pages/AcceptProjetInvitation.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -79,7 +80,7 @@ const router = createRouter({
         title: 'Accepter l\'invitation'
       }
     },
- // ==========================================
+    // ==========================================
     // PROJETS
     // ==========================================
     {
@@ -135,6 +136,15 @@ const router = createRouter({
         title: 'Modifier le Projet',
         requiresAuth: true,
       },
+    },
+    {
+      path: '/invitations/projet/:token',
+      name: 'AcceptProjetInvitation',
+      component: AcceptProjetInvitation,
+      meta: {
+        requiresAuth: false, // Accessible sans authentification
+        layout: 'fullscreen'
+      }
     },
 
     //  {
@@ -295,7 +305,7 @@ const router = createRouter({
         requiresAuth: true,
       },
     },
- 
+
     {
       path: '/users/invitations',
       name: 'invitations',

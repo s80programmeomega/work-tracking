@@ -1,3 +1,4 @@
+<!-- resources\js\components\layout\header\NotificationMenu.vue -->
 <template>
   <div class="relative" ref="dropdownRef">
     <button
@@ -11,7 +12,7 @@
       >
         {{ unreadCount > 99 ? '99+' : unreadCount }}
       </span>
-
+ 
       <svg
         class="fill-current"
         width="20"
@@ -43,7 +44,7 @@
             ({{ unreadCount }})
           </span>
         </h5>
-
+ 
         <div class="flex items-center gap-2">
           <button
             v-if="unreadCount > 0"
