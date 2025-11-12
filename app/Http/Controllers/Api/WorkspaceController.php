@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\WorkspaceInvitation;
 use App\Notifications\WorkspaceInvitationNotification;
 use App\Notifications\WorkspaceMemberAddedNotification;
+use App\Services\MemberRemovalService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -1546,5 +1547,98 @@ class WorkspaceController extends Controller
       ->first();
 
     return $member && in_array($member->pivot->role, ['owner', 'super_admin', 'admin']);
+  }
+
+
+  /**
+   * ✅ Obtenir les projets où l'user est responsable
+   */
+  public function getUserProjects(Request $request, Workspace $workspace, User $user)
+  {
+    $this->authorize('manageMembers', $workspace);
+
+    $removalService = app(MemberRemovalService::class);
+    $projects = $removalService->getUserProjectsAsResponsable($user, $workspace);
+
+    return response()->json([
+      'data' => $projects,
+      'count' => $projects->count(),
+    ]);
+  }
+
+  /**
+   * ✅ Obtenir les candidats pour le transfert
+   */
+  public function getTransferCandidates(Request $request, Workspace $workspace)
+  {
+    $this->authorize('manageMembers', $workspace);
+
+    $request->validate([
+      'exclude_user_id' => 'required|exists:users,id',
+    ]);
+
+    $removalService = app(MemberRemovalService::class);
+    $excludeUser = User::findOrFail($request->exclude_user_id);
+
+    $candidates = $removalService->getTransferCandidates($workspace, $excludeUser);
+
+    return response()->json([
+      'data' => $candidates,
+    ]);
+  }
+
+  /**
+   * ✅ Retirer un membre avec transfert de projets
+   */
+  public function removeMemberWithTransfer(Request $request, Workspace $workspace, User $user)
+  {
+    $this->authorize('manageMembers', $workspace);
+
+    // Ne peut pas retirer le owner
+    if ($workspace->owner_id === $user->id) {
+      return response()->json([
+        'message' => 'Impossible de retirer le propriétaire du workspace'
+      ], 422);
+    }
+
+    $request->validate([
+      'new_responsable_id' => 'nullable|exists:users,id',
+    ]);
+
+    if (!$workspace->members()->where('user_id', $user->id)->exists()) {
+      return response()->json([
+        'message' => 'Cet utilisateur n\'est pas membre du workspace'
+      ], 404);
+    }
+
+    try {
+      $newResponsable = $request->new_responsable_id
+        ? User::findOrFail($request->new_responsable_id)
+        : null;
+
+      $removalService = app(MemberRemovalService::class);
+      $stats = $removalService->removeFromWorkspace($workspace, $user, $newResponsable);
+
+      return response()->json([
+        'message' => 'Membre retiré avec succès',
+        'data' => [
+          'stats' => $stats,
+          'removed_user' => [
+            'id' => $user->id,
+            'nom' => $user->nom,
+          ],
+          'new_responsable' => $newResponsable ? [
+            'id' => $newResponsable->id,
+            'nom' => $newResponsable->nom,
+          ] : null,
+        ],
+      ]);
+
+    } catch (\Exception $e) {
+      return response()->json([
+        'message' => 'Erreur lors du retrait du membre',
+        'error' => $e->getMessage(),
+      ], 500);
+    }
   }
 }
