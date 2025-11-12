@@ -20,7 +20,7 @@ class ProjetInvitationController extends Controller
     /**
      * ✅ Inviter des membres au projet
      */
-    public function invite(Request $request, Projet $projet)
+public function invite(Projet $projet, Request $request)
     {
         $this->authorize('manageMembers', $projet);
 

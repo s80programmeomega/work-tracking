@@ -283,6 +283,11 @@
                 <PlusIcon class="w-4 h-4" />
                 Ajouter un membre
               </button>
+              <!-- Bouton Inviter -->
+              <button @click="showInviteModal = true">
+                Inviter des membres
+              </button>
+
             </div>
 
             <div
@@ -355,10 +360,17 @@
                           class="text-brand-600 hover:text-brand-900 dark:text-brand-400 text-sm">
                           Modifier
                         </button>
-                        <button v-if="member.pivot?.role !== 'owner'" @click="removeMember(member)"
+                        <!-- <button v-if="member.pivot?.role !== 'owner'" @click="removeMember(member)"
                           class="text-red-600 hover:text-red-900 dark:text-red-400 text-sm">
                           Retirer
-                        </button>
+                        </button> -->
+
+                        <div v-for="member in members" :key="member.id">
+                          <button @click="removeMember(member)">
+                            Retirer
+                          </button>
+                        </div>
+
                       </div>
                     </td>
                   </tr>
@@ -374,24 +386,43 @@
     <AddMemberModal v-if="showAddMemberModal" :projet-id="projetId" @close="showAddMemberModal = false"
       @added="handleMemberAdded" />
 
+
+    <!-- Modal d'invitation -->
+    <InviteExternalMemberModal v-if="showInviteModal" :projet-id="projetId" @close="showInviteModal = false"
+      @invited="handleInvited" />
+
+    <!-- Invite Member Modal (NEW) -->
+    <InviteExternalMemberModal v-if="showAddMemberModal" :projet-id="projetId" @close="showAddMemberModal = false"
+      @invited="handleMemberAdded" />
+
+
+    <!-- Edit Member Modal -->
+    <EditMemberModal v-if="showEditMemberModal" :membre="selectedMember" :projet-id="projetId"
+      @close="showEditMemberModal = false" @updated="handleMemberUpdated" />
+
     <!-- Edit Member Modal -->
     <EditMemberModal v-if="showEditMemberModal" :membre="selectedMember" :projet-id="projetId"
       @close="showEditMemberModal = false" @updated="handleMemberUpdated" />
 
     <!-- Remove Member Confirmation -->
-    <ConfirmModal v-if="showRemoveMemberModal" title="Retirer le membre"
+    <!-- <ConfirmModal v-if="showRemoveMemberModal" title="Retirer le membre"
       :message="`Êtes-vous sûr de vouloir retirer ${memberToRemove?.nom} du projet ? Il perdra l'accès à toutes les tâches et documents du projet.`"
       confirm-text="Retirer" confirm-class="bg-red-600 hover:bg-red-700" @confirm="confirmRemoveMember"
-      @cancel="showRemoveMemberModal = false" />
+      @cancel="showRemoveMemberModal = false" /> -->
 
-      <!-- Project Form Modal -->
-     <ProjetFormModal
-      v-if="showFormModal"
-      :projet="selectedProjet"
-      :workspace-id="workspaceId"  
-      @close="closeFormModal"
-      @saved="handleProjetSaved"
-    />
+    <!-- Modal de retrait -->
+    <RemoveMemberWithTransferModal v-if="showRemoveModal" :member="memberToRemove" :workspace-id="workspaceId"
+      :projet-id="projetId" context="projet" @close="showRemoveModal = false" @removed="handleRemoved" />
+
+
+    <!-- Remove Member With Transfer Modal (NEW) -->
+    <RemoveMemberWithTransferModal v-if="showRemoveMemberModal" :member="memberToRemove"
+      :workspace-id="projet.workspace_id" :projet-id="projetId" context="projet" @close="showRemoveMemberModal = false"
+      @removed="handleMemberRemoved" />
+
+    <!-- Project Form Modal -->
+    <ProjetFormModal v-if="showFormModal" :projet="selectedProjet" :workspace-id="workspaceId" @close="closeFormModal"
+      @saved="handleProjetSaved" />
 
   </div>
 </template>
@@ -418,6 +449,8 @@ import AddMemberModal from './AddMemberModal.vue'
 import EditMemberModal from './EditMemberModal.vue'
 import ConfirmModal from '@/components/common/ConfirmModal.vue'
 import ProjetFormModal from './ProjetFormModal.vue'
+import InviteExternalMemberModal from '@/components/projets/InviteExternalMemberModal.vue'
+import RemoveMemberWithTransferModal from '@/components/projets/RemoveMemberWithTransferModal.vue'
 
 const props = defineProps({
   projetId: {
@@ -428,7 +461,7 @@ const props = defineProps({
 
 const emit = defineEmits(['back', 'create-activity', 'view-activity'])
 
-const { fetchProjet, removeMember: removeMemberService,fetchProjets } = useProjets()
+const { fetchProjet, removeMember: removeMemberService, fetchProjets } = useProjets()
 
 const loading = ref(false)
 // const projet = ref(null)
@@ -441,8 +474,16 @@ const showAddMemberModal = ref(false)
 const showEditMemberModal = ref(false)
 const showRemoveMemberModal = ref(false)
 const selectedMember = ref(null)
-const memberToRemove = ref(null)
 const activeMenuId = ref(null)
+
+const showInviteModal = ref(false)
+const showRemoveModal = ref(false)
+const memberToRemove = ref(null)
+
+const handleInvited = () => {
+  showInviteModal.value = false
+  // Recharger les membres
+}
 
 const tabs = computed(() => [
   { id: 'overview', label: 'Vue d\'ensemble', icon: TrendingUpIcon },
@@ -535,6 +576,11 @@ const editMember = (member) => {
 const removeMember = (member) => {
   memberToRemove.value = member
   showRemoveMemberModal.value = true
+}
+
+const handleRemoved = () => {
+  showRemoveModal.value = false
+  // Recharger les membres
 }
 
 const confirmRemoveMember = async () => {
