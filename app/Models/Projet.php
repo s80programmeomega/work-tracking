@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Builder;
 
 class Projet extends Model
 {
@@ -204,30 +205,51 @@ class Projet extends Model
                 ->orWhere('code', 'like', "%{$term}%");
         });
     }
-    public function scopeAccessibleBy($query, $userId)
+ 
+ /**
+     * Scope pour filtrer les projets accessibles par un utilisateur
+     */
+    public function scopeAccessibleBy(Builder $query, $userId): Builder
     {
         return $query->where(function ($q) use ($userId) {
             // 1. Projets où l'user est responsable
             $q->where('responsable_id', $userId)
 
-                // 2. OU projets où l'user est membre direct
-                ->orWhereHas('members', function ($memberQuery) use ($userId) {
-                    $memberQuery->where('user_id', $userId);
-                })
+            // 2. OU projets où l'user est membre direct
+            ->orWhereHas('members', function ($memberQuery) use ($userId) {
+                $memberQuery->where('user_id', $userId);
+            })
 
-                // 3. OU l'user est Owner/Admin du workspace
-                ->orWhereHas('workspace', function ($workspaceQuery) use ($userId) {
-                    $workspaceQuery->where(function ($wq) use ($userId) {
-                        // Owner du workspace
-                        $wq->where('owner_id', $userId)
-                            // OU Admin/Super Admin du workspace
-                            ->orWhereHas('members', function ($memberQuery) use ($userId) {
-                            $memberQuery->where('user_id', $userId)
-                                ->whereIn('role', ['owner', 'super_admin', 'admin']);
-                        });
+            // 3. OU l'user est Owner/Admin du workspace
+            ->orWhereHas('workspace', function ($workspaceQuery) use ($userId) {
+                $workspaceQuery->where(function ($wq) use ($userId) {
+                    // Owner du workspace
+                    $wq->where('owner_id', $userId)
+                    // OU Admin/Super Admin du workspace
+                    ->orWhereHas('members', function ($memberQuery) use ($userId) {
+                        $memberQuery->where('workspace_members.user_id', $userId)
+                            ->whereIn('workspace_members.role', ['owner', 'admin']);
                     });
                 });
+            });
         });
+    }
+
+    public function getEligibleMembers()
+    {
+        $members = $this->members()
+            ->where(function ($query) {
+                $query->where('projet_members.can_edit', true)
+                    ->orWhere('projet_members.can_assign_tasks', true);
+            })
+            ->get(['users.id', 'users.nom', 'users.email', 'users.avatar']);
+
+        // Ajouter le responsable du projet s'il n'est pas déjà dans la liste
+        if ($this->responsable && !$members->contains('id', $this->responsable->id)) {
+            $members->prepend($this->responsable);
+        }
+
+        return $members->unique('id');
     }
 
     /**
