@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -160,6 +161,13 @@ class User extends Authenticatable
     public function teamPresence()
     {
         return $this->hasMany(TeamPresence::class);
+    }
+
+        public function projets(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'projet_user')
+            ->withPivot(['role', 'can_edit', 'can_delete', 'can_invite'])
+            ->withTimestamps();
     }
 
     // TODO: Uncomment when Projet, Activite, Tache models are created
