@@ -1,3 +1,4 @@
+<!-- resources\js\components\activites\ActivityList.vue -->
 <template>
   <div class="space-y-6">
     <!-- Header with Search and Filters -->

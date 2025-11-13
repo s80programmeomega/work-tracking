@@ -1,14 +1,17 @@
-<!-- resources\js\components\activites\ActiviteList.vue -->
+<!-- resources\js\pages\ActivitesEnRetard.vue -->
 <template>
   <div class="space-y-6">
     <!-- Header -->
     <div class="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
       <div>
-        <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Activités</h1>
-        <p class="text-gray-500 dark:text-gray-400">Gérer toutes vos activités</p>
+        <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+          {{ getPageTitle }}
+        </h1>
+        <p class="text-gray-500 dark:text-gray-400">{{ getPageDescription }}</p>
       </div>
 
       <button
+        v-if="viewType === 'all'"
         @click="showCreateForm = true"
         class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
       >
@@ -33,6 +36,7 @@
         </div>
 
         <select
+          v-if="viewType === 'all'"
           v-model="filters.status"
           class="px-4 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
           @change="loadActivites"
@@ -80,6 +84,7 @@
               v-for="activite in activites"
               :key="activite.id"
               class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+              :class="{ 'bg-red-50 dark:bg-red-900/10': activite.is_overdue }"
             >
               <td class="px-6 py-4">
                 <div>
@@ -102,6 +107,9 @@
                 >
                   {{ getStatusLabel(activite.status) }}
                 </span>
+                <span v-if="activite.is_overdue" class="ml-2 px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                  En retard
+                </span>
               </td>
               <td class="px-6 py-4">
                 <div class="flex items-center gap-2">
@@ -114,7 +122,14 @@
                   <span class="text-xs">{{ activite.progression }}%</span>
                 </div>
               </td>
-              <td class="px-6 py-4">{{ activite.date_fin || '-' }}</td>
+              <td class="px-6 py-4">
+                <span :class="{ 'text-red-600 dark:text-red-400 font-semibold': activite.is_overdue }">
+                  {{ formatDate(activite.date_fin) }}
+                </span>
+                <div v-if="activite.days_remaining !== null" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  {{ activite.days_remaining > 0 ? `${activite.days_remaining}j restants` : `${Math.abs(activite.days_remaining)}j de retard` }}
+                </div>
+              </td>
               <td class="px-6 py-4">
                 <div class="flex items-center gap-2">
                   <button
@@ -122,16 +137,14 @@
                     class="px-3 py-1 text-sm text-white bg-blue-500 rounded hover:bg-blue-600"
                     title="Modifier"
                   >
-                    <i class="fas fa-edit"></i> Modifier
+                    Modifier
                   </button>
                   <button
                     @click="deleteActivite(activite)"
                     class="px-3 py-1 text-sm text-white bg-red-500 rounded hover:bg-red-600"
                     title="Supprimer"
                   >
-                    <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
+                    Supprimer
                   </button>
                 </div>
               </td>
@@ -142,7 +155,10 @@
 
       <!-- Empty State -->
       <div v-if="!loading && activites.length === 0" class="text-center py-12">
-        <p class="text-gray-500 dark:text-gray-400">Aucune activité trouvée</p>
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+        <p class="mt-2 text-gray-500 dark:text-gray-400">{{ getEmptyMessage }}</p>
       </div>
 
       <!-- Pagination -->
@@ -203,10 +219,18 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useActivites } from '@/composables/useActivites'
+import { useActiviteStore } from '@/stores/activiteStore'
 import ActiviteForm from './ActiviteForm.vue'
 
-const { fetchActivites, activites, loading, deleteActivite: deleteAct, pagination, getStatusLabel } = useActivites()
+const props = defineProps({
+  viewType: {
+    type: String,
+    default: 'all', // 'all', 'mes-activites', 'en-retard'
+    validator: (value) => ['all', 'mes-activites', 'en-retard'].includes(value)
+  }
+})
+
+const activiteStore = useActiviteStore()
 
 const filters = ref({
   search: '',
@@ -218,8 +242,52 @@ const showCreateForm = ref(false)
 const showEditForm = ref(false)
 const editingActivite = ref(null)
 
+const activites = computed(() => activiteStore.activites)
+const loading = computed(() => activiteStore.loading)
+const pagination = computed(() => activiteStore.pagination)
+
+const getPageTitle = computed(() => {
+  const titles = {
+    'all': 'Activités',
+    'mes-activites': 'Mes Activités',
+    'en-retard': 'Activités en Retard'
+  }
+  return titles[props.viewType]
+})
+
+const getPageDescription = computed(() => {
+  const descriptions = {
+    'all': 'Gérer toutes les activités',
+    'mes-activites': 'Activités dont vous êtes responsable',
+    'en-retard': 'Activités ayant dépassé leur échéance'
+  }
+  return descriptions[props.viewType]
+})
+
+const getEmptyMessage = computed(() => {
+  const messages = {
+    'all': 'Aucune activité trouvée',
+    'mes-activites': 'Vous n\'êtes responsable d\'aucune activité',
+    'en-retard': 'Aucune activité en retard'
+  }
+  return messages[props.viewType]
+})
+
 const loadActivites = async () => {
-  await fetchActivites(filters.value)
+  try {
+    switch (props.viewType) {
+      case 'mes-activites':
+        await activiteStore.fetchMesActivites(filters.value)
+        break
+      case 'en-retard':
+        await activiteStore.fetchActivitesEnRetard(filters.value)
+        break
+      default:
+        await activiteStore.fetchActivites(filters.value)
+    }
+  } catch (error) {
+    console.error('Erreur chargement:', error)
+  }
 }
 
 const editActivite = (activite) => {
@@ -273,10 +341,10 @@ const visiblePages = computed(() => {
 const deleteActivite = async (activite) => {
   if (confirm(`Êtes-vous sûr de vouloir supprimer l'activité "${activite.nom}" ?`)) {
     try {
-      await deleteAct(activite.id)
+      await activiteStore.deleteActivite(activite.id)
       loadActivites()
     } catch (error) {
-      alert('Erreur lors de la suppression de l\'activité')
+      alert(error.response?.data?.message || 'Erreur lors de la suppression de l\'activité')
     }
   }
 }
@@ -298,6 +366,19 @@ const getStatusClass = (status) => {
     archived: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
   }
   return classes[status] || 'bg-gray-100 text-gray-800'
+}
+
+const getStatusLabel = (status) => {
+  const labels = {
+    active: 'Actif',
+    archived: 'Archivé',
+  }
+  return labels[status] || status
+}
+
+const formatDate = (date) => {
+  if (!date) return '-'
+  return new Date(date).toLocaleDateString('fr-FR')
 }
 
 onMounted(() => {

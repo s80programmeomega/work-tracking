@@ -1,3 +1,4 @@
+<!-- resources\js\pages\Activites.vue -->
 <template>
   <AdminLayout>
     <PageBreadcrumb :pageTitle="'Gestion des Activités'" />

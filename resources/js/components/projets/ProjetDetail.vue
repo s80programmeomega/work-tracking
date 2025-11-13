@@ -35,11 +35,7 @@
             </div>
 
             <div class="flex items-center gap-2 ml-4">
-              <!-- <button @click="editProjet"
-                class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                <EditIcon class="w-4 h-4" />
-                Modifier
-              </button> -->
+              
               <button @click.stop="editProjet(projet)"
                 class="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-t-lg">
                 <EditIcon class="w-4 h-4" />
@@ -214,22 +210,27 @@
           </div>
 
           <!-- Activities Tab -->
-          <div v-if="activeTab === 'activities'" class="space-y-4">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                Liste des activités
-              </h3>
-              <div class="flex items-center gap-4">
-                <span class="text-sm text-gray-500">
-                  {{ activities.length }} / {{ projectStats.activites_count || 0 }} activité(s)
-                </span>
-                <button @click="$emit('create-activity')"
-                  class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors">
+            <div v-if="activeTab === 'activities'" class="space-y-4">
+              <!-- Header avec bouton de création -->
+              <div class="flex items-center justify-between mb-6">
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    Activités du projet
+                  </h3>
+                  <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    Gérez les activités et les tâches de votre projet
+                  </p>
+                </div>
+                
+                <!-- Bouton Nouvelle Activité -->
+                <button 
+                  @click="showCreateActivityModal = true"
+                  class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors shadow-sm"
+                >
                   <PlusIcon class="w-4 h-4" />
                   Nouvelle activité
                 </button>
               </div>
-            </div>
 
             <!-- Message de débogage -->
             <div v-if="projectStats.activites_count > 0 && activities.length === 0"
@@ -241,36 +242,108 @@
               </p>
             </div>
 
-            <div v-if="activities.length === 0 && projectStats.activites_count === 0" class="text-center py-12">
+            <!-- État vide -->
+            <div v-if="activities.length === 0 && projectStats.activites_count === 0" 
+              class="text-center py-12 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
               <ListIcon class="mx-auto h-12 w-12 text-gray-400" />
-              <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                Aucune activité pour ce projet
+              <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">
+                Aucune activité
+              </h3>
+              <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+                Commencez par créer votre première activité pour organiser les tâches de ce projet.
               </p>
+              <button 
+                @click="showCreateActivityModal = true"
+                class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
+              >
+                <PlusIcon class="w-4 h-4" />
+                Créer une activité
+              </button>
             </div>
 
-            <div v-else class="space-y-3">
-              <div v-for="activity in activities" :key="activity.id" @click="$emit('view-activity', activity.id)"
-                class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors">
-                <div class="flex-1">
-                  <h4 class="font-medium text-gray-900 dark:text-white">
-                    {{ activity.nom || 'Activité sans nom' }}
-                  </h4>
-                  <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    {{ activity.tache_count || 0 }} tâche(s) •
-                    Progression: {{ activity.progression || 0 }}%
-                  </p>
-                </div>
-                <div class="flex items-center gap-3">
-                  <div class="text-right">
-                    <div class="text-sm font-semibold text-gray-900 dark:text-white">
-                      {{ activity.progression || 0 }}%
+            <!-- Liste des activités -->
+            <div v-else class="space-y-4">
+              <!-- En-tête de liste -->
+              <div class="flex items-center justify-between px-4 py-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {{ activities.length }} activité(s)
+                </span>
+                <span class="text-sm text-gray-500">
+                  Progression moyenne: {{ calculateAverageProgress() }}%
+                </span>
+              </div>
+
+              <!-- Cartes des activités -->
+              <div class="grid gap-4">
+                <div 
+                  v-for="activity in activities" 
+                  :key="activity.id" 
+                  @click="viewActivity(activity)"
+                  class="group cursor-pointer"
+                >
+                  <div class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200 group-hover:shadow-sm">
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-3 mb-2">
+                        <!-- Indicateur de couleur -->
+                        <div 
+                          class="w-3 h-3 rounded-full flex-shrink-0"
+                          :style="{ backgroundColor: activity.couleur || '#3B82F6' }"
+                        ></div>
+                        <h4 class="font-semibold text-gray-900 dark:text-white truncate">
+                          {{ activity.nom || 'Activité sans nom' }}
+                        </h4>
+                        <!-- Badge statut -->
+                        <span :class="[
+                          'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
+                          activity.status === 'archived' 
+                            ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                            : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                        ]">
+                          {{ activity.status === 'archived' ? 'Archivée' : 'Active' }}
+                        </span>
+                      </div>
+                      
+                      <p v-if="activity.description" class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-2">
+                        {{ activity.description }}
+                      </p>
+                      
+                      <div class="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                        <span class="flex items-center gap-1">
+                          <UsersIcon class="w-3 h-3" />
+                          {{ activity.responsable?.nom || 'Non assigné' }}
+                        </span>
+                        <span class="flex items-center gap-1">
+                          <ListIcon class="w-3 h-3" />
+                          {{ activity.tache_count || 0 }} tâche(s)
+                        </span>
+                        <span v-if="activity.date_debut && activity.date_fin" class="flex items-center gap-1">
+                          <CalendarIcon class="w-3 h-3" />
+                          {{ formatActivityDates(activity) }}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-4 ml-4 flex-shrink-0">
+                      <!-- Progression -->
+                      <div class="text-right min-w-20">
+                        <div class="text-sm font-semibold text-gray-900 dark:text-white mb-1">
+                          {{ activity.progression || 0 }}%
+                        </div>
+                        <div class="w-20 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                          <div 
+                            class="bg-green-500 h-2 rounded-full transition-all duration-300"
+                            :style="{ width: `${activity.progression || 0}%` }"
+                          ></div>
+                        </div>
+                      </div>
+                      
+                      <ChevronRightIcon class="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" />
                     </div>
                   </div>
-                  <ChevronRightIcon class="w-5 h-5 text-gray-400" />
                 </div>
               </div>
             </div>
-          </div>
+            </div>
 
           <!-- Members Tab -->
           <div v-if="activeTab === 'members'" class="space-y-4">
@@ -278,14 +351,10 @@
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                 Membres du projet
               </h3>
-              <button @click="showAddMemberModal = true"
-                class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors">
-                <PlusIcon class="w-4 h-4" />
-                Ajouter un membre
-              </button>
+              
               <!-- Bouton Inviter -->
-              <button @click="showInviteModal = true">
-                Inviter des membres
+              <button @click="showInviteModal = true" class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors">
+             <PlusIcon class="w-4 h-4" />   Inviter des membres
               </button>
 
             </div>
@@ -360,17 +429,12 @@
                           class="text-brand-600 hover:text-brand-900 dark:text-brand-400 text-sm">
                           Modifier
                         </button>
-                        <!-- <button v-if="member.pivot?.role !== 'owner'" @click="removeMember(member)"
-                          class="text-red-600 hover:text-red-900 dark:text-red-400 text-sm">
-                          Retirer
-                        </button> -->
 
-                        <div v-for="member in members" :key="member.id">
+                        <div v-for="member in members" :key="member.id"  class="text-red-600 hover:text-red-900 dark:text-red-400 text-sm">
                           <button @click="removeMember(member)">
                             Retirer
                           </button>
                         </div>
-
                       </div>
                     </td>
                   </tr>
@@ -382,39 +446,23 @@
       </div>
     </template>
 
-    <!-- Add Member Modal -->
-    <AddMemberModal v-if="showAddMemberModal" :projet-id="projetId" @close="showAddMemberModal = false"
-      @added="handleMemberAdded" />
+  <!-- Modal de création d'activité -->
+    <ActiviteForm 
+      v-if="showCreateActivityModal"
+      :activite="null"
+      @close="showCreateActivityModal = false"
+      @saved="handleActivityCreated"
+    />
 
 
     <!-- Modal d'invitation -->
     <InviteExternalMemberModal v-if="showInviteModal" :projet-id="projetId" @close="showInviteModal = false"
       @invited="handleInvited" />
-
-    <!-- Invite Member Modal (NEW) -->
-    <InviteExternalMemberModal v-if="showAddMemberModal" :projet-id="projetId" @close="showAddMemberModal = false"
-      @invited="handleMemberAdded" />
-
-
+ 
     <!-- Edit Member Modal -->
     <EditMemberModal v-if="showEditMemberModal" :membre="selectedMember" :projet-id="projetId"
       @close="showEditMemberModal = false" @updated="handleMemberUpdated" />
-
-    <!-- Edit Member Modal -->
-    <EditMemberModal v-if="showEditMemberModal" :membre="selectedMember" :projet-id="projetId"
-      @close="showEditMemberModal = false" @updated="handleMemberUpdated" />
-
-    <!-- Remove Member Confirmation -->
-    <!-- <ConfirmModal v-if="showRemoveMemberModal" title="Retirer le membre"
-      :message="`Êtes-vous sûr de vouloir retirer ${memberToRemove?.nom} du projet ? Il perdra l'accès à toutes les tâches et documents du projet.`"
-      confirm-text="Retirer" confirm-class="bg-red-600 hover:bg-red-700" @confirm="confirmRemoveMember"
-      @cancel="showRemoveMemberModal = false" /> -->
-
-    <!-- Modal de retrait -->
-    <RemoveMemberWithTransferModal v-if="showRemoveModal" :member="memberToRemove" :workspace-id="workspaceId"
-      :projet-id="projetId" context="projet" @close="showRemoveModal = false" @removed="handleRemoved" />
-
-
+  
     <!-- Remove Member With Transfer Modal (NEW) -->
     <RemoveMemberWithTransferModal v-if="showRemoveMemberModal" :member="memberToRemove"
       :workspace-id="projet.workspace_id" :projet-id="projetId" context="projet" @close="showRemoveMemberModal = false"
@@ -445,6 +493,8 @@ import {
   ArchiveIcon,
   ClockIcon
 } from '@/icons'
+
+import ActiviteForm from '@/components/activites/ActiviteForm.vue'
 import AddMemberModal from './AddMemberModal.vue'
 import EditMemberModal from './EditMemberModal.vue'
 import ConfirmModal from '@/components/common/ConfirmModal.vue'
@@ -463,33 +513,7 @@ const emit = defineEmits(['back', 'create-activity', 'view-activity'])
 
 const { fetchProjet, removeMember: removeMemberService, fetchProjets } = useProjets()
 
-const loading = ref(false)
-// const projet = ref(null)
-// const projectStats = ref({})
-// const activities = ref([])
-// const members = ref([])
-
-const activeTab = ref('overview')
-const showAddMemberModal = ref(false)
-const showEditMemberModal = ref(false)
-const showRemoveMemberModal = ref(false)
-const selectedMember = ref(null)
-const activeMenuId = ref(null)
-
-const showInviteModal = ref(false)
-const showRemoveModal = ref(false)
-const memberToRemove = ref(null)
-
-const handleInvited = () => {
-  showInviteModal.value = false
-  // Recharger les membres
-}
-
-const tabs = computed(() => [
-  { id: 'overview', label: 'Vue d\'ensemble', icon: TrendingUpIcon },
-  { id: 'activities', label: 'Activités', icon: ListIcon, count: activities.value.length },
-  { id: 'members', label: 'Membres', icon: UsersIcon, count: members.value.length }
-])
+const loading = ref(false) 
 
 const projet = ref({
   activites: [],
@@ -501,11 +525,36 @@ const projet = ref({
 const projectStats = ref({})
 const activities = ref([])
 const members = ref([])
+ 
+
+const activeTab = ref('overview')
+const showAddMemberModal = ref(false)
+const showCreateActivityModal = ref(false) 
+const showEditMemberModal = ref(false)
+const showRemoveMemberModal = ref(false)
+const selectedMember = ref(null)
+const activeMenuId = ref(null)
+
+const showInviteModal = ref(false)
+const showRemoveModal = ref(false)
+const memberToRemove = ref(null)
+
 
 const showFormModal = ref(false)
 const showDeleteModal = ref(false)
 const selectedProjet = ref(null)
 const projetToDelete = ref(null)
+ 
+const tabs = computed(() => [
+  { id: 'overview', label: 'Vue d\'ensemble', icon: TrendingUpIcon },
+  { id: 'activities', label: 'Activités', icon: ListIcon, count: activities.value.length },
+  { id: 'members', label: 'Membres', icon: UsersIcon, count: members.value.length }
+])
+
+const handleInvited = () => {
+  showInviteModal.value = false
+  // Recharger les membres
+}
 
 const loadProjet = async () => {
   try {
@@ -524,12 +573,8 @@ const loadProjet = async () => {
       projectStats.value = response.stats || {}
 
       // Assurez-vous que les tableaux existent
-      activities.value = Array.isArray(response.data.activites)
-        ? response.data.activites
-        : []
-      members.value = Array.isArray(response.data.members)
-        ? response.data.members
-        : []
+      activities.value = Array.isArray(response.data.activites) ? response.data.activites : []
+      members.value = Array.isArray(response.data.members) ? response.data.members : []
     } else {
       // Fallback si la structure est différente
       projet.value = response || {}
@@ -552,6 +597,44 @@ const loadProjet = async () => {
     loading.value = false
   }
 }
+
+
+// ✅ Nouvelle méthode : Gérer la création d'activité
+const handleActivityCreated = () => {
+  showCreateActivityModal.value = false
+  // Recharger les données du projet pour afficher la nouvelle activité
+  loadProjet()
+}
+
+// ✅ Nouvelle méthode : Voir les détails d'une activité
+const viewActivity = (activity) => {
+  console.log('View activity:', activity)
+  // Vous pouvez émettre un événement ou naviguer vers la vue détaillée de l'activité
+  emit('view-activity', activity.id)
+}
+
+// ✅ Nouvelle méthode : Calculer la progression moyenne
+const calculateAverageProgress = () => {
+  if (activities.value.length === 0) return 0
+  const total = activities.value.reduce((sum, activity) => sum + (activity.progression || 0), 0)
+  return Math.round(total / activities.value.length)
+}
+
+// ✅ Nouvelle méthode : Formater les dates d'activité
+const formatActivityDates = (activity) => {
+  const start = activity.date_debut ? new Date(activity.date_debut).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : ''
+  const end = activity.date_fin ? new Date(activity.date_fin).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : ''
+  
+  if (start && end) {
+    return `${start} - ${end}`
+  } else if (start) {
+    return `Débute ${start}`
+  } else if (end) {
+    return `Termine ${end}`
+  }
+  return ''
+}
+
 
 const editProjet = (projet) => {
   selectedProjet.value = projet
@@ -688,3 +771,12 @@ watch(() => props.projetId, () => {
   }
 })
 </script>
+
+<style scoped>
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+</style>
