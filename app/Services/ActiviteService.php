@@ -10,11 +10,12 @@ class ActiviteService
 {
     /**
      * Get all activities with filters and pagination
+     * ✅ Support multi-workspace
      */
     public function getAllActivites(array $filters = []): LengthAwarePaginator
     {
         $query = Activite::query()
-            ->with(['projet', 'responsable']);
+            ->with(['projet.workspace', 'responsable']);
 
         // Apply filters
         if (!empty($filters['search'])) {
@@ -37,6 +38,13 @@ class ActiviteService
             $query->overdue();
         }
 
+        // ✅ Filtre par workspace
+        if (!empty($filters['workspace_id'])) {
+            $query->whereHas('projet', function ($q) use ($filters) {
+                $q->where('workspace_id', $filters['workspace_id']);
+            });
+        }
+
         // Sorting
         $query->orderByPosition();
 
@@ -57,11 +65,48 @@ class ActiviteService
 
     /**
      * Get activities for a user
+     * ✅ Support multi-workspace
      */
     public function getUserActivites(User $user, array $filters = []): LengthAwarePaginator
     {
-        $filters['responsable_id'] = $user->id;
-        return $this->getAllActivites($filters);
+        $query = Activite::query()
+            ->with(['projet.workspace', 'responsable'])
+            ->where('responsable_id', $user->id)
+            ->whereHas('projet', function ($q) use ($user) {
+                $q->accessibleBy($user->id);
+            });
+
+        // Apply filters
+        if (!empty($filters['search'])) {
+            $query->search($filters['search']);
+        }
+
+        if (!empty($filters['projet_id'])) {
+            $query->forProjet($filters['projet_id']);
+        }
+
+        if (isset($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        if (!empty($filters['is_overdue'])) {
+            $query->overdue();
+        }
+
+        // ✅ Filtre par workspace
+        if (!empty($filters['workspace_id'])) {
+            $query->whereHas('projet', function ($q) use ($filters) {
+                $q->where('workspace_id', $filters['workspace_id']);
+            });
+        }
+
+        // Sorting
+        $query->orderBy('created_at', 'desc');
+
+        // Pagination
+        $perPage = $filters['per_page'] ?? 15;
+
+        return $query->paginate($perPage);
     }
 
     /**
@@ -74,6 +119,7 @@ class ActiviteService
             $maxOrder = Activite::where('projet_id', $data['projet_id'])->max('ordre') ?? -1;
             $data['ordre'] = $maxOrder + 1;
         }
+            $data['created_by'] = auth()->id();
 
         $activite = Activite::create($data);
 
@@ -158,12 +204,18 @@ class ActiviteService
      */
     public function getActiviteStats(Activite $activite): array
     {
+        $tacheCount = $activite->taches()->count();
+        $tachesCompleted = $activite->taches()->where('statut', 'termine')->count();
+        $tachesInProgress = $activite->taches()->where('statut', 'en_cours')->count();
+        $tachesOverdue = $activite->taches()->overdue()->count();
+
         return [
-            'tache_count' => $activite->tache_count,
-            // TODO: Add more stats when Tache model is created
-            // 'taches_completed' => $activite->taches()->where('statut', 'termine')->count(),
-            // 'taches_in_progress' => $activite->taches()->where('statut', 'en_cours')->count(),
-            // 'taches_overdue' => $activite->taches()->overdue()->count(),
+            'tache_count' => $tacheCount,
+            'taches_completed' => $tachesCompleted,
+            'taches_in_progress' => $tachesInProgress,
+            'taches_pending' => $tacheCount - $tachesCompleted - $tachesInProgress,
+            'taches_overdue' => $tachesOverdue,
+            'completion_rate' => $tacheCount > 0 ? round(($tachesCompleted / $tacheCount) * 100, 2) : 0,
         ];
     }
 }

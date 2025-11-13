@@ -1,7 +1,7 @@
 // resources\js\router\index.ts
 import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore } from '@/stores/authStore'
-import AcceptProjetInvitation from '@/pages/AcceptProjetInvitation.vue'
+import { useAuthStore } from '../stores/authStore'
+import AcceptProjetInvitation from '../pages/AcceptProjetInvitation.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -274,6 +274,33 @@ const router = createRouter({
         title: 'Gestion des Activités',
         requiresAuth: true,
       },
+    },
+    {
+      path: '/activites/mes-activites',
+      name: 'activites.my',
+      component: () => import('../pages/MesActivites.vue'),
+      meta: {
+        requiresAuth: true,
+        title: 'Mes activités'
+      }
+    },
+    {
+      path: '/activites/en-retard',
+      name: 'activites.overdue',
+      component: () => import('../pages/ActivitesEnRetard.vue'),
+      meta: {
+        requiresAuth: true,
+        title: 'Activités en retard'
+      }
+    },
+    {
+      path: '/activites/:id',
+      name: 'activites.show',
+      component: () => import('../pages/ActiviteDetail.vue'),
+      meta: {
+        requiresAuth: true,
+        title: 'Détail de l\'activité'
+      }
     },
 
     {

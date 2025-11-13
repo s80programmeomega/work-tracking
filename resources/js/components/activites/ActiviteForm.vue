@@ -1,3 +1,4 @@
+<!-- resources/js/components/activites/ActiviteForm.vue -->
 <template>
   <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" @click.self="$emit('close')">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
@@ -21,9 +22,7 @@
             @click="$emit('close')"
             class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
-            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <XIcon class="w-5 h-5 text-gray-400" />
           </button>
         </div>
       </div>
@@ -101,13 +100,39 @@
                 <select
                   v-model="formData.projet_id"
                   required
-                  class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all"
+                  @change="onProjetChange"
+                  :disabled="!!activite || loadingProjets"
+                  class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <option value="">Sélectionner un projet</option>
-                  <option v-for="projet in projets" :key="projet.id" :value="projet.id">
+                  <option value="">
+                    {{ loadingProjets ? 'Chargement des projets...' : 'Sélectionner un projet' }}
+                  </option>
+                  <option v-for="projet in accessibleProjets" :key="projet.id" :value="projet.id">
                     {{ projet.nom }}
+                    <template v-if="projet.workspace"> - {{ projet.workspace.nom }}</template>
                   </option>
                 </select>
+                
+                <!-- Message si aucun projet disponible -->
+                <div v-if="!loadingProjets && accessibleProjets.length === 0" class="mt-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                  <div class="flex items-start gap-2">
+                    <svg class="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                    </svg>
+                    <div class="flex-1">
+                      <p class="text-sm font-medium text-amber-800 dark:text-amber-200">
+                        Aucun projet disponible
+                      </p>
+                      <p class="text-xs text-amber-700 dark:text-amber-300 mt-1">
+                        Vous n'avez accès à aucun projet dans ce workspace. Créez d'abord un projet ou demandez à y être ajouté.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <p v-if="activite" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Le projet ne peut pas être modifié après la création
+                </p>
               </div>
 
               <div>
@@ -117,23 +142,27 @@
                 <select
                   v-model="formData.responsable_id"
                   required
-                  class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all"
+                  :disabled="!formData.projet_id || loadingMembers"
+                  class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <option value="">Sélectionner un responsable</option>
-                  <option v-for="user in users" :key="user.id" :value="user.id">
-                    {{ user.nom }}
+                  <option value="">
+                    {{ loadingMembers ? 'Chargement...' : 'Sélectionner un responsable' }}
+                  </option>
+                  <option v-for="member in availableMembers" :key="member.id" :value="member.id">
+                    {{ member.nom }} {{ member.email ? `(${member.email})` : '' }}
                   </option>
                 </select>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  ⓘ Seuls les membres du projet sélectionné sont disponibles
+                </p>
               </div>
             </div>
           </div>
 
-          <!-- Section 3: Planification -->
+          <!-- Section 3: Planification avec DatePicker amélioré -->
           <div class="space-y-4">
             <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
+              <CalendarIcon class="w-5 h-5 text-green-500" />
               Planification
             </h3>
 
@@ -142,22 +171,43 @@
                 <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Date de début
                 </label>
-                <input
+                <DatePicker
                   v-model="formData.date_debut"
-                  type="date"
-                  class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all"
-                />
+                  :enable-time-picker="false"
+                  :is-required="false"
+                  auto-apply
+                  :format="'yyyy-MM-dd'"
+                  :locale="'fr'"
+                  :dark="isDark"
+                  placeholder="Sélectionner une date"
+                  class="w-full date-input"
+                >
+                  <template #input-icon>
+                    <CalendarIcon class="w-5 h-5 text-gray-400" />
+                  </template>
+                </DatePicker>
               </div>
 
               <div>
                 <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Date de fin
                 </label>
-                <input
+                <DatePicker
                   v-model="formData.date_fin"
-                  type="date"
-                  class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all"
-                />
+                  :enable-time-picker="false"
+                  :is-required="false"
+                  auto-apply
+                  :format="'yyyy-MM-dd'"
+                  :locale="'fr'"
+                  :dark="isDark"
+                  :min-date="formData.date_debut"
+                  placeholder="Sélectionner une date"
+                  class="w-full date-input"
+                >
+                  <template #input-icon>
+                    <CalendarIcon class="w-5 h-5 text-gray-400" />
+                  </template>
+                </DatePicker>
               </div>
             </div>
           </div>
@@ -270,6 +320,19 @@
                   :style="{ backgroundColor: formData.couleur }"
                 ></div>
               </div>
+              <div class="flex gap-2 mt-3">
+                <button
+                  v-for="color in presetColors"
+                  :key="color"
+                  type="button"
+                  @click="formData.couleur = color"
+                  :style="{ backgroundColor: color }"
+                  :class="[
+                    'w-8 h-8 rounded-lg border-2 transition-transform hover:scale-110',
+                    formData.couleur === color ? 'border-gray-900 dark:border-white scale-110' : 'border-transparent'
+                  ]"
+                ></button>
+              </div>
               <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
                 Cette couleur sera utilisée pour identifier visuellement l'activité
               </p>
@@ -301,7 +364,7 @@
               </svg>
               Enregistrement...
             </span>
-            <span v-else>Enregistrer</span>
+            <span v-else>{{ activite ? 'Mettre à jour' : 'Créer l\'activité' }}</span>
           </button>
         </div>
       </div>
@@ -310,9 +373,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useActivites } from '@/composables/useActivites'
+import { XIcon, CalendarIcon } from '@/icons'
+import DatePicker from '@vuepic/vue-datepicker'
+import '@vuepic/vue-datepicker/dist/main.css'
 import api from '@/api/axios'
 
 const props = defineProps({
@@ -327,22 +393,33 @@ const emit = defineEmits(['close', 'saved'])
 const authStore = useAuthStore()
 const { createActivite, updateActivite } = useActivites()
 
+const loadingProjets = ref(false)
 const loading = ref(false)
-const users = ref([])
-const projets = ref([])
+const loadingMembers = ref(false)
+
+const accessibleProjets = ref([])
+const availableMembers = ref([])
+const currentProjet = ref(null)
 const errorMessage = ref('')
 const validationErrors = ref([])
+
+const isDark = computed(() => document.documentElement.classList.contains('dark'))
 
 const statusOptions = [
   { value: 'active', label: 'Actif', color: 'bg-green-500' },
   { value: 'archived', label: 'Archivé', color: 'bg-gray-500' }
 ]
 
+const presetColors = [
+  '#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', 
+  '#EF4444', '#EC4899', '#14B8A6', '#F97316'
+]
+
 const formData = ref({
   nom: '',
   description: '',
   projet_id: '',
-  responsable_id: authStore.user?.id,
+  responsable_id: '',
   date_debut: '',
   date_fin: '',
   progression: 0,
@@ -350,22 +427,59 @@ const formData = ref({
   couleur: '#3B82F6'
 })
 
-const loadUsers = async () => {
+// ✅ Charger les projets accessibles
+const loadAccessibleProjets = async () => {
+  loadingProjets.value = true
   try {
-    const { data } = await api.get('/users')
-    users.value = data.data || []
+    // Utilisez la route qui fonctionne
+    const { data } = await api.get('/projets/mes-projets')
+    accessibleProjets.value = data.data || []
+    console.log('Projets accessibles chargés:', accessibleProjets.value.length)
   } catch (error) {
-    console.error('Error loading users:', error)
+    console.error('Error loading accessible projets:', error)
+    accessibleProjets.value = []
+    errorMessage.value = 'Erreur lors du chargement des projets'
+  } finally {
+    loadingProjets.value = false
   }
 }
 
-const loadProjets = async () => {
-  try {
-    const { data } = await api.get('/projets')
-    projets.value = data.data || []
-  } catch (error) {
-    console.error('Error loading projets:', error)
+// ✅ Charger les membres disponibles pour le projet sélectionné
+const loadAvailableMembers = async (projetId) => {
+  if (!projetId) {
+    availableMembers.value = []
+    currentProjet.value = null
+    return
   }
+
+  loadingMembers.value = true
+  try {
+    // Charger les détails du projet
+    const projetResponse = await api.get(`/projets/${projetId}`)
+    currentProjet.value = projetResponse.data.data
+
+    // Charger les membres disponibles
+    const { data } = await api.get(`/activites/available-members/${projetId}`)
+    availableMembers.value = data.data || []
+    
+    // Si le responsable actuel n'est plus dans la liste, réinitialiser
+    if (formData.value.responsable_id && 
+        !availableMembers.value.find(m => m.id === formData.value.responsable_id)) {
+      formData.value.responsable_id = ''
+    }
+  } catch (error) {
+    console.error('Error loading members:', error)
+    availableMembers.value = []
+    currentProjet.value = null
+  } finally {
+    loadingMembers.value = false
+  }
+}
+
+// ✅ Réagir au changement de projet
+const onProjetChange = () => {
+  formData.value.responsable_id = '' // Réinitialiser le responsable
+  loadAvailableMembers(formData.value.projet_id)
 }
 
 const handleSubmit = async () => {
@@ -374,6 +488,24 @@ const handleSubmit = async () => {
   validationErrors.value = []
 
   try {
+    // Validation
+    if (!formData.value.nom.trim()) {
+      throw new Error('Le nom de l\'activité est requis')
+    }
+    if (!formData.value.projet_id) {
+      throw new Error('Le projet est requis')
+    }
+    if (!formData.value.responsable_id) {
+      throw new Error('Le responsable est requis')
+    }
+    if (formData.value.date_debut && formData.value.date_fin) {
+      const dateDebut = new Date(formData.value.date_debut)
+      const dateFin = new Date(formData.value.date_fin)
+      if (dateFin < dateDebut) {
+        throw new Error('La date de fin doit être après la date de début')
+      }
+    }
+
     if (props.activite) {
       await updateActivite(props.activite.id, formData.value)
     } else {
@@ -381,13 +513,12 @@ const handleSubmit = async () => {
     }
     emit('saved')
   } catch (error) {
-    console.error(error)
+    console.error('Error submitting form:', error)
 
     // Handle validation errors (422)
     if (error.response && error.response.status === 422) {
       const errors = error.response.data.errors
       if (errors) {
-        // Collect all validation error messages
         validationErrors.value = Object.values(errors).flat()
         errorMessage.value = 'Veuillez corriger les erreurs suivantes :'
       } else {
@@ -397,6 +528,10 @@ const handleSubmit = async () => {
     // Handle other errors
     else if (error.response && error.response.data && error.response.data.message) {
       errorMessage.value = error.response.data.message
+    }
+    // Custom validation errors
+    else if (error.message) {
+      errorMessage.value = error.message
     }
     // Network or unknown errors
     else if (error.message === 'Network Error') {
@@ -410,20 +545,64 @@ const handleSubmit = async () => {
 }
 
 onMounted(async () => {
-  await Promise.all([loadUsers(), loadProjets()])
+  await loadAccessibleProjets()
 
   if (props.activite) {
     formData.value = {
       nom: props.activite.nom || '',
       description: props.activite.description || '',
       projet_id: props.activite.projet_id || '',
-      responsable_id: props.activite.responsable_id || authStore.user?.id,
+      responsable_id: props.activite.responsable_id || '',
       date_debut: props.activite.date_debut || '',
       date_fin: props.activite.date_fin || '',
       progression: props.activite.progression || 0,
       status: props.activite.status || 'active',
       couleur: props.activite.couleur || '#3B82F6'
     }
+    
+    // Charger les membres du projet existant
+    if (props.activite.projet_id) {
+      await loadAvailableMembers(props.activite.projet_id)
+    }
+  }
+})
+
+// ✅ Watch projet_id pour charger automatiquement les membres
+watch(() => formData.value.projet_id, (newProjetId) => {
+  if (newProjetId) {
+    loadAvailableMembers(newProjetId)
   }
 })
 </script>
+
+<style scoped>
+/* Solution CSS pour forcer l'affichage du calendrier */
+.date-input {
+  position: relative;
+  z-index: 1;
+}
+
+/* S'assurer que le calendrier s'affiche au-dessus de la modal */
+.date-input::-webkit-calendar-picker-indicator {
+  background: transparent;
+  bottom: 0;
+  color: transparent;
+  cursor: pointer;
+  height: auto;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: auto;
+  z-index: 2;
+}
+
+/* Pour Firefox */
+.date-input {
+  position: relative;
+}
+
+.date-input:focus {
+  z-index: 100000;
+}
+</style>

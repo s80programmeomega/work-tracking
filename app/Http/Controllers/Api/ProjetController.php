@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\FacadesLog;
 
 class ProjetController extends Controller
 {
@@ -324,7 +325,7 @@ class ProjetController extends Controller
         ]);
 
         $overrides = $request->only(['nom', 'date_debut', 'date_fin', 'responsable_id', 'workspace_id']);
-        
+
         // ✅ Par défaut, clone dans le même workspace que l'original
         $overrides['workspace_id'] = $overrides['workspace_id'] ?? $projet->workspace_id;
 
@@ -669,4 +670,23 @@ class ProjetController extends Controller
             ], 500);
         }
     }
+
+
+public function accessible()
+{
+    $user = auth()->user();
+
+    $projets = Projet::with('workspace')
+        ->whereHas('workspace', function ($q) use ($user) {
+            $q->where('owner_id', $user->id)
+              ->orWhereHas('members', fn($m) => $m->where('user_id', $user->id));
+        })
+        ->get();
+
+    return response()->json($projets);
+}
+
+
+
+
 }

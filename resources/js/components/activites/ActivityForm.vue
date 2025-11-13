@@ -1,3 +1,4 @@
+<!-- resources\js\components\activites\ActivityForm.vue -->
 <template>
   <Dialog :open="open" @update:open="handleClose">
     <DialogContent class="max-w-2xl max-h-[90vh] overflow-y-auto">
