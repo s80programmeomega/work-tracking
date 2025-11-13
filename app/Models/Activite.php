@@ -215,4 +215,7 @@ class Activite extends Model
             static::where('id', $id)->update(['ordre' => $index]);
         }
     }
+
+    
+
 }
