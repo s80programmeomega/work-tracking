@@ -1,3 +1,4 @@
+// resources\js\stores\activiteStore.js
 import { defineStore } from 'pinia'
 import api from '@/api/axios'
 
@@ -132,6 +133,21 @@ export const useActiviteStore = defineStore('activite', {
         return data
       } catch (error) {
         this.error = error.response?.data?.message || 'Erreur lors du chargement de l\'activité'
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
+     async fetchActiviteTaches(id) {
+      this.loading = true
+      this.error = null
+
+      try {
+        const { data } = await api.get(`/activites/${id}/taches`)
+        return data // Retourner les données des tâches
+      } catch (error) {
+        this.error = error.response?.data?.message || 'Erreur lors du chargement des tâches'
         throw error
       } finally {
         this.loading = false

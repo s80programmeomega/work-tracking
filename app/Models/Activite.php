@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -23,6 +24,7 @@ class Activite extends Model
         'ordre',
         'status',
         'progression',
+        'created_by',
         'couleur',
         'metadata',
         'archived_at',
@@ -74,6 +76,21 @@ class Activite extends Model
         return $this->belongsTo(Projet::class);
     }
 
+    public function membres()
+    {
+        return $this->belongsToMany(User::class, 'activite_user')
+            ->withPivot([
+                'role',
+                'can_create_tasks',
+                'can_edit_tasks',
+                'can_delete_tasks',
+                'can_validate_results',
+                'can_assign_users',
+            ])
+            ->withTimestamps();
+    }
+
+
     public function responsable(): BelongsTo
     {
         return $this->belongsTo(User::class, 'responsable_id');
@@ -83,6 +100,51 @@ class Activite extends Model
     public function taches(): HasMany
     {
         return $this->hasMany(Tache::class);
+    }
+
+
+    public function members(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'activite_user')
+            ->withPivot([
+                'role',
+                'can_create_tasks',
+                'can_edit_tasks',
+                'can_delete_tasks',
+                'can_validate_results',
+                'can_assign_users'
+            ])
+            ->withTimestamps();
+    }
+
+    public function isResponsable(User $user): bool
+    {
+        return $this->responsable_id === $user->id;
+    }
+
+    public function isMember(User $user): bool
+    {
+        return $this->members()->where('user_id', $user->id)->exists();
+    }
+
+    public function getMemberRole(User $user): ?string
+    {
+        if ($this->isResponsable($user)) {
+            return 'responsable';
+        }
+
+        $member = $this->members()->where('user_id', $user->id)->first();
+        return $member?->pivot->role;
+    }
+
+    public function canUserValidateN1(User $user): bool
+    {
+        if ($this->isResponsable($user)) {
+            return true;
+        }
+
+        $member = $this->members()->where('user_id', $user->id)->first();
+        return $member?->pivot->can_validate_results ?? false;
     }
 
     /**
@@ -123,8 +185,8 @@ class Activite extends Model
 
         return $query->where(function ($q) use ($term) {
             $q->where('nom', 'like', "%{$term}%")
-              ->orWhere('code', 'like', "%{$term}%")
-              ->orWhere('description', 'like', "%{$term}%");
+                ->orWhere('code', 'like', "%{$term}%")
+                ->orWhere('description', 'like', "%{$term}%");
         });
     }
 
@@ -216,6 +278,6 @@ class Activite extends Model
         }
     }
 
-    
+
 
 }
