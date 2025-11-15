@@ -23,56 +23,10 @@ class ProjetService
      */
     public function getAllProjets(array $filters = [])
     {
-        $query = Projet::query()
-            ->with(['responsable', 'members', 'tags', 'workspace'])
+         $query = Projet::with(['responsable', 'members', 'tags', 'workspace'])
             ->withCount(['activites', 'taches']);
 
-        // ✅ Filtre par workspace si spécifié
-        if (!empty($filters['workspace_id'])) {
-            $query->where('workspace_id', $filters['workspace_id']);
-        }
-
-        // Recherche
-        if (!empty($filters['search'])) {
-            $query->search($filters['search']);
-        }
-
-        // Statut
-        if (!empty($filters['status']) && $filters['status'] !== 'all') {
-            $query->where('status', $filters['status']);
-        }
-
-        // Visibilité
-        if (!empty($filters['visibility']) && $filters['visibility'] !== 'all') {
-            $query->where('visibility', $filters['visibility']);
-        }
-
-        // Responsable
-        if (!empty($filters['responsable_id'])) {
-            $query->where('responsable_id', $filters['responsable_id']);
-        }
-
-        // Template
-        if (!empty($filters['is_template'])) {
-            $query->template();
-        }
-
-        // Favoris
-        if (!empty($filters['is_favorite'])) {
-            $query->favorite();
-        }
-
-        // En retard
-        if (!empty($filters['is_overdue'])) {
-            $query->overdue();
-        }
-
-        // Tags
-        if (!empty($filters['tags'])) {
-            $query->whereHas('tags', function ($q) use ($filters) {
-                $q->whereIn('projet_tags.id', (array) $filters['tags']);
-            });
-        }
+        $this->applyFilters($query, $filters);
 
         return $query->latest()->paginate($filters['per_page'] ?? 15);
     }
@@ -88,62 +42,37 @@ class ProjetService
 
     public function getUserProjets(User $user, array $filters = []): LengthAwarePaginator
     {
-        $query = Projet::query()
-            ->with(['responsable', 'workspace', 'members'])
+         $query = Projet::with(['responsable', 'workspace', 'members'])
             ->withCount(['activites', 'members']);
 
-        // Filtre par workspace (IMPORTANT)
         if (!empty($filters['workspace_id'])) {
-            $workspaceId = $filters['workspace_id'];
-            $workspace = Workspace::find($workspaceId);
-
+            $workspace = Workspace::find($filters['workspace_id']);
             if (!$workspace) {
                 return new LengthAwarePaginator([], 0, $filters['per_page'] ?? 15);
             }
 
-            $query->where('workspace_id', $workspaceId);
+            $query->where('workspace_id', $workspace->id);
 
-            // 🔥 LOGIQUE DE PERMISSION
-            // Si Owner ou Admin du workspace → Voir TOUT
-            if (
-                $workspace->owner_id === $user->id ||
-                $this->isWorkspaceAdmin($user, $workspace)
-            ) {
-
-                // ✅ Pas de filtre supplémentaire
-
-            } else {
-                // ❌ Membre simple → Filtrer
+            if (!($workspace->owner_id === $user->id || $this->isWorkspaceAdmin($user, $workspace))) {
                 $query->where(function ($q) use ($user) {
                     $q->where('responsable_id', $user->id)
-                        ->orWhereHas('members', function ($memberQuery) use ($user) {
-                            $memberQuery->where('user_id', $user->id);
-                        });
+                      ->orWhereHas('members', fn($m) => $m->where('user_id', $user->id));
                 });
             }
         } else {
-            // Pas de workspace spécifié → Projets accessibles tous workspaces
+            // Tous les workspaces accessibles
             $query->where(function ($q) use ($user) {
                 $q->where('responsable_id', $user->id)
-                    ->orWhereHas('members', function ($memberQuery) use ($user) {
-                        $memberQuery->where('user_id', $user->id);
-                    })
-                    // OU Owner/Admin d'un workspace
-                    ->orWhereHas('workspace', function ($workspaceQuery) use ($user) {
-                        $workspaceQuery->where('owner_id', $user->id)
-                            ->orWhereHas('members', function ($memberQuery) use ($user) {
-                                $memberQuery->where('user_id', $user->id)
-                                    ->whereIn('role', ['super_admin', 'admin']);
-                            });
-                    });
+                  ->orWhereHas('members', fn($m) => $m->where('user_id', $user->id))
+                  ->orWhereHas('workspace', fn($w) => $w->where('owner_id', $user->id)
+                      ->orWhereHas('members', fn($m) => $m->where('user_id', $user->id)
+                          ->whereIn('role', ['super_admin', 'admin'])));
             });
         }
 
-        // Appliquer les autres filtres
         $this->applyFilters($query, $filters);
 
-        $perPage = $filters['per_page'] ?? 15;
-        return $query->latest()->paginate($perPage);
+        return $query->latest()->paginate($filters['per_page'] ?? 15);
     }
 
     /**
@@ -152,12 +81,7 @@ class ProjetService
     private function isWorkspaceAdmin(User $user, Workspace $workspace): bool
     {
         $member = $workspace->members()->where('user_id', $user->id)->first();
-
-        if (!$member) {
-            return false;
-        }
-
-        return in_array($member->pivot->role, ['super_admin', 'admin']);
+        return $member && in_array($member->pivot->role, ['admin']);
     }
 
 
@@ -289,60 +213,47 @@ class ProjetService
             ->toArray();
     }
 
-    /**
-     * Apply filters to query.
+   /**
+     * Apply filters to a query
      */
     protected function applyFilters(Builder $query, array $filters): void
     {
-        // Workspace filter
         if (!empty($filters['workspace_id'])) {
             $query->where('workspace_id', $filters['workspace_id']);
         }
 
-        // Search filter
         if (!empty($filters['search'])) {
-            $query->where(function ($q) use ($filters) {
-                $searchTerm = $filters['search'];
-                $q->where('nom', 'like', "%{$searchTerm}%")
-                    ->orWhere('code', 'like', "%{$searchTerm}%")
-                    ->orWhere('description', 'like', "%{$searchTerm}%");
-            });
+            $search = $filters['search'];
+            $query->where(fn($q) => $q->where('nom', 'like', "%$search%")
+                ->orWhere('code', 'like', "%$search%")
+                ->orWhere('description', 'like', "%$search%"));
         }
 
-        // Status filter
-        if (!empty($filters['status'])) {
+        if (!empty($filters['status']) && $filters['status'] !== 'all') {
             $query->where('status', $filters['status']);
         }
 
-        // Visibility filter
-        if (!empty($filters['visibility'])) {
+        if (!empty($filters['visibility']) && $filters['visibility'] !== 'all') {
             $query->where('visibility', $filters['visibility']);
         }
 
-        // Responsable filter
         if (!empty($filters['responsable_id'])) {
             $query->where('responsable_id', $filters['responsable_id']);
         }
 
-        // Tags filter
         if (!empty($filters['tags'])) {
-            $query->whereHas('tags', function ($q) use ($filters) {
-                $q->whereIn('projet_tags.id', (array) $filters['tags']);
-            });
+            $query->whereHas('tags', fn($q) => $q->whereIn('projet_tags.id', (array)$filters['tags']));
         }
 
-        // Template filter
-        if (isset($filters['is_template'])) {
+        if (!empty($filters['is_template'])) {
             $query->where('is_template', filter_var($filters['is_template'], FILTER_VALIDATE_BOOLEAN));
         }
 
-        // Favorite filter
-        if (isset($filters['is_favorite'])) {
+        if (!empty($filters['is_favorite'])) {
             $query->where('is_favorite', filter_var($filters['is_favorite'], FILTER_VALIDATE_BOOLEAN));
         }
 
-        // Overdue filter
-        if (isset($filters['is_overdue']) && filter_var($filters['is_overdue'], FILTER_VALIDATE_BOOLEAN)) {
+        if (!empty($filters['is_overdue'])) {
             $query->where('date_fin', '<', now())
                 ->whereNotIn('status', ['completed', 'archived']);
         }
