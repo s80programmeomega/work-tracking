@@ -17,6 +17,7 @@ class Tache extends Model
 
     protected $fillable = [
         'activite_id',
+        'parent_tache_id',
         'titre',
         'code',
         'description',
@@ -41,6 +42,8 @@ class Tache extends Model
         'actual_hours',
         'archive_status',
         'archived_at',
+        'created_by',
+        'visibility'
     ];
 
     protected $casts = [
@@ -57,6 +60,7 @@ class Tache extends Model
         'estimated_hours' => 'integer',
         'actual_hours' => 'integer',
         'archived_at' => 'datetime',
+        'visibility' => 'string',
     ];
 
     protected $with = ['activite', 'assignees', 'validateur', 'labels'];
@@ -113,6 +117,14 @@ class Tache extends Model
     public function validateur(): BelongsTo
     {
         return $this->belongsTo(User::class, 'validateur_id');
+    }
+
+    // Définir la relation many-to-many avec l'utilisateur via tache_user
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'tache_user')
+            ->withPivot(['role', 'can_edit', 'can_complete'])
+            ->withTimestamps();
     }
 
     /**
@@ -219,10 +231,22 @@ class Tache extends Model
     /**
      * Scope to get tasks assigned to a user
      */
-    public function scopeAssignedTo($query, int $userId)
+    public function scopeAssignedTo($query, int $userId, ?string $role = null, ?bool $canEdit = null, ?bool $canComplete = null)
     {
-        return $query->whereHas('assignees', function ($q) use ($userId) {
+        return $query->whereHas('assignees', function ($q) use ($userId, $role, $canEdit, $canComplete) {
             $q->where('user_id', $userId);
+
+            if ($role !== null) {
+                $q->where('role', $role);
+            }
+
+            if ($canEdit !== null) {
+                $q->where('can_edit', $canEdit);
+            }
+
+            if ($canComplete !== null) {
+                $q->where('can_complete', $canComplete);
+            }
         });
     }
 
@@ -313,6 +337,72 @@ class Tache extends Model
         $completed = $subtasks->where('statut', TacheStatut::TERMINE)->count();
 
         return (int) round(($completed / $total) * 100);
+    }
+
+
+    public function isAccessibleBy(User $user): bool
+    {
+        // Super admin
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        // Responsable de l'activité parent
+        if ($this->activite && $this->activite->responsable_id === $user->id) {
+            return true;
+        }
+
+        // Responsable du projet parent
+        if (
+            $this->activite && $this->activite->projet &&
+            $this->activite->projet->responsable_id === $user->id
+        ) {
+            return true;
+        }
+
+        // Assigné à la tâche
+        if ($this->assignees()->where('user_id', $user->id)->exists()) {
+            return true;
+        }
+
+        // Check visibility
+        switch ($this->visibility) {
+            case 'public':
+                // Accessible par tous les membres du projet
+                return $this->activite->projet->isMember($user);
+
+            case 'members_only':
+                // Accessible par les membres du projet
+                return $this->activite->projet->isMember($user);
+
+            case 'private':
+                // Uniquement les assignés (déjà vérifié ci-dessus)
+                return false;
+
+            default:
+                return false;
+        }
+    }
+
+    public function canBeEditedBy(User $user): bool
+    {
+        // Super admin
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        // Responsable de l'activité
+        if ($this->activite && $this->activite->responsable_id === $user->id) {
+            return true;
+        }
+
+        // Assigné avec permission d'édition
+        $assignment = $this->assignees()->where('user_id', $user->id)->first();
+        if ($assignment && ($assignment->pivot->can_edit ?? true)) {
+            return true;
+        }
+
+        return false;
     }
 
 }
