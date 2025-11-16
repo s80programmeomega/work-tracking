@@ -21,13 +21,16 @@ class ActiviteController extends Controller
 {
     public function __construct(
         protected ActiviteService $activiteService
-    ) {}
+    ) {
+    }
 
     /**
      * Display a listing of ALL activities (SUPER ADMIN ONLY).
      */
     public function index(Request $request): AnonymousResourceCollection
     {
+        $user = $request->user();
+
         $filters = $request->only([
             'search',
             'projet_id',
@@ -38,7 +41,13 @@ class ActiviteController extends Controller
             'workspace_id', // ✅ Permet de filtrer par workspace
         ]);
 
-        $activites = $this->activiteService->getAllActivites($filters);
+        // ✅ Si Super Admin : toutes les activités
+        if ($user->isSuperAdmin()) {
+            $activites = $this->activiteService->getAllActivites($filters);
+        } else {
+            // ✅ Sinon : activités des projets accessibles
+            $activites = $this->activiteService->getAccessibleActivites($user, $filters);
+        }
 
         return ActiviteResource::collection($activites);
     }
@@ -71,6 +80,7 @@ class ActiviteController extends Controller
 
     /**
      * Get current user's activities.
+     * ✅ AMÉLIORATION : Filtrage par workspace et permissions
      */
     public function myActivites(Request $request): AnonymousResourceCollection
     {
@@ -80,6 +90,7 @@ class ActiviteController extends Controller
             'status',
             'is_overdue',
             'per_page',
+            'workspace_id',
         ]);
 
         // ✅ Filtre par workspace actuel
@@ -87,7 +98,6 @@ class ActiviteController extends Controller
         if ($workspaceId) {
             $filters['workspace_id'] = $workspaceId;
         }
-
         $activites = $this->activiteService->getUserActivites($request->user(), $filters);
 
         return ActiviteResource::collection($activites);
@@ -95,6 +105,7 @@ class ActiviteController extends Controller
 
     /**
      * Get overdue activities.
+     * ✅ AMÉLIORATION : Filtrage par workspace
      */
     public function enRetard(Request $request): JsonResponse
     {
@@ -115,9 +126,6 @@ class ActiviteController extends Controller
         return response()->json($activites);
     }
 
-    /**
-     * Store a newly created activity.
-     */
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -131,26 +139,33 @@ class ActiviteController extends Controller
             'progression' => 'integer|min:0|max:100',
             'couleur' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
             'metadata' => 'nullable|array',
+            'membres' => 'nullable|array',
+            'membres.*.user_id' => 'required|exists:users,id',
+            'membres.*.role' => 'required|in:responsable,collaborator,viewer',
+            'membres.*.can_create_tasks' => 'boolean',
+            'membres.*.can_edit_tasks' => 'boolean',
+            'membres.*.can_delete_tasks' => 'boolean',
+            'membres.*.can_validate_results' => 'boolean',
+            'membres.*.can_assign_users' => 'boolean',
         ]);
 
         $user = $request->user();
         $projet = Projet::findOrFail($validated['projet_id']);
 
-        // ✅ Vérifier que l'utilisateur a accès au projet
+        // Vérifier l'accès
         if (!$user->isSuperAdmin() && !$projet->hasAccess($user)) {
             return response()->json([
                 'message' => 'Vous n\'avez pas accès à ce projet'
             ], 403);
         }
 
-        // ✅ Vérifier que l'utilisateur peut créer des activités
         if (!$user->isSuperAdmin() && !$projet->canUserEdit($user)) {
             return response()->json([
-                'message' => 'Vous n\'avez pas la permission de créer des activités dans ce projet'
+                'message' => 'Vous n\'avez pas la permission de créer des activités'
             ], 403);
         }
 
-        // ✅ VALIDATION CRITIQUE : Le responsable doit être membre du projet
+        // Validation responsable
         $responsable = User::find($validated['responsable_id']);
         if (!$projet->isMember($responsable) && $projet->responsable_id !== $responsable->id) {
             throw ValidationException::withMessages([
@@ -158,19 +173,57 @@ class ActiviteController extends Controller
             ]);
         }
 
-        // Définir l'ordre (dernière position)
+        // Validation membres
+        if (isset($validated['membres'])) {
+            foreach ($validated['membres'] as $membre) {
+                $membreUser = User::find($membre['user_id']);
+                if (!$projet->isMember($membreUser) && $projet->responsable_id !== $membreUser->id) {
+                    throw ValidationException::withMessages([
+                        'membres' => ['Tous les membres doivent appartenir au projet']
+                    ]);
+                }
+            }
+        }
+
         $validated['ordre'] = Activite::where('projet_id', $validated['projet_id'])->max('ordre') + 1;
         $validated['created_by'] = $user->id;
 
         DB::beginTransaction();
         try {
             $activite = Activite::create($validated);
-            
+
+            // ✅ CORRECTION : Ajouter TOUJOURS le responsable comme membre
+            $activite->membres()->attach($validated['responsable_id'], [
+                'role' => 'responsable',
+                'can_create_tasks' => true,
+                'can_edit_tasks' => true,
+                'can_delete_tasks' => true,
+                'can_validate_results' => true,
+                'can_assign_users' => true,
+            ]);
+
+            // Ajouter les autres membres
+            if (isset($validated['membres'])) {
+                foreach ($validated['membres'] as $membre) {
+                    // Ne pas ajouter deux fois le responsable
+                    if ($membre['user_id'] != $validated['responsable_id']) {
+                        $activite->membres()->attach($membre['user_id'], [
+                            'role' => $membre['role'],
+                            'can_create_tasks' => $membre['can_create_tasks'] ?? false,
+                            'can_edit_tasks' => $membre['can_edit_tasks'] ?? false,
+                            'can_delete_tasks' => $membre['can_delete_tasks'] ?? false,
+                            'can_validate_results' => $membre['can_validate_results'] ?? false,
+                            'can_assign_users' => $membre['can_assign_users'] ?? false,
+                        ]);
+                    }
+                }
+            }
+
             DB::commit();
 
             return response()->json([
                 'message' => 'Activité créée avec succès',
-                'data' => $activite->load(['projet', 'responsable'])
+                'data' => $activite->load(['projet', 'responsable', 'membres'])
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -183,10 +236,11 @@ class ActiviteController extends Controller
 
     /**
      * Display the specified activity.
+     * ✅ AMÉLIORATION : Inclure les membres dans la réponse
      */
     public function show(Request $request, $id): JsonResponse
     {
-        $activite = Activite::with(['projet', 'responsable', 'taches'])->findOrFail($id);
+        $activite = Activite::with(['projet', 'responsable', 'taches', 'membres'])->findOrFail($id);
         $user = $request->user();
 
         // Vérifier l'accès au projet parent
@@ -222,8 +276,19 @@ class ActiviteController extends Controller
             return response()->json(['message' => 'Accès non autorisé'], 403);
         }
 
+        // ✅ AMÉLIORATION : Vérifier aussi si l'utilisateur est membre de l'activité avec can_edit_tasks
+        $isMemberWithEditPermission = $activite->membres()
+            ->where('user_id', $user->id)
+            ->wherePivot('can_edit_tasks', true)
+            ->exists();
+
         // Vérifier les permissions d'édition
-        if (!$user->isSuperAdmin() && !$projet->canUserEdit($user) && $activite->responsable_id !== $user->id) {
+        if (
+            !$user->isSuperAdmin()
+            && !$projet->canUserEdit($user)
+            && $activite->responsable_id !== $user->id
+            && !$isMemberWithEditPermission
+        ) {
             return response()->json([
                 'message' => 'Vous n\'avez pas la permission de modifier cette activité'
             ], 403);
@@ -254,12 +319,12 @@ class ActiviteController extends Controller
         DB::beginTransaction();
         try {
             $activite->update($validated);
-            
+
             DB::commit();
 
             return response()->json([
                 'message' => 'Activité mise à jour avec succès',
-                'data' => $activite->load(['projet', 'responsable'])
+                'data' => $activite->load(['projet', 'responsable', 'membres'])
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -331,7 +396,7 @@ class ActiviteController extends Controller
     public function archive(Request $request, Activite $activite): JsonResponse
     {
         $user = $request->user();
-        
+
         if (!$user->isSuperAdmin() && (!$activite->projet->hasAccess($user) || !$activite->projet->canUserEdit($user))) {
             return response()->json(['message' => 'Accès non autorisé'], 403);
         }
@@ -350,7 +415,7 @@ class ActiviteController extends Controller
     public function unarchive(Request $request, Activite $activite): JsonResponse
     {
         $user = $request->user();
-        
+
         if (!$user->isSuperAdmin() && (!$activite->projet->hasAccess($user) || !$activite->projet->canUserEdit($user))) {
             return response()->json(['message' => 'Accès non autorisé'], 403);
         }
@@ -371,22 +436,23 @@ class ActiviteController extends Controller
         $activite = Activite::findOrFail($id);
         $user = $request->user();
 
-        if (!$user->isSuperAdmin() && (!$activite->projet->hasAccess($user) || !$activite->projet->canUserEdit($user))) {
+        if (!$user->isSuperAdmin() && !$activite->projet->hasAccess($user)) {
             return response()->json(['message' => 'Accès non autorisé'], 403);
         }
 
         $validated = $request->validate([
             'nom' => 'nullable|string|max:255',
             'projet_id' => 'nullable|exists:projets,id',
+            'copy_members' => 'nullable|boolean',
         ]);
 
         DB::beginTransaction();
         try {
             $newActivite = $activite->replicate();
             $newActivite->nom = $validated['nom'] ?? $activite->nom . ' (Copie)';
-            $newActivite->code = null; // Le code sera régénéré
+            $newActivite->code = null;
             $newActivite->progression = 0;
-            
+
             if (isset($validated['projet_id'])) {
                 $newProjet = Projet::findOrFail($validated['projet_id']);
                 if (!$user->isSuperAdmin() && !$newProjet->hasAccess($user)) {
@@ -398,11 +464,37 @@ class ActiviteController extends Controller
             $newActivite->ordre = Activite::where('projet_id', $newActivite->projet_id)->max('ordre') + 1;
             $newActivite->save();
 
+            // ✅ TOUJOURS copier le responsable
+            $newActivite->membres()->attach($newActivite->responsable_id, [
+                'role' => 'responsable',
+                'can_create_tasks' => true,
+                'can_edit_tasks' => true,
+                'can_delete_tasks' => true,
+                'can_validate_results' => true,
+                'can_assign_users' => true,
+            ]);
+
+            // Copier les autres membres si demandé
+            if ($validated['copy_members'] ?? true) {
+                foreach ($activite->membres as $membre) {
+                    if ($membre->id != $newActivite->responsable_id) {
+                        $newActivite->membres()->attach($membre->id, [
+                            'role' => $membre->pivot->role,
+                            'can_create_tasks' => $membre->pivot->can_create_tasks,
+                            'can_edit_tasks' => $membre->pivot->can_edit_tasks,
+                            'can_delete_tasks' => $membre->pivot->can_delete_tasks,
+                            'can_validate_results' => $membre->pivot->can_validate_results,
+                            'can_assign_users' => $membre->pivot->can_assign_users,
+                        ]);
+                    }
+                }
+            }
+
             DB::commit();
 
             return response()->json([
                 'message' => 'Activité dupliquée avec succès',
-                'data' => $newActivite->load(['projet', 'responsable'])
+                'data' => $newActivite->load(['projet', 'responsable', 'membres'])
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -449,7 +541,7 @@ class ActiviteController extends Controller
         $members = $projet->members()
             ->select('users.id', 'users.nom', 'users.email')
             ->get();
-        
+
         // ✅ Ajouter le responsable du projet s'il n'est pas déjà membre
         if ($projet->responsable && !$members->contains('id', $projet->responsable->id)) {
             $members->prepend([
@@ -460,5 +552,228 @@ class ActiviteController extends Controller
         }
 
         return response()->json(['data' => $members]);
+    }
+
+    // ==================== ✅ NOUVELLES MÉTHODES POUR GESTION DES MEMBRES ====================
+
+    /**
+     * Get members of an activity
+     */
+    public function getMembers(Request $request, $id): JsonResponse
+    {
+        $activite = Activite::with('membres')->findOrFail($id);
+        $user = $request->user();
+
+        // Vérifier l'accès à l'activité
+        if (!$user->isSuperAdmin() && !$activite->projet->hasAccess($user)) {
+            return response()->json(['message' => 'Accès non autorisé'], 403);
+        }
+
+        return response()->json([
+            'data' => $activite->membres->map(function ($membre) {
+                return [
+                    'id' => $membre->id,
+                    'nom' => $membre->nom,
+                    'email' => $membre->email,
+                    'role' => $membre->pivot->role,
+                    'can_create_tasks' => $membre->pivot->can_create_tasks,
+                    'can_edit_tasks' => $membre->pivot->can_edit_tasks,
+                    'can_delete_tasks' => $membre->pivot->can_delete_tasks,
+                    'can_validate_results' => $membre->pivot->can_validate_results,
+                    'can_assign_users' => $membre->pivot->can_assign_users,
+                ];
+            })
+        ]);
+    }
+
+    /**
+     * Add a member to an activity
+     */
+    public function addMember(Request $request, $id): JsonResponse
+    {
+        $activite = Activite::findOrFail($id);
+        $user = $request->user();
+        $projet = $activite->projet;
+
+        // Vérifier les permissions
+        $canManage = $user->isSuperAdmin()
+            || $projet->canUserEdit($user)
+            || $activite->responsable_id === $user->id
+            || $activite->membres()->where('user_id', $user->id)
+                ->wherePivot('can_assign_users', true)
+                ->exists();
+
+        if (!$canManage) {
+            return response()->json(['message' => 'Permission refusée'], 403);
+        }
+
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'role' => 'required|in:responsable,collaborator,viewer',
+            'can_create_tasks' => 'boolean',
+            'can_edit_tasks' => 'boolean',
+            'can_delete_tasks' => 'boolean',
+            'can_validate_results' => 'boolean',
+            'can_assign_users' => 'boolean',
+        ]);
+
+        // Vérifier que le membre est dans le projet
+        $membreUser = User::find($validated['user_id']);
+        if (!$projet->isMember($membreUser) && $projet->responsable_id !== $membreUser->id) {
+            return response()->json([
+                'message' => 'Le membre doit appartenir au projet'
+            ], 422);
+        }
+
+        // Vérifier si déjà membre
+        if ($activite->membres()->where('user_id', $validated['user_id'])->exists()) {
+            return response()->json([
+                'message' => 'Ce membre est déjà assigné à l\'activité'
+            ], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            $activite->membres()->attach($validated['user_id'], [
+                'role' => $validated['role'],
+                'can_create_tasks' => $validated['can_create_tasks'] ?? false,
+                'can_edit_tasks' => $validated['can_edit_tasks'] ?? false,
+                'can_delete_tasks' => $validated['can_delete_tasks'] ?? false,
+                'can_validate_results' => $validated['can_validate_results'] ?? false,
+                'can_assign_users' => $validated['can_assign_users'] ?? false,
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Membre ajouté avec succès',
+                'data' => $activite->load('membres')
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Erreur lors de l\'ajout du membre',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update member permissions
+     */
+    public function updateMember(Request $request, $activiteId, $userId): JsonResponse
+    {
+        $activite = Activite::findOrFail($activiteId);
+        $user = $request->user();
+
+        // Vérifier les permissions
+        $canManage = $user->isSuperAdmin()
+            || $activite->projet->canUserEdit($user)
+            || $activite->responsable_id === $user->id
+            || $activite->membres()->where('user_id', $user->id)
+                ->wherePivot('can_assign_users', true)
+                ->exists();
+
+        if (!$canManage) {
+            return response()->json(['message' => 'Permission refusée'], 403);
+        }
+
+        $validated = $request->validate([
+            'role' => 'sometimes|in:responsable,collaborator,viewer',
+            'can_create_tasks' => 'sometimes|boolean',
+            'can_edit_tasks' => 'sometimes|boolean',
+            'can_delete_tasks' => 'sometimes|boolean',
+            'can_validate_results' => 'sometimes|boolean',
+            'can_assign_users' => 'sometimes|boolean',
+        ]);
+
+        // Vérifier que le membre existe
+        if (!$activite->membres()->where('user_id', $userId)->exists()) {
+            return response()->json([
+                'message' => 'Ce membre n\'est pas assigné à l\'activité'
+            ], 404);
+        }
+
+        DB::beginTransaction();
+        try {
+            $activite->membres()->updateExistingPivot($userId, $validated);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Permissions mises à jour',
+                'data' => $activite->load('membres')
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Erreur lors de la mise à jour',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Remove a member from an activity
+     */
+    public function removeMember(Request $request, $activiteId, $userId): JsonResponse
+    {
+        $activite = Activite::findOrFail($activiteId);
+        $user = $request->user();
+
+        // Vérifier les permissions
+        $canManage = $user->isSuperAdmin()
+            || $activite->projet->canUserEdit($user)
+            || $activite->responsable_id === $user->id
+            || $activite->membres()->where('user_id', $user->id)
+                ->wherePivot('can_assign_users', true)
+                ->exists();
+
+        if (!$canManage) {
+            return response()->json(['message' => 'Permission refusée'], 403);
+        }
+
+        // Ne pas permettre de retirer le responsable
+        if ($activite->responsable_id == $userId) {
+            return response()->json([
+                'message' => 'Impossible de retirer le responsable de l\'activité'
+            ], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            $activite->membres()->detach($userId);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Membre retiré avec succès'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Erreur lors du retrait du membre',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get tasks of an activity
+     * ✅ Méthode existante mais ajout de vérifications
+     */
+    public function getTaches(Request $request, $id): JsonResponse
+    {
+        $activite = Activite::with('taches.assignee')->findOrFail($id);
+        $user = $request->user();
+
+        // Vérifier l'accès
+        if (!$user->isSuperAdmin() && !$activite->projet->hasAccess($user)) {
+            return response()->json(['message' => 'Accès non autorisé'], 403);
+        }
+
+        return response()->json([
+            'data' => $activite->taches
+        ]);
     }
 }
