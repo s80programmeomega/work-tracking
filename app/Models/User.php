@@ -34,7 +34,7 @@ class User extends Authenticatable
         'bio',
         'numero_telephone',
         'adresse',
-        'role',
+        // 'role',
         'team_id',
         'language',
         'timezone',
@@ -42,6 +42,7 @@ class User extends Authenticatable
         'is_active',
         'last_login_at',
         'last_login_ip',
+        'is_super_admin',
     ];
 
     /**
@@ -54,6 +55,7 @@ class User extends Authenticatable
         'remember_token',
         'two_factor_secret',
         'two_factor_recovery_codes',
+        'is_super_admin' => 'boolean',
     ];
 
     /**
@@ -68,6 +70,7 @@ class User extends Authenticatable
         'is_active' => 'boolean',
         'notification_preferences' => 'array',
         'password' => 'hashed',
+        'is_super_admin' => 'boolean',
     ];
 
     protected $appends = [
@@ -170,16 +173,21 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
-    // TODO: Uncomment when Projet, Activite, Tache models are created
-    // public function projets()
-    // {
-    //     return $this->hasMany(Projet::class, 'responsable_id');
-    // }
+    
+    public function activites()
+{
+    return $this->belongsToMany(Activite::class, 'activite_user')
+        ->withPivot([
+            'role',
+            'can_create_tasks',
+            'can_edit_tasks',
+            'can_delete_tasks',
+            'can_validate_results',
+            'can_assign_users',
+        ])
+        ->withTimestamps();
+}
 
-    // public function activites()
-    // {
-    //     return $this->hasMany(Activite::class, 'responsable_id');
-    // }
 
     // public function taches()
     // {
@@ -319,7 +327,7 @@ class User extends Authenticatable
      */
     public function isSuperAdmin(): bool
     {
-        return $this->role === 'super_admin';
+        return (bool) $this->is_super_admin;
     }
 
     /**
