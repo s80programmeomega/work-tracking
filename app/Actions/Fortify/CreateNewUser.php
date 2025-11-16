@@ -29,7 +29,7 @@ class CreateNewUser implements CreatesNewUsers
                 Rule::unique(User::class),
             ],
             'password' => $this->passwordRules(),
-            'role' => ['required', 'string', 'in:super_admin,manager,member,responsable_n2,cadre,stagiaire'],
+            // 'role' => ['required', 'string', 'in:super_admin,manager,member,responsable_n2,cadre,stagiaire'],
             'fonction' => ['nullable', 'string', 'max:255'],
         ])->validate();
 
