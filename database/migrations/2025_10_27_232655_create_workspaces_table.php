@@ -57,6 +57,7 @@ return new class extends Migration
             $table->foreignId('parent_tache_id')->nullable()->after('activite_id')->constrained('taches')->onDelete('cascade');
             $table->index('parent_tache_id');
         });
+        
     }
 
     /**

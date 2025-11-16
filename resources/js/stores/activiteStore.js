@@ -37,7 +37,7 @@ export const useActiviteStore = defineStore('activite', {
 
       try {
         const params = { ...this.filters, ...filters }
-        const { data } = await api.get('/activites', { params })
+        const { data } = await api.get('/activites/all/activity', { params })
 
         this.activites = data.data || []
         this.pagination = {

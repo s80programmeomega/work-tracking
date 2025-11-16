@@ -1,220 +1,340 @@
-// resources\js\stores\auth.js
+// resources/js/stores/auth.js
 import { defineStore } from 'pinia'
 import axios from 'axios'
+
+/**
+ * Auth store (Pinia)
+ * - Respecte la nouvelle architecture (is_super_admin, workspace_members, projet_user pivots)
+ * - Centralise axios via `api`
+ * - Token kept in memory (this.token) + fallback localStorage
+ * - Auto refresh token before expiration (based on JWT exp if present)
+ *
+ * NOTE: Assumptions (défensives) :
+ * - L'endpoint /api/user retourne idéalement :
+ *   { id, nom, ..., is_super_admin, workspace_members: [...], projet_user: [...], permissions: [...] }
+ * - Si ton backend retourne d'autres clés, adapte les accès ci-dessous en conséquence.
+ */
+
+const api = axios.create({
+  baseURL: '/api',
+  headers: {
+    'Accept': 'application/json'
+  },
+  withCredentials: true // utile si refresh token est en cookie HttpOnly côté serveur
+})
+
+// --- helper: decode token expiration ---
+function getJwtExpiry(token) {
+  if (!token) return null
+  try {
+    const parts = token.split('.')
+    if (parts.length !== 3) return null
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')))
+    if (!payload.exp) return null
+    // exp is in seconds
+    return payload.exp * 1000
+  } catch (e) {
+    return null
+  }
+}
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null,
-    token: localStorage.getItem('auth_token') || null,
+    token: null, // preferred: keep in memory
     isAuthenticated: false,
-    loading: false
+    loading: false,
+    error: null,
+    _refreshTimerId: null, // internal interval id
+    _isRefreshing: false,  // avoid concurrent refreshes
   }),
 
   getters: {
-    isLoggedIn: (state) => state.isAuthenticated && state.user !== null,
-    hasRole: (state) => (role) => {
-      return state.user?.role === role
+    isLoggedIn: (s) => s.isAuthenticated && !!s.user,
+    // Super admin global (users.is_super_admin)
+    isSuperAdmin: (s) => !!s.user?.is_super_admin,
+
+    // Retourne workspace membership pivot si présent
+    _workspaceMemberById: (s) => (workspaceId) => {
+      // API should return e.g. user.workspace_members [{ workspace_id, role, permissions }]
+      if (!s.user) return null
+      const members = s.user.workspace_members || s.user.workspaces || []
+      return members.find(m => Number(m.workspace_id ?? m.id) === Number(workspaceId)) || null
     },
-    hasRoleLevel: (state) => (role) => {
-      if (!state.user) return false
 
-      const roleHierarchy = {
-        'stagiaire': 1,
-        'cadre': 2,
-        'responsable_n2': 3,
-        'responsable_n1': 4,
-        'manager': 5,
-        'super_admin': 6,
-      }
-
-      const userLevel = roleHierarchy[state.user.role] || 0
-      const requiredLevel = roleHierarchy[role] || 0
-
-      return userLevel >= requiredLevel
+    // Check workspace role(s) — roles peut être string ou array
+    hasWorkspaceRole: (s) => (workspaceId, roles) => {
+      if (!s.user) return false
+      if (s.isSuperAdmin) return true // super admin bypass
+      const pivot = this._workspaceMemberById(workspaceId)
+      if (!pivot) return false
+      const role = pivot.role
+      const wanted = Array.isArray(roles) ? roles : [roles]
+      return wanted.includes(role)
     },
-    hasPermission: (state) => (permission) => {
-      if (!state.user) return false
 
-      // Super admin has all permissions
-      if (state.user.role === 'super_admin') return true
-
-      // Check if user has specific permission via Spatie Permission
-      if (state.user.permissions && state.user.permissions.length > 0) {
-        return state.user.permissions.some(perm => perm.name === permission)
-      }
-
-      // Fallback: Check permissions based on role hierarchy
-      return state.hasPermissionByRole(permission)
+    // Vérifie si user peut voir tous les projets d'un workspace
+    canViewAllWorkspaceProjects: (s) => (workspaceId) => {
+      if (!s.user) return false
+      if (s.isSuperAdmin) return true
+      // Owner property in workspace_pivot or workspace.owner_id etc.
+      const pivot = this._workspaceMemberById(workspaceId)
+      if (pivot?.role === 'owner' || pivot?.role === 'admin') return true
+      // Also allow explicit permission in pivot.permissions JSON
+      const perms = pivot?.permissions || {}
+      if (perms.can_view_all_projects === true) return true
+      return false
     },
-    hasPermissionByRole: (state) => (permission) => {
-      if (!state.user) return false
 
-      const rolePermissions = {
-        'super_admin': ['*'], // All permissions
-        'admin': [
-          'auth.login', 'auth.logout', 'profile.view', 'profile.edit', 'profile.change_password',
-          'team.view', 'team.create', 'team.edit', 'team.delete', 'team.manage_members', 'team.invite_members',
-          'user.view', 'user.create', 'user.edit', 'user.assign_role',
-          'projet.view', 'projet.create', 'projet.edit', 'projet.delete', 'projet.assign',
-          'tache.view', 'tache.create', 'tache.edit', 'tache.assign', 'tache.validate', 'tache.change_status',
-          'rapport.view', 'rapport.create', 'rapport.export',
-        ],
-        'member': [
-          'auth.login', 'auth.logout', 'profile.view', 'profile.edit', 'profile.change_password',
-          'team.view', 'team.manage_members',
-          'user.view',
-          'projet.view', 'projet.edit',
-          'tache.view', 'tache.create', 'tache.edit', 'tache.assign', 'tache.validate', 'tache.change_status',
-          'rapport.view', 'rapport.create',
-        ],
-        'member': [
-          'auth.login', 'auth.logout', 'profile.view', 'profile.edit', 'profile.change_password',
-          'team.view',
-          'user.view',
-          'projet.view', 'projet.edit',
-          'tache.view', 'tache.create', 'tache.edit', 'tache.assign', 'tache.change_status',
-          'rapport.view',
-        ],
-        'cadre': [
-          'auth.login', 'auth.logout', 'profile.view', 'profile.edit', 'profile.change_password',
-          'team.view',
-          'user.view',
-          'projet.view',
-          'tache.view', 'tache.edit', 'tache.change_status',
-          'rapport.view',
-        ],
-        'stagiaire': [
-          'auth.login', 'auth.logout', 'profile.view', 'profile.edit', 'profile.change_password',
-          'team.view',
-          'projet.view',
-          'tache.view', 'tache.change_status',
-        ],
-      }
+    // Project membership helpers (check projet_user pivot in user payload)
+    isProjectMember: (s) => (projectId) => {
+      if (!s.user) return false
+      if (s.isSuperAdmin) return true
+      const p = (s.user.projet_user || s.user.projects || []).find(x => Number(x.projet_id ?? x.id) === Number(projectId))
+      return !!p
+    },
 
-      const userPermissions = rolePermissions[state.user.role] || []
-      return userPermissions.includes('*') || userPermissions.includes(permission)
+    getProjectPivot: (s) => (projectId) => {
+      if (!s.user) return null
+      return (s.user.projet_user || s.user.projects || []).find(x => Number(x.projet_id ?? x.id) === Number(projectId)) || null
+    },
+
+    // Vérifie permission générale (liste `user.permissions` si ton API la fournit)
+    hasPermission: (s) => (permission) => {
+      if (!s.user) return false
+      if (s.isSuperAdmin) return true
+      const perms = s.user.permissions || []
+      return perms.some(p => (p.name || p) === permission)
     }
   },
 
   actions: {
+    // configure axios headers
+    _setApiToken(token) {
+      if (token) {
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}` // legacy code compatibility
+      } else {
+        delete api.defaults.headers.common['Authorization']
+        delete axios.defaults.headers.common['Authorization']
+      }
+    },
+
+    // start auto-refresh based on token exp
+    _startAutoRefresh(token) {
+      this._stopAutoRefresh()
+      if (!token) return
+      const expiry = getJwtExpiry(token)
+      if (!expiry) return // no jwt exp present — can't schedule reliably
+
+      // refresh a few seconds before expiry
+      const refreshBeforeMs = 60 * 1000 // 1 minute
+      const scheduleAt = Math.max(1000, expiry - Date.now() - refreshBeforeMs)
+
+      // Single timeout (instead of interval) to avoid drift
+      this._refreshTimerId = setTimeout(async () => {
+        try {
+          await this.refreshToken()
+        } catch (e) {
+          // If refresh fails, logout (handled in refreshToken)
+        }
+      }, scheduleAt)
+    },
+
+    _stopAutoRefresh() {
+      if (this._refreshTimerId) {
+        clearTimeout(this._refreshTimerId)
+        this._refreshTimerId = null
+      }
+    },
+
+    // --- Public actions ---
+
+    /**
+     * login(credentials)
+     * Expected backend response:
+     * {
+     *   token: '...access token...',
+     *   user: { id, ..., is_super_admin, workspace_members: [...], projet_user: [...], permissions: [...] },
+     *   // optionally: expires_at or refresh token handled by cookie
+     * }
+     */
     async login(credentials) {
       this.loading = true
-
+      this.error = null
       try {
-        // Get CSRF token first
-        await axios.get('/sanctum/csrf-cookie')
+        // CSRF cookie if using sanctum
+        await axios.get('/sanctum/csrf-cookie').catch(() => {})
 
-        const response = await axios.post('/api/auth/login', credentials)
+        const res = await api.post('/auth/login', credentials)
+        const data = res.data
 
-        if (response.data.token) {
-          this.token = response.data.token
-          this.user = response.data.user
-          this.isAuthenticated = true
+        // Defensive: adapt to your API shape
+        const token = data.token || data.access_token || data.data?.token
+        const user = data.user || data.data?.user || data.data
 
-          localStorage.setItem('auth_token', this.token)
-          axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`
+        if (!token || !user) {
+          throw new Error('Réponse d\'auth incorrecte : vérifier l\'API')
         }
 
-        return response.data
-      } catch (error) {
-        this.logout()
-        throw error
-      } finally {
-        this.loading = false
-      }
-    },
-
-    async register(userData) {
-      this.loading = true
-
-      try {
-        await axios.get('/sanctum/csrf-cookie')
-        const response = await axios.post('/api/register', userData)
-        return response.data
-      } catch (error) {
-        throw error
-      } finally {
-        this.loading = false
-      }
-    },
-
-    async logout() {
-      this.loading = true
-
-      try {
-        if (this.token) {
-          await axios.post('/api/logout')
-        }
-      } catch (error) {
-        console.error('Logout error:', error)
-      } finally {
-        this.user = null
-        this.token = null
-        this.isAuthenticated = false
-
-        localStorage.removeItem('auth_token')
-        delete axios.defaults.headers.common['Authorization']
-
-        this.loading = false
-      }
-    },
-
-    async fetchUser() {
-      if (!this.token) return null
-
-      this.loading = true
-
-      try {
-        axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`
-        const response = await axios.get('/api/user')
-
-        this.user = response.data
+        // store in memory
+        this.token = token
+        this.user = user
         this.isAuthenticated = true
 
+        // persist token if desired (fallback)
+        try {
+          localStorage.setItem('auth_token', token)
+        } catch (e) { /* ignore storage errors */ }
+
+        this._setApiToken(token)
+        this._startAutoRefresh(token)
+
+        return { user, token }
+      } catch (error) {
+        this.error = error?.response?.data?.message || error.message || 'Login failed'
+        await this.logout()
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    /**
+     * logout()
+     * Calls backend logout (if any) then clears local state
+     */
+    async logout() {
+      this.loading = true
+      try {
+        if (this.token) {
+          // Try server logout (may clear refresh cookie)
+          await api.post('/auth/logout').catch(() => {})
+        }
+      } catch (e) {
+        // ignore, proceed to clear local state
+      } finally {
+        // Clear everything locally
+        this._clearAuthState()
+        this.loading = false
+      }
+    },
+
+    _clearAuthState() {
+      this.user = null
+      this.token = null
+      this.isAuthenticated = false
+      this.error = null
+      this._stopAutoRefresh()
+      try { localStorage.removeItem('auth_token') } catch (e) {}
+      this._setApiToken(null)
+    },
+
+    /**
+     * fetchUser()
+     * Récupère les données utilisateur (doit inclure workspace_members, projet_user, permissions si possible)
+     */
+    async fetchUser() {
+      if (!this.token) return null
+      this.loading = true
+      try {
+        this._setApiToken(this.token)
+        const res = await api.get('/user')
+        // adapt selon le format : res.data ou res.data.data
+        const payload = res.data?.data ?? res.data
+        this.user = payload
+        this.isAuthenticated = true
         return this.user
       } catch (error) {
-        this.logout()
-        throw error
+        // si on reçoit 401 ou autre, essayer refresh une fois (interceptor aussi gère)
+        try {
+          await this.refreshToken()
+          // retry fetch
+          const res2 = await api.get('/user')
+          const payload2 = res2.data?.data ?? res2.data
+          this.user = payload2
+          this.isAuthenticated = true
+          return this.user
+        } catch (e) {
+          await this.logout()
+          throw error
+        }
       } finally {
         this.loading = false
       }
     },
 
-    async forgotPassword(email) {
-      this.loading = true
-
+    /**
+     * refreshToken()
+     * - idéal : backend stocke refresh token en cookie HttpOnly et renvoie nouvel access token via /auth/refresh
+     * - action rend l'access token dans this.token et relance fetchUser si nécessaire
+     */
+    async refreshToken() {
+      if (this._isRefreshing) return
+      this._isRefreshing = true
       try {
-        await axios.get('/sanctum/csrf-cookie')
-        const response = await axios.post('/api/forgot-password', { email })
-        return response.data
+        // endpoint à adapter si besoin
+        const res = await api.post('/auth/refresh') // <-- adapte si ton endpoint diffère
+        const newToken = res.data?.token || res.data?.access_token || res.data?.data?.token
+        if (!newToken) {
+          throw new Error('No token returned from refresh endpoint')
+        }
+
+        this.token = newToken
+        try { localStorage.setItem('auth_token', newToken) } catch (e) {}
+        this._setApiToken(newToken)
+        this._startAutoRefresh(newToken)
+        // optionally refresh user payload
+        await this.fetchUser().catch(() => {})
+        return newToken
       } catch (error) {
+        // échec de refresh → logout
+        await this._clearAuthState()
         throw error
       } finally {
-        this.loading = false
+        this._isRefreshing = false
       }
     },
 
-    async resetPassword(data) {
-      this.loading = true
-
-      try {
-        await axios.get('/sanctum/csrf-cookie')
-        const response = await axios.post('/api/reset-password', data)
-        return response.data
-      } catch (error) {
-        throw error
-      } finally {
-        this.loading = false
-      }
-    },
-
+    /**
+     * initializeAuth()
+     * à appeler au bootstrap de l'app (main.js)
+     */
     initializeAuth() {
-      if (this.token) {
-        axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`
+      // 1) Prefer token in memory; else localStorage fallback
+      const savedToken = localStorage.getItem('auth_token')
+      if (savedToken) {
+        this.token = savedToken
+        this._setApiToken(savedToken)
+        // try to fetch user; if fails, attempt refresh once (fetchUser handles that)
         this.fetchUser().catch(() => {
-          this.logout()
+          // fetchUser already logs out on failure
         })
+        // start auto refresh as best-effort
+        this._startAutoRefresh(savedToken)
       }
+    },
+
+    /**
+     * Utility pour vérifier rapidement si user a un role sur workspaceId
+     * Exposed pour usage dans composants (ex: sidebar)
+     */
+    hasWorkspaceRoleQuick(workspaceId, roles) {
+      return this.hasWorkspaceRole(workspaceId, roles)
+    },
+
+    /**
+     * Check project-level permission quickly using projet pivot
+     * permissionFlag: 'can_edit' | 'can_delete' | 'can_invite'
+     */
+    hasProjectPermission(projectId, permissionFlag) {
+      if (!this.user) return false
+      if (this.isSuperAdmin) return true
+      const pivot = (this.user.projet_user || this.user.projects || []).find(x => Number(x.projet_id ?? x.id) === Number(projectId))
+      if (!pivot) return false
+      // owner/admin roles in pivot also grant rights
+      if (['owner','admin'].includes(pivot.role)) return true
+      return !!pivot[permissionFlag]
     }
   }
 })
