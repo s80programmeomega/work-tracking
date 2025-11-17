@@ -211,6 +211,7 @@
                           <span class="text-xs text-gray-700 dark:text-gray-300">Assigner membres</span>
                         </label>
                       </div>
+                      
                     </div>
                   </div>
                 </div>
@@ -331,6 +332,18 @@ const removeMemberFromSelection = (memberId) => {
   if (index > -1) {
     selectedMemberIds.value.splice(index, 1)
     delete memberPermissions.value[memberId]
+  }
+}
+
+// ✅ Gérer le changement de rôle
+const handleRoleChange = (memberId) => {
+  if (memberPermissions.value[memberId].role === 'viewer') {
+    // Désactiver toutes les permissions pour les viewers
+    memberPermissions.value[memberId].can_create_tasks = false
+    memberPermissions.value[memberId].can_edit_tasks = false
+    memberPermissions.value[memberId].can_delete_tasks = false
+    memberPermissions.value[memberId].can_validate_results = false
+    memberPermissions.value[memberId].can_assign_users = false
   }
 }
 

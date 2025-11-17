@@ -88,7 +88,7 @@ class ActiviteResource extends JsonResource
                 }
                 
                 // Admin du projet
-                if ($this->projet && $this->projet->canUserEdit($user)) {
+                if ($this->projet && $this->projet->responsable_id === $user->id) {
                     return [
                         'can_edit' => true,
                         'can_delete' => true,

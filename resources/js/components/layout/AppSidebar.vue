@@ -415,7 +415,7 @@ const menuGroups = computed(() => [
                 icon: ListIcon,
                 name: 'Activités',
                 subItems: [
-                    { name: 'Toutes les activités', path: '/activites', superAdminOnly: true },
+                    { name: 'Toutes les activités', path: '/activites/all/activity', superAdminOnly: true },
                     { name: 'Mes activités', path: '/activites/mes-activites' },
                     { name: 'En retard', path: '/activites/en-retard', count: 5 },
                 ],
