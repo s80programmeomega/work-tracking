@@ -260,7 +260,7 @@ class ActiviteController extends Controller
         ];
 
         return response()->json([
-            'data' => $activite,
+            'data' => new ActiviteResource($activite),
             'stats' => $stats,
         ]);
     }
