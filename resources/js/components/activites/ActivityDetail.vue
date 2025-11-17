@@ -35,6 +35,10 @@
         </div>
 
         <div class="flex items-center space-x-2">
+          <Button variant="outline" @click="openMembersModal">
+            <Users class="w-4 h-4 mr-2" />
+            Gérer l'équipe
+          </Button>
           <Button variant="outline" @click="$emit('edit-activite', activite)">
             <Edit class="w-4 h-4 mr-2" />
             Modifier
@@ -65,18 +69,18 @@
       </Card>
       <Card class="p-6">
         <div class="text-center">
-          <div class="text-2xl font-bold text-orange-600">
-            {{ Math.round(activite.pourcentage_avancement || 0) }}%
+          <div class="text-2xl font-bold text-purple-600">
+            {{ activite.membres_count || 0 }}
           </div>
-          <div class="text-sm text-muted-foreground">Avancement</div>
+          <div class="text-sm text-muted-foreground">Membres</div>
         </div>
       </Card>
       <Card class="p-6">
         <div class="text-center">
-          <div class="text-2xl font-bold text-purple-600">
-            {{ activite.budget_alloue ? formatCurrency(activite.budget_alloue) : 'N/A' }}
+          <div class="text-2xl font-bold text-orange-600">
+            {{ Math.round(activite.pourcentage_avancement || 0) }}%
           </div>
-          <div class="text-sm text-muted-foreground">Budget alloué</div>
+          <div class="text-sm text-muted-foreground">Avancement</div>
         </div>
       </Card>
     </div>
@@ -224,15 +228,21 @@
         <!-- Team Members -->
         <Card class="p-6">
           <div class="space-y-4">
-            <h3 class="text-lg font-semibold flex items-center">
-              <Users class="w-5 h-5 mr-2" />
-              Équipe
-            </h3>
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-semibold flex items-center">
+                <Users class="w-5 h-5 mr-2" />
+                Équipe ({{ members.length }})
+              </h3>
+              <Button variant="ghost" size="sm" @click="openMembersModal">
+                <Settings class="w-4 h-4" />
+              </Button>
+            </div>
 
             <div class="space-y-3">
-              <div class="flex items-center space-x-3">
-                <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Crown class="w-4 h-4 text-orange-500" />
+              <!-- Responsable -->
+              <div class="flex items-center space-x-3 p-2 rounded-lg bg-orange-50 dark:bg-orange-900/20">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-yellow-500 flex items-center justify-center">
+                  <Crown class="w-4 h-4 text-white" />
                 </div>
                 <div class="flex-1">
                   <div class="text-sm font-medium">{{ activite.responsable?.nom }}</div>
@@ -240,20 +250,61 @@
                 </div>
               </div>
 
-              <div v-for="member in teamMembers" :key="member.id" class="flex items-center space-x-3">
-                <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span class="text-sm font-medium">
-                    {{ getInitials(member.nom) }}
-                  </span>
+              <!-- Membres avec permissions -->
+              <div 
+                v-for="member in members" 
+                :key="member.id"
+                class="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
+              >
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-xs font-medium">
+                  {{ getInitials(member.nom) }}
                 </div>
-                <div class="flex-1">
-                  <div class="text-sm font-medium">{{ member.nom }}</div>
-                  <div class="text-xs text-muted-foreground">{{ member.fonction }}</div>
+                <div class="flex-1 min-w-0">
+                  <div class="text-sm font-medium truncate">{{ member.nom }}</div>
+                  <div class="text-xs text-muted-foreground capitalize">{{ member.role }}</div>
+                  
+                  <!-- Badges des permissions -->
+                  <div class="flex flex-wrap gap-1 mt-1">
+                    <Badge 
+                      v-if="member.can_create_tasks" 
+                      variant="outline" 
+                      class="text-xs px-1 py-0 h-4"
+                    >
+                      Créer
+                    </Badge>
+                    <Badge 
+                      v-if="member.can_edit_tasks" 
+                      variant="outline" 
+                      class="text-xs px-1 py-0 h-4"
+                    >
+                      Éditer
+                    </Badge>
+                    <Badge 
+                      v-if="member.can_validate_results" 
+                      variant="outline" 
+                      class="text-xs px-1 py-0 h-4"
+                    >
+                      Valider
+                    </Badge>
+                  </div>
                 </div>
               </div>
 
-              <div v-if="teamMembers.length === 0" class="text-sm text-muted-foreground text-center py-4">
-                Aucun autre membre assigné
+              <!-- État vide -->
+              <div v-if="members.length === 0" class="text-center py-4 text-muted-foreground">
+                <Users class="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p class="text-sm">Aucun autre membre</p>
+                <Button variant="link" size="sm" @click="openMembersModal" class="mt-1">
+                  Ajouter des membres
+                </Button>
+              </div>
+
+              <!-- Bouton d'ajout rapide -->
+              <div v-else class="pt-2">
+                <Button variant="outline" size="sm" class="w-full" @click="openMembersModal">
+                  <Plus class="w-4 h-4 mr-2" />
+                  Gérer l'équipe
+                </Button>
               </div>
             </div>
           </div>
@@ -279,6 +330,11 @@
                 <Calendar class="w-4 h-4 mr-2" />
                 Vue planning
               </Button>
+
+              <Button variant="outline" size="sm" class="w-full justify-start" @click="openMembersModal">
+                <Users class="w-4 h-4 mr-2" />
+                Gérer les membres
+              </Button>
             </div>
           </div>
         </Card>
@@ -289,10 +345,18 @@
   <div v-else class="flex items-center justify-center min-h-[400px]">
     <Loader2 class="w-8 h-8 animate-spin" />
   </div>
+
+  <!-- Modal de gestion des membres -->
+  <ManageMembersModal
+    v-if="showMembersModal"
+    :activite="activite"
+    @close="showMembersModal = false"
+    @updated="handleMembersUpdated"
+  />
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import {
   Edit,
   List,
@@ -305,7 +369,8 @@ import {
   Plus,
   Calendar,
   AlertTriangle,
-  Loader2
+  Loader2,
+  Settings
 } from 'lucide-vue-next'
 
 import Card from '@/components/ui/card/Card.vue'
@@ -318,6 +383,8 @@ import BreadcrumbItem from '@/components/ui/breadcrumb/BreadcrumbItem.vue'
 import BreadcrumbLink from '@/components/ui/breadcrumb/BreadcrumbLink.vue'
 import BreadcrumbPage from '@/components/ui/breadcrumb/BreadcrumbPage.vue'
 import BreadcrumbSeparator from '@/components/ui/breadcrumb/BreadcrumbSeparator.vue'
+import ManageMembersModal from '@/components/activites/ManageMembersModal.vue'
+import api from '@/api/axios'
 
 const props = defineProps({
   activite: {
@@ -330,9 +397,11 @@ const props = defineProps({
   }
 })
 
-defineEmits(['go-back', 'edit-activite', 'view-tasks', 'create-task'])
+const emit = defineEmits(['go-back', 'edit-activite', 'view-tasks', 'create-task'])
 
-const teamMembers = ref([])
+const members = ref([])
+const showMembersModal = ref(false)
+const loadingMembers = ref(false)
 
 const recentTaches = computed(() => {
   return props.taches
@@ -345,6 +414,37 @@ const isOverdue = computed(() => {
   return new Date(props.activite.date_fin) < new Date() &&
          !['terminee', 'annulee'].includes(props.activite.status)
 })
+
+// Charger les membres de l'activité
+const loadMembers = async () => {
+  if (!props.activite?.id) return
+  
+  loadingMembers.value = true
+  try {
+    const response = await api.get(`/activites/${props.activite.id}/members`)
+    // Filtrer pour exclure le responsable (déjà affiché séparément)
+    members.value = response.data.data.filter(member => 
+      member.id !== props.activite.responsable_id
+    )
+  } catch (error) {
+    console.error('Erreur lors du chargement des membres:', error)
+    members.value = []
+  } finally {
+    loadingMembers.value = false
+  }
+}
+
+// Ouvrir le modal de gestion des membres
+const openMembersModal = () => {
+  showMembersModal.value = true
+}
+
+// Gérer la mise à jour des membres
+const handleMembersUpdated = () => {
+  loadMembers()
+  // Émettre un événement pour rafraîchir les données parentes si nécessaire
+  emit('members-updated')
+}
 
 // Helper functions
 const getInitials = (name) => {
@@ -413,6 +513,7 @@ const getTaskStatusLabel = (status) => {
 }
 
 const formatDate = (dateString) => {
+  if (!dateString) return 'Non définie'
   return new Date(dateString).toLocaleDateString('fr-FR')
 }
 
@@ -442,4 +543,18 @@ const viewGantt = () => {
   // TODO: Show Gantt chart view
   console.log('View Gantt for activity:', props.activite?.id)
 }
+
+// Charger les membres au montage
+onMounted(() => {
+  if (props.activite) {
+    loadMembers()
+  }
+})
+
+// Recharger les membres quand l'activité change
+watch(() => props.activite, (newActivite) => {
+  if (newActivite) {
+    loadMembers()
+  }
+})
 </script>

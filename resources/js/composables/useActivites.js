@@ -1,3 +1,4 @@
+// resources\js\composables\useActivites.js
 import { computed } from 'vue'
 import { useActiviteStore } from '@/stores/activiteStore'
 
@@ -16,9 +17,39 @@ export function useActivites() {
   const archivedActivites = computed(() => activiteStore.archivedActivites)
   const overdueActivites = computed(() => activiteStore.overdueActivites)
 
-  // Fetch operations
+
+  const fetchActiviteTaches = async (activiteId) => {
+    try {
+      const response = await activiteStore.fetchActiviteTaches(activiteId)
+      return response.data || [] // Retourner les données des tâches
+    } catch (err) {
+      console.error('Error fetching activity tasks:', err)
+      return []
+    }
+  }
+
+  const fetchMesActivites = async (filters = {}) => {
+    try {
+      console.log('🔍 fetchMesActivites appelé avec:', filters)
+      await activiteStore.fetchMesActivites(filters)
+    } catch (error) {
+      console.error('Error fetching user activites:', error)
+      throw error
+    }
+  }
+
+  const fetchActivite = async (id) => {
+    try {
+      return await activiteStore.fetchActivite(id)
+    } catch (error) {
+      console.error('Error fetching activite:', error)
+      throw error
+    }
+  }
+ 
   const fetchActivites = async (filters = {}) => {
     try {
+      console.log('🔍 fetchActivites appelé avec:', filters)
       await activiteStore.fetchActivites(filters)
     } catch (error) {
       console.error('Error fetching activites:', error)
@@ -31,15 +62,6 @@ export function useActivites() {
       await activiteStore.fetchActivitiesForProjet(projetId, filters)
     } catch (error) {
       console.error('Error fetching activites:', error)
-      throw error
-    }
-  }
-
-  const fetchActivite = async (id) => {
-    try {
-      return await activiteStore.fetchActivite(id)
-    } catch (error) {
-      console.error('Error fetching activite:', error)
       throw error
     }
   }
@@ -132,6 +154,11 @@ export function useActivites() {
     const colors = {
       active: 'blue',
       archived: 'gray',
+      planifiee: 'blue',
+      en_cours: 'green',
+      terminee: 'purple',
+      annulee: 'red',
+      suspendue: 'yellow'
     }
     return colors[status] || 'gray'
   }
@@ -140,8 +167,27 @@ export function useActivites() {
     const labels = {
       active: 'Actif',
       archived: 'Archivé',
+      planifiee: 'Planifiée',
+      en_cours: 'En cours',
+      terminee: 'Terminée',
+      annulee: 'Annulée',
+      suspendue: 'Suspendue'
     }
     return labels[status] || status
+  }
+
+  // ✅ NOUVEAU : Helper pour les classes Tailwind CSS
+  const getStatusClass = (status) => {
+    const classes = {
+      active: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+      archived: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+      planifiee: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+      en_cours: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
+      terminee: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
+      annulee: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+      suspendue: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+    }
+    return classes[status] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
   }
 
   return {
@@ -160,8 +206,10 @@ export function useActivites() {
 
     // Fetch operations
     fetchActivites,
+    fetchMesActivites,
     fetchActivitesForProjet,
     fetchActivite,
+    fetchActiviteTaches,
 
     // CRUD operations
     createActivite,
@@ -183,5 +231,6 @@ export function useActivites() {
     clearError,
     getStatusColor,
     getStatusLabel,
+    getStatusClass, // ✅ NOUVEAU
   }
 }

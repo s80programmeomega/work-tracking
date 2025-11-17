@@ -14,6 +14,11 @@ class WorkspacePolicy
      */
     public function viewMembers(User $user, Workspace $workspace): bool
     {
+         // Super admin a toujours tous les droits
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
         // Le propriétaire peut voir les membres
         if ($workspace->owner_id === $user->id) {
             return true;
@@ -27,7 +32,7 @@ class WorkspacePolicy
         }
 
         // Tous les membres peuvent voir les autres membres (ajustez selon vos besoins)
-        return in_array($member->pivot->role, ['owner', 'super_admin', 'admin', 'member', 'viewer']);
+        return in_array($member->pivot->role, ['owner', 'admin', 'member', 'viewer']);
     }
 
     /**
@@ -35,6 +40,11 @@ class WorkspacePolicy
      */
     public function manageMembers(User $user, Workspace $workspace): bool
     {
+        // Super admin a toujours tous les droits
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
         // Le propriétaire peut tout gérer
         if ($workspace->owner_id === $user->id) {
             return true;
@@ -56,6 +66,11 @@ class WorkspacePolicy
      */
     public function view(User $user, Workspace $workspace): bool
     {
+        // Super admin a toujours tous les droits
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
         return $workspace->owner_id === $user->id || 
                $workspace->members()->where('user_id', $user->id)->exists();
     }
@@ -65,7 +80,7 @@ class WorkspacePolicy
      */
     public function update(User $user, Workspace $workspace): bool
     {
-        return $workspace->owner_id === $user->id;
+        return $user->isSuperAdmin() || $workspace->owner_id === $user->id;
     }
 
     /**
@@ -73,6 +88,6 @@ class WorkspacePolicy
      */
     public function delete(User $user, Workspace $workspace): bool
     {
-        return $workspace->owner_id === $user->id;
+        return $user->isSuperAdmin() || $workspace->owner_id === $user->id;
     }
 }

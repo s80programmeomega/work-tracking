@@ -9,6 +9,9 @@ use App\Http\Resources\ActiviteResource;
 use App\Models\Activite;
 use App\Models\Projet;
 use App\Models\User;
+use App\Notifications\ActiviteMemberAdded;
+use App\Notifications\ActiviteMemberPermissionsUpdated;
+use App\Notifications\ActiviteMemberRemoved;
 use App\Services\ActiviteService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -524,34 +527,41 @@ class ActiviteController extends Controller
         }
     }
 
-    /**
-     * Get available members for an activity.
-     * Returns members of the parent project.
+   /**
+     * ✅ Get available members for an activity (from project)
+     * Cette méthode charge TOUS les membres du projet parent
      */
     public function availableMembers(Request $request, $projetId): JsonResponse
     {
-        $projet = Projet::findOrFail($projetId);
+        $projet = Projet::with(['members', 'responsable'])->findOrFail($projetId);
         $user = $request->user();
 
+        // Vérifier l'accès au projet
         if (!$user->isSuperAdmin() && !$projet->hasAccess($user)) {
-            return response()->json(['message' => 'Accès non autorisé'], 403);
+            return response()->json([
+                'message' => 'Accès non autorisé'
+            ], 403);
         }
 
         // ✅ Récupérer tous les membres du projet
         $members = $projet->members()
-            ->select('users.id', 'users.nom', 'users.email')
+            ->select('users.id', 'users.nom', 'users.email', 'users.avatar')
             ->get();
 
         // ✅ Ajouter le responsable du projet s'il n'est pas déjà membre
         if ($projet->responsable && !$members->contains('id', $projet->responsable->id)) {
-            $members->prepend([
+            $responsable = [
                 'id' => $projet->responsable->id,
                 'nom' => $projet->responsable->nom,
                 'email' => $projet->responsable->email,
-            ]);
+                'avatar' => $projet->responsable->avatar,
+            ];
+            $members->prepend($responsable);
         }
 
-        return response()->json(['data' => $members]);
+        return response()->json([
+            'data' => $members->unique('id')->values()
+        ]);
     }
 
     // ==================== ✅ NOUVELLES MÉTHODES POUR GESTION DES MEMBRES ====================
@@ -586,16 +596,16 @@ class ActiviteController extends Controller
         ]);
     }
 
-    /**
-     * Add a member to an activity
+  /**
+     * ✅ Add a member to an activity with notifications
      */
     public function addMember(Request $request, $id): JsonResponse
     {
-        $activite = Activite::findOrFail($id);
+        $activite = Activite::with('projet')->findOrFail($id);
         $user = $request->user();
         $projet = $activite->projet;
 
-        // Vérifier les permissions
+        // ✅ Vérifier les permissions
         $canManage = $user->isSuperAdmin()
             || $projet->canUserEdit($user)
             || $activite->responsable_id === $user->id
@@ -604,7 +614,9 @@ class ActiviteController extends Controller
                 ->exists();
 
         if (!$canManage) {
-            return response()->json(['message' => 'Permission refusée'], 403);
+            return response()->json([
+                'message' => 'Vous n\'avez pas la permission d\'ajouter des membres'
+            ], 403);
         }
 
         $validated = $request->validate([
@@ -617,15 +629,15 @@ class ActiviteController extends Controller
             'can_assign_users' => 'boolean',
         ]);
 
-        // Vérifier que le membre est dans le projet
+        // ✅ Vérifier que le membre est dans le projet
         $membreUser = User::find($validated['user_id']);
         if (!$projet->isMember($membreUser) && $projet->responsable_id !== $membreUser->id) {
             return response()->json([
-                'message' => 'Le membre doit appartenir au projet'
+                'message' => 'Le membre doit d\'abord être ajouté au projet'
             ], 422);
         }
 
-        // Vérifier si déjà membre
+        // ✅ Vérifier si déjà membre
         if ($activite->membres()->where('user_id', $validated['user_id'])->exists()) {
             return response()->json([
                 'message' => 'Ce membre est déjà assigné à l\'activité'
@@ -634,6 +646,7 @@ class ActiviteController extends Controller
 
         DB::beginTransaction();
         try {
+            // Ajouter le membre
             $activite->membres()->attach($validated['user_id'], [
                 'role' => $validated['role'],
                 'can_create_tasks' => $validated['can_create_tasks'] ?? false,
@@ -643,10 +656,26 @@ class ActiviteController extends Controller
                 'can_assign_users' => $validated['can_assign_users'] ?? false,
             ]);
 
+            // ✅ ENVOYER LA NOTIFICATION
+            $permissions = [
+                'can_create_tasks' => $validated['can_create_tasks'] ?? false,
+                'can_edit_tasks' => $validated['can_edit_tasks'] ?? false,
+                'can_delete_tasks' => $validated['can_delete_tasks'] ?? false,
+                'can_validate_results' => $validated['can_validate_results'] ?? false,
+                'can_assign_users' => $validated['can_assign_users'] ?? false,
+            ];
+
+            $membreUser->notify(new ActiviteMemberAdded(
+                $activite,
+                $user,
+                $validated['role'],
+                $permissions
+            ));
+
             DB::commit();
 
             return response()->json([
-                'message' => 'Membre ajouté avec succès',
+                'message' => 'Membre ajouté avec succès. Une notification a été envoyée.',
                 'data' => $activite->load('membres')
             ]);
         } catch (\Exception $e) {
@@ -659,11 +688,11 @@ class ActiviteController extends Controller
     }
 
     /**
-     * Update member permissions
+     * ✅ Update member permissions with notifications
      */
     public function updateMember(Request $request, $activiteId, $userId): JsonResponse
     {
-        $activite = Activite::findOrFail($activiteId);
+        $activite = Activite::with('projet')->findOrFail($activiteId);
         $user = $request->user();
 
         // Vérifier les permissions
@@ -675,7 +704,9 @@ class ActiviteController extends Controller
                 ->exists();
 
         if (!$canManage) {
-            return response()->json(['message' => 'Permission refusée'], 403);
+            return response()->json([
+                'message' => 'Permission refusée'
+            ], 403);
         }
 
         $validated = $request->validate([
@@ -688,7 +719,8 @@ class ActiviteController extends Controller
         ]);
 
         // Vérifier que le membre existe
-        if (!$activite->membres()->where('user_id', $userId)->exists()) {
+        $currentMember = $activite->membres()->where('user_id', $userId)->first();
+        if (!$currentMember) {
             return response()->json([
                 'message' => 'Ce membre n\'est pas assigné à l\'activité'
             ], 404);
@@ -696,12 +728,32 @@ class ActiviteController extends Controller
 
         DB::beginTransaction();
         try {
+            // Sauvegarder les anciennes permissions
+            $oldPermissions = [
+                'role' => $currentMember->pivot->role,
+                'can_create_tasks' => $currentMember->pivot->can_create_tasks,
+                'can_edit_tasks' => $currentMember->pivot->can_edit_tasks,
+                'can_delete_tasks' => $currentMember->pivot->can_delete_tasks,
+                'can_validate_results' => $currentMember->pivot->can_validate_results,
+                'can_assign_users' => $currentMember->pivot->can_assign_users,
+            ];
+
+            // Mettre à jour
             $activite->membres()->updateExistingPivot($userId, $validated);
+
+            // ✅ ENVOYER LA NOTIFICATION
+            $memberUser = User::find($userId);
+            $memberUser->notify(new ActiviteMemberPermissionsUpdated(
+                $activite,
+                $user,
+                $oldPermissions,
+                array_merge($oldPermissions, $validated)
+            ));
 
             DB::commit();
 
             return response()->json([
-                'message' => 'Permissions mises à jour',
+                'message' => 'Permissions mises à jour. Une notification a été envoyée.',
                 'data' => $activite->load('membres')
             ]);
         } catch (\Exception $e) {
@@ -714,11 +766,11 @@ class ActiviteController extends Controller
     }
 
     /**
-     * Remove a member from an activity
+     * ✅ Remove a member from an activity with notifications
      */
     public function removeMember(Request $request, $activiteId, $userId): JsonResponse
     {
-        $activite = Activite::findOrFail($activiteId);
+        $activite = Activite::with('projet')->findOrFail($activiteId);
         $user = $request->user();
 
         // Vérifier les permissions
@@ -730,7 +782,9 @@ class ActiviteController extends Controller
                 ->exists();
 
         if (!$canManage) {
-            return response()->json(['message' => 'Permission refusée'], 403);
+            return response()->json([
+                'message' => 'Permission refusée'
+            ], 403);
         }
 
         // Ne pas permettre de retirer le responsable
@@ -742,12 +796,19 @@ class ActiviteController extends Controller
 
         DB::beginTransaction();
         try {
+            // ✅ ENVOYER LA NOTIFICATION AVANT DE RETIRER
+            $memberUser = User::find($userId);
+            if ($memberUser) {
+                $memberUser->notify(new ActiviteMemberRemoved($activite, $user));
+            }
+
+            // Retirer le membre
             $activite->membres()->detach($userId);
 
             DB::commit();
 
             return response()->json([
-                'message' => 'Membre retiré avec succès'
+                'message' => 'Membre retiré avec succès. Une notification a été envoyée.'
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
