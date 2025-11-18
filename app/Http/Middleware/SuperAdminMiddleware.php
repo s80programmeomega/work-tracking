@@ -16,7 +16,7 @@ class SuperAdminMiddleware
     {
         if (!$request->user() || !$request->user()->isSuperAdmin()) {
             return response()->json([
-                'message' => 'Accès non autorisé. Réservé aux super administrateurs.',
+                'message' => 'Accès non autorisé. Réservé aux super administrateurs!!!.',
             ], 403);
         }
 

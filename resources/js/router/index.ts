@@ -267,7 +267,7 @@ const router = createRouter({
 
 
     {
-      path: '/activites',
+      path: '/activites/all/activity',
       name: 'Activites',
       component: () => import('../pages/Activites.vue'),
       meta: {

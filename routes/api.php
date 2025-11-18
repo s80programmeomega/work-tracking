@@ -127,6 +127,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/dashboard-stats', [ProjetController::class, 'dashboardStats']);
         Route::get('/mes-projets', [ProjetController::class, 'myProjets']);
         Route::get('/archives', [ProjetController::class, 'archived']);
+        Route::get('/projets-accessibles', [ProjetController::class, 'accessible']);
 
         Route::middleware(['super_admin'])->group(function () {
             Route::get('/list/all', [ProjetController::class, 'index']); // Tous les projets
@@ -170,48 +171,57 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/{projet}/statistics', [ProjetController::class, 'getStatistics']);
         Route::get('/{projet}/performance-report', [ProjetController::class, 'performanceReport']);
         Route::get('/{projet}/accessible-tasks', [ProjetController::class, 'accessibleTasks']);
+        Route::delete('/{projet}/members/{user}/remove', [ProjetController::class, 'removeMemberWithTransfer']);
 
-        Route::prefix('{projet}')->group(function () {
-            // Retirer membre avec transfert optionnel
-            Route::delete('/members/{user}/remove', [ProjetController::class, 'removeMemberWithTransfer']);
+
+    });
+
+
+
+    // Activity Management Routes
+    Route::prefix('activites')->group(function () {
+
+        // ✅ Routes PUBLIQUES (accessibles à tous les utilisateurs authentifiés)
+        Route::get('/mes-activites', [ActiviteController::class, 'myActivites']); // Mes activités
+        Route::get('/my-activites', [ActiviteController::class, 'myActivites']); // Alias
+        Route::get('/en-retard', [ActiviteController::class, 'enRetard']); // Activités en retard
+        Route::get('/projet/{projetId}', [ActiviteController::class, 'forProjet']); // Par projet
+
+        // CRUD de base
+        Route::post('/', [ActiviteController::class, 'store']);
+        Route::get('/{activite}', [ActiviteController::class, 'show']);
+        Route::put('/{activite}', [ActiviteController::class, 'update']);
+        Route::delete('/{activite}', [ActiviteController::class, 'destroy']);
+
+        // Actions
+        Route::post('/{activite}/archive', [ActiviteController::class, 'archive']);
+        Route::post('/{activite}/unarchive', [ActiviteController::class, 'unarchive']);
+        Route::post('/{activite}/toggle-archive', [ActiviteController::class, 'toggleArchive']);
+        Route::post('/{activite}/duplicate', [ActiviteController::class, 'duplicate']);
+        Route::post('/reorder', [ActiviteController::class, 'reorder']);
+
+        // Available members for projet
+        Route::get('/available-members/{projetId}', [ActiviteController::class, 'availableMembers']);
+
+        // ✅ Gestion des membres d'activité
+        Route::prefix('{activite}/members')->group(function () {
+            Route::get('/', [ActiviteController::class, 'getMembers']);
+            Route::post('/', [ActiviteController::class, 'addMember']);
+            Route::put('/{user}', [ActiviteController::class, 'updateMember']);
+            Route::delete('/{user}', [ActiviteController::class, 'removeMember']);
         });
-        Route::get('/projets-accessibles', [ProjetController::class, 'accessible']);
 
+        // Tâches de l'activité
+        Route::get('/{activite}/taches', [ActiviteController::class, 'getTaches']);
+
+        // List and filter
+        // Route::middleware(['super_admin'])->group(function () {
+        Route::get('/all/activity', [ActiviteController::class, 'index']); // Toutes les activités (Super Admin)
+        // });
     });
 
-     
 
-// Activity Management Routes
-Route::prefix('activites')->group(function () {
-    // List and filter
-    Route::middleware(['super_admin'])->group(function () {
-        Route::get('/', [ActiviteController::class, 'index']); // Toutes les activités (Super Admin)
-    });
-    
-    Route::get('/my-activites', [ActiviteController::class, 'myActivites']); // Mes activités
-    Route::get('/mes-activites', [ActiviteController::class, 'myActivites']); // Alias pour compatibilité
-    Route::get('/en-retard', [ActiviteController::class, 'enRetard']); // Activités en retard
-    Route::get('/projet/{projetId}', [ActiviteController::class, 'forProjet']); // Par projet
-
-    // CRUD
-    Route::post('/', [ActiviteController::class, 'store']);
-    Route::get('/{activite}', [ActiviteController::class, 'show']);
-    Route::put('/{activite}', [ActiviteController::class, 'update']);
-    Route::delete('/{activite}', [ActiviteController::class, 'destroy']);
-
-    // Actions
-    Route::post('/{activite}/archive', [ActiviteController::class, 'archive']);
-    Route::post('/{activite}/unarchive', [ActiviteController::class, 'unarchive']);
-    Route::post('/{activite}/toggle-archive', [ActiviteController::class, 'toggleArchive']);
-    Route::post('/{activite}/duplicate', [ActiviteController::class, 'duplicate']);
-    Route::post('/reorder', [ActiviteController::class, 'reorder']);
-
-    // Available members for projet
-    Route::get('/available-members/{projetId}', [ActiviteController::class, 'availableMembers']);
-});
-
-
-      // Activity Management Routes
+    // Activity Management Routes
     // Route::prefix('activites')->group(function () {
     //     // List and filter
     //     Route::get('/', [\App\Http\Controllers\ActiviteController::class, 'index']);
@@ -233,27 +243,27 @@ Route::prefix('activites')->group(function () {
     //     Route::get('/activites/available-members/{projetId}', [ActiviteController::class, 'availableMembers']); 
     // });
 
-     // Liste et filtres
+    // Liste et filtres
     // Route::get('/activites', [ActiviteController::class, 'index']);
     // Route::get('/activites/mes-activites', [ActiviteController::class, 'mesActivites']);
     // Route::get('/activites/en-retard', [ActiviteController::class, 'enRetard']);
     // Route::get('/projets/{projet}/activites', [ActiviteController::class, 'byProjet']);
-    
+
     // // Membres disponibles pour une activité (membres du projet parent)
     // Route::get('/projets/{projet}/available-members', [ActiviteController::class, 'availableMembers']);
-    
+
     // // CRUD
     // Route::get('/activites/{activite}', [ActiviteController::class, 'show']);
     // Route::post('/activites', [ActiviteController::class, 'store']);
     // Route::put('/activites/{activite}', [ActiviteController::class, 'update']);
     // Route::delete('/activites/{activite}', [ActiviteController::class, 'destroy']);
-    
+
     // // Actions
     // Route::post('/activites/{activite}/toggle-archive', [ActiviteController::class, 'toggleArchive']);
     // Route::post('/activites/{activite}/duplicate', [ActiviteController::class, 'duplicate']);
     // Route::post('/activites/reorder', [ActiviteController::class, 'reorder']);
 
-  
+
 
 
 
@@ -421,6 +431,8 @@ Route::prefix('activites')->group(function () {
 
     // User Management Routes
     Route::prefix('users')->group(function () {
+
+
         // List and search
         Route::get('/', [UserController::class, 'index']);
         Route::get('/search', [UserController::class, 'search']);

@@ -32,8 +32,8 @@ class AuthService
             ]);
 
             // ✅ 2. Rôle par défaut
-            $defaultRole = $data['role'] ?? Role::ADMIN->value;
-            $user->assignRole($defaultRole);
+            // $defaultRole = $data['role'] ?? Role::ADMIN->value;
+            // $user->assignRole($defaultRole);
 
             // ✅ 3. Création automatique du workspace personnel
             $workspace = Workspace::create([

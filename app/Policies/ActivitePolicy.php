@@ -14,14 +14,33 @@ class ActivitePolicy
     {
         return true; // All authenticated users can view activities
     }
-
-    /**
-     * Determine if user can view the activity.
+  /**
+     * Voir une activité :
+     * - super admin global
+     * - owner/admin du workspace parent
+     * - membre assigné à l’activité
      */
     public function view(User $user, Activite $activite): bool
     {
-        // All authenticated users can view activities
-        return true;
+         // 1. Super admin global
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        // Récupération du workspace via le projet
+        $workspace = $activite->projet?->workspace;
+
+        if (!$workspace) {
+            return false;
+        }
+
+        // 2. Owner ou Admin du workspace
+        if ($workspace->isOwnerOrAdmin($user)) {
+            return true;
+        }
+
+        // 3. Membre assigné à l’activité
+        return $activite->users()->where('user_id', $user->id)->exists();
     }
 
     /**
@@ -29,25 +48,61 @@ class ActivitePolicy
      */
     public function create(User $user): bool
     {
-        // All authenticated users can create activities
-        return true;
+        $workspace = $activite->projet?->workspace;
+
+        if (!$workspace) {
+            return false;
+        }
+
+        return $workspace->isOwnerOrAdmin($user);
     }
 
+   
     /**
-     * Determine if user can update the activity.
+     * Modifier une activité :
+     * - super admin
+     * - owner / admin du workspace
+     * - créateur de l’activité
      */
     public function update(User $user, Activite $activite): bool
     {
-        // All authenticated users can update activities
-        return true;
+        // Super admin
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        $workspace = $activite->projet?->workspace;
+
+        if (!$workspace) {
+            return false;
+        }
+
+        // Owner/Admin
+        if ($workspace->isOwnerOrAdmin($user)) {
+            return true;
+        }
+
+        // Créateur de l’activité
+        return $activite->created_by === $user->id;
     }
 
     /**
-     * Determine if user can delete the activity.
+     * Supprimer une activité :
+     * - super admin
+     * - owner / admin du workspace
      */
     public function delete(User $user, Activite $activite): bool
     {
-        // All authenticated users can delete activities
-        return true;
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        $workspace = $activite->projet?->workspace;
+
+        if (!$workspace) {
+            return false;
+        }
+
+        return $workspace->isOwnerOrAdmin($user);
     }
 }

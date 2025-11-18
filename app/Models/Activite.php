@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -23,6 +24,7 @@ class Activite extends Model
         'ordre',
         'status',
         'progression',
+        'created_by',
         'couleur',
         'metadata',
         'archived_at',
@@ -74,6 +76,21 @@ class Activite extends Model
         return $this->belongsTo(Projet::class);
     }
 
+    public function membres()
+    {
+        return $this->belongsToMany(User::class, 'activite_user')
+            ->withPivot([
+                'role',
+                'can_create_tasks',
+                'can_edit_tasks',
+                'can_delete_tasks',
+                'can_validate_results',
+                'can_assign_users',
+            ])
+            ->withTimestamps();
+    }
+
+
     public function responsable(): BelongsTo
     {
         return $this->belongsTo(User::class, 'responsable_id');
@@ -85,6 +102,233 @@ class Activite extends Model
         return $this->hasMany(Tache::class);
     }
 
+
+    public function members(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'activite_user')
+            ->withPivot([
+                'role',
+                'can_create_tasks',
+                'can_edit_tasks',
+                'can_delete_tasks',
+                'can_validate_results',
+                'can_assign_users'
+            ])
+            ->withTimestamps();
+    }
+
+    public function isResponsable(User $user): bool
+    {
+        return $this->responsable_id === $user->id;
+    }
+
+    public function isMember(User $user): bool
+    {
+        return $this->members()->where('user_id', $user->id)->exists();
+    }
+
+    public function getMemberRole(User $user): ?string
+    {
+        if ($this->isResponsable($user)) {
+            return 'responsable';
+        }
+
+        $member = $this->members()->where('user_id', $user->id)->first();
+        return $member?->pivot->role;
+    }
+
+    public function canUserValidateN1(User $user): bool
+    {
+        if ($this->isResponsable($user)) {
+            return true;
+        }
+
+        $member = $this->members()->where('user_id', $user->id)->first();
+        return $member?->pivot->can_validate_results ?? false;
+    }
+
+
+     /**
+     * Vérifie si l'utilisateur peut modifier l'activité
+     */
+    public function canUserEdit(User $user): bool
+    {
+        // Super admin a tous les droits
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        // Responsable de l'activité
+        if ($this->responsable_id === $user->id) {
+            return true;
+        }
+
+        // Responsable du projet parent
+        if ($this->projet && $this->projet->responsable_id === $user->id) {
+            return true;
+        }
+
+        // Membre avec permission can_edit_tasks
+        $member = $this->members()->where('user_id', $user->id)->first();
+        return $member && $member->pivot->can_edit_tasks === true;
+    }
+
+    /**
+     * Vérifie si l'utilisateur peut gérer les membres
+     */
+    public function canUserManageMembers(User $user): bool
+    {
+        // Super admin a tous les droits
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        // Responsable de l'activité
+        if ($this->responsable_id === $user->id) {
+            return true;
+        }
+
+        // Responsable du projet parent
+        if ($this->projet && $this->projet->responsable_id === $user->id) {
+            return true;
+        }
+
+        // Membre avec permission can_assign_users
+        $member = $this->members()->where('user_id', $user->id)->first();
+        return $member && $member->pivot->can_assign_users === true;
+    }
+
+    /**
+     * Vérifie si l'utilisateur peut créer des tâches
+     */
+    public function canUserCreateTasks(User $user): bool
+    {
+        // Super admin a tous les droits
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        // Responsable de l'activité
+        if ($this->responsable_id === $user->id) {
+            return true;
+        }
+
+        // Responsable du projet parent
+        if ($this->projet && $this->projet->responsable_id === $user->id) {
+            return true;
+        }
+
+        // Membre avec permission can_create_tasks
+        $member = $this->members()->where('user_id', $user->id)->first();
+        return $member && $member->pivot->can_create_tasks === true;
+    }
+
+    /**
+     * Vérifie si l'utilisateur peut modifier les tâches
+     */
+    public function canUserEditTasks(User $user): bool
+    {
+        return $this->canUserCreateTasks($user); // Généralement les mêmes permissions
+    }
+
+    /**
+     * Vérifie si l'utilisateur peut supprimer des tâches
+     */
+    public function canUserDeleteTasks(User $user): bool
+    {
+        // Plus restrictif - seulement responsables et super admin
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        if ($this->responsable_id === $user->id) {
+            return true;
+        }
+
+        if ($this->projet && $this->projet->responsable_id === $user->id) {
+            return true;
+        }
+
+        $member = $this->members()->where('user_id', $user->id)->first();
+        return $member && $member->pivot->can_delete_tasks === true;
+    }
+
+    /**
+     * Vérifie si l'utilisateur peut valider les résultats
+     */
+    public function canUserValidateResults(User $user): bool
+    {
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        if ($this->responsable_id === $user->id) {
+            return true;
+        }
+
+        if ($this->projet && $this->projet->responsable_id === $user->id) {
+            return true;
+        }
+
+        $member = $this->members()->where('user_id', $user->id)->first();
+        return $member && $member->pivot->can_validate_results === true;
+    }
+
+    /**
+     * Vérifie si l'utilisateur peut supprimer l'activité
+     */
+    public function canUserDelete(User $user): bool
+    {
+        // Très restrictif - seulement super admin et responsable du projet
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        // Responsable du projet parent seulement
+        return $this->projet && $this->projet->responsable_id === $user->id;
+    }
+
+    /**
+     * Vérifie si l'utilisateur peut assigner des utilisateurs
+     */
+    public function canUserAssignUsers(User $user): bool
+    {
+        return $this->canUserManageMembers($user);
+    }
+
+    /**
+     * Vérifie si l'utilisateur a accès à l'activité
+     */
+    public function canUserAccess(User $user): bool
+    {
+        // Super admin a accès à tout
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        // Responsable de l'activité
+        if ($this->responsable_id === $user->id) {
+            return true;
+        }
+
+        // Responsable du projet
+        if ($this->projet && $this->projet->responsable_id === $user->id) {
+            return true;
+        }
+
+        // Membre de l'activité
+        if ($this->isMember($user)) {
+            return true;
+        }
+
+        // Membre du projet parent avec accès
+        if ($this->projet && $this->projet->hasAccess($user)) {
+            return true;
+        }
+
+        return false;
+    }
+    
     /**
      * Scopes
      */
@@ -123,8 +367,8 @@ class Activite extends Model
 
         return $query->where(function ($q) use ($term) {
             $q->where('nom', 'like', "%{$term}%")
-              ->orWhere('code', 'like', "%{$term}%")
-              ->orWhere('description', 'like', "%{$term}%");
+                ->orWhere('code', 'like', "%{$term}%")
+                ->orWhere('description', 'like', "%{$term}%");
         });
     }
 
@@ -216,6 +460,6 @@ class Activite extends Model
         }
     }
 
-    
+
 
 }

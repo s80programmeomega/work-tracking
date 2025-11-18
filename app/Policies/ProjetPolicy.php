@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\Projet;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Support\Facades\DB;
 
 class ProjetPolicy
 {
@@ -15,7 +16,7 @@ class ProjetPolicy
      */
     public function before(User $user, $ability)
     {
-        if ($user->hasRole('super_admin')) {
+        if ($user->isSuperAdmin()) {
             return true;
         }
     }
@@ -34,38 +35,11 @@ class ProjetPolicy
      */
     public function view(User $user, Projet $projet): bool
     {
-        // Responsable du projet
-        if ($projet->responsable_id === $user->id) {
-            return true;
-        }
+       return $projet->isResponsable($user)
+            || $projet->isMember($user)
+            || ($projet->workspace && $projet->workspace->isOwnerOrAdmin($user))
+            || $projet->visibility === 'public';
 
-        // Membre du projet
-        if ($projet->members()->where('user_id', $user->id)->exists()) {
-            return true;
-        }
-
-        // Owner ou Admin du workspace
-        if ($projet->workspace) {
-            $workspace = $projet->workspace;
-
-            // Owner
-            if ($workspace->owner_id === $user->id) {
-                return true;
-            }
-
-            // Admin
-            $member = $workspace->members()->where('user_id', $user->id)->first();
-            if ($member && in_array($member->pivot->role, ['super_admin', 'admin'])) {
-                return true;
-            }
-        }
-
-        // Projet public
-        if ($projet->visibility === 'public') {
-            return true;
-        }
-
-        return false;
     }
 
 
@@ -83,56 +57,32 @@ class ProjetPolicy
      */
     public function update(User $user, Projet $projet): bool
     {
-        // Responsable
-        if ($projet->responsable_id === $user->id) {
-            return true;
-        }
-
-        // Owner/Admin du workspace
-        if ($projet->workspace) {
-            $workspace = $projet->workspace;
-            
-            if ($workspace->owner_id === $user->id) {
-                return true;
-            }
-            
-            $member = $workspace->members()->where('user_id', $user->id)->first();
-            if ($member && in_array($member->pivot->role, ['super_admin', 'admin'])) {
-                return true;
-            }
-        }
-
-        // Membre avec permission can_edit
-        $member = $projet->members()->where('user_id', $user->id)->first();
-        if ($member && $member->pivot->can_edit) {
-            return true;
-        }
-
-        return false;
+         return $projet->isResponsable($user)
+            || ($projet->workspace && $projet->workspace->isOwnerOrAdmin($user))
+            || $projet->canUserEdit($user)
+            || $this->hasTemporaryAccess($user, $projet);
     }
 
+    private function hasTemporaryAccess(User $user, Projet $projet): bool
+    {
+        return DB::table('temporary_access')
+            ->where('user_id', $user->id)
+            ->where('accessible_type', Projet::class)
+            ->where('accessible_id', $projet->id)
+            ->where(function ($q) {
+                $q->whereNull('expires_at')
+                    ->orWhere('expires_at', '>', now());
+            })
+            ->exists();
+    }
     /**
      * ✅ SUPPRIMER un projet
      */
     public function delete(User $user, Projet $projet): bool
     {
-        // Responsable
-        if ($projet->responsable_id === $user->id) {
-            return true;
-        }
-
-        // Owner du workspace
-        if ($projet->workspace && $projet->workspace->owner_id === $user->id) {
-            return true;
-        }
-
-        // Membre avec permission can_delete
-        $member = $projet->members()->where('user_id', $user->id)->first();
-        if ($member && $member->pivot->can_delete) {
-            return true;
-        }
-
-        return false;
+         return $projet->isResponsable($user)
+            || ($projet->workspace && $projet->workspace->isOwnerOrAdmin($user))
+            || $projet->canUserDelete($user);
     }
 
     /**
@@ -149,7 +99,8 @@ class ProjetPolicy
     public function forceDelete(User $user, Projet $projet): bool
     {
         // Only super admin can force delete
-        return $user->role === 'super_admin';
+        return $user->isSuperAdmin();
+
     }
 
     /**
@@ -157,46 +108,18 @@ class ProjetPolicy
      */
     public function archive(User $user, Projet $projet): bool
     {
-        // Super admin can archive all
-        if ($user->role === 'super_admin') {
-            return true;
-        }
-
         // Only responsable can archive
         return $projet->isResponsable($user);
     }
 
-  /**
+    /**
      * ✅ GÉRER les membres du projet
      */
     public function manageMembers(User $user, Projet $projet): bool
     {
-        // Responsable
-        if ($projet->responsable_id === $user->id) {
-            return true;
-        }
-
-        // Owner/Admin du workspace
-        if ($projet->workspace) {
-            $workspace = $projet->workspace;
-            
-            if ($workspace->owner_id === $user->id) {
-                return true;
-            }
-            
-            $member = $workspace->members()->where('user_id', $user->id)->first();
-            if ($member && in_array($member->pivot->role, ['super_admin', 'admin'])) {
-                return true;
-            }
-        }
-
-        // Membre avec permission can_invite
-        $member = $projet->members()->where('user_id', $user->id)->first();
-        if ($member && $member->pivot->can_invite) {
-            return true;
-        }
-
-        return false;
+         return $projet->isResponsable($user)
+            || $projet->isMember($user) && $projet->canUserInvite($user)
+            || ($projet->workspace && $projet->workspace->isOwnerOrAdmin($user));
     }
 
     /**

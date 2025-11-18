@@ -95,6 +95,42 @@ class Projet extends Model
             ->withTimestamps();
     }
 
+    public function creator(): BelongsTo
+{
+    return $this->belongsTo(User::class, 'created_by');
+}
+
+public function canUserValidateN2(User $user): bool
+{
+    // Responsable du projet = Manager N2
+    return $this->responsable_id === $user->id;
+}
+public function isAccessibleBy(User $user): bool
+{
+    // Super admin
+    if ($user->isSuperAdmin()) {
+        return true;
+    }
+    
+    // Workspace owner/admin can see all projects
+    if ($this->workspace && $user->canSeeAllWorkspaceProjects($this->workspace)) {
+        return true;
+    }
+    
+    // Responsable du projet
+    if ($this->responsable_id === $user->id) {
+        return true;
+    }
+    
+    // Membre du projet
+    if ($this->isMember($user)) {
+        return true;
+    }
+    
+    // Accès temporaire
+    return $user->hasTemporaryAccess($this);
+}
+
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(ProjetTag::class, 'projet_projet_tag')
@@ -205,33 +241,40 @@ class Projet extends Model
                 ->orWhere('code', 'like', "%{$term}%");
         });
     }
- 
- /**
+
+    /**
      * Scope pour filtrer les projets accessibles par un utilisateur
      */
     public function scopeAccessibleBy(Builder $query, $userId): Builder
     {
+        $user = User::find($userId);
+
+        // Super admin voit tout
+        if ($user && $user->isSuperAdmin()) {
+            return $query;
+        }
+
         return $query->where(function ($q) use ($userId) {
             // 1. Projets où l'user est responsable
             $q->where('responsable_id', $userId)
 
-            // 2. OU projets où l'user est membre direct
-            ->orWhereHas('members', function ($memberQuery) use ($userId) {
-                $memberQuery->where('user_id', $userId);
-            })
+                // 2. OU projets où l'user est membre direct
+                ->orWhereHas('members', function ($memberQuery) use ($userId) {
+                    $memberQuery->where('user_id', $userId);
+                })
 
-            // 3. OU l'user est Owner/Admin du workspace
-            ->orWhereHas('workspace', function ($workspaceQuery) use ($userId) {
-                $workspaceQuery->where(function ($wq) use ($userId) {
-                    // Owner du workspace
-                    $wq->where('owner_id', $userId)
-                    // OU Admin/Super Admin du workspace
-                    ->orWhereHas('members', function ($memberQuery) use ($userId) {
-                        $memberQuery->where('workspace_members.user_id', $userId)
-                            ->whereIn('workspace_members.role', ['owner', 'admin']);
+                // 3. OU l'user est Owner/Admin du workspace
+                ->orWhereHas('workspace', function ($workspaceQuery) use ($userId) {
+                    $workspaceQuery->where(function ($wq) use ($userId) {
+                        // Owner du workspace
+                        $wq->where('owner_id', $userId)
+                            // OU Admin/Super Admin du workspace
+                            ->orWhereHas('members', function ($memberQuery) use ($userId) {
+                            $memberQuery->where('workspace_members.user_id', $userId)
+                                ->whereIn('workspace_members.role', ['owner', 'admin']);
+                        });
                     });
                 });
-            });
         });
     }
 
@@ -261,14 +304,14 @@ class Projet extends Model
             return false;
         }
 
-        // Owner du workspace
-        if ($this->workspace->owner_id === $user->id) {
+        if ($user->isSuperAdmin())
             return true;
-        }
+        if ($this->workspace->owner_id === $user->id)
+            return true;
 
         // Admin du workspace
         $member = $this->workspace->members()->where('user_id', $user->id)->first();
-        if ($member && in_array($member->pivot->role, ['super_admin', 'admin'])) {
+        if ($member && in_array($member->pivot->role, ['owner', 'admin'])) {
             return true;
         }
 
@@ -312,13 +355,20 @@ class Projet extends Model
 
     public function isMember(User $user): bool
     {
-        return $this->members()->where('user_id', $user->id)->exists();
+        return $this->members()->where('user_id', $user->id)->exists()
+            || $this->responsable_id === $user->id;
     }
+
 
     public function hasAccess(User $user): bool
     {
+        // Super admin a toujours accès
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
         // Owner has access
-        if ($this->isResponsable($user)) {
+        if ($this->responsable_id === $user->id) {
             return true;
         }
 
@@ -332,7 +382,10 @@ class Projet extends Model
             return true;
         }
 
-        return false;
+        // Si utilisateur est membre du projet
+        return $this->membres()->where('user_id', $user->id)->exists();
+
+
     }
 
     public function getMemberRole(User $user): ?string
@@ -343,9 +396,13 @@ class Projet extends Model
 
     public function canUserEdit(User $user): bool
     {
-        if ($this->isResponsable($user)) {
+        if ($user->isSuperAdmin() || $this->isResponsable($user)) {
             return true;
         }
+
+        // if ($this->isResponsable($user)) {
+        //     return true;
+        // }
 
         $member = $this->members()->where('user_id', $user->id)->first();
         return $member?->pivot->can_edit ?? false;

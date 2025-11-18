@@ -2,6 +2,8 @@
 import { defineStore } from 'pinia';
 import { authAPI } from '@/api/auth';
 import router from '@/router';
+import axios from 'axios';
+import { i18n } from '@/locales';
 
 /**
  * STORE D'AUTHENTIFICATION - Gère tout ce qui concerne l'utilisateur connecté
@@ -14,23 +16,14 @@ import router from '@/router';
  */
 export const useAuthStore = defineStore('auth', {
     state: () => ({
-        // Données utilisateur récupérées depuis le localStorage ou null si non connecté
         user: JSON.parse(localStorage.getItem('user')) || null,
-
-        // Token JWT pour les requêtes API
         token: localStorage.getItem('auth_token') || null,
-
-        // État de connexion (booléen)
         isAuthenticated: !!localStorage.getItem('auth_token'),
-
-        // État de chargement pour les requêtes
         loading: false,
-
-        // Stockage des erreurs
         error: null,
-
-        // ✅ NOUVEAU : Langue de l'utilisateur (par défaut: français)
-        language: localStorage.getItem('user_language') || 'fr'
+        language: localStorage.getItem('user_language') || 'fr',
+        tokenExpiry: null, // timestamp pour le rafraîchissement automatique
+        refreshInterval: null, // ID du setInterval pour auto-refresh
     }),
 
     getters: {
@@ -39,138 +32,64 @@ export const useAuthStore = defineStore('auth', {
          */
         currentUser: (state) => state.user,
 
-        /**
-         * Retourne tous les rôles de l'utilisateur
-         * Gère à la fois le champ 'role' (string) et 'roles' (collection Spatie)
-         */
+        // Retourne les rôles sous forme normalisée (array de string)
         userRoles: (state) => {
-            // Si l'utilisateur a un champ 'role'  
-            if (state.user?.role) {
-                return [state.user.role];
-            }
-            // Si l'utilisateur a une collection 'roles' (Spatie)
-            if (state.user?.roles) {
-                return state.user.roles.map(r => r.name || r);
-            }
+            if (!state.user) return [];
+            if (state.user.role) return [state.user.role];
+            if (state.user.roles) return state.user.roles.map(r => r.name || r);
             return [];
         },
 
-        /**
-         * NOUVEAU : Vérifie si l'utilisateur est super_admin
-         * Compatible avec les deux systèmes (role string et roles collection)
-         */
         isSuperAdmin: (state) => {
-            // Vérifie le champ 'role' (votre nouvelle implémentation)
+            // 1️⃣ Vérifie le champ is_super_admin (BDD)
+            if (state.user?.is_super_admin) return true;
+
+            // 2️⃣ Vérifie le champ role string
             if (state.user?.role === 'super_admin') return true;
 
-            // Vérifie la collection 'roles' (Spatie)
+            // 3️⃣ Vérifie la collection roles
             if (state.user?.roles) {
-                return state.user.roles.some(r =>
-                    (r.name || r) === 'super_admin'
-                );
+                return state.user.roles.some(r => (r.name || r) === 'super_admin');
             }
 
             return false;
         },
 
-        /**
-         * Retourne toutes les permissions de l'utilisateur
-         * Combine permissions des rôles + permissions directes
-         */
-        userPermissions: (state) => {
-            const rolePerms = state.user?.roles?.flatMap(r => r.permissions) || [];
-            const directPerms = state.user?.permissions || [];
-            return [...rolePerms, ...directPerms].map(p => p.name);
-        },
 
-        /**
-         * Vérifie si l'utilisateur a un rôle spécifique
-         */
-        hasRole: (state) => (role) => {
-            // Vérifie le champ 'role'
-            if (state.user?.role === role) return true;
+        hasRole: (state) => (role) => state.userRoles.includes(role),
+        hasAnyRole: (state) => (roles) => roles.some(r => state.userRoles.includes(r)),
+        hasPermission: (state) => (perm) => state.userPermissions.includes(perm),
+        hasAnyPermission: (state) => (perms) => perms.some(p => state.userPermissions.includes(p)),
 
-            // Vérifie la collection 'roles'
-            if (state.user?.roles) {
-                return state.user.roles.some(r => (r.name || r) === role);
-            }
-
-            return false;
-        },
-
-        /**
-         * Vérifie si l'utilisateur a au moins un des rôles demandés
-         */
-        hasAnyRole: (state) => (roles) => {
-            // Vérifie d'abord le champ 'role'
-            if (state.user?.role && roles.includes(state.user.role)) return true;
-
-            // Puis vérifie la collection 'roles'
-            if (state.user?.roles) {
-                return roles.some(role =>
-                    state.user.roles.some(r => (r.name || r) === role)
-                );
-            }
-
-            return false;
-        },
-
-        /**
-         * Vérifie si l'utilisateur a une permission spécifique
-         */
-        hasPermission: (state) => (permission) => {
-            const allPerms = [
-                ...state.user?.roles?.flatMap(r => r.permissions) || [],
-                ...state.user?.permissions || []
-            ];
-            return allPerms.some(p => p.name === permission);
-        },
-
-        /**
-         * Vérifie si l'utilisateur a au moins une des permissions demandées
-         */
-        hasAnyPermission: (state) => (permissions) => {
-            const allPerms = [
-                ...state.user?.roles?.flatMap(r => r.permissions) || [],
-                ...state.user?.permissions || []
-            ];
-            return permissions.some(perm =>
-                allPerms.some(p => p.name === perm)
-            );
-        },
-
-
-        /**
-         * ✅ NOUVEAU : Retourne la langue de l'utilisateur
-         */
         currentLanguage: (state) => state.language,
-
-        /**
-         * ✅ NOUVEAU : Vérifie si la langue est française
-         */
         isFrench: (state) => state.language === 'fr',
+        isEnglish: (state) => state.language === 'en',
 
-        /**
-         * ✅ NOUVEAU : Vérifie si la langue est anglaise
-         */
-        isEnglish: (state) => state.language === 'en'
     },
 
     actions: {
-        /**
-         * INSCRIPTION - Crée un nouveau compte utilisateur
-         */
+        // ---------------------------
+        // CONFIGURATION AXIOS
+        // ---------------------------
+        setAxiosToken(token) {
+            if (token) {
+                axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            } else {
+                delete axios.defaults.headers.common['Authorization'];
+            }
+        },
+
+        // ---------------------------
+        // INSCRIPTION
+        // ---------------------------
         async register(data) {
             this.loading = true;
             this.error = null;
-
             try {
                 const response = await authAPI.register(data);
-                // Redirige vers la page de connexion après inscription
                 router.push('/signin');
                 return response.data;
             } catch (error) {
-                // Gestion des erreurs avec message personnalisé
                 this.error = error.response?.data?.message || 'Registration failed';
                 throw error;
             } finally {
@@ -178,114 +97,93 @@ export const useAuthStore = defineStore('auth', {
             }
         },
 
-        /**
-         * CONNEXION - Authentifie l'utilisateur
-         */
+
+        // ---------------------------
+        // CONNEXION
+        // ---------------------------
         async login(credentials) {
             this.loading = true;
             this.error = null;
-
             try {
                 const response = await authAPI.login(credentials);
-                console.log('Réponse API:', response.data);
+                const { user, token, expires_at } = response.data.data;
 
-                const { user, token } = response.data.data;
-
-                // Met à jour l'état du store
                 this.user = user;
                 this.token = token;
                 this.isAuthenticated = true;
+                this.tokenExpiry = new Date(expires_at).getTime();
 
-                // Sauvegarde dans le localStorage pour persister la connexion
                 localStorage.setItem('user', JSON.stringify(user));
                 localStorage.setItem('auth_token', token);
+                localStorage.setItem('user_language', user.language || 'fr');
 
-                // ✅ Met à jour la langue depuis les données utilisateur
-                if (user.language) {
-                    this.setLanguage(user.language);
-                }
-                // ✅ Vérifier si on vient d'une invitation
-                // Avec Pinia + Vue Router 4, on récupère le query param comme ceci
-                const currentRoute = router.currentRoute.value;
+                this.setAxiosToken(token);
 
-                // ✅ Vérifier si on vient d'une invitation
-                const invitationToken = currentRoute.query.invitation;
+                // Mise à jour de la langue
+                if (user.language) this.setLanguage(user.language);
 
+                // Auto refresh token
+                this.startTokenAutoRefresh();
+
+                // Redirection après login
+                const invitationToken = router.currentRoute.value.query.invitation;
                 if (invitationToken) {
-                    // Rediriger vers la page d'acceptation d'invitation
                     router.push(`/accept-invitation/${invitationToken}`);
                 } else {
-                    // Redirige vers la page d'accueil
                     router.push('/');
                 }
+
                 return response.data;
             } catch (error) {
-                // Messages d'erreur spécifiques selon le type d'erreur
-                const errorMessage = error.response?.status === 401
-                    ? 'Invalid email or password' // Identifiants incorrects
-                    : error.response?.data?.message || error.response?.data?.error || 'Login failed';
-
-                this.error = errorMessage;
-
-                // Efface l'erreur après 5 secondes
-                setTimeout(() => {
-                    this.error = null;
-                }, 5000);
-
+                this.error = error.response?.data?.message || 'Login failed';
+                setTimeout(() => (this.error = null), 5000);
                 throw error;
             } finally {
                 this.loading = false;
             }
         },
 
-        /**
-         * DÉCONNEXION - Déconnecte l'utilisateur
-         */
+
+        // ---------------------------
+        // DÉCONNEXION
+        // ---------------------------
         async logout() {
             this.loading = true;
-
             try {
-                // Appel API pour invalider le token côté serveur
                 await authAPI.logout();
             } catch (error) {
                 console.error('Logout error:', error);
             } finally {
-                // Nettoie l'état local quoi qu'il arrive
-                this.user = null;
-                this.token = null;
-                this.isAuthenticated = false;
-
-                // Nettoie le localStorage
-                localStorage.removeItem('user');
-                localStorage.removeItem('auth_token');
-
-                // Redirige vers la page de connexion
+                this.clearAuth();
                 router.push('/signin');
                 this.loading = false;
             }
         },
 
-        /**
-         * RÉCUPÈRE LES INFOS UTILISATEUR - Appel API pour mettre à jour les données
-         */
+        clearAuth() {
+            this.user = null;
+            this.token = null;
+            this.isAuthenticated = false;
+            this.tokenExpiry = null;
+            this.stopTokenAutoRefresh();
+            localStorage.removeItem('user');
+            localStorage.removeItem('auth_token');
+            this.setAxiosToken(null);
+        },
+
+
+        // ---------------------------
+        // RÉCUPÉRATION USER
+        // ---------------------------
         async fetchUser() {
             if (!this.token) return;
-
             this.loading = true;
-
             try {
                 const response = await authAPI.getUser();
                 this.user = response.data.data;
-
-                // Sauvegarde les nouvelles données
                 localStorage.setItem('user', JSON.stringify(this.user));
-
-                // ✅ Met à jour la langue si elle a changé
-                if (this.user.language && this.user.language !== this.language) {
-                    this.setLanguage(this.user.language);
-                }
+                if (this.user.language) this.setLanguage(this.user.language);
             } catch (error) {
-                // Si erreur, déconnecte l'utilisateur (token probablement expiré)
                 this.logout();
                 throw error;
             } finally {
@@ -293,97 +191,78 @@ export const useAuthStore = defineStore('auth', {
             }
         },
 
-        /**
-         * RAFRAÎCHIT LE TOKEN - Obtient un nouveau token
-         */
+        // ---------------------------
+        // RAFRAÎCHISSEMENT TOKEN
+        // ---------------------------
         async refreshToken() {
             try {
                 const response = await authAPI.refreshToken();
-                this.token = response.data.data.token;
-                localStorage.setItem('auth_token', this.token);
+                const { token, expires_at } = response.data.data;
+                this.token = token;
+                this.tokenExpiry = new Date(expires_at).getTime();
+                localStorage.setItem('auth_token', token);
+                this.setAxiosToken(token);
             } catch (error) {
                 this.logout();
                 throw error;
             }
         },
+        startTokenAutoRefresh() {
+            this.stopTokenAutoRefresh();
+            const refreshBefore = 60 * 1000; // 1 min avant expiration
+            this.refreshInterval = setInterval(() => {
+                if (!this.tokenExpiry) return;
+                const now = Date.now();
+                if (this.tokenExpiry - now <= refreshBefore) this.refreshToken();
+            }, 30 * 1000); // vérifie toutes les 30 sec
+        },
 
-        /**
-         * ✅ NOUVEAU : CHANGE LA LANGUE
-         * @param {string} language - 'fr' ou 'en'
-         */
+        stopTokenAutoRefresh() {
+            if (this.refreshInterval) clearInterval(this.refreshInterval);
+        },
+
+        // ---------------------------
+        // LANGUE
+        // ---------------------------
         async setLanguage(language) {
-            if (!['fr', 'en'].includes(language)) {
-                console.warn('Langue non supportée:', language);
-                return;
-            }
-
-            try {
-                // Met à jour i18n
-                const { i18n } = await import('@/locales');
-                i18n.global.locale.value = language;
-
-                // Met à jour le store
-                this.language = language;
-                localStorage.setItem('user_language', language);
-
-                // Met à jour le document HTML pour l'accessibilité
-                document.documentElement.lang = language;
-
-                // Si l'utilisateur est connecté, met à jour son profil en base
-                if (this.isAuthenticated) {
-                    await authAPI.updateLanguage({ language });
-
-                    // Met à jour l'utilisateur dans le store
-                    if (this.user) {
-                        this.user.language = language;
-                        localStorage.setItem('user', JSON.stringify(this.user));
-                    }
+            if (!['fr', 'en'].includes(language)) return;
+            i18n.global.locale.value = language;
+            this.language = language;
+            localStorage.setItem('user_language', language);
+            document.documentElement.lang = language;
+            if (this.isAuthenticated) {
+                await authAPI.updateLanguage({ language }).catch(console.error);
+                if (this.user) {
+                    this.user.language = language;
+                    localStorage.setItem('user', JSON.stringify(this.user));
                 }
-
-                // Déclenche un événement pour notifier les autres composants
-                window.dispatchEvent(new Event('languageChanged'));
-
-            } catch (error) {
-                console.error('Erreur lors du changement de langue:', error);
             }
+            window.dispatchEvent(new Event('languageChanged'));
         },
 
-        /**
-         * INITIALISATION - Doit être appelé au démarrage de l'app
-         */
+        // ---------------------------
+        // INITIALISATION
+        // ---------------------------
         initialize() {
-            // Récupère la langue sauvegardée ou utilise le français par défaut
-            const savedLanguage = localStorage.getItem('user_language') || 'fr';
-            this.setLanguage(savedLanguage);
-
-            // Configure axios pour les requêtes authentifiées
-            if (this.token) {
-                // Ta configuration axios existante...
-            }
-
-            // Récupère les données utilisateur si connecté
-            if (this.isAuthenticated && !this.user) {
-                this.fetchUser();
-            }
+            this.setAxiosToken(this.token);
+            if (this.isAuthenticated) this.startTokenAutoRefresh();
+            if (this.isAuthenticated && !this.user) this.fetchUser();
+            this.setLanguage(localStorage.getItem('user_language') || 'fr');
         },
 
-        /**
-        * NOUVEAU : Met à jour le workspace courant
-        */
+
+        // ---------------------------
+        // MISE À JOUR WORKSPACE / USER
+        // ---------------------------
         setCurrentWorkspace(workspaceId) {
-            if (this.user) {
-                this.user.current_workspace_id = workspaceId;
-                // Mettre à jour le localStorage
-                localStorage.setItem('user', JSON.stringify(this.user));
-            }
+            if (!this.user) return;
+            this.user.current_workspace_id = workspaceId;
+            localStorage.setItem('user', JSON.stringify(this.user));
         },
 
-        /**
-         * NOUVEAU : Met à jour les données utilisateur
-         */
         setUser(userData) {
             this.user = userData;
             localStorage.setItem('user', JSON.stringify(userData));
-        }
+        },
     },
 });

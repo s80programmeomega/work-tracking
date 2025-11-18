@@ -5,7 +5,7 @@ const API_URL = '/activites'
 export default {
   // List and filter
   async getAll(filters = {}) {
-    return api.get(API_URL, { params: filters })
+    return api.get(`${API_URL}/all/activity/`, { params: filters })
   },
 
   async getForProjet(projetId, filters = {}) {
