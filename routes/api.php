@@ -127,6 +127,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/dashboard-stats', [ProjetController::class, 'dashboardStats']);
         Route::get('/mes-projets', [ProjetController::class, 'myProjets']);
         Route::get('/archives', [ProjetController::class, 'archived']);
+        Route::get('/projets-accessibles', [ProjetController::class, 'accessible']);
 
         Route::middleware(['super_admin'])->group(function () {
             Route::get('/list/all', [ProjetController::class, 'index']); // Tous les projets
@@ -170,12 +171,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/{projet}/statistics', [ProjetController::class, 'getStatistics']);
         Route::get('/{projet}/performance-report', [ProjetController::class, 'performanceReport']);
         Route::get('/{projet}/accessible-tasks', [ProjetController::class, 'accessibleTasks']);
+        Route::delete('/{projet}/members/{user}/remove', [ProjetController::class, 'removeMemberWithTransfer']);
 
-        Route::prefix('{projet}')->group(function () {
-            // Retirer membre avec transfert optionnel
-            Route::delete('/members/{user}/remove', [ProjetController::class, 'removeMemberWithTransfer']);
-        });
-        Route::get('/projets-accessibles', [ProjetController::class, 'accessible']);
 
     });
 
@@ -206,7 +203,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Available members for projet
         Route::get('/available-members/{projetId}', [ActiviteController::class, 'availableMembers']);
 
-
         // ✅ Gestion des membres d'activité
         Route::prefix('{activite}/members')->group(function () {
             Route::get('/', [ActiviteController::class, 'getMembers']);
@@ -219,9 +215,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/{activite}/taches', [ActiviteController::class, 'getTaches']);
 
         // List and filter
-        Route::middleware(['super_admin'])->group(function () {
-            Route::get('/', [ActiviteController::class, 'index']); // Toutes les activités (Super Admin)
-        });
+        // Route::middleware(['super_admin'])->group(function () {
+        Route::get('/all/activity', [ActiviteController::class, 'index']); // Toutes les activités (Super Admin)
+        // });
     });
 
 
@@ -435,8 +431,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // User Management Routes
     Route::prefix('users')->group(function () {
-        
-        
+
+
         // List and search
         Route::get('/', [UserController::class, 'index']);
         Route::get('/search', [UserController::class, 'search']);

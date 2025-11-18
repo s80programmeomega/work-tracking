@@ -111,7 +111,8 @@ const {
   workspaces,
   loading,
   fetchWorkspaces,
-  selectWorkspace: setWorkspace
+ selectWorkspace,
+  onWorkspaceChanged
 } = useWorkspace()
 
 const currentWorkspaceName = computed(() => currentWorkspace.value?.nom || '')
@@ -130,15 +131,10 @@ const getWorkspaceInitials = (name) => {
     .slice(0, 2) || 'WS'
 }
 
-const selectWorkspace = async (workspace) => {
-  try {
-    await setWorkspace(workspace)
-    showDropdown.value = false
-    emit('workspace-changed', workspace)
-  } catch (error) {
-    console.error('Erreur lors du changement de workspace:', error)
-  }
-}
+ 
+
+// ✅ ÉCOUTE DES CHANGEMENTS EXTERNES
+let unsubscribeWorkspaceListener = null
 
 // Click outside to close
 const handleClickOutside = (event) => {
@@ -159,10 +155,17 @@ onMounted(async () => {
   if (workspaces.value.length === 0) {
     await fetchWorkspaces()
   }
+  
+  // Écouter les changements de workspace depuis d'autres composants
+  unsubscribeWorkspaceListener = onWorkspaceChanged((event) => {
+    console.log('WorkspaceSelector: Workspace changé depuis un autre composant', event.detail)
+  })
 })
 
 onBeforeUnmount(() => {
-  document.removeEventListener('click', handleClickOutside)
+  if (unsubscribeWorkspaceListener) {
+    unsubscribeWorkspaceListener()
+  }
 })
 </script>
 

@@ -47,12 +47,15 @@ export const useAuthStore = defineStore('auth', {
     error: null,
     _refreshTimerId: null, // internal interval id
     _isRefreshing: false,  // avoid concurrent refreshes
+        current_workspace_id: localStorage.getItem('current_workspace_id')
+
   }),
 
   getters: {
     isLoggedIn: (s) => s.isAuthenticated && !!s.user,
     // Super admin global (users.is_super_admin)
     isSuperAdmin: (s) => !!s.user?.is_super_admin,
+    currentWorkspaceId: (state) => state.current_workspace_id,
 
     // Retourne workspace membership pivot si présent
     _workspaceMemberById: (s) => (workspaceId) => {
@@ -148,6 +151,26 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
+     // ✅ ACTION POUR METTRE À JOUR LE WORKSPACE COURANT
+    setCurrentWorkspace(workspaceId) {
+      this.current_workspace_id = workspaceId;
+      localStorage.setItem('current_workspace_id', workspaceId);
+      
+      // Mettre à jour l'utilisateur si nécessaire
+      if (this.user) {
+        this.user.current_workspace_id = workspaceId;
+      }
+    },
+
+     // ✅ ACTION POUR METTRE À JOUR LES DONNÉES UTILISATEUR AVEC WORKSPACE
+    setUser(userData) {
+      this.user = userData;
+      
+      // Définir le workspace courant depuis les données utilisateur
+      if (userData.current_workspace_id) {
+        this.setCurrentWorkspace(userData.current_workspace_id);
+      }
+    },
     // --- Public actions ---
 
     /**

@@ -19,7 +19,8 @@
             </div>
             <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
               <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
             </div>
           </div>
@@ -47,7 +48,8 @@
             </div>
             <div class="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center">
               <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
           </div>
@@ -61,7 +63,8 @@
             </div>
             <div class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center">
               <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
             </div>
           </div>
@@ -72,41 +75,31 @@
       <div class="mb-6 bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
         <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div class="flex-1">
-            <input
-              v-model="filters.search"
-              type="text"
-              placeholder="Rechercher une activité..."
+            <input v-model="filters.search" type="text" placeholder="Rechercher une activité..."
               class="w-full max-w-md rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm"
-              @input="debouncedSearch"
-            />
+              @input="debouncedSearch" />
           </div>
 
           <div class="flex gap-2">
-            <select
-              v-model="filters.projet_id"
+            <select v-model="filters.projet_id"
               class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm"
-              @change="loadActivites"
-            >
+              @change="loadActivites">
               <option value="">Tous les projets</option>
               <option v-for="projet in accessibleProjets" :key="projet.id" :value="projet.id">
                 {{ projet.nom }}
               </option>
             </select>
 
-            <select
-              v-model="filters.status"
+            <select v-model="filters.status"
               class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm"
-              @change="loadActivites"
-            >
+              @change="loadActivites">
               <option value="">Tous les statuts</option>
               <option value="active">Actives</option>
               <option value="archived">Archivées</option>
             </select>
 
-            <button
-              @click="resetFilters"
-              class="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700"
-            >
+            <button @click="resetFilters"
+              class="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700">
               Réinitialiser
             </button>
           </div>
@@ -122,7 +115,8 @@
       <!-- Empty State -->
       <div v-else-if="activites.length === 0" class="text-center py-12">
         <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
         </svg>
         <p class="text-gray-500 dark:text-gray-400 mb-2">Aucune activité trouvée</p>
       </div>
@@ -144,11 +138,8 @@
               </tr>
             </thead>
             <tbody>
-              <tr
-                v-for="activite in activites"
-                :key="activite.id"
-                class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
-              >
+              <tr v-for="activite in activites" :key="activite.id"
+                class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
                 <!-- Activité -->
                 <td class="px-6 py-4">
                   <div class="cursor-pointer" @click="viewActivityDetail(activite)">
@@ -169,7 +160,8 @@
                 <!-- Responsable -->
                 <td class="px-6 py-4">
                   <div v-if="activite.responsable" class="flex items-center gap-2">
-                    <div class="w-6 h-6 rounded-full bg-brand-500 flex items-center justify-center text-white text-xs font-medium">
+                    <div
+                      class="w-6 h-6 rounded-full bg-brand-500 flex items-center justify-center text-white text-xs font-medium">
                       {{ getInitials(activite.responsable.nom) }}
                     </div>
                     <span class="text-gray-700 dark:text-gray-300">{{ activite.responsable.nom }}</span>
@@ -178,29 +170,26 @@
 
                 <!-- Équipe -->
                 <td class="px-6 py-4">
-                <button
-                  v-if="getPermissions(activite).canManageMembers"
-                  @click="openMembersModal(activite)"
-                  class="flex items-center gap-2 px-3 py-1.5 text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors"
-                >
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                  {{ activite.membres_count || 0 }} membre(s)
-                </button>
-                <div v-else class="flex items-center gap-2 px-3 py-1.5 text-xs text-gray-500">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                  {{ activite.membres_count || 0 }} membre(s)
-                </div>
-              </td>
+                  <button v-if="getPermissions(activite).canManageMembers" @click="openMembersModal(activite)"
+                    class="flex items-center gap-2 px-3 py-1.5 text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    {{ activite.membres_count || 0 }} membre(s)
+                  </button>
+                  <div v-else class="flex items-center gap-2 px-3 py-1.5 text-xs text-gray-500">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    {{ activite.membres_count || 0 }} membre(s)
+                  </div>
+                </td>
 
                 <!-- Statut -->
                 <td class="px-6 py-4">
-                  <span
-                    :class="['px-2 py-1 text-xs font-medium rounded-full', getStatusClass(activite.status)]"
-                  >
+                  <span :class="['px-2 py-1 text-xs font-medium rounded-full', getStatusClass(activite.status)]">
                     {{ getStatusLabel(activite.status) }}
                   </span>
                 </td>
@@ -209,10 +198,8 @@
                 <td class="px-6 py-4">
                   <div class="flex items-center gap-2 min-w-32">
                     <div class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                      <div
-                        class="h-full bg-brand-500 transition-all duration-500"
-                        :style="{ width: `${activite.progression || 0}%` }"
-                      ></div>
+                      <div class="h-full bg-brand-500 transition-all duration-500"
+                        :style="{ width: `${activite.progression || 0}%` }"></div>
                     </div>
                     <span class="text-xs text-gray-600 dark:text-gray-400 min-w-8">
                       {{ activite.progression || 0 }}%
@@ -228,45 +215,38 @@
                 <!-- Actions -->
                 <td class="px-6 py-4">
                   <div class="flex items-center gap-2">
-                      <button
-                        @click="viewActivityDetail(activite)"
-                        class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg"
-                        title="Voir"
-                      >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                      </button>
+                    <button @click="viewActivityDetail(activite)"
+                      class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg" title="Voir">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </button>
 
-                     <button
-                        v-if="getPermissions(activite).canEdit"
-                        @click="editActivite(activite)"
-                        class="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg"
-                        title="Modifier"
-                      >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                      </button>
+                    <button v-if="getPermissions(activite).canEdit" @click="editActivite(activite)"
+                      class="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg"
+                      title="Modifier">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </button>
 
-                     <!-- Bouton Supprimer - Seulement si permission -->
-                      <button
-                        v-if="getPermissions(activite).canDelete"
-                        @click="deleteActivite(activite)"
-                        class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
-                        title="Supprimer"
-                      >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                       <!-- Indicateur si aucune action disponible -->
-                        <span 
-                          v-if="!getPermissions(activite).canEdit && !getPermissions(activite).canDelete"
-                          class="text-xs text-gray-400 px-2" >
-                          Lecture seule
-                        </span>
+                    <!-- Bouton Supprimer - Seulement si permission -->
+                    <button v-if="getPermissions(activite).canDelete" @click="deleteActivite(activite)"
+                      class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg" title="Supprimer">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                    <!-- Indicateur si aucune action disponible -->
+                    <span v-if="!getPermissions(activite).canEdit && !getPermissions(activite).canDelete"
+                      class="text-xs text-gray-400 px-2">
+                      Lecture seule
+                    </span>
                   </div>
                 </td>
               </tr>
@@ -275,25 +255,21 @@
         </div>
 
         <!-- Pagination -->
-        <div v-if="pagination.last_page > 1" class="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+        <div v-if="pagination.last_page > 1"
+          class="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-700">
           <div class="text-sm text-gray-500 dark:text-gray-400">
             Affichage de {{ (pagination.current_page - 1) * pagination.per_page + 1 }}
             à {{ Math.min(pagination.current_page * pagination.per_page, pagination.total) }}
             sur {{ pagination.total }} activités
           </div>
           <div class="flex gap-1">
-            <button
-              @click="changePage(pagination.current_page - 1)"
-              :disabled="pagination.current_page === 1"
-              class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+            <button @click="changePage(pagination.current_page - 1)" :disabled="pagination.current_page === 1"
+              class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
               Précédent
             </button>
-            <button
-              @click="changePage(pagination.current_page + 1)"
+            <button @click="changePage(pagination.current_page + 1)"
               :disabled="pagination.current_page === pagination.last_page"
-              class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+              class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
               Suivant
             </button>
           </div>
@@ -308,45 +284,26 @@
       @saved="onActiviteCreated"
     /> -->
 
-    <ActiviteForm
-      v-if="showEditForm"
-      :activite="editingActivite"
-      @close="showEditForm = false; editingActivite = null"
-      @saved="onActiviteUpdated"
-    />
+    <ActiviteForm v-if="showEditForm" :activite="editingActivite" @close="showEditForm = false; editingActivite = null"
+      @saved="onActiviteUpdated" />
 
-     <ManageMembersModal
-      v-if="showMembersModal"
-      :activite="selectedActiviteForMembers"
-      @close="showMembersModal = false"
-      @updated="onMembersUpdated"
-      @edit-member="onEditMember"
-      @add-member="onAddMember"
-    />
+    <ManageMembersModal v-if="showMembersModal" :activite="selectedActiviteForMembers" @close="showMembersModal = false"
+      @updated="onMembersUpdated" @edit-member="onEditMember" @add-member="onAddMember" />
 
     <!-- Nouveaux modaux ajoutés ici -->
-    <EditMemberPermissionsModal
-      v-if="showEditMemberModal"
-      :member="editingMember"
-      :activite-id="selectedActiviteForMembers?.id"
-      @close="showEditMemberModal = false"
-      @updated="onMemberPermissionsUpdated"
-    />
+    <EditMemberPermissionsModal v-if="showEditMemberModal" :member="editingMember"
+      :activite-id="selectedActiviteForMembers?.id" @close="showEditMemberModal = false"
+      @updated="onMemberPermissionsUpdated" />
 
-    <AddMemberModal
-      v-if="showAddMemberModal"
-      :show="showAddMemberModal"
-      :activite-id="selectedActiviteForMembers?.id"
-      :projet-id="selectedActiviteForMembers?.projet_id"
-      @close="showAddMemberModal = false"
-      @member-added="onMemberAdded"
-    />
+    <AddMemberModal v-if="showAddMemberModal" :show="showAddMemberModal" :activite-id="selectedActiviteForMembers?.id"
+      :projet-id="selectedActiviteForMembers?.projet_id" @close="showAddMemberModal = false"
+      @member-added="onMemberAdded" />
 
   </AdminLayout>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useActivites } from '@/composables/useActivites'
 import { useProjets } from '@/composables/useProjets'
@@ -364,11 +321,20 @@ import AddMemberModal from '@/components/activites/AddMemberModal.vue'
 
 const router = useRouter()
 
-const { currentWorkspaceId } = useWorkspace()
+// ✅ INITIALISATION CORRECTE DU WORKSPACE
+const {
+  currentWorkspace,
+  currentWorkspaceId,
+  currentWorkspaceName,
+  workspaces,
+  loading: workspaceLoading,
+  onWorkspaceChanged,
+  initializeCurrentWorkspace
+} = useWorkspace()
 
 const {
   activites,
-  loading,
+  loading: activitesLoading,
   pagination,
   fetchMesActivites,
   deleteActivite: deleteAct,
@@ -395,7 +361,7 @@ const showEditMemberModal = ref(false)
 const showAddMemberModal = ref(false)
 const editingActivite = ref(null)
 const selectedActiviteForMembers = ref(null)
-const editingMember = ref(null) 
+const editingMember = ref(null)
 
 // ✅ NOUVEAU : Cache des permissions pour éviter les recalculs
 const permissionsCache = ref(new Map())
@@ -410,7 +376,7 @@ const getPermissions = (activite) => {
       canView: false
     }
   }
-    // Utiliser le cache si disponible
+  // Utiliser le cache si disponible
   const cacheKey = `${activite.id}_${activite.updated_at}`
   if (permissionsCache.value.has(cacheKey)) {
     return permissionsCache.value.get(cacheKey)
@@ -423,7 +389,7 @@ const getPermissions = (activite) => {
     canDelete: activite.user_permissions?.can_delete || false,
     canManageMembers: activite.user_permissions?.can_manage_members || false,
     canView: true // Par défaut, si l'activité est dans la liste, l'utilisateur peut la voir
-    
+
     // Vous pouvez aussi utiliser le composable si nécessaire :
     // const { canEdit, canDelete, canManageMembers } = useActivityPermissions(ref(activite))
   }
@@ -444,6 +410,34 @@ const stats = computed(() => {
   return { total, active, overdue, avgProgress }
 })
 
+
+// ✅ GESTION DU CHARGEMENT COMBINÉ
+const loading = computed(() => activitesLoading.value || workspaceLoading.value)
+
+// ✅ ÉCOUTEUR DES CHANGEMENTS DE WORKSPACE
+let unsubscribeWorkspaceListener = null
+
+// ✅ CHARGEMENT DES DONNÉES AVEC GESTION DU WORKSPACE
+const loadData = async () => {
+  if (!currentWorkspaceId.value) {
+    console.log('Aucun workspace sélectionné, chargement des données différé');
+    return;
+  }
+
+  try {
+    console.log(`Chargement des données pour le workspace: ${currentWorkspaceId.value}`);
+
+    await Promise.all([
+      loadActivites(),
+      loadProjets()
+    ]);
+
+  } catch (error) {
+    console.error('Erreur lors du chargement des données:', error);
+  }
+};
+
+
 const loadActivites = async () => {
   if (!currentWorkspaceId.value) return
 
@@ -452,7 +446,7 @@ const loadActivites = async () => {
     workspace_id: currentWorkspaceId.value
   })
 
-    // Vider le cache lors du rechargement
+  // Vider le cache lors du rechargement
   permissionsCache.value.clear()
 
 }
@@ -461,6 +455,22 @@ const loadProjets = async () => {
   if (!currentWorkspaceId.value) return
   await fetchProjetsByWorkspace(currentWorkspaceId.value, { per_page: 100 })
 }
+
+// ✅ GESTION DU CHANGEMENT DE WORKSPACE
+const onWorkspaceChangedHandler = async (event) => {
+  console.log('Workspace changé détecté:', event.detail);
+
+  // Réinitialiser les filtres
+  filters.value = {
+    search: '',
+    status: '',
+    projet_id: '',
+    page: 1
+  };
+
+  // Recharger les données
+  await loadData();
+};
 
 let searchTimeout
 const debouncedSearch = () => {
@@ -490,7 +500,7 @@ const viewActivityDetail = (activite) => {
 }
 
 const editActivite = (activite) => {
-   // Vérifier une dernière fois les permissions avant d'ouvrir le modal
+  // Vérifier une dernière fois les permissions avant d'ouvrir le modal
   if (!getPermissions(activite).canEdit) {
     alert('Vous n\'avez pas la permission de modifier cette activité')
     return
@@ -515,7 +525,7 @@ const deleteActivite = async (activite) => {
 
 // ✅ GESTION DES MEMBRES
 const openMembersModal = (activite) => {
-   if (!getPermissions(activite).canManageMembers) {
+  if (!getPermissions(activite).canManageMembers) {
     alert('Vous n\'avez pas la permission de gérer les membres de cette activité')
     return
   }
@@ -537,7 +547,7 @@ const onMemberPermissionsUpdated = () => {
   showEditMemberModal.value = false
   editingMember.value = null
   // Recharger les membres si nécessaire
-  if (showMembersModal.value) { 
+  if (showMembersModal.value) {
     // Ou simplement fermer et rouvrir le modal
     showMembersModal.value = false
     setTimeout(() => {
@@ -573,10 +583,10 @@ const onActiviteUpdated = () => {
   loadActivites()
 }
 
-const onWorkspaceChanged = async () => {
-  await loadActivites()
-  await loadProjets()
-}
+// const onWorkspaceChanged = async () => {
+//   await loadActivites()
+//   await loadProjets()
+// }
 
 const getInitials = (name) => {
   if (!name) return '??'
@@ -594,15 +604,41 @@ const formatDate = (dateString) => {
 
 watch(currentWorkspaceId, async (newId, oldId) => {
   if (newId && newId !== oldId) {
-    await loadActivites()
-    await loadProjets()
+    console.log(`Workspace ID changé: ${oldId} -> ${newId}`);
+    await loadData();
   }
 })
 
+// ✅ WATCH POUR LES CHANGEMENTS DE FILTRES
+watch([
+  () => filters.value.status,
+  () => filters.value.projet_id
+  ], () => {
+    loadActivites();
+});
+
 onMounted(async () => {
+  // Initialiser le workspace courant
+  await initializeCurrentWorkspace();
+  // Charger les données si un workspace est disponible
   if (currentWorkspaceId.value) {
-    await loadActivites()
-    await loadProjets()
+    await loadData();
   }
+
+  // Écouter les changements de workspace
+  unsubscribeWorkspaceListener = onWorkspaceChanged(onWorkspaceChangedHandler);
+
+  // if (currentWorkspaceId.value) {
+  //   await loadActivites()
+  //   await loadProjets()
+  // }
 })
+
+// ✅ NETTOYAGE
+onUnmounted(() => {
+  if (unsubscribeWorkspaceListener) {
+    unsubscribeWorkspaceListener();
+  }
+});
+
 </script>

@@ -1,4 +1,4 @@
-<!-- resources/js/components/projets/ProjetDetail.vue -->
+<!-- resources/js/components/projets/ProjetDetail.vue - VERSION CORRIGÉE -->
 <template>
   <div class="space-y-6">
     <!-- Loading -->
@@ -7,20 +7,8 @@
     </div>
 
     <template v-else-if="projet">
-      <!-- Vue détail d'activité -->
-      <div v-if="selectedActivity">
-        <ActiviteDetail 
-          :activite="selectedActivity" 
-          :taches="selectedActivityTaches" 
-          @go-back="selectedActivity = null"
-          @edit-activite="editActivity" 
-          @view-tasks="viewActivityTasks" 
-          @create-task="createActivityTask" 
-        />
-      </div>
-
-      <!-- Header du projet et tabs (masqués quand une activité est sélectionnée) -->
-      <div v-else>
+      <!-- Header du projet et tabs -->
+      <div>
         <!-- Header existant du projet -->
         <div
           class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -284,10 +272,11 @@
 
                 <!-- Cartes des activités -->
                 <div class="grid gap-4">
-                  <div v-for="activity in activities" :key="activity.id" @click="viewActivityDetail(activity)"
+                  <div v-for="activity in activities" :key="activity.id" 
                     class="group cursor-pointer">
                     <div
-                      class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200 group-hover:shadow-sm">
+                      class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200 group-hover:shadow-sm"
+                      @click="navigateToActivityDetail(activity)">
                       <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-3 mb-2">
                           <!-- Indicateur de couleur -->
@@ -342,6 +331,32 @@
                         <ChevronRightIcon
                           class="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" />
                       </div>
+                    </div>
+
+                    <!-- Actions rapides sous la carte -->
+                    <div class="flex items-center gap-2 mt-2 px-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button 
+                        @click.stop="editActivity(activity)"
+                        class="inline-flex items-center gap-1 px-3 py-1 text-xs text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                      >
+                        <EditIcon class="w-3 h-3" />
+                        Modifier
+                      </button>
+                      <button 
+                        @click.stop="navigateToActivityTasks(activity)"
+                        class="inline-flex items-center gap-1 px-3 py-1 text-xs text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
+                      >
+                        <ListIcon class="w-3 h-3" />
+                        Voir les tâches
+                      </button>
+                      <button 
+                        v-if="canCreateTasks(activity)"
+                        @click.stop="navigateToCreateTask(activity)"
+                        class="inline-flex items-center gap-1 px-3 py-1 text-xs text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
+                      >
+                        <PlusIcon class="w-3 h-3" />
+                        Nouvelle tâche
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -449,7 +464,7 @@
       </div>
     </template>
 
-    <!-- Modaux (toujours visibles) -->
+    <!-- Modaux -->
     <ActiviteForm v-if="showCreateActivityModal" :activite="null" :projet-id="projetId"
       @close="showCreateActivityModal = false" @saved="handleActivityCreated" />
 
@@ -473,8 +488,10 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { useProjets } from '@/composables/useProjets'
 import { useActivites } from '@/composables/useActivites'
+import { useActivityPermissions } from '@/composables/useActivityPermissions'
 
 import {
   ChevronLeftIcon,
@@ -492,7 +509,6 @@ import {
   ClockIcon
 } from '@/icons'
 
-import ActiviteDetail from '@/pages/ActiviteDetail.vue'
 import ActiviteForm from '@/components/activites/ActiviteForm.vue'
 import EditMemberModal from './EditMemberModal.vue'
 import ProjetFormModal from './ProjetFormModal.vue'
@@ -503,11 +519,16 @@ const props = defineProps({
   projetId: {
     type: Number,
     required: true
+  },
+  workspaceId: {
+    type: Number,
+    default: null
   }
 })
 
 const emit = defineEmits(['back', 'create-activity', 'view-activity'])
 
+const router = useRouter()
 const { fetchProjet, removeMember: removeMemberService, fetchProjets } = useProjets()
 const { fetchActiviteTaches } = useActivites()
 
@@ -526,7 +547,6 @@ const members = ref([])
 
 // États pour la gestion des activités
 const selectedActivity = ref(null)
-const selectedActivityTaches = ref([])
 const showEditActivityModal = ref(false)
 
 const activeTab = ref('overview')
@@ -548,22 +568,29 @@ const tabs = computed(() => [
   { id: 'members', label: 'Membres', icon: UsersIcon, count: members.value.length }
 ])
 
-// ✅ CORRECTION : Afficher les détails d'une activité
-const viewActivityDetail = async (activity) => {
-  try {
-    console.log('Viewing activity details:', activity)
-    selectedActivity.value = activity
+// ✅ NOUVEAU : Navigation vers la page ActiviteDetail
+const navigateToActivityDetail = (activity) => {
+  console.log('Navigating to activity detail:', activity.id)
+  router.push(`/activites/${activity.id}`)
+}
 
-    // Charger les tâches de l'activité
-    if (activity.id) {
-      const response = await fetchActiviteTaches(activity.id)
-      selectedActivityTaches.value = response.data || response || []
-      console.log('Loaded tasks:', selectedActivityTaches.value)
-    }
-  } catch (error) {
-    console.error('Error loading activity details:', error)
-    selectedActivityTaches.value = []
-  }
+// ✅ NOUVEAU : Navigation vers les tâches de l'activité
+const navigateToActivityTasks = (activity) => {
+  console.log('Navigating to activity tasks:', activity.id)
+  router.push(`/activites/${activity.id}/taches`)
+}
+
+// ✅ NOUVEAU : Navigation pour créer une tâche
+const navigateToCreateTask = (activity) => {
+  console.log('Navigating to create task for activity:', activity.id)
+  router.push(`/activites/${activity.id}/taches/create`)
+}
+
+// ✅ NOUVEAU : Vérifier les permissions pour créer des tâches
+const canCreateTasks = (activity) => {
+  // Pour une vérification basique, on peut utiliser les permissions de l'activité
+  // Une implémentation plus complète utiliserait useActivityPermissions
+  return activity.user_permissions?.can_create_tasks || false
 }
 
 // Les autres méthodes restent identiques...
@@ -576,16 +603,6 @@ const handleActivityUpdated = () => {
   showEditActivityModal.value = false
   selectedActivity.value = null
   loadProjet()
-}
-
-const viewActivityTasks = (activityId) => {
-  console.log('View tasks for activity:', activityId)
-  emit('view-activity', activityId)
-}
-
-const createActivityTask = (activityId) => {
-  console.log('Create task for activity:', activityId)
-  emit('create-activity', activityId)
 }
 
 const handleInvited = () => {

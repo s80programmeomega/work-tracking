@@ -314,6 +314,10 @@ class Workspace extends Model
      */
     public function canManageMembers(User $user): bool
     {
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
         $role = $this->getMemberRole($user);
         return in_array($role, ['owner', 'admin']);
     }
@@ -323,7 +327,11 @@ class Workspace extends Model
      */
     public function canCreateProjects(User $user): bool
     {
-        if ($this->owner_id === $user->id) {
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        if ($this->isOwner($user)) {
             return true;
         }
 
@@ -341,8 +349,11 @@ class Workspace extends Model
      */
     public function canManageSettings(User $user): bool
     {
-        // Owner can manage
-        if ($this->owner_id === $user->id) {
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        if ($this->isOwner($user)) {
             return true;
         }
 
@@ -358,9 +369,14 @@ class Workspace extends Model
 
     public function canUserManageMembers(User $user): bool
     {
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
         if ($this->isOwner($user)) {
             return true;
         }
+
 
         $role = $this->getMemberRole($user);
         return in_array($role, ['owner', 'admin']);
@@ -368,6 +384,10 @@ class Workspace extends Model
 
     public function canUserManageProjets(User $user): bool
     {
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
         if ($this->isOwner($user)) {
             return true;
         }
@@ -393,6 +413,11 @@ class Workspace extends Model
      */
     public function addMember(User $user, string $role = 'member', array $permissions = []): void
     {
+        // Seul super admin, owner ou admin peut ajouter
+        if (!($user->isSuperAdmin() || $this->isOwner($user) || $this->getMemberRole($user) === 'admin')) {
+            throw new \Exception("Permission refusée : vous ne pouvez pas ajouter de membres.");
+        }
+
         if (!$this->isMember($user)) {
             $this->members()->attach($user->id, [
                 'role' => $role,
@@ -403,11 +428,48 @@ class Workspace extends Model
         }
     }
 
-    public function removeMember(User $user): void
+    public function removeMember(User $user, User $targetUser): void
     {
+        // Super admin, owner ou admin peuvent supprimer
+        if (!($user->isSuperAdmin() || $this->isOwner($user) || $this->getMemberRole($user) === 'admin')) {
+            throw new \Exception("Permission refusée : vous ne pouvez pas supprimer ce membre.");
+        }
+
+        // Personne ne peut supprimer l'owner
+        if ($this->isOwner($targetUser)) {
+            throw new \Exception("Impossible de supprimer le propriétaire du workspace.");
+        }
+
         if (!$this->isOwner($user)) {
             $this->members()->detach($user->id);
         }
+    }
+
+    /**
+     * Vérifie si un utilisateur est Owner, Admin ou Super Admin du workspace
+     */
+    public function isOwnerOrAdmin(User $user): bool
+    {
+        // Super admin global → accès total
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        // Owner du workspace
+        if ($this->owner_id === $user->id) {
+            return true;
+        }
+
+        // Rôle Admin dans workspace_members
+        $member = $this->members()
+            ->where('workspace_members.user_id', $user->id)
+            ->first();
+
+        if ($member && in_array($member->pivot->role, ['owner', 'admin'])) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -420,6 +482,16 @@ class Workspace extends Model
      */
     public function updateMemberRole(User $user, string $role, array $permissions = []): void
     {
+        // Super admin, owner ou admin peuvent modifier
+        if (!($user->isSuperAdmin() || $this->isOwner($user) || $this->getMemberRole($user) === 'admin')) {
+            throw new \Exception("Permission refusée : vous ne pouvez pas modifier ce membre.");
+        }
+
+        // Ne jamais modifier l’owner
+        if ($this->isOwner($targetUser)) {
+            throw new \Exception("Impossible de modifier le propriétaire du workspace.");
+        }
+
         if ($this->isMember($user) && !$this->isOwner($user)) {
             $this->members()->updateExistingPivot($user->id, [
                 'role' => $role,
@@ -480,6 +552,43 @@ class Workspace extends Model
 
         // Optionally archive all projects
         $this->projets()->update(['status' => 'archived']);
+    }
+
+    /**
+     * Vérifie si un user peut voir TOUS les projets du workspace
+     */
+    public function canSeeAllProjects(User $user): bool
+    {
+        if ($user->isSuperAdmin()) {
+            return true; // Super admin a tous les droits
+        }
+
+        if ($this->owner_id === $user->id) {
+            return true; // Owner
+        }
+
+        // Admin du workspace
+        $member = $this->members()->where('user_id', $user->id)->first();
+        return $member && $member->pivot->role === 'admin';
+    }
+
+    /**
+     * Récupère les projets accessibles pour un user
+     */
+    public function getAccessibleProjects(User $user)
+    {
+        // Si peut voir tout, retourner tous les projets
+        if ($this->canSeeAllProjects($user)) {
+            return $this->projets();
+        }
+
+        // Sinon, uniquement les projets où il est impliqué
+        return $this->projets()->where(function ($q) use ($user) {
+            $q->where('responsable_id', $user->id)
+                ->orWhereHas('members', function ($mq) use ($user) {
+                    $mq->where('user_id', $user->id);
+                });
+        });
     }
 
     /**
