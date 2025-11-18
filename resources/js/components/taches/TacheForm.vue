@@ -1,7 +1,7 @@
+<!-- resources/js/components/taches/TacheForm.vue -->
 <template>
   <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm" @click.self="$emit('close')">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[95vh] overflow-hidden flex flex-col">
-
       <!-- Header -->
       <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-brand-50 to-white dark:from-gray-900 dark:to-gray-800">
         <div class="flex items-center justify-between">
@@ -16,7 +16,7 @@
                 {{ tache ? 'Modifier la tâche' : 'Nouvelle tâche' }}
               </h2>
               <p class="text-sm text-gray-500 dark:text-gray-400">
-                {{ tache ? 'Mettez à jour les informations de la tâche' : 'Créez une nouvelle tâche pour votre projet' }}
+                {{ activiteContext ? `Activité: ${activiteContext.nom}` : 'Créez une nouvelle tâche' }}
               </p>
             </div>
           </div>
@@ -47,7 +47,6 @@
       <div class="flex-1 overflow-y-auto">
         <form @submit.prevent="handleSubmit" class="px-8 py-6">
           <div class="space-y-6">
-
             <!-- Section Informations Générales -->
             <div class="space-y-4">
               <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
@@ -57,8 +56,8 @@
                 Informations générales
               </h3>
 
-              <!-- Activité -->
-              <div>
+              <!-- Activité (cachée si fournie en contexte) -->
+              <div v-if="!activiteContext">
                 <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Activité <span class="text-red-500">*</span>
                 </label>
@@ -69,9 +68,17 @@
                 >
                   <option value="">Sélectionner une activité</option>
                   <option v-for="activite in activites" :key="activite.id" :value="activite.id">
-                    {{ activite.nom }}
+                    {{ activite.nom }} - {{ activite.projet?.nom }}
                   </option>
                 </select>
+              </div>
+              <div v-else class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <p class="text-sm font-medium text-blue-800 dark:text-blue-300">
+                  Activité: <span class="font-semibold">{{ activiteContext.nom }}</span>
+                </p>
+                <p class="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                  Projet: {{ activiteContext.projet?.nom }}
+                </p>
               </div>
 
               <!-- Titre -->
@@ -124,6 +131,49 @@
                     placeholder="Comment mesurer le succès ?"
                     class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all resize-none"
                   ></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section Validation -->
+            <div class="space-y-4">
+              <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Validation
+              </h3>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="flex items-center gap-2">
+                    <input
+                      v-model="formData.validation_n1_required"
+                      type="checkbox"
+                      class="rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                    />
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Validation N1 requise
+                    </span>
+                  </label>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Par le responsable d'activité
+                  </p>
+                </div>
+                <div>
+                  <label class="flex items-center gap-2">
+                    <input
+                      v-model="formData.validation_n2_required"
+                      type="checkbox"
+                      class="rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                    />
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Validation N2 requise
+                    </span>
+                  </label>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Par le responsable de projet
+                  </p>
                 </div>
               </div>
             </div>
@@ -301,70 +351,71 @@
                   class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
                   size="4"
                 >
-                  <option v-for="user in users" :key="user.id" :value="user.id">
-                    {{ user.nom }}
+                  <option v-for="user in availableUsers" :key="user.id" :value="user.id">
+                    {{ user.nom }} ({{ user.email }})
                   </option>
                 </select>
                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Maintenez Ctrl/Cmd pour sélectionner plusieurs utilisateurs</p>
               </div>
 
               <!-- Labels -->
-              <TaskLabelsSelector
-                v-model="formData.label_ids"
-                :show-create-button="true"
-                @create-label="showLabelModal = true"
-              />
-            </div>
-
-            <!-- Section Apparence -->
-            <div class="space-y-4">
-              <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <svg class="w-5 h-5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                </svg>
-                Apparence
-              </h3>
-
-              <div class="grid grid-cols-2 gap-4">
-                <!-- Couleur -->
-                <div>
-                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Couleur
-                  </label>
-                  <div class="flex gap-3 items-center">
-                    <input
-                      v-model="formData.couleur"
-                      type="color"
-                      class="h-12 w-20 border-2 border-gray-300 dark:border-gray-700 rounded-lg cursor-pointer"
-                    />
-                    <input
-                      v-model="formData.couleur"
-                      type="text"
-                      placeholder="#3B82F6"
-                      pattern="^#[0-9A-Fa-f]{6}$"
-                      class="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
-                    />
-                  </div>
-                </div>
-
-                <!-- Image de couverture -->
-                <div>
-                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Image de couverture
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    @change="handleCoverImageUpload"
-                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100"
-                  />
-                  <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">PNG, JPG, GIF jusqu'à 2 Mo</p>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Labels
+                </label>
+                <div class="flex flex-wrap gap-2">
+                  <span
+                    v-for="label in availableLabels"
+                    :key="label.id"
+                    class="px-3 py-1 text-xs font-medium rounded-full cursor-pointer transition-all"
+                    :style="{
+                      backgroundColor: label.couleur + '20',
+                      color: label.couleur,
+                      border: `1px solid ${label.couleur}`
+                    }"
+                    :class="{
+                      'ring-2 ring-offset-2': formData.label_ids.includes(label.id)
+                    }"
+                    @click="toggleLabel(label.id)"
+                  >
+                    {{ label.nom }}
+                  </span>
                 </div>
               </div>
+            </div>
 
-              <!-- Preview Image -->
-              <div v-if="coverImagePreview" class="mt-3">
-                <img :src="coverImagePreview" alt="Preview" class="h-40 w-full rounded-xl object-cover shadow-lg" />
+            <!-- Section Visibilité -->
+            <div class="space-y-4">
+              <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                Visibilité
+              </h3>
+
+              <div class="grid grid-cols-3 gap-4">
+                <label
+                  v-for="visibility in visibilityOptions"
+                  :key="visibility.value"
+                  class="relative flex flex-col items-center gap-2 p-4 border-2 rounded-xl cursor-pointer transition-all text-center"
+                  :class="formData.visibility === visibility.value
+                    ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20'
+                    : 'border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600'"
+                >
+                  <input
+                    type="radio"
+                    v-model="formData.visibility"
+                    :value="visibility.value"
+                    class="sr-only"
+                  />
+                  <span class="text-2xl">{{ visibility.icon }}</span>
+                  <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ visibility.label }}</span>
+                  <span class="text-xs text-gray-500 dark:text-gray-400">{{ visibility.description }}</span>
+                  <svg v-if="formData.visibility === visibility.value" class="absolute top-2 right-2 w-5 h-5 text-brand-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                  </svg>
+                </label>
               </div>
             </div>
 
@@ -400,34 +451,25 @@
         <button
           type="button"
           @click="handleSubmit"
-          :disabled="loading"
+          :disabled="loading || !hasPermission"
           class="px-5 py-2.5 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
         >
           <svg v-if="loading" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          {{ loading ? 'Enregistrement...' : 'Enregistrer' }}
+          {{ loading ? 'Enregistrement...' : hasPermission ? 'Enregistrer' : 'Permission refusée' }}
         </button>
       </div>
 
     </div>
-
-    <!-- Label Modal -->
-    <LabelModal
-      v-if="showLabelModal"
-      @saved="handleLabelCreated"
-      @close="showLabelModal = false"
-    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useTaches } from '@/composables/useTaches'
-import { useLabels } from '@/composables/useLabels'
-import { TaskLabelsSelector, LabelModal } from '@/components/labels'
 import api from '@/api/axios'
 
 const props = defineProps({
@@ -437,6 +479,10 @@ const props = defineProps({
   },
   activiteId: {
     type: Number,
+    default: null
+  },
+  activiteContext: {
+    type: Object,
     default: null
   },
   initialStatut: {
@@ -449,14 +495,14 @@ const emit = defineEmits(['close', 'saved'])
 
 const authStore = useAuthStore()
 const { createTache, updateTache } = useTaches()
-const { labels, fetchLabels } = useLabels()
 
 const loading = ref(false)
 const users = ref([])
 const activites = ref([])
+const availableLabels = ref([])
 const errorMessage = ref('')
 const validationErrors = ref([])
-const showLabelModal = ref(false)
+const hasPermission = ref(true)
 
 const formData = ref({
   activite_id: props.activiteId || '',
@@ -472,14 +518,14 @@ const formData = ref({
   taux_realisation: 0,
   estimated_hours: null,
   actual_hours: null,
-  cover_image: null,
+  validation_n1_required: false,
+  validation_n2_required: false,
   couleur: '#3B82F6',
   commentaire: '',
   assignee_ids: [],
-  label_ids: []
+  label_ids: [],
+  visibility: 'members_only'
 })
-
-const coverImagePreview = ref(null)
 
 const statutOptions = [
   { value: 'a_faire', label: 'À faire', color: 'bg-gray-500' },
@@ -494,20 +540,47 @@ const prioriteOptions = [
   { value: 'critique', label: 'Critique', icon: '🔴' }
 ]
 
-const handleLabelCreated = async () => {
-  showLabelModal.value = false
-  await fetchLabels()
+const visibilityOptions = [
+  { value: 'public', label: 'Public', icon: '👁️', description: 'Tous les membres du projet' },
+  { value: 'members_only', label: 'Membres', icon: '👥', description: 'Membres de l\'activité' },
+  { value: 'private', label: 'Privé', icon: '🔒', description: 'Seulement les assignés' }
+]
+
+// Computed
+const availableUsers = computed(() => {
+  if (!formData.value.activite_id) return []
+  
+  const activite = activites.value.find(a => a.id === formData.value.activite_id)
+  if (!activite) return []
+  
+  return users.value.filter(user => 
+    activite.membres?.some(membre => membre.id === user.id) ||
+    activite.responsable_id === user.id
+  )
+})
+
+// Methods
+const toggleLabel = (labelId) => {
+  const index = formData.value.label_ids.indexOf(labelId)
+  if (index > -1) {
+    formData.value.label_ids.splice(index, 1)
+  } else {
+    formData.value.label_ids.push(labelId)
+  }
 }
 
-const handleCoverImageUpload = (event) => {
-  const file = event.target.files[0]
-  if (file) {
-    formData.value.cover_image = file
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      coverImagePreview.value = e.target.result
-    }
-    reader.readAsDataURL(file)
+const checkPermissions = async () => {
+  if (!formData.value.activite_id) {
+    hasPermission.value = false
+    return
+  }
+
+  try {
+    const { data } = await api.get(`/activites/${formData.value.activite_id}/permissions`)
+    hasPermission.value = data.data.can_create_tasks || false
+  } catch (error) {
+    console.error('Error checking permissions:', error)
+    hasPermission.value = false
   }
 }
 
@@ -522,96 +595,113 @@ const loadUsers = async () => {
 
 const loadActivites = async () => {
   try {
-    const { data } = await api.get('/activites')
+    const { data } = await api.get('/activites?with_members=true')
     activites.value = data.data || []
   } catch (error) {
     console.error('Error loading activites:', error)
   }
 }
 
+const loadLabels = async () => {
+  try {
+    const { data } = await api.get('/labels')
+    availableLabels.value = data.data || []
+  } catch (error) {
+    console.error('Error loading labels:', error)
+  }
+}
+
 const handleSubmit = async () => {
+  if (!hasPermission.value) {
+    errorMessage.value = 'Vous n\'avez pas la permission de créer des tâches dans cette activité'
+    return
+  }
+
   loading.value = true
   errorMessage.value = ''
   validationErrors.value = []
 
   try {
-    let dataToSend = formData.value
-
-    if (formData.value.cover_image instanceof File) {
-      const formDataObj = new FormData()
-      Object.keys(formData.value).forEach(key => {
-        if (key === 'assignee_ids' || key === 'label_ids') {
-          formData.value[key].forEach(id => {
-            formDataObj.append(`${key}[]`, id)
-          })
-        } else if (formData.value[key] !== null && formData.value[key] !== '') {
-          formDataObj.append(key, formData.value[key])
-        }
-      })
-      dataToSend = formDataObj
+    // S'assurer que l'activité est définie
+    if (props.activiteContext) {
+      formData.value.activite_id = props.activiteContext.id
     }
 
     if (props.tache) {
-      await updateTache(props.tache.id, dataToSend)
+      await updateTache(props.tache.id, formData.value)
     } else {
-      await createTache(dataToSend)
+      await createTache(formData.value)
     }
     emit('saved')
   } catch (error) {
     console.error(error)
-
-    if (error.response && error.response.status === 422) {
-      const errors = error.response.data.errors
-      if (errors) {
-        validationErrors.value = Object.values(errors).flat()
-        errorMessage.value = 'Veuillez corriger les erreurs suivantes :'
-      } else {
-        errorMessage.value = error.response.data.message || 'Erreur de validation'
-      }
-    } else if (error.response && error.response.data && error.response.data.message) {
-      errorMessage.value = error.response.data.message
-    } else if (error.message === 'Network Error') {
-      errorMessage.value = 'Erreur de connexion. Veuillez vérifier votre connexion internet.'
-    } else {
-      errorMessage.value = 'Une erreur s\'est produite. Veuillez réessayer.'
-    }
+    handleError(error)
   } finally {
     loading.value = false
   }
 }
 
+const handleError = (error) => {
+  if (error.response && error.response.status === 422) {
+    const errors = error.response.data.errors
+    if (errors) {
+      validationErrors.value = Object.values(errors).flat()
+      errorMessage.value = 'Veuillez corriger les erreurs suivantes :'
+    } else {
+      errorMessage.value = error.response.data.message || 'Erreur de validation'
+    }
+  } else if (error.response && error.response.data && error.response.data.message) {
+    errorMessage.value = error.response.data.message
+  } else if (error.message === 'Network Error') {
+    errorMessage.value = 'Erreur de connexion. Veuillez vérifier votre connexion internet.'
+  } else {
+    errorMessage.value = 'Une erreur s\'est produite. Veuillez réessayer.'
+  }
+}
+
 onMounted(async () => {
   try {
-    await Promise.all([loadUsers(), loadActivites(), fetchLabels()])
+    await Promise.all([loadUsers(), loadActivites(), loadLabels()])
+    
+    if (props.activiteContext) {
+      formData.value.activite_id = props.activiteContext.id
+      await checkPermissions()
+    }
+
+    if (props.tache) {
+      formData.value = {
+        activite_id: props.tache.activite_id || '',
+        titre: props.tache.titre || '',
+        description: props.tache.description || '',
+        objectif: props.tache.objectif || '',
+        indicateurs_resultats: props.tache.indicateurs_resultats || '',
+        statut: props.tache.statut || 'a_faire',
+        priorite: props.tache.priorite || 'moyenne',
+        echeance: props.tache.echeance || '',
+        date_debut: props.tache.date_debut || '',
+        date_fin_reelle: props.tache.date_fin_reelle || '',
+        taux_realisation: props.tache.taux_realisation || 0,
+        estimated_hours: props.tache.estimated_hours || null,
+        actual_hours: props.tache.actual_hours || null,
+        validation_n1_required: props.tache.validation_n1_required || false,
+        validation_n2_required: props.tache.validation_n2_required || false,
+        couleur: props.tache.couleur || '#3B82F6',
+        commentaire: props.tache.commentaire || '',
+        assignee_ids: props.tache.assignees?.map(a => a.id) || [],
+        label_ids: props.tache.labels?.map(l => l.id) || [],
+        visibility: props.tache.visibility || 'members_only'
+      }
+      await checkPermissions()
+    }
   } catch (error) {
     console.error('Error loading form data:', error)
   }
+})
 
-  if (props.tache) {
-    formData.value = {
-      activite_id: props.tache.activite_id || '',
-      titre: props.tache.titre || '',
-      description: props.tache.description || '',
-      objectif: props.tache.objectif || '',
-      indicateurs_resultats: props.tache.indicateurs_resultats || '',
-      statut: props.tache.statut || 'a_faire',
-      priorite: props.tache.priorite || 'moyenne',
-      echeance: props.tache.echeance || '',
-      date_debut: props.tache.date_debut || '',
-      date_fin_reelle: props.tache.date_fin_reelle || '',
-      taux_realisation: props.tache.taux_realisation || 0,
-      estimated_hours: props.tache.estimated_hours || null,
-      actual_hours: props.tache.actual_hours || null,
-      cover_image: null,
-      couleur: props.tache.couleur || '#3B82F6',
-      commentaire: props.tache.commentaire || '',
-      assignee_ids: props.tache.assignees?.map(a => a.id) || [],
-      label_ids: props.tache.labels?.map(l => l.id) || []
-    }
-
-    if (props.tache.cover_image) {
-      coverImagePreview.value = props.tache.cover_image
-    }
+// Watch for activite_id changes to check permissions
+watch(() => formData.value.activite_id, async (newActiviteId) => {
+  if (newActiviteId) {
+    await checkPermissions()
   }
 })
 </script>

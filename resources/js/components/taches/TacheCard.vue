@@ -1,6 +1,7 @@
+<!-- resources/js/components/taches/TacheCard.vue -->
 <template>
   <div
-    class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-move border border-gray-200 dark:border-gray-700"
+    class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm hover:shadow-md transition-all cursor-move border border-gray-200 dark:border-gray-700 group"
     :style="{ borderLeftColor: tache.couleur, borderLeftWidth: '4px' }"
   >
     <!-- Cover Image -->
@@ -31,11 +32,35 @@
           {{ tache.priorite_label }}
         </span>
 
+        <!-- Validation badges -->
+        <span
+          v-if="tache.validation?.n1_validated_at"
+          class="px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 flex items-center gap-1"
+        >
+          <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+          </svg>
+          N1
+        </span>
+
+        <span
+          v-if="tache.validation?.n2_validated_at"
+          class="px-2 py-1 text-xs font-medium rounded bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 flex items-center gap-1"
+        >
+          <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+          </svg>
+          N2
+        </span>
+
         <!-- Overdue indicator -->
         <span
           v-if="tache.is_overdue"
-          class="px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+          class="px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 flex items-center gap-1"
         >
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
           En retard
         </span>
 
@@ -49,12 +74,12 @@
       </div>
 
       <!-- Actions menu -->
-      <div class="relative">
+      <div class="relative opacity-0 group-hover:opacity-100 transition-opacity">
         <button
           @click.stop="showMenu = !showMenu"
-          class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
         >
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
             <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
           </svg>
         </button>
@@ -63,10 +88,24 @@
         <div
           v-if="showMenu"
           v-click-outside="() => showMenu = false"
-          class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-lg z-10 py-1"
+          class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-lg z-10 py-1 border border-gray-200 dark:border-gray-600"
         >
+          <!-- View -->
           <button
-            @click.stop="$emit('edit', tache)"
+            @click.stop="$emit('view', tache); showMenu = false"
+            class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            Voir détails
+          </button>
+
+          <!-- Edit -->
+          <button
+            v-if="tache.permissions?.can_edit"
+            @click.stop="$emit('edit', tache); showMenu = false"
             class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,8 +113,11 @@
             </svg>
             Modifier
           </button>
+
+          <!-- Duplicate -->
           <button
-            @click.stop="$emit('duplicate', tache)"
+            v-if="tache.permissions?.can_edit"
+            @click.stop="$emit('duplicate', tache); showMenu = false"
             class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -83,20 +125,52 @@
             </svg>
             Dupliquer
           </button>
+
+          <!-- Validation actions -->
+          <div v-if="!tache.validation?.is_fully_validated">
+            <!-- Validate N1 -->
+            <button
+              v-if="tache.permissions?.can_validate_n1 && tache.statut === 'termine' && !tache.validation?.n1_validated_at"
+              @click.stop="$emit('validate-n1', tache); showMenu = false"
+              class="w-full px-4 py-2 text-left text-sm text-green-600 hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Valider N1
+            </button>
+
+            <!-- Validate N2 -->
+            <button
+              v-if="tache.permissions?.can_validate_n2 && tache.validation?.n1_validated_at && !tache.validation?.n2_validated_at"
+              @click.stop="$emit('validate-n2', tache); showMenu = false"
+              class="w-full px-4 py-2 text-left text-sm text-purple-600 hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Valider N2
+            </button>
+          </div>
+
+          <!-- Complete task -->
           <button
-            v-if="!tache.validation_superieur"
-            @click.stop="$emit('validate', tache)"
-            class="w-full px-4 py-2 text-left text-sm text-green-600 hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2"
+            v-if="tache.permissions?.can_complete && tache.statut !== 'termine'"
+            @click.stop="$emit('complete', tache); showMenu = false"
+            class="w-full px-4 py-2 text-left text-sm text-blue-600 hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
             </svg>
-            Valider
+            Marquer terminé
           </button>
+
+          <div class="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+
+          <!-- Archive/Unarchive -->
           <button
-            @click.stop="$emit('archive', tache)"
+            @click.stop="tache.archive_status === 'archived' ? $emit('unarchive', tache) : $emit('archive', tache); showMenu = false"
             class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2"
-            :class="{ 'text-blue-600': tache.archive_status === 'archived' }"
           >
             <svg v-if="tache.archive_status === 'archived'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
@@ -106,8 +180,11 @@
             </svg>
             {{ tache.archive_status === 'archived' ? 'Désarchiver' : 'Archiver' }}
           </button>
+
+          <!-- Delete -->
           <button
-            @click.stop="$emit('delete', tache)"
+            v-if="tache.permissions?.can_edit"
+            @click.stop="$emit('delete', tache); showMenu = false"
             class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -121,7 +198,7 @@
 
     <!-- Title -->
     <h3
-      class="font-semibold text-gray-900 dark:text-white mb-2 cursor-pointer hover:text-brand-500"
+      class="font-semibold text-gray-900 dark:text-white mb-2 cursor-pointer hover:text-brand-500 transition-colors line-clamp-2"
       @click="$emit('view', tache)"
     >
       {{ tache.titre }}
@@ -160,7 +237,8 @@
       </div>
       <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
         <div
-          class="bg-brand-500 h-2 rounded-full transition-all"
+          class="h-2 rounded-full transition-all"
+          :class="getProgressColor(tache.taux_realisation)"
           :style="{ width: `${tache.taux_realisation}%` }"
         ></div>
       </div>
@@ -177,9 +255,17 @@
       <span v-if="tache.estimated_hours">
         Est: {{ tache.estimated_hours }}h
       </span>
-      <span v-if="tache.actual_hours" :class="getTimeVarianceClass()">
+      <span v-if="tache.actual_hours" :class="getTimeVarianceClass(tache)">
         / Réel: {{ tache.actual_hours }}h
       </span>
+    </div>
+
+    <!-- Activity info -->
+    <div v-if="tache.activite" class="mb-3 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+      </svg>
+      <span class="truncate">{{ tache.activite.nom }}</span>
     </div>
 
     <!-- Footer with assignees and due date -->
@@ -202,7 +288,7 @@
             v-else
             class="w-6 h-6 rounded-full border-2 border-white dark:border-gray-800 bg-brand-500 text-white flex items-center justify-center text-xs font-medium"
           >
-            {{ assignee.nom.charAt(0).toUpperCase() }}
+            {{ getInitials(assignee.nom) }}
           </div>
         </div>
         <div
@@ -224,15 +310,15 @@
       </div>
     </div>
 
-    <!-- Validated indicator -->
-    <div
-      v-if="tache.validation_superieur"
-      class="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700 flex items-center gap-1 text-xs text-green-600 dark:text-green-400"
-    >
-      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-        <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-      </svg>
-      <span>Validée</span>
+    <!-- Week indicator -->
+    <div v-if="tache.week_number" class="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+      <span>Semaine {{ tache.week_number }}/{{ tache.year }}</span>
+      <span v-if="tache.resultats_count > 0" class="flex items-center gap-1 text-green-600">
+        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+        </svg>
+        {{ tache.resultats_count }} résultat(s)
+      </span>
     </div>
   </div>
 </template>
@@ -247,10 +333,17 @@ const props = defineProps({
   }
 })
 
-defineEmits(['view', 'edit', 'duplicate', 'archive', 'delete', 'validate'])
-
-// Debug: Log labels
-console.log('TacheCard - tache:', props.tache.titre, 'labels:', JSON.parse(JSON.stringify(props.tache.labels)))
+defineEmits([
+  'view', 
+  'edit', 
+  'duplicate', 
+  'archive', 
+  'unarchive', 
+  'delete', 
+  'validate-n1',
+  'validate-n2',
+  'complete'
+])
 
 const showMenu = ref(false)
 
@@ -262,6 +355,12 @@ const getPriorityClass = (priorite) => {
     critique: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
   }
   return classes[priorite] || classes.moyenne
+}
+
+const getProgressColor = (progress) => {
+  if (progress < 30) return 'bg-red-500'
+  if (progress < 70) return 'bg-amber-500'
+  return 'bg-green-500'
 }
 
 const formatDate = (date) => {
@@ -277,13 +376,22 @@ const formatDate = (date) => {
   return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
 }
 
-const getTimeVarianceClass = () => {
-  if (!props.tache.estimated_hours || !props.tache.actual_hours) return ''
+const getTimeVarianceClass = (tache) => {
+  if (!tache.estimated_hours || !tache.actual_hours) return ''
 
-  const variance = props.tache.actual_hours - props.tache.estimated_hours
+  const variance = tache.actual_hours - tache.estimated_hours
   if (variance > 0) return 'text-red-600 dark:text-red-400 font-medium' // Over budget
   if (variance < 0) return 'text-green-600 dark:text-green-400 font-medium' // Under budget
   return '' // On budget
+}
+
+const getInitials = (name) => {
+  return name
+    .split(' ')
+    .map(part => part.charAt(0))
+    .join('')
+    .toUpperCase()
+    .substring(0, 2)
 }
 
 // Click outside directive
