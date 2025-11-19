@@ -1,11 +1,12 @@
 <!-- resources/js/components/taches/TacheCard.vue -->
 <template>
-  <div
-    class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm hover:shadow-md transition-all cursor-move border border-gray-200 dark:border-gray-700 group"
+ <div
+    class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-move border border-gray-200 dark:border-gray-700 group"
     :style="{ borderLeftColor: tache.couleur, borderLeftWidth: '4px' }"
+    :data-tache-id="tache.id"
   >
     <!-- Cover Image -->
-    <div v-if="tache.cover_image" class="mb-3 -mx-4 -mt-4">
+     <div v-if="tache.cover_image" class="mb-3 -mx-4 -mt-4">
       <img
         :src="tache.cover_image"
         alt="Cover"
@@ -13,9 +14,9 @@
       />
     </div>
 
-    <!-- Header with priority and menu -->
-    <div class="flex items-start justify-between mb-2">
-      <div class="flex items-center gap-2 flex-wrap">
+    <!-- Header with badges and menu -->
+    <div class="flex items-start justify-between mb-2 gap-2">
+      <div class="flex items-center gap-2 flex-wrap flex-1">
         <!-- Task Code -->
         <span
           v-if="tache.code"
@@ -29,37 +30,46 @@
           class="px-2 py-1 text-xs font-medium rounded"
           :class="getPriorityClass(tache.priorite)"
         >
-          {{ tache.priorite_label }}
+          {{ tache.priorite_icon }} {{ tache.priorite_label }}
         </span>
 
-        <!-- Validation badges -->
-        <span
-          v-if="tache.validation?.n1_validated_at"
-          class="px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 flex items-center gap-1"
-        >
-          <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-          </svg>
-          N1
-        </span>
-
+        <!-- Validation status badges -->
         <span
           v-if="tache.validation?.n2_validated_at"
-          class="px-2 py-1 text-xs font-medium rounded bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 flex items-center gap-1"
+          class="px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 flex items-center gap-1"
+          title="Validation complète (N1 + N2)"
         >
           <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+            <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
           </svg>
-          N2
+          Validé N2
+        </span>
+        <span
+          v-else-if="tache.validation?.n1_validated_at"
+          class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 flex items-center gap-1"
+          title="Validation niveau 1" >
+          <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+          </svg>
+          Validé N1
+        </span>
+        <span
+          v-else-if="tache.statut === 'termine' && (tache.validation?.n1_required || tache.validation?.n2_required)"
+          class="px-2 py-1 text-xs font-medium rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300 flex items-center gap-1"
+          title="En attente de validation" >
+          <svg class="w-3 h-3 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+          </svg>
+          En attente
         </span>
 
         <!-- Overdue indicator -->
         <span
           v-if="tache.is_overdue"
-          class="px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 flex items-center gap-1"
+          class="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 flex items-center gap-1"
         >
-          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
           </svg>
           En retard
         </span>
@@ -67,19 +77,19 @@
         <!-- Archived indicator -->
         <span
           v-if="tache.archive_status === 'archived'"
-          class="px-2 py-1 text-xs font-medium rounded bg-gray-500 text-white"
+          class="px-2 py-1 text-xs font-medium rounded-full bg-gray-500 text-white"
         >
           Archivée
         </span>
       </div>
 
       <!-- Actions menu -->
-      <div class="relative opacity-0 group-hover:opacity-100 transition-opacity">
+      <div class="relative">
         <button
           @click.stop="showMenu = !showMenu"
-          class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+          class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity"
         >
-          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
             <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
           </svg>
         </button>
@@ -88,25 +98,23 @@
         <div
           v-if="showMenu"
           v-click-outside="() => showMenu = false"
-          class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-lg z-10 py-1 border border-gray-200 dark:border-gray-600"
+          class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-700 rounded-lg shadow-lg z-20 py-1 border border-gray-200 dark:border-gray-600"
         >
-          <!-- View -->
           <button
-            @click.stop="$emit('view', tache); showMenu = false"
-            class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2"
+            @click.stop="$emit('view', tache)"
+            class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2 text-gray-700 dark:text-gray-300"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
-            Voir détails
+            Voir les détails
           </button>
 
-          <!-- Edit -->
           <button
             v-if="tache.permissions?.can_edit"
-            @click.stop="$emit('edit', tache); showMenu = false"
-            class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2"
+            @click.stop="$emit('edit', tache)"
+            class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2 text-gray-700 dark:text-gray-300"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -114,11 +122,9 @@
             Modifier
           </button>
 
-          <!-- Duplicate -->
           <button
-            v-if="tache.permissions?.can_edit"
-            @click.stop="$emit('duplicate', tache); showMenu = false"
-            class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2"
+            @click.stop="$emit('duplicate', tache)"
+            class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2 text-gray-700 dark:text-gray-300"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -126,51 +132,37 @@
             Dupliquer
           </button>
 
-          <!-- Validation actions -->
-          <div v-if="!tache.validation?.is_fully_validated">
-            <!-- Validate N1 -->
-            <button
-              v-if="tache.permissions?.can_validate_n1 && tache.statut === 'termine' && !tache.validation?.n1_validated_at"
-              @click.stop="$emit('validate-n1', tache); showMenu = false"
-              class="w-full px-4 py-2 text-left text-sm text-green-600 hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Valider N1
-            </button>
-
-            <!-- Validate N2 -->
-            <button
-              v-if="tache.permissions?.can_validate_n2 && tache.validation?.n1_validated_at && !tache.validation?.n2_validated_at"
-              @click.stop="$emit('validate-n2', tache); showMenu = false"
-              class="w-full px-4 py-2 text-left text-sm text-purple-600 hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Valider N2
-            </button>
-          </div>
-
-          <!-- Complete task -->
+          <!-- Validation buttons -->
+          <div v-if="canValidate" class="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+          
           <button
-            v-if="tache.permissions?.can_complete && tache.statut !== 'termine'"
-            @click.stop="$emit('complete', tache); showMenu = false"
-            class="w-full px-4 py-2 text-left text-sm text-blue-600 hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2"
+            v-if="tache.permissions?.can_validate_n1 && tache.statut === 'termine' && !tache.validation?.n1_validated_at"
+            @click.stop="$emit('validate', tache)"
+            class="w-full px-4 py-2 text-left text-sm text-green-600 dark:text-green-400 hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2 font-medium"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            Marquer terminé
+            Valider N1
+          </button>
+
+          <button
+            v-if="tache.permissions?.can_validate_n2 && tache.validation?.n1_validated_at && !tache.validation?.n2_validated_at"
+            @click.stop="$emit('validate', tache)"
+            class="w-full px-4 py-2 text-left text-sm text-purple-600 dark:text-purple-400 hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2 font-medium"
+          >
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+            Valider N2 (Final)
           </button>
 
           <div class="border-t border-gray-200 dark:border-gray-600 my-1"></div>
 
-          <!-- Archive/Unarchive -->
           <button
-            @click.stop="tache.archive_status === 'archived' ? $emit('unarchive', tache) : $emit('archive', tache); showMenu = false"
-            class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2"
+            @click.stop="$emit('archive', tache)"
+            class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2 text-gray-700 dark:text-gray-300"
+            :class="{ 'text-blue-600 dark:text-blue-400': tache.archive_status === 'archived' }"
           >
             <svg v-if="tache.archive_status === 'archived'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
@@ -181,11 +173,10 @@
             {{ tache.archive_status === 'archived' ? 'Désarchiver' : 'Archiver' }}
           </button>
 
-          <!-- Delete -->
           <button
             v-if="tache.permissions?.can_edit"
-            @click.stop="$emit('delete', tache); showMenu = false"
-            class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2"
+            @click.stop="handleDelete"
+            class="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2 font-medium"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -198,7 +189,7 @@
 
     <!-- Title -->
     <h3
-      class="font-semibold text-gray-900 dark:text-white mb-2 cursor-pointer hover:text-brand-500 transition-colors line-clamp-2"
+      class="font-semibold text-gray-900 dark:text-white mb-2 cursor-pointer hover:text-brand-500 transition-colors"
       @click="$emit('view', tache)"
     >
       {{ tache.titre }}
@@ -233,11 +224,11 @@
     <div v-if="tache.taux_realisation > 0" class="mb-3">
       <div class="flex justify-between text-xs text-gray-600 dark:text-gray-400 mb-1">
         <span>Progression</span>
-        <span>{{ tache.taux_realisation }}%</span>
+        <span class="font-medium">{{ tache.taux_realisation }}%</span>
       </div>
-      <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+      <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
         <div
-          class="h-2 rounded-full transition-all"
+          class="h-2 rounded-full transition-all duration-300"
           :class="getProgressColor(tache.taux_realisation)"
           :style="{ width: `${tache.taux_realisation}%` }"
         ></div>
@@ -247,53 +238,47 @@
     <!-- Time Tracking -->
     <div
       v-if="tache.estimated_hours || tache.actual_hours"
-      class="mb-3 flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400"
+      class="mb-3 flex items-center gap-2 text-xs"
     >
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
-      <span v-if="tache.estimated_hours">
-        Est: {{ tache.estimated_hours }}h
+      <span class="text-gray-600 dark:text-gray-400">
+        <span v-if="tache.estimated_hours">Est: {{ tache.estimated_hours }}h</span>
+        <span v-if="tache.actual_hours" :class="getTimeVarianceClass()" class="ml-1">
+          / Réel: {{ tache.actual_hours }}h
+        </span>
       </span>
-      <span v-if="tache.actual_hours" :class="getTimeVarianceClass(tache)">
-        / Réel: {{ tache.actual_hours }}h
-      </span>
-    </div>
-
-    <!-- Activity info -->
-    <div v-if="tache.activite" class="mb-3 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-      </svg>
-      <span class="truncate">{{ tache.activite.nom }}</span>
     </div>
 
     <!-- Footer with assignees and due date -->
-    <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+    <div class="flex items-center justify-between text-xs">
       <!-- Assignees -->
       <div class="flex -space-x-2">
         <div
           v-for="assignee in tache.assignees.slice(0, 3)"
           :key="assignee.id"
-          class="relative"
+          class="relative group/avatar"
           :title="assignee.nom"
         >
           <div
             v-if="assignee.avatar"
-            class="w-6 h-6 rounded-full border-2 border-white dark:border-gray-800 overflow-hidden"
+            class="w-7 h-7 rounded-full border-2 border-white dark:border-gray-800 overflow-hidden ring-1 ring-gray-200 dark:ring-gray-700"
           >
             <img :src="assignee.avatar" :alt="assignee.nom" class="w-full h-full object-cover" />
           </div>
           <div
             v-else
-            class="w-6 h-6 rounded-full border-2 border-white dark:border-gray-800 bg-brand-500 text-white flex items-center justify-center text-xs font-medium"
+            class="w-7 h-7 rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center text-xs font-medium ring-1 ring-gray-200 dark:ring-gray-700"
+            :style="{ backgroundColor: stringToColor(assignee.nom), color: '#fff' }"
           >
-            {{ getInitials(assignee.nom) }}
+            {{ assignee.nom.charAt(0).toUpperCase() }}
           </div>
         </div>
         <div
           v-if="tache.assignees.length > 3"
-          class="w-6 h-6 rounded-full border-2 border-white dark:border-gray-800 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 flex items-center justify-center text-xs font-medium"
+          class="w-7 h-7 rounded-full border-2 border-white dark:border-gray-800 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 flex items-center justify-center text-xs font-medium ring-1 ring-gray-200 dark:ring-gray-700"
+          :title="`+${tache.assignees.length - 3} autres`"
         >
           +{{ tache.assignees.length - 3 }}
         </div>
@@ -301,30 +286,22 @@
 
       <!-- Due date -->
       <div v-if="tache.echeance" class="flex items-center gap-1">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
-        <span :class="{ 'text-red-600 font-medium': tache.is_overdue }">
+        <span
+          class="text-gray-600 dark:text-gray-400"
+          :class="{ 'text-red-600 dark:text-red-400 font-medium': tache.is_overdue }"
+        >
           {{ formatDate(tache.echeance) }}
         </span>
       </div>
-    </div>
-
-    <!-- Week indicator -->
-    <div v-if="tache.week_number" class="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-      <span>Semaine {{ tache.week_number }}/{{ tache.year }}</span>
-      <span v-if="tache.resultats_count > 0" class="flex items-center gap-1 text-green-600">
-        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-        </svg>
-        {{ tache.resultats_count }} résultat(s)
-      </span>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 const props = defineProps({
   tache: {
@@ -333,20 +310,16 @@ const props = defineProps({
   }
 })
 
-defineEmits([
-  'view', 
-  'edit', 
-  'duplicate', 
-  'archive', 
-  'unarchive', 
-  'delete', 
-  'validate-n1',
-  'validate-n2',
-  'complete'
-])
+const emit = defineEmits(['view', 'edit', 'duplicate', 'archive', 'delete', 'validate'])
 
 const showMenu = ref(false)
 
+// Computed
+const canValidate = computed(() => {
+  return props.tache.permissions?.can_validate_n1 || props.tache.permissions?.can_validate_n2
+})
+
+// Methods
 const getPriorityClass = (priorite) => {
   const classes = {
     faible: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
@@ -376,22 +349,27 @@ const formatDate = (date) => {
   return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
 }
 
-const getTimeVarianceClass = (tache) => {
-  if (!tache.estimated_hours || !tache.actual_hours) return ''
+const getTimeVarianceClass = () => {
+  if (!props.tache.estimated_hours || !props.tache.actual_hours) return ''
 
-  const variance = tache.actual_hours - tache.estimated_hours
+  const variance = props.tache.actual_hours - props.tache.estimated_hours
   if (variance > 0) return 'text-red-600 dark:text-red-400 font-medium' // Over budget
   if (variance < 0) return 'text-green-600 dark:text-green-400 font-medium' // Under budget
-  return '' // On budget
+  return ''
 }
 
-const getInitials = (name) => {
-  return name
-    .split(' ')
-    .map(part => part.charAt(0))
-    .join('')
-    .toUpperCase()
-    .substring(0, 2)
+const stringToColor = (str) => {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  const hue = hash % 360
+  return `hsl(${hue}, 65%, 50%)`
+}
+
+const handleDelete = () => {
+  showMenu.value = false
+  emit('delete', props.tache)
 }
 
 // Click outside directive
