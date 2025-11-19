@@ -473,7 +473,7 @@ const menuGroups = computed(() => [
                 name: 'Tâches',
                 subItems: [
                     { name: 'Toutes les tâches', path: '/taches', superAdminOnly: true },
-                    { name: 'Mes tâches', path: '/taches/mes-taches' },
+                    { name: 'Mes tâches', path: '/taches' },
                     { name: 'Assignées à moi', path: '/taches/assignees' },
                     { name: 'En attente', path: '/taches/en-attente', count: 12 },
                     { name: 'En retard', path: '/taches/en-retard', count: 3 },

@@ -383,7 +383,7 @@ public function isAccessibleBy(User $user): bool
         }
 
         // Si utilisateur est membre du projet
-        return $this->membres()->where('user_id', $user->id)->exists();
+        return $this->members()->where('user_id', $user->id)->exists();
 
 
     }
