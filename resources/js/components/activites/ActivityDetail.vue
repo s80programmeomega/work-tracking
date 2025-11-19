@@ -157,7 +157,7 @@
                 <div class="space-y-1">
                   <div class="font-medium">{{ tache.titre }}</div>
                   <div class="text-sm text-muted-foreground">
-                    Assignée à {{ tache.assignee?.nom }}
+                    Assignée à {{ tache.assignees?.nom }}
                   </div>
                 </div>
                 <Badge :variant="getTaskStatusVariant(tache.status)">

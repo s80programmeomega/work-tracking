@@ -228,72 +228,163 @@
                 </div>
               </div>
 
-              <!-- Tâches récentes -->
-              <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex items-center justify-between mb-6">
-                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                    Tâches récentes
-                  </h3>
-                  <button @click="viewAllTasks"
-                    class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
-                    Voir tout
-                  </button>
-                </div>
+             <!-- Dans le template, remplacez la section "Tâches récentes" par : -->
 
-                <div v-if="taches.length > 0" class="space-y-3">
-                  <div v-for="tache in recentTaches" :key="tache.id"
-                    class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer"
-                    @click="viewTask(tache.id)">
-                    <div class="space-y-1 flex-1">
-                      <div class="font-medium text-gray-900 dark:text-white">
-                        {{ tache.titre }}
-                      </div>
-                      <div class="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        {{ tache.assignee?.nom || 'Non assignée' }}
-                      </div>
-                    </div>
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                      :class="getTaskStatusClasses(tache.statut)">
-                      {{ getTaskStatusLabel(tache.statut) }}
-                    </span>
-                  </div>
-                </div>
+<!-- Tâches récentes avec bouton de création -->
+<div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+  <div class="flex items-center justify-between mb-6">
+    <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+      <svg class="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+      </svg>
+      Tâches récentes
+    </h3>
+    <div class="flex items-center gap-2">
+      <!-- Bouton Vue Kanban -->
+      <button 
+        @click="toggleKanbanView"
+        class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+      >
+        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+        </svg>
+        {{ showKanbanView ? 'Liste' : 'Kanban' }}
+      </button>
+      
+      <button 
+        v-if="canCreateTasks" 
+        @click="openCreateTaskForm"
+        class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+      >
+        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Nouvelle tâche
+      </button>
+    </div>
+  </div>
 
-                <div v-else class="text-center py-12 text-gray-500 dark:text-gray-400">
-                  <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                  <p class="font-medium text-lg">Aucune tâche</p>
-                  <p class="text-sm mt-1">Créez votre première tâche pour commencer</p>
-                  
-                  <!-- ✅ Message si viewer -->
-                  <div v-if="userRole === 'viewer'" class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                    <p class="text-sm text-blue-700 dark:text-blue-300">
-                      Vous êtes observateur : accès en lecture seule
-                    </p>
-                  </div>
-                  
-                  <button 
-                    v-if="canCreateTasks" 
-                    @click="createTask" 
-                    class="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                  >
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Créer une tâche
-                  </button>
-                </div>
-              </div>
+  <!-- Vue Kanban -->
+  <div v-if="showKanbanView && activite">
+    <KanbanBoard
+      :kanban="kanban"
+      :activite-id="activite.id"
+      :loading="tachesLoading"
+      @add-task="openCreateTaskForm"
+      @view-task="viewTaskDetails"
+      @edit-task="editTask"
+      @task-moved="handleTaskMoved"
+    />
+  </div>
+
+  <!-- Vue Liste (par défaut) -->
+  <div v-else>
+    <div v-if="taches.length > 0" class="space-y-3">
+      <div 
+        v-for="tache in recentTaches" 
+        :key="tache.id"
+        class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group"
+        @click="viewTaskDetails(tache)"
+      >
+        <div class="space-y-1 flex-1">
+          <div class="font-medium text-gray-900 dark:text-white flex items-center gap-2">
+            {{ tache.titre }}
+            <!-- Badge de priorité -->
+            <span 
+              class="px-2 py-0.5 text-xs font-medium rounded"
+              :class="getPriorityBadgeClass(tache.priorite)"
+            >
+              {{ tache.priorite_label }}
+            </span>
+          </div>
+          <div class="text-sm text-gray-500 dark:text-gray-400 flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            {{ tache.assignees?.map(a => a.nom).join(', ') || 'Non assignée' }}
+          </div>
+          
+          <!-- Progression -->
+          <div v-if="tache.taux_realisation > 0" class="flex items-center gap-2 mt-2">
+            <div class="w-20 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+              <div
+                class="h-2 rounded-full transition-all"
+                :class="getProgressColor(tache.taux_realisation)"
+                :style="{ width: `${tache.taux_realisation}%` }"
+              ></div>
+            </div>
+            <span class="text-xs text-gray-500">{{ tache.taux_realisation }}%</span>
+          </div>
+        </div>
+        
+        <div class="flex items-center gap-3">
+          <!-- Date d'échéance -->
+          <div v-if="tache.echeance" class="text-right">
+            <div class="text-xs text-gray-500">Échéance</div>
+            <div 
+              class="text-sm font-medium"
+              :class="tache.is_overdue ? 'text-red-600' : 'text-gray-900 dark:text-white'"
+            >
+              {{ formatTaskDate(tache.echeance) }}
+            </div>
+          </div>
+          
+          <!-- Statut -->
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+            :class="getTaskStatusClasses(tache.statut)">
+            {{ getTaskStatusLabel(tache.statut) }}
+          </span>
+          
+          <!-- Actions rapides -->
+          <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button 
+              v-if="tache.permissions?.can_edit"
+              @click.stop="editTask(tache)"
+              class="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+              title="Modifier"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-else class="text-center py-12 text-gray-500 dark:text-gray-400">
+      <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+      </svg>
+      <p class="font-medium text-lg">Aucune tâche</p>
+      <p class="text-sm mt-1">Créez votre première tâche pour commencer</p>
+      
+      <!-- Message si viewer -->
+      <div v-if="userRole === 'viewer'" class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg max-w-md mx-auto">
+        <p class="text-sm text-blue-700 dark:text-blue-300 flex items-center justify-center">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Vous êtes observateur : accès en lecture seule
+        </p>
+      </div>
+      
+      <button 
+        v-if="canCreateTasks" 
+        @click="openCreateTaskForm" 
+        class="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+      >
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Créer une tâche
+      </button>
+    </div>
+  </div>
+</div>
+              
             </div>
 
             <!-- Sidebar -->
@@ -481,7 +572,7 @@
                 <div class="space-y-3">
                   <button 
                     v-if="canCreateTasks"
-                    @click="createTask"
+                    @click="openCreateTaskForm"
                     class="w-full flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group"
                   >
                     <div class="flex items-center">
@@ -606,6 +697,30 @@
         @close="showAddMemberModal = false"
         @member-added="onMemberAdded"
       />
+
+       
+ 
+
+    <!-- Task Form Modal -->
+   <TacheForm
+  v-if="showTaskForm"
+  :tache="selectedTask"
+  :activite-context="activite"
+  :initial-statut="newTaskStatut"
+  @close="closeTaskForm"
+  @saved="handleTaskSaved"
+/>
+
+    <!-- Task Detail Modal -->
+    <TacheDetailModal
+  v-if="showTaskDetail && selectedTask"
+  :tache="selectedTask"
+  @close="showTaskDetail = false; selectedTask = null"
+  @edit="editTask"
+  @validate-n1="handleValidation('n1', $event)"
+  @validate-n2="handleValidation('n2', $event)"
+/>
+
     </div>
   </AdminLayout>
 </template>
@@ -622,10 +737,15 @@ import ManageMembersModal from '@/components/activites/ManageMembersModal.vue'
 import EditMemberPermissionsModal from '@/components/activites/EditMemberPermissionsModal.vue'
 import AddMemberModal from '@/components/activites/AddMemberModal.vue'
 import { useActivityPermissions } from '@/composables/useActivityPermissions'
+import TacheForm from '@/components/taches/TacheForm.vue' 
+import TacheDetailModal from '@/components/taches/TacheDetailModal.vue'
+import KanbanBoard from '@/components/taches/KanbanBoardSimple.vue'
+import { useTaches } from '@/composables/useTaches'
+
 
 const route = useRoute()
 const router = useRouter()
-const authStore = useAuthStore()
+const authStore = useAuthStore() 
 
 const loading = ref(true)
 const activite = ref(null)
@@ -636,6 +756,21 @@ const showAddMemberModal = ref(false)
 const editingActivite = ref(null)
 const showEditForm = ref(false)
 const editingMember = ref(null)
+
+// AJOUT: Variables pour la gestion des tâches
+const showTaskForm = ref(false)
+const selectedTask = ref(null)
+const showTaskDetail = ref(false)
+const newTaskStatut = ref('a_faire')
+const showKanbanView = ref(false)
+
+// Composable pour les tâches
+const { 
+  kanban, 
+  loading: tachesLoading, 
+  fetchKanbanForActivite, 
+  fetchTache 
+} = useTaches()
 
 // ✅ Utiliser le composable pour les permissions
 const {
@@ -803,7 +938,7 @@ const loadActivite = async () => {
 
 const loadTaches = async () => {
   try {
-    const response = await api.get(`/activites/${activite.value.id}/taches`)
+    const response = await api.get(`/activites/${activite.value.id}/taches?with_permissions=true`)
     taches.value = response.data.data || []
   } catch (error) {
     console.error('Erreur lors du chargement des tâches:', error)
@@ -828,12 +963,45 @@ const onActiviteUpdated = () => {
 }
 
 // ✅ Actions avec vérification
-const createTask = () => {
+const openCreateTaskForm = (statut = 'a_faire') => {
   if (!canCreateTasks.value) {
     alert(getPermissionDeniedMessage('create_tasks'))
     return
   }
-  router.push(`/activites/${activite.value.id}/taches/create`)
+  newTaskStatut.value = statut
+  showTaskForm.value = true
+}
+
+const closeTaskForm = () => {
+  showTaskForm.value = false
+  selectedTask.value = null
+}
+
+const handleTaskSaved = async () => {
+  closeTaskForm()
+  await loadTaches()
+  await loadKanban()
+}
+
+const viewTaskDetails = async (tache) => {
+  try {
+    // Charger les détails complets de la tâche
+    const taskDetails = await fetchTache(tache.id)
+    selectedTask.value = taskDetails
+    showTaskDetail.value = true
+  } catch (error) {
+    console.error('Erreur lors du chargement des détails de la tâche:', error)
+    alert('Erreur lors du chargement des détails de la tâche')
+  }
+}
+
+const editTask = (tache) => {
+  if (!tache.permissions?.can_edit) {
+    alert(getPermissionDeniedMessage('edit_tasks'))
+    return
+  }
+  selectedTask.value = tache
+  showTaskForm.value = true
 }
 
 const viewAllTasks = () => {
@@ -842,6 +1010,66 @@ const viewAllTasks = () => {
 
 const viewTask = (taskId) => {
   router.push(`/taches/${taskId}`)
+}
+
+const handleTaskMoved = async ({ tache, newStatut, newOrdre }) => {
+  try {
+    // Implémenter la logique de déplacement via l'API
+    await api.post(`/taches/${tache.id}/move`, {
+      statut: newStatut,
+      position: newOrdre
+    })
+    await loadKanban()
+  } catch (error) {
+    console.error('Erreur lors du déplacement de la tâche:', error)
+    alert('Erreur lors du déplacement de la tâche')
+  }
+}
+
+const toggleKanbanView = () => {
+  showKanbanView.value = !showKanbanView.value
+  if (showKanbanView.value && activite.value) {
+    loadKanban()
+  }
+}
+
+const loadKanban = async () => {
+  if (!activite.value) return
+  try {
+    await fetchKanbanForActivite(activite.value.id)
+  } catch (error) {
+    console.error('Erreur lors du chargement du kanban:', error)
+  }
+}
+
+// Helper methods pour l'affichage des tâches
+const getPriorityBadgeClass = (priorite) => {
+  const classes = {
+    faible: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300',
+    moyenne: 'bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300',
+    elevee: 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300',
+    critique: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300'
+  }
+  return classes[priorite] || classes.moyenne
+}
+
+const getProgressColor = (progress) => {
+  if (progress < 30) return 'bg-red-500'
+  if (progress < 70) return 'bg-amber-500'
+  return 'bg-green-500'
+}
+
+const formatTaskDate = (date) => {
+  if (!date) return ''
+  const d = new Date(date)
+  const today = new Date()
+  const diffDays = Math.ceil((d - today) / (1000 * 60 * 60 * 24))
+
+  if (diffDays === 0) return "Aujourd'hui"
+  if (diffDays === 1) return 'Demain'
+  if (diffDays === -1) return 'Hier'
+
+  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
 }
 
 // ✅ Gestion des membres
@@ -897,7 +1125,38 @@ const removeMember = async (member) => {
   }
 }
 
-onMounted(() => {
-  loadActivite()
+const handleValidation = async (level, tache) => {
+  try {
+    if (level === 'n1') {
+      await api.post(`/taches/${tache.id}/validate-n1`)
+    } else {
+      await api.post(`/taches/${tache.id}/validate-n2`)
+    }
+    
+    // Recharger les données
+    await loadTaches()
+    if (showKanbanView.value) {
+      await loadKanban()
+    }
+    
+    // Fermer le modal de détail si ouvert
+    if (showTaskDetail.value) {
+      showTaskDetail.value = false
+      selectedTask.value = null
+    }
+    
+    alert(`Tâche validée avec succès (${level.toUpperCase()})`)
+  } catch (error) {
+    console.error(`Erreur lors de la validation ${level}:`, error)
+    alert(error.response?.data?.message || `Erreur lors de la validation ${level}`)
+  }
+}
+
+onMounted(async () => {
+  await loadActivite()
+  // Charger le kanban si nécessaire
+  if (showKanbanView.value) {
+    await loadKanban()
+  }
 })
 </script>

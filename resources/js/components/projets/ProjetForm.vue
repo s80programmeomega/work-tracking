@@ -16,8 +16,15 @@
             <p class="text-sm text-gray-500 dark:text-gray-400">
               {{ projet ? 'Mettre à jour les informations du projet' : 'Créer un nouveau projet pour votre organisation' }}
             </p>
+             <!-- ✅ Affichage du workspace courant -->
+            <div v-if="!projet" class="flex items-center gap-2 mt-2 text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-lg w-fit">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+              <span>Workspace : {{ currentWorkspaceName }}</span>
+            </div>
           </div>
-          <button
+           <button
             @click="$emit('close')"
             class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
@@ -260,7 +267,7 @@
         </form>
       </div>
 
-      <!-- Footer -->
+       <!-- Footer -->
       <div class="px-8 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
         <div class="flex justify-end gap-3">
           <button
@@ -283,10 +290,11 @@
               </svg>
               Enregistrement...
             </span>
-            <span v-else>Enregistrer</span>
+            <span v-else>{{ projet ? 'Mettre à jour' : 'Créer le projet' }}</span>
           </button>
         </div>
       </div>
+
     </div>
   </div>
 </template>
@@ -296,6 +304,7 @@ import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useProjets } from '@/composables/useProjets'
 import api from '@/api/axios'
+import { useWorkspace } from '@/composables/useWorkspace' // ✅ IMPORTANT
 
 const props = defineProps({
   projet: {
@@ -308,6 +317,13 @@ const emit = defineEmits(['close', 'saved'])
 
 const authStore = useAuthStore()
 const { createProjet, updateProjet } = useProjets()
+
+// ✅ UTILISER LE WORKSPACE COURANT
+const { 
+  currentWorkspace, 
+  currentWorkspaceId, 
+  currentWorkspaceName 
+} = useWorkspace()
 
 const loading = ref(false)
 const users = ref([])
@@ -351,7 +367,9 @@ const formData = ref({
   responsable_id: authStore.user?.id,
   progression: 0,
   status: 'active',
-  visibility: 'team'
+  visibility: 'team',
+    // ✅ AJOUTER LE WORKSPACE_ID AUTOMATIQUEMENT
+  workspace_id: currentWorkspaceId.value
 })
 
 const loadUsers = async () => {
@@ -364,10 +382,22 @@ const loadUsers = async () => {
 }
 
 const handleSubmit = async () => {
+  // ✅ VALIDER QUE LE WORKSPACE EST DISPONIBLE
+  if (!currentWorkspaceId.value && !props.projet) {
+    errorMessage.value = 'Aucun workspace sélectionné. Veuillez sélectionner un workspace avant de créer un projet.'
+    return
+  }
+
   loading.value = true
   errorMessage.value = ''
 
   try {
+     const dataToSend = {
+      ...formData.value,
+      // ✅ S'ASSURER QUE LE WORKSPACE_ID EST TOUJOURS INCLUS
+      workspace_id: props.projet ? formData.value.workspace_id : currentWorkspaceId.value
+    }
+
     if (props.projet) {
       await updateProjet(props.projet.id, formData.value)
     } else {
@@ -401,8 +431,13 @@ onMounted(async () => {
       responsable_id: props.projet.responsable_id || authStore.user?.id,
       progression: props.projet.progression || 0,
       status: props.projet.status || 'active',
-      visibility: props.projet.visibility || 'team'
+      visibility: props.projet.visibility || 'team',
+      workspace_id: props.projet.workspace_id // Garder le workspace original en modification
     }
+  } else {
+    // ✅ EN CRÉATION, FORCER LE WORKSPACE COURANT
+    formData.value.workspace_id = currentWorkspaceId.value
   }
+  
 })
 </script>

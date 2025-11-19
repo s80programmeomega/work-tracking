@@ -365,7 +365,19 @@ const editingMember = ref(null)
 
 // ✅ NOUVEAU : Cache des permissions pour éviter les recalculs
 const permissionsCache = ref(new Map())
+// ✅ GESTION DU CHARGEMENT COMBINÉ
+const loading = computed(() => activitesLoading.value || workspaceLoading.value)
 
+// ✅ Stats calculées
+const stats = computed(() => {
+  const total = activites.value.length
+  const active = activites.value.filter(a => a.status === 'active').length
+  const overdue = activites.value.filter(a => a.is_overdue).length
+  const avgProgress = total > 0 ? Math.round(activites.value.reduce((sum, a) => sum + (a.progression || 0), 0) / total) : 0
+
+  return { total, active, overdue, avgProgress }
+})
+ 
 // ✅ FONCTION POUR OBTENIR LES PERMISSIONS
 const getPermissions = (activite) => {
   if (!activite) {
@@ -397,68 +409,65 @@ const getPermissions = (activite) => {
   // Mettre en cache
   permissionsCache.value.set(cacheKey, permissions)
   return permissions
-}
-
-const stats = computed(() => {
-  const total = activites.value.length
-  const active = activites.value.filter(a => a.status === 'active').length
-  const overdue = activites.value.filter(a => a.is_overdue).length
-  const avgProgress = total > 0
-    ? Math.round(activites.value.reduce((sum, a) => sum + (a.progression || 0), 0) / total)
-    : 0
-
-  return { total, active, overdue, avgProgress }
-})
+} 
 
 
-// ✅ GESTION DU CHARGEMENT COMBINÉ
-const loading = computed(() => activitesLoading.value || workspaceLoading.value)
 
-// ✅ ÉCOUTEUR DES CHANGEMENTS DE WORKSPACE
-let unsubscribeWorkspaceListener = null
-
-// ✅ CHARGEMENT DES DONNÉES AVEC GESTION DU WORKSPACE
-const loadData = async () => {
+// ✅ Chargement des activités
+const loadActivites = async () => {
   if (!currentWorkspaceId.value) {
-    console.log('Aucun workspace sélectionné, chargement des données différé');
-    return;
+    console.log('Aucun workspace sélectionné')
+    return
   }
 
   try {
-    console.log(`Chargement des données pour le workspace: ${currentWorkspaceId.value}`);
+    await fetchMesActivites({
+      ...filters.value,
+      workspace_id: currentWorkspaceId.value
+    })
+    permissionsCache.value.clear()
+  } catch (error) {
+    console.error('Erreur lors du chargement des activités:', error)
+  }
+}
 
+// ✅ Chargement des projets
+const loadProjets = async () => {
+  if (!currentWorkspaceId.value) return
+  
+  try {
+    await fetchProjetsByWorkspace(currentWorkspaceId.value, { per_page: 100 })
+  } catch (error) {
+    console.error('Erreur lors du chargement des projets:', error)
+  }
+}
+
+// ✅ Chargement complet des données
+const loadData = async () => {
+  if (!currentWorkspaceId.value) {
+    console.log('⚠️ Aucun workspace sélectionné, attente...')
+    return
+  }
+
+  console.log('📊 Chargement des données pour workspace:', currentWorkspaceId.value)
+
+  try {
     await Promise.all([
       loadActivites(),
       loadProjets()
-    ]);
-
+    ])
+    console.log('✅ Données chargées avec succès')
   } catch (error) {
-    console.error('Erreur lors du chargement des données:', error);
+    console.error('❌ Erreur lors du chargement des données:', error)
   }
-};
-
-
-const loadActivites = async () => {
-  if (!currentWorkspaceId.value) return
-
-  await fetchMesActivites({
-    ...filters.value,
-    workspace_id: currentWorkspaceId.value
-  })
-
-  // Vider le cache lors du rechargement
-  permissionsCache.value.clear()
-
 }
 
-const loadProjets = async () => {
-  if (!currentWorkspaceId.value) return
-  await fetchProjetsByWorkspace(currentWorkspaceId.value, { per_page: 100 })
-}
+// ✅ Gestion du changement de workspace depuis WorkspaceSelector
+let unsubscribeWorkspaceListener = null
 
-// ✅ GESTION DU CHANGEMENT DE WORKSPACE
-const onWorkspaceChangedHandler = async (event) => {
-  console.log('Workspace changé détecté:', event.detail);
+ 
+const handleWorkspaceChangeInActivities  = async (event) => {
+  console.log('🔄 Changement de workspace détecté:', event.detail)
 
   // Réinitialiser les filtres
   filters.value = {
@@ -466,19 +475,22 @@ const onWorkspaceChangedHandler = async (event) => {
     status: '',
     projet_id: '',
     page: 1
-  };
+  }
 
   // Recharger les données
-  await loadData();
-};
-
-let searchTimeout
-const debouncedSearch = () => {
-  clearTimeout(searchTimeout)
-  searchTimeout = setTimeout(() => {
-    loadActivites()
-  }, 500)
+  await loadData()
 }
+
+// ✅ Autres fonctions
+const debouncedSearch = (() => {
+  let searchTimeout
+  return () => {
+    clearTimeout(searchTimeout)
+    searchTimeout = setTimeout(() => {
+      loadActivites()
+    }, 500)
+  }
+})()
 
 const resetFilters = () => {
   filters.value = {
@@ -582,11 +594,7 @@ const onActiviteUpdated = () => {
   editingActivite.value = null
   loadActivites()
 }
-
-// const onWorkspaceChanged = async () => {
-//   await loadActivites()
-//   await loadProjets()
-// }
+ 
 
 const getInitials = (name) => {
   if (!name) return '??'
@@ -626,7 +634,7 @@ onMounted(async () => {
   }
 
   // Écouter les changements de workspace
-  unsubscribeWorkspaceListener = onWorkspaceChanged(onWorkspaceChangedHandler);
+  unsubscribeWorkspaceListener = onWorkspaceChanged(handleWorkspaceChangeInActivities );
 
   // if (currentWorkspaceId.value) {
   //   await loadActivites()

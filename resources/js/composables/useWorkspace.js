@@ -1,14 +1,65 @@
 // resources\js\composables\useWorkspace.js
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import api from '@/api/axios';
+import { useAuthStore } from '@/stores/auth';
 
 const currentWorkspace = ref(null);
 const workspaces = ref([]);
 const loading = ref(false);
 const error = ref(null);
 
+// ✅ Event bus pour la communication entre composants
+const workspaceChangeListeners = new Set();
 
 export function useWorkspace() {
+  const authStore = useAuthStore();
+
+  /**
+     * ✅ Initialiser le workspace courant depuis plusieurs sources
+     */
+  const initializeCurrentWorkspace = async () => {
+    loading.value = true;
+    try {
+      // 1. Charger les workspaces disponibles
+      if (workspaces.value.length === 0) {
+        await fetchWorkspaces();
+      }
+
+      // 2. Déterminer le workspace courant (ordre de priorité)
+      let workspaceId = null;
+
+      // a) Depuis le store auth
+      if (authStore.currentWorkspaceId) {
+        workspaceId = authStore.currentWorkspaceId;
+      }
+      // b) Depuis localStorage
+      else if (localStorage.getItem('current_workspace_id')) {
+        workspaceId = parseInt(localStorage.getItem('current_workspace_id'));
+      }
+      // c) Premier workspace disponible
+      else if (workspaces.value.length > 0) {
+        workspaceId = workspaces.value[0].id;
+      }
+
+      // 3. Définir le workspace courant
+      if (workspaceId) {
+        const workspace = workspaces.value.find(w => w.id === workspaceId);
+        if (workspace) {
+          currentWorkspace.value = workspace;
+          authStore.setCurrentWorkspace(workspaceId);
+          localStorage.setItem('current_workspace_id', workspaceId);
+        }
+      }
+
+      return currentWorkspace.value;
+    } catch (err) {
+      console.error('Erreur lors de l\'initialisation du workspace:', err);
+      error.value = err.response?.data?.message || 'Erreur d\'initialisation';
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  };
 
   /**
    * Fetch all workspaces for the current user
@@ -23,19 +74,21 @@ export function useWorkspace() {
       // Si c'est paginé
       if (response.data.data && Array.isArray(response.data.data)) {
         workspaces.value = response.data.data;
-        return response.data; // Retourne toute la réponse (avec pagination)
-      }
-
-      // Si ce n'est pas paginé
-      workspaces.value = response.data.data || response.data;
-
-      // Set first workspace as current if none selected
-      if (!currentWorkspace.value && workspaces.value.length > 0) {
-        currentWorkspace.value = workspaces.value[0];
-        localStorage.setItem('current_workspace_id', workspaces.value[0].id);
+      } else {
+        workspaces.value = response.data.data || response.data;
       }
 
       return workspaces.value;
+      // // Si ce n'est pas paginé
+      // workspaces.value = response.data.data || response.data;
+
+      // // Set first workspace as current if none selected
+      // if (!currentWorkspace.value && workspaces.value.length > 0) {
+      //   currentWorkspace.value = workspaces.value[0];
+      //   localStorage.setItem('current_workspace_id', workspaces.value[0].id);
+      // }
+
+      // return workspaces.value;
     } catch (err) {
       error.value = err.response?.data?.message || 'Erreur lors du chargement des workspaces';
       console.error('Error fetching workspaces:', err);
@@ -64,12 +117,94 @@ export function useWorkspace() {
   };
 
   /**
-   * Select a workspace as current
+   * ✅ Sélectionner un workspace et notifier tous les composants
    */
-  const selectWorkspace = (workspace) => {
+  const selectWorkspace = async (workspace) => {
+    const oldWorkspaceId = currentWorkspace.value?.id;
+    const newWorkspaceId = workspace.id;
+
+    // Ne rien faire si c'est le même workspace
+    if (oldWorkspaceId === newWorkspaceId) {
+      return;
+    }
+
+    // Mettre à jour le workspace courant
     currentWorkspace.value = workspace;
-    localStorage.setItem('current_workspace_id', workspace.id);
+    authStore.setCurrentWorkspace(newWorkspaceId);
+    localStorage.setItem('current_workspace_id', newWorkspaceId);
+
+    // ✅ Notifier le backend
+    try {
+      await api.post(`/workspaces/switch/${newWorkspaceId}`);
+    } catch (err) {
+      console.warn('Erreur lors du switch workspace côté serveur:', err);
+    }
+
+    // ✅ Notifier tous les listeners
+    const event = new CustomEvent('workspace-changed', {
+      detail: {
+        workspace,
+        oldWorkspaceId,
+        newWorkspaceId
+      }
+    });
+    window.dispatchEvent(event);
+
+    // ✅ Notifier les listeners directs - AVEC VALIDATION
+    const listenersToRemove = [];
+    workspaceChangeListeners.forEach(listener => {
+      if (typeof listener === 'function') {
+        try {
+          listener(event);
+        } catch (error) {
+          console.error('Error in workspace change listener:', error);
+        }
+      } else {
+        // Marquer les listeners invalides pour suppression
+        listenersToRemove.push(listener);
+      }
+    });
+
+    // Nettoyer les listeners invalides
+    listenersToRemove.forEach(invalidListener => {
+      workspaceChangeListeners.delete(invalidListener);
+    });
+
+    // ✅ Déclencher l'événement global
+    window.dispatchEvent(event);
   };
+
+  /**
+  * ✅ S'abonner aux changements de workspace
+  */
+  const onWorkspaceChanged = (callback) => {
+    // Validation du callback
+    if (typeof callback !== 'function') {
+      console.error('onWorkspaceChanged: callback must be a function', callback);
+      return () => { }; // Retourne une fonction vide si le callback n'est pas valide
+    }
+
+    const handler = (event) => {
+      try {
+        callback(event);
+      } catch (error) {
+        console.error('Error in workspace change callback:', error);
+      }
+    };
+
+    // Ajouter le callback original au Set pour la notification directe
+    workspaceChangeListeners.add(callback);
+
+    // Écouter l'événement global
+    window.addEventListener('workspace-changed', handler);
+
+    // Retourner la fonction de nettoyage
+    return () => {
+      workspaceChangeListeners.delete(callback);
+      window.removeEventListener('workspace-changed', handler);
+    };
+  };
+
 
   /**
    * Create a new workspace
@@ -91,7 +226,7 @@ export function useWorkspace() {
       const newWorkspace = response.data.data;
 
       workspaces.value.push(newWorkspace);
-      selectWorkspace(newWorkspace);
+      await selectWorkspace(newWorkspace);
 
       return newWorkspace;
     } catch (err) {
@@ -105,9 +240,6 @@ export function useWorkspace() {
   /**
    * Update a workspace
    */
-  /**
-   * Update a workspace (version corrigée)
-   */
   const updateWorkspace = async (id, data) => {
     loading.value = true;
     error.value = null;
@@ -118,16 +250,6 @@ export function useWorkspace() {
       // Si c'est FormData, utiliser POST avec _method
       if (data instanceof FormData) {
         data.append('_method', 'PUT');
-
-        // ✅ Debug: Afficher le contenu du FormData
-        console.log('FormData envoyé:');
-        for (let [key, value] of data.entries()) {
-          if (value instanceof File) {
-            console.log(key, ':', value.name, value.type, value.size);
-          } else {
-            console.log(key, ':', value);
-          }
-        }
 
         const config = {
           headers: {
@@ -180,10 +302,12 @@ export function useWorkspace() {
 
       // Select another workspace if current was deleted
       if (currentWorkspace.value?.id === id) {
-        currentWorkspace.value = workspaces.value[0] || null;
-        if (currentWorkspace.value) {
-          localStorage.setItem('current_workspace_id', currentWorkspace.value.id);
+        const newWorkspace = workspaces.value[0] || null;
+        if (newWorkspace) {
+          await selectWorkspace(newWorkspace);
         } else {
+          currentWorkspace.value = null;
+          authStore.setCurrentWorkspace(null);
           localStorage.removeItem('current_workspace_id');
         }
       }
@@ -652,6 +776,7 @@ export function useWorkspace() {
     isWorkspaceOwner,
 
     // Methods
+    initializeCurrentWorkspace,
     fetchWorkspaces,
     fetchWorkspace,
     selectWorkspace,
@@ -668,6 +793,7 @@ export function useWorkspace() {
     unarchiveWorkspace,
     transferOwnership,
     initializeWorkspace,
+    onWorkspaceChanged,
 
     // Nouvelles méthodes pour la gestion des membres
     fetchInvitations,
