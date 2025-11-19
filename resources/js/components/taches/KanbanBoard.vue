@@ -1,3 +1,4 @@
+<!-- resources\js\components\taches\KanbanBoard.vue -->
 <template>
   <div class="kanban-board h-full">
     <div class="grid grid-cols-3 gap-4 h-full">
