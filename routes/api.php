@@ -119,9 +119,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
 
-
-
-
     // ======================================== PROJETS ========================================
     Route::prefix('projets')->group(function () {
 
@@ -204,6 +201,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         // Available members for projet
         Route::get('/available-members/{projetId}', [ActiviteController::class, 'availableMembers']);
+        //  Membres d'une activité spécifique
+        Route::get('/{activite}/membres', [ActiviteController::class, 'membres']);
 
         // ✅ Gestion des membres d'activité
         Route::prefix('{activite}/members')->group(function () {
@@ -221,8 +220,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/all/activity', [ActiviteController::class, 'index']); // Toutes les activités (Super Admin)
         // });
     });
-
-
 
     // ======================================== TÂCHES  ========================================
     Route::prefix('taches')->group(function () {
@@ -399,29 +396,29 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
     // Task Management Routes
-    Route::prefix('taches')->group(function () {
-        // List and filter
-        Route::get('/', [\App\Http\Controllers\TacheController::class, 'index']);
-        Route::get('/my-taches', [\App\Http\Controllers\TacheController::class, 'myTaches']);
-        Route::get('/activite/{activiteId}', [\App\Http\Controllers\TacheController::class, 'forActivite']);
+    // Route::prefix('taches')->group(function () {
+    //     // List and filter
+    //     Route::get('/', [\App\Http\Controllers\TacheController::class, 'index']);
+    //     Route::get('/my-taches', [\App\Http\Controllers\TacheController::class, 'myTaches']);
+    //     Route::get('/activite/{activiteId}', [\App\Http\Controllers\TacheController::class, 'forActivite']);
 
-        // CRUD
-        Route::post('/', [\App\Http\Controllers\TacheController::class, 'store']);
-        Route::get('/{tache}', [\App\Http\Controllers\TacheController::class, 'show']);
-        Route::put('/{tache}', [\App\Http\Controllers\TacheController::class, 'update']);
-        Route::delete('/{tache}', [\App\Http\Controllers\TacheController::class, 'destroy']);
+    //     // CRUD
+    //     Route::post('/', [\App\Http\Controllers\TacheController::class, 'store']);
+    //     Route::get('/{tache}', [\App\Http\Controllers\TacheController::class, 'show']);
+    //     Route::put('/{tache}', [\App\Http\Controllers\TacheController::class, 'update']);
+    //     Route::delete('/{tache}', [\App\Http\Controllers\TacheController::class, 'destroy']);
 
-        // Actions
-        Route::post('/{tache}/move', [\App\Http\Controllers\TacheController::class, 'move']);
-        Route::post('/{tache}/reorder', [\App\Http\Controllers\TacheController::class, 'reorder']);
-        Route::post('/{tache}/duplicate', [\App\Http\Controllers\TacheController::class, 'duplicate']);
-        Route::post('/{tache}/archive', [\App\Http\Controllers\TacheController::class, 'archive']);
-        Route::post('/{tache}/unarchive', [\App\Http\Controllers\TacheController::class, 'unarchive']);
-        Route::post('/{tache}/validate', [\App\Http\Controllers\TacheController::class, 'validateTask']);
-        Route::post('/{tache}/assign', [\App\Http\Controllers\TacheController::class, 'assignUser']);
-        Route::post('/{tache}/unassign', [\App\Http\Controllers\TacheController::class, 'unassignUser']);
-        Route::post('/{tache}/progress', [\App\Http\Controllers\TacheController::class, 'updateProgress']);
-    });
+    //     // Actions
+    //     Route::post('/{tache}/move', [\App\Http\Controllers\TacheController::class, 'move']);
+    //     Route::post('/{tache}/reorder', [\App\Http\Controllers\TacheController::class, 'reorder']);
+    //     Route::post('/{tache}/duplicate', [\App\Http\Controllers\TacheController::class, 'duplicate']);
+    //     Route::post('/{tache}/archive', [\App\Http\Controllers\TacheController::class, 'archive']);
+    //     Route::post('/{tache}/unarchive', [\App\Http\Controllers\TacheController::class, 'unarchive']);
+    //     Route::post('/{tache}/validate', [\App\Http\Controllers\TacheController::class, 'validateTask']);
+    //     Route::post('/{tache}/assign', [\App\Http\Controllers\TacheController::class, 'assignUser']);
+    //     Route::post('/{tache}/unassign', [\App\Http\Controllers\TacheController::class, 'unassignUser']);
+    //     Route::post('/{tache}/progress', [\App\Http\Controllers\TacheController::class, 'updateProgress']);
+    // });
 
     // Labels routes
     Route::prefix('labels')->group(function () {

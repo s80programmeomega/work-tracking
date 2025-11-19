@@ -20,6 +20,7 @@ return new class extends Migration
             $table->text('indicateurs_resultats')->nullable();
             $table->enum('statut', ['a_faire', 'en_cours', 'termine'])->default('a_faire');
             $table->enum('priorite', ['faible', 'moyenne', 'elevee', 'critique'])->default('moyenne');
+            $table->date('date_debut')->nullable();
             $table->date('echeance')->nullable();
             $table->date('date_fin_reelle')->nullable();
             $table->integer('taux_realisation')->default(0); // 0-100%

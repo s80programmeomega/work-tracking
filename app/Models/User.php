@@ -189,12 +189,12 @@ class User extends Authenticatable
 }
 
 
-    // public function taches()
-    // {
-    //     return $this->belongsToMany(Tache::class, 'tache_user')
-    //         ->withPivot('role')
-    //         ->withTimestamps();
-    // }
+    public function taches()
+    {
+        return $this->belongsToMany(Tache::class, 'tache_user')
+            ->withPivot('role')
+            ->withTimestamps();
+    }
 
     // public function comments()
     // {

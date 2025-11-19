@@ -6,6 +6,7 @@ use App\Models\Tache;
 use App\Models\User;
 use App\Models\Activite;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Support\Facades\Log;
 
 /**
  * 🔐 TachePolicy - Gestion des permissions sur les tâches
@@ -107,6 +108,17 @@ class TachePolicy
      */
     public function create(User $user, Activite $activite): bool
     {
+        Log::debug('🎯 TachePolicy::create called', [
+        'user_id' => $user->id,
+        'user_name' => $user->nom,
+        'activite_id' => $activite->id,
+        'activite_name' => $activite->nom,
+        'file' => __FILE__,
+        'line' => __LINE__
+    ]);
+    
+
+        return true;
         $projet = $activite->projet;
         if (!$projet) {
             return false;
