@@ -12,13 +12,13 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class TacheController extends Controller
 {
-    public function __construct(
-        protected TacheService $tacheService
-    ) {
+    public function __construct(protected TacheService $tacheService)
+    {
         $this->middleware('auth:sanctum');
     }
 
@@ -53,24 +53,89 @@ class TacheController extends Controller
     }
 
     /**
-     * ✅ Kanban pour une activité
+     * ✅ CORRIGÉ : Kanban pour une activité avec logs détaillés
      */
-    public function forActivite(int $activiteId): JsonResponse
+    public function forActivite(Request $request, int $activiteId): JsonResponse
     {
-        $activite = Activite::findOrFail($activiteId);
+        try {
+            $activite = Activite::with(['projet', 'membres'])->findOrFail($activiteId);
+            $user = $request->user();
 
-        // Vérifier si l'utilisateur peut voir cette activité
-        if (!$activite->canUserView(auth()->user())) {
-            return response()->json(['message' => 'Accès non autorisé'], 403);
+            Log::info('Chargement Kanban', [
+                'activite_id' => $activiteId,
+                'user_id' => $user->id,
+                'is_super_admin' => $user->isSuperAdmin()
+            ]);
+
+            // ✅ Vérification d'accès simplifiée
+            if (!$user->isSuperAdmin() && !$this->canUserAccessActivite($user, $activite)) {
+                Log::warning('Accès refusé au kanban', [
+                    'user_id' => $user->id,
+                    'activite_id' => $activiteId
+                ]);
+                return response()->json([
+                    'message' => 'Accès non autorisé',
+                    'a_faire' => [],
+                    'en_cours' => [],
+                    'termine' => [],
+                    'stats' => ['total' => 0, 'a_faire' => 0, 'en_cours' => 0, 'termine' => 0]
+                ], 403);
+            }
+
+            // ✅ Récupérer le kanban
+            $kanban = $this->tacheService->getKanbanForActivite($activiteId);
+
+            // ✅ GARANTIR la structure complète
+            $kanbanData = [
+                'a_faire' => $kanban['a_faire'] ?? [],
+                'en_cours' => $kanban['en_cours'] ?? [],
+                'termine' => $kanban['termine'] ?? [],
+            ];
+
+            // ✅ Calculer les stats
+            $stats = [
+                'total' => count($kanbanData['a_faire']) + count($kanbanData['en_cours']) + count($kanbanData['termine']),
+                'a_faire' => count($kanbanData['a_faire']),
+                'en_cours' => count($kanbanData['en_cours']),
+                'termine' => count($kanbanData['termine']),
+            ];
+
+            Log::info('Kanban chargé avec succès', [
+                'activite_id' => $activiteId,
+                'stats' => $stats
+            ]);
+
+            return response()->json([
+                'a_faire' => TacheResource::collection($kanbanData['a_faire']),
+                'en_cours' => TacheResource::collection($kanbanData['en_cours']),
+                'termine' => TacheResource::collection($kanbanData['termine']),
+                'stats' => $stats
+            ]);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            Log::error('Activité non trouvée', ['activite_id' => $activiteId]);
+            return response()->json([
+                'message' => 'Activité non trouvée',
+                'a_faire' => [],
+                'en_cours' => [],
+                'termine' => [],
+                'stats' => ['total' => 0, 'a_faire' => 0, 'en_cours' => 0, 'termine' => 0]
+            ], 404);
+        } catch (\Exception $e) {
+            Log::error('Erreur chargement Kanban', [
+                'activite_id' => $activiteId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'message' => 'Erreur lors du chargement du kanban',
+                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue',
+                'a_faire' => [],
+                'en_cours' => [],
+                'termine' => [],
+                'stats' => ['total' => 0, 'a_faire' => 0, 'en_cours' => 0, 'termine' => 0]
+            ], 500);
         }
-
-        $kanban = $this->tacheService->getKanbanForActivite($activiteId);
-
-        return response()->json([
-            'a_faire' => TacheResource::collection($kanban['a_faire']),
-            'en_cours' => TacheResource::collection($kanban['en_cours']),
-            'termine' => TacheResource::collection($kanban['termine']),
-        ]);
     }
 
     /**
@@ -120,7 +185,13 @@ class TacheController extends Controller
                             ->where('can_validate_results', true);
                     });
             })
-            ->with(['activite.projet', 'assignees'])
+            ->with([
+                'activite.projet',
+                'assignees',
+                'labels',
+                'validatedN1By',
+                'validatedN2By'
+            ])
             ->get()
             ->filter(function ($tache) use ($user) {
                 // Double vérification avec Policy
@@ -132,7 +203,13 @@ class TacheController extends Controller
             ->whereHas('activite.projet', function ($q) use ($user) {
                 $q->where('responsable_id', $user->id);
             })
-            ->with(['activite.projet', 'assignees'])
+            ->with([
+                'activite.projet',
+                'assignees',
+                'labels',
+                'validatedN1By',
+                'validatedN2By'
+            ])
             ->get()
             ->filter(function ($tache) use ($user) {
                 return Gate::allows('validateN2', $tache);
@@ -176,8 +253,41 @@ class TacheController extends Controller
     }
 
     /**
+     * ✅ NOUVEAU : Helper pour vérifier l'accès à une activité
+     */
+    private function canUserAccessActivite(User $user, Activite $activite): bool
+    {
+        // Responsable de l'activité
+        if ($activite->responsable_id === $user->id) {
+            return true;
+        }
+
+        // Responsable du projet
+        if ($activite->projet && $activite->projet->responsable_id === $user->id) {
+            return true;
+        }
+
+        // Membre de l'activité
+        if ($activite->membres()->where('user_id', $user->id)->exists()) {
+            return true;
+        }
+
+        // Membre du workspace (owner/admin)
+        if ($activite->projet && $activite->projet->workspace) {
+            $workspace = $activite->projet->workspace;
+            $member = $workspace->membres()->where('user_id', $user->id)->first();
+            if ($member && in_array($member->pivot->role, ['owner', 'admin'])) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Créer une tâche
      */
+
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -201,18 +311,149 @@ class TacheController extends Controller
             'visibility' => 'nullable|in:public,private,members_only',
         ]);
 
-        $activite = Activite::findOrFail($validated['activite_id']);
-        $this->authorize('create', [Tache::class, $activite]);
+        try {
+            $activite = Activite::with(['projet.workspace', 'membres'])->findOrFail($validated['activite_id']);
+            $user = $request->user();
 
-        $tache = $this->tacheService->createTache($validated, $request->user());
+            Log::info('Tentative de création de tâche', [
+                'user_id' => $user->id,
+                'activite_id' => $validated['activite_id'],
+                'titre' => $validated['titre']
+            ]);
 
-        return response()->json([
-            'message' => 'Tâche créée avec succès.',
-            'data' => new TacheResource($tache),
-        ], 201);
+            // ✅ VÉRIFICATION COMPLÈTE DES PERMISSIONS
+            $canCreate = $user->isSuperAdmin() ||
+                $activite->responsable_id === $user->id ||
+                ($activite->projet && $activite->projet->responsable_id === $user->id) ||
+                $activite->membres()
+                    ->where('user_id', $user->id)
+                    ->where(function ($query) {
+                        $query->where('role', 'responsable')
+                            ->orWhere('can_create_tasks', true);
+                    })
+                    ->exists();
+
+            // ✅ Si l'utilisateur est membre du workspace (owner/admin), autoriser
+            if (!$canCreate && $activite->projet && $activite->projet->workspace) {
+                $workspace = $activite->projet->workspace;
+                $workspaceMember = $workspace->membres()->where('user_id', $user->id)->first();
+                if ($workspaceMember && in_array($workspaceMember->pivot->role, ['owner', 'admin'])) {
+                    $canCreate = true;
+                }
+            }
+
+            if (!$canCreate) {
+                Log::warning('Permission refusée pour création de tâche', [
+                    'user_id' => $user->id,
+                    'activite_id' => $validated['activite_id'],
+                    'is_responsable' => $activite->responsable_id === $user->id,
+                    'is_membre' => $activite->membres()->where('user_id', $user->id)->exists()
+                ]);
+
+                return response()->json([
+                    'message' => 'Vous n\'avez pas la permission de créer des tâches pour cette activité.',
+                    'error' => 'permission_denied',
+                    'debug' => [
+                        'user_id' => $user->id,
+                        'activite_responsable_id' => $activite->responsable_id,
+                        'is_membre' => $activite->membres()->where('user_id', $user->id)->exists(),
+                        'membre_role' => $activite->membres()->where('user_id', $user->id)->first()?->pivot->role ?? 'non-membre'
+                    ]
+                ], 403);
+            }
+
+            // ✅ Créer la tâche
+            $tache = $this->tacheService->createTache($validated, $user);
+
+            Log::info('Tâche créée avec succès', [
+                'tache_id' => $tache->id,
+                'user_id' => $user->id
+            ]);
+
+            return response()->json([
+                'message' => 'Tâche créée avec succès.',
+                'data' => new TacheResource($tache),
+            ], 201);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            Log::error('Activité non trouvée', ['activite_id' => $validated['activite_id']]);
+            return response()->json([
+                'message' => 'Activité non trouvée',
+                'error' => 'not_found'
+            ], 404);
+        } catch (\Exception $e) {
+            Log::error('Erreur création tâche', [
+                'user_id' => $user->id ?? null,
+                'activite_id' => $validated['activite_id'] ?? null,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'message' => 'Erreur lors de la création de la tâche',
+                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue'
+            ], 500);
+        }
     }
 
 
+    /**
+     * ✅ NOUVEAU : Endpoint pour vérifier les permissions d'une activité
+     */
+    public function checkPermissions(Request $request, int $activiteId): JsonResponse
+    {
+        try {
+            $activite = Activite::with(['projet.workspace', 'membres'])->findOrFail($activiteId);
+            $user = $request->user();
+
+            $membre = $activite->membres()->where('user_id', $user->id)->first();
+
+            // Vérifier les permissions workspace
+            $workspaceRole = null;
+            if ($activite->projet && $activite->projet->workspace) {
+                $workspaceMember = $activite->projet->workspace->membres()->where('user_id', $user->id)->first();
+                $workspaceRole = $workspaceMember ? $workspaceMember->pivot->role : null;
+            }
+
+            $permissions = [
+                'can_view' => $this->canUserAccessActivite($user, $activite),
+                'can_create_tasks' => $user->isSuperAdmin() ||
+                    $activite->responsable_id === $user->id ||
+                    ($activite->projet && $activite->projet->responsable_id === $user->id) ||
+                    ($membre && ($membre->pivot->role === 'responsable' || $membre->pivot->can_create_tasks)) ||
+                    in_array($workspaceRole, ['owner', 'admin']),
+                'can_edit_tasks' => $user->isSuperAdmin() ||
+                    $activite->responsable_id === $user->id ||
+                    ($membre && $membre->pivot->can_edit_tasks),
+                'can_delete_tasks' => $user->isSuperAdmin() ||
+                    $activite->responsable_id === $user->id ||
+                    ($membre && $membre->pivot->can_delete_tasks),
+                'can_validate_results' => $user->isSuperAdmin() ||
+                    $activite->responsable_id === $user->id ||
+                    ($membre && $membre->pivot->can_validate_results),
+                'can_manage_members' => $user->isSuperAdmin() ||
+                    $activite->responsable_id === $user->id ||
+                    ($activite->projet && $activite->projet->responsable_id === $user->id),
+            ];
+
+            return response()->json([
+                'permissions' => $permissions,
+                'user_role' => $membre ? $membre->pivot->role : 'non-membre',
+                'workspace_role' => $workspaceRole,
+                'is_responsable' => $activite->responsable_id === $user->id,
+                'is_projet_responsable' => $activite->projet && $activite->projet->responsable_id === $user->id,
+                'is_super_admin' => $user->isSuperAdmin(),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Erreur vérification permissions', [
+                'activite_id' => $activiteId,
+                'error' => $e->getMessage()
+            ]);
+            return response()->json([
+                'message' => 'Erreur lors de la vérification des permissions'
+            ], 500);
+        }
+    }
     /**
      * Afficher une tâche
      */

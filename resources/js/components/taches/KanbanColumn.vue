@@ -1,3 +1,4 @@
+<!-- resources\js\components\taches\KanbanColumn.vue -->
 <template>
   <div class="flex flex-col h-full bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
     <!-- Column header -->

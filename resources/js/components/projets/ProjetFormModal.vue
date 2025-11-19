@@ -225,6 +225,8 @@
   </Teleport>
 </template>
 
+// resources/js/components/projets/ProjetFormModal.vue
+
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useProjets } from '@/composables/useProjets'
@@ -244,14 +246,17 @@ const authStore = useAuthStore()
 const isDark = computed(() => document.documentElement.classList.contains('dark'))
 
 const { createProjet, updateProjet } = useProjets()
-const { fetchWorkspaces, fetchMembers } = useWorkspace()
+const { 
+  workspaces, // ✅ UTILISER LA RÉF DIRECTEMENT
+  fetchWorkspaces, 
+  fetchMembers,
+  currentWorkspaceId // ✅ WORKSPACE COURANT
+} = useWorkspace()
 
-const workspaces = ref([])
 const users = ref([])
 const loading = ref(false)
 const error = ref(null)
 const presetColors = ['#3B82F6','#10B981','#8B5CF6','#F59E0B','#EF4444','#EC4899','#14B8A6','#F97316']
-
 
 const isEdit = computed(() => !!props.projet)
 
@@ -272,52 +277,100 @@ const form = ref({
   is_favorite: false
 })
 
-// ✅ NOUVELLE MÉTHODE : Charger les membres d'un workspace
+// ✅ CORRECTION : Charger les membres d'un workspace
 const loadWorkspaceMembers = async (workspaceId) => {
   try {
     const members = await fetchMembers(workspaceId)
-    users.value = members  || []
-    console.log('Membres chargés:', users.value.length)
+    users.value = members || []
+    console.log('Membres chargés pour workspace', workspaceId, ':', users.value.length)
   } catch (err) {
     console.error('Error loading workspace members:', err)
     users.value = []
   }
 }
 
-// Initialisation du formulaire pour création ou édition
+// ✅ CORRECTION : Initialisation améliorée
 const initializeForm = async () => {
   try {
-    const workspacesResponse = await fetchWorkspaces()
-    workspaces.value = workspacesResponse.data || []
+    console.log('Initialisation du formulaire...')
+    
+    // Charger les workspaces si nécessaire
+    if (workspaces.value.length === 0) {
+      console.log('Chargement des workspaces...')
+      await fetchWorkspaces()
+    }
+    
+    console.log('Workspaces disponibles:', workspaces.value)
 
-    // Déterminer le workspace à utiliser
-    const workspaceToUse = props.projet?.workspace_id || props.workspaceId || authStore.user?.current_workspace_id || (workspaces.value[0]?.id)
-    if (!workspaceToUse) return
+    // ✅ DÉTERMINER LE WORKSPACE PAR DÉFAUT AVEC PRIORITÉS :
+    // 1. Workspace passé en prop (depuis MyProjects ou Show)
+    // 2. Workspace courant (depuis le sélecteur/sidebar)  
+    // 3. Premier workspace disponible
+    let defaultWorkspaceId = null
+    
+    if (props.workspaceId) {
+      defaultWorkspaceId = props.workspaceId
+      console.log('Workspace depuis prop:', defaultWorkspaceId)
+    } else if (currentWorkspaceId.value) {
+      defaultWorkspaceId = currentWorkspaceId.value
+      console.log('Workspace courant:', defaultWorkspaceId)
+    } else if (workspaces.value.length > 0) {
+      defaultWorkspaceId = workspaces.value[0].id
+      console.log('Premier workspace disponible:', defaultWorkspaceId)
+    }
 
-    form.value.workspace_id = workspaceToUse
-    await loadWorkspaceMembers(workspaceToUse)
+    if (defaultWorkspaceId) {
+      form.value.workspace_id = defaultWorkspaceId
+      console.log('Workspace sélectionné:', defaultWorkspaceId)
+      
+      // Charger les membres du workspace sélectionné
+      await loadWorkspaceMembers(defaultWorkspaceId)
+    }
 
     // Si édition, pré-remplir les champs
     if (props.projet) {
+      console.log('Mode édition pour projet:', props.projet)
       form.value = { ...form.value, ...props.projet }
-      // Assure que responsable est bien sélectionné
+      
+      // Recharger les membres si le workspace a changé
+      if (props.projet.workspace_id && props.projet.workspace_id !== defaultWorkspaceId) {
+        await loadWorkspaceMembers(props.projet.workspace_id)
+      }
+      
+      // Assurer que le responsable est bien sélectionné
       if (props.projet.responsable_id && !users.value.find(u => u.id === props.projet.responsable_id)) {
+        console.warn('Responsable non trouvé dans les membres')
         form.value.responsable_id = ''
       }
+    } else {
+      // En création, définir l'utilisateur courant comme responsable par défaut
+      if (authStore.user?.id && users.value.find(u => u.id === authStore.user.id)) {
+        form.value.responsable_id = authStore.user.id
+      }
     }
+
   } catch (err) {
     console.error('Erreur initialisation formulaire:', err)
+    error.value = 'Erreur lors du chargement des données'
   }
 }
 
-onMounted(() => initializeForm())
+onMounted(() => {
+  console.log('Montage du ProjetFormModal')
+  initializeForm()
+})
 
-// Recharger les membres si workspace change
+// ✅ CORRECTION : Recharger les membres si workspace change
 watch(() => form.value.workspace_id, async (newWorkspaceId) => {
   if (newWorkspaceId) {
+    console.log('Changement de workspace:', newWorkspaceId)
     await loadWorkspaceMembers(newWorkspaceId)
-    // Reset responsable si création
-    if (!isEdit.value) form.value.responsable_id = ''
+    
+    // Reset responsable si création (sauf si c'est l'utilisateur courant)
+    if (!isEdit.value) {
+      const currentUserInMembers = users.value.find(u => u.id === authStore.user?.id)
+      form.value.responsable_id = currentUserInMembers ? authStore.user.id : ''
+    }
   }
 })
 
@@ -326,33 +379,50 @@ const handleSubmit = async () => {
     loading.value = true
     error.value = null
 
+    console.log('Soumission du formulaire:', form.value)
+
     // Validation
     if (!form.value.workspace_id) throw new Error('Veuillez sélectionner un workspace')
     if (!form.value.nom) throw new Error('Le nom du projet est requis')
     if (!form.value.date_debut) throw new Error('La date de début est requise')
     if (!form.value.date_fin) throw new Error('La date de fin est requise')
     if (!form.value.responsable_id) throw new Error('Le responsable du projet est requis')
-    if (new Date(form.value.date_fin) < new Date(form.value.date_debut)) throw new Error('La date de fin doit être après la date de début')
+    
+    const startDate = new Date(form.value.date_debut)
+    const endDate = new Date(form.value.date_fin)
+    if (endDate < startDate) throw new Error('La date de fin doit être après la date de début')
 
-    const submitData = { ...form.value, code: form.value.code || (isEdit.value ? undefined : null) }
-    if (isEdit.value && !submitData.code) delete submitData.code
+    // Préparer les données
+    const submitData = { 
+      ...form.value, 
+      code: form.value.code || (isEdit.value ? undefined : null),
+      budget: form.value.budget || null
+    }
+    
+    // Nettoyer les données pour l'édition
+    if (isEdit.value && !submitData.code) {
+      delete submitData.code
+    }
 
+    console.log('Données envoyées:', submitData)
+
+    // Appel API
     if (isEdit.value) {
       await updateProjet(props.projet.id, submitData)
     } else {
       await createProjet(submitData)
     }
 
+    console.log('Projet sauvegardé avec succès')
     emit('saved')
+    
   } catch (err) {
-    error.value = err.response?.data?.message || err.message || 'Une erreur est survenue'
     console.error('Erreur sauvegarde projet:', err)
+    error.value = err.response?.data?.message || err.message || 'Une erreur est survenue lors de la sauvegarde'
   } finally {
     loading.value = false
   }
 }
-
-
 </script>
 
 <style scoped>

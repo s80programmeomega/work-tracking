@@ -9,7 +9,8 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Gate; 
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 
 class TacheService
 {
@@ -126,23 +127,67 @@ class TacheService
         return $query->ordered()->get();
     }
 
-    /**
-     * ✅ Kanban pour une activité
+ /**
+     * ✅ CORRIGÉ : Récupérer le Kanban pour une activité avec garantie de structure
      */
     public function getKanbanForActivite(int $activiteId): array
     {
-        $taches = Tache::forActivite($activiteId)
-            ->active()
-            ->with(['assignees', 'labels', 'validatedN1By', 'validatedN2By'])
-            ->ordered()
-            ->get();
+        try {
+            Log::info('Service: Récupération Kanban', ['activite_id' => $activiteId]);
 
-        return [
-            'a_faire' => $taches->where('statut', TacheStatut::A_FAIRE)->values(),
-            'en_cours' => $taches->where('statut', TacheStatut::EN_COURS)->values(),
-            'termine' => $taches->where('statut', TacheStatut::TERMINE)->values(),
-        ];
+            // ✅ Charger toutes les tâches actives de l'activité
+            $taches = Tache::where('activite_id', $activiteId)
+                ->where('archive_status', 'active')
+                ->with([
+                    'activite:id,nom,code,projet_id,responsable_id',
+                    'activite.projet:id,nom,workspace_id',
+                    'assignees:id,nom,email,avatar',
+                    'labels:id,nom,couleur',
+                    'validatedN1By:id,nom',
+                    'validatedN2By:id,nom',
+                    'createdBy:id,nom'
+                ])
+                ->orderBy('position')
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            Log::info('Tâches récupérées', [
+                'activite_id' => $activiteId,
+                'total' => $taches->count()
+            ]);
+
+            // ✅ Grouper par statut avec garantie de structure
+            $kanban = [
+                'a_faire' => $taches->where('statut', TacheStatut::A_FAIRE)->values()->all(),
+                'en_cours' => $taches->where('statut', TacheStatut::EN_COURS)->values()->all(),
+                'termine' => $taches->where('statut', TacheStatut::TERMINE)->values()->all(),
+            ];
+
+            Log::info('Kanban groupé', [
+                'activite_id' => $activiteId,
+                'a_faire' => count($kanban['a_faire']),
+                'en_cours' => count($kanban['en_cours']),
+                'termine' => count($kanban['termine'])
+            ]);
+
+            return $kanban;
+
+        } catch (\Exception $e) {
+            Log::error('Erreur Service getKanbanForActivite', [
+                'activite_id' => $activiteId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            // ✅ Retourner structure vide en cas d'erreur
+            return [
+                'a_faire' => [],
+                'en_cours' => [],
+                'termine' => [],
+            ];
+        }
     }
+
 
     /**
      * ✅ Mes tâches (toutes mes tâches accessibles)

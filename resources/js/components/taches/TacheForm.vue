@@ -1,12 +1,10 @@
 <!-- resources/js/components/taches/TacheForm.vue -->
 <template>
   <!-- ✅ z-index très élevé pour passer au-dessus de sidebar et header -->
-  <div 
-    class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-    @click.self="$emit('close')"
-  >
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-20"
+    @click.self="$emit('close')" >
     <div
-      class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-6xl max-h-[95vh] overflow-hidden flex flex-col animate-fade-in"
+      class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[95vh] overflow-hidden flex flex-col animate-fade-in"
     >
       <!-- Header avec gradient moderne -->
       <div
@@ -425,26 +423,38 @@
 
             <!-- Section Équipe & Organisation -->
             <div class="space-y-5">
-              <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
-                <div class="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg">
-                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
+                <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
+                  <div class="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  </div>
+                  <h3 class="text-xl font-bold text-gray-900 dark:text-white">
+                    Équipe & Organisation
+                  </h3>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white">
-                  Équipe & Organisation
-                </h3>
-              </div>
 
               <!-- Assignation avec permissions -->
               <div>
                 <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
                   Assigner à
                 </label>
+                <!-- Chargement des membres -->
+                <div v-if="loadingMembers" class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl mb-4">
+                  <div class="flex items-center gap-3">
+                    <svg class="animate-spin w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p class="text-sm text-blue-700 dark:text-blue-300">
+                      Chargement des membres de l'activité...
+                    </p>
+                  </div>
+                </div>
                 
                 <!-- Message si pas de permission -->
-                <div v-if="!canAssignUsers" class="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl border-l-4 border-amber-500 mb-4">
+               <div v-else-if="!canAssignUsers" class="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl border-l-4 border-amber-500 mb-4">
                   <div class="flex items-start gap-3">
                     <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -463,39 +473,42 @@
                 
                 <!-- Sélecteur multiple amélioré -->
                 <div class="relative">
-                  <select 
-                    v-model="formData.assignee_ids" 
-                    multiple
-                    :disabled="!canAssignUsers || availableUsers.length === 0"
-                    class="w-full px-4 py-3 border-2 rounded-xl transition-all"
-                    :class="[
-                      !canAssignUsers || availableUsers.length === 0 
-                        ? 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 opacity-60 cursor-not-allowed' 
-                        : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 hover:border-blue-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
-                    ]"
-                    size="5"
-                  >
-                    <option v-for="user in availableUsers" :key="user.id" :value="user.id" class="py-2">
-                      {{ user.nom }} ({{ user.email }})
-                      <template v-if="activiteContext?.responsable_id === user.id"> - 👑 Responsable</template>
-                    </option>
+                   <select 
+                      v-model="formData.assignee_ids" 
+                      multiple
+                      :disabled="!canAssignUsers || availableUsers.length === 0 || loadingMembers"
+                      class="w-full px-4 py-3 border-2 rounded-xl transition-all"
+                      :class="[
+                        !canAssignUsers || availableUsers.length === 0 || loadingMembers
+                          ? 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 opacity-60 cursor-not-allowed' 
+                          : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 hover:border-blue-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                      ]"
+                      size="5" >
+                      <option v-for="user in availableUsers" :key="user.id" :value="user.id" class="py-2">
+                        {{ user.nom }} ({{ user.email }})
+                        <template v-if="user.id === activiteContext?.responsable_id"> - 👑 Responsable</template>
+                        <template v-else-if="getUserRole(user)"> - {{ getUserRole(user) }}</template>
+                      </option>
                   </select>
                   
                   <!-- Icône indicative -->
-                  <div class="absolute top-3 right-3 pointer-events-none">
-                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
-                  </div>
+                   <div class="absolute top-3 right-3 pointer-events-none">
+                      <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                      </svg>
+                    </div>
                 </div>
                 
                 <!-- Info ou message -->
-                <div v-if="availableUsers.length === 0" class="mt-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                  <p class="text-sm text-gray-600 dark:text-gray-400 text-center">
-                    Aucun membre disponible dans cette activité
-                  </p>
-                </div>
-                <p v-else class="mt-2 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                  <div v-if="!loadingMembers && availableUsers.length === 0" class="mt-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <p class="text-sm text-gray-600 dark:text-gray-400 text-center">
+                      Aucun membre disponible dans cette activité
+                    </p>
+                    <p class="text-xs text-gray-500 dark:text-gray-500 mt-1 text-center">
+                      Les membres doivent être ajoutés à l'activité avant de pouvoir être assignés
+                    </p>
+                  </div>
+                <p v-else-if="!loadingMembers" class="mt-2 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -686,6 +699,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useTaches } from '@/composables/useTaches'
 import api from '@/api/axios'
 import { useActivityPermissions } from '@/composables/useActivityPermissions'
+import { useActivityMembers } from '@/composables/useActivityMembers'  
 
 const props = defineProps({
   tache: {
@@ -711,23 +725,43 @@ const emit = defineEmits(['close', 'saved'])
 const authStore = useAuthStore()
 const { createTache, updateTache } = useTaches()
 
-// ✅ Utiliser le composable pour les permissions
+// ✅ CORRECTION : Utiliser le composable pour les membres d'activité
+const {
+  loadingMembers,
+  activityMembers,
+  availableMembers,
+  loadActivityMembers,
+  loadProjectMembers
+} = useActivityMembers()
+
+// ✅ CORRECTION : Créer une référence réactive pour l'activité
+const currentActivite = ref(props.activiteContext)
+
+// ✅ CORRECTION : Utiliser useActivityPermissions avec l'activité réactive
 const {
   canCreateTasks,
   canEditTasks,
   canAssignUsers,
-  getPermissionDeniedMessage
-} = useActivityPermissions(props.activiteContext ? ref(props.activiteContext) : ref(null))
+  getPermissionDeniedMessage,
+  canView,
+  isSuperAdmin,
+  isActivityResponsable,
+  isProjectResponsable
+} = useActivityPermissions(currentActivite)
 
 const loading = ref(false)
-const users = ref([])
 const activites = ref([])
 const availableLabels = ref([])
 const errorMessage = ref('')
 const validationErrors = ref([])
 
-// ✅ Permission calculée
+// ✅ CORRECTION : Permission calculée avec fallback sécurisé
 const hasPermission = computed(() => {
+  if (!currentActivite.value) {
+    console.warn('⚠️ Aucune activité sélectionnée pour vérifier les permissions')
+    return false
+  }
+
   if (props.tache) {
     return canEditTasks.value
   } else {
@@ -777,16 +811,81 @@ const visibilityOptions = [
   { value: 'private', label: 'Privé', icon: '🔒', description: 'Seulement les assignés' }
 ]
 
-// Filtrage des utilisateurs disponibles
+// ✅ CORRECTION : Utiliser les membres de l'activité
 const availableUsers = computed(() => {
-  const activite = activites.value.find(a => a.id === formData.value.activite_id)
-  const membresActivite = activite.membres || []
-  
-  return users.value.filter(user => {
-    if (activite.responsable_id === user.id) return true
-    return membresActivite.some(membre => membre.id === user.id)
-  })
+  return availableMembers.value || []
 })
+
+// ✅ CORRECTION : Obtenir le rôle de l'utilisateur dans l'activité
+const getUserRole = (user) => {
+  if (!currentActivite.value) return null
+  
+  // Si c'est le responsable de l'activité
+  if (currentActivite.value.responsable_id === user.id) {
+    return 'Responsable'
+  }
+  
+  // Si c'est le responsable du projet
+  if (currentActivite.value.projet?.responsable_id === user.id) {
+    return 'Responsable Projet'
+  }
+  
+  // Vérifier les rôles dans les membres de l'activité
+  const membre = currentActivite.value.membres?.find(m => m.id === user.id)
+  if (membre) {
+    return membre.pivot?.role || 'Membre'
+  }
+  
+  return null
+}
+
+// ✅ CORRECTION : Charger les membres quand l'activité change
+const loadMembersForActivity = async (activiteId) => {
+  if (!activiteId) return
+  
+  try {
+    console.log('🔄 Chargement des membres pour activité:', activiteId)
+    await loadActivityMembers(activiteId)
+  } catch (error) {
+    console.error('❌ Erreur chargement membres:', error)
+    // Fallback: essayer de charger via le projet
+    if (currentActivite.value?.projet_id) {
+      console.log('🔄 Fallback: Chargement via projet:', currentActivite.value.projet_id)
+      await loadProjectMembers(currentActivite.value.projet_id)
+    }
+  }
+}
+
+// ✅ CORRECTION : Mettre à jour l'activité courante
+const updateCurrentActivite = async (activiteId) => {
+  if (!activiteId) {
+    currentActivite.value = null
+    return
+  }
+
+  try {
+    // Si on a déjà l'activité contextuelle, l'utiliser
+    if (props.activiteContext && props.activiteContext.id === activiteId) {
+      currentActivite.value = props.activiteContext
+      return
+    }
+
+    // Sinon charger l'activité depuis l'API
+    console.log('🔄 Chargement des détails de l\'activité:', activiteId)
+    const { data } = await api.get(`/activites/${activiteId}?with_members=true`)
+    currentActivite.value = data.data
+    
+    console.log('✅ Activité chargée pour permissions:', {
+      id: currentActivite.value.id,
+      nom: currentActivite.value.nom,
+      responsable_id: currentActivite.value.responsable_id,
+      membres_count: currentActivite.value.membres?.length || 0
+    })
+  } catch (error) {
+    console.error('❌ Erreur chargement activité:', error)
+    currentActivite.value = null
+  }
+}
 
 // Methods
 const toggleLabel = (labelId) => {
@@ -806,7 +905,7 @@ const removeAssignee = (userId) => {
 }
 
 const getUserById = (userId) => {
-  return users.value.find(u => u.id === userId)
+  return availableUsers.value.find(u => u.id === userId)
 }
 
 const getInitials = (name) => {
@@ -820,18 +919,9 @@ const getProgressColorClass = (progress) => {
   return 'bg-green-500'
 }
 
-const loadUsers = async () => {
-  try {
-    const { data } = await api.get('/users')
-    users.value = data.data || []
-  } catch (error) {
-    console.error('Error loading users:', error)
-  }
-}
-
 const loadActivites = async () => {
   try {
-    const { data } = await api.get('/activites?with_members=true&include=projet,membres')
+    const { data } = await api.get('/activites/mes-activites')
     activites.value = data.data || []
   } catch (error) {
     console.error('Error loading activites:', error)
@@ -848,10 +938,19 @@ const loadLabels = async () => {
 }
 
 const handleSubmit = async () => {
+  // ✅ CORRECTION : Vérification robuste des permissions
   if (!hasPermission.value) {
-    errorMessage.value = props.tache
-      ? getPermissionDeniedMessage('edit_tasks')
-      : getPermissionDeniedMessage('create_tasks')
+    const action = props.tache ? 'edit_tasks' : 'create_tasks'
+    errorMessage.value = getPermissionDeniedMessage(action)
+    
+    console.warn('🚫 Permission refusée:', {
+      action,
+      hasPermission: hasPermission.value,
+      canCreateTasks: canCreateTasks.value,
+      canEditTasks: canEditTasks.value,
+      activite: currentActivite.value?.id,
+      user: authStore.user?.id
+    })
     return
   }
 
@@ -860,8 +959,8 @@ const handleSubmit = async () => {
   validationErrors.value = []
 
   try {
-    if (props.activiteContext) {
-      formData.value.activite_id = props.activiteContext.id
+    if (currentActivite.value) {
+      formData.value.activite_id = currentActivite.value.id
     }
 
     if (props.tache) {
@@ -871,7 +970,7 @@ const handleSubmit = async () => {
     }
     emit('saved')
   } catch (error) {
-    console.error(error)
+    console.error('❌ Erreur soumission formulaire:', error)
     handleError(error)
   } finally {
     loading.value = false
@@ -896,12 +995,16 @@ const handleError = (error) => {
   }
 }
 
+// ✅ CORRECTION : Chargement initial amélioré
 onMounted(async () => {
   try {
-    await Promise.all([loadUsers(), loadActivites(), loadLabels()])
+    await Promise.all([loadActivites(), loadLabels()])
 
+    // Initialiser l'activité courante
     if (props.activiteContext) {
+      currentActivite.value = props.activiteContext
       formData.value.activite_id = props.activiteContext.id
+      await loadMembersForActivity(props.activiteContext.id)
     }
 
     if (props.tache) {
@@ -927,15 +1030,54 @@ onMounted(async () => {
         label_ids: props.tache.labels?.map(l => l.id) || [],
         visibility: props.tache.visibility || 'members_only'
       }
+      
+      // Charger l'activité et les membres pour la tâche existante
+      if (props.tache.activite_id) {
+        await updateCurrentActivite(props.tache.activite_id)
+        await loadMembersForActivity(props.tache.activite_id)
+      }
     }
   } catch (error) {
-    console.error('Error loading form data:', error)
+    console.error('❌ Erreur chargement données formulaire:', error)
   }
 })
 
-watch(() => formData.value.activite_id, () => {
-  // Reset assignees when activity changes
+// ✅ CORRECTION : Watchers améliorés
+watch(() => formData.value.activite_id, async (newActiviteId) => {
+  console.log('🔄 Changement d\'activité:', newActiviteId)
+  
+  // Reset assignees quand l'activité change
   formData.value.assignee_ids = []
+  
+  if (newActiviteId) {
+    await updateCurrentActivite(newActiviteId)
+    await loadMembersForActivity(newActiviteId)
+  } else {
+    currentActivite.value = null
+  }
+})
+
+// ✅ CORRECTION : Watcher pour l'activité contextuelle
+watch(() => props.activiteContext, (newContext) => {
+  if (newContext) {
+    console.log('🔄 Mise à jour contexte activité:', newContext.id)
+    currentActivite.value = newContext
+    formData.value.activite_id = newContext.id
+  }
+})
+
+// ✅ CORRECTION : Debug des permissions
+watch([currentActivite, canCreateTasks, canEditTasks], () => {
+  console.log('🔍 État des permissions:', {
+    activite: currentActivite.value?.id,
+    canCreateTasks: canCreateTasks.value,
+    canEditTasks: canEditTasks.value,
+    canAssignUsers: canAssignUsers.value,
+    hasPermission: hasPermission.value,
+    isSuperAdmin: isSuperAdmin.value,
+    isActivityResponsable: isActivityResponsable.value,
+    isProjectResponsable: isProjectResponsable.value
+  })
 })
 </script>
 

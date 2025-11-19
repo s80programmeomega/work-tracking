@@ -74,7 +74,7 @@ class Tache extends Model
         'week_number' => 'integer',
         'year' => 'integer',
     ];
- 
+
 
     protected $appends = [
         'is_overdue',
@@ -84,8 +84,8 @@ class Tache extends Model
     ];
 
     protected $with = ['activite', 'labels'];
-    
-       // ==================== ACTIVITY LOG ====================
+
+    // ==================== ACTIVITY LOG ====================
 
     public function getActivitylogOptions(): LogOptions
     {
@@ -107,7 +107,7 @@ class Tache extends Model
             if (!$tache->code) {
                 $tache->code = static::generateUniqueCode();
             }
-            
+
             // ✅ Auto-définir semaine et année
             if (!$tache->week_number && $tache->date_debut) {
                 $tache->week_number = $tache->date_debut->weekOfYear;
@@ -191,7 +191,7 @@ class Tache extends Model
     }
 
     // ==================== HELPER METHODS ====================
-/**
+    /**
      * ✅ Vérifier si un utilisateur est assigné
      */
     public function isAssignedTo(User $user): bool
@@ -219,85 +219,11 @@ class Tache extends Model
             ->performedOn($this)
             ->log('Tâche marquée comme terminée');
     }
+      
 
-      /**
-     * ✅ Valider N1 avec traçabilité
-     */
-    public function validateN1(User $validator, ?string $commentaire = null): void
-    {
-        if (!$this->validation_n1_required) {
-            throw new \Exception('Cette tâche ne nécessite pas de validation N1');
-        }
-
-        if ($this->validated_n1_at) {
-            throw new \Exception('Cette tâche est déjà validée (N1)');
-        }
-
-        if ($this->statut !== TacheStatut::TERMINE) {
-            throw new \Exception('La tâche doit être terminée avant d\'être validée');
-        }
-
-        $this->update([
-            'validated_n1_by' => $validator->id,
-            'validated_n1_at' => now(),
-            'commentaire_n1' => $commentaire,
-        ]);
-
-        activity()
-            ->causedBy($validator)
-            ->performedOn($this)
-            ->withProperties(['commentaire' => $commentaire])
-            ->log('Validation N1 effectuée');
-
-        // TODO: Notifier responsable projet pour N2
-    }
+     
 
     /**
-     * ✅ Valider N2 avec traçabilité
-     */
-    public function validateN2(User $validator, ?string $commentaire = null): void
-    {
-        if (!$this->validation_n2_required) {
-            throw new \Exception('Cette tâche ne nécessite pas de validation N2');
-        }
-
-        if (!$this->validated_n1_at) {
-            throw new \Exception('La validation N1 doit être effectuée en premier');
-        }
-
-        if ($this->validated_n2_at) {
-            throw new \Exception('Cette tâche est déjà validée (N2)');
-        }
-
-        $this->update([
-            'validated_n2_by' => $validator->id,
-            'validated_n2_at' => now(),
-            'commentaire_n2' => $commentaire,
-        ]);
-
-        activity()
-            ->causedBy($validator)
-            ->performedOn($this)
-            ->withProperties(['commentaire' => $commentaire])
-            ->log('Validation N2 effectuée - Tâche entièrement validée');
-
-        // TODO: Notifier tous les participants
-    }
-
-    
-
-    /**
-     * ✅ Vérifier si la tâche est entièrement validée
-     */
-    public function isFullyValidated(): bool
-    {
-        $n1Valid = !$this->validation_n1_required || $this->validated_n1_at !== null;
-        $n2Valid = !$this->validation_n2_required || $this->validated_n2_at !== null;
-
-        return $n1Valid && $n2Valid;
-    }
-
-     /**
      * ✅ Archiver/Désarchiver
      */
     public function archive(): void
@@ -331,8 +257,10 @@ class Tache extends Model
         }
 
         // Responsable du projet
-        if ($this->activite && $this->activite->projet && 
-            $this->activite->projet->responsable_id === $user->id) {
+        if (
+            $this->activite && $this->activite->projet &&
+            $this->activite->projet->responsable_id === $user->id
+        ) {
             return true;
         }
 
@@ -342,10 +270,12 @@ class Tache extends Model
         }
 
         // Membre de l'activité avec permissions
-        if ($this->activite && $this->activite->membres()
-            ->where('user_id', $user->id)
-            ->wherePivot('can_edit_tasks', true)
-            ->exists()) {
+        if (
+            $this->activite && $this->activite->membres()
+                ->where('user_id', $user->id)
+                ->wherePivot('can_edit_tasks', true)
+                ->exists()
+        ) {
             return true;
         }
 
@@ -374,36 +304,7 @@ class Tache extends Model
 
         return false;
     }
-
-    /**
-     * ✅ Vérifier si l'utilisateur peut valider N1
-     */
-    public function canBeValidatedN1By(User $user): bool
-    {
-        if (!$this->validation_n1_required) {
-            return false;
-        }
-
-        // Déjà validé N1
-        if ($this->validated_n1_at) {
-            return false;
-        }
-
-        // Responsable de l'activité
-        if ($this->activite && $this->activite->responsable_id === $user->id) {
-            return true;
-        }
-
-        // Membre de l'activité avec permission de validation
-        if ($this->activite && $this->activite->membres()
-            ->where('user_id', $user->id)
-            ->wherePivot('can_validate_results', true)
-            ->exists()) {
-            return true;
-        }
-
-        return false;
-    }
+     
 
     /**
      * ✅ Vérifier si l'utilisateur peut valider N2
@@ -425,14 +326,18 @@ class Tache extends Model
         }
 
         // Responsable du projet
-        if ($this->activite && $this->activite->projet && 
-            $this->activite->projet->responsable_id === $user->id) {
+        if (
+            $this->activite && $this->activite->projet &&
+            $this->activite->projet->responsable_id === $user->id
+        ) {
             return true;
         }
 
         // Super admin du workspace
-        if ($this->activite && $this->activite->projet && 
-            $this->activite->projet->workspace) {
+        if (
+            $this->activite && $this->activite->projet &&
+            $this->activite->projet->workspace
+        ) {
             $workspace = $this->activite->projet->workspace;
             if ($workspace->owner_id === $user->id) {
                 return true;
@@ -441,26 +346,8 @@ class Tache extends Model
 
         return false;
     }
-
-    /**
-     * ✅ Vérifier si l'utilisateur peut marquer comme terminé
-     */
-    public function canBeCompletedBy(User $user): bool
-    {
-        // Assigné avec permission de complétion
-        $assignment = $this->assignees()->where('user_id', $user->id)->first();
-        if ($assignment && ($assignment->pivot->can_complete ?? false)) {
-            return true;
-        }
-
-        // Responsable de l'activité
-        if ($this->activite && $this->activite->responsable_id === $user->id) {
-            return true;
-        }
-
-        return false;
-    }
  
+
     // ==================== ACCESSORS ====================
 
     public function getIsOverdueAttribute(): bool
@@ -477,15 +364,15 @@ class Tache extends Model
         if ($this->validated_n2_at) {
             return 'fully_validated';
         }
-        
+
         if ($this->validated_n1_at) {
             return 'validated_n1';
         }
-        
+
         if ($this->statut === TacheStatut::TERMINE) {
             return 'pending_validation';
         }
-        
+
         return 'not_validated';
     }
 
@@ -505,16 +392,74 @@ class Tache extends Model
         return round((($this->actual_hours - $this->estimated_hours) / $this->estimated_hours) * 100, 2);
     }
 
+    public function canBeStarted(User $user = null): bool
+    {
+        // État de base
+        if ($this->statut === TacheStatut::TERMINE) {
+            return false;
+        }
+
+        if ($this->archive_status === 'archived') {
+            return false;
+        }
+
+        // Vérifier les permissions utilisateur si fourni
+        if ($user && !$this->canBeEditedBy($user)) {
+            return false;
+        }
+
+        // Vérifier les dépendances (si vous avez cette fonctionnalité)
+        // if ($this->hasBlockingDependencies()) {
+        //     return false;
+        // }
+
+        // Vérifier les prérequis métier
+        // if (!$this->meetsStartRequirements()) {
+        //     return false;
+        // }
+
+        return true;
+    }
+
+    /**
+     * Vérifier si la tâche a des dépendances bloquantes
+     */
+    protected function hasBlockingDependencies(): bool
+    {
+        // Implémentez votre logique de dépendances ici
+        // Par exemple :
+        // return $this->dependencies()
+        //     ->where('statut', '!=', TacheStatut::TERMINE)
+        //     ->where('is_blocking', true)
+        //     ->exists();
+
+        return false; // Temporairement désactivé
+    }
+
+    /**
+     * Vérifier les prérequis métier pour démarrer
+     */
+    protected function meetsStartRequirements(): bool
+    {
+        // Implémentez vos règles métier ici
+        // Par exemple :
+        // - Date de début dans le futur
+        // - Ressources disponibles
+        // - Budget approuvé, etc.
+
+        return true; // Temporairement toujours vrai
+    }
+
 
     // ==================== SCOPES ====================
 
     public function scopeForWeek($query, int $weekNumber, int $year)
     {
         return $query->where('week_number', $weekNumber)
-                    ->where('year', $year);
+            ->where('year', $year);
     }
 
-     public function scopeForActivite($query, int $activiteId)
+    public function scopeForActivite($query, int $activiteId)
     {
         return $query->where('activite_id', $activiteId);
     }
@@ -522,22 +467,22 @@ class Tache extends Model
     public function scopePendingValidationN1($query)
     {
         return $query->where('statut', TacheStatut::TERMINE)
-                    ->where('validation_n1_required', true)
-                    ->whereNull('validated_n1_at');
+            ->where('validation_n1_required', true)
+            ->whereNull('validated_n1_at');
     }
 
     public function scopePendingValidationN2($query)
     {
         return $query->where('statut', TacheStatut::TERMINE)
-                    ->where('validation_n2_required', true)
-                    ->whereNotNull('validated_n1_at')
-                    ->whereNull('validated_n2_at');
+            ->where('validation_n2_required', true)
+            ->whereNotNull('validated_n1_at')
+            ->whereNull('validated_n2_at');
     }
 
     public function scopeOverdue($query)
     {
         return $query->where('echeance', '<', now())
-                    ->where('statut', '!=', TacheStatut::TERMINE->value);
+            ->where('statut', '!=', TacheStatut::TERMINE->value);
     }
 
     public function scopeAssignedTo($query, int $userId)
@@ -547,7 +492,7 @@ class Tache extends Model
         });
     }
 
-     public function scopeActive($query)
+    public function scopeActive($query)
     {
         return $query->where('archive_status', 'active');
     }
@@ -561,4 +506,144 @@ class Tache extends Model
     {
         return $query->orderBy('position')->orderBy('created_at', 'desc');
     }
+ 
+/**
+ * ✅ NOUVEAU : Vérifier si l'utilisateur peut compléter la tâche
+ */
+public function canBeCompletedBy(User $user): bool
+{
+    // Super admin peut tout faire
+    if ($user->isSuperAdmin()) {
+        return true;
+    }
+
+    // Responsable de l'activité
+    if ($this->activite && $this->activite->responsable_id === $user->id) {
+        return true;
+    }
+
+    // Responsable du projet
+    if ($this->activite && $this->activite->projet && $this->activite->projet->responsable_id === $user->id) {
+        return true;
+    }
+
+    // Assigné avec permission can_complete
+    $assignment = $this->assignees()->where('user_id', $user->id)->first();
+    return $assignment && ($assignment->pivot->can_complete ?? true);
+}
+
+/**
+ * ✅ NOUVEAU : Vérifier si l'utilisateur peut valider N1
+ */
+public function canBeValidatedN1By(User $user): bool
+{
+    // Tâche doit être en attente de validation N1
+    if (!$this->validation_n1_required || $this->validated_n1_at) {
+        return false;
+    }
+
+    // Super admin
+    if ($user->isSuperAdmin()) {
+        return true;
+    }
+
+    // Responsable de l'activité (N1)
+    if ($this->activite && $this->activite->responsable_id === $user->id) {
+        return true;
+    }
+
+    // Membre de l'activité avec permission de validation
+    if ($this->activite) {
+        $membre = $this->activite->membres()->where('user_id', $user->id)->first();
+        if ($membre && $membre->pivot->can_validate_results) {
+            return true;
+        }
+    }
+
+    return false;
+}
+ 
+
+ 
+
+/**
+ * ✅ NOUVEAU : Valider la tâche (N1)
+ */
+public function validateN1(User $user, ?string $commentaire = null): void
+{
+    if (!$this->canBeValidatedN1By($user)) {
+        throw new \Exception('Vous n\'avez pas la permission de valider cette tâche (N1)');
+    }
+
+    if ($this->statut !== TacheStatut::TERMINE) {
+        throw new \Exception('La tâche doit être terminée avant validation');
+    }
+
+    $this->update([
+        'validated_n1_at' => now(),
+        'validated_n1_by' => $user->id,
+        'commentaire_n1' => $commentaire,
+    ]);
+
+    // Notification N2 si requis
+    if ($this->validation_n2_required && $this->activite && $this->activite->projet && $this->activite->projet->responsable) {
+        // TODO: Envoyer notification au responsable projet
+    }
+
+    activity()
+        ->causedBy($user)
+        ->performedOn($this)
+        ->withProperties(['commentaire' => $commentaire])
+        ->log('Validation N1 effectuée');
+}
+
+/**
+ * ✅ NOUVEAU : Valider la tâche (N2)
+ */
+public function validateN2(User $user, ?string $commentaire = null): void
+{
+    if (!$this->canBeValidatedN2By($user)) {
+        throw new \Exception('Vous n\'avez pas la permission de valider cette tâche (N2)');
+    }
+
+    if (!$this->validated_n1_at) {
+        throw new \Exception('La validation N1 doit être effectuée avant la validation N2');
+    }
+
+    $this->update([
+        'validated_n2_at' => now(),
+        'validated_n2_by' => $user->id,
+        'commentaire_n2' => $commentaire,
+        'validation_superieur' => true, // Marque complètement validée
+    ]);
+
+    // Notification à l'utilisateur assigné
+    if ($this->assignees->first()) {
+        // TODO: Envoyer notification
+    }
+
+    activity()
+        ->causedBy($user)
+        ->performedOn($this)
+        ->withProperties(['commentaire' => $commentaire])
+        ->log('Validation N2 effectuée - Validation complète');
+}
+
+/**
+ * ✅ NOUVEAU : Vérifier si la tâche est complètement validée
+ */
+public function isFullyValidated(): bool
+{
+    if ($this->validation_n1_required && !$this->validated_n1_at) {
+        return false;
+    }
+
+    if ($this->validation_n2_required && !$this->validated_n2_at) {
+        return false;
+    }
+
+    return true;
+}
+ 
+
 }

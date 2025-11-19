@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Activite\StoreActiviteRequest;
 use App\Http\Requests\Activite\UpdateActiviteRequest;
 use App\Http\Resources\ActiviteResource;
+use App\Http\Resources\TacheResource;
 use App\Models\Activite;
 use App\Models\Projet;
 use App\Models\User;
@@ -13,6 +14,7 @@ use App\Notifications\ActiviteMemberAdded;
 use App\Notifications\ActiviteMemberPermissionsUpdated;
 use App\Notifications\ActiviteMemberRemoved;
 use App\Services\ActiviteService;
+use App\Services\TacheService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -128,6 +130,34 @@ class ActiviteController extends Controller
 
         return response()->json($activites);
     }
+
+    /**
+ * ✅ Kanban pour une activité (spécifique pour ActiviteDetail)
+ */
+public function kanban(Request $request, Activite $activite): JsonResponse
+{
+    $user = $request->user();
+    
+    // Vérification d'accès
+    if (!$user->isSuperAdmin() && !$activite->canUserAccess($user)) {
+        return response()->json(['message' => 'Accès non autorisé'], 403);
+    }
+
+    $tacheService = app(TacheService::class);
+    $kanban = $tacheService->getKanbanForActivite($activite->id);
+
+    return response()->json([
+        'a_faire' => TacheResource::collection($kanban['a_faire']),
+        'en_cours' => TacheResource::collection($kanban['en_cours']),
+        'termine' => TacheResource::collection($kanban['termine']),
+        'stats' => [
+            'total' => count($kanban['a_faire']) + count($kanban['en_cours']) + count($kanban['termine']),
+            'a_faire' => count($kanban['a_faire']),
+            'en_cours' => count($kanban['en_cours']),
+            'termine' => count($kanban['termine']),
+        ]
+    ]);
+}
 
     public function store(Request $request): JsonResponse
     {
@@ -563,6 +593,77 @@ class ActiviteController extends Controller
             'data' => $members->unique('id')->values()
         ]);
     }
+ 
+
+/**
+ * ✅ NOUVEAU : Récupérer les membres d'une activité spécifique
+ * Compatible avec l'endpoint attendu par le frontend
+ */
+public function membres($id): JsonResponse
+{
+    try {
+        $activite = Activite::with([
+            'membres' => function ($query) {
+                $query->select('users.id', 'users.nom', 'users.email', 'users.avatar')
+                    ->where('is_active', true);
+            },
+            'projet.members' => function ($query) {
+                $query->select('users.id', 'users.nom', 'users.email', 'users.avatar')
+                    ->where('is_active', true);
+            }
+        ])->findOrFail($id);
+
+        $user = request()->user();
+
+        // Vérifier l'accès à l'activité
+        if (!$user->isSuperAdmin() && !$activite->projet->hasAccess($user)) {
+            return response()->json([
+                'message' => 'Accès non autorisé'
+            ], 403);
+        }
+
+        // Combiner les membres de l'activité et du projet
+        $membres = $activite->membres->merge($activite->projet->membres ?? collect())->unique('id');
+
+        // Formater la réponse
+        $formattedMembers = $membres->map(function ($membre) use ($activite) {
+            $memberData = [
+                'id' => $membre->id,
+                'nom' => $membre->nom,
+                'email' => $membre->email,
+                'avatar' => $membre->avatar,
+                'is_active' => $membre->is_active ?? true,
+            ];
+
+            // Ajouter les informations de rôle si disponibles
+            if ($membre->pivot) {
+                $memberData['role'] = $membre->pivot->role;
+                $memberData['permissions'] = [
+                    'can_create_tasks' => $membre->pivot->can_create_tasks ?? false,
+                    'can_edit_tasks' => $membre->pivot->can_edit_tasks ?? false,
+                    'can_delete_tasks' => $membre->pivot->can_delete_tasks ?? false,
+                    'can_validate_results' => $membre->pivot->can_validate_results ?? false,
+                    'can_assign_users' => $membre->pivot->can_assign_users ?? false,
+                ];
+            }
+
+            return $memberData;
+        });
+
+        return response()->json($formattedMembers->values());
+
+    } catch (\Exception $e) {
+        \Log::error('Erreur chargement membres activité', [
+            'activite_id' => $id,
+            'error' => $e->getMessage()
+        ]);
+
+        return response()->json([
+            'message' => 'Erreur lors du chargement des membres',
+            'error' => config('app.debug') ? $e->getMessage() : 'Erreur serveur'
+        ], 500);
+    }
+}
 
     // ==================== ✅ NOUVELLES MÉTHODES POUR GESTION DES MEMBRES ====================
 
@@ -825,7 +926,7 @@ class ActiviteController extends Controller
      */
     public function getTaches(Request $request, $id): JsonResponse
     {
-        $activite = Activite::with('taches.assignee')->findOrFail($id);
+        $activite = Activite::with('taches.assignees')->findOrFail($id);
         $user = $request->user();
 
         // Vérifier l'accès
