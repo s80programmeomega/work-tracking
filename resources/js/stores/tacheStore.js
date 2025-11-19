@@ -1,15 +1,24 @@
+// resources/js/stores/tacheStore.js - VERSION CORRIGÉE
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import tachesApi from '@/api/taches'
 
 export const useTacheStore = defineStore('tache', () => {
-  // State
+  // ✅ State avec initialisation garantie
   const taches = ref([])
   const kanban = ref({
     a_faire: [],
     en_cours: [],
     termine: []
   })
+
+  const stats = ref({
+    total: 0,
+    a_faire: 0,
+    en_cours: 0,
+    termine: 0
+  })
+
   const currentTache = ref(null)
   const loading = ref(false)
   const error = ref(null)
@@ -29,12 +38,72 @@ export const useTacheStore = defineStore('tache', () => {
 
   const myTaches = computed(() => {
     return taches.value.filter(t => {
-      // Filter tasks assigned to current user (implement based on auth)
-      return true
+      return true // À adapter selon votre système d'auth
     })
   })
 
-  // Actions
+  // ✅ CORRIGÉ : Fetch Kanban avec gestion d'erreurs robuste
+  async function fetchKanbanForActivite(activiteId) {
+    loading.value = true
+    error.value = null
+    
+    try {
+      console.log('🔄 Store: Chargement kanban pour activité:', activiteId)
+      
+      const { data } = await tachesApi.getForActivite(activiteId)
+      
+      console.log('📦 Store: Données reçues:', data)
+      
+      // ✅ Initialisation GARANTIE avec structure complète
+      kanban.value = {
+        a_faire: Array.isArray(data.a_faire) ? data.a_faire : [],
+        en_cours: Array.isArray(data.en_cours) ? data.en_cours : [],
+        termine: Array.isArray(data.termine) ? data.termine : []
+      }
+      
+      // ✅ Stats avec fallback
+      stats.value = data.stats || {
+        total: kanban.value.a_faire.length + kanban.value.en_cours.length + kanban.value.termine.length,
+        a_faire: kanban.value.a_faire.length,
+        en_cours: kanban.value.en_cours.length,
+        termine: kanban.value.termine.length
+      }
+      
+      console.log('✅ Store: Kanban mis à jour:', {
+        a_faire: kanban.value.a_faire.length,
+        en_cours: kanban.value.en_cours.length,
+        termine: kanban.value.termine.length,
+        stats: stats.value
+      })
+      
+      return kanban.value
+      
+    } catch (err) {
+      console.error('❌ Store: Erreur chargement kanban:', err)
+      console.error('Response:', err.response?.data)
+      
+      error.value = err.response?.data?.message || 'Failed to fetch kanban'
+      
+      // ✅ Réinitialiser avec structure vide en cas d'erreur
+      kanban.value = {
+        a_faire: [],
+        en_cours: [],
+        termine: []
+      }
+      stats.value = {
+        total: 0,
+        a_faire: 0,
+        en_cours: 0,
+        termine: 0
+      }
+      
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // Actions de base
   async function fetchTaches(filters = {}) {
     loading.value = true
     error.value = null
@@ -44,27 +113,6 @@ export const useTacheStore = defineStore('tache', () => {
       return taches.value
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to fetch tasks'
-      throw err
-    } finally {
-      loading.value = false
-    }
-  }
-
-  async function fetchKanbanForActivite(activiteId) {
-    loading.value = true
-    error.value = null
-    try {
-      const { data } = await tachesApi.getForActivite(activiteId)
-      kanban.value = {
-        a_faire: data.a_faire || [],
-        en_cours: data.en_cours || [],
-        termine: data.termine || []
-      }
-      // Debug: Check if labels are in the data
-      console.log('Kanban data loaded, first task labels:', kanban.value.a_faire[0]?.labels)
-      return kanban.value
-    } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to fetch kanban'
       throw err
     } finally {
       loading.value = false
@@ -108,10 +156,8 @@ export const useTacheStore = defineStore('tache', () => {
       const { data } = await tachesApi.create(tacheData)
       const newTache = data.data
 
-      // Add to local state
       taches.value.push(newTache)
 
-      // Add to kanban if it exists
       if (kanban.value[newTache.statut]) {
         kanban.value[newTache.statut].push(newTache)
       }
@@ -132,16 +178,13 @@ export const useTacheStore = defineStore('tache', () => {
       const { data } = await tachesApi.update(id, tacheData)
       const updatedTache = data.data
 
-      // Update in local state
       const index = taches.value.findIndex(t => t.id === id)
       if (index !== -1) {
         taches.value[index] = updatedTache
       }
 
-      // Update in kanban
       updateTacheInKanban(updatedTache)
 
-      // Update current if it's the same
       if (currentTache.value?.id === id) {
         currentTache.value = updatedTache
       }
@@ -161,15 +204,12 @@ export const useTacheStore = defineStore('tache', () => {
     try {
       await tachesApi.delete(id)
 
-      // Remove from local state
       taches.value = taches.value.filter(t => t.id !== id)
 
-      // Remove from kanban
       for (const statut in kanban.value) {
         kanban.value[statut] = kanban.value[statut].filter(t => t.id !== id)
       }
 
-      // Clear current if it's the same
       if (currentTache.value?.id === id) {
         currentTache.value = null
       }
@@ -189,7 +229,6 @@ export const useTacheStore = defineStore('tache', () => {
       const { data } = await tachesApi.move(id, statut, ordre)
       const movedTache = data.data
 
-      // Update in local state
       const index = taches.value.findIndex(t => t.id === id)
       if (index !== -1) {
         taches.value[index] = movedTache
@@ -209,10 +248,8 @@ export const useTacheStore = defineStore('tache', () => {
       const { data } = await tachesApi.duplicate(id)
       const duplicatedTache = data.data
 
-      // Add to local state
       taches.value.push(duplicatedTache)
 
-      // Add to kanban
       if (kanban.value[duplicatedTache.statut]) {
         kanban.value[duplicatedTache.statut].push(duplicatedTache)
       }
@@ -232,10 +269,8 @@ export const useTacheStore = defineStore('tache', () => {
     try {
       await tachesApi.archive(id)
 
-      // Remove from local state
       taches.value = taches.value.filter(t => t.id !== id)
 
-      // Remove from kanban
       for (const statut in kanban.value) {
         kanban.value[statut] = kanban.value[statut].filter(t => t.id !== id)
       }
@@ -249,25 +284,22 @@ export const useTacheStore = defineStore('tache', () => {
     }
   }
 
-  async function validateTache(id) {
+  async function unarchiveTache(id) {
     loading.value = true
     error.value = null
     try {
-      const { data } = await tachesApi.validate(id)
-      const validatedTache = data.data
+      const { data } = await tachesApi.unarchive(id)
+      const unarchivedTache = data.data
 
-      // Update in local state
-      const index = taches.value.findIndex(t => t.id === id)
-      if (index !== -1) {
-        taches.value[index] = validatedTache
+      taches.value.push(unarchivedTache)
+
+      if (kanban.value[unarchivedTache.statut]) {
+        kanban.value[unarchivedTache.statut].push(unarchivedTache)
       }
 
-      // Update in kanban
-      updateTacheInKanban(validatedTache)
-
-      return validatedTache
+      return unarchivedTache
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to validate task'
+      error.value = err.response?.data?.message || 'Failed to unarchive task'
       throw err
     } finally {
       loading.value = false
@@ -280,13 +312,11 @@ export const useTacheStore = defineStore('tache', () => {
       const { data } = await tachesApi.assignUser(tacheId, userId)
       const updatedTache = data.data
 
-      // Update in local state
       const index = taches.value.findIndex(t => t.id === tacheId)
       if (index !== -1) {
         taches.value[index] = updatedTache
       }
 
-      // Update in kanban
       updateTacheInKanban(updatedTache)
 
       return updatedTache
@@ -302,13 +332,11 @@ export const useTacheStore = defineStore('tache', () => {
       const { data } = await tachesApi.unassignUser(tacheId, userId)
       const updatedTache = data.data
 
-      // Update in local state
       const index = taches.value.findIndex(t => t.id === tacheId)
       if (index !== -1) {
         taches.value[index] = updatedTache
       }
 
-      // Update in kanban
       updateTacheInKanban(updatedTache)
 
       return updatedTache
@@ -324,13 +352,11 @@ export const useTacheStore = defineStore('tache', () => {
       const { data } = await tachesApi.updateProgress(id, tauxRealisation)
       const updatedTache = data.data
 
-      // Update in local state
       const index = taches.value.findIndex(t => t.id === id)
       if (index !== -1) {
         taches.value[index] = updatedTache
       }
 
-      // Update in kanban
       updateTacheInKanban(updatedTache)
 
       return updatedTache
@@ -342,12 +368,10 @@ export const useTacheStore = defineStore('tache', () => {
 
   // Helper function to update task in kanban
   function updateTacheInKanban(tache) {
-    // Remove from all statuts
     for (const statut in kanban.value) {
       kanban.value[statut] = kanban.value[statut].filter(t => t.id !== tache.id)
     }
 
-    // Add to correct statut
     if (kanban.value[tache.statut]) {
       const index = kanban.value[tache.statut].findIndex(t => t.id === tache.id)
       if (index !== -1) {
@@ -365,6 +389,7 @@ export const useTacheStore = defineStore('tache', () => {
   function $reset() {
     taches.value = []
     kanban.value = { a_faire: [], en_cours: [], termine: [] }
+    stats.value = { total: 0, a_faire: 0, en_cours: 0, termine: 0 }
     currentTache.value = null
     loading.value = false
     error.value = null
@@ -374,6 +399,7 @@ export const useTacheStore = defineStore('tache', () => {
     // State
     taches,
     kanban,
+    stats,
     currentTache,
     loading,
     error,
@@ -394,7 +420,7 @@ export const useTacheStore = defineStore('tache', () => {
     moveTache,
     duplicateTache,
     archiveTache,
-    validateTache,
+    unarchiveTache,
     assignUser,
     unassignUser,
     updateProgress,
