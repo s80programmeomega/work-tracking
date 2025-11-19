@@ -157,7 +157,7 @@
                 <div class="space-y-1">
                   <div class="font-medium">{{ tache.titre }}</div>
                   <div class="text-sm text-muted-foreground">
-                    Assignée à {{ tache.assignee?.nom }}
+                    Assignée à {{ tache.assignees?.nom }}
                   </div>
                 </div>
                 <Badge :variant="getTaskStatusVariant(tache.status)">
@@ -316,10 +316,16 @@
             <h3 class="text-lg font-semibold">Actions rapides</h3>
 
             <div class="space-y-2">
-              <Button variant="outline" size="sm" class="w-full justify-start" @click="createTask">
-                <Plus class="w-4 h-4 mr-2" />
-                Créer une tâche
-              </Button>
+             <button
+          v-if="canCreateTask"
+          @click="openCreateTaskForm"
+          class="px-4 py-2 bg-gradient-to-r from-brand-500 to-brand-600 text-white rounded-lg hover:from-brand-600 hover:to-brand-700 flex items-center gap-2 shadow-lg hover:shadow-xl transition-all"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          Nouvelle tâche
+        </button>
 
               <Button variant="outline" size="sm" class="w-full justify-start" @click="generateReport">
                 <FileText class="w-4 h-4 mr-2" />

@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\WorkspaceController;
 use App\Http\Controllers\Api\ProjetController;
 use App\Http\Controllers\Api\ProjetInvitationController;
+use App\Http\Controllers\Api\TacheController;
+use App\Http\Controllers\Api\TacheResultatController;
 use App\Http\Controllers\LabelController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -221,161 +223,99 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
 
-    // Activity Management Routes
-    // Route::prefix('activites')->group(function () {
-    //     // List and filter
-    //     Route::get('/', [\App\Http\Controllers\ActiviteController::class, 'index']);
-    //     Route::get('/my-activites', [\App\Http\Controllers\ActiviteController::class, 'myActivites']);
-    //     Route::get('/projet/{projetId}', [\App\Http\Controllers\ActiviteController::class, 'forProjet']);
 
-    //     // CRUD
-    //     Route::post('/', [\App\Http\Controllers\ActiviteController::class, 'store']);
-    //     Route::get('/{activite}', [\App\Http\Controllers\ActiviteController::class, 'show']);
-    //     Route::put('/{activite}', [\App\Http\Controllers\ActiviteController::class, 'update']);
-    //     Route::delete('/{activite}', [\App\Http\Controllers\ActiviteController::class, 'destroy']);
+    // ======================================== TÂCHES  ========================================
+    Route::prefix('taches')->group(function () {
+        // Liste et création
+        Route::get('/', [TacheController::class, 'index']);
+        Route::post('/', [TacheController::class, 'store']);
 
-    //     // Actions
-    //     Route::post('/{activite}/archive', [\App\Http\Controllers\ActiviteController::class, 'archive']);
-    //     Route::post('/{activite}/unarchive', [\App\Http\Controllers\ActiviteController::class, 'unarchive']);
-    //     Route::post('/{activite}/duplicate', [\App\Http\Controllers\ActiviteController::class, 'duplicate']);
-    //     Route::post('/reorder', [\App\Http\Controllers\ActiviteController::class, 'reorder']);
+        // Vues spécifiques
+        Route::get('/mes-taches', [TacheController::class, 'myTasks']);
+        Route::get('/assignees', [TacheController::class, 'assignedToMe']);
+        Route::get('/en-attente', [TacheController::class, 'pending']);
+        Route::get('/en-retard', [TacheController::class, 'overdue']);
+        Route::post('/reorder', [TacheController::class, 'reorder']);
 
-    //     Route::get('/activites/available-members/{projetId}', [ActiviteController::class, 'availableMembers']); 
-    // });
+        // ✅ Kanban pour une activité
+        Route::get('/activite/{activiteId}/kanban', [TacheController::class, 'forActivite']);
 
-    // Liste et filtres
-    // Route::get('/activites', [ActiviteController::class, 'index']);
-    // Route::get('/activites/mes-activites', [ActiviteController::class, 'mesActivites']);
-    // Route::get('/activites/en-retard', [ActiviteController::class, 'enRetard']);
-    // Route::get('/projets/{projet}/activites', [ActiviteController::class, 'byProjet']);
+        // CRUD basique
+        Route::get('/{tache}', [TacheController::class, 'show']);
+        Route::put('/{tache}', [TacheController::class, 'update']);
+        Route::delete('/{tache}', [TacheController::class, 'destroy']);
 
-    // // Membres disponibles pour une activité (membres du projet parent)
-    // Route::get('/projets/{projet}/available-members', [ActiviteController::class, 'availableMembers']);
+        // ✅ Actions principales
+        Route::post('/{tache}/complete', [TacheController::class, 'complete']); // Marquer terminé
+        Route::post('/{tache}/validate-n1', [TacheController::class, 'validateN1']); // Validation N1
+        Route::post('/{tache}/validate-n2', [TacheController::class, 'validateN2']); // Validation N2
+        Route::post('/{tache}/move', [TacheController::class, 'move']); // Déplacer (Kanban)
+        Route::post('/{tache}/archive', [TacheController::class, 'archive']);
+        Route::post('/{tache}/unarchive', [TacheController::class, 'unarchive']);
+        Route::post('/{tache}/duplicate', [TacheController::class, 'duplicate']);
 
-    // // CRUD
-    // Route::get('/activites/{activite}', [ActiviteController::class, 'show']);
-    // Route::post('/activites', [ActiviteController::class, 'store']);
-    // Route::put('/activites/{activite}', [ActiviteController::class, 'update']);
-    // Route::delete('/activites/{activite}', [ActiviteController::class, 'destroy']);
+        // Task Assignees
+        Route::post('/{tache}/assignees', [TacheController::class, 'assignUser']);
+        Route::delete('/{tache}/assignees/{user}', [TacheController::class, 'unassignUser']);
 
-    // // Actions
-    // Route::post('/activites/{activite}/toggle-archive', [ActiviteController::class, 'toggleArchive']);
-    // Route::post('/activites/{activite}/duplicate', [ActiviteController::class, 'duplicate']);
-    // Route::post('/activites/reorder', [ActiviteController::class, 'reorder']);
+        // Sub-tasks
+        Route::get('/{tache}/sous-taches', [TacheController::class, 'subTasks']);
+        Route::post('/{tache}/sous-taches', [TacheController::class, 'createSubTask']);
 
+        // Task Dependencies
+        Route::get('/{tache}/dependencies', [TacheController::class, 'dependencies']);
+        Route::post('/{tache}/dependencies', [TacheController::class, 'addDependency']);
+        Route::delete('/{tache}/dependencies/{dependencyId}', [TacheController::class, 'removeDependency']);
 
+        // Task Labels
+        Route::post('/{tache}/labels', [TacheController::class, 'attachLabel']);
+        Route::delete('/{tache}/labels/{label}', [TacheController::class, 'detachLabel']);
+    });
 
+    // ======================================== RÉSULTATS DE TÂCHES  ========================================
+    Route::prefix('taches/{tache}/resultats')->group(function () {
+        Route::get('/', [TacheResultatController::class, 'index']);
+        Route::post('/', [TacheResultatController::class, 'store']);
+        Route::get('/{resultat}', [TacheResultatController::class, 'show']);
+        Route::put('/{resultat}', [TacheResultatController::class, 'update']);
+        Route::delete('/{resultat}', [TacheResultatController::class, 'destroy']);
 
+        // Soumettre un résultat
+        Route::post('/{resultat}/submit', [TacheResultatController::class, 'submit']);
 
+        // Validation N1 (Responsable Activité)
+        Route::post('/{resultat}/validate-n1', [TacheResultatController::class, 'validateN1']);
 
+        // Validation N2 (Responsable Projet)
+        Route::post('/{resultat}/validate-n2', [TacheResultatController::class, 'validateN2']);
 
+        // Rejeter un résultat
+        Route::post('/{resultat}/reject', [TacheResultatController::class, 'reject']);
 
-    // ========================================  ACTIVITÉS  ========================================
-    // Route::prefix('activites')->group(function () {
-    //     Route::get('/', [ActiviteController::class, 'index']);
-    //     Route::post('/', [ActiviteController::class, 'store']);
-    //     Route::get('/mes-activites', [ActiviteController::class, 'myActivities']);
-    //     Route::get('/en-retard', [ActiviteController::class, 'overdue']);
-    //     Route::get('/{activite}', [ActiviteController::class, 'show']);
-    //     Route::put('/{activite}', [ActiviteController::class, 'update']);
-    //     Route::delete('/{activite}', [ActiviteController::class, 'destroy']);
+        // Historique
+        Route::get('/{resultat}/history', [TacheResultatController::class, 'history']);
+    });
 
-    //     // Activity Actions
-    //     Route::post('/{activite}/archive', [ActiviteController::class, 'archive']);
-    //     Route::post('/{activite}/unarchive', [ActiviteController::class, 'unarchive']);
-    //     Route::post('/reorder', [ActiviteController::class, 'reorder']);
+    // ========================================  ÉVALUATIONS  ========================================
+    Route::prefix('evaluations')->group(function () {
+        // ✅ Rapport hebdomadaire personnel
+        Route::get('/mon-rapport-hebdomadaire', [TacheController::class, 'myWeeklyReport']);
 
-    //     // Activity Tasks
-    //     Route::get('/{activite}/taches', [ActiviteController::class, 'taches']);
+        // ✅ Rapport hebdomadaire d'un utilisateur (managers)
+        Route::get('/rapport-hebdomadaire/{userId}', [TacheController::class, 'userWeeklyReport']);
 
-    //     // Activity Statistics
-    //     Route::get('/{activite}/statistics', [ActiviteController::class, 'statistics']);
-    // });
+        // ✅ Performance d'équipe
+        Route::get('/performance-equipe/{activiteId}', [TacheController::class, 'teamPerformance']);
 
+        // ✅ Export PDF
+        Route::post('/export-pdf', [TacheController::class, 'exportWeeklyReportPdf']);
 
-    // ========================================
-    // TÂCHES
-    // ========================================
-    // Route::prefix('taches')->group(function () {
-    //     Route::get('/', [TacheController::class, 'index']);
-    //     Route::post('/', [TacheController::class, 'store']);
-    //     Route::get('/mes-taches', [TacheController::class, 'myTasks']);
-    //     Route::get('/assignees', [TacheController::class, 'assignedToMe']);
-    //     Route::get('/en-attente', [TacheController::class, 'pending']);
-    //     Route::get('/en-retard', [TacheController::class, 'overdue']);
-    //     Route::get('/{tache}', [TacheController::class, 'show']);
-    //     Route::put('/{tache}', [TacheController::class, 'update']);
-    //     Route::delete('/{tache}', [TacheController::class, 'destroy']);
+        // Dashboard général
+        Route::get('/dashboard', [TacheController::class, 'evaluationDashboard']);
 
-    //     // Task Actions
-    //     Route::post('/{tache}/archive', [TacheController::class, 'archive']);
-    //     Route::post('/{tache}/unarchive', [TacheController::class, 'unarchive']);
-    //     Route::post('/{tache}/validate', [TacheController::class, 'validate']);
-    //     Route::post('/reorder', [TacheController::class, 'reorder']);
-
-    //     // Task Assignees
-    //     Route::post('/{tache}/assignees', [TacheController::class, 'assignUser']);
-    //     Route::delete('/{tache}/assignees/{user}', [TacheController::class, 'unassignUser']);
-
-    //     // Task Dependencies
-    //     Route::get('/{tache}/dependencies', [TacheController::class, 'dependencies']);
-    //     Route::post('/{tache}/dependencies', [TacheController::class, 'addDependency']);
-    //     Route::delete('/{tache}/dependencies/{dependencyId}', [TacheController::class, 'removeDependency']);
-
-    //     // Sub-tasks
-    //     Route::get('/{tache}/sous-taches', [TacheController::class, 'subTasks']);
-    //     Route::post('/{tache}/sous-taches', [TacheController::class, 'createSubTask']);
-
-    //     // Task Labels
-    //     Route::post('/{tache}/labels', [TacheController::class, 'attachLabel']);
-    //     Route::delete('/{tache}/labels/{label}', [TacheController::class, 'detachLabel']);
-
-    //     // Task Documents
-    //     Route::get('/{tache}/documents', [TacheController::class, 'documents']);
-    //     Route::post('/{tache}/documents', [TacheController::class, 'uploadDocument']);
-    // });
-
-    // ========================================
-    // RÉSULTATS DE TÂCHES
-    // ========================================
-    // Route::prefix('taches/{tache}/resultats')->group(function () {
-    //     Route::get('/', [TacheResultatController::class, 'index']);
-    //     Route::post('/', [TacheResultatController::class, 'store']);
-    //     Route::get('/{resultat}', [TacheResultatController::class, 'show']);
-    //     Route::put('/{resultat}', [TacheResultatController::class, 'update']);
-    //     Route::delete('/{resultat}', [TacheResultatController::class, 'destroy']);
-
-    //     // Validation Actions
-    //     Route::post('/{resultat}/validate-n1', [TacheResultatController::class, 'validateN1']);
-    //     Route::post('/{resultat}/validate-n2', [TacheResultatController::class, 'validateN2']);
-    //     Route::post('/{resultat}/reject', [TacheResultatController::class, 'reject']);
-
-    //     // Documents for results
-    //     Route::post('/{resultat}/documents', [TacheResultatController::class, 'uploadDocument']);
-    // });
-
-    // ========================================
-    // VALIDATIONS
-    // ========================================
-    // Route::prefix('validations')->group(function () {
-    //     Route::get('/n1', [TacheValidationController::class, 'pendingN1']);
-    //     Route::get('/n2', [TacheValidationController::class, 'pendingN2']);
-    //     Route::get('/historique', [TacheValidationController::class, 'history']);
-    //     Route::post('/{validation}/approve-n1', [TacheValidationController::class, 'approveN1']);
-    //     Route::post('/{validation}/approve-n2', [TacheValidationController::class, 'approveN2']);
-    //     Route::post('/{validation}/reject', [TacheValidationController::class, 'reject']);
-    // });
-
-    // ========================================
-    // ÉVALUATIONS
-    // ========================================
-    // Route::prefix('evaluations')->group(function () {
-    //     Route::get('/dashboard', [TacheResultatController::class, 'dashboard']);
-    //     Route::get('/rapport-hebdomadaire', [TacheResultatController::class, 'weeklyReport']);
-    //     Route::get('/fiches', [TacheResultatController::class, 'evaluationSheets']);
-    //     Route::get('/performance', [TacheResultatController::class, 'teamPerformance']);
-    //     Route::post('/export-pdf', [TacheResultatController::class, 'exportPdf']);
-    // });
+           // Résultats en attente de validation
+        Route::get('/resultats/en-attente', [TacheResultatController::class, 'pendingValidations']);
+    });
 
 
 

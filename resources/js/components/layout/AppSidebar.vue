@@ -1,3 +1,4 @@
+<!-- resources\js\components\layout\AppSidebar.vue -->
 <template>
     <aside
         :class="[
@@ -305,7 +306,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useRoute } from 'vue-router';
 import {
     GridIcon,
@@ -328,16 +329,28 @@ import UsersIcon from '@/icons/UsersIcon.vue';
 import { useSidebar } from '@/composables/useSidebar';
 import api from '@/api/axios'
 import { useAuthStore } from '@/stores/auth';  
+import { useWorkspace } from '@/composables/useWorkspace';
 
 const route = useRoute();
 const { isExpanded, isMobileOpen, isHovered, openSubmenu } = useSidebar();
 const authStore = useAuthStore();
+// ✅ Utiliser le composable workspace
+const {
+  currentWorkspace,
+  currentWorkspaceId,
+  workspaces,
+  loading: workspaceLoading,
+  selectWorkspace,
+  fetchWorkspaces,
+  onWorkspaceChanged,
+  initializeCurrentWorkspace
+} = useWorkspace();
 
 // Workspace management
 const showWorkspaceSelector = ref(false);
-const currentWorkspace = ref(null);
-const workspaces = ref([]);
-const loading = ref(false);
+// const currentWorkspace = ref(null);
+// const workspaces = ref([]);
+// const loading = ref(false);
 
 // CORRECTION : Utiliser le getter isSuperAdmin du store
 const isSuperAdmin = computed(() => {
@@ -362,26 +375,61 @@ const getWorkspaceInitials = (name) => {
         .slice(0, 2) || 'MW';
 };
 
-const selectWorkspace = async (workspace) => {
-    try {
-        const response = await api.post(`/workspaces/switch/${workspace.id}`, {}, {
-            headers: { Authorization: `Bearer ${authStore.token}` }
-        });
 
-        currentWorkspace.value = response.data.workspace;
-        authStore.setCurrentWorkspace(response.data.current_workspace_id);
-        showWorkspaceSelector.value = false;
+// ✅ Fonction de sélection de workspace optimisée
+const handleSelectWorkspace = async (workspace) => {
+  if (currentWorkspace.value?.id === workspace.id) {
+    console.log('Sidebar: Même workspace, aucune action');
+    showWorkspaceSelector.value = false;
+    return;
+  }
 
-        window.dispatchEvent(new CustomEvent('workspace-changed', {
-            detail: { workspace }
-        }));
+  console.log('Sidebar: Changement de workspace vers:', workspace.nom);
 
-    } catch (error) {
-        console.error('Erreur lors du changement de workspace :', error);
-    }
+  try {
+    // Utiliser la fonction du composable qui gère tout
+    await selectWorkspace(workspace);
+    
+    // Fermer le sélecteur
+    showWorkspaceSelector.value = false;
+    
+    console.log('✅ Sidebar: Workspace changé avec succès');
+  } catch (error) {
+    console.error('❌ Sidebar: Erreur lors du changement de workspace:', error);
+  }
 };
 
+// ✅ Écoute des changements externes
+let unsubscribeWorkspaceListener = null;
+
+const handleWorkspaceChange  = (event) => {
+  console.log('Sidebar: Changement externe détecté', event.detail);
+  // Le currentWorkspace est déjà mis à jour par le composable
+  // Fermer le dropdown si ouvert
+  showWorkspaceSelector.value = false;
+};
+
+// const selectWorkspace = async (workspace) => {
+//     try {
+//         const response = await api.post(`/workspaces/switch/${workspace.id}`, {}, {
+//             headers: { Authorization: `Bearer ${authStore.token}` }
+//         });
+
+//         currentWorkspace.value = response.data.workspace;
+//         authStore.setCurrentWorkspace(response.data.current_workspace_id);
+//         showWorkspaceSelector.value = false;
+
+//         window.dispatchEvent(new CustomEvent('workspace-changed', {
+//             detail: { workspace }
+//         }));
+
+//     } catch (error) {
+//         console.error('Erreur lors du changement de workspace :', error);
+//     }
+// };
+
 // Menu structure
+
 const menuGroups = computed(() => [
     {
         title: 'Principal',
@@ -424,7 +472,7 @@ const menuGroups = computed(() => [
                 icon: TaskIcon,
                 name: 'Tâches',
                 subItems: [
-                    { name: 'Toutes les tâches', path: '/taches' },
+                    { name: 'Toutes les tâches', path: '/taches', superAdminOnly: true },
                     { name: 'Mes tâches', path: '/taches/mes-taches' },
                     { name: 'Assignées à moi', path: '/taches/assignees' },
                     { name: 'En attente', path: '/taches/en-attente', count: 12 },
@@ -583,21 +631,32 @@ const endTransition = (el) => {
 };
 
 onMounted(async () => {
-    try {
-        const response = await api.get('/workspaces/user-workspaces', {
-            headers: { Authorization: `Bearer ${authStore.token}` }
-        });
-        workspaces.value = response.data.data || [];
-        
-        // CORRECTION : Gestion sécurisée du workspace courant
-        const currentWorkspaceId = authStore.user?.current_workspace_id;
-        currentWorkspace.value = workspaces.value.find(w => w.id === currentWorkspaceId) || workspaces.value[0] || null;
-        
-    } catch (error) {
-        console.error('Erreur lors du chargement des workspaces :', error);
-        workspaces.value = [];
+  console.log('🚀 Montage du Sidebar');
+  
+  try {
+    // Charger les workspaces
+    if (workspaces.value.length === 0) {
+      await fetchWorkspaces();
     }
+    
+    // Initialiser le workspace courant
+    await initializeCurrentWorkspace();
+    
+    // Écouter les changements
+    unsubscribeWorkspaceListener = onWorkspaceChanged(handleWorkspaceChange);
+    
+    console.log('✅ Sidebar initialisé, workspace courant:', currentWorkspace.value?.nom);
+  } catch (error) {
+    console.error('❌ Erreur lors de l\'initialisation du sidebar:', error);
+  }
 });
+
+onBeforeUnmount(() => {
+  if (unsubscribeWorkspaceListener) {
+    unsubscribeWorkspaceListener();
+  }
+});
+
 </script>
 
 <style scoped>

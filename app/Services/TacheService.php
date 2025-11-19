@@ -3,22 +3,81 @@
 namespace App\Services;
 
 use App\Enums\TacheStatut;
+use App\Models\Activite;
 use App\Models\Tache;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Gate; 
 
 class TacheService
 {
     /**
-     * Get all tasks with filters
+     * ✅ Obtenir le numéro de semaine standardisé (ISO 8601)
+     * 
+     * ISO 8601: La semaine commence le lundi, la première semaine de l'année
+     * contient le 4 janvier.
      */
-    public function getAllTaches(array $filters = []): Collection
+    public static function getWeekInfo(?Carbon $date = null): array
     {
-        $query = Tache::query()->with(['activite', 'assignees', 'validateur', 'labels']);
+        $date = $date ?? now();
 
+        return [
+            'week_number' => $date->isoWeek(),
+            'year' => $date->isoWeekYear(),
+            'start_date' => $date->copy()->startOfWeek(Carbon::MONDAY),
+            'end_date' => $date->copy()->endOfWeek(Carbon::SUNDAY),
+        ];
+    }
+
+
+    /**
+     * ✅ Obtenir toutes les tâches avec filtres et permissions
+     */
+    public function getAllTaches(User $user, array $filters = []): Collection
+    {
+        $query = Tache::query()->with(['activite.projet', 'assignees', 'labels']);
+
+        // ✅ Appliquer les permissions via Policy
+        if (!$user->isSuperAdmin()) {
+            $query->where(function ($q) use ($user) {
+                // Tâches assignées
+                $q->whereHas('assignees', function ($aq) use ($user) {
+                    $aq->where('user_id', $user->id);
+                })
+                    // OU tâches des activités où je suis responsable
+                    ->orWhereHas('activite', function ($actq) use ($user) {
+                        $actq->where('responsable_id', $user->id)
+                            // OU membre avec permissions
+                            ->orWhereHas('membres', function ($mq) use ($user) {
+                                $mq->where('user_id', $user->id)
+                                    ->where(function ($pmq) {
+                                        $pmq->where('can_edit_tasks', true)
+                                            ->orWhere('can_create_tasks', true)
+                                            ->orWhere('can_validate_results', true);
+                                    });
+                            });
+                    })
+                    // OU tâches des projets où je suis responsable
+                    ->orWhereHas('activite.projet', function ($projq) use ($user) {
+                        $projq->where('responsable_id', $user->id);
+                    })
+                    // OU tâches visibles (public) dans mes workspaces
+                    ->orWhere(function ($visq) use ($user) {
+                        $visq->where('visibility', 'public')
+                            ->whereHas('activite.projet.workspace', function ($wsq) use ($user) {
+                                $wsq->whereHas('membres', function ($wmq) use ($user) {
+                                    $wmq->where('user_id', $user->id);
+                                });
+                            });
+                    });
+            });
+        }
+
+        // Filtres standards
         if (isset($filters['activite_id'])) {
-            $query->forActivite($filters['activite_id']);
+            $query->where('activite_id', $filters['activite_id']);
         }
 
         if (isset($filters['statut'])) {
@@ -29,15 +88,31 @@ class TacheService
             $query->where('priorite', $filters['priorite']);
         }
 
-        if (isset($filters['user_id'])) {
-            $query->assignedTo($filters['user_id']);
-        }
-
         if (isset($filters['overdue']) && $filters['overdue']) {
             $query->overdue();
         }
 
-        // Filter by archive status
+        // ✅ Filtre par semaine (pour rapports hebdomadaires)
+        if (isset($filters['week_number']) && isset($filters['year'])) {
+            $query->forWeek($filters['week_number'], $filters['year']);
+        }
+
+        // ✅ Filtre par statut de validation
+        if (isset($filters['validation_status'])) {
+            switch ($filters['validation_status']) {
+                case 'pending_n1':
+                    $query->pendingValidationN1();
+                    break;
+                case 'pending_n2':
+                    $query->pendingValidationN2();
+                    break;
+                case 'fully_validated':
+                    $query->whereNotNull('validated_n2_at');
+                    break;
+            }
+        }
+
+        // Archive status
         if (isset($filters['archive_status'])) {
             if ($filters['archive_status'] === 'archived') {
                 $query->archived();
@@ -45,7 +120,6 @@ class TacheService
                 $query->active();
             }
         } else {
-            // Default: only show active tasks
             $query->active();
         }
 
@@ -53,13 +127,13 @@ class TacheService
     }
 
     /**
-     * Get tasks for a specific activity grouped by status (Kanban)
+     * ✅ Kanban pour une activité
      */
     public function getKanbanForActivite(int $activiteId): array
     {
         $taches = Tache::forActivite($activiteId)
-            ->active() // Only show active (non-archived) tasks
-            ->with(['assignees', 'validateur', 'labels'])
+            ->active()
+            ->with(['assignees', 'labels', 'validatedN1By', 'validatedN2By'])
             ->ordered()
             ->get();
 
@@ -71,28 +145,38 @@ class TacheService
     }
 
     /**
-     * Get tasks assigned to current user
+     * ✅ Mes tâches (toutes mes tâches accessibles)
      */
-    public function getMyTaches(int $userId): Collection
+    public function getMyTaches(User $user): Collection
     {
-        return Tache::assignedTo($userId)
-            ->with(['activite', 'assignees', 'validateur', 'labels'])
+        return Tache::assignedTo($user->id)
+            ->with(['activite', 'assignees', 'labels'])
+            ->active()
             ->ordered()
             ->get();
     }
 
     /**
-     * Create a new task
+     * ✅ Créer une tâche avec gestion automatique des semaines
      */
-    public function createTache(array $data): Tache
+    public function createTache(array $data, User $creator): Tache
     {
-        return DB::transaction(function () use ($data) {
-            // Extract assignees and labels
+        // Vérifier les permissions via Policy
+        $activite = Activite::findOrFail($data['activite_id']);
+        Gate::authorize('create', [Tache::class, $activite]);
+
+        return DB::transaction(function () use ($data, $creator) {
+            // Extraire relations
             $assigneeIds = $data['assignee_ids'] ?? [];
             $labelIds = $data['label_ids'] ?? [];
             unset($data['assignee_ids'], $data['label_ids']);
 
-            // Set default order if not provided
+            // ✅ Définir semaine et année de manière standardisée (ISO 8601)
+            $weekInfo = $this->determineWeekInfo($data);
+            $data['week_number'] = $weekInfo['week_number'];
+            $data['year'] = $weekInfo['year'];
+
+            // Position par défaut
             if (!isset($data['position'])) {
                 $maxPosition = Tache::where('activite_id', $data['activite_id'])
                     ->where('statut', $data['statut'] ?? TacheStatut::A_FAIRE->value)
@@ -100,53 +184,101 @@ class TacheService
                 $data['position'] = ($maxPosition ?? -1) + 1;
             }
 
-            // Create task
+            $data['created_by'] = $creator->id;
+
+            // Créer tâche
             $tache = Tache::create($data);
 
-            // Attach assignees
+            // Assigner membres
             if (!empty($assigneeIds)) {
-                $tache->assignees()->attach($assigneeIds);
+                foreach ($assigneeIds as $userId) {
+                    $tache->assignees()->attach($userId, [
+                        'role' => 'assignee',
+                        'can_edit' => true,
+                        'can_complete' => true,
+                        'can_validate' => false,
+                    ]);
+                }
             }
 
-            // Attach labels
+            // Attacher labels
             if (!empty($labelIds)) {
                 $tache->labels()->attach($labelIds);
             }
 
-            return $tache->load(['activite', 'assignees', 'validateur', 'labels']);
+            // ✅ Log création pour audit
+            activity()
+                ->causedBy($creator)
+                ->performedOn($tache)
+                ->withProperties(['data' => $data])
+                ->log('Tâche créée');
+
+            return $tache->load(['activite', 'assignees', 'labels']);
         });
     }
 
     /**
-     * Update a task
+     * ✅ Déterminer les informations de semaine à partir des dates
+     */
+    protected function determineWeekInfo(array $data): array
+    {
+        // Priorité: date_debut > echeance > maintenant
+        if (isset($data['date_debut'])) {
+            $date = Carbon::parse($data['date_debut']);
+        } elseif (isset($data['echeance'])) {
+            $date = Carbon::parse($data['echeance']);
+        } else {
+            $date = now();
+        }
+
+        return self::getWeekInfo($date);
+    }
+
+    /**
+     * ✅ Mettre à jour une tâche avec vérification de permissions
      */
     public function updateTache(Tache $tache, array $data): Tache
     {
+        Gate::authorize('update', $tache);
+
         return DB::transaction(function () use ($tache, $data) {
-            // Extract assignees and labels if provided
+            // Extraire relations
             $assigneeIds = $data['assignee_ids'] ?? null;
             $labelIds = $data['label_ids'] ?? null;
             unset($data['assignee_ids'], $data['label_ids']);
 
-            // Update task
+            // ✅ Recalculer semaine si dates changent
+            if (isset($data['date_debut']) || isset($data['echeance'])) {
+                $weekInfo = $this->determineWeekInfo($data);
+                $data['week_number'] = $weekInfo['week_number'];
+                $data['year'] = $weekInfo['year'];
+            }
+
+            // Mettre à jour tâche
             $tache->update($data);
 
-            // Sync assignees if provided
+            // Sync relations si fournies
             if ($assigneeIds !== null) {
                 $tache->assignees()->sync($assigneeIds);
             }
 
-            // Sync labels if provided
             if ($labelIds !== null) {
                 $tache->labels()->sync($labelIds);
             }
 
-            return $tache->fresh(['activite', 'assignees', 'validateur', 'labels']);
+            // ✅ Log modification
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($tache)
+                ->withProperties(['changes' => $data])
+                ->log('Tâche mise à jour');
+
+            return $tache->fresh(['activite', 'assignees', 'labels']);
         });
     }
 
     /**
-     * Delete a task
+     * Supprimer une tâche
      */
     public function deleteTache(Tache $tache): void
     {
@@ -154,7 +286,7 @@ class TacheService
     }
 
     /**
-     * Move task to a different status (Kanban)
+     * ✅ Déplacer tâche (Kanban)
      */
     public function moveTache(Tache $tache, TacheStatut $newStatut, int $newPosition): Tache
     {
@@ -162,36 +294,33 @@ class TacheService
             $oldStatut = $tache->statut;
             $oldPosition = $tache->position;
 
-            // If moving to same status, just reorder
             if ($oldStatut === $newStatut) {
                 $this->reorderTachesInStatus($tache->activite_id, $newStatut, $oldPosition, $newPosition);
             } else {
-                // Moving to different status
-                // Adjust order in old status
+                // Ajuster ordre ancien statut
                 Tache::forActivite($tache->activite_id)
                     ->where('statut', $oldStatut)
                     ->where('position', '>', $oldPosition)
                     ->decrement('position');
 
-                // Adjust order in new status
+                // Ajuster ordre nouveau statut
                 Tache::forActivite($tache->activite_id)
                     ->where('statut', $newStatut)
                     ->where('position', '>=', $newPosition)
                     ->increment('position');
             }
 
-            // Update task
             $tache->update([
                 'statut' => $newStatut,
                 'position' => $newPosition,
             ]);
 
-            return $tache->fresh(['activite', 'assignees', 'validateur']);
+            return $tache->fresh(['activite', 'assignees']);
         });
     }
 
     /**
-     * Reorder tasks within the same status
+     * Réordonner tâches dans même statut
      */
     protected function reorderTachesInStatus(int $activiteId, TacheStatut $statut, int $oldPosition, int $newPosition): void
     {
@@ -200,14 +329,12 @@ class TacheService
         }
 
         if ($oldPosition < $newPosition) {
-            // Moving down: decrement tasks between old and new position
             Tache::forActivite($activiteId)
                 ->where('statut', $statut)
                 ->where('position', '>', $oldPosition)
                 ->where('position', '<=', $newPosition)
                 ->decrement('position');
         } else {
-            // Moving up: increment tasks between new and old position
             Tache::forActivite($activiteId)
                 ->where('statut', $statut)
                 ->where('position', '>=', $newPosition)
@@ -217,21 +344,22 @@ class TacheService
     }
 
     /**
-     * Duplicate a task
+     * Dupliquer une tâche
      */
     public function duplicateTache(Tache $tache): Tache
     {
         return DB::transaction(function () use ($tache) {
             $newTache = $tache->replicate([
-                'validation_superieur',
-                'validateur_id',
+                'validated_n1_by',
+                'validated_n1_at',
+                'validated_n2_by',
+                'validated_n2_at',
             ]);
 
             $newTache->titre = $tache->titre . ' (Copie)';
             $newTache->taux_realisation = 0;
             $newTache->statut = TacheStatut::A_FAIRE;
 
-            // Set position to end of list
             $maxPosition = Tache::where('activite_id', $tache->activite_id)
                 ->where('statut', TacheStatut::A_FAIRE)
                 ->max('position');
@@ -239,67 +367,219 @@ class TacheService
 
             $newTache->save();
 
-            // Copy assignees
+            // Copier assignés
             $assigneeIds = $tache->assignees->pluck('id')->toArray();
             $newTache->assignees()->attach($assigneeIds);
 
-            return $newTache->load(['activite', 'assignees', 'validateur']);
+            // Copier labels
+            $labelIds = $tache->labels->pluck('id')->toArray();
+            $newTache->labels()->attach($labelIds);
+
+            return $newTache->load(['activite', 'assignees', 'labels']);
         });
     }
 
     /**
-     * Archive a task
+     * Archiver tâche
      */
     public function archiveTache(Tache $tache): Tache
     {
         $tache->archive();
-        return $tache->load(['activite', 'assignees', 'validateur', 'labels']);
+        return $tache->load(['activite', 'assignees', 'labels']);
     }
 
     /**
-     * Restore archived task
+     * Désarchiver tâche
      */
     public function unarchiveTache(Tache $tache): Tache
     {
         $tache->unarchive();
-        return $tache->load(['activite', 'assignees', 'validateur', 'labels']);
+        return $tache->load(['activite', 'assignees', 'labels']);
     }
 
     /**
-     * Validate a task by superior
+     * ✅ Assigner utilisateur avec permissions
      */
-    public function validateTache(Tache $tache, User $validator): Tache
+    public function assignUser(Tache $tache, array $data): Tache
     {
-        $tache->validate($validator);
-        return $tache->fresh(['activite', 'assignees', 'validateur']);
-    }
+        $userId = $data['user_id'];
 
-    /**
-     * Assign user to task
-     */
-    public function assignUser(Tache $tache, int $userId): Tache
-    {
         if (!$tache->assignees->contains($userId)) {
-            $tache->assignees()->attach($userId);
+            $tache->assignees()->attach($userId, [
+                'role' => $data['role'] ?? 'collaborator',
+                'can_edit' => $data['can_edit'] ?? false,
+                'can_complete' => $data['can_complete'] ?? true,
+                'can_validate' => $data['can_validate'] ?? false,
+            ]);
         }
-        return $tache->fresh(['activite', 'assignees', 'validateur']);
+
+        return $tache->fresh(['activite', 'assignees']);
     }
 
     /**
-     * Unassign user from task
+     * Désassigner utilisateur
      */
     public function unassignUser(Tache $tache, int $userId): Tache
     {
         $tache->assignees()->detach($userId);
-        return $tache->fresh(['activite', 'assignees', 'validateur']);
+        return $tache->fresh(['activite', 'assignees']);
     }
 
     /**
-     * Update task progress
+     * ✅ Rapport hebdomadaire pour un utilisateur avec détails
      */
-    public function updateProgress(Tache $tache, int $taux): Tache
+    public function getWeeklyReport(User $user, ?int $weekNumber = null, ?int $year = null): array
     {
-        $tache->updateProgress($taux);
-        return $tache->fresh(['activite', 'assignees', 'validateur']);
+        $weekInfo = self::getWeekInfo();
+        $weekNumber = $weekNumber ?? $weekInfo['week_number'];
+        $year = $year ?? $weekInfo['year'];
+
+        $taches = Tache::assignedTo($user->id)
+            ->forWeek($weekNumber, $year)
+            ->with(['activite.projet', 'labels', 'validatedN1By', 'validatedN2By', 'resultats'])
+            ->get();
+
+        // Statistiques détaillées
+        $stats = [
+            'total' => $taches->count(),
+            'completed' => $taches->where('statut', TacheStatut::TERMINE)->count(),
+            'in_progress' => $taches->where('statut', TacheStatut::EN_COURS)->count(),
+            'pending' => $taches->where('statut', TacheStatut::A_FAIRE)->count(),
+            'overdue' => $taches->filter->is_overdue->count(),
+            'validated_n1' => $taches->whereNotNull('validated_n1_at')->count(),
+            'validated_n2' => $taches->whereNotNull('validated_n2_at')->count(),
+            'with_results' => $taches->filter(fn($t) => $t->resultats->count() > 0)->count(),
+            'estimated_hours' => $taches->sum('estimated_hours'),
+            'actual_hours' => $taches->sum('actual_hours'),
+        ];
+
+        $stats['completion_rate'] = $stats['total'] > 0
+            ? round(($stats['completed'] / $stats['total']) * 100, 2)
+            : 0;
+
+        $stats['validation_rate'] = $stats['completed'] > 0
+            ? round(($stats['validated_n2'] / $stats['completed']) * 100, 2)
+            : 0;
+
+        $stats['time_variance'] = $stats['estimated_hours'] > 0
+            ? round((($stats['actual_hours'] - $stats['estimated_hours']) / $stats['estimated_hours']) * 100, 2)
+            : 0;
+
+        // Grouper par activité
+        $tachesByActivite = $taches->groupBy('activite_id')->map(function ($groupedTaches) {
+            $activite = $groupedTaches->first()->activite;
+            return [
+                'activite' => [
+                    'id' => $activite->id,
+                    'nom' => $activite->nom,
+                    'projet_nom' => $activite->projet->nom ?? null,
+                ],
+                'tasks' => $groupedTaches->values(),
+                'count' => $groupedTaches->count(),
+                'completed' => $groupedTaches->where('statut', TacheStatut::TERMINE)->count(),
+            ];
+        });
+
+        return [
+            'week_number' => $weekNumber,
+            'year' => $year,
+            'week_dates' => [
+                'start' => Carbon::now()->setISODate($year, $weekNumber)->startOfWeek()->format('Y-m-d'),
+                'end' => Carbon::now()->setISODate($year, $weekNumber)->endOfWeek()->format('Y-m-d'),
+            ],
+            'user' => $user->only(['id', 'nom', 'email']),
+            'statistics' => $stats,
+            'tasks_by_activite' => $tachesByActivite->values(),
+            'all_tasks' => $taches,
+        ];
     }
+
+    /**
+     * ✅ Performance d'équipe avec analyses détaillées
+     */
+    public function getTeamPerformance(int $activiteId, ?int $weekNumber = null, ?int $year = null): array
+    {
+        $weekInfo = self::getWeekInfo();
+        $weekNumber = $weekNumber ?? $weekInfo['week_number'];
+        $year = $year ?? $weekInfo['year'];
+
+        $activite = Activite::with('projet')->findOrFail($activiteId);
+
+        $taches = Tache::forActivite($activiteId)
+            ->forWeek($weekNumber, $year)
+            ->with(['assignees', 'resultats'])
+            ->get();
+
+        // Statistiques par utilisateur
+        $userStats = [];
+        foreach ($taches as $tache) {
+            foreach ($tache->assignees as $user) {
+                if (!isset($userStats[$user->id])) {
+                    $userStats[$user->id] = [
+                        'user' => $user->only(['id', 'nom', 'email', 'avatar']),
+                        'total' => 0,
+                        'completed' => 0,
+                        'in_progress' => 0,
+                        'overdue' => 0,
+                        'validated' => 0,
+                        'estimated_hours' => 0,
+                        'actual_hours' => 0,
+                    ];
+                }
+
+                $userStats[$user->id]['total']++;
+
+                if ($tache->statut === TacheStatut::TERMINE) {
+                    $userStats[$user->id]['completed']++;
+                }
+
+                if ($tache->statut === TacheStatut::EN_COURS) {
+                    $userStats[$user->id]['in_progress']++;
+                }
+
+                if ($tache->is_overdue) {
+                    $userStats[$user->id]['overdue']++;
+                }
+
+                if ($tache->validated_n2_at) {
+                    $userStats[$user->id]['validated']++;
+                }
+
+                $userStats[$user->id]['estimated_hours'] += $tache->estimated_hours ?? 0;
+                $userStats[$user->id]['actual_hours'] += $tache->actual_hours ?? 0;
+            }
+        }
+
+        // Ajouter taux de complétion
+        foreach ($userStats as $userId => &$stats) {
+            $stats['completion_rate'] = $stats['total'] > 0
+                ? round(($stats['completed'] / $stats['total']) * 100, 2)
+                : 0;
+
+            $stats['time_variance'] = $stats['estimated_hours'] > 0
+                ? round((($stats['actual_hours'] - $stats['estimated_hours']) / $stats['estimated_hours']) * 100, 2)
+                : 0;
+        }
+
+        return [
+            'week_number' => $weekNumber,
+            'year' => $year,
+            'activite' => [
+                'id' => $activite->id,
+                'nom' => $activite->nom,
+                'projet' => $activite->projet->only(['id', 'nom']),
+            ],
+            'team_stats' => array_values($userStats),
+            'overall' => [
+                'total_tasks' => $taches->count(),
+                'completed' => $taches->where('statut', TacheStatut::TERMINE)->count(),
+                'completion_rate' => $taches->count() > 0
+                    ? round(($taches->where('statut', TacheStatut::TERMINE)->count() / $taches->count()) * 100, 2)
+                    : 0,
+                'estimated_hours' => $taches->sum('estimated_hours'),
+                'actual_hours' => $taches->sum('actual_hours'),
+            ]
+        ];
+    }
+
 }
