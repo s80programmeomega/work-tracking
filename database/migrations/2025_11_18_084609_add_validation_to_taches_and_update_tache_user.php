@@ -27,7 +27,8 @@ return new class extends Migration {
             $table->index(['week_number', 'year']);
             $table->index(['validated_n1_at']);
             $table->index(['validated_n2_at']);
-            $table->integer('estimated_hours')->nullable()->after('date_fin_reelle');
+            $table->integer('actual_hours')->nullable()->after('date_fin_reelle');
+            $table->integer('estimated_hours')->nullable()->after('actual_hours');
 
             // Foreign keys
             $table->foreign('validated_n1_by')->references('id')->on('users')->onDelete('set null');
