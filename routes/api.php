@@ -176,7 +176,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
 
-
     // Activity Management Routes
     Route::prefix('activites')->group(function () {
 
