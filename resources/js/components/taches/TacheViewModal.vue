@@ -1,3 +1,4 @@
+<!-- resources\js\components\taches\TacheViewModal.vue --------->
 <template>
   <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm" @click.self="$emit('close')">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-7xl max-h-[95vh] overflow-hidden flex flex-col">

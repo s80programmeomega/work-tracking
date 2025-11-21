@@ -2,8 +2,9 @@
 <template>
   <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-20"
     @click.self="$emit('close')">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-hidden flex flex-col animate-fade-in">
-      
+     <div
+      class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[95vh] overflow-hidden flex flex-col animate-fade-in"
+    >
       <!-- Header -->
       <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white">
         <div class="flex items-center justify-between">
@@ -255,47 +256,82 @@
                 </div>
               </div>
 
-              <!-- Dates -->
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Date de début</label>
-                  <div class="relative">
-                    <input v-model="formData.date_debut" type="date"
-                      class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all pl-10" />
-                    <svg class="absolute left-3 top-3.5 w-5 h-5 text-gray-400 pointer-events-none" fill="none"
-                      stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                </div>
+              <!-- Dates - Version améliorée avec DatePicker -->
+<div class="space-y-4">
+  <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+    <CalendarIcon class="w-5 h-5 text-green-500" />
+    Planification de la tâche
+  </h3>
 
-                <div>
-                  <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Date d'échéance</label>
-                  <div class="relative">
-                    <input v-model="formData.echeance" type="date" :min="formData.date_debut"
-                      class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all pl-10" />
-                    <svg class="absolute left-3 top-3.5 w-5 h-5 text-gray-400 pointer-events-none" fill="none"
-                      stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                </div>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-                <div>
-                  <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Date de fin réelle</label>
-                  <div class="relative">
-                    <input v-model="formData.date_fin_reelle" type="date"
-                      class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all pl-10" />
-                    <svg class="absolute left-3 top-3.5 w-5 h-5 text-gray-400 pointer-events-none" fill="none"
-                      stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
+    <!-- Date de début -->
+    <div>
+      <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        Date de début
+      </label>
+      <DatePicker
+        v-model="formData.date_debut"
+        :enable-time-picker="false"
+        auto-apply
+        :format="'yyyy-MM-dd'"
+        :locale="'fr'"
+        :dark="isDark"
+        placeholder="Sélectionner une date"
+        class="w-full date-input"
+      >
+        <template #input-icon>
+          <CalendarIcon class="w-5 h-5 text-gray-400" />
+        </template>
+      </DatePicker>
+    </div>
+
+    <!-- Date d'échéance -->
+    <div>
+      <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        Date d'échéance
+      </label>
+      <DatePicker
+        v-model="formData.echeance"
+        :enable-time-picker="false"
+        auto-apply
+        :format="'yyyy-MM-dd'"
+        :locale="'fr'"
+        :dark="isDark"
+        :min-date="formData.date_debut"
+        placeholder="Sélectionner une date"
+        class="w-full date-input"
+      >
+        <template #input-icon>
+          <CalendarIcon class="w-5 h-5 text-gray-400" />
+        </template>
+      </DatePicker>
+    </div>
+
+    <!-- Date de fin réelle -->
+    <div>
+      <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        Date de fin réelle
+      </label>
+      <DatePicker
+        v-model="formData.date_fin_reelle"
+        :enable-time-picker="false"
+        auto-apply
+        :format="'yyyy-MM-dd'"
+        :locale="'fr'"
+        :dark="isDark"
+        placeholder="Sélectionner une date"
+        class="w-full date-input"
+      >
+        <template #input-icon>
+          <CalendarIcon class="w-5 h-5 text-gray-400" />
+        </template>
+      </DatePicker>
+    </div>
+
+  </div>
+</div>
+
 
               <!-- Progression & Heures -->
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -504,6 +540,12 @@ import { useTaches } from '@/composables/useTaches'
 import api from '@/api/axios'
 import { useActivityPermissions } from '@/composables/useActivityPermissions'
 import { useActivityMembers } from '@/composables/useActivityMembers'
+import DatePicker from '@vuepic/vue-datepicker'
+import '@vuepic/vue-datepicker/dist/main.css'
+import { CalendarIcon } from '@/icons'
+
+const isDark = computed(() => document.documentElement.classList.contains('dark'))
+
 
 const props = defineProps({
   tache: { type: Object, default: null },
@@ -850,5 +892,85 @@ onMounted(async () => {
   0%, 100% { transform: translateX(0); }
   10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
   20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+/* ✅ STYLES SPÉCIFIQUES AU DATEPICKER */
+.date-input {
+  position: relative;
+  z-index: 1;
+}
+
+/* S'assurer que le calendrier s'affiche au-dessus de la modal */
+.date-input :deep(.dp__input) {
+  width: 100%;
+  padding: 0.875rem 1rem 0.875rem 2.5rem;
+  border: 2px solid #d1d5db;
+  border-radius: 0.75rem;
+  background-color: white;
+  color: #1f2937;
+  transition: all 0.2s ease-in-out;
+}
+
+.dark .date-input :deep(.dp__input) {
+  border-color: #4b5563;
+  background-color: #111827;
+  color: white;
+}
+
+.date-input :deep(.dp__input):focus {
+  border-color: #3b82f6;
+  ring: 2px;
+  ring-color: #3b82f6;
+}
+
+.date-input :deep(.dp__input_icon) {
+  left: 0.75rem;
+  padding: 0;
+}
+
+.date-input :deep(.dp__clear_icon) {
+  padding: 0;
+  margin-right: 0.5rem;
+}
+
+/* Z-index élevé pour le calendrier dans les modals */
+.date-input :deep(.dp__menu) {
+  z-index: 10000;
+}
+
+/* Styles pour le mode sombre */
+.dark .date-input :deep(.dp__menu) {
+  background-color: #1f2937;
+  border: 1px solid #374151;
+}
+
+.dark .date-input :deep(.dp__calendar_header) {
+  color: #f9fafb;
+  border-color: #374151;
+}
+
+.dark .date-input :deep(.dp__calendar_item) {
+  color: #f9fafb;
+}
+
+.dark .date-input :deep(.dp__today) {
+  border-color: #3b82f6;
+}
+
+.dark .date-input :deep(.dp__active_date) {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.dark .date-input :deep(.dp__cell_inner) {
+  color: #f9fafb;
+}
+
+.dark .date-input :deep(.dp__button) {
+  color: #f9fafb;
+}
+
+.dark .date-input :deep(.dp__button:hover) {
+  background-color: #374151;
 }
 </style>
