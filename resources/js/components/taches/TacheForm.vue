@@ -1,8 +1,8 @@
-<!-- resources/js/components/taches/TacheForm.vue - VERSION OPTIMISÉE -->
+<!-- resources/js/components/taches/TacheForm.vue - VERSION AVEC ONGLETS -->
 <template>
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-20"
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 sm:p-6 lg:p-20"
     @click.self="$emit('close')">
-     <div
+    <div
       class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[95vh] overflow-hidden flex flex-col animate-fade-in"
     >
       <!-- Header -->
@@ -34,8 +34,7 @@
       </div>
 
       <!-- Permission Check - Loading State -->
-      <div v-if="isCheckingPermissions"
-        class="mx-8 mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border-l-4 border-blue-500">
+      <div v-if="isCheckingPermissions" class="mx-8 mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border-l-4 border-blue-500">
         <div class="flex items-center gap-3">
           <svg class="animate-spin w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -87,19 +86,42 @@
         </div>
       </div>
 
-      <!-- Form Body -->
+      <!-- Navigation par onglets -->
+      <div class="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+        <div class="px-8">
+          <nav class="flex space-x-8" aria-label="Tabs">
+            <button
+              v-for="tab in tabs"
+              :key="tab.id"
+              @click="activeTab = tab.id"
+              class="py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200"
+              :class="activeTab === tab.id
+                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
+            >
+              <div class="flex items-center gap-2">
+                <component :is="tab.icon" class="w-5 h-5" />
+                <span>{{ tab.name }}</span>
+                <span v-if="tab.badge" class="ml-2 py-0.5 px-2 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                  {{ tab.badge }}
+                </span>
+              </div>
+            </button>
+          </nav>
+        </div>
+      </div>
+
+      <!-- Form Body avec contenu des onglets -->
       <div class="flex-1 overflow-y-auto custom-scrollbar">
         <form @submit.prevent="handleSubmit" class="p-8">
-          <div class="space-y-8">
-
+          
+          <!-- Onglet 1: Informations de base -->
+          <div v-if="activeTab === 'informations'" class="space-y-8">
             <!-- Section Informations Générales -->
             <div class="space-y-5">
               <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
                 <div class="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg">
-                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                  <InformationCircleIcon class="w-5 h-5 text-white" />
                 </div>
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white">Informations générales</h3>
               </div>
@@ -109,10 +131,7 @@
                 class="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border-2 border-blue-200 dark:border-blue-800">
                 <div class="flex items-center gap-3">
                   <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                    </svg>
+                    <FolderIcon class="w-5 h-5 text-white" />
                   </div>
                   <div class="flex-1">
                     <p class="text-sm font-medium text-blue-700 dark:text-blue-300">Activité sélectionnée</p>
@@ -171,51 +190,11 @@
               </div>
             </div>
 
-            <!-- Section Validation -->
-            <div class="space-y-5">
-              <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
-                <div class="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg">
-                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Validation</h3>
-              </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <label class="relative flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all"
-                  :class="formData.validation_n1_required ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
-                    : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'">
-                  <input v-model="formData.validation_n1_required" type="checkbox"
-                    class="mt-1 rounded border-gray-300 text-green-600 focus:ring-green-500" />
-                  <div class="flex-1">
-                    <span class="block text-sm font-bold text-gray-900 dark:text-white">Validation N1 requise</span>
-                    <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Par le responsable d'activité</p>
-                  </div>
-                </label>
-
-                <label class="relative flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all"
-                  :class="formData.validation_n2_required ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
-                    : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'">
-                  <input v-model="formData.validation_n2_required" type="checkbox"
-                    class="mt-1 rounded border-gray-300 text-purple-600 focus:ring-purple-500" />
-                  <div class="flex-1">
-                    <span class="block text-sm font-bold text-gray-900 dark:text-white">Validation N2 requise</span>
-                    <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Par le responsable de projet</p>
-                  </div>
-                </label>
-              </div>
-            </div>
-
             <!-- Section Planification -->
             <div class="space-y-5">
               <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
                 <div class="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg">
-                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
+                  <CalendarIcon class="w-5 h-5 text-white" />
                 </div>
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white">Planification</h3>
               </div>
@@ -256,82 +235,79 @@
                 </div>
               </div>
 
-              <!-- Dates - Version améliorée avec DatePicker -->
-<div class="space-y-4">
-  <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-    <CalendarIcon class="w-5 h-5 text-green-500" />
-    Planification de la tâche
-  </h3>
+              <!-- Dates -->
+              <div class="space-y-4">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <CalendarIcon class="w-5 h-5 text-green-500" />
+                  Planification de la tâche
+                </h3>
 
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <!-- Date de début -->
+                  <div>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Date de début
+                    </label>
+                    <DatePicker
+                      v-model="formData.date_debut"
+                      :enable-time-picker="false"
+                      auto-apply
+                      :format="'dd-MM-yyyy'"
+                      :locale="'fr'"
+                      :dark="isDark"
+                      placeholder="Sélectionner une date"
+                      class="w-full date-input"
+                    >
+                      <template #input-icon>
+                        <CalendarIcon class="w-5 h-5 text-gray-400" />
+                      </template>
+                    </DatePicker>
+                  </div>
 
-    <!-- Date de début -->
-    <div>
-      <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-        Date de début
-      </label>
-      <DatePicker
-        v-model="formData.date_debut"
-        :enable-time-picker="false"
-        auto-apply
-        :format="'yyyy-MM-dd'"
-        :locale="'fr'"
-        :dark="isDark"
-        placeholder="Sélectionner une date"
-        class="w-full date-input"
-      >
-        <template #input-icon>
-          <CalendarIcon class="w-5 h-5 text-gray-400" />
-        </template>
-      </DatePicker>
-    </div>
+                  <!-- Date d'échéance -->
+                  <div>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Date d'échéance
+                    </label>
+                    <DatePicker
+                      v-model="formData.echeance"
+                      :enable-time-picker="false"
+                      auto-apply
+                      :format="'dd-MM-yyyy'"
+                      :locale="'fr'"
+                      :dark="isDark"
+                      :min-date="formData.date_debut"
+                      placeholder="Sélectionner une date"
+                      class="w-full date-input"
+                    >
+                      <template #input-icon>
+                        <CalendarIcon class="w-5 h-5 text-gray-400" />
+                      </template>
+                    </DatePicker>
+                  </div>
 
-    <!-- Date d'échéance -->
-    <div>
-      <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-        Date d'échéance
-      </label>
-      <DatePicker
-        v-model="formData.echeance"
-        :enable-time-picker="false"
-        auto-apply
-        :format="'yyyy-MM-dd'"
-        :locale="'fr'"
-        :dark="isDark"
-        :min-date="formData.date_debut"
-        placeholder="Sélectionner une date"
-        class="w-full date-input"
-      >
-        <template #input-icon>
-          <CalendarIcon class="w-5 h-5 text-gray-400" />
-        </template>
-      </DatePicker>
-    </div>
-
-    <!-- Date de fin réelle -->
-    <div>
-      <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-        Date de fin réelle
-      </label>
-      <DatePicker
-        v-model="formData.date_fin_reelle"
-        :enable-time-picker="false"
-        auto-apply
-        :format="'yyyy-MM-dd'"
-        :locale="'fr'"
-        :dark="isDark"
-        placeholder="Sélectionner une date"
-        class="w-full date-input"
-      >
-        <template #input-icon>
-          <CalendarIcon class="w-5 h-5 text-gray-400" />
-        </template>
-      </DatePicker>
-    </div>
-
-  </div>
-</div>
-
+                  <!-- Date de fin réelle -->
+                  <div>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Date de fin réelle
+                    </label>
+                    <DatePicker
+                      v-model="formData.date_fin_reelle"
+                      :enable-time-picker="false"
+                      auto-apply
+                      :format="'yyyy-MM-dd'"
+                      :locale="'fr'"
+                      :dark="isDark"
+                      placeholder="Sélectionner une date"
+                      class="w-full date-input"
+                    >
+                      <template #input-icon>
+                        <CalendarIcon class="w-5 h-5 text-gray-400" />
+                      </template>
+                    </DatePicker>
+                  </div>
+                </div>
+              </div>
 
               <!-- Progression & Heures -->
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -358,14 +334,27 @@
               </div>
             </div>
 
-            <!-- Section Équipe -->
+            <!-- Section Commentaire -->
+            <div class="space-y-5">
+              <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
+                <div class="p-2 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-lg">
+                  <ChatBubbleLeftRightIcon class="w-5 h-5 text-white" />
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Commentaire</h3>
+              </div>
+
+              <textarea v-model="formData.commentaire" rows="3" placeholder="Ajoutez un commentaire ou une note..."
+                class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"></textarea>
+            </div>
+          </div>
+
+          <!-- Onglet 2: Équipe & Validation -->
+          <div v-if="activeTab === 'equipe'" class="space-y-8">
+            <!-- Section Équipe & Organisation -->
             <div class="space-y-5">
               <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
                 <div class="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg">
-                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
+                  <UserGroupIcon class="w-5 h-5 text-white" />
                 </div>
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white">Équipe & Organisation</h3>
               </div>
@@ -403,9 +392,7 @@
                 </div>
                 
                 <p class="mt-2 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                  <InformationCircleIcon class="w-4 h-4" />
                   Maintenez Ctrl/Cmd pour sélectionner plusieurs utilisateurs
                 </p>
               </div>
@@ -413,20 +400,55 @@
               <!-- Labels -->
               <div>
                 <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Labels</label>
-                <div class="flex flex-wrap gap-2">
-                  <button v-for="label in availableLabels" :key="label.id" type="button" @click="toggleLabel(label.id)"
-                    class="px-4 py-2 text-sm font-medium rounded-xl transition-all border-2" :style="{
-                      backgroundColor: formData.label_ids.includes(label.id) ? label.couleur + '20' : 'transparent',
-                      color: label.couleur,
-                      borderColor: formData.label_ids.includes(label.id) ? label.couleur : 'transparent'
-                    }" :class="formData.label_ids.includes(label.id) ? 'shadow-sm scale-105'
-                      : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'">
-                    <span class="flex items-center gap-2">
-                      <span class="w-2.5 h-2.5 rounded-full" :style="{ backgroundColor: label.couleur }"></span>
-                      {{ label.nom }}
-                    </span>
-                  </button>
+                <TaskLabelsSelector
+                  v-model="formData.label_ids"
+                  :projet-id="currentActivite?.projet_id"
+                  :show-create-button="true"
+                  :show-scope-filter="true"
+                  @create-label="showLabelModal = true"
+                />
+              </div>
+            </div>
+
+            <!-- Section Validation -->
+            <div class="space-y-5">
+              <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
+                <div class="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg">
+                  <CheckBadgeIcon class="w-5 h-5 text-white" />
                 </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Validation</h3>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <label class="relative flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all"
+                  :class="formData.validation_n1_required ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                    : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'">
+                  <input v-model="formData.validation_n1_required" type="checkbox"
+                    class="mt-1 rounded border-gray-300 text-green-600 focus:ring-green-500" />
+                  <div class="flex-1">
+                    <span class="block text-sm font-bold text-gray-900 dark:text-white">Validation N1 requise</span>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Par le responsable d'activité</p>
+                  </div>
+                </label>
+
+                <label class="relative flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all"
+                  :class="formData.validation_n2_required ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                    : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'">
+                  <input v-model="formData.validation_n2_required" type="checkbox"
+                    class="mt-1 rounded border-gray-300 text-purple-600 focus:ring-purple-500" />
+                  <div class="flex-1">
+                    <span class="block text-sm font-bold text-gray-900 dark:text-white">Validation N2 requise</span>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Par le responsable de projet</p>
+                  </div>
+                </label>
+              </div>
+
+              <!-- Validateurs assignés (si besoin) -->
+              <div v-if="formData.validation_n1_required || formData.validation_n2_required" class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                <p class="text-sm text-blue-700 dark:text-blue-300">
+                  <InformationCircleIcon class="w-4 h-4 inline mr-2" />
+                  Les validateurs seront automatiquement assignés en fonction des rôles dans l'activité et le projet.
+                </p>
               </div>
             </div>
 
@@ -434,12 +456,7 @@
             <div class="space-y-5">
               <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
                 <div class="p-2 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg">
-                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
+                  <EyeIcon class="w-5 h-5 text-white" />
                 </div>
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white">Visibilité</h3>
               </div>
@@ -459,50 +476,247 @@
                 </label>
               </div>
             </div>
+          </div>
 
-            <!-- Section Commentaire -->
+          <!-- Onglet 3: Fichiers & Ressources -->
+          <div v-if="activeTab === 'fichiers'" class="space-y-8">
+            <!-- Section Fichiers attachés -->
             <div class="space-y-5">
               <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
-                <div class="p-2 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-lg">
-                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-                  </svg>
+                <div class="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg">
+                  <PaperClipIcon class="w-5 h-5 text-white" />
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Commentaire</h3>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Fichiers & Ressources</h3>
               </div>
 
-              <textarea v-model="formData.commentaire" rows="3" placeholder="Ajoutez un commentaire ou une note..."
-                class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"></textarea>
+              <!-- Upload de fichiers -->
+              <div>
+                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">
+                  Fichiers attachés
+                </label>
+                
+                <!-- Zone de dépôt de fichiers -->
+                <div 
+                  @drop.prevent="handleFileDrop"
+                  @dragover.prevent="isDragOver = true"
+                  @dragleave="isDragOver = false"
+                  class="border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200"
+                  :class="isDragOver 
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
+                    : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'"
+                >
+                  <PaperClipIcon class="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                  <p class="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-2">
+                    Glissez-déposez vos fichiers ici
+                  </p>
+                  <p class="text-sm text-gray-500 dark:text-gray-500 mb-4">
+                    ou
+                  </p>
+                  <input
+                    type="file"
+                    ref="fileInput"
+                    multiple
+                    @change="handleFileUpload"
+                    class="hidden"
+                  />
+                  <button
+                    type="button"
+                    @click="$refs.fileInput.click()"
+                    class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                  >
+                    Parcourir les fichiers
+                  </button>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">
+                    Formats supportés: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, JPG, PNG, GIF, ZIP
+                  </p>
+                  <p class="text-xs text-gray-400 dark:text-gray-500">
+                    Taille maximale: 10 Mo par fichier
+                  </p>
+                </div>
+              </div>
+
+              <!-- Liste des fichiers uploadés -->
+              <div v-if="uploadedFiles.length > 0" class="space-y-3">
+                <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300">
+                  Fichiers sélectionnés ({{ uploadedFiles.length }})
+                </h4>
+                <div class="space-y-2">
+                  <div
+                    v-for="(file, index) in uploadedFiles"
+                    :key="index"
+                    class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+                  >
+                    <div class="flex items-center gap-3">
+                      <DocumentIcon class="w-5 h-5 text-gray-400" />
+                      <div>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">{{ file.name }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                          {{ formatFileSize(file.size) }}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      @click="removeFile(index)"
+                      class="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    >
+                      <TrashIcon class="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Liens externes -->
+              <div class="space-y-4">
+                <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300">
+                  Liens externes
+                </h4>
+                
+                <!-- Ajout de lien -->
+                <div class="flex gap-3">
+                  <input
+                    v-model="newLink.url"
+                    type="url"
+                    placeholder="https://example.com"
+                    class="flex-1 px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  />
+                  <input
+                    v-model="newLink.title"
+                    type="text"
+                    placeholder="Titre du lien"
+                    class="flex-1 px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  />
+                  <button
+                    type="button"
+                    @click="addLink"
+                    class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                  >
+                    Ajouter
+                  </button>
+                </div>
+
+                <!-- Liste des liens -->
+                <div v-if="externalLinks.length > 0" class="space-y-2">
+                  <div
+                    v-for="(link, index) in externalLinks"
+                    :key="index"
+                    class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+                  >
+                    <div class="flex items-center gap-3">
+                      <LinkIcon class="w-5 h-5 text-blue-500" />
+                      <div>
+                        <a :href="link.url" target="_blank" class="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline">
+                          {{ link.title || link.url }}
+                        </a>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ link.url }}</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      @click="removeLink(index)"
+                      class="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    >
+                      <TrashIcon class="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
 
+            <!-- Section Apparence --> 
+            <div class="space-y-5">
+              <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
+                <div class="p-2 bg-gradient-to-br from-pink-500 to-rose-600 rounded-lg">
+                  <PaintBrushIcon class="w-5 h-5 text-white" />
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Apparence</h3>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <!-- Couleur -->
+                <div>
+                  <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Couleur</label>
+                  <div class="flex gap-3 items-center">
+                    <input
+                      v-model="formData.couleur"
+                      type="color"
+                      class="h-12 w-20 border-2 border-gray-300 dark:border-gray-700 rounded-lg cursor-pointer"
+                    />
+                    <input
+                      v-model="formData.couleur"
+                      type="text"
+                      placeholder="#3B82F6"
+                      pattern="^#[0-9A-Fa-f]{6}$"
+                      class="flex-1 px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                    />
+                  </div>
+                </div>
+
+                <!-- Image de couverture - CORRIGÉE -->
+                <div>
+                  <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Image de couverture</label>
+                  <input
+                    ref="coverImageInput"
+                    type="file"
+                    accept="image/*"
+                    @change="handleCoverImageUpload"
+                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  />
+                  <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">PNG, JPG, GIF jusqu'à 2 Mo</p>
+                </div>
+              </div>
+
+              <!-- Preview Image -->
+              <div v-if="coverImagePreview" class="mt-3">
+                <img :src="coverImagePreview" alt="Preview" class="h-40 w-full rounded-xl object-cover shadow-lg" />
+              </div>
+            </div>
           </div>
+
         </form>
       </div>
 
       <!-- Footer -->
       <div class="px-8 py-5 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex items-center justify-between gap-4">
-        <div v-if="isCheckingPermissions" class="flex items-center gap-2 text-blue-600 dark:text-blue-400">
-          <svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-            </path>
-          </svg>
-          <span class="text-sm font-medium">Vérification...</span>
-        </div>
+        <div class="flex items-center gap-4">
+          <!-- Navigation entre les onglets -->
+          <div class="flex gap-2">
+            <button
+              v-for="tab in tabs"
+              :key="tab.id"
+              @click="activeTab = tab.id"
+              class="p-2 rounded-lg transition-colors"
+              :class="activeTab === tab.id
+                ? 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400'
+                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
+              :title="tab.name"
+            >
+              <component :is="tab.icon" class="w-4 h-4" />
+            </button>
+          </div>
 
-        <div v-else-if="permissionChecked && !hasPermission"
-          class="flex items-center gap-2 text-red-600 dark:text-red-400">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-          </svg>
-          <span class="text-sm font-medium">Action non autorisée</span>
-        </div>
+          <div v-if="isCheckingPermissions" class="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+            <svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+              </path>
+            </svg>
+            <span class="text-sm font-medium">Vérification...</span>
+          </div>
 
-        <div v-else class="text-sm text-gray-500 dark:text-gray-400">
-          <span class="text-red-500">*</span> Champs obligatoires
+          <div v-else-if="permissionChecked && !hasPermission"
+            class="flex items-center gap-2 text-red-600 dark:text-red-400">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            <span class="text-sm font-medium">Action non autorisée</span>
+          </div>
+
+          <div v-else class="text-sm text-gray-500 dark:text-gray-400">
+            <span class="text-red-500">*</span> Champs obligatoires
+          </div>
         </div>
 
         <div class="flex items-center gap-3">
@@ -530,6 +744,15 @@
       </div>
 
     </div>
+
+    <!-- Label Modal -->
+    <LabelModal
+      v-if="showLabelModal"
+      :projet-id="currentActivite?.projet_id"
+      @saved="handleLabelCreated"
+      @close="showLabelModal = false"
+    />
+
   </div>
 </template>
 
@@ -542,10 +765,25 @@ import { useActivityPermissions } from '@/composables/useActivityPermissions'
 import { useActivityMembers } from '@/composables/useActivityMembers'
 import DatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
-import { CalendarIcon } from '@/icons'
+import { 
+  CalendarIcon,
+  InformationCircleIcon,
+  UserGroupIcon,
+  CheckBadgeIcon,
+  EyeIcon,
+  ChatBubbleLeftRightIcon,
+  PaperClipIcon,
+  DocumentIcon,
+  LinkIcon,
+  TrashIcon,
+  PaintBrushIcon,
+  FolderIcon
+} from '@heroicons/vue/24/outline'
+
+import { TaskLabelsSelector, LabelModal } from '@/components/labels'
+import { useLabels } from '@/composables/useLabels'
 
 const isDark = computed(() => document.documentElement.classList.contains('dark'))
-
 
 const props = defineProps({
   tache: { type: Object, default: null },
@@ -560,16 +798,49 @@ const emit = defineEmits(['close', 'saved'])
 const authStore = useAuthStore()
 const { createTache, updateTache } = useTaches()
 const { loadingMembers, availableMembers, loadActivityMembers, loadProjectMembers } = useActivityMembers()
+const { labels, fetchLabels, fetchLabelsForProject } = useLabels()
 
 // ==================== ÉTAT RÉACTIF ====================
 const currentActivite = ref(props.activiteContext)
 const loading = ref(false)
 const activites = ref([])
-const availableLabels = ref([])
 const errorMessage = ref('')
 const validationErrors = ref([])
 const isCheckingPermissions = ref(true)
 const permissionChecked = ref(false)
+
+// Variables pour les onglets
+const activeTab = ref('informations')
+
+// Variables pour les fichiers et liens
+const isDragOver = ref(false)
+const uploadedFiles = ref([])
+const externalLinks = ref([])
+const newLink = ref({ url: '', title: '' })
+
+// Variables labels et apparence
+const showLabelModal = ref(false)
+const coverImagePreview = ref(null)
+const coverImageFile = ref(null) // ✅ NOUVEAU : Référence séparée pour le fichier
+
+// Refs pour les inputs
+const fileInputRef = ref(null)
+const coverImageInputRef = ref(null)
+
+// ==================== CONFIGURATION DES ONGLETS ====================
+const tabs = [
+  { id: 'informations', name: 'Informations', icon: InformationCircleIcon },
+  { id: 'equipe', name: 'Équipe & Validation', icon: UserGroupIcon },
+  { 
+    id: 'fichiers', 
+    name: 'Fichiers & Ressources', 
+    icon: PaperClipIcon,
+    badge: computed(() => {
+      const total = uploadedFiles.value.length + externalLinks.value.length
+      return total > 0 ? total : null
+    })
+  }
+]
 
 // ==================== PERMISSIONS ====================
 const {
@@ -581,7 +852,6 @@ const {
 
 const hasPermission = computed(() => {
   if (!currentActivite.value) {
-    console.warn('⚠️ Aucune activité sélectionnée pour vérifier les permissions')
     return false
   }
   return props.tache ? canEditTasks.value : canCreateTasks.value
@@ -590,7 +860,6 @@ const hasPermission = computed(() => {
 // ==================== UTILISATEURS DISPONIBLES ====================
 const availableUsers = computed(() => {
   if (!Array.isArray(availableMembers.value)) {
-    console.warn('⚠️ availableMembers n\'est pas un tableau')
     return []
   }
   return availableMembers.value
@@ -605,9 +874,9 @@ const formData = ref({
   indicateurs_resultats: '',
   statut: props.initialStatut || 'a_faire',
   priorite: 'moyenne',
-  echeance: '',
-  date_debut: '',
-  date_fin_reelle: '',
+  echeance: null,
+  date_debut: null,
+  date_fin_reelle: null,
   taux_realisation: 0,
   estimated_hours: null,
   actual_hours: null,
@@ -639,57 +908,201 @@ const visibilityOptions = [
   { value: 'private', label: 'Privé', icon: '🔒', description: 'Seulement les assignés' }
 ]
 
-// ==================== MÉTHODES ====================
+// ==================== MÉTHODES FICHIERS & LIENS ====================
 
 /**
- * Vérifier les permissions pour une activité
+ * ✅ CORRIGÉ : Gérer le drag & drop de fichiers
  */
-const checkPermissions = async (activiteId) => {
-  if (!activiteId) {
-    permissionChecked.value = false
-    return
-  }
+const handleFileDrop = (event) => {
+  isDragOver.value = false
+  const files = Array.from(event.dataTransfer.files)
+  handleFiles(files)
+}
 
-  isCheckingPermissions.value = true
-  try {
-    if (props.activiteContext && props.activiteContext.id == activiteId) {
-      currentActivite.value = props.activiteContext
-    } else {
-      const { data } = await api.get(`/activites/${activiteId}?with_members=true`)
-      currentActivite.value = data.data
+/**
+ * ✅ CORRIGÉ : Gérer l'upload de fichiers via input
+ */
+const handleFileUpload = (event) => {
+  const files = Array.from(event.target.files)
+  handleFiles(files)
+  event.target.value = '' // Reset l'input
+}
+
+/**
+ * ✅ CORRIGÉ : Traiter les fichiers uploadés avec validation stricte
+ */
+const handleFiles = (files) => {
+  const allowedTypes = [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'image/gif',
+    'application/zip',
+    'application/x-zip-compressed'
+  ]
+  
+  const validFiles = []
+  const errors = []
+  
+  files.forEach(file => {
+    // Vérifier la taille (10 Mo max)
+    if (file.size > 10 * 1024 * 1024) {
+      errors.push(`Le fichier "${file.name}" dépasse la taille maximale de 10 Mo`)
+      return
     }
-
-    formData.value.activite_id = activiteId
-    permissionChecked.value = true
-
-    console.log('✅ Permissions vérifiées:', {
-      activite: activiteId,
-      canCreate: canCreateTasks.value,
-      canEdit: canEditTasks.value,
-      canAssign: canAssignUsers.value
-    })
-
-    // Charger les membres
-    await loadActivityMembers(activiteId).catch(err => {
-      console.warn('⚠️ Erreur chargement membres, fallback vers projet')
-      if (currentActivite.value?.projet_id) {
-        return loadProjectMembers(currentActivite.value.projet_id)
-      }
-    })
-  } catch (error) {
-    console.error('❌ Erreur vérification permissions:', error)
-    permissionChecked.value = true
-  } finally {
-    isCheckingPermissions.value = false
+    
+    // Vérifier le type MIME
+    if (!allowedTypes.includes(file.type)) {
+      errors.push(`Le format du fichier "${file.name}" (${file.type}) n'est pas supporté`)
+      return
+    }
+    
+    // Vérifier que le fichier n'est pas déjà ajouté
+    const exists = uploadedFiles.value.some(f => 
+      f.name === file.name && f.size === file.size
+    )
+    
+    if (exists) {
+      errors.push(`Le fichier "${file.name}" est déjà ajouté`)
+      return
+    }
+    
+    validFiles.push(file)
+  })
+  
+  if (errors.length > 0) {
+    errorMessage.value = errors.join('\n')
+    setTimeout(() => {
+      errorMessage.value = ''
+    }, 5000)
+  }
+  
+  if (validFiles.length > 0) {
+    uploadedFiles.value.push(...validFiles)
+    console.log('✅ Fichiers ajoutés:', validFiles.length, 'Total:', uploadedFiles.value.length, 'uploaded files', uploadedFiles.value, 'validFiles', validFiles)
   }
 }
 
 /**
- * Basculer un label
+ * Supprimer un fichier
  */
-const toggleLabel = (labelId) => {
-  const index = formData.value.label_ids.indexOf(labelId)
-  index > -1 ? formData.value.label_ids.splice(index, 1) : formData.value.label_ids.push(labelId)
+const removeFile = (index) => {
+  uploadedFiles.value.splice(index, 1)
+}
+
+/**
+ * Formater la taille du fichier
+ */
+const formatFileSize = (bytes) => {
+  if (bytes === 0) return '0 Bytes'
+  const k = 1024
+  const sizes = ['Bytes', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
+
+/**
+ * ✅ CORRIGÉ : Ajouter un lien externe avec validation
+ */
+const addLink = () => {
+  if (!newLink.value.url || !newLink.value.url.trim()) {
+    errorMessage.value = 'Veuillez saisir une URL'
+    setTimeout(() => { errorMessage.value = '' }, 3000)
+    return
+  }
+  
+  // Validation URL
+  try {
+    const url = new URL(newLink.value.url)
+    if (!['http:', 'https:'].includes(url.protocol)) {
+      throw new Error('Protocol invalide')
+    }
+  } catch {
+    errorMessage.value = 'Veuillez saisir une URL valide (doit commencer par http:// ou https://)'
+    setTimeout(() => { errorMessage.value = '' }, 3000)
+    return
+  }
+  
+  // Vérifier doublon
+  const exists = externalLinks.value.some(link => link.url === newLink.value.url)
+  if (exists) {
+    errorMessage.value = 'Ce lien a déjà été ajouté'
+    setTimeout(() => { errorMessage.value = '' }, 3000)
+    return
+  }
+  
+  externalLinks.value.push({
+    url: newLink.value.url.trim(),
+    title: newLink.value.title.trim() || newLink.value.url.trim()
+  })
+  
+  // Réinitialiser
+  newLink.value = { url: '', title: '' }
+  
+  console.log('✅ Lien ajouté. Total:', externalLinks.value.length)
+}
+
+/**
+ * Supprimer un lien
+ */
+const removeLink = (index) => {
+  externalLinks.value.splice(index, 1)
+}
+
+/**
+ * ✅ CORRIGÉ : Gérer l'upload d'image de couverture
+ */
+const handleCoverImageUpload = (event) => {
+  const file = event.target.files?.[0]
+  
+  if (!file) {
+    return
+  }
+  
+  // Réinitialiser les erreurs
+  errorMessage.value = ''
+  
+  // Vérifier la taille (2 Mo max)
+  if (file.size > 2 * 1024 * 1024) {
+    errorMessage.value = 'L\'image ne doit pas dépasser 2 Mo'
+    event.target.value = ''
+    return
+  }
+  
+  // Vérifier le type MIME strictement
+  const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif']
+  if (!validImageTypes.includes(file.type)) {
+    errorMessage.value = `Format d'image non supporté (${file.type}). Formats acceptés: JPEG, PNG, GIF`
+    event.target.value = ''
+    return
+  }
+  
+  // Stocker le fichier
+  coverImageFile.value = file
+  
+  // Générer preview
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    coverImagePreview.value = e.target.result
+  }
+  reader.onerror = () => {
+    errorMessage.value = 'Erreur lors de la lecture du fichier'
+    coverImageFile.value = null
+  }
+  reader.readAsDataURL(file)
+  
+  console.log('✅ Image de couverture sélectionnée:', {
+    name: file.name,
+    type: file.type,
+    size: formatFileSize(file.size)
+  })
 }
 
 /**
@@ -702,29 +1115,42 @@ const getProgressColorClass = (progress) => {
 }
 
 /**
- * Charger toutes les données nécessaires
+ * ✅ CORRIGÉ : Formater une date pour l'API (YYYY-MM-DD)
  */
-const loadData = async () => {
-  try {
-    const [activitesRes, labelsRes] = await Promise.all([
-      api.get('/activites/mes-activites'),
-      api.get('/labels')
-    ])
-    activites.value = activitesRes.data.data || []
-    availableLabels.value = labelsRes.data.data || []
-  } catch (error) {
-    console.error('❌ Erreur chargement données:', error)
+const formatDateForApi = (date) => {
+  if (!date) return null
+  
+  // Si c'est déjà une string au bon format
+  if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return date
   }
+  
+  // Si c'est un objet Date
+  let dateObj
+  if (date instanceof Date) {
+    dateObj = date
+  } else {
+    dateObj = new Date(date)
+  }
+  
+  if (isNaN(dateObj.getTime())) {
+    return null
+  }
+  
+  const year = dateObj.getFullYear()
+  const month = String(dateObj.getMonth() + 1).padStart(2, '0')
+  const day = String(dateObj.getDate()).padStart(2, '0')
+  
+  return `${year}-${month}-${day}`
 }
 
 /**
- * Soumettre le formulaire
+ * ✅ CORRIGÉ : Soumettre le formulaire avec gestion optimale des fichiers
  */
 const handleSubmit = async () => {
   if (!hasPermission.value) {
     const action = props.tache ? 'edit_tasks' : 'create_tasks'
     errorMessage.value = getPermissionDeniedMessage(action)
-    console.warn('🚫 Permission refusée')
     return
   }
 
@@ -737,12 +1163,110 @@ const handleSubmit = async () => {
       formData.value.activite_id = currentActivite.value.id
     }
 
-    if (props.tache) {
-      await updateTache(props.tache.id, formData.value)
-    } else {
-      await createTache(formData.value)
+    // ✅ TOUJOURS utiliser FormData pour éviter les problèmes
+    const formDataObj = new FormData()
+    
+    console.log('=== FormData Debug ===')
+for (let [key, value] of formDataObj.entries()) {
+  if (value instanceof File) {
+    console.log(`${key}: [FILE] ${value.name} (${value.type})`)
+  } else {
+    console.log(`${key}:`, value)
+  }
+}
+
+    // ✅ Ajouter les champs simples
+    formDataObj.append('activite_id', formData.value.activite_id)
+    formDataObj.append('titre', formData.value.titre || '')
+    formDataObj.append('description', formData.value.description || '')
+    formDataObj.append('objectif', formData.value.objectif || '')
+    formDataObj.append('indicateurs_resultats', formData.value.indicateurs_resultats || '')
+    formDataObj.append('statut', formData.value.statut)
+    formDataObj.append('priorite', formData.value.priorite)
+    
+    // ✅ Dates formatées
+    const dateDebut = formatDateForApi(formData.value.date_debut)
+    const echeance = formatDateForApi(formData.value.echeance)
+    const dateFinReelle = formatDateForApi(formData.value.date_fin_reelle)
+    
+    if (dateDebut) formDataObj.append('date_debut', dateDebut)
+    if (echeance) formDataObj.append('echeance', echeance)
+    if (dateFinReelle) formDataObj.append('date_fin_reelle', dateFinReelle)
+    
+    formDataObj.append('taux_realisation', formData.value.taux_realisation || 0)
+    
+    if (formData.value.estimated_hours) {
+      formDataObj.append('estimated_hours', formData.value.estimated_hours)
     }
+    if (formData.value.actual_hours) {
+      formDataObj.append('actual_hours', formData.value.actual_hours)
+    }
+    
+    // ✅ Booléens en 0/1
+    formDataObj.append('validation_n1_required', formData.value.validation_n1_required ? '1' : '0')
+    formDataObj.append('validation_n2_required', formData.value.validation_n2_required ? '1' : '0')
+    
+    formDataObj.append('couleur', formData.value.couleur || '#3B82F6')
+    formDataObj.append('commentaire', formData.value.commentaire || '')
+    formDataObj.append('visibility', formData.value.visibility || 'members_only')
+    
+    // ✅ Tableaux d'IDs
+    if (formData.value.assignee_ids && formData.value.assignee_ids.length > 0) {
+      formData.value.assignee_ids.forEach(id => {
+        formDataObj.append('assignee_ids[]', id)
+      })
+    }
+    
+    if (formData.value.label_ids && formData.value.label_ids.length > 0) {
+      formData.value.label_ids.forEach(id => {
+        formDataObj.append('label_ids[]', id)
+      })
+    }
+    
+    // ✅ FICHIERS : Ajouter chaque fichier individuellement
+    if (uploadedFiles.value.length > 0) {
+      uploadedFiles.value.forEach((file, index) => {
+        formDataObj.append(`uploaded_files[${index}]`, file, file.name)
+      })
+      console.log('✅ Fichiers ajoutés au FormData:', uploadedFiles.value.length)
+    }
+    
+    // ✅ LIENS EXTERNES : Sérialiser proprement en JSON
+    if (externalLinks.value.length > 0) {
+      formDataObj.append('external_links', JSON.stringify(externalLinks.value))
+      console.log('✅ Liens externes:', externalLinks.value.length)
+    }
+    
+    // ✅ IMAGE DE COUVERTURE
+    if (coverImageFile.value) {
+      formDataObj.append('cover_image', coverImageFile.value, coverImageFile.value.name)
+      console.log('✅ Image de couverture ajoutée:', coverImageFile.value.name)
+    }
+    
+    // ✅ Debug: Afficher le contenu du FormData
+    console.log('=== FormData Content ===')
+    for (let [key, value] of formDataObj.entries()) {
+      if (value instanceof File) {
+        console.log(`${key}:`, {
+          name: value.name,
+          type: value.type,
+          size: value.size
+        })
+      } else {
+        console.log(`${key}:`, value)
+      }
+    }
+    
+    // ✅ Envoyer
+    if (props.tache) {
+      formDataObj.append('_method', 'PUT')
+      await updateTache(props.tache.id, formDataObj)
+    } else {
+      await createTache(formDataObj)
+    }
+    
     emit('saved')
+    
   } catch (error) {
     console.error('❌ Erreur soumission:', error)
     handleError(error)
@@ -772,30 +1296,76 @@ const handleError = (error) => {
   }
 }
 
-// ==================== WATCHERS ====================
-
 /**
- * Surveiller les changements d'activité
+ * Vérifier les permissions pour une activité
  */
-watch(() => formData.value.activite_id, async (newActiviteId) => {
-  if (!newActiviteId || newActiviteId === currentActivite.value?.id) return
-  
-  console.log('🔄 Changement d\'activité:', newActiviteId)
-  formData.value.assignee_ids = []
-  
-  await checkPermissions(newActiviteId)
-}, { immediate: false })
-
-/**
- * Surveiller les changements de contexte
- */
-watch(() => props.activiteContext, (newContext) => {
-  if (newContext && newContext.id !== currentActivite.value?.id) {
-    console.log('🔄 Mise à jour contexte:', newContext.id)
-    currentActivite.value = newContext
-    formData.value.activite_id = newContext.id
+const checkPermissions = async (activiteId) => {
+  if (!activiteId) {
+    permissionChecked.value = false
+    return
   }
-}, { immediate: true })
+
+  isCheckingPermissions.value = true
+  try {
+    if (props.activiteContext && props.activiteContext.id == activiteId) {
+      currentActivite.value = props.activiteContext
+    } else {
+      const { data } = await api.get(`/activites/${activiteId}?with_members=true`)
+      currentActivite.value = data.data
+    }
+
+    formData.value.activite_id = activiteId
+    permissionChecked.value = true
+
+    // Charger les membres
+    await loadActivityMembers(activiteId).catch(err => {
+      if (currentActivite.value?.projet_id) {
+        return loadProjectMembers(currentActivite.value.projet_id)
+      }
+    })
+  } catch (error) {
+    console.error('❌ Erreur vérification permissions:', error)
+    permissionChecked.value = true
+  } finally {
+    isCheckingPermissions.value = false
+  }
+}
+
+/**
+ * Gérer la création d'un nouveau label
+ */
+const handleLabelCreated = async () => {
+  showLabelModal.value = false
+  try {
+    if (currentActivite.value?.projet_id) {
+      await fetchLabelsForProject(currentActivite.value.projet_id)
+    } else {
+      await fetchLabels()
+    }
+  } catch (error) {
+    console.error('❌ Erreur rechargement labels:', error)
+  }
+}
+
+/**
+ * Charger toutes les données nécessaires
+ */
+const loadData = async () => {
+  try {
+    const [activitesRes] = await Promise.all([
+      api.get('/activites/mes-activites')
+    ])
+    activites.value = activitesRes.data.data || []
+    
+    if (currentActivite.value?.projet_id) {
+      await fetchLabelsForProject(currentActivite.value.projet_id)
+    } else {
+      await fetchLabels()
+    }
+  } catch (error) {
+    console.error('❌ Erreur chargement données:', error)
+  }
+}
 
 // ==================== LIFECYCLE ====================
 
@@ -823,9 +1393,9 @@ onMounted(async () => {
         indicateurs_resultats: props.tache.indicateurs_resultats || '',
         statut: props.tache.statut || 'a_faire',
         priorite: props.tache.priorite || 'moyenne',
-        echeance: props.tache.echeance || '',
-        date_debut: props.tache.date_debut || '',
-        date_fin_reelle: props.tache.date_fin_reelle || '',
+        echeance: props.tache.echeance || null,
+        date_debut: props.tache.date_debut || null,
+        date_fin_reelle: props.tache.date_fin_reelle || null,
         taux_realisation: props.tache.taux_realisation || 0,
         estimated_hours: props.tache.estimated_hours || null,
         actual_hours: props.tache.actual_hours || null,
@@ -836,6 +1406,14 @@ onMounted(async () => {
         assignee_ids: props.tache.assignees?.map(a => a.id) || [],
         label_ids: props.tache.labels?.map(l => l.id) || [],
         visibility: props.tache.visibility || 'members_only'
+      }
+
+      if (props.tache.external_links) {
+        externalLinks.value = props.tache.external_links
+      }
+
+      if (props.tache.cover_image) {
+        coverImagePreview.value = props.tache.cover_image
       }
 
       if (props.tache.activite_id) {
@@ -894,13 +1472,12 @@ onMounted(async () => {
   20%, 40%, 60%, 80% { transform: translateX(4px); }
 }
 
-/* ✅ STYLES SPÉCIFIQUES AU DATEPICKER */
+/* Styles spécifiques au DatePicker */
 .date-input {
   position: relative;
   z-index: 1;
 }
 
-/* S'assurer que le calendrier s'affiche au-dessus de la modal */
 .date-input :deep(.dp__input) {
   width: 100%;
   padding: 0.875rem 1rem 0.875rem 2.5rem;
@@ -933,12 +1510,10 @@ onMounted(async () => {
   margin-right: 0.5rem;
 }
 
-/* Z-index élevé pour le calendrier dans les modals */
 .date-input :deep(.dp__menu) {
   z-index: 10000;
 }
 
-/* Styles pour le mode sombre */
 .dark .date-input :deep(.dp__menu) {
   background-color: #1f2937;
   border: 1px solid #374151;
