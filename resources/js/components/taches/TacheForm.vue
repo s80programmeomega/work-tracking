@@ -764,7 +764,7 @@ import api from '@/api/axios'
 import { useActivityPermissions } from '@/composables/useActivityPermissions'
 import { useActivityMembers } from '@/composables/useActivityMembers'
 import DatePicker from '@vuepic/vue-datepicker'
-import '@vuepic/vue-datepicker/dist/main.css'
+import '@vuepic/vue-datepicker/dist/main.css' 
 import { 
   CalendarIcon,
   InformationCircleIcon,
