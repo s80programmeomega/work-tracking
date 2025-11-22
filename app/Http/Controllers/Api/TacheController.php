@@ -8,11 +8,14 @@ use App\Models\Tache;
 use App\Services\TacheService;
 use App\Http\Resources\TacheResource;
 use App\Models\Activite;
+use App\Models\TacheAttachment;
+use App\Models\TacheExternalLink;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
 
 class TacheController extends Controller
@@ -285,11 +288,96 @@ class TacheController extends Controller
     }
 
     /**
-     * Créer une tâche
+     * ✅ Télécharger un fichier attaché
      */
+    public function downloadAttachment(Tache $tache, TacheAttachment $attachment): Response
+    {
+        $this->authorize('view', $tache);
 
+        if ($attachment->tache_id !== $tache->id) {
+            abort(404, 'Fichier non trouvé pour cette tâche');
+        }
+
+        if (!Storage::disk('public')->exists($attachment->file_path)) {
+            abort(404, 'Fichier non trouvé sur le serveur');
+        }
+
+        return Storage::disk('public')->download(
+            $attachment->file_path,
+            $attachment->original_name
+        );
+    }
+
+    /**
+     * ✅ Ajouter un lien externe
+     */
+    public function addExternalLink(Request $request, Tache $tache): JsonResponse
+    {
+        $this->authorize('update', $tache);
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'url' => 'required|url|max:500',
+        ]);
+
+        try {
+            $link = TacheExternalLink::create([
+                'tache_id' => $tache->id,
+                'title' => $validated['title'],
+                'url' => $validated['url'],
+                'created_by' => $request->user()->id,
+            ]);
+
+            return response()->json([
+                'message' => 'Lien ajouté avec succès',
+                'data' => $link
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erreur lors de l\'ajout du lien',
+                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue'
+            ], 500);
+        }
+    }
+
+
+    /**
+     * Créer une tâche - VERSION ULTRA CORRIGÉE
+     */
     public function store(Request $request): JsonResponse
     {
+        // ✅ DEBUG: Vérifier ce que Laravel reçoit
+        Log::info('Request Files Debug', [
+            'has_uploaded_files' => $request->hasFile('uploaded_files'),
+            'has_cover_image' => $request->hasFile('cover_image'),
+            'uploaded_files_count' => $request->file('uploaded_files') ? count($request->file('uploaded_files')) : 0,
+            'all_files' => array_keys($request->allFiles()),
+        ]);
+
+        // Vérifier chaque fichier individuellement
+        if ($request->hasFile('uploaded_files')) {
+            foreach ($request->file('uploaded_files') as $index => $file) {
+                Log::info("File {$index}", [
+                    'name' => $file->getClientOriginalName(),
+                    'mime' => $file->getMimeType(),
+                    'size' => $file->getSize(),
+                    'is_valid' => $file->isValid(),
+                    'error' => $file->getError(),
+                ]);
+            }
+        }
+
+        if ($request->hasFile('cover_image')) {
+            $cover = $request->file('cover_image');
+            Log::info('Cover Image', [
+                'name' => $cover->getClientOriginalName(),
+                'mime' => $cover->getMimeType(),
+                'size' => $cover->getSize(),
+                'is_valid' => $cover->isValid(),
+            ]);
+        }
+
+        // ✅ Validation stricte avec messages personnalisés
         $validated = $request->validate([
             'activite_id' => 'required|exists:activites,id',
             'titre' => 'required|string|max:255',
@@ -298,30 +386,62 @@ class TacheController extends Controller
             'indicateurs_resultats' => 'nullable|string',
             'statut' => 'required|in:a_faire,en_cours,termine',
             'priorite' => 'required|in:faible,moyenne,elevee,critique',
-            'echeance' => 'nullable|date|after:today',
-            'date_debut' => 'nullable|date',
+
+            // ✅ Dates avec format flexible
+            'echeance' => 'nullable|date_format:Y-m-d',
+            'date_debut' => 'nullable|date_format:Y-m-d',
+            'date_fin_reelle' => 'nullable|date_format:Y-m-d',
+
             'estimated_hours' => 'nullable|numeric|min:0|max:999.99',
+            'actual_hours' => 'nullable|numeric|min:0|max:999.99',
+            'taux_realisation' => 'nullable|integer|min:0|max:100',
             'couleur' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
+            'commentaire' => 'nullable|string',
+            'visibility' => 'nullable|in:public,private,members_only',
+
+            // ✅ Booléens
+            'validation_n1_required' => 'nullable|boolean',
+            'validation_n2_required' => 'nullable|boolean',
+
+            // ✅ CORRECTION 1: Validation des fichiers uploadés
+            'uploaded_files' => 'nullable|array',
+            'uploaded_files.*' => [
+                'file',
+                'max:10240', // 10MB
+                'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,zip'
+            ],
+
+            // ✅ CORRECTION 2: Validation de l'image de couverture
+            'cover_image' => [
+                'nullable',
+                'file',
+                'image',
+                'mimes:jpeg,jpg,png,gif',
+                'max:2048' // 2MB
+            ],
+
+            // ✅ CORRECTION 3: Links en JSON ou array
+            'external_links' => 'nullable|json',
+
+            // ✅ Relations
             'assignee_ids' => 'nullable|array',
             'assignee_ids.*' => 'exists:users,id',
             'label_ids' => 'nullable|array',
             'label_ids.*' => 'exists:labels,id',
-            'validation_n1_required' => 'boolean',
-            'validation_n2_required' => 'boolean',
-            'visibility' => 'nullable|in:public,private,members_only',
+        ], [
+            'uploaded_files.*.file' => 'Chaque fichier doit être un fichier valide',
+            'uploaded_files.*.max' => 'Les fichiers ne doivent pas dépasser 10 Mo',
+            'uploaded_files.*.mimes' => 'Les fichiers doivent être : PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, JPG, PNG, GIF, ZIP',
+            'cover_image.image' => 'L\'image de couverture doit être une image valide',
+            'cover_image.mimes' => 'L\'image doit être au format JPEG, PNG, JPG ou GIF',
+            'cover_image.max' => 'L\'image ne doit pas dépasser 2 Mo',
         ]);
 
         try {
             $activite = Activite::with(['projet.workspace', 'membres'])->findOrFail($validated['activite_id']);
             $user = $request->user();
 
-            Log::info('Tentative de création de tâche', [
-                'user_id' => $user->id,
-                'activite_id' => $validated['activite_id'],
-                'titre' => $validated['titre']
-            ]);
-
-            // ✅ VÉRIFICATION COMPLÈTE DES PERMISSIONS
+            // ✅ Vérification des permissions
             $canCreate = $user->isSuperAdmin() ||
                 $activite->responsable_id === $user->id ||
                 ($activite->projet && $activite->projet->responsable_id === $user->id) ||
@@ -333,7 +453,7 @@ class TacheController extends Controller
                     })
                     ->exists();
 
-            // ✅ Si l'utilisateur est membre du workspace (owner/admin), autoriser
+            // Vérifier permissions workspace
             if (!$canCreate && $activite->projet && $activite->projet->workspace) {
                 $workspace = $activite->projet->workspace;
                 $workspaceMember = $workspace->membres()->where('user_id', $user->id)->first();
@@ -343,31 +463,75 @@ class TacheController extends Controller
             }
 
             if (!$canCreate) {
-                Log::warning('Permission refusée pour création de tâche', [
+                Log::warning('Permission refusée création tâche', [
                     'user_id' => $user->id,
-                    'activite_id' => $validated['activite_id'],
-                    'is_responsable' => $activite->responsable_id === $user->id,
-                    'is_membre' => $activite->membres()->where('user_id', $user->id)->exists()
+                    'activite_id' => $validated['activite_id']
                 ]);
-
                 return response()->json([
                     'message' => 'Vous n\'avez pas la permission de créer des tâches pour cette activité.',
-                    'error' => 'permission_denied',
-                    'debug' => [
-                        'user_id' => $user->id,
-                        'activite_responsable_id' => $activite->responsable_id,
-                        'is_membre' => $activite->membres()->where('user_id', $user->id)->exists(),
-                        'membre_role' => $activite->membres()->where('user_id', $user->id)->first()?->pivot->role ?? 'non-membre'
-                    ]
                 ], 403);
             }
 
-            // ✅ Créer la tâche
-            $tache = $this->tacheService->createTache($validated, $user);
+            // ✅ Préparer les données
+            $data = $validated;
+
+            // Convertir external_links de JSON string vers array
+            if (isset($data['external_links']) && is_string($data['external_links'])) {
+                $data['external_links'] = json_decode($data['external_links'], true) ?? [];
+            } else {
+                $data['external_links'] = [];
+            }
+
+            // ✅ Gérer les fichiers uploadés - ULTRA SÉCURISÉ
+            $uploadedFiles = [];
+            if ($request->hasFile('uploaded_files')) {
+                $files = $request->file('uploaded_files');
+
+                // S'assurer que c'est un tableau
+                if (!is_array($files)) {
+                    $files = [$files];
+                }
+
+                foreach ($files as $file) {
+                    // ✅ Vérification stricte
+                    if ($file && $file->isValid()) {
+                        $uploadedFiles[] = $file;
+                        Log::info('Fichier valide détecté', [
+                            'name' => $file->getClientOriginalName(),
+                            'mime' => $file->getMimeType(),
+                            'size' => $file->getSize()
+                        ]);
+                    }
+                }
+            }
+
+            $data['uploaded_files'] = $uploadedFiles;
+
+            Log::info('Avant création tâche', [
+                'files_count' => count($uploadedFiles),
+                'has_cover' => $request->hasFile('cover_image')
+            ]);
+
+            // ✅ Gérer l'image de couverture
+            if ($request->hasFile('cover_image')) {
+                $coverImage = $request->file('cover_image');
+                if ($coverImage->isValid()) {
+                    $coverImagePath = $coverImage->store('task-covers', 'public');
+                    $data['cover_image'] = $coverImagePath;
+                    Log::info('Image de couverture uploadée', [
+                        'path' => $coverImagePath
+                    ]);
+                }
+            }
+
+            // ✅ Créer la tâche via service
+            $tache = $this->tacheService->createTache($data, $user);
 
             Log::info('Tâche créée avec succès', [
                 'tache_id' => $tache->id,
-                'user_id' => $user->id
+                'user_id' => $user->id,
+                'activite_id' => $validated['activite_id'],
+                'files' => count($uploadedFiles)
             ]);
 
             return response()->json([
@@ -375,16 +539,16 @@ class TacheController extends Controller
                 'data' => new TacheResource($tache),
             ], 201);
 
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            Log::error('Activité non trouvée', ['activite_id' => $validated['activite_id']]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::warning('Erreur validation création tâche', [
+                'errors' => $e->errors()
+            ]);
             return response()->json([
-                'message' => 'Activité non trouvée',
-                'error' => 'not_found'
-            ], 404);
+                'message' => 'Erreur de validation',
+                'errors' => $e->errors()
+            ], 422);
         } catch (\Exception $e) {
             Log::error('Erreur création tâche', [
-                'user_id' => $user->id ?? null,
-                'activite_id' => $validated['activite_id'] ?? null,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
@@ -395,7 +559,6 @@ class TacheController extends Controller
             ], 500);
         }
     }
-
 
     /**
      * ✅ NOUVEAU : Endpoint pour vérifier les permissions d'une activité
@@ -478,38 +641,243 @@ class TacheController extends Controller
         ]);
     }
 
+
     /**
-     * Mettre à jour une tâche
+     * Mettre à jour une tâche - VERSION COMPLÈTEMENT CORRIGÉE
      */
     public function update(Request $request, Tache $tache): JsonResponse
     {
+        // ✅ Vérification des permissions
         $this->authorize('update', $tache);
 
+        // ✅ DEBUG: Vérifier ce que Laravel reçoit pour la mise à jour
+        Log::info('Request Update Files Debug', [
+            'tache_id' => $tache->id,
+            'has_uploaded_files' => $request->hasFile('uploaded_files'),
+            'has_cover_image' => $request->hasFile('cover_image'),
+            'uploaded_files_count' => $request->file('uploaded_files') ? count($request->file('uploaded_files')) : 0,
+            'all_files' => array_keys($request->allFiles()),
+            'method' => $request->method(),
+            'has__method' => $request->has('_method')
+        ]);
+
+        // ✅ Validation COMPLÈTE similaire à store
         $validated = $request->validate([
-            'titre' => 'sometimes|string|max:255',
+            'titre' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
             'objectif' => 'nullable|string',
             'indicateurs_resultats' => 'nullable|string',
-            'statut' => 'sometimes|in:a_faire,en_cours,termine',
-            'priorite' => 'sometimes|in:faible,moyenne,elevee,critique',
-            'echeance' => 'nullable|date',
-            'date_debut' => 'nullable|date',
+            'statut' => 'sometimes|required|in:a_faire,en_cours,termine',
+            'priorite' => 'sometimes|required|in:faible,moyenne,elevee,critique',
+
+            // Dates
+            'echeance' => 'nullable|date_format:Y-m-d',
+            'date_debut' => 'nullable|date_format:Y-m-d',
+            'date_fin_reelle' => 'nullable|date_format:Y-m-d',
+
             'taux_realisation' => 'sometimes|integer|min:0|max:100',
             'estimated_hours' => 'nullable|numeric|min:0|max:999.99',
             'actual_hours' => 'nullable|numeric|min:0|max:999.99',
             'couleur' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
             'commentaire' => 'nullable|string',
-            'assignee_ids' => 'nullable|array',
-            'label_ids' => 'nullable|array',
             'visibility' => 'nullable|in:public,private,members_only',
+
+            // Booléens
+            'validation_n1_required' => 'nullable|boolean',
+            'validation_n2_required' => 'nullable|boolean',
+
+            // ✅ CORRECTION: Même validation des fichiers que pour store
+            'uploaded_files' => 'nullable|array',
+            'uploaded_files.*' => [
+                'file',
+                'max:10240',
+                'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,zip'
+            ],
+
+            // ✅ CORRECTION: Même validation de l'image
+            'cover_image' => [
+                'nullable',
+                'file',
+                'image',
+                'mimes:jpeg,jpg,png,gif',
+                'max:2048'
+            ],
+
+            // Links
+            'external_links' => 'nullable|json',
+
+            // Relations
+            'assignee_ids' => 'nullable|array',
+            'assignee_ids.*' => 'exists:users,id',
+            'label_ids' => 'nullable|array',
+            'label_ids.*' => 'exists:labels,id',
+        ], [
+            // ✅ CORRECTION: Messages d'erreur cohérents
+            'uploaded_files.*.file' => 'Chaque fichier doit être un fichier valide',
+            'uploaded_files.*.max' => 'Les fichiers ne doivent pas dépasser 10 Mo',
+            'uploaded_files.*.mimes' => 'Les fichiers doivent être : PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, JPG, PNG, GIF, ZIP',
+            'cover_image.image' => 'L\'image de couverture doit être une image valide',
+            'cover_image.mimes' => 'L\'image doit être au format JPEG, PNG, JPG ou GIF',
+            'cover_image.max' => 'L\'image ne doit pas dépasser 2 Mo',
         ]);
 
-        $tache = $this->tacheService->updateTache($tache, $validated);
+        try {
+            Log::info('Début mise à jour tâche', [
+                'tache_id' => $tache->id,
+                'user_id' => $request->user()->id,
+                'has_files' => $request->hasFile('uploaded_files'),
+                'files_count' => $request->hasFile('uploaded_files') ? count($request->file('uploaded_files')) : 0,
+                'has_cover' => $request->hasFile('cover_image')
+            ]);
 
-        return response()->json([
-            'message' => 'Tâche mise à jour avec succès.',
-            'data' => new TacheResource($tache),
-        ]);
+            // ✅ Préparer les données de la même manière que store
+            $data = $validated;
+
+            // Convertir external_links
+            if (isset($data['external_links']) && is_string($data['external_links'])) {
+                $data['external_links'] = json_decode($data['external_links'], true) ?? [];
+            } else {
+                $data['external_links'] = [];
+            }
+
+            // ✅ Gérer les fichiers uploadés - MÊME LOGIQUE QUE STORE
+            $uploadedFiles = [];
+            if ($request->hasFile('uploaded_files')) {
+                $files = $request->file('uploaded_files');
+
+                // S'assurer que c'est un tableau
+                if (!is_array($files)) {
+                    $files = [$files];
+                }
+
+                foreach ($files as $file) {
+                    if ($file && $file->isValid()) {
+                        $uploadedFiles[] = $file;
+                        Log::info('Fichier valide détecté pour mise à jour', [
+                            'name' => $file->getClientOriginalName(),
+                            'mime' => $file->getMimeType(),
+                            'size' => $file->getSize()
+                        ]);
+                    }
+                }
+            }
+
+            $data['uploaded_files'] = $uploadedFiles;
+
+            // ✅ Gérer l'image de couverture - MÊME LOGIQUE QUE STORE
+            if ($request->hasFile('cover_image')) {
+                $coverImage = $request->file('cover_image');
+                if ($coverImage->isValid()) {
+                    // Supprimer l'ancienne image si elle existe
+                    if ($tache->cover_image && Storage::disk('public')->exists($tache->cover_image)) {
+                        Storage::disk('public')->delete($tache->cover_image);
+                        Log::info('Ancienne image de couverture supprimée', [
+                            'old_path' => $tache->cover_image
+                        ]);
+                    }
+
+                    $coverImagePath = $coverImage->store('task-covers', 'public');
+                    $data['cover_image'] = $coverImagePath;
+                    Log::info('Nouvelle image de couverture uploadée', [
+                        'path' => $coverImagePath
+                    ]);
+                }
+            }
+
+            Log::info('Avant mise à jour tâche via service', [
+                'tache_id' => $tache->id,
+                'files_count' => count($uploadedFiles),
+                'has_cover' => isset($data['cover_image'])
+            ]);
+
+            // ✅ Mettre à jour via service
+            $tache = $this->tacheService->updateTache($tache, $data);
+
+            Log::info('Tâche mise à jour avec succès', [
+                'tache_id' => $tache->id,
+                'files_processed' => count($uploadedFiles)
+            ]);
+
+            return response()->json([
+                'message' => 'Tâche mise à jour avec succès.',
+                'data' => new TacheResource($tache),
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::warning('Erreur validation mise à jour tâche', [
+                'tache_id' => $tache->id,
+                'errors' => $e->errors()
+            ]);
+            return response()->json([
+                'message' => 'Erreur de validation',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Erreur mise à jour tâche', [
+                'tache_id' => $tache->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'message' => 'Erreur lors de la mise à jour de la tâche',
+                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue'
+            ], 500);
+        }
+    }
+
+    /**
+     * ✅ Supprimer un fichier attaché
+     */
+    public function deleteAttachment(Tache $tache, TacheAttachment $attachment): JsonResponse
+    {
+        $this->authorize('update', $tache);
+
+        if ($attachment->tache_id !== $tache->id) {
+            return response()->json([
+                'message' => 'Fichier non trouvé pour cette tâche'
+            ], 404);
+        }
+
+        try {
+            $this->tacheService->deleteAttachment($attachment);
+
+            return response()->json([
+                'message' => 'Fichier supprimé avec succès'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erreur lors de la suppression du fichier',
+                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue'
+            ], 500);
+        }
+    }
+
+    /**
+     * ✅ Supprimer un lien externe
+     */
+    public function deleteExternalLink(Tache $tache, TacheExternalLink $link): JsonResponse
+    {
+        $this->authorize('update', $tache);
+
+        if ($link->tache_id !== $tache->id) {
+            return response()->json([
+                'message' => 'Lien non trouvé pour cette tâche'
+            ], 404);
+        }
+
+        try {
+            $this->tacheService->deleteExternalLink($link);
+
+            return response()->json([
+                'message' => 'Lien supprimé avec succès'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erreur lors de la suppression du lien',
+                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue'
+            ], 500);
+        }
     }
 
     /**
