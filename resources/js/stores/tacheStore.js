@@ -1,7 +1,7 @@
 // resources/js/stores/tacheStore.js - VERSION CORRIGÉE
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import tachesApi from '@/api/taches'
+import api from '@/api/axios'
 
 export const useTacheStore = defineStore('tache', () => {
   // ✅ State avec initialisation garantie
@@ -38,7 +38,7 @@ export const useTacheStore = defineStore('tache', () => {
 
   const myTaches = computed(() => {
     return taches.value.filter(t => {
-      return true // À adapter selon votre système d'auth
+      return true
     })
   })
 
@@ -50,7 +50,7 @@ export const useTacheStore = defineStore('tache', () => {
     try {
       console.log('🔄 Store: Chargement kanban pour activité:', activiteId)
       
-      const { data } = await tachesApi.getForActivite(activiteId)
+      const { data } = await api.get(`/taches/activite/${activiteId}/kanban`)
       
       console.log('📦 Store: Données reçues:', data)
       
@@ -108,7 +108,7 @@ export const useTacheStore = defineStore('tache', () => {
     loading.value = true
     error.value = null
     try {
-      const { data } = await tachesApi.getAll(filters)
+      const { data } = await api.get('/taches', { params: filters })
       taches.value = data.data || []
       return taches.value
     } catch (err) {
@@ -123,7 +123,7 @@ export const useTacheStore = defineStore('tache', () => {
     loading.value = true
     error.value = null
     try {
-      const { data } = await tachesApi.getMyTaches()
+      const { data } = await api.get('/taches/mes-taches')
       taches.value = data.data || []
       return taches.value
     } catch (err) {
@@ -138,7 +138,7 @@ export const useTacheStore = defineStore('tache', () => {
     loading.value = true
     error.value = null
     try {
-      const { data } = await tachesApi.get(id)
+      const { data } = await api.get(`/taches/${id}`)
       currentTache.value = data.data
       return currentTache.value
     } catch (err) {
@@ -149,22 +149,33 @@ export const useTacheStore = defineStore('tache', () => {
     }
   }
 
+  // ✅ CORRIGÉ : createTache sans 
   async function createTache(tacheData) {
     loading.value = true
     error.value = null
     try {
-      const { data } = await tachesApi.create(tacheData)
-      const newTache = data.data
-
-      taches.value.push(newTache)
-
-      if (kanban.value[newTache.statut]) {
-        kanban.value[newTache.statut].push(newTache)
+      // Vérifier si c'est du FormData ou du JSON
+      const isFormData = tacheData instanceof FormData
+      
+      console.log('🚀 Store: Envoi création tâche', {
+        isFormData,
+        contentType: isFormData ? 'multipart/form-data' : 'application/json'
+      })
+      const axiosConfig = isFormData ? {
+      ...config,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        ...config.headers
       }
+    } : config
 
-      return newTache
+      const response = await api.post('/taches', tacheData, axiosConfig)
+      
+      console.log('✅ Store: Tâche créée:', response.data)
+      return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to create task'
+      console.error('❌ Store: Erreur création tâche:', err.response?.data || err)
+      error.value = err.response?.data?.message || 'Erreur lors de la création'
       throw err
     } finally {
       loading.value = false
@@ -172,37 +183,60 @@ export const useTacheStore = defineStore('tache', () => {
   }
 
   async function updateTache(id, tacheData) {
-    loading.value = true
-    error.value = null
-    try {
-      const { data } = await tachesApi.update(id, tacheData)
-      const updatedTache = data.data
+  loading.value = true
+  error.value = null
+  try {
+    // Vérifier si c'est du FormData ou du JSON
+    const isFormData = tacheData instanceof FormData
+    
+    console.log('🔄 Store: Envoi mise à jour tâche', {
+      isFormData,
+      id,
+      hasFiles: isFormData ? 'OUI' : 'NON'
+    })
 
-      const index = taches.value.findIndex(t => t.id === id)
-      if (index !== -1) {
-        taches.value[index] = updatedTache
+    // ✅ CORRECTION: Gestion correcte des headers pour FormData
+    const config = isFormData ? {
+      headers: {
+        'Content-Type': 'multipart/form-data'
       }
+    } : {}
 
-      updateTacheInKanban(updatedTache)
+    const response = await api.post(`/taches/${id}`, tacheData, config)
+    const updatedTache = response.data.data
 
-      if (currentTache.value?.id === id) {
-        currentTache.value = updatedTache
-      }
-
-      return updatedTache
-    } catch (err) {
-      error.value = err.response?.data?.message || 'Failed to update task'
-      throw err
-    } finally {
-      loading.value = false
+    // Mettre à jour le store local
+    const index = taches.value.findIndex(t => t.id === id)
+    if (index !== -1) {
+      taches.value[index] = updatedTache
     }
+
+    updateTacheInKanban(updatedTache)
+
+    if (currentTache.value?.id === id) {
+      currentTache.value = updatedTache
+    }
+
+    console.log('✅ Store: Tâche mise à jour avec succès')
+    return updatedTache
+  } catch (err) {
+    console.error('❌ Store: Erreur mise à jour tâche:', {
+      message: err.response?.data?.message || err.message,
+      errors: err.response?.data?.errors,
+      status: err.response?.status
+    })
+    error.value = err.response?.data?.message || 'Erreur lors de la mise à jour'
+    throw err
+  } finally {
+    loading.value = false
   }
+}
 
   async function deleteTache(id) {
     loading.value = true
     error.value = null
     try {
-      await tachesApi.delete(id)
+      await api.delete(`/taches/${id}`)
 
       taches.value = taches.value.filter(t => t.id !== id)
 
@@ -226,7 +260,7 @@ export const useTacheStore = defineStore('tache', () => {
   async function moveTache(id, statut, ordre) {
     error.value = null
     try {
-      const { data } = await tachesApi.move(id, statut, ordre)
+      const { data } = await api.post(`/taches/${id}/move`, { statut, position: ordre })
       const movedTache = data.data
 
       const index = taches.value.findIndex(t => t.id === id)
@@ -245,7 +279,7 @@ export const useTacheStore = defineStore('tache', () => {
     loading.value = true
     error.value = null
     try {
-      const { data } = await tachesApi.duplicate(id)
+      const { data } = await api.post(`/taches/${id}/duplicate`)
       const duplicatedTache = data.data
 
       taches.value.push(duplicatedTache)
@@ -267,7 +301,7 @@ export const useTacheStore = defineStore('tache', () => {
     loading.value = true
     error.value = null
     try {
-      await tachesApi.archive(id)
+      await api.post(`/taches/${id}/archive`)
 
       taches.value = taches.value.filter(t => t.id !== id)
 
@@ -288,7 +322,7 @@ export const useTacheStore = defineStore('tache', () => {
     loading.value = true
     error.value = null
     try {
-      const { data } = await tachesApi.unarchive(id)
+      const { data } = await api.post(`/taches/${id}/unarchive`)
       const unarchivedTache = data.data
 
       taches.value.push(unarchivedTache)
@@ -309,7 +343,7 @@ export const useTacheStore = defineStore('tache', () => {
   async function assignUser(tacheId, userId) {
     error.value = null
     try {
-      const { data } = await tachesApi.assignUser(tacheId, userId)
+      const { data } = await api.post(`/taches/${tacheId}/assignees`, { user_id: userId })
       const updatedTache = data.data
 
       const index = taches.value.findIndex(t => t.id === tacheId)
@@ -329,7 +363,7 @@ export const useTacheStore = defineStore('tache', () => {
   async function unassignUser(tacheId, userId) {
     error.value = null
     try {
-      const { data } = await tachesApi.unassignUser(tacheId, userId)
+      const { data } = await api.delete(`/taches/${tacheId}/assignees/${userId}`)
       const updatedTache = data.data
 
       const index = taches.value.findIndex(t => t.id === tacheId)
@@ -349,7 +383,7 @@ export const useTacheStore = defineStore('tache', () => {
   async function updateProgress(id, tauxRealisation) {
     error.value = null
     try {
-      const { data } = await tachesApi.updateProgress(id, tauxRealisation)
+      const { data } = await api.put(`/taches/${id}`, { taux_realisation: tauxRealisation })
       const updatedTache = data.data
 
       const index = taches.value.findIndex(t => t.id === id)
