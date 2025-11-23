@@ -8,9 +8,11 @@
     <!-- Cover Image -->
      <div v-if="tache.cover_image" class="mb-3 -mx-4 -mt-4">
       <img
-        :src="tache.cover_image"
-        alt="Cover"
+        :src="getImageUrl(tache.cover_image)"
+        :alt="`Couverture de la tâche: ${tache.titre}`"
         class="w-full h-32 object-cover rounded-t-lg"
+        @error="handleImageError"
+        loading="lazy"
       />
     </div>
 
@@ -252,7 +254,7 @@
     </div>
 
     <!-- Footer with assignees and due date -->
-    <div class="flex items-center justify-between text-xs">
+     <div class="flex items-center justify-between text-xs">
       <!-- Assignees -->
       <div class="flex -space-x-2">
         <div
@@ -265,14 +267,20 @@
             v-if="assignee.avatar"
             class="w-7 h-7 rounded-full border-2 border-white dark:border-gray-800 overflow-hidden ring-1 ring-gray-200 dark:ring-gray-700"
           >
-            <img :src="assignee.avatar" :alt="assignee.nom" class="w-full h-full object-cover" />
+            <img 
+              :src="getImageUrl(assignee.avatar)" 
+              :alt="assignee.nom" 
+              class="w-full h-full object-cover"
+              @error="handleAvatarError(assignee)"
+              loading="lazy"
+            />
           </div>
           <div
             v-else
             class="w-7 h-7 rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center text-xs font-medium ring-1 ring-gray-200 dark:ring-gray-700"
             :style="{ backgroundColor: stringToColor(assignee.nom), color: '#fff' }"
           >
-            {{ assignee.nom.charAt(0).toUpperCase() }}
+            {{ getInitials(assignee.nom) }}
           </div>
         </div>
         <div
@@ -314,11 +322,46 @@ const emit = defineEmits(['view', 'edit', 'duplicate', 'archive', 'delete', 'val
 
 const showMenu = ref(false)
 
+// ✅ NOUVEAU : Méthodes pour gérer les URLs d'images
+const getImageUrl = (path) => {
+  if (!path) return ''
+  
+  // Si c'est déjà une URL complète
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path
+  }
+  
+  // Si c'est un chemin de stockage Laravel
+  if (path.startsWith('storage/')) {
+    return `${import.meta.env.VITE_APP_URL || window.location.origin}/${path}`
+  }
+  
+  // Si c'est un chemin relatif sans storage/
+  if (path.startsWith('task-covers/') || path.startsWith('avatars/')) {
+    return `${import.meta.env.VITE_APP_URL || window.location.origin}/storage/${path}`
+  }
+  
+  // Pour les chemins absolus depuis la racine
+  return `${import.meta.env.VITE_APP_URL || window.location.origin}${path.startsWith('/') ? path : '/' + path}`
+}
+const handleImageError = (event) => {
+  event.target.src = '/images/default-cover.png' // Image de couverture par défaut
+}
 // Computed
 const canValidate = computed(() => {
   return props.tache.permissions?.can_validate_n1 || props.tache.permissions?.can_validate_n2
 })
 
+const handleAvatarError = (assignee) => {
+  console.warn('❌ Erreur chargement avatar:', assignee.nom)
+  // L'avatar sera remplacé par les initiales automatiquement
+}
+const getInitials = (name) => {
+  if (!name) return ''
+  const parts = name.trim().split(' ')
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase()
+  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase()
+}
 // Methods
 const getPriorityClass = (priorite) => {
   const classes = {

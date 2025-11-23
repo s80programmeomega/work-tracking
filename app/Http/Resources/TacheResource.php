@@ -12,7 +12,7 @@ class TacheResource extends JsonResource
         return [
             'id' => $this->id,
             'code' => $this->code,
-            
+
             // Activité
             'activite_id' => $this->activite_id,
             'activite' => [
@@ -29,7 +29,8 @@ class TacheResource extends JsonResource
             'objectif' => $this->objectif,
             'indicateurs_resultats' => $this->indicateurs_resultats,
             'commentaire' => $this->commentaire,
-
+            'attachments' => TacheAttachmentResource::collection($this->whenLoaded('attachments')),
+            'external_links' => TacheExternalLinkResource::collection($this->whenLoaded('externalLinks')),
             // Statut et priorité
             'statut' => $this->statut->value,
             'statut_label' => $this->statut->label(),
@@ -54,7 +55,7 @@ class TacheResource extends JsonResource
             'actual_hours' => $this->actual_hours,
             'time_variance' => $this->when(
                 $this->estimated_hours && $this->actual_hours,
-                function() {
+                function () {
                     return $this->actual_hours - $this->estimated_hours;
                 }
             ),
@@ -103,12 +104,12 @@ class TacheResource extends JsonResource
             // Sous-tâches
             'parent_tache_id' => $this->parent_tache_id,
             'is_subtask' => (bool) $this->parent_tache_id,
-            'sous_taches_count' => $this->whenLoaded('sousTaches', function() {
+            'sous_taches_count' => $this->whenLoaded('sousTaches', function () {
                 return $this->sousTaches->count();
             }),
 
             // Résultats
-            'resultats_count' => $this->whenLoaded('resultats', function() {
+            'resultats_count' => $this->whenLoaded('resultats', function () {
                 return $this->resultats->count();
             }),
 
@@ -135,7 +136,7 @@ class TacheResource extends JsonResource
             'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
 
             // ✅ Permissions pour l'utilisateur actuel
-            'permissions' => $this->when($request->user(), function() use ($request) {
+            'permissions' => $this->when($request->user(), function () use ($request) {
                 $user = $request->user();
                 return [
                     'can_view' => $this->isAccessibleBy($user),

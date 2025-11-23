@@ -312,6 +312,46 @@ const router = createRouter({
         requiresAuth: true,
       },
     },
+    {
+      path: '/taches',
+      name: 'mes-taches',
+      component: () => import('../pages/MesTaches.vue'),
+      meta: {
+        title: 'Mes Tâches',
+        requiresAuth: true,
+        breadcrumb: 'Mes Tâches'
+      }
+    },
+    {
+      path: '/taches/assignees',
+      name: 'taches.assignees',
+      component: () => import('../pages/TachesAssignees.vue'),
+      meta: {
+        title: 'Tâches Assignées',
+        requiresAuth: true,
+        breadcrumb: 'Tâches Assignées'
+      }
+    },
+    {
+      path: '/taches/en-attente',
+      name: 'taches.pending',
+      component: () => import('../pages/TachesEnAttente.vue'),
+      meta: {
+        title: 'Tâches en Attente',
+        requiresAuth: true,
+        breadcrumb: 'En Attente de Validation'
+      }
+    },
+    // {
+    //   path: '/taches/en-retard',
+    //   name: 'taches.overdue',
+    //   component: () => import('../pages/TachesEnRetard.vue'),
+    //   meta: {
+    //     title: 'Tâches en Retard',
+    //     requiresAuth: true,
+    //     breadcrumb: 'Tâches en Retard'
+    //   }
+    // },
 
     {
       path: '/notifications',

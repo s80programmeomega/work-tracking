@@ -1,11 +1,11 @@
 <!-- resources/js/components/taches/TacheDetailModal.vue - VERSION HYBRIDE -->
 <template>
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm" 
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-gradient bg-opacity-50 p-4 backdrop-blur-sm" 
        @click.self="$emit('close')">
     
     <!-- Container principal avec taille adaptative -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full overflow-hidden flex flex-col transition-all duration-300"
-         :class="modalSizeClass">
+    <!-- <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full overflow-hidden flex flex-col transition-all duration-300"> -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-hidden flex flex-col":class="modalSizeClass">
       
       <!-- Header unifié -->
       <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
@@ -222,8 +222,8 @@ import DocumentSection from '@/components/common/DocumentSection.vue'
 import ResultatsSection from '@/components/taches/ResultatsSection.vue'
 
 // Composants modulaires pour le mode rapide
-// import QuickActionsPanel from './panels/QuickActionsPanel.vue'
-// import EssentialInfoPanel from './panels/EssentialInfoPanel.vue'
+import QuickActionsPanel from './panels/QuickActionsPanel.vue'
+import EssentialInfoPanel from './panels/EssentialInfoPanel.vue'
 // import AssigneesPanel from './panels/AssigneesPanel.vue'
 // import LabelsPanel from './panels/LabelsPanel.vue'
 // import SectionCollapsible from './panels/SectionCollapsible.vue'

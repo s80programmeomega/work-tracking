@@ -130,6 +130,21 @@ class Tache extends Model
         return $code;
     }
 
+    /**
+     * Fichiers attachés
+     */
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(TacheAttachment::class);
+    }
+
+    /**
+     * Liens externes
+     */
+    public function externalLinks(): HasMany
+    {
+        return $this->hasMany(TacheExternalLink::class);
+    }
     // ==================== RELATIONSHIPS ====================
 
     public function activite(): BelongsTo

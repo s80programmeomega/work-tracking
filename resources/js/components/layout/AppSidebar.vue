@@ -1,8 +1,8 @@
 <!-- resources\js\components\layout\AppSidebar.vue -->
 <template>
-    <aside
+       <aside
         :class="[
-            'fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-99999 border-r border-gray-200',
+            'fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-40 border-r border-gray-200', // ← z-40 au lieu de z-99999
             {
                 'lg:w-[290px]': isExpanded || isMobileOpen || isHovered,
                 'lg:w-[90px]': !isExpanded && !isHovered,
@@ -472,7 +472,7 @@ const menuGroups = computed(() => [
                 icon: TaskIcon,
                 name: 'Tâches',
                 subItems: [
-                    { name: 'Toutes les tâches', path: '/taches', superAdminOnly: true },
+                    // { name: 'Toutes les tâches', path: '/taches', superAdminOnly: true },
                     { name: 'Mes tâches', path: '/taches' },
                     { name: 'Assignées à moi', path: '/taches/assignees' },
                     { name: 'En attente', path: '/taches/en-attente', count: 12 },

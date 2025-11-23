@@ -266,6 +266,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Task Labels
         Route::post('/{tache}/labels', [TacheController::class, 'attachLabel']);
         Route::delete('/{tache}/labels/{label}', [TacheController::class, 'detachLabel']);
+
+        // Routes pour les fichiers
+        Route::get('{tache}/attachments/{attachment}/download', [TacheController::class, 'downloadAttachment']);
+        Route::delete('{tache}/attachments/{attachment}', [TacheController::class, 'deleteAttachment']);
+
+        // Routes pour les liens externes
+        Route::post('{tache}/external-links', [TacheController::class, 'addExternalLink']);
+        Route::delete('{tache}/external-links/{link}', [TacheController::class, 'deleteExternalLink']);
+
     });
 
     // ======================================== RÉSULTATS DE TÂCHES  ========================================
@@ -309,7 +318,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Dashboard général
         Route::get('/dashboard', [TacheController::class, 'evaluationDashboard']);
 
-           // Résultats en attente de validation
+        // Résultats en attente de validation
         Route::get('/resultats/en-attente', [TacheResultatController::class, 'pendingValidations']);
     });
 
