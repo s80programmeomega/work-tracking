@@ -1,127 +1,115 @@
-<!-- resources/js/components/taches/panels/EssentialInfoPanel.vue -->
 <template>
-  <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
-    <h3 class="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-      <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      Informations
-    </h3>
+  <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 space-y-4">
+    <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Informations</h4>
     
+    <!-- Dates -->
     <div class="space-y-3">
-      <!-- Statut -->
-      <div>
-        <span class="text-xs text-gray-500 dark:text-gray-400">Statut</span>
-        <div class="flex items-center gap-2 mt-1">
-          <span :class="getStatusColor(tache.statut)" class="w-2 h-2 rounded-full"></span>
-          <span class="text-sm font-medium text-gray-900 dark:text-white">{{ tache.statut_label }}</span>
+      <!-- Date de début -->
+      <div v-if="tache.date_debut" class="flex items-start gap-3">
+        <div class="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+          <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <div class="flex-1">
+          <p class="text-xs text-gray-500 dark:text-gray-400">Début</p>
+          <p class="text-sm font-medium text-gray-900 dark:text-white">{{ formatDate(tache.date_debut) }}</p>
         </div>
       </div>
 
-      <!-- Priorité -->
-      <div>
-        <span class="text-xs text-gray-500 dark:text-gray-400">Priorité</span>
-        <div class="flex items-center gap-2 mt-1">
-          <span class="text-sm">{{ getPriorityIcon(tache.priorite) }}</span>
-          <span class="text-sm font-medium text-gray-900 dark:text-white">{{ tache.priorite_label }}</span>
+      <!-- Échéance -->
+      <div v-if="tache.echeance" class="flex items-start gap-3">
+        <div class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center"
+             :class="tache.is_overdue 
+               ? 'bg-red-100 dark:bg-red-900/30' 
+               : 'bg-orange-100 dark:bg-orange-900/30'">
+          <svg class="w-4 h-4" 
+               :class="tache.is_overdue 
+                 ? 'text-red-600 dark:text-red-400' 
+                 : 'text-orange-600 dark:text-orange-400'"
+               fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div class="flex-1">
+          <p class="text-xs text-gray-500 dark:text-gray-400">Échéance</p>
+          <p class="text-sm font-medium" 
+             :class="tache.is_overdue 
+               ? 'text-red-600 dark:text-red-400' 
+               : 'text-gray-900 dark:text-white'">
+            {{ formatDate(tache.echeance) }}
+            <span v-if="tache.is_overdue" class="text-xs ml-1">⚠️ En retard</span>
+          </p>
         </div>
       </div>
 
-      <!-- Dates -->
-      <div v-if="tache.date_debut || tache.echeance">
-        <span class="text-xs text-gray-500 dark:text-gray-400">Dates</span>
-        <div class="text-sm space-y-1 mt-1">
-          <div v-if="tache.date_debut" class="flex justify-between">
-            <span>Début:</span>
-            <span class="font-medium">{{ formatDate(tache.date_debut) }}</span>
-          </div>
-          <div v-if="tache.echeance" class="flex justify-between" :class="{ 'text-red-600 font-medium': tache.is_overdue }">
-            <span>Échéance:</span>
-            <span>{{ formatDate(tache.echeance) }}</span>
-          </div>
-          <div v-if="tache.date_fin_reelle" class="flex justify-between text-green-600">
-            <span>Terminé le:</span>
-            <span class="font-medium">{{ formatDate(tache.date_fin_reelle) }}</span>
-          </div>
+      <!-- Semaine -->
+      <div v-if="tache.week_number" class="flex items-start gap-3">
+        <div class="flex-shrink-0 w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+          <svg class="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+        </div>
+        <div class="flex-1">
+          <p class="text-xs text-gray-500 dark:text-gray-400">Semaine</p>
+          <p class="text-sm font-medium text-gray-900 dark:text-white">
+            S{{ tache.week_number }} - {{ tache.year }}
+          </p>
         </div>
       </div>
+    </div>
 
-      <!-- Progression -->
-      <div>
+    <!-- Progression -->
+    <div v-if="tache.taux_realisation !== null" class="pt-3 border-t border-gray-200 dark:border-gray-700">
+      <div class="flex justify-between items-center mb-2">
         <span class="text-xs text-gray-500 dark:text-gray-400">Progression</span>
-        <div class="mt-1">
-          <div class="flex justify-between text-sm mb-1">
-            <span class="font-medium">{{ tache.taux_realisation }}%</span>
-          </div>
-          <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-            <div
-              class="h-2 rounded-full transition-all"
-              :class="getProgressColor(tache.taux_realisation)"
-              :style="{ width: `${tache.taux_realisation}%` }"
-            ></div>
-          </div>
-        </div>
+        <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ tache.taux_realisation }}%</span>
       </div>
+      <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+        <div 
+          class="h-2 rounded-full transition-all duration-300"
+          :class="getProgressColor(tache.taux_realisation)"
+          :style="{ width: `${tache.taux_realisation}%` }"
+        ></div>
+      </div>
+    </div>
 
-      <!-- Heures -->
-      <div v-if="tache.estimated_hours || tache.actual_hours">
-        <span class="text-xs text-gray-500 dark:text-gray-400">Temps</span>
-        <div class="text-sm space-y-1 mt-1">
-          <div v-if="tache.estimated_hours" class="flex justify-between">
-            <span>Estimé:</span>
-            <span class="font-medium">{{ tache.estimated_hours }}h</span>
-          </div>
-          <div v-if="tache.actual_hours" class="flex justify-between" :class="getTimeVarianceClass(tache)">
-            <span>Réel:</span>
-            <span>{{ tache.actual_hours }}h</span>
-          </div>
-        </div>
+    <!-- Heures estimées/réelles -->
+    <div v-if="tache.estimated_hours || tache.actual_hours" class="pt-3 border-t border-gray-200 dark:border-gray-700 space-y-2">
+      <div v-if="tache.estimated_hours" class="flex justify-between text-sm">
+        <span class="text-gray-600 dark:text-gray-400">⏱️ Estimé</span>
+        <span class="font-medium text-gray-900 dark:text-white">{{ tache.estimated_hours }}h</span>
       </div>
+      <div v-if="tache.actual_hours" class="flex justify-between text-sm">
+        <span class="text-gray-600 dark:text-gray-400">⏰ Réel</span>
+        <span class="font-medium text-gray-900 dark:text-white">{{ tache.actual_hours }}h</span>
+      </div>
+      <div v-if="tache.estimated_hours && tache.actual_hours" class="flex justify-between text-sm pt-2 border-t border-gray-100 dark:border-gray-700">
+        <span class="text-gray-600 dark:text-gray-400">Écart</span>
+        <span class="font-medium" :class="getVarianceClass(tache.actual_hours - tache.estimated_hours)">
+          {{ formatVariance(tache.actual_hours - tache.estimated_hours) }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Activité parent -->
+    <div class="pt-3 border-t border-gray-200 dark:border-gray-700">
+      <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Activité</p>
+      <p class="text-sm font-medium text-gray-900 dark:text-white">{{ tache.activite.nom }}</p>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ tache.activite.projet_nom }}</p>
     </div>
   </div>
 </template>
 
 <script setup>
+import { computed } from 'vue'
+
 const props = defineProps({
   tache: {
     type: Object,
     required: true
   }
 })
-
-const getStatusColor = (statut) => {
-  const colors = {
-    a_faire: 'bg-gray-500',
-    en_cours: 'bg-blue-500',
-    termine: 'bg-green-500'
-  }
-  return colors[statut] || 'bg-gray-500'
-}
-
-const getPriorityIcon = (priorite) => {
-  const icons = {
-    faible: '🟢',
-    moyenne: '🟡',
-    elevee: '🟠',
-    critique: '🔴'
-  }
-  return icons[priorite] || '🟡'
-}
-
-const getProgressColor = (progress) => {
-  if (progress < 30) return 'bg-red-500'
-  if (progress < 70) return 'bg-amber-500'
-  return 'bg-green-500'
-}
-
-const getTimeVarianceClass = (tache) => {
-  if (!tache.estimated_hours || !tache.actual_hours) return ''
-
-  const variance = tache.actual_hours - tache.estimated_hours
-  if (variance > 0) return 'text-red-600 dark:text-red-400 font-medium'
-  if (variance < 0) return 'text-green-600 dark:text-green-400 font-medium'
-  return ''
-}
 
 const formatDate = (date) => {
   if (!date) return ''
@@ -130,5 +118,23 @@ const formatDate = (date) => {
     month: 'short',
     year: 'numeric'
   })
+}
+
+const getProgressColor = (progress) => {
+  if (progress >= 75) return 'bg-green-500'
+  if (progress >= 50) return 'bg-blue-500'
+  if (progress >= 25) return 'bg-yellow-500'
+  return 'bg-red-500'
+}
+
+const getVarianceClass = (variance) => {
+  if (variance > 0) return 'text-red-600 dark:text-red-400'
+  if (variance < 0) return 'text-green-600 dark:text-green-400'
+  return 'text-gray-600 dark:text-gray-400'
+}
+
+const formatVariance = (variance) => {
+  const sign = variance > 0 ? '+' : ''
+  return `${sign}${variance.toFixed(1)}h`
 }
 </script>
