@@ -323,35 +323,83 @@ export function useWorkspace() {
   /**
    * Fetch workspace members
    */
-  const fetchMembers = async (workspaceId) => {
-    loading.value = true;
-    error.value = null;
+const fetchMembers = async (workspaceId) => {
+  loading.value = true
+  error.value = null
 
-    try {
-      const response = await api.get(`/workspaces/${workspaceId}/members`);
-      return response.data.data;
-    } catch (err) {
-      error.value = err.response?.data?.message || 'Erreur lors du chargement des membres';
-      throw err;
-    } finally {
-      loading.value = false;
-    }
-  };
+  try {
+    const response = await api.get(`/workspaces/${workspaceId}/members`)
+    
+    console.log('✅ Membres chargés:', response.data)
+    
+    // Les membres sont déjà formatés avec permissions et statistiques
+    const members = response.data.data || []
+    
+    // Validation des données
+    members.forEach(member => {
+      if (!member.pivot) {
+        console.warn('⚠️ Membre sans pivot:', member)
+        member.pivot = {
+          role: 'viewer',
+          permissions: {
+            can_create_projects: false,
+            can_invite_members: false,
+            can_manage_settings: false,
+          }
+        }
+      }
+      
+      if (!member.pivot.permissions) {
+        member.pivot.permissions = {
+          can_create_projects: false,
+          can_invite_members: false,
+          can_manage_settings: false,
+        }
+      }
+      
+      if (!member.statistics) {
+        member.statistics = {
+          projets_count: 0,
+          taches_count: 0,
+          taches_completees: 0,
+          taux_completion: 0,
+        }
+      }
+      
+      if (!member.projets) {
+        member.projets = []
+      }
+    })
+    
+    return members
+  } catch (err) {
+    console.error('❌ Erreur chargement membres:', err)
+    error.value = err.response?.data?.message || 'Erreur lors du chargement des membres'
+    throw err
+  } finally {
+    loading.value = false
+  }
+}
 
-  const fetchInvitations = async (workspaceId) => {
-    loading.value = true;
-    error.value = null;
-    // alert(  'fetchInvitations called');
-    try {
-      const response = await api.get(`/workspaces/${workspaceId}/invitations`);
-      return response.data.data;
-    } catch (err) {
-      error.value = err.response?.data?.message || 'Erreur lors du chargement des invitations';
-      throw err;
-    } finally {
-      loading.value = false;
-    }
-  };
+const fetchInvitations = async (workspaceId) => {
+  loading.value = true
+  error.value = null
+  
+  try {
+    const response = await api.get(`/workspaces/${workspaceId}/invitations`)
+    
+    console.log('✅ Invitations chargées:', response.data)
+    
+    // La réponse contient déjà les données formatées du backend
+    return response.data.data || []
+  } catch (err) {
+    console.error('❌ Erreur chargement invitations:', err)
+    error.value = err.response?.data?.message || 'Erreur lors du chargement des invitations'
+    throw err
+  } finally {
+    loading.value = false
+  }
+}
 
   /**
  * Fetch all invitations across all workspaces (for admin/super_admin)
@@ -387,20 +435,48 @@ export function useWorkspace() {
   /**
    * Invite members to workspace
    */
-  const inviteMembers = async (workspaceId, inviteData) => {
-    loading.value = true;
-    error.value = null;
+const inviteMembers = async (workspaceId, inviteData) => {
+  loading.value = true
+  error.value = null
 
-    try {
-      const response = await api.post(`/workspaces/${workspaceId}/members/invite`, inviteData);
-      return response.data;
-    } catch (err) {
-      error.value = err.response?.data?.message || 'Erreur lors de l\'envoi des invitations';
-      throw err;
-    } finally {
-      loading.value = false;
+  try {
+    console.log('📧 Envoi invitations:', {
+      workspaceId,
+      emails: inviteData.emails,
+      role: inviteData.role,
+      send_email: inviteData.send_email
+    })
+
+    const response = await api.post(`/workspaces/${workspaceId}/members/invite`, inviteData)
+    
+    console.log('✅ Réponse invitations:', response.data)
+    
+    // Afficher un résumé dans la console
+    if (response.data.data) {
+      const { success_count, error_count, invitations, errors } = response.data.data
+      
+      console.log(`✅ Invitations réussies: ${success_count}`)
+      if (error_count > 0) {
+        console.warn(`⚠️ Invitations échouées: ${error_count}`)
+        errors.forEach(err => {
+          console.warn(`  - ${err.email}: ${err.message}`)
+        })
+      }
+      
+      invitations.forEach(inv => {
+        console.log(`  ✓ ${inv.email} ${inv.user_exists ? '(utilisateur existant)' : '(nouvel utilisateur)'}`)
+      })
     }
-  };
+    
+    return response.data
+  } catch (err) {
+    console.error('❌ Erreur invitations:', err)
+    error.value = err.response?.data?.message || 'Erreur lors de l\'envoi des invitations'
+    throw err
+  } finally {
+    loading.value = false
+  }
+}
 
   /**
    * Resend invitation
@@ -653,43 +729,48 @@ export function useWorkspace() {
   /**
    * Get member permissions and role
    */
-  const getMemberPermissions = (member) => {
-    const pivot = member.pivot || {};
-    let permissions = {};
-
-    // Si les permissions sont stockées dans un champ JSON
-    if (pivot.permissions) {
-      // Si c'est le format "all"
-      if ((pivot.permissions === '["all"]') || (pivot.permissions === ['all'])) {
-        permissions = {
-          can_create_projects: true,
-          can_invite_members: true,
-          can_manage_settings: true,
-        };
-      }
-      // Si c'est un objet de permissions
-      else if (typeof pivot.permissions === 'object') {
-        permissions = pivot.permissions;
-      }
-      // Si c'est une chaîne JSON
-      else if (typeof pivot.permissions === 'string') {
-        try {
-          const decoded = JSON.parse(pivot.permissions);
-          permissions = typeof decoded === 'object' ? decoded : {};
-        } catch (e) {
-          console.warn('Invalid permissions format:', pivot.permissions);
-          permissions = {};
-        }
-      }
-    }
-
-    // Si les permissions sont stockées dans des champs séparés (fallback)
+const getMemberPermissions = (member) => {
+  // Validation de base
+  if (!member || !member.pivot) {
+    console.warn('⚠️ Member sans pivot:', member)
     return {
-      can_create_projects: permissions.can_create_projects || pivot.can_create_projects || false,
-      can_invite_members: permissions.can_invite_members || pivot.can_invite_members || false,
-      can_manage_settings: permissions.can_manage_settings || pivot.can_manage_settings || false,
-    };
-  };
+      can_create_projects: false,
+      can_invite_members: false,
+      can_manage_settings: false,
+    }
+  }
+
+  const pivot = member.pivot
+  let permissions = pivot.permissions || {}
+
+  // Si c'est une string, essayer de parser
+  if (typeof permissions === 'string') {
+    try {
+      permissions = JSON.parse(permissions)
+    } catch (e) {
+      console.error('❌ Erreur parsing permissions:', permissions)
+      permissions = {}
+    }
+  }
+
+  // Si c'est le format "all"
+  if (permissions === 'all' || 
+      (Array.isArray(permissions) && permissions[0] === 'all') ||
+      (typeof permissions === 'string' && permissions === '["all"]')) {
+    return {
+      can_create_projects: true,
+      can_invite_members: true,
+      can_manage_settings: true,
+    }
+  }
+
+  // Format normal
+  return {
+    can_create_projects: permissions.can_create_projects ?? false,
+    can_invite_members: permissions.can_invite_members ?? false,
+    can_manage_settings: permissions.can_manage_settings ?? false,
+  }
+}
 
   /**
   * Check if user can manage workspace members
@@ -783,7 +864,6 @@ export function useWorkspace() {
     createWorkspace,
     updateWorkspace,
     deleteWorkspace,
-    fetchMembers,
     addMember,
     removeMember,
     updateMember,
@@ -796,6 +876,7 @@ export function useWorkspace() {
     onWorkspaceChanged,
 
     // Nouvelles méthodes pour la gestion des membres
+    fetchMembers,
     fetchInvitations,
     inviteMembers,
     resendInvitation,

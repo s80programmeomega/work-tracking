@@ -305,7 +305,7 @@ const router = createRouter({
 
     {
       path: '/taches',
-      name: 'Taches',
+      name: 'Toutes les taches',
       component: () => import('../pages/Taches.vue'),
       meta: {
         title: 'Gestion des Tâches',
@@ -313,8 +313,8 @@ const router = createRouter({
       },
     },
     {
-      path: '/taches',
-      name: 'mes-taches',
+      path: '/taches/mes-taches',
+      name: 'taches.mes-taches',
       component: () => import('../pages/MesTaches.vue'),
       meta: {
         title: 'Mes Tâches',
@@ -353,6 +353,64 @@ const router = createRouter({
     //   }
     // },
 
+    // {
+    // path: '/evaluations',
+    // component: () => import('@/layouts/MainLayout.vue'),
+    // meta: { requiresAuth: true },
+    // children: [
+      {
+        path: '/evaluations/dashboard',
+        name: 'evaluations.dashboard',
+        component: () => import('../pages/EvaluationDashboard.vue'),
+        meta: {
+          title: 'Tableau de bord des évaluations',
+          breadcrumb: [
+            { label: 'Accueil', to: '/' },
+            { label: 'Évaluations', to: '/evaluations/dashboard' },
+            { label: 'Tableau de bord' }
+          ]
+        }
+      },
+      {
+        path: '/evaluations/rapport-hebdomadaire',
+        name: 'evaluations.rapport-hebdomadaire',
+        component: () => import('../pages/RapportHebdomadaire.vue'),
+        meta: {
+          title: 'Rapport hebdomadaire',
+          breadcrumb: [
+            { label: 'Accueil', to: '/' },
+            { label: 'Évaluations', to: '/evaluations/dashboard' },
+            { label: 'Rapport hebdomadaire' }
+          ]
+        }
+      },
+      {
+        path: '/evaluations/fiches',
+        name: 'evaluations.fiches',
+        component: () => import('../pages/FichesEvaluation.vue'),
+        meta: {
+          title: 'Fiches d\'évaluation',
+          breadcrumb: [
+            { label: 'Accueil', to: '/' },
+            { label: 'Évaluations', to: '/evaluations/dashboard' },
+            { label: 'Fiches d\'évaluation' }
+          ]
+        }
+      },
+      {
+        path: '/evaluations/performance',
+        name: 'evaluations.performance',
+        component: () => import('../pages/PerformanceEquipe.vue'),
+        meta: {
+          title: 'Performance d\'équipe',
+          breadcrumb: [
+            { label: 'Accueil', to: '/' },
+            { label: 'Évaluations', to: '/evaluations/dashboard' },
+            { label: 'Performance d\'équipe' }
+          ]
+        }
+      },
+    
     {
       path: '/notifications',
       name: 'Notifications',

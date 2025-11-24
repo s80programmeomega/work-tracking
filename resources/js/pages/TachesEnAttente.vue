@@ -1,7 +1,7 @@
 <!-- resources/js/pages/TachesEnAttente.vue -->
 <template>
   <AdminLayout>
-    <PageBreadcrumb :pageTitle="'Tâches en Attente de Validation'" />
+    <!-- <PageBreadcrumb :pageTitle="'Tâches en Attente de Validation'" /> -->
 
     <div class="space-y-6">
       <!-- Header Premium -->

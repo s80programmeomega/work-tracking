@@ -456,7 +456,7 @@ const menuGroups = computed(() => [
                     { name: 'Tableau de bord', path: '/projets/list/all', superAdminOnly: true },
                     { name: 'Mes projets', path: '/projets/mes-projets' },
                     { name: 'Projets archivés', path: '/projets/archives' },
-                    { name: 'Créer un projet', path: '/projets/create', new: true },
+                    // { name: 'Créer un projet', path: '/projets/create', new: true },
                 ],
             },
             {
@@ -465,18 +465,18 @@ const menuGroups = computed(() => [
                 subItems: [
                     { name: 'Toutes les activités', path: '/activites/all/activity', superAdminOnly: true },
                     { name: 'Mes activités', path: '/activites/mes-activites' },
-                    { name: 'En retard', path: '/activites/en-retard', count: 5 },
+                    // { name: 'En retard', path: '/activites/en-retard', count: 5 },
                 ],
             },
             {
                 icon: TaskIcon,
                 name: 'Tâches',
                 subItems: [
-                    // { name: 'Toutes les tâches', path: '/taches', superAdminOnly: true },
-                    { name: 'Mes tâches', path: '/taches' },
+                    { name: 'Toutes les tâches', path: '/taches', superAdminOnly: false },
+                    { name: 'Mes tâches', path: '/taches/mes-taches' },
                     { name: 'Assignées à moi', path: '/taches/assignees' },
-                    { name: 'En attente', path: '/taches/en-attente', count: 12 },
-                    { name: 'En retard', path: '/taches/en-retard', count: 3 },
+                    { name: 'En attente de validation', path: '/taches/en-attente'},
+                    // { name: 'En retard', path: '/taches/en-retard', count: 3 },
                 ],
             },
         ],
@@ -484,16 +484,16 @@ const menuGroups = computed(() => [
     {
         title: 'Évaluation & Validation',
         items: [
-            {
-                icon: ClipboardCheckIcon,
-                name: 'Validations',
-                badge: '8',
-                subItems: [
-                    { name: 'En attente N1', path: '/validations/n1', count: 5 },
-                    { name: 'En attente N2', path: '/validations/n2', count: 3 },
-                    { name: 'Historique', path: '/validations/historique' },
-                ],
-            },
+            // {
+            //     icon: ClipboardCheckIcon,
+            //     name: 'Validations',
+            //     badge: '8',
+            //     subItems: [
+            //         { name: 'En attente N1', path: '/validations/n1', count: 5 },
+            //         { name: 'En attente N2', path: '/validations/n2', count: 3 },
+            //         { name: 'Historique', path: '/validations/historique' },
+            //     ],
+            // },
             {
                 icon: ClipboardCheckIcon,
                 name: 'Évaluations',
@@ -582,9 +582,30 @@ const getFilteredSubItems = (subItems) => {
         return !subItem.superAdminOnly || isSuperAdmin.value;
     });
 };
+ 
 
+// OU encore mieux : une solution par route spécifique
 const isActive = (path) => {
-    return route.path === path || route.path.startsWith(path + '/');
+  const currentPath = route.path;
+  
+  // Routes exactes qui ne doivent pas activer leurs parents
+  const exactRoutes = [
+    '/taches/mes-taches',
+    '/taches/assignees', 
+    '/taches/en-attente',
+    '/projets/mes-projets',
+    '/projets/archives',
+    '/activites/mes-activites',
+    '/activites/en-retard'
+  ];
+  
+  // Si c'est une route exacte, vérifier la correspondance exacte
+  if (exactRoutes.includes(path) || exactRoutes.includes(currentPath)) {
+    return currentPath === path;
+  }
+  
+  // Pour les autres routes, utiliser la logique normale
+  return currentPath === path || currentPath.startsWith(path + '/');
 };
 
 const toggleSubmenu = (groupIndex, itemIndex) => {

@@ -1,11 +1,10 @@
-<!-- resources/js/components/taches/TacheDetailModal.vue - VERSION HYBRIDE -->
+<!-- resources/js/components/taches/TacheDetailModal.vue -->
 <template>
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-gradient bg-opacity-50 p-4 backdrop-blur-sm" 
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm" 
        @click.self="$emit('close')">
     
-    <!-- Container principal avec taille adaptative -->
-    <!-- <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full overflow-hidden flex flex-col transition-all duration-300"> -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-hidden flex flex-col":class="modalSizeClass">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full overflow-hidden flex flex-col transition-all duration-300"
+         :class="modalSizeClass">
       
       <!-- Header unifié -->
       <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
@@ -43,7 +42,7 @@
             <!-- Bascule mode détaillé -->
             <button 
               v-if="!isDetailedView"
-              @click="enableDetailedView"
+              @click="enableDetailedView('details')"
               class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
               title="Vue détaillée">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -61,19 +60,24 @@
         </div>
 
         <!-- Onglets - Seulement en mode détaillé -->
-        <div v-if="isDetailedView" class="mt-4 flex gap-4 border-b border-gray-200 dark:border-gray-700">
+        <div v-if="isDetailedView" class="mt-4 flex gap-4 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
           <button
             v-for="tab in tabs"
             :key="tab.id"
             @click="activeTab = tab.id"
-            class="px-4 py-2 font-medium rounded-t-lg transition-all border-b-2"
+            class="px-4 py-2 font-medium rounded-t-lg transition-all border-b-2 whitespace-nowrap"
             :class="activeTab === tab.id
-              ? 'border-brand-500 text-brand-600 dark:text-brand-400'
-              : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
+              ? 'border-brand-500 text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/20'
+              : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800'"
           >
-            {{ tab.label }}
-            <span v-if="tab.count" class="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-200 dark:bg-gray-700">
-              {{ tab.count }}
+            <span class="flex items-center gap-2">
+              {{ tab.label }}
+              <span v-if="tab.count" class="px-2 py-0.5 text-xs rounded-full"
+                    :class="activeTab === tab.id 
+                      ? 'bg-brand-200 dark:bg-brand-800 text-brand-800 dark:text-brand-200' 
+                      : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'">
+                {{ tab.count }}
+              </span>
             </span>
           </button>
         </div>
@@ -145,20 +149,20 @@
         <div v-else class="px-8 py-6">
           
           <!-- Onglet Détails -->
-          <div v-if="activeTab === 'details'">
-            <DetailedTaskView :tache="tache" />
+          <div v-show="activeTab === 'details'">
+            <DetailedTaskView :tache="tache" @refresh="refreshTask" />
           </div>
 
           <!-- Onglet Résultats -->
-          <div v-if="activeTab === 'resultats'">
+          <div v-show="activeTab === 'resultats'">
             <ResultatsSection
               :tache="tache"
-              @resultat-added="$emit('resultat-added')"
+              @resultat-added="handleResultatAdded"
             />
           </div>
 
           <!-- Onglet Commentaires -->
-          <div v-if="activeTab === 'commentaires'">
+          <div v-show="activeTab === 'commentaires'">
             <CommentSection
               v-if="tache?.id"
               commentable-type="App\Models\Tache"
@@ -168,7 +172,7 @@
           </div>
 
           <!-- Onglet Documents -->
-          <div v-if="activeTab === 'documents'">
+          <div v-show="activeTab === 'documents'">
             <DocumentSection
               v-if="tache?.id"
               documentable-type="App\Models\Tache"
@@ -216,18 +220,17 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useTaches } from '@/composables/useTaches'
-import CommentSection from '@/components/comments/CommentSection.vue'
-import DocumentSection from '@/components/common/DocumentSection.vue'
-import ResultatsSection from '@/components/taches/ResultatsSection.vue'
+import { useTaches } from '@/composables/useTaches' 
 
-// Composants modulaires pour le mode rapide
 import QuickActionsPanel from './panels/QuickActionsPanel.vue'
 import EssentialInfoPanel from './panels/EssentialInfoPanel.vue'
-// import AssigneesPanel from './panels/AssigneesPanel.vue'
-// import LabelsPanel from './panels/LabelsPanel.vue'
-// import SectionCollapsible from './panels/SectionCollapsible.vue'
-// import DetailedTaskView from './DetailedTaskView.vue'
+import AssigneesPanel from './panels/AssigneesPanel.vue'
+import LabelsPanel from './panels/LabelsPanel.vue'
+import SectionCollapsible from './panels/SectionCollapsible.vue'
+import DetailedTaskView from './DetailedTaskView.vue'
+import ResultatsSection from './ResultatsSection.vue'
+import CommentSection from '@/components/comments/CommentSection.vue'
+import DocumentSection from '@/components/common/DocumentSection.vue'
 
 const props = defineProps({
   tache: {
@@ -236,7 +239,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['close', 'edit', 'validate-n1', 'validate-n2', 'resultat-added'])
+const emit = defineEmits(['close', 'edit', 'validate-n1', 'validate-n2', 'resultat-added', 'refresh'])
 
 const { completeTache } = useTaches()
 
@@ -295,7 +298,16 @@ const handleCompleteTask = async () => {
   }
 }
 
-// Méthodes utilitaires (conservées de l'original)
+const handleResultatAdded = () => {
+  emit('resultat-added')
+  refreshTask()
+}
+
+const refreshTask = () => {
+  emit('refresh')
+}
+
+// Méthodes utilitaires
 const getStatusClass = (statut) => {
   const classes = {
     'a_faire': 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
@@ -344,7 +356,6 @@ const formatDate = (date) => {
 }
 
 const formatRelativeTime = (date) => {
-  // Implémentation simplifiée
   const now = new Date()
   const diffMs = now - new Date(date)
   const diffMins = Math.floor(diffMs / 60000)
@@ -359,12 +370,8 @@ const formatRelativeTime = (date) => {
 
 // Lifecycle
 onMounted(() => {
-  // Détection automatique du mode au chargement
   if (shouldUseDetailedView.value) {
     isDetailedView.value = true
-  }
-
-  // Charger le dernier commentaire pour l'aperçu
-  // (à implémenter avec votre API)
+  } 
 })
 </script>

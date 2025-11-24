@@ -1,4 +1,184 @@
-<!-- resources/js/components/workspaces/MemberDetailsModal.vue -->
+<!-- resources/js/components/workspaces/MemberDetailsModal.vue - CORRIGÉ -->
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { 
+  XIcon, 
+  ChevronRightIcon, 
+  PencilIcon,
+  FolderOpenIcon,
+  CubeIcon,
+  UserPlusIcon,
+  CogIcon
+} from '@/icons'
+import { useWorkspace } from '@/composables/useWorkspace'
+
+const props = defineProps({
+  member: {
+    type: Object,
+    required: true
+  },
+  workspaceId: {
+    type: Number,
+    required: true
+  }
+})
+
+const emit = defineEmits(['close', 'edit'])
+
+const router = useRouter()
+const { getMemberPermissions, getRoleLabel, getRoleColor } = useWorkspace()
+
+const loading = ref(false)
+const showAllProjects = ref(false)
+
+// ✅ Utiliser directement les données du membre (déjà chargées depuis le backend)
+const memberProjects = computed(() => {
+  return props.member.projets || []
+})
+
+const statistics = computed(() => {
+  // ✅ Les statistiques sont déjà calculées côté backend
+  if (props.member.statistics) {
+    return props.member.statistics
+  }
+  
+  // Fallback si pas de statistiques
+  return {
+    projets_count: memberProjects.value.length || 0,
+    taches_count: 0,
+    taches_completees: 0,
+    taux_completion: 0
+  }
+})
+
+// Liste des permissions avec icônes
+const permissionsList = ref([
+  {
+    key: 'can_create_projects',
+    label: 'Créer des projets',
+    description: 'Peut créer de nouveaux projets',
+    icon: CubeIcon
+  },
+  {
+    key: 'can_invite_members',
+    label: 'Inviter des membres',
+    description: 'Peut inviter de nouveaux membres',
+    icon: UserPlusIcon
+  },
+  {
+    key: 'can_manage_settings',
+    label: 'Gérer les paramètres',
+    description: 'Peut modifier les paramètres',
+    icon: CogIcon
+  }
+])
+
+const getInitials = (name) => {
+  if (!name) return 'U'
+  return name
+    .split(' ')
+    .map(word => word[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+}
+
+const getProjectRoleColor = (role) => {
+  const colors = {
+    manager: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
+    editor: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+    viewer: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+  }
+  return colors[role] || colors.viewer
+}
+
+const getProjectRoleLabel = (role) => {
+  const labels = {
+    manager: 'Gestionnaire',
+    editor: 'Éditeur',
+    viewer: 'Observateur'
+  }
+  return labels[role] || role
+}
+
+const formatDate = (date) => {
+  if (!date) return 'N/A'
+  return new Date(date).toLocaleDateString('fr-FR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}
+
+const isRecentlyActive = (date) => {
+  if (!date) return false
+  const lastActivity = new Date(date)
+  const now = new Date()
+  const diffMinutes = (now - lastActivity) / (1000 * 60)
+  return diffMinutes < 15
+}
+
+// ✅ CORRIGÉ : Utiliser getMemberPermissions du composable
+const getPermissionValue = (permissionKey) => {
+  const permissions = getMemberPermissions(props.member)
+  console.log('🔍 Permission check:', {
+    key: permissionKey,
+    value: permissions[permissionKey],
+    allPermissions: permissions
+  })
+  return permissions[permissionKey] || false
+}
+
+const getActiveProjectsCount = computed(() => {
+  return memberProjects.value.filter(p => p.status === 'active').length
+})
+
+const getMembershipDuration = computed(() => {
+  if (!props.member.pivot?.invited_at) return 'N/A'
+  
+  const joinDate = new Date(props.member.pivot.invited_at)
+  const now = new Date()
+  const diffTime = Math.abs(now - joinDate)
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  
+  if (diffDays < 30) {
+    return `${diffDays} jour${diffDays > 1 ? 's' : ''}`
+  } else if (diffDays < 365) {
+    const months = Math.floor(diffDays / 30)
+    return `${months} mois`
+  } else {
+    const years = Math.floor(diffDays / 365)
+    return `${years} an${years > 1 ? 's' : ''}`
+  }
+})
+
+const canEditMember = computed(() => {
+  return props.member.pivot?.role !== 'owner'
+})
+
+const viewProject = (projet) => {
+  router.push({ name: 'projets.show', params: { id: projet.id } })
+  emit('close')
+}
+
+const editMember = () => {
+  emit('edit', props.member)
+  emit('close')
+}
+
+// ✅ Plus besoin de charger les données - elles sont déjà là !
+onMounted(() => {
+  console.log('📊 Member Details:', {
+    member: props.member,
+    statistics: statistics.value,
+    projects: memberProjects.value,
+    permissions: getMemberPermissions(props.member)
+  })
+})
+</script>
+
+<!-- Le template reste identique, juste quelques ajustements pour debug -->
 <template>
   <Teleport to="body">
     <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -27,13 +207,9 @@
           </button>
         </div>
 
-        <!-- Loading State -->
-        <div v-if="loading" class="flex items-center justify-center py-12">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
-        </div>
-
         <!-- Body -->
-        <div v-else class="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+        <div class="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+          
           <!-- Member Profile -->
           <div class="flex items-start gap-4 mb-6">
             <div class="relative">
@@ -49,9 +225,8 @@
               >
                 {{ getInitials(member.nom) }}
               </div>
-              <!-- Online Status Indicator -->
               <div
-                v-if="member.is_online"
+                v-if="member.is_online || isRecentlyActive(member.last_activity_at)"
                 class="absolute bottom-1 right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"
               ></div>
             </div>
@@ -80,12 +255,6 @@
                   ]"
                 >
                   {{ member.is_active ? 'Actif' : 'Inactif' }}
-                </span>
-                <span
-                  v-if="member.last_activity_at && isRecentlyActive(member.last_activity_at)"
-                  class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
-                >
-                  En ligne
                 </span>
               </div>
             </div>
@@ -176,37 +345,6 @@
             </div>
           </div>
 
-          <!-- Membership Timeline -->
-          <div class="mb-6">
-            <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">
-              Historique d'adhésion
-            </h4>
-            <div class="space-y-3">
-              <div class="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                <div class="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></div>
-                <div class="flex-1">
-                  <p class="text-sm font-medium text-gray-900 dark:text-white">
-                    A rejoint le workspace
-                  </p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">
-                    {{ formatDate(member.pivot?.invited_at) }}
-                  </p>
-                </div>
-              </div>
-              <div v-if="member.last_activity_at" class="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                <div class="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
-                <div class="flex-1">
-                  <p class="text-sm font-medium text-gray-900 dark:text-white">
-                    Dernière activité
-                  </p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">
-                    {{ formatDate(member.last_activity_at) }}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
           <!-- Projects Section -->
           <div v-if="memberProjects.length > 0">
             <div class="flex items-center justify-between mb-3">
@@ -219,7 +357,7 @@
             </div>
             <div class="space-y-2">
               <div
-                v-for="projet in memberProjects.slice(0, 5)"
+                v-for="projet in (showAllProjects ? memberProjects : memberProjects.slice(0, 5))"
                 :key="projet.id"
                 class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600/50 transition-colors cursor-pointer group"
                 @click="viewProject(projet)"
@@ -252,7 +390,6 @@
                 </div>
               </div>
               
-              <!-- Show More Button -->
               <div
                 v-if="memberProjects.length > 5"
                 class="text-center pt-2"
@@ -302,175 +439,3 @@
     </div>
   </Teleport>
 </template>
-
-<script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { 
-  XIcon, 
-  ChevronRightIcon, 
-  PencilIcon,
-  FolderOpenIcon,
-  CubeIcon,
-  UserPlusIcon,
-  CogIcon
-} from '@/icons'
-import { useWorkspace } from '@/composables/useWorkspace'
-
-const props = defineProps({
-  member: {
-    type: Object,
-    required: true
-  },
-  workspaceId: {
-    type: Number,
-    required: true
-  }
-})
-
-const emit = defineEmits(['close', 'edit'])
-
-const router = useRouter()
-const { getMemberPermissions, getRoleLabel, getRoleColor } = useWorkspace()
-
-const loading = ref(false)
-const memberProjects = ref([])
-const statistics = ref({})
-const showAllProjects = ref(false)
-
-// Liste des permissions avec icônes et descriptions
-const permissionsList = ref([
-  {
-    key: 'can_create_projects',
-    label: 'Créer des projets',
-    description: 'Peut créer de nouveaux projets',
-    icon: CubeIcon
-  },
-  {
-    key: 'can_invite_members',
-    label: 'Inviter des membres',
-    description: 'Peut inviter de nouveaux membres',
-    icon: UserPlusIcon
-  },
-  {
-    key: 'can_manage_settings',
-    label: 'Gérer les paramètres',
-    description: 'Peut modifier les paramètres',
-    icon: CogIcon
-  }
-])
-
-const getInitials = (name) => {
-  if (!name) return 'U'
-  return name
-    .split(' ')
-    .map(word => word[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2)
-}
-
-const getProjectRoleColor = (role) => {
-  const colors = {
-    manager: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
-    editor: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-    viewer: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-  }
-  return colors[role] || colors.viewer
-}
-
-const getProjectRoleLabel = (role) => {
-  const labels = {
-    manager: 'Gestionnaire',
-    editor: 'Éditeur',
-    viewer: 'Observateur'
-  }
-  return labels[role] || role
-}
-
-const formatDate = (date) => {
-  if (!date) return 'N/A'
-  return new Date(date).toLocaleDateString('fr-FR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
-}
-
-const isRecentlyActive = (date) => {
-  if (!date) return false
-  const lastActivity = new Date(date)
-  const now = new Date()
-  const diffMinutes = (now - lastActivity) / (1000 * 60)
-  return diffMinutes < 15 // Considéré comme actif si activité il y a moins de 15 minutes
-}
-
-const getPermissionValue = (permissionKey) => {
-  const permissions = getMemberPermissions(props.member)
-  return permissions[permissionKey] || false
-}
-
-const getActiveProjectsCount = computed(() => {
-  return memberProjects.value.filter(p => p.status === 'active').length
-})
-
-const getMembershipDuration = computed(() => {
-  if (!props.member.pivot?.invited_at) return 'N/A'
-  
-  const joinDate = new Date(props.member.pivot.invited_at)
-  const now = new Date()
-  const diffTime = Math.abs(now - joinDate)
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-  
-  if (diffDays < 30) {
-    return `${diffDays} jour${diffDays > 1 ? 's' : ''}`
-  } else if (diffDays < 365) {
-    const months = Math.floor(diffDays / 30)
-    return `${months} mois`
-  } else {
-    const years = Math.floor(diffDays / 365)
-    return `${years} an${years > 1 ? 's' : ''}`
-  }
-})
-
-const canEditMember = computed(() => {
-  // TODO: Implémenter la logique de permission
-  // Pour l'instant, permettre l'édition si ce n'est pas le propriétaire
-  return props.member.pivot?.role !== 'owner'
-})
-
-const viewProject = (projet) => {
-  router.push({ name: 'projets.show', params: { id: projet.id } })
-  emit('close')
-}
-
-const editMember = () => {
-  emit('edit', props.member)
-  emit('close')
-}
-
-const loadMemberData = async () => {
-  loading.value = true
-  try {
-    // TODO: Implémenter l'appel API pour récupérer les projets et statistiques du membre
-    // Pour l'instant, utiliser les données existantes
-    memberProjects.value = props.member.projets || []
-    
-    // Statistiques mockées - à remplacer par un appel API
-    statistics.value = {
-      projets_count: memberProjects.value.length,
-      taches_count: 24,
-      taches_completees: 18,
-      taux_completion: 75
-    }
-  } catch (error) {
-    console.error('Error loading member data:', error)
-  } finally {
-    loading.value = false
-  }
-}
-
-onMounted(() => {
-  loadMemberData()
-})
-</script>

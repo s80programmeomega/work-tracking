@@ -12,6 +12,7 @@ class TacheExternalLinkResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'tache_id' => $this->tache_id,
             'title' => $this->title,
             'url' => $this->url,
             'created_by' => $this->whenLoaded('createdBy', function () {

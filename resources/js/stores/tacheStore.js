@@ -46,21 +46,21 @@ export const useTacheStore = defineStore('tache', () => {
   async function fetchKanbanForActivite(activiteId) {
     loading.value = true
     error.value = null
-    
+
     try {
       console.log('🔄 Store: Chargement kanban pour activité:', activiteId)
-      
+
       const { data } = await api.get(`/taches/activite/${activiteId}/kanban`)
-      
+
       console.log('📦 Store: Données reçues:', data)
-      
+
       // ✅ Initialisation GARANTIE avec structure complète
       kanban.value = {
         a_faire: Array.isArray(data.a_faire) ? data.a_faire : [],
         en_cours: Array.isArray(data.en_cours) ? data.en_cours : [],
         termine: Array.isArray(data.termine) ? data.termine : []
       }
-      
+
       // ✅ Stats avec fallback
       stats.value = data.stats || {
         total: kanban.value.a_faire.length + kanban.value.en_cours.length + kanban.value.termine.length,
@@ -68,22 +68,22 @@ export const useTacheStore = defineStore('tache', () => {
         en_cours: kanban.value.en_cours.length,
         termine: kanban.value.termine.length
       }
-      
+
       console.log('✅ Store: Kanban mis à jour:', {
         a_faire: kanban.value.a_faire.length,
         en_cours: kanban.value.en_cours.length,
         termine: kanban.value.termine.length,
         stats: stats.value
       })
-      
+
       return kanban.value
-      
+
     } catch (err) {
       console.error('❌ Store: Erreur chargement kanban:', err)
       console.error('Response:', err.response?.data)
-      
+
       error.value = err.response?.data?.message || 'Failed to fetch kanban'
-      
+
       // ✅ Réinitialiser avec structure vide en cas d'erreur
       kanban.value = {
         a_faire: [],
@@ -96,7 +96,7 @@ export const useTacheStore = defineStore('tache', () => {
         en_cours: 0,
         termine: 0
       }
-      
+
       throw err
     } finally {
       loading.value = false
@@ -150,27 +150,34 @@ export const useTacheStore = defineStore('tache', () => {
   }
 
   // ✅ CORRIGÉ : createTache sans 
+
   async function createTache(tacheData) {
     loading.value = true
     error.value = null
+
     try {
-      // Vérifier si c'est du FormData ou du JSON
       const isFormData = tacheData instanceof FormData
-      
+
       console.log('🚀 Store: Envoi création tâche', {
         isFormData,
         contentType: isFormData ? 'multipart/form-data' : 'application/json'
       })
-      const axiosConfig = isFormData ? {
-      ...config,
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        ...config.headers
-      }
-    } : config
+
+      // Configuration axios adaptée au type de données
+      const axiosConfig = isFormData
+        ? {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+        : {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
 
       const response = await api.post('/taches', tacheData, axiosConfig)
-      
+
       console.log('✅ Store: Tâche créée:', response.data)
       return response.data
     } catch (err) {
@@ -183,54 +190,54 @@ export const useTacheStore = defineStore('tache', () => {
   }
 
   async function updateTache(id, tacheData) {
-  loading.value = true
-  error.value = null
-  try {
-    // Vérifier si c'est du FormData ou du JSON
-    const isFormData = tacheData instanceof FormData
-    
-    console.log('🔄 Store: Envoi mise à jour tâche', {
-      isFormData,
-      id,
-      hasFiles: isFormData ? 'OUI' : 'NON'
-    })
+    loading.value = true
+    error.value = null
+    try {
+      // Vérifier si c'est du FormData ou du JSON
+      const isFormData = tacheData instanceof FormData
 
-    // ✅ CORRECTION: Gestion correcte des headers pour FormData
-    const config = isFormData ? {
-      headers: {
-        'Content-Type': 'multipart/form-data'
+      console.log('🔄 Store: Envoi mise à jour tâche', {
+        isFormData,
+        id,
+        hasFiles: isFormData ? 'OUI' : 'NON'
+      })
+
+      // ✅ CORRECTION: Gestion correcte des headers pour FormData
+      const config = isFormData ? {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      } : {}
+
+      const response = await api.post(`/taches/${id}`, tacheData, config)
+      const updatedTache = response.data.data
+
+      // Mettre à jour le store local
+      const index = taches.value.findIndex(t => t.id === id)
+      if (index !== -1) {
+        taches.value[index] = updatedTache
       }
-    } : {}
 
-    const response = await api.post(`/taches/${id}`, tacheData, config)
-    const updatedTache = response.data.data
+      updateTacheInKanban(updatedTache)
 
-    // Mettre à jour le store local
-    const index = taches.value.findIndex(t => t.id === id)
-    if (index !== -1) {
-      taches.value[index] = updatedTache
+      if (currentTache.value?.id === id) {
+        currentTache.value = updatedTache
+      }
+
+      console.log('✅ Store: Tâche mise à jour avec succès')
+      return updatedTache
+    } catch (err) {
+      console.error('❌ Store: Erreur mise à jour tâche:', {
+        message: err.response?.data?.message || err.message,
+        errors: err.response?.data?.errors,
+        status: err.response?.status
+      })
+      error.value = err.response?.data?.message || 'Erreur lors de la mise à jour'
+      throw err
+    } finally {
+      loading.value = false
     }
-
-    updateTacheInKanban(updatedTache)
-
-    if (currentTache.value?.id === id) {
-      currentTache.value = updatedTache
-    }
-
-    console.log('✅ Store: Tâche mise à jour avec succès')
-    return updatedTache
-  } catch (err) {
-    console.error('❌ Store: Erreur mise à jour tâche:', {
-      message: err.response?.data?.message || err.message,
-      errors: err.response?.data?.errors,
-      status: err.response?.status
-    })
-    error.value = err.response?.data?.message || 'Erreur lors de la mise à jour'
-    throw err
-  } finally {
-    loading.value = false
   }
-}
 
   async function deleteTache(id) {
     loading.value = true

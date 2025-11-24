@@ -1,7 +1,7 @@
 <!-- resources/js/pages/MesTaches.vue -->
 <template>
   <AdminLayout>
-    <PageBreadcrumb :pageTitle="'Mes Tâches'" />
+    <!-- <PageBreadcrumb :pageTitle="'Mes Tâches'" /> -->
 
     <div class="space-y-6">
       <!-- Header avec statistiques personnelles -->
@@ -329,7 +329,7 @@ import KanbanColumnPremium from '@/components/taches/KanbanColumnPremium.vue'
 import TacheCard from '@/components/taches/TacheCard.vue'
 import TacheDetailModal from '@/components/taches/TacheDetailModal.vue'
 import TacheForm from '@/components/taches/TacheForm.vue'
-import TaskCalendarView from '@/components/taches/TaskCalendarView.vue'
+// import TaskCalendarView from '@/components/taches/TaskCalendarView.vue'
 import api from '@/api/axios'
 
 // State
