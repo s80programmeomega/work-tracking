@@ -246,6 +246,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // ✅ NOUVEAU : Tâches en attente de collègues
         Route::get('/waiting-for-colleagues', [TacheController::class, 'waitingForColleagues']);
 
+        // ✅ NOUVEAU : Validation résultats individuels
+        Route::post('/resultats-individuels/{resultat}/validate-n1', [TacheController::class, 'validateIndividualResultN1']);
+        Route::post('/resultats-individuels/{resultat}/validate-n2', [TacheController::class, 'validateIndividualResultN2']);
+
+
         // CRUD basique
         Route::get('/{tache}', [TacheController::class, 'show']);
         Route::put('/{tache}', [TacheController::class, 'update']);
