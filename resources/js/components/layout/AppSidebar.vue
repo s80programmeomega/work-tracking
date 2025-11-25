@@ -477,6 +477,8 @@ const menuGroups = computed(() => [
                     { name: 'Assignées à moi', path: '/taches/assignees' },
                     { name: 'En attente de validation', path: '/taches/en-attente'},
                     // { name: 'En retard', path: '/taches/en-retard', count: 3 },
+                    { name: 'En Attente de Collègues', path: '/taches/waiting-colleagues' },
+                    { name: 'Vue Coordination', path: '/taches/coordination' },
                 ],
             },
         ],
@@ -509,25 +511,25 @@ const menuGroups = computed(() => [
     {
         title: 'Collaboration',
         items: [
-            {
-                icon: ChatIcon,
-                name: 'Équipes',
-                subItems: [
-                    { name: 'Mes équipes', path: '/teams' },
-                    { name: 'Messages', path: '/teams/messages', count: 24 },
-                    { name: 'Annonces', path: '/teams/announcements' },
-                    { name: 'Ressources', path: '/teams/resources' },
-                ],
-            },
-            {
-                icon: UsersIcon,
-                name: 'Utilisateurs',
-                subItems: [
-                    { name: 'Tous les utilisateurs', path: '/users', superAdminOnly: true },
-                    { name: 'Invitations', path: '/users/invitations', count: 2 },
-                    { name: 'Permissions', path: '/users/permissions', superAdminOnly: true },
-                ],
-            },
+            // {
+            //     icon: ChatIcon,
+            //     name: 'Équipes',
+            //     subItems: [
+            //         { name: 'Mes équipes', path: '/teams' },
+            //         { name: 'Messages', path: '/teams/messages', count: 24 },
+            //         { name: 'Annonces', path: '/teams/announcements' },
+            //         { name: 'Ressources', path: '/teams/resources' },
+            //     ],
+            // },
+            // {
+            //     icon: UsersIcon,
+            //     name: 'Utilisateurs',
+            //     subItems: [
+            //         { name: 'Tous les utilisateurs', path: '/users', superAdminOnly: true },
+            //         { name: 'Invitations', path: '/users/invitations', count: 2 },
+            //         { name: 'Permissions', path: '/users/permissions', superAdminOnly: true },
+            //     ],
+            // },
             {
                 icon: MailIcon,
                 name: 'Notifications',
@@ -539,11 +541,11 @@ const menuGroups = computed(() => [
     {
         title: 'Autres',
         items: [
-            {
-                icon: CalenderIcon,
-                name: 'Calendrier',
-                path: '/calendar',
-            },
+            // {
+            //     icon: CalenderIcon,
+            //     name: 'Calendrier',
+            //     path: '/calendar',
+            // },
             {
                 icon: UserCircleIcon,
                 name: 'Mon Profil',
