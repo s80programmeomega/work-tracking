@@ -218,6 +218,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Route::middleware(['super_admin'])->group(function () {
         Route::get('/all/activity', [ActiviteController::class, 'index']); // Toutes les activités (Super Admin)
         // });
+
+        // ✅ NOUVEAU : Vue coordination (tâches par utilisateur)
+        Route::get('/{activiteId}/taches-by-user', [TacheController::class, 'assignedByUser']);
     });
 
     // ======================================== TÂCHES  ========================================
@@ -233,8 +236,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/en-retard', [TacheController::class, 'overdue']);
         Route::post('/reorder', [TacheController::class, 'reorder']);
 
+        // ✅ NOUVEAU : Gestion statut individuel
+        Route::post('/{tache}/move-my-card', [TacheController::class, 'moveMyCard']);
+        Route::post('/{tache}/submit-result', [TacheController::class, 'submitMyResult']);
+
         // ✅ Kanban pour une activité
         Route::get('/activite/{activiteId}/kanban', [TacheController::class, 'forActivite']);
+
+        // ✅ NOUVEAU : Tâches en attente de collègues
+        Route::get('/waiting-for-colleagues', [TacheController::class, 'waitingForColleagues']);
 
         // CRUD basique
         Route::get('/{tache}', [TacheController::class, 'show']);
@@ -267,7 +277,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/{tache}/labels', [TacheController::class, 'attachLabel']);
         Route::delete('/{tache}/labels/{label}', [TacheController::class, 'detachLabel']);
 
-        // Routes pour les fichiers
+        // Routes pour les fichiers attachés
+        Route::post('{tache}/attachments', [TacheController::class, 'addAttachments']);
+        Route::get('{tache}/attachments', [TacheController::class, 'getAttachments']);
         Route::get('{tache}/attachments/{attachment}/download', [TacheController::class, 'downloadAttachment']);
         Route::delete('{tache}/attachments/{attachment}', [TacheController::class, 'deleteAttachment']);
 
