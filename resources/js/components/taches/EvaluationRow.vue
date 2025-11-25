@@ -1,4 +1,4 @@
-<!-- resources/js/views/evaluations/components/EvaluationRow.vue -->
+<!-- resources\js\components\taches\EvaluationRow.vue -->
 <template>
   <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
       :class="{ 'bg-green-50 dark:bg-green-900/10': isFullyValidated }">
