@@ -7,8 +7,11 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class TacheResource extends JsonResource
 {
+
+
     public function toArray(Request $request): array
     {
+        $user = $request->user();
         return [
             'id' => $this->id,
             'code' => $this->code,
@@ -31,6 +34,7 @@ class TacheResource extends JsonResource
             'commentaire' => $this->commentaire,
             'attachments' => TacheAttachmentResource::collection($this->whenLoaded('attachments')),
             'external_links' => TacheExternalLinkResource::collection($this->whenLoaded('externalLinks')),
+
             // Statut et priorité
             'statut' => $this->statut->value,
             'statut_label' => $this->statut->label(),
@@ -39,6 +43,20 @@ class TacheResource extends JsonResource
             'priorite_label' => $this->priorite->label(),
             'priorite_color' => $this->priorite->color(),
             'priorite_icon' => $this->priorite->icon(),
+
+            // ✅ NOUVEAU : Mon statut personnel
+            'my_status' => $this->when($user && $this->isAssignedTo($user), function () use ($user) {
+                $pivot = $this->assignees()->where('user_id', $user->id)->first();
+
+                return [
+                    'statut' => $pivot?->pivot->statut_individuel ?? $this->statut->value,
+                    'progression' => $pivot?->pivot->progression_individuelle ?? 0,
+                    'started_at' => $pivot?->pivot->started_at?->format('Y-m-d H:i:s'),
+                    'completed_at' => $pivot?->pivot->completed_at?->format('Y-m-d H:i:s'),
+                    'notes_personnelles' => $pivot?->pivot->notes_personnelles,
+                    'can_move' => true, // L'utilisateur peut toujours bouger sa propre carte
+                ];
+            }),
 
             // Dates
             'date_debut' => $this->date_debut?->format('Y-m-d'),
@@ -64,10 +82,12 @@ class TacheResource extends JsonResource
             'validation' => [
                 'n1_required' => $this->validation_n1_required,
                 'n1_validated_at' => $this->validated_n1_at?->format('Y-m-d H:i:s'),
-                'n1_validated_by' => $this->when($this->validatedN1By, [
-                    'id' => $this->validatedN1By?->id,
-                    'nom' => $this->validatedN1By?->nom,
-                ]),
+                'n1_validated_by' => $this->when($this->validatedN1By, function () {
+                    return [
+                        'id' => $this->validatedN1By->id,
+                        'nom' => $this->validatedN1By->nom,
+                    ];
+                }),
                 'n1_commentaire' => $this->commentaire_n1,
 
                 'n2_required' => $this->validation_n2_required,
@@ -82,7 +102,7 @@ class TacheResource extends JsonResource
                 'is_fully_validated' => $this->isFullyValidated(),
             ],
 
-            // Assignés
+            // ✅ NOUVEAU : Assignés avec leurs statuts individuels
             'assignees' => $this->assignees->map(function ($user) {
                 return [
                     'id' => $user->id,
@@ -94,8 +114,90 @@ class TacheResource extends JsonResource
                         'can_edit' => (bool) $user->pivot->can_edit,
                         'can_complete' => (bool) $user->pivot->can_complete,
                         'can_validate' => (bool) $user->pivot->can_validate,
+                        // ✅ Statut individuel
+                        'statut_individuel' => $user->pivot->statut_individuel,
+                        'progression_individuelle' => $user->pivot->progression_individuelle,
+                        'started_at' => $user->pivot->started_at?->format('Y-m-d H:i:s'),
+                        'completed_at' => $user->pivot->completed_at?->format('Y-m-d H:i:s'),
                     ],
                 ];
+            }),
+
+            // ✅ NOUVEAU : Statistiques d'équipe
+            'team_stats' => $this->when($this->assignees->count() > 1, function () {
+                $stats = $this->getStatistiquesAssignes();
+                $termine = collect($stats)->where('statut', 'termine')->count();
+                $enCours = collect($stats)->where('statut', 'en_cours')->count();
+                $aFaire = collect($stats)->where('statut', 'a_faire')->count();
+                $total = count($stats);
+
+                return [
+                    'termine_count' => $termine,
+                    'en_cours_count' => $enCours,
+                    'a_faire_count' => $aFaire,
+                    'total' => $total,
+                    'completion_percentage' => $total > 0 ? round(($termine / $total) * 100) : 0,
+                    'tous_ont_termine' => $this->tousLesAssignesOntTermine(),
+                ];
+            }),
+
+            // ✅ NOUVEAU : Mon résultat individuel
+            'my_result' => $this->when($user && $this->isAssignedTo($user), function () use ($user) {
+                $resultat = $this->getResultatForUser($user);
+
+                return $resultat ? [
+                    'id' => $resultat->id,
+                    'is_individual' => $resultat->is_individual,
+                    'resultats_attendus' => $resultat->resultats_attendus,
+                    'resultats_obtenus' => $resultat->resultats_obtenus,
+                    'taux_realisation' => $resultat->taux_realisation,
+                    'difficultes_rencontrees' => $resultat->difficultes_rencontrees,
+                    'solutions_envisagees' => $resultat->solutions_envisagees,
+                    'observations' => $resultat->observations,
+                    'soumis_le' => $resultat->soumis_le?->format('Y-m-d H:i:s'),
+                    'valide_par_n1' => $resultat->valide_par_n1,
+                    'valide_le_n1' => $resultat->valide_le_n1?->format('Y-m-d H:i:s'),
+                    'commentaire_n1' => $resultat->commentaire_n1,
+                    'valide_par_n2' => $resultat->valide_par_n2,
+                    'valide_le_n2' => $resultat->valide_le_n2?->format('Y-m-d H:i:s'),
+                    'commentaire_n2' => $resultat->commentaire_n2,
+                    'is_fully_validated' => $resultat->is_fully_validated,
+                    'validation_status' => $resultat->validation_status,
+                    'documents_count' => $resultat->documents()->count(),
+                    'created_at' => $resultat->created_at->format('Y-m-d H:i:s'),
+                ] : null;
+            }),
+
+            // ✅ NOUVEAU : Résultats de tous les assignés (visible par responsables)
+            'all_results' => $this->when(
+                $user && ($this->activite->responsable_id === $user->id ||
+                    ($this->activite->projet && $this->activite->projet->responsable_id === $user->id)),
+                function () {
+                    return $this->getResultatsIndividuels()->map(function ($resultat) {
+                        return [
+                            'id' => $resultat->id,
+                            'user' => [
+                                'id' => $resultat->user->id,
+                                'nom' => $resultat->user->nom,
+                                'avatar' => $resultat->user->avatar,
+                            ],
+                            'is_individual' => $resultat->is_individual,
+                            'resultats_obtenus' => $resultat->resultats_obtenus,
+                            'taux_realisation' => $resultat->taux_realisation,
+                            'soumis_le' => $resultat->soumis_le?->format('Y-m-d H:i:s'),
+                            'valide_par_n1' => $resultat->valide_par_n1,
+                            'valide_par_n2' => $resultat->valide_par_n2,
+                            'is_fully_validated' => $resultat->is_fully_validated,
+                            'validation_status' => $resultat->validation_status,
+                            'documents_count' => $resultat->documents()->count(),
+                        ];
+                    });
+                }
+            ),
+
+            // ✅ AJOUTER : Statistiques des résultats
+            'resultats_stats' => $this->when($this->assignees->count() > 1, function () {
+                return $this->getStatsResultats();
             }),
 
             // Labels
@@ -144,6 +246,9 @@ class TacheResource extends JsonResource
                     'can_complete' => $this->canBeCompletedBy($user),
                     'can_validate_n1' => $this->canBeValidatedN1By($user),
                     'can_validate_n2' => $this->canBeValidatedN2By($user),
+                    'can_move_my_card' => $this->isAssignedTo($user),
+                    'can_submit_result' => $this->isAssignedTo($user) &&
+                        $this->getStatutForUser($user) === 'termine',
                 ];
             }),
         ];
