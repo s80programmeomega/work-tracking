@@ -217,7 +217,7 @@ class TacheService
     /**
      * ✅ Uploader un fichier individuel
      */
-    protected function uploadFile(Tache $tache, $file, User $uploadedBy): TacheAttachment
+    public function uploadFile(Tache $tache, $file, User $uploadedBy): TacheAttachment
     {
         $originalName = $file->getClientOriginalName();
         $fileName = time() . '_' . uniqid() . '_' . $originalName;
