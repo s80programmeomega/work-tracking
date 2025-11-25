@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\TachePriorite;
 use App\Enums\TacheStatut;
+use App\Notifications\AssigneCompletedTaskNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -189,7 +190,7 @@ class Tache extends Model
     /**
      * ✅ NOUVEAU : Obtenir tous les résultats individuels
      */
-    public function getResultatsIndividuels(): Collection
+    public function getResultatsIndividuels()
     {
         return $this->resultats()
             ->where('is_individual', true)
