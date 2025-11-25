@@ -12,6 +12,7 @@ class TacheAttachmentResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'tache_id' => $this->tache_id,
             'file_name' => $this->file_name,
             'original_name' => $this->original_name,
             'file_size' => $this->file_size,
