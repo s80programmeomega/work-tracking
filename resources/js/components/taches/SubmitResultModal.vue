@@ -160,73 +160,123 @@
                 </div>
 
                 <!-- Documents joints -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Documents justificatifs
-                  </label>
-                  <div
-                    @drop.prevent="handleDrop"
-                    @dragover.prevent="isDragging = true"
-                    @dragleave="isDragging = false"
-                    class="border-2 border-dashed rounded-lg p-6 text-center transition-colors"
-                    :class="isDragging ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-300 dark:border-gray-700'"
-                  >
-                    <input
-                      ref="fileInput"
-                      type="file"
-                      multiple
-                      accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
-                      @change="handleFileSelect"
-                      class="hidden"
-                    />
-                    <svg class="w-12 h-12 mx-auto mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                      Glissez-déposez des fichiers ou
-                      <button
-                        type="button"
-                        @click="$refs.fileInput.click()"
-                        class="text-purple-600 dark:text-purple-400 hover:underline font-medium"
-                      >
-                        parcourez
-                      </button>
-                    </p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">
-                      PDF, DOC, DOCX, XLS, XLSX, JPG, PNG (max 10 Mo par fichier)
-                    </p>
-                  </div>
-
-                  <!-- Liste des fichiers sélectionnés -->
-                  <div v-if="form.documents.length > 0" class="mt-3 space-y-2">
-                    <div
-                      v-for="(file, index) in form.documents"
-                      :key="index"
-                      class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg"
-                    >
-                      <div class="flex items-center gap-3 flex-1 min-w-0">
-                        <div class="w-8 h-8 rounded bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
-                          <svg class="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                          <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ file.name }}</p>
-                          <p class="text-xs text-gray-500 dark:text-gray-400">{{ formatFileSize(file.size) }}</p>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        @click="removeFile(index)"
-                        class="p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors"
-                      >
-                        <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Documents justificatifs
+        </label>
+        
+        <!-- Documents existants -->
+        <div v-if="existingDocuments.length > 0" class="mb-4">
+          <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Documents déjà soumis :</p>
+          <div class="space-y-2">
+            <div
+              v-for="document in existingDocuments"
+              :key="document.id"
+              class="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg"
+            >
+              <div class="flex items-center gap-3 flex-1 min-w-0">
+                <div class="w-8 h-8 rounded bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+                  <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
                 </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ document.nom }}</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ formatFileSize(document.taille_fichier) }}</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <a
+                  :href="document.url"
+                  target="_blank"
+                  class="p-1 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded transition-colors"
+                  title="Voir le document"
+                >
+                  <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </a>
+                <button
+                  v-if="isEditing"
+                  type="button"
+                  @click="removeExistingDocument(document.id)"
+                  class="p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors"
+                  title="Supprimer le document"
+                >
+                  <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zone d'upload de nouveaux documents -->
+        <div
+          @drop.prevent="handleDrop"
+          @dragover.prevent="isDragging = true"
+          @dragleave="isDragging = false"
+          class="border-2 border-dashed rounded-lg p-6 text-center transition-colors"
+          :class="isDragging ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-300 dark:border-gray-700'"
+        >
+          <input
+            ref="fileInput"
+            type="file"
+            multiple
+            accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
+            @change="handleFileSelect"
+            class="hidden"
+          />
+          <svg class="w-12 h-12 mx-auto mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          </svg>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+            Glissez-déposez des fichiers ou
+            <button
+              type="button"
+              @click="$refs.fileInput.click()"
+              class="text-purple-600 dark:text-purple-400 hover:underline font-medium"
+            >
+              parcourez
+            </button>
+          </p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">
+            PDF, DOC, DOCX, XLS, XLSX, JPG, PNG (max 10 Mo par fichier)
+          </p>
+        </div>
+
+        <!-- Liste des nouveaux fichiers sélectionnés -->
+        <div v-if="form.documents.length > 0" class="mt-3 space-y-2">
+          <div
+            v-for="(file, index) in form.documents"
+            :key="index"
+            class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg"
+          >
+            <div class="flex items-center gap-3 flex-1 min-w-0">
+              <div class="w-8 h-8 rounded bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ file.name }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ formatFileSize(file.size) }}</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              @click="removeFile(index)"
+              class="p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors"
+            >
+              <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
 
                 <!-- Info validation avec message adapté -->
                 <div class="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
@@ -308,6 +358,7 @@ const emit = defineEmits(['close', 'submitted'])
 const submitting = ref(false)
 const isDragging = ref(false)
 const fileInput = ref(null)
+const existingDocuments = ref([])
 
 const form = ref({
   resultats_attendus: '',
@@ -316,11 +367,31 @@ const form = ref({
   difficultes_rencontrees: '',
   solutions_envisagees: '',
   observations: '',
-  documents: []
+  documents: [],
+    documents_to_delete: [] // Pour gérer la suppression des documents existants
+
 })
 
 // Computed
 const isEditing = computed(() => !!props.tache.my_result)
+
+// Charger les documents existants
+async function loadExistingDocuments() {
+  if (isEditing.value && props.tache.my_result) {
+    try {
+      const { data } = await api.get(`/taches/${props.tache.id}/resultats/${props.tache.my_result.id}/documents`)
+      existingDocuments.value = data.data || []
+    } catch (error) {
+      console.error('Erreur chargement documents:', error)
+    }
+  }
+}
+
+// Méthodes pour gérer les documents existants
+function removeExistingDocument(documentId) {
+  form.value.documents_to_delete.push(documentId)
+  existingDocuments.value = existingDocuments.value.filter(doc => doc.id !== documentId)
+}
 
 const myStatut = computed(() => props.tache.my_status?.statut || props.tache.statut)
 
@@ -434,6 +505,24 @@ async function handleSubmit() {
       formData.append(`documents[${index}]`, file)
     })
 
+    // Ajouter les documents à supprimer
+    form.value.documents_to_delete.forEach((docId, index) => {
+      formData.append(`documents_to_delete[${index}]`, docId)
+    })
+
+    // Utiliser PUT pour l'édition, POST pour la création
+    const url = isEditing.value 
+      ? `/taches/${props.tache.id}/resultats/${props.tache.my_result.id}`
+      : `/taches/${props.tache.id}/submit-result`
+
+    const method = isEditing.value ? 'put' : 'post'
+
+    await api[method](url, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+
     // Soumettre
     await api.post(`/taches/${props.tache.id}/submit-result`, formData, {
       headers: {
@@ -452,7 +541,7 @@ async function handleSubmit() {
 }
 
 // Lifecycle
-onMounted(() => {
+onMounted(async () => {
   // Pré-remplir si édition
   if (isEditing.value) {
     const result = props.tache.my_result
@@ -462,6 +551,9 @@ onMounted(() => {
     form.value.difficultes_rencontrees = result.difficultes_rencontrees || ''
     form.value.solutions_envisagees = result.solutions_envisagees || ''
     form.value.observations = result.observations || ''
+    
+    // Charger les documents existants
+    await loadExistingDocuments()
   }
 })
 </script>

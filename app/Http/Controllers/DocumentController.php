@@ -24,11 +24,11 @@ class DocumentController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $request->validate([
-            'documentable_type' => 'required|string',
-            'documentable_id' => 'required|integer',
-            'with_versions' => 'boolean',
-        ]);
+        // $request->validate([
+        //     'documentable_type' => 'required|string',
+        //     'documentable_id' => 'required|integer',
+        //     'with_versions' => 'boolean',
+        // ]);
 
         $documents = $this->documentService->getForEntity(
             $request->documentable_type,

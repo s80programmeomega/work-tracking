@@ -444,6 +444,91 @@ class TacheResultatController extends Controller
         ]);
     }
 
+    /**
+ * 📁 Récupérer les documents d'un résultat
+ */
+public function getDocuments(Tache $tache, TacheResultat $resultat)
+{
+    Gate::authorize('view', $tache);
+
+    if ($resultat->tache_id !== $tache->id) {
+        abort(404, 'Résultat non trouvé');
+    }
+
+    $documents = $resultat->documents()
+        ->with('user')
+        ->latest()
+        ->get()
+        ->map(function($doc) {
+            return [
+                'id' => $doc->id,
+                'nom' => $doc->nom,
+                'nom_fichier' => $doc->nom_fichier,
+                'taille' => $doc->taille_fichier,
+                'type_fichier' => $doc->type_fichier,
+                'extension' => $doc->extension,
+                'url' => Storage::disk('public')->url($doc->chemin_fichier),
+                'uploaded_by' => $doc->user ? [
+                    'id' => $doc->user->id,
+                    'nom' => $doc->user->nom,
+                ] : null,
+                'created_at' => $doc->created_at->toIso8601String(),
+            ];
+        });
+
+    return response()->json([
+        'success' => true,
+        'data' => $documents
+    ]);
+}
+
+/**
+ * 🗑️ Supprimer un document d'un résultat
+ */
+public function deleteDocument(Tache $tache, TacheResultat $resultat, Document $document)
+{
+    Gate::authorize('update', $tache);
+
+    if ($resultat->tache_id !== $tache->id) {
+        abort(404);
+    }
+
+    // Vérifier que le document appartient bien à ce résultat
+    if ($document->documentable_type !== TacheResultat::class || 
+        $document->documentable_id !== $resultat->id) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Document non trouvé pour ce résultat'
+        ], 404);
+    }
+
+    // Ne pas supprimer si le résultat est validé (sauf admin)
+    if ($resultat->is_fully_validated && !auth()->user()->isSuperAdmin()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Impossible de supprimer un document d\'un résultat validé'
+        ], 403);
+    }
+
+    // Supprimer le fichier physique
+    if ($document->chemin_fichier) {
+        Storage::disk('public')->delete($document->chemin_fichier);
+    }
+
+    $document->delete();
+
+    activity()
+        ->causedBy(auth()->user())
+        ->performedOn($resultat)
+        ->withProperties(['document' => $document->nom])
+        ->log('Document supprimé du résultat');
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Document supprimé avec succès'
+    ]);
+}
+
     // ==================== MÉTHODES PRIVÉES ====================
 
     /**

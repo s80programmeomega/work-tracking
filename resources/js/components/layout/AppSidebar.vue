@@ -476,6 +476,7 @@ const menuGroups = computed(() => [
                     { name: 'Mes tâches', path: '/taches/mes-taches' },
                     { name: 'Assignées à moi', path: '/taches/assignees' },
                     { name: 'En attente de validation', path: '/taches/en-attente'},
+                    { name: 'Tache attente de validation', path: '/taches/resultats/en-attente'},
                     // { name: 'En retard', path: '/taches/en-retard', count: 3 },
                     { name: 'En Attente de Collègues', path: '/taches/waiting-colleagues' },
                     { name: 'Vue Coordination', path: '/taches/coordination' },

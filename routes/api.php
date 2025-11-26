@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\ActiviteController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\EvaluationController;
 use App\Http\Controllers\Api\WorkspaceController;
 use App\Http\Controllers\Api\ProjetController;
 use App\Http\Controllers\Api\ProjetInvitationController;
@@ -241,7 +242,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         // ✅ NOUVEAU : Gestion statut individuel
         Route::post('/{tache}/move-my-card', [TacheController::class, 'moveMyCard']);
-        
+
         // Soumettre mon résultat individuel
         Route::post('/{tache}/submit-my-result', [TacheResultatController::class, 'submitMyResult']);
 
@@ -324,6 +325,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         // Historique
         Route::get('/{resultat}/history', [TacheResultatController::class, 'history']);
+
+        Route::get('/documents', [TacheResultatController::class, 'getDocuments']);
+        Route::delete('/documents/{document}', [TacheResultatController::class, 'deleteDocument']);
     });
 
     // ========================================  ÉVALUATIONS  ========================================
@@ -345,9 +349,17 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         // Résultats en attente de validation
         Route::get('/resultats/en-attente', [TacheResultatController::class, 'pendingValidations']);
+
+        // ✅ Route pour l'historique des validations
+        Route::get('/evaluations/history', [EvaluationController::class, 'validationHistory']);
+
     });
 
-
+// Routes pour les rapports
+Route::prefix('reports')->group(function () {
+    Route::get('/activite/{activiteId}/performance', [TacheController::class, 'activityPerformanceReport']);
+    Route::get('/activite/{activiteId}/user-tasks', [TacheController::class, 'userTasksReport']);
+});
 
 
 

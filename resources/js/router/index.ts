@@ -346,6 +346,16 @@ const router = createRouter({
       }
     },
     {
+      path: '/taches/resultats/en-attente',
+      name: 'taches.resultats.pending',
+      component: () => import('../pages/ValidationResultats.vue'),
+      meta: {
+        title: 'Tâches en Attente Validation',
+        requiresAuth: true,
+        breadcrumb: 'Tache en Attente de Validation'
+      }
+    },
+    {
       path: '/taches/waiting-colleagues',
       name: 'taches.waiting-colleagues',
       component: TachesAttendantCollegues,

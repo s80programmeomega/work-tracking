@@ -184,14 +184,14 @@
           </div>
 
           <!-- Onglet Documents -->
-          <!-- <div v-show="activeTab === 'documents'">
+          <div v-show="activeTab === 'documents'">
             <DocumentSection
               v-if="tache?.id"
               documentable-type="App\Models\Tache"
               :documentable-id="tache.id"
               :current-user-id="currentUser?.id"
             />
-          </div> -->
+          </div>
 
         </div>
       </div>
@@ -243,7 +243,7 @@ import SectionCollapsible from './panels/SectionCollapsible.vue'
 import DetailedTaskView from './DetailedTaskView.vue'
 import ResultatsSection from './ResultatsSection.vue'
 import CommentSection from '@/components/comments/CommentSection.vue'
-// import DocumentSection from '@/components/common/DocumentSection.vue'
+import DocumentSection from '@/components/common/DocumentSection.vue'
 
 const props = defineProps({
   tache: {

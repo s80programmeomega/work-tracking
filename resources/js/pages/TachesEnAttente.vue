@@ -1,93 +1,64 @@
-<!-- resources/js/pages/TachesEnAttente.vue -->
+<!-- resources/js/pages/ValidationTaches.vue -->
 <template>
   <AdminLayout>
-    <!-- <PageBreadcrumb :pageTitle="'Tâches en Attente de Validation'" /> -->
-
     <div class="space-y-6">
-      <!-- Header Premium -->
-      <div class="rounded-2xl border border-gray-200 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-gray-900 dark:to-gray-800 dark:border-gray-800 p-6 shadow-sm">
-        <div class="flex items-center justify-between mb-6">
+      <!-- Header -->
+      <div class="rounded-2xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 dark:border-gray-800 p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-4">
-            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg">
               <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
             <div>
-              <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                Validations en Attente
-              </h1>
+              <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Validation des Résultats</h1>
               <p class="text-gray-500 dark:text-gray-400">
-                Tâches nécessitant votre validation (N1 ou N2)
+                Examinez et validez les résultats soumis par les collaborateurs
               </p>
             </div>
           </div>
 
-          <button
-            @click="loadPendingTasks"
-            :disabled="loading"
-            class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-2"
-          >
-            <svg 
-              class="w-5 h-5 text-gray-600 dark:text-gray-400" 
-              :class="{ 'animate-spin': loading }"
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Actualiser
-          </button>
+          <div class="flex items-center gap-3">
+            <!-- Filtres -->
+            <select v-model="filters.niveau" @change="loadPendingValidations" class="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+              <option value="all">Tous les niveaux</option>
+              <option value="n1">En attente N1</option>
+              <option value="n2">En attente N2</option>
+            </select>
+
+            <select v-model="filters.activite_id" @change="loadPendingValidations" class="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+              <option value="">Toutes les activités</option>
+              <option v-for="act in activites" :key="act.id" :value="act.id">
+                {{ act.nom }}
+              </option>
+            </select>
+
+            <button @click="loadPendingValidations" :disabled="loading" class="p-2 rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50">
+              <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" :class="{ 'animate-spin': loading }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         <!-- Statistiques -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <!-- Total -->
-          <div class="rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur p-4 border border-white/50 dark:border-gray-700">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Total en attente</p>
-                <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ totalPending }}</p>
-              </div>
-              <div class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-                <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
+        <div class="grid grid-cols-4 gap-4">
+          <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+            <p class="text-sm text-gray-500 dark:text-gray-400">En attente N1</p>
+            <p class="text-2xl font-bold text-orange-600 dark:text-orange-400 mt-1">{{ stats.pending_n1 }}</p>
           </div>
-
-          <!-- N1 -->
-          <div class="rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur p-4 border border-white/50 dark:border-gray-700">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Validation N1</p>
-                <p class="text-3xl font-bold text-green-600 dark:text-green-400 mt-1">{{ pendingN1.length }}</p>
-                <p class="text-xs text-gray-400 mt-1">Responsable activité</p>
-              </div>
-              <div class="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
+          <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+            <p class="text-sm text-gray-500 dark:text-gray-400">En attente N2</p>
+            <p class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">{{ stats.pending_n2 }}</p>
           </div>
-
-          <!-- N2 -->
-          <div class="rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur p-4 border border-white/50 dark:border-gray-700">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Validation N2</p>
-                <p class="text-3xl font-bold text-purple-600 dark:text-purple-400 mt-1">{{ pendingN2.length }}</p>
-                <p class="text-xs text-gray-400 mt-1">Responsable projet</p>
-              </div>
-              <div class="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                </svg>
-              </div>
-            </div>
+          <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+            <p class="text-sm text-gray-500 dark:text-gray-400">Validés cette semaine</p>
+            <p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">{{ stats.validated_week }}</p>
+          </div>
+          <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+            <p class="text-sm text-gray-500 dark:text-gray-400">Rejetés</p>
+            <p class="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">{{ stats.rejected }}</p>
           </div>
         </div>
       </div>
@@ -95,188 +66,275 @@
       <!-- Loading -->
       <div v-if="loading" class="flex justify-center items-center h-64">
         <div class="text-center">
-          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto mb-4"></div>
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
           <p class="text-gray-600 dark:text-gray-400">Chargement des validations...</p>
         </div>
       </div>
 
-      <!-- Error -->
-      <div v-else-if="error" class="rounded-2xl border border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800 p-6">
-        <div class="flex items-center gap-3 text-red-700 dark:text-red-300">
-          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-          </svg>
-          <span class="font-medium">{{ error }}</span>
-        </div>
-      </div>
+      <!-- Liste des résultats en attente -->
+      <div v-else class="space-y-4">
+        <div v-for="resultat in pendingValidations" :key="resultat.id" class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] overflow-hidden">
+          <div class="p-6">
+            <div class="flex items-start justify-between gap-4">
+              <!-- Informations de base -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-3 mb-3">
+                  <span class="px-3 py-1 text-xs font-medium rounded-full" :class="getNiveauBadgeClass(resultat)">
+                    {{ getNiveauLabel(resultat) }}
+                  </span>
+                  <span class="text-sm text-gray-500 dark:text-gray-400">
+                    Soumis le {{ formatDate(resultat.soumis_le) }}
+                  </span>
+                </div>
 
-      <!-- Empty State -->
-      <div v-else-if="totalPending === 0" class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] p-12 text-center">
-        <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 rounded-3xl flex items-center justify-center">
-          <svg class="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                  {{ resultat.tache.titre }}
+                </h3>
+
+                <div class="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-3">
+                  <span class="flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    {{ resultat.user.nom }}
+                  </span>
+                  <span class="flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    {{ resultat.tache.activite.nom }}
+                  </span>
+                  <span class="flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    {{ resultat.taux_realisation }}% réalisé
+                  </span>
+                </div>
+
+                <!-- Résultats -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Résultats attendus</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900 p-3 rounded-lg">
+                      {{ resultat.resultats_attendus }}
+                    </p>
+                  </div>
+                  <div>
+                    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Résultats obtenus</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900 p-3 rounded-lg">
+                      {{ resultat.resultats_obtenus }}
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Documents -->
+                <div v-if="resultat.documents.length > 0" class="mb-4">
+                  <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Documents justificatifs</h4>
+                  <div class="flex flex-wrap gap-2">
+                    <a
+                      v-for="doc in resultat.documents"
+                      :key="doc.id"
+                      :href="doc.url"
+                      target="_blank"
+                      class="inline-flex items-center gap-2 px-3 py-2 text-sm bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      {{ doc.nom }}
+                    </a>
+                  </div>
+                </div>
+
+                <!-- Commentaires supplémentaires -->
+                <div v-if="resultat.difficultes_rencontrees || resultat.observations" class="space-y-2">
+                  <div v-if="resultat.difficultes_rencontrees">
+                    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">Difficultés rencontrées</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ resultat.difficultes_rencontrees }}</p>
+                  </div>
+                  <div v-if="resultat.observations">
+                    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">Observations</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ resultat.observations }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Actions de validation -->
+              <div class="flex flex-col gap-3 min-w-[200px]">
+                <button
+                  @click="validateResultat(resultat, 'validate')"
+                  :disabled="validating"
+                  class="w-full px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  Valider
+                </button>
+
+                <button
+                  @click="openRejectModal(resultat)"
+                  :disabled="validating"
+                  class="w-full px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  Refuser
+                </button>
+
+                <button
+                  @click="viewTacheDetails(resultat.tache_id)"
+                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                >
+                  Voir la tâche
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty state -->
+        <div v-if="pendingValidations.length === 0" class="text-center py-12">
+          <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-        </div>
-        <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
-          Aucune validation en attente
-        </h3>
-        <p class="text-gray-500 dark:text-gray-400">
-          Toutes les tâches ont été validées. Bravo ! 🎉
-        </p>
-      </div>
-
-      <!-- Content -->
-      <div v-else class="space-y-6">
-        <!-- Section N1 -->
-        <div v-if="pendingN1.length > 0" class="rounded-2xl border border-green-200 dark:border-green-800 overflow-hidden">
-          <div class="px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-b border-green-200 dark:border-green-800">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg bg-green-500 flex items-center justify-center">
-                <span class="text-white font-bold">N1</span>
-              </div>
-              <div>
-                <h2 class="font-semibold text-gray-900 dark:text-white">Validation Niveau 1</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400">En tant que responsable d'activité</p>
-              </div>
-              <span class="ml-auto px-3 py-1 bg-green-500 text-white text-sm font-bold rounded-full">
-                {{ pendingN1.length }}
-              </span>
-            </div>
-          </div>
-          
-          <div class="p-4 bg-white dark:bg-gray-900 space-y-3">
-            <div v-for="tache in pendingN1" :key="tache.id">
-              <ValidationTaskCard
-                :tache="tache"
-                validation-level="n1"
-                @view="handleViewTask"
-                @validate="handleValidateN1"
-              />
-            </div>
-          </div>
-        </div>
-
-        <!-- Section N2 -->
-        <div v-if="pendingN2.length > 0" class="rounded-2xl border border-purple-200 dark:border-purple-800 overflow-hidden">
-          <div class="px-6 py-4 bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 border-b border-purple-200 dark:border-purple-800">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg bg-purple-500 flex items-center justify-center">
-                <span class="text-white font-bold">N2</span>
-              </div>
-              <div>
-                <h2 class="font-semibold text-gray-900 dark:text-white">Validation Niveau 2</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400">En tant que responsable de projet</p>
-              </div>
-              <span class="ml-auto px-3 py-1 bg-purple-500 text-white text-sm font-bold rounded-full">
-                {{ pendingN2.length }}
-              </span>
-            </div>
-          </div>
-          
-          <div class="p-4 bg-white dark:bg-gray-900 space-y-3">
-            <div v-for="tache in pendingN2" :key="tache.id">
-              <ValidationTaskCard
-                :tache="tache"
-                validation-level="n2"
-                @view="handleViewTask"
-                @validate="handleValidateN2"
-              />
-            </div>
-          </div>
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Aucune validation en attente</h3>
+          <p class="text-gray-500 dark:text-gray-400">Tous les résultats ont été traités.</p>
         </div>
       </div>
     </div>
 
-    <!-- Task Detail Modal -->
-    <TacheDetailModal
-      v-if="showViewModal"
-      :tache="currentTache"
-      @close="showViewModal = false"
-      @validate-n1="handleValidateN1"
-      @validate-n2="handleValidateN2"
+    <!-- Modal de rejet -->
+    <RejectModal
+      v-if="showRejectModal"
+      :resultat="currentResultat"
+      :niveau="currentNiveau"
+      @close="showRejectModal = false"
+      @rejected="handleRejected"
     />
   </AdminLayout>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
-import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
-import ValidationTaskCard from '@/components/taches/ValidationTaskCard.vue'
-import TacheDetailModal from '@/components/taches/TacheDetailModal.vue'
+import RejectModal from '@/components/taches/RejectModal.vue'
 import api from '@/api/axios'
 
 // State
-const pendingN1 = ref([])
-const pendingN2 = ref([])
 const loading = ref(false)
-const error = ref(null)
-const showViewModal = ref(false)
-const currentTache = ref(null)
+const validating = ref(false)
+const activites = ref([])
+const pendingValidations = ref([])
+const showRejectModal = ref(false)
+const currentResultat = ref(null)
+const currentNiveau = ref('n1')
 
-// Computed
-const totalPending = computed(() => pendingN1.value.length + pendingN2.value.length)
+const filters = ref({
+  niveau: 'all',
+  activite_id: ''
+})
+
+const stats = ref({
+  pending_n1: 0,
+  pending_n2: 0,
+  validated_week: 0,
+  rejected: 0
+})
 
 // Methods
-async function loadPendingTasks() {
-  loading.value = true
-  error.value = null
-
+async function loadActivites() {
   try {
-    const { data } = await api.get('/taches/en-attente')
-    pendingN1.value = data.pending_n1 || []
-    pendingN2.value = data.pending_n2 || []
-    console.log('✅ Validations chargées:', { n1: pendingN1.value.length, n2: pendingN2.value.length })
+    const { data } = await api.get('/activites/mes-activites')
+    activites.value = data.data || data || []
   } catch (err) {
-    console.error('❌ Erreur:', err)
-    error.value = err.response?.data?.message || 'Impossible de charger les validations'
+    console.error('Erreur chargement activités:', err)
+  }
+}
+
+async function loadPendingValidations() {
+  loading.value = true
+  try {
+    const params = {}
+    if (filters.value.niveau !== 'all') params.niveau = filters.value.niveau
+    if (filters.value.activite_id) params.activite_id = filters.value.activite_id
+
+    const { data } = await api.get('/taches/resultats/en-attente', { params })
+    
+    pendingValidations.value = data.data || []
+    stats.value = data.stats || stats.value
+  } catch (err) {
+    console.error('Erreur chargement validations:', err)
   } finally {
     loading.value = false
   }
 }
 
-async function handleViewTask(tache) {
+async function validateResultat(resultat, action) {
+  validating.value = true
   try {
-    const { data } = await api.get(`/taches/${tache.id}`)
-    currentTache.value = data.data
-    showViewModal.value = true
+    const niveau = resultat.valide_par_n1 ? 'n2' : 'n1'
+    const url = `/taches/resultats-individuels/${resultat.id}/validate-${niveau}`
+
+    await api.post(url, {
+      commentaire: 'Résultat validé avec succès'
+    })
+
+    await loadPendingValidations()
   } catch (err) {
-    console.error('Erreur:', err)
-    alert('Erreur lors du chargement')
+    console.error('Erreur validation:', err)
+    alert(err.response?.data?.message || 'Erreur lors de la validation')
+  } finally {
+    validating.value = false
   }
 }
 
-async function handleValidateN1(tache) {
-  const commentaire = prompt('Commentaire de validation N1 (optionnel):')
-  if (commentaire === null) return
-
-  try {
-    await api.post(`/taches/${tache.id}/validate-n1`, { commentaire })
-    await loadPendingTasks()
-    alert('Tâche validée (N1) avec succès !')
-  } catch (err) {
-    console.error('Erreur validation N1:', err)
-    alert(err.response?.data?.message || 'Erreur lors de la validation')
-  }
+function openRejectModal(resultat) {
+  currentResultat.value = resultat
+  currentNiveau.value = resultat.valide_par_n1 ? 'n2' : 'n1'
+  showRejectModal.value = true
 }
 
+async function handleRejected() {
+  showRejectModal.value = false
+  await loadPendingValidations()
+}
 
-async function handleValidateN2(tache) {
-  const commentaire = prompt('Commentaire de validation finale N2 (optionnel):')
-  if (commentaire === null) return
+function viewTacheDetails(tacheId) {
+  // Implémenter la navigation vers les détails de la tâche
+  window.open(`/taches/${tacheId}`, '_blank')
+}
 
-  try {
-    await api.post(`/taches/${tache.id}/validate-n2`, { commentaire })
-    await loadPendingTasks()
-    alert('Tâche validée (N2) avec succès ! Validation complète.')
-  } catch (err) {
-    console.error('Erreur validation N2:', err)
-    alert(err.response?.data?.message || 'Erreur lors de la validation')
+// Helpers
+function getNiveauBadgeClass(resultat) {
+  if (resultat.valide_par_n1) {
+    return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
   }
+  return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300'
+}
+
+function getNiveauLabel(resultat) {
+  if (resultat.valide_par_n1) {
+    return 'En attente N2 (Responsable Projet)'
+  }
+  return 'En attente N1 (Responsable Activité)'
+}
+
+function formatDate(date) {
+  return new Date(date).toLocaleDateString('fr-FR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
 }
 
 // Lifecycle
-onMounted(() => {
-  loadPendingTasks()
+onMounted(async () => {
+  await loadActivites()
+  await loadPendingValidations()
 })
 </script>
