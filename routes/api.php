@@ -241,8 +241,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         // ✅ NOUVEAU : Gestion statut individuel
         Route::post('/{tache}/move-my-card', [TacheController::class, 'moveMyCard']);
+        
         // Soumettre mon résultat individuel
-        Route::post('/{tache}/submit-my-result', [TacheController::class, 'submitMyResult']);
+        Route::post('/{tache}/submit-my-result', [TacheResultatController::class, 'submitMyResult']);
 
         // ✅ Kanban pour une activité
         Route::get('/activite/{activiteId}/kanban', [TacheController::class, 'forActivite']);

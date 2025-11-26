@@ -15,6 +15,7 @@ use App\Models\TacheAttachment;
 use App\Models\TacheExternalLink;
 use App\Models\TacheResultat;
 use App\Models\User;
+use App\Notifications\ResultatIndividuelSoumisNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
