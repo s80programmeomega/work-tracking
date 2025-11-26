@@ -1,89 +1,77 @@
 <!-- resources/js/components/taches/KanbanColumnPersonal.vue -->
 <template>
-  <div class="kanban-column-personal">
-    <div class="flex flex-col h-full bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 rounded-2xl p-6 border-2 border-gray-200 dark:border-gray-700 shadow-sm">
-      <!-- Column header -->
-      <div class="flex items-center justify-between mb-6">
-        <div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-xl flex items-center justify-center text-white text-lg font-bold shadow-lg" :style="{ backgroundColor: statusColor }">
-            {{ statusIcon }}
-          </div>
-          <div>
-            <h3 class="font-bold text-gray-900 dark:text-white text-lg">{{ title }}</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400">{{ filteredTaches.length }} tâche{{ filteredTaches.length !== 1 ? 's' : '' }}</p>
-          </div>
-        </div>
-
-        <!-- Actions rapides pour la vue personnelle -->
-        <div class="flex items-center gap-2">
-          <button
-            v-if="statut === 'a_faire' && filteredTaches.length > 0"
-            @click="startAllTasks"
-            class="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-green-600 hover:text-green-700 hover:border-green-300 dark:hover:border-green-600 flex items-center justify-center transition-all hover:scale-110 shadow-sm"
-            title="Démarrer toutes les tâches"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-            </svg>
-          </button>
+  <div class="flex flex-col h-full bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
+    <!-- Header -->
+    <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl">{{ statusIcon }}</span>
+        <div>
+          <h3 class="font-semibold text-gray-900 dark:text-white">{{ title }}</h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Mon statut individuel</p>
         </div>
       </div>
+      <div class="flex items-center gap-2">
+        <span class="px-2.5 py-1 text-sm font-bold rounded-full" :style="{ backgroundColor: statusColor, color: 'white' }">
+          {{ taches.length }}
+        </span>
+      </div>
+    </div>
 
-      <!-- Task list -->
-      <div class="flex-1 overflow-y-auto space-y-4 min-h-[500px] max-h-[70vh] custom-scrollbar">
-        <div v-if="filteredTaches.length === 0" class="flex items-center justify-center h-full text-gray-400 dark:text-gray-600">
-          <div class="text-center py-12">
-            <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center">
-              <svg class="w-8 h-8 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
-            <p class="text-sm">Aucune tâche</p>
-            <p class="text-xs mt-1">Glissez une tâche ici</p>
-          </div>
-        </div>
-
-        <!-- Draggable task list -->
-        <draggable
-          v-else
-          :list="localTaches"
-          :group="{ name: 'personal-tasks', pull: true, put: true }"
-          item-key="id"
-          class="space-y-4 min-h-full"
-          :animation="200"
-          ghost-class="ghost-card"
-          drag-class="dragging-card"
-          @start="onDragStart"
-          @end="onDragEnd"
-          @change="onDragChange"
-        >
-          <template #item="{ element }">
-            <div class="transform transition-all duration-300 hover:scale-[1.02]">
-              <TacheCardPersonal
-                :tache="element"
-                @view="$emit('view-task', element)"
-                @move="handleMoveTask"
-                @submit-result="$emit('submit-result', element)"
-              />
-            </div>
-          </template>
-        </draggable>
+    <!-- Tasks Container -->
+    <div 
+      class="flex-1 p-3 space-y-3 overflow-y-auto min-h-[400px]"
+      @drop="handleDrop"
+      @dragover.prevent
+      @dragenter.prevent="isDragOver = true"
+      @dragleave="isDragOver = false"
+      :class="{ 'bg-blue-50 dark:bg-blue-900/20 border-2 border-dashed border-blue-400': isDragOver }"
+    >
+      <!-- Empty State -->
+      <div v-if="taches.length === 0" class="flex flex-col items-center justify-center h-32 text-gray-400 dark:text-gray-600">
+        <svg class="w-12 h-12 mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+        </svg>
+        <p class="text-sm">Aucune tâche</p>
       </div>
 
-      <!-- Column footer -->
-      <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-        <div class="flex justify-between items-center text-sm text-gray-500 dark:text-gray-400">
-          <span>Glissez pour réorganiser</span>
-          <span class="font-medium" :style="{ color: statusColor }">{{ filteredTaches.length }}</span>
-        </div>
+      <!-- Task Cards -->
+      <div
+        v-for="tache in taches"
+        :key="tache.id"
+        :draggable="true"
+        @dragstart="handleDragStart($event, tache)"
+        @dragend="isDragging = false"
+        class="cursor-move transition-all"
+        :class="{ 'opacity-50': isDragging && draggedTask?.id === tache.id }"
+      >
+        <TacheCardPersonal
+          :tache="tache"
+          @view="$emit('view-task', tache)"
+          @move="handleQuickMove"
+          @submit-result="$emit('submit-result', tache)"
+          @update-progression="handleUpdateProgression"
+        />
+      </div>
+    </div>
+
+    <!-- Footer Stats -->
+    <div v-if="taches.length > 0" class="p-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+      <div class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+        <span>{{ taches.length }} tâche{{ taches.length > 1 ? 's' : '' }}</span>
+        <span v-if="overdueCount > 0" class="text-red-600 dark:text-red-400 font-medium flex items-center gap-1">
+          <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+          </svg>
+          {{ overdueCount }} en retard
+        </span>
+        <span v-if="averageProgress > 0">{{ averageProgress }}% moy.</span>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue'
-import draggable from 'vuedraggable'
+import { ref, computed } from 'vue'
 import TacheCardPersonal from './TacheCardPersonal.vue'
 
 const props = defineProps({
@@ -109,125 +97,108 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits([
-  'view-task',
-  'submit-result',
-  'my-card-moved'
-])
+const emit = defineEmits(['move-card', 'view-task', 'submit-result', 'update-progression'])
 
-// Filtrer les tâches selon le statut personnel
-const filteredTaches = computed(() => {
-  return props.taches.filter(tache => {
-    return tache.my_status?.statut === props.statut
-  })
+// State
+const isDragOver = ref(false)
+const isDragging = ref(false)
+const draggedTask = ref(null)
+
+// Computed
+const overdueCount = computed(() => {
+  return props.taches.filter(t => t.is_overdue && props.statut !== 'termine').length
 })
 
-// Local mutable copy for draggable
-const localTaches = ref([...filteredTaches.value])
+const averageProgress = computed(() => {
+  if (props.taches.length === 0) return 0
+  const total = props.taches.reduce((sum, t) => {
+    return sum + (t.my_status?.progression || 0)
+  }, 0)
+  return Math.round(total / props.taches.length)
+})
 
-// Sync with filtered taches
-watch(filteredTaches, (newTaches) => {
-  console.log(`🔄 Synchronisation colonne ${props.statut}:`, newTaches.length, 'tâches')
-  localTaches.value = [...newTaches]
-}, { deep: true, immediate: true })
-
-const onDragStart = (event) => {
-  console.log(`[${props.statut}] Drag start:`, event.item.textContent)
-  event.item.classList.add('dragging')
+// Methods
+function handleDragStart(event, tache) {
+  isDragging.value = true
+  draggedTask.value = tache
+  event.dataTransfer.effectAllowed = 'move'
+  event.dataTransfer.setData('tache', JSON.stringify(tache))
 }
 
-const onDragEnd = (event) => {
-  console.log(`[${props.statut}] Drag end`)
-  event.item.classList.remove('dragging')
-}
-
-const onDragChange = (event) => {
-  if (event.added) {
-    const { element, newIndex } = event.added
-    console.log(`[${props.statut}] Task added:`, element.titre, 'at index:', newIndex)
+function handleDrop(event) {
+  event.preventDefault()
+  isDragOver.value = false
+  
+  try {
+    const tacheData = JSON.parse(event.dataTransfer.getData('tache'))
+    const currentStatus = tacheData.my_status?.statut || tacheData.statut
     
-    // Émettre l'événement pour déplacement de carte personnelle
-    emit('my-card-moved', {
-      tache: element,
-      newStatut: props.statut,
-      progression: getProgressionForStatus(props.statut),
-      oldStatut: element.my_status?.statut || element.statut
-    })
-  }
-}
-
-// Démarrer toutes les tâches de la colonne
-function startAllTasks() {
-  localTaches.value.forEach(tache => {
-    if (tache.my_status?.statut === 'a_faire') {
-      emit('my-card-moved', {
-        tache,
-        newStatut: 'en_cours',
-        progression: 50
-      })
+    // Ne rien faire si déjà dans cette colonne
+    if (currentStatus === props.statut) {
+      return
     }
-  })
-}
 
-function handleMoveTask({ tache, newStatut, progression, notes }) {
-  emit('my-card-moved', { 
-    tache, 
-    newStatut, 
-    progression, 
-    notes_personnelles: notes 
-  })
-}
+    // Calculer la progression suggérée
+    let suggestedProgression = 0
+    if (props.statut === 'en_cours') {
+      suggestedProgression = 50
+    } else if (props.statut === 'termine') {
+      suggestedProgression = 100
+    }
 
-function getProgressionForStatus(status) {
-  const progressMap = {
-    'a_faire': 0,
-    'en_cours': 50,
-    'termine': 100
+    // Émettre l'événement de déplacement
+    emit('move-card', {
+      tache: tacheData,
+      newStatut: props.statut,
+      progression: suggestedProgression,
+      notes: null
+    })
+
+    console.log('✅ Carte déplacée:', tacheData.titre, '→', props.statut)
+  } catch (err) {
+    console.error('❌ Erreur drop:', err)
   }
-  return progressMap[status] || 0
+}
+
+function handleQuickMove({ tache, statut, progression }) {
+  emit('move-card', {
+    tache,
+    newStatut: statut,
+    progression,
+    notes: null
+  })
+}
+
+function handleUpdateProgression({ tache, progression }) {
+  emit('move-card', {
+    tache,
+    newStatut: tache.my_status?.statut || tache.statut,
+    progression,
+    notes: null
+  })
 }
 </script>
 
 <style scoped>
-.kanban-column-personal {
-  height: 100%;
-}
-
-.custom-scrollbar::-webkit-scrollbar {
+/* Custom scrollbar */
+.overflow-y-auto::-webkit-scrollbar {
   width: 6px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-track {
+.overflow-y-auto::-webkit-scrollbar-track {
   background: transparent;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #CBD5E0;
   border-radius: 3px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
+.dark .overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #4A5568;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-.dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #475569;
-}
-
-.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
-}
-
-.ghost-card {
-  opacity: 0.6;
-  background: #f1f5f9;
-  border: 2px dashed #cbd5e1;
-  border-radius: 0.75rem;
-}
-
-.dragging-card {
-  transform: rotate(5deg);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #A0AEC0;
 }
 </style>

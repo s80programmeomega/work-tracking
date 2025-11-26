@@ -82,7 +82,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import draggable from 'vuedraggable'
 import TacheCard from './TacheCard.vue'
 
@@ -110,6 +110,11 @@ const props = defineProps({
   canAdd: {
     type: Boolean,
     default: true
+  },
+  // ✅ NOUVEAU : Type de vue (personnelle ou globale)
+  viewMode: {
+    type: String,
+    default: 'personal', // 'personal' | 'global'
   }
 })
 
@@ -121,14 +126,29 @@ const emit = defineEmits([
   'archive-task',
   'delete-task',
   'validate-task',
-  'task-moved'
+  'task-moved',
+  'my-card-moved' // ✅ NOUVEAU : Événement pour déplacement de carte personnelle
 ])
 
-// Local mutable copy for draggable
-const localTaches = ref([...props.taches])
+// ✅ Filtrer les tâches selon le mode de vue
+const filteredTaches = computed(() => {
+  if (props.viewMode === 'personal') {
+    // Vue personnelle: afficher les tâches selon MON statut
+    return props.taches.filter(tache => {
+      return tache.my_status?.statut === props.statut
+    })
+  } else {
+    // Vue globale: afficher selon le statut global
+    return props.taches.filter(tache => tache.statut === props.statut)
+  }
+})
 
-// Sync with props
-watch(() => props.taches, (newTaches) => {
+// Local mutable copy for draggable
+const localTaches = ref([...filteredTaches.value])
+
+
+// Sync with filtered taches
+watch(filteredTaches, (newTaches) => {
   localTaches.value = [...newTaches]
 }, { deep: true })
 
@@ -147,24 +167,36 @@ const onDragChange = (event) => {
     const { element, newIndex } = event.added
     console.log(`[${props.statut}] Task added:`, element.titre, 'at index:', newIndex)
     
-    emit('task-moved', {
-      tache: element,
-      newStatut: props.statut,
-      newOrdre: newIndex,
-      oldStatut: getSourceColumn(event),
-      oldOrdre: event.added.oldIndex
-    })
+    // ✅ Émettre l'événement approprié selon le mode
+    if (props.viewMode === 'personal') {
+      emit('my-card-moved', {
+        tache: element,
+        newStatut: props.statut,
+        oldStatut: element.my_status?.statut || element.statut
+      })
+    } else {
+      emit('task-moved', {
+        tache: element,
+        newStatut: props.statut,
+        newOrdre: newIndex,
+        oldStatut: element.statut,
+        oldOrdre: event.added.oldIndex
+      })
+    }
   } else if (event.moved) {
     const { element, newIndex } = event.moved
     console.log(`[${props.statut}] Task moved within column:`, element.titre, 'to index:', newIndex)
     
-    emit('task-moved', {
-      tache: element,
-      newStatut: props.statut,
-      newOrdre: newIndex,
-      oldStatut: props.statut,
-      oldOrdre: event.moved.oldIndex
-    })
+    // En mode personnel, pas besoin de réorganiser dans la même colonne
+    if (props.viewMode !== 'personal') {
+      emit('task-moved', {
+        tache: element,
+        newStatut: props.statut,
+        newOrdre: newIndex,
+        oldStatut: props.statut,
+        oldOrdre: event.moved.oldIndex
+      })
+    }
   }
 }
 
