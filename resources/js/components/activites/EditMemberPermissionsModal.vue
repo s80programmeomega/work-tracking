@@ -1,4 +1,3 @@
-<!-- resources/js/components/activites/EditMemberPermissionsModal.vue - VERSION CORRIGÉE -->
 <template>
   <TransitionRoot :show="true" as="template">
     <Dialog as="div" class="relative z-[100]" @close="$emit('close')">
@@ -69,8 +68,8 @@
                   <select
                     v-model="form.role"
                     @change="handleRoleChange"
-                    class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 py-2.5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     @click.stop
+                    class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 py-2.5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="collaborator">Collaborateur</option>
                     <option value="viewer">Observateur</option>
@@ -255,10 +254,11 @@ const getInitials = (name) => {
   return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
 }
 
-// ✅ CORRECTION 1 : Gérer le changement de rôle
+// ✅ CORRECTION : Gérer le changement de rôle
 const handleRoleChange = () => {
-  // Si on passe en mode viewer, désactiver toutes les permissions
+  console.log('Role changed to:', form.value.role)
   if (form.value.role === 'viewer') {
+    // Désactiver toutes les permissions
     form.value.can_create_tasks = false
     form.value.can_edit_tasks = false
     form.value.can_delete_tasks = false
@@ -276,7 +276,6 @@ const handleSubmit = async () => {
       `/activites/${props.activiteId}/members/${props.member.id}`,
       form.value
     )
-
     emit('updated')
     emit('close')
   } catch (err) {
@@ -287,42 +286,38 @@ const handleSubmit = async () => {
   }
 }
 
-// ✅ CORRECTION 2 : Initialiser correctement le formulaire
-const initializeForm = () => {
-  console.log('Initializing form with member:', props.member)
+// ✅ CORRECTION SIMPLIFIÉE : Extraction des permissions
+const extractPermissionsFromMember = (member) => {
+  console.log('Extracting permissions from:', member)
   
-  if (props.member) {
-    // Récupérer le rôle depuis pivot OU permissions
-    const role = props.member.pivot?.role || props.member.role || 'viewer'
-    
-    // Récupérer les permissions depuis pivot OU permissions
-    const permissions = props.member.permissions || {
-      can_create_tasks: props.member.pivot?.can_create_tasks || false,
-      can_edit_tasks: props.member.pivot?.can_edit_tasks || false,
-      can_delete_tasks: props.member.pivot?.can_delete_tasks || false,
-      can_validate_results: props.member.pivot?.can_validate_results || false,
-      can_assign_users: props.member.pivot?.can_assign_users || false
-    }
-
-    form.value = {
-      role: role,
-      can_create_tasks: Boolean(permissions.can_create_tasks),
-      can_edit_tasks: Boolean(permissions.can_edit_tasks),
-      can_delete_tasks: Boolean(permissions.can_delete_tasks),
-      can_validate_results: Boolean(permissions.can_validate_results),
-      can_assign_users: Boolean(permissions.can_assign_users)
-    }
-
-    console.log('Form initialized:', form.value)
+  // Les permissions sont directement dans l'objet membre
+  return {
+    role: member.role || 'collaborator',
+    can_create_tasks: Boolean(member.can_create_tasks),
+    can_edit_tasks: Boolean(member.can_edit_tasks),
+    can_delete_tasks: Boolean(member.can_delete_tasks),
+    can_validate_results: Boolean(member.can_validate_results),
+    can_assign_users: Boolean(member.can_assign_users)
   }
 }
 
-// ✅ CORRECTION 3 : Réagir aux changements du membre
-watch(() => props.member, () => {
-  initializeForm()
-}, { immediate: true, deep: true })
+// ✅ CORRECTION : Initialisation
+const initializeForm = () => {
+  if (props.member && props.member.id) {
+    const permissions = extractPermissionsFromMember(props.member)
+    form.value = { ...permissions }
+    console.log('Form initialized with:', form.value)
+  } else {
+    console.error('Member data is invalid:', props.member)
+  }
+}
 
+// Initialiser au montage et quand le membre change
 onMounted(() => {
   initializeForm()
 })
+
+watch(() => props.member, () => {
+  initializeForm()
+}, { deep: true })
 </script>
