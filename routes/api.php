@@ -236,15 +236,22 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/en-retard', [TacheController::class, 'overdue']);
         Route::post('/reorder', [TacheController::class, 'reorder']);
 
+        // ✅ NOUVEAU: Mon kanban personnel
+        Route::get('/my-kanban', [TacheController::class, 'myKanban']);
+
         // ✅ NOUVEAU : Gestion statut individuel
         Route::post('/{tache}/move-my-card', [TacheController::class, 'moveMyCard']);
-        Route::post('/{tache}/submit-result', [TacheController::class, 'submitMyResult']);
+        // Soumettre mon résultat individuel
+        Route::post('/{tache}/submit-my-result', [TacheController::class, 'submitMyResult']);
 
         // ✅ Kanban pour une activité
         Route::get('/activite/{activiteId}/kanban', [TacheController::class, 'forActivite']);
 
         // ✅ NOUVEAU : Tâches en attente de collègues
         Route::get('/waiting-for-colleagues', [TacheController::class, 'waitingForColleagues']);
+
+        // Vérifier les permissions
+        Route::get('/activite/{activiteId}/check-permissions', [TacheController::class, 'checkPermissions']);
 
         // ✅ NOUVEAU : Validation résultats individuels
         Route::post('/resultats-individuels/{resultat}/validate-n1', [TacheController::class, 'validateIndividualResultN1']);
