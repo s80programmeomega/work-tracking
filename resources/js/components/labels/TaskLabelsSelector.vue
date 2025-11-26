@@ -1,3 +1,4 @@
+<!-- resources\js\components\labels\TaskLabelsSelector.vue -->
 <template>
   <div class="space-y-4">
     <!-- Current Labels Display -->

@@ -5,12 +5,15 @@ namespace App\Services;
 use App\Enums\TacheStatut;
 use App\Models\Activite;
 use App\Models\Tache;
+use App\Models\TacheAttachment;
+use App\Models\TacheExternalLink;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class TacheService
 {
@@ -127,7 +130,7 @@ class TacheService
         return $query->ordered()->get();
     }
 
- /**
+    /**
      * ✅ CORRIGÉ : Récupérer le Kanban pour une activité avec garantie de structure
      */
     public function getKanbanForActivite(int $activiteId): array
@@ -202,6 +205,78 @@ class TacheService
     }
 
     /**
+     * ✅ Gérer l'upload de fichiers pour une tâche
+     */
+    public function handleFileUploads(Tache $tache, array $files, User $uploadedBy): void
+    {
+        foreach ($files as $file) {
+            $this->uploadFile($tache, $file, $uploadedBy);
+        }
+    }
+
+    /**
+     * ✅ Uploader un fichier individuel
+     */
+    public function uploadFile(Tache $tache, $file, User $uploadedBy): TacheAttachment
+    {
+        $originalName = $file->getClientOriginalName();
+        $fileName = time() . '_' . uniqid() . '_' . $originalName;
+        $filePath = $file->storeAs('tache-attachments', $fileName, 'public');
+
+        if (!$filePath) {
+            throw new \Exception('Erreur lors de l\'upload du fichier');
+        }
+
+        return TacheAttachment::create([
+            'tache_id' => $tache->id,
+            'file_name' => $fileName,
+            'file_path' => $filePath,
+            'file_size' => $file->getSize(),
+            'mime_type' => $file->getMimeType(),
+            'original_name' => $originalName,
+            'uploaded_by' => $uploadedBy->id,
+        ]);
+    }
+
+    /**
+     * ✅ Supprimer un fichier attaché
+     */
+    public function deleteAttachment(TacheAttachment $attachment): bool
+    {
+        // Supprimer le fichier physique
+        if (Storage::disk('public')->exists($attachment->file_path)) {
+            Storage::disk('public')->delete($attachment->file_path);
+        }
+
+        // Supprimer l'enregistrement
+        return $attachment->delete();
+    }
+
+    /**
+     * ✅ Ajouter des liens externes
+     */
+    public function addExternalLinks(Tache $tache, array $links, User $createdBy): void
+    {
+        foreach ($links as $link) {
+            TacheExternalLink::create([
+                'tache_id' => $tache->id,
+                'title' => $link['title'] ?? $link['url'],
+                'url' => $link['url'],
+                'created_by' => $createdBy->id,
+            ]);
+        }
+    }
+
+    /**
+     * ✅ Supprimer un lien externe
+     */
+    public function deleteExternalLink(TacheExternalLink $link): bool
+    {
+        return $link->delete();
+    }
+
+
+    /**
      * ✅ Créer une tâche avec gestion automatique des semaines
      */
     public function createTache(array $data, User $creator): Tache
@@ -211,6 +286,11 @@ class TacheService
         Gate::authorize('create', [Tache::class, $activite]);
 
         return DB::transaction(function () use ($data, $creator) {
+            // Extraire fichiers et liens des données
+            $uploadedFiles = $data['uploaded_files'] ?? [];
+            $externalLinks = $data['external_links'] ?? [];
+            unset($data['uploaded_files'], $data['external_links']);
+
             // Extraire relations
             $assigneeIds = $data['assignee_ids'] ?? [];
             $labelIds = $data['label_ids'] ?? [];
@@ -233,6 +313,16 @@ class TacheService
 
             // Créer tâche
             $tache = Tache::create($data);
+
+            // Gérer les fichiers uploadés
+            if (!empty($uploadedFiles)) {
+                $this->handleFileUploads($tache, $uploadedFiles, $creator);
+            }
+
+            // Gérer les liens externes
+            if (!empty($externalLinks)) {
+                $this->addExternalLinks($tache, $externalLinks, $creator);
+            }
 
             // Assigner membres
             if (!empty($assigneeIds)) {
@@ -258,9 +348,121 @@ class TacheService
                 ->withProperties(['data' => $data])
                 ->log('Tâche créée');
 
-            return $tache->load(['activite', 'assignees', 'labels']);
+            return $tache->load(['activite', 'assignees', 'labels', 'attachments', 'externalLinks']);
         });
     }
+
+
+
+    /**
+     * ✅ Mettre à jour une tâche avec gestion COMPLÈTE des fichiers
+     */
+    public function updateTache(Tache $tache, array $data): Tache
+    {
+        Gate::authorize('update', $tache);
+
+        return DB::transaction(function () use ($tache, $data) {
+            // ✅ DEBUG: Log des données reçues
+            Log::info('Service updateTache - Données reçues', [
+                'tache_id' => $tache->id,
+                'data_keys' => array_keys($data),
+                'has_uploaded_files' => isset($data['uploaded_files']),
+                'uploaded_files_count' => isset($data['uploaded_files']) ? count($data['uploaded_files']) : 0,
+                'has_cover_image' => isset($data['cover_image'])
+            ]);
+
+            // Extraire fichiers et liens
+            $uploadedFiles = $data['uploaded_files'] ?? [];
+            $externalLinks = $data['external_links'] ?? [];
+            $coverImagePath = $data['cover_image'] ?? null;
+
+            unset($data['uploaded_files'], $data['external_links'], $data['cover_image']);
+
+            // Extraire relations
+            $assigneeIds = $data['assignee_ids'] ?? null;
+            $labelIds = $data['label_ids'] ?? null;
+            unset($data['assignee_ids'], $data['label_ids']);
+
+            // ✅ Recalculer semaine si dates changent
+            if (isset($data['date_debut']) || isset($data['echeance'])) {
+                $weekInfo = $this->determineWeekInfo($data);
+                $data['week_number'] = $weekInfo['week_number'];
+                $data['year'] = $weekInfo['year'];
+            }
+
+            // ✅ Ajouter le chemin de l'image de couverture si présent
+            if ($coverImagePath) {
+                $data['cover_image'] = $coverImagePath;
+            }
+
+            Log::info('Service updateTache - Données avant mise à jour', [
+                'tache_id' => $tache->id,
+                'data' => $data,
+                'uploaded_files_count' => count($uploadedFiles),
+                'assignee_ids' => $assigneeIds,
+                'label_ids' => $labelIds
+            ]);
+
+            // Mettre à jour tâche
+            $tache->update($data);
+
+            // Sync relations si fournies
+            if ($assigneeIds !== null) {
+                Log::info('Mise à jour assignees', [
+                    'tache_id' => $tache->id,
+                    'assignee_ids' => $assigneeIds
+                ]);
+                $tache->assignees()->sync($assigneeIds);
+            }
+
+            if ($labelIds !== null) {
+                Log::info('Mise à jour labels', [
+                    'tache_id' => $tache->id,
+                    'label_ids' => $labelIds
+                ]);
+                $tache->labels()->sync($labelIds);
+            }
+
+            // ✅ Gérer les nouveaux fichiers
+            if (!empty($uploadedFiles)) {
+                Log::info('Ajout nouveaux fichiers', [
+                    'tache_id' => $tache->id,
+                    'count' => count($uploadedFiles)
+                ]);
+                $this->handleFileUploads($tache, $uploadedFiles, auth()->user());
+            }
+
+            // ✅ Gérer les liens externes - remplacement complet
+            if (array_key_exists('external_links', $data) || !empty($externalLinks)) {
+                Log::info('Mise à jour liens externes', [
+                    'tache_id' => $tache->id,
+                    'links_count' => count($externalLinks)
+                ]);
+
+                // Supprimer les anciens liens
+                $tache->externalLinks()->delete();
+
+                // Ajouter les nouveaux liens
+                if (!empty($externalLinks)) {
+                    $this->addExternalLinks($tache, $externalLinks, auth()->user());
+                }
+            }
+
+            // ✅ Log modification
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($tache)
+                ->withProperties(['changes' => $data])
+                ->log('Tâche mise à jour');
+
+            Log::info('Service updateTache - Tâche mise à jour avec succès', [
+                'tache_id' => $tache->id
+            ]);
+
+            return $tache->fresh(['activite', 'assignees', 'labels', 'attachments', 'externalLinks']);
+        });
+    }
+
 
     /**
      * ✅ Déterminer les informations de semaine à partir des dates
@@ -277,49 +479,6 @@ class TacheService
         }
 
         return self::getWeekInfo($date);
-    }
-
-    /**
-     * ✅ Mettre à jour une tâche avec vérification de permissions
-     */
-    public function updateTache(Tache $tache, array $data): Tache
-    {
-        Gate::authorize('update', $tache);
-
-        return DB::transaction(function () use ($tache, $data) {
-            // Extraire relations
-            $assigneeIds = $data['assignee_ids'] ?? null;
-            $labelIds = $data['label_ids'] ?? null;
-            unset($data['assignee_ids'], $data['label_ids']);
-
-            // ✅ Recalculer semaine si dates changent
-            if (isset($data['date_debut']) || isset($data['echeance'])) {
-                $weekInfo = $this->determineWeekInfo($data);
-                $data['week_number'] = $weekInfo['week_number'];
-                $data['year'] = $weekInfo['year'];
-            }
-
-            // Mettre à jour tâche
-            $tache->update($data);
-
-            // Sync relations si fournies
-            if ($assigneeIds !== null) {
-                $tache->assignees()->sync($assigneeIds);
-            }
-
-            if ($labelIds !== null) {
-                $tache->labels()->sync($labelIds);
-            }
-
-            // ✅ Log modification
-            activity()
-                ->causedBy(auth()->user())
-                ->performedOn($tache)
-                ->withProperties(['changes' => $data])
-                ->log('Tâche mise à jour');
-
-            return $tache->fresh(['activite', 'assignees', 'labels']);
-        });
     }
 
     /**
@@ -626,5 +785,6 @@ class TacheService
             ]
         ];
     }
+
 
 }

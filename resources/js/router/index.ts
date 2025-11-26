@@ -2,6 +2,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/authStore'
 import AcceptProjetInvitation from '../pages/AcceptProjetInvitation.vue'
+import TachesAttendantCollegues from '../pages/TachesAttendantCollegues.vue'
+import TachesParUtilisateur from '../pages/TachesParUtilisateur.vue'
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -305,12 +308,129 @@ const router = createRouter({
 
     {
       path: '/taches',
-      name: 'Taches',
+      name: 'Toutes les taches',
       component: () => import('../pages/Taches.vue'),
       meta: {
         title: 'Gestion des Tâches',
         requiresAuth: true,
       },
+    },
+    {
+      path: '/taches/mes-taches',
+      name: 'taches.mes-taches',
+      component: () => import('../pages/MesTaches.vue'),
+      meta: {
+        title: 'Mes Tâches',
+        requiresAuth: true,
+        breadcrumb: 'Mes Tâches'
+      }
+    },
+    {
+      path: '/taches/assignees',
+      name: 'taches.assignees',
+      component: () => import('../pages/TachesAssignees.vue'),
+      meta: {
+        title: 'Tâches Assignées',
+        requiresAuth: true,
+        breadcrumb: 'Tâches Assignées'
+      }
+    },
+    {
+      path: '/taches/en-attente',
+      name: 'taches.pending',
+      component: () => import('../pages/TachesEnAttente.vue'),
+      meta: {
+        title: 'Tâches en Attente',
+        requiresAuth: true,
+        breadcrumb: 'En Attente de Validation'
+      }
+    },
+    {
+      path: '/taches/waiting-colleagues',
+      name: 'taches.waiting-colleagues',
+      component: TachesAttendantCollegues,
+      meta: {
+        requiresAuth: true,
+        title: 'En Attente de Collègues'
+      }
+    },
+    {
+      path: '/taches/coordination',
+      name: 'taches.coordination',
+      component: TachesParUtilisateur,
+      meta: {
+        requiresAuth: true,
+        title: 'Vue Coordination',
+        permissions: ['responsable_activite', 'responsable_projet', 'super_admin']
+      }
+    },
+    // {
+    //   path: '/taches/en-retard',
+    //   name: 'taches.overdue',
+    //   component: () => import('../pages/TachesEnRetard.vue'),
+    //   meta: {
+    //     title: 'Tâches en Retard',
+    //     requiresAuth: true,
+    //     breadcrumb: 'Tâches en Retard'
+    //   }
+    // },
+
+    // {
+    // path: '/evaluations',
+    // component: () => import('@/layouts/MainLayout.vue'),
+    // meta: { requiresAuth: true },
+    // children: [
+    {
+      path: '/evaluations/dashboard',
+      name: 'evaluations.dashboard',
+      component: () => import('../pages/EvaluationDashboard.vue'),
+      meta: {
+        title: 'Tableau de bord des évaluations',
+        breadcrumb: [
+          { label: 'Accueil', to: '/' },
+          { label: 'Évaluations', to: '/evaluations/dashboard' },
+          { label: 'Tableau de bord' }
+        ]
+      }
+    },
+    {
+      path: '/evaluations/rapport-hebdomadaire',
+      name: 'evaluations.rapport-hebdomadaire',
+      component: () => import('../pages/RapportHebdomadaire.vue'),
+      meta: {
+        title: 'Rapport hebdomadaire',
+        breadcrumb: [
+          { label: 'Accueil', to: '/' },
+          { label: 'Évaluations', to: '/evaluations/dashboard' },
+          { label: 'Rapport hebdomadaire' }
+        ]
+      }
+    },
+    {
+      path: '/evaluations/fiches',
+      name: 'evaluations.fiches',
+      component: () => import('../pages/FichesEvaluation.vue'),
+      meta: {
+        title: 'Fiches d\'évaluation',
+        breadcrumb: [
+          { label: 'Accueil', to: '/' },
+          { label: 'Évaluations', to: '/evaluations/dashboard' },
+          { label: 'Fiches d\'évaluation' }
+        ]
+      }
+    },
+    {
+      path: '/evaluations/performance',
+      name: 'evaluations.performance',
+      component: () => import('../pages/PerformanceEquipe.vue'),
+      meta: {
+        title: 'Performance d\'équipe',
+        breadcrumb: [
+          { label: 'Accueil', to: '/' },
+          { label: 'Évaluations', to: '/evaluations/dashboard' },
+          { label: 'Performance d\'équipe' }
+        ]
+      }
     },
 
     {
@@ -458,14 +578,14 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // Check role requirements
-  if (to.meta.roles && !authStore.hasAnyRole(to.meta.roles)) {
-    return next({ name: 'Unauthorized' })
-  }
+  // if (to.meta.roles && !authStore.hasAnyRole(to.meta.roles)) {
+  //   return next({ name: 'Unauthorized' })
+  // }
 
   // Check permission requirements
-  if (to.meta.permissions && !authStore.hasAnyPermission(to.meta.permissions)) {
-    return next({ name: 'Unauthorized' })
-  }
+  // if (to.meta.permissions && !authStore.hasAnyPermission(to.meta.permissions)) {
+  //   return next({ name: 'Unauthorized' })
+  // }
 
   next()
 })

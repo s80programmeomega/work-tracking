@@ -1,321 +1,249 @@
 <!-- resources/js/components/taches/TacheDetailModal.vue -->
 <template>
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm" @click.self="$emit('close')">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-hidden flex flex-col">
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm" 
+       @click.self="$emit('close')">
+    
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full overflow-hidden flex flex-col transition-all duration-300"
+         :class="modalSizeClass">
       
-      <!-- Header -->
-      <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div 
-              class="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg"
-              :style="{ backgroundColor: tache.couleur }"
-            >
-              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-            </div>
-            <div>
-              <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
-                {{ tache.titre }}
-              </h2>
-              <p class="text-sm text-gray-500 dark:text-gray-400">
-                {{ tache.code }} • {{ tache.activite?.nom }}
-              </p>
+      <!-- Header unifié -->
+      <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+        <div class="flex justify-between items-start">
+          <!-- Titre et badges -->
+          <div class="flex-1">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ tache.titre }}</h2>
+            <div class="flex items-center gap-3 flex-wrap">
+              <!-- Badges statut et priorité -->
+              <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full shadow-sm"
+                    :class="getStatusClass(tache.statut)">
+                <span class="w-2 h-2 rounded-full mr-2" :class="getStatusDotClass(tache.statut)"></span>
+                {{ tache.statut_label }}
+              </span>
+              
+              <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full shadow-sm"
+                    :class="getPriorityClass(tache.priorite)">
+                {{ getPriorityIcon(tache.priorite) }} {{ tache.priorite_label }}
+              </span>
+
+              <!-- Badges validation -->
+              <span v-if="tache.validation?.n2_validated_at" 
+                    class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300">
+                ✓✓ Validé N2
+              </span>
+              <span v-else-if="tache.validation?.n1_validated_at" 
+                    class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+                ✓ Validé N1
+              </span>
             </div>
           </div>
-          <div class="flex items-center gap-2">
-            <!-- Validation status -->
-            <div v-if="tache.validation" class="flex items-center gap-2">
-              <span
-                v-if="tache.validation.is_fully_validated"
-                class="px-3 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 flex items-center gap-1"
-              >
-                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                </svg>
-                Validée
-              </span>
-              <span
-                v-else-if="tache.validation.n1_validated_at"
-                class="px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 flex items-center gap-1"
-              >
-                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                </svg>
-                Validée N1
-              </span>
-              <span
-                v-else-if="tache.statut === 'termine'"
-                class="px-3 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 flex items-center gap-1"
-              >
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                En attente de validation
-              </span>
-            </div>
 
-            <button @click="$emit('close')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-2">
+          <!-- Actions header -->
+          <div class="flex items-center gap-2 ml-4">
+            <!-- Bascule mode détaillé -->
+            <button 
+              v-if="!isDetailedView"
+              @click="enableDetailedView('details')"
+              class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              title="Vue détaillée">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+              </svg>
+            </button>
+
+            <!-- Bouton refresh -->
+            <button 
+              @click="refreshTask"
+              :disabled="isRefreshing"
+              class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors disabled:opacity-50"
+              title="Actualiser">
+              <svg class="w-5 h-5" :class="{ 'animate-spin': isRefreshing }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
+
+            <button @click="$emit('close')" 
+                    class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-2">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
         </div>
+
+        <!-- Onglets - Seulement en mode détaillé -->
+        <div v-if="isDetailedView" class="mt-4 flex gap-4 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
+          <button
+            v-for="tab in tabs"
+            :key="tab.id"
+            @click="activeTab = tab.id"
+            class="px-4 py-2 font-medium rounded-t-lg transition-all border-b-2 whitespace-nowrap"
+            :class="activeTab === tab.id
+              ? 'border-brand-500 text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/20'
+              : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800'"
+          >
+            <span class="flex items-center gap-2">
+              {{ tab.label }}
+              <span v-if="tab.count" class="px-2 py-0.5 text-xs rounded-full"
+                    :class="activeTab === tab.id 
+                      ? 'bg-brand-200 dark:bg-brand-800 text-brand-800 dark:text-brand-200' 
+                      : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'">
+                {{ tab.count }}
+              </span>
+            </span>
+          </button>
+        </div>
       </div>
 
-      <!-- Body -->
+      <!-- Contenu principal -->
       <div class="flex-1 overflow-y-auto">
-        <div class="px-8 py-6">
+        
+        <!-- MODE RAPIDE -->
+        <div v-if="!isDetailedView" class="px-8 py-6">
           <div class="grid grid-cols-3 gap-8">
-            <!-- Main Content -->
+            <!-- Colonne principale -->
             <div class="col-span-2 space-y-6">
               <!-- Description -->
-              <div v-if="tache.description">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Description</h3>
-                <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">{{ tache.description }}</p>
-              </div>
+              <SectionCollapsible title="Description" :default-open="!!tache.description">
+                <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">{{ tache.description || 'Aucune description' }}</p>
+              </SectionCollapsible>
 
               <!-- Objectif -->
-              <div v-if="tache.objectif">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Objectif</h3>
-                <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">{{ tache.objectif }}</p>
-              </div>
+              <SectionCollapsible title="Objectif" :default-open="!!tache.objectif">
+                <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">{{ tache.objectif || 'Aucun objectif défini' }}</p>
+              </SectionCollapsible>
 
-              <!-- Indicateurs de résultats -->
-              <div v-if="tache.indicateurs_resultats">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Indicateurs de résultats</h3>
-                <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">{{ tache.indicateurs_resultats }}</p>
-              </div>
+              <!-- Indicateurs -->
+              <SectionCollapsible title="Indicateurs de résultats" :default-open="!!tache.indicateurs_resultats">
+                <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">{{ tache.indicateurs_resultats || 'Aucun indicateur défini' }}</p>
+              </SectionCollapsible>
 
-              <!-- Commentaire -->
-              <div v-if="tache.commentaire">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Commentaire</h3>
-                <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">{{ tache.commentaire }}</p>
-              </div>
-
-              <!-- Résultats hebdomadaires -->
-              <div v-if="tache.resultats && tache.resultats.length > 0">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Résultats hebdomadaires</h3>
-                <div class="space-y-4">
-                  <div
-                    v-for="resultat in tache.resultats"
-                    :key="resultat.id"
-                    class="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
-                  >
-                    <div class="flex items-center justify-between mb-2">
-                      <span class="text-sm font-medium text-gray-900 dark:text-white">
-                        Semaine {{ resultat.week_number }}/{{ resultat.year }}
-                      </span>
-                      <span class="text-xs px-2 py-1 rounded-full" :class="getValidationBadgeClass(resultat)">
-                        {{ getValidationStatusText(resultat) }}
-                      </span>
-                    </div>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                      <strong>Résultats obtenus:</strong> {{ resultat.resultats_obtenus }}
-                    </p>
-                    <div class="flex items-center justify-between text-xs text-gray-500">
-                      <span>Taux de réalisation: {{ resultat.taux_realisation }}%</span>
-                      <span>Soumis le: {{ formatDate(resultat.soumis_le) }}</span>
-                    </div>
-                  </div>
+              <!-- Commentaire récent -->
+              <SectionCollapsible v-if="latestComment" title="Dernier commentaire" :default-open="true">
+                <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+                  <p class="text-gray-700 dark:text-gray-300">{{ latestComment.content }}</p>
+                  <p class="text-xs text-gray-500 mt-2">
+                    Par {{ latestComment.user?.name }} • {{ formatRelativeTime(latestComment.created_at) }}
+                  </p>
                 </div>
-              </div>
+                <button 
+                  @click="enableDetailedView('commentaires')"
+                  class="mt-2 text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400">
+                  Voir tous les commentaires →
+                </button>
+              </SectionCollapsible>
             </div>
 
             <!-- Sidebar -->
             <div class="space-y-6">
-              <!-- Actions -->
-              <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-3">Actions</h3>
-                <div class="space-y-2">
-                  <button
-                    v-if="tache.permissions?.can_edit"
-                    @click="$emit('edit', tache)"
-                    class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    Modifier
-                  </button>
+              <!-- Actions rapides -->
+              <QuickActionsPanel 
+                :tache="tache"
+                @edit="$emit('edit', tache)"
+                @validate-n1="$emit('validate-n1', tache)"
+                @validate-n2="$emit('validate-n2', tache)"
+                @complete="handleCompleteTask"
+              />
 
-                  <!-- Validation actions -->
-                  <button
-                    v-if="tache.permissions?.can_validate_n1 && tache.statut === 'termine' && !tache.validation?.n1_validated_at"
-                    @click="$emit('validate-n1', tache)"
-                    class="w-full px-3 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center gap-2"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Valider N1
-                  </button>
-
-                  <button
-                    v-if="tache.permissions?.can_validate_n2 && tache.validation?.n1_validated_at && !tache.validation?.n2_validated_at"
-                    @click="$emit('validate-n2', tache)"
-                    class="w-full px-3 py-2 text-sm bg-purple-600 text-white rounded-md hover:bg-purple-700 flex items-center gap-2"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Valider N2
-                  </button>
-
-                  <button
-                    v-if="tache.permissions?.can_complete && tache.statut !== 'termine'"
-                    @click="handleCompleteTask"
-                    class="w-full px-3 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    Marquer terminé
-                  </button>
-                </div>
-              </div>
-
-              <!-- Informations -->
-              <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-3">Informations</h3>
-                <div class="space-y-3">
-                  <!-- Statut -->
-                  <div>
-                    <span class="text-xs text-gray-500 dark:text-gray-400">Statut</span>
-                    <div class="flex items-center gap-2 mt-1">
-                      <span :class="getStatusColor(tache.statut)" class="w-2 h-2 rounded-full"></span>
-                      <span class="text-sm font-medium text-gray-900 dark:text-white">{{ tache.statut_label }}</span>
-                    </div>
-                  </div>
-
-                  <!-- Priorité -->
-                  <div>
-                    <span class="text-xs text-gray-500 dark:text-gray-400">Priorité</span>
-                    <div class="flex items-center gap-2 mt-1">
-                      <span class="text-sm">{{ getPriorityIcon(tache.priorite) }}</span>
-                      <span class="text-sm font-medium text-gray-900 dark:text-white">{{ tache.priorite_label }}</span>
-                    </div>
-                  </div>
-
-                  <!-- Dates -->
-                  <div v-if="tache.date_debut || tache.echeance">
-                    <span class="text-xs text-gray-500 dark:text-gray-400">Dates</span>
-                    <div class="text-sm space-y-1 mt-1">
-                      <div v-if="tache.date_debut" class="flex justify-between">
-                        <span>Début:</span>
-                        <span class="font-medium">{{ formatDate(tache.date_debut) }}</span>
-                      </div>
-                      <div v-if="tache.echeance" class="flex justify-between" :class="{ 'text-red-600 font-medium': tache.is_overdue }">
-                        <span>Échéance:</span>
-                        <span>{{ formatDate(tache.echeance) }}</span>
-                      </div>
-                      <div v-if="tache.date_fin_reelle" class="flex justify-between text-green-600">
-                        <span>Terminé le:</span>
-                        <span class="font-medium">{{ formatDate(tache.date_fin_reelle) }}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Progression -->
-                  <div>
-                    <span class="text-xs text-gray-500 dark:text-gray-400">Progression</span>
-                    <div class="mt-1">
-                      <div class="flex justify-between text-sm mb-1">
-                        <span class="font-medium">{{ tache.taux_realisation }}%</span>
-                      </div>
-                      <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                        <div
-                          class="h-2 rounded-full transition-all"
-                          :class="getProgressColor(tache.taux_realisation)"
-                          :style="{ width: `${tache.taux_realisation}%` }"
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Heures -->
-                  <div v-if="tache.estimated_hours || tache.actual_hours">
-                    <span class="text-xs text-gray-500 dark:text-gray-400">Temps</span>
-                    <div class="text-sm space-y-1 mt-1">
-                      <div v-if="tache.estimated_hours" class="flex justify-between">
-                        <span>Estimé:</span>
-                        <span class="font-medium">{{ tache.estimated_hours }}h</span>
-                      </div>
-                      <div v-if="tache.actual_hours" class="flex justify-between" :class="getTimeVarianceClass(tache)">
-                        <span>Réel:</span>
-                        <span>{{ tache.actual_hours }}h</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <!-- Informations essentielles -->
+              <EssentialInfoPanel :tache="tache" />
 
               <!-- Assignés -->
-              <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-3">Assignés</h3>
-                <div class="space-y-2">
-                  <div
-                    v-for="assignee in tache.assignees"
-                    :key="assignee.id"
-                    class="flex items-center gap-3 p-2 rounded-md hover:bg-white dark:hover:bg-gray-800"
-                  >
-                    <div
-                      v-if="assignee.avatar"
-                      class="w-8 h-8 rounded-full overflow-hidden"
-                    >
-                      <img :src="assignee.avatar" :alt="assignee.nom" class="w-full h-full object-cover" />
-                    </div>
-                    <div
-                      v-else
-                      class="w-8 h-8 rounded-full bg-brand-500 text-white flex items-center justify-center text-sm font-medium"
-                    >
-                      {{ getInitials(assignee.nom) }}
-                    </div>
-                    <div class="flex-1 min-w-0">
-                      <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
-                        {{ assignee.nom }}
-                      </p>
-                      <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
-                        {{ assignee.email }}
-                      </p>
-                    </div>
-                    <span class="text-xs px-2 py-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                      {{ assignee.pivot?.role || 'assignee' }}
-                    </span>
-                  </div>
-                </div>
-              </div>
+              <AssigneesPanel :assignees="tache.assignees" />
 
               <!-- Labels -->
-              <div v-if="tache.labels?.length > 0" class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-3">Labels</h3>
-                <div class="flex flex-wrap gap-2">
-                  <span
-                    v-for="label in tache.labels"
-                    :key="label.id"
-                    class="px-2 py-1 text-xs font-medium rounded-md"
-                    :style="{
-                      backgroundColor: label.couleur + '20',
-                      color: label.couleur,
-                      border: `1px solid ${label.couleur}`
-                    }"
-                  >
-                    {{ label.nom }}
-                  </span>
-                </div>
-              </div>
+              <LabelsPanel v-if="tache.labels?.length > 0" :labels="tache.labels" />
             </div>
           </div>
         </div>
+
+        <!-- MODE DÉTAILLÉ -->
+        <div v-else class="px-8 py-6">
+          
+          <!-- Onglet Détails -->
+          <div v-show="activeTab === 'details'">
+            <DetailedTaskView :tache="tache" @refresh="refreshTask" />
+          </div>
+
+          <!-- Onglet Résultats -->
+          <div v-show="activeTab === 'resultats'">
+            <ResultatsSection
+              :tache="tache"
+              @resultat-added="handleResultatAdded"
+              @refresh="refreshTask"
+            />
+          </div>
+
+          <!-- Onglet Commentaires -->
+          <div v-show="activeTab === 'commentaires'">
+            <CommentSection
+              v-if="tache?.id"
+              commentable-type="App\Models\Tache"
+              :commentable-id="tache.id"
+              :current-user-id="currentUser?.id"
+            />
+          </div>
+
+          <!-- Onglet Documents -->
+          <!-- <div v-show="activeTab === 'documents'">
+            <DocumentSection
+              v-if="tache?.id"
+              documentable-type="App\Models\Tache"
+              :documentable-id="tache.id"
+              :current-user-id="currentUser?.id"
+            />
+          </div> -->
+
+        </div>
       </div>
+
+      <!-- Footer adaptatif -->
+      <div class="px-8 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-between items-center">
+        <div class="text-sm text-gray-500 dark:text-gray-400">
+          <span>Créée le {{ formatDate(tache.created_at) }}</span>
+          <span v-if="tache.updated_at !== tache.created_at" class="ml-3">
+            • Modifiée le {{ formatDate(tache.updated_at) }}
+          </span>
+        </div>
+        
+        <div class="flex gap-3">
+          <button
+            @click="$emit('close')"
+            class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all"
+          >
+            Fermer
+          </button>
+          
+          <button
+            v-if="tache.permissions?.can_edit"
+            @click="$emit('edit', tache)"
+            class="px-5 py-2.5 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Modifier
+          </button>
+        </div>
+      </div>
+
     </div>
   </div>
 </template>
 
 <script setup>
+import { ref, computed, onMounted } from 'vue'
 import { useTaches } from '@/composables/useTaches'
+import api from '@/api/axios'
+
+import QuickActionsPanel from './panels/QuickActionsPanel.vue'
+import EssentialInfoPanel from './panels/EssentialInfoPanel.vue'
+import AssigneesPanel from './panels/AssigneesPanel.vue'
+import LabelsPanel from './panels/LabelsPanel.vue'
+import SectionCollapsible from './panels/SectionCollapsible.vue'
+import DetailedTaskView from './DetailedTaskView.vue'
+import ResultatsSection from './ResultatsSection.vue'
+import CommentSection from '@/components/comments/CommentSection.vue'
+// import DocumentSection from '@/components/common/DocumentSection.vue'
 
 const props = defineProps({
   tache: {
@@ -324,17 +252,115 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['close', 'edit', 'validate-n1', 'validate-n2'])
+const emit = defineEmits(['close', 'edit', 'validate-n1', 'validate-n2', 'resultat-added', 'refresh'])
 
 const { completeTache } = useTaches()
 
-const getStatusColor = (statut) => {
-  const colors = {
-    a_faire: 'bg-gray-500',
-    en_cours: 'bg-blue-500',
-    termine: 'bg-green-500'
+// État réactif
+const isDetailedView = ref(false)
+const activeTab = ref('details')
+const latestComment = ref(null)
+const isRefreshing = ref(false)
+const localTache = ref(props.tache)
+
+// Computed
+const modalSizeClass = computed(() => 
+  isDetailedView.value ? 'max-w-7xl max-h-[95vh]' : 'max-w-4xl max-h-[90vh]'
+)
+
+const tabs = computed(() => [
+  { id: 'details', label: 'Détails' },
+  { id: 'resultats', label: 'Résultats', count: localTache.value.resultats_count || 0 },
+  { id: 'commentaires', label: 'Commentaires', count: localTache.value.comments_count || 0 },
+  // { id: 'documents', label: 'Documents', count: localTache.value.documents_count || 0 },
+])
+
+const currentUser = computed(() => {
+  const userStr = localStorage.getItem('user')
+  return userStr ? JSON.parse(userStr) : null
+})
+
+// Détection automatique du mode détaillé
+const shouldUseDetailedView = computed(() => {
+  const t = localTache.value
+  return (
+    (t.comments_count > 3) ||
+    (t.documents_count > 2) ||
+    (t.resultats_count > 5) ||
+    (t.description?.length > 500) ||
+    (t.assignees?.length > 5)
+  )
+})
+
+// Méthodes
+const enableDetailedView = (tab = 'details') => {
+  isDetailedView.value = true
+  activeTab.value = tab
+}
+
+const handleCompleteTask = async () => {
+  if (!localTache.value.permissions?.can_complete) {
+    alert('Vous n\'avez pas la permission de marquer cette tâche comme terminée')
+    return
   }
-  return colors[statut] || 'bg-gray-500'
+
+  try {
+    await completeTache(localTache.value.id)
+    emit('close')
+  } catch (error) {
+    console.error('Error completing task:', error)
+    alert(error.response?.data?.message || 'Erreur lors de la complétion de la tâche')
+  }
+}
+
+const handleResultatAdded = () => {
+  emit('resultat-added')
+  refreshTask()
+}
+
+// ✅ AMÉLIORATION : Méthode pour recharger complètement la tâche
+const refreshTask = async () => {
+  if (isRefreshing.value) return
+  
+  isRefreshing.value = true
+  try {
+    const { data } = await api.get(`/taches/${localTache.value.id}`)
+    localTache.value = data.data
+    emit('refresh', data.data)
+  } catch (error) {
+    console.error('Error refreshing task:', error)
+  } finally {
+    isRefreshing.value = false
+  }
+}
+
+// Méthodes utilitaires
+const getStatusClass = (statut) => {
+  const classes = {
+    'a_faire': 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+    'en_cours': 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+    'termine': 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+  }
+  return classes[statut] || classes.a_faire
+}
+
+const getStatusDotClass = (statut) => {
+  const classes = {
+    'a_faire': 'bg-gray-500',
+    'en_cours': 'bg-blue-500',
+    'termine': 'bg-green-500'
+  }
+  return classes[statut] || classes.a_faire
+}
+
+const getPriorityClass = (priorite) => {
+  const classes = {
+    'faible': 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
+    'moyenne': 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300',
+    'elevee': 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300',
+    'critique': 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
+  }
+  return classes[priorite] || classes.moyenne
 }
 
 const getPriorityIcon = (priorite) => {
@@ -347,37 +373,6 @@ const getPriorityIcon = (priorite) => {
   return icons[priorite] || '🟡'
 }
 
-const getProgressColor = (progress) => {
-  if (progress < 30) return 'bg-red-500'
-  if (progress < 70) return 'bg-amber-500'
-  return 'bg-green-500'
-}
-
-const getTimeVarianceClass = (tache) => {
-  if (!tache.estimated_hours || !tache.actual_hours) return ''
-
-  const variance = tache.actual_hours - tache.estimated_hours
-  if (variance > 0) return 'text-red-600 dark:text-red-400 font-medium'
-  if (variance < 0) return 'text-green-600 dark:text-green-400 font-medium'
-  return ''
-}
-
-const getValidationBadgeClass = (resultat) => {
-  if (resultat.is_fully_validated) {
-    return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300'
-  }
-  if (resultat.validation_n1?.valide) {
-    return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-  }
-  return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
-}
-
-const getValidationStatusText = (resultat) => {
-  if (resultat.is_fully_validated) return 'Validé'
-  if (resultat.validation_n1?.valide) return 'Validé N1'
-  return 'En attente'
-}
-
 const formatDate = (date) => {
   if (!date) return ''
   return new Date(date).toLocaleDateString('fr-FR', {
@@ -387,28 +382,23 @@ const formatDate = (date) => {
   })
 }
 
-const getInitials = (name) => {
-  return name
-    .split(' ')
-    .map(part => part.charAt(0))
-    .join('')
-    .toUpperCase()
-    .substring(0, 2)
+const formatRelativeTime = (date) => {
+  const now = new Date()
+  const diffMs = now - new Date(date)
+  const diffMins = Math.floor(diffMs / 60000)
+  const diffHours = Math.floor(diffMs / 3600000)
+  const diffDays = Math.floor(diffMs / 86400000)
+
+  if (diffMins < 60) return `il y a ${diffMins} min`
+  if (diffHours < 24) return `il y a ${diffHours} h`
+  if (diffDays < 7) return `il y a ${diffDays} j`
+  return formatDate(date)
 }
 
-const handleCompleteTask = async () => {
-  if (!props.tache.permissions?.can_complete) {
-    alert('Vous n\'avez pas la permission de marquer cette tâche comme terminée')
-    return
+// Lifecycle
+onMounted(() => {
+  if (shouldUseDetailedView.value) {
+    isDetailedView.value = true
   }
-
-  try {
-    await completeTache(props.tache.id)
-    // La modal sera fermée et la tâche rafraîchie par le parent
-    emit('close')
-  } catch (error) {
-    console.error('Error completing task:', error)
-    alert(error.response?.data?.message || 'Erreur lors de la complétion de la tâche')
-  }
-}
+})
 </script>

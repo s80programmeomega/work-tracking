@@ -63,6 +63,7 @@ class User extends Authenticatable
      *
      * @var array<string, string>
      */
+
     protected $casts = [
         'email_verified_at' => 'datetime',
         'two_factor_confirmed_at' => 'datetime',
@@ -78,6 +79,7 @@ class User extends Authenticatable
         'full_name',
         'avatar_url',
     ];
+
 
     /**
      * Activity logging configuration
@@ -166,40 +168,45 @@ class User extends Authenticatable
         return $this->hasMany(TeamPresence::class);
     }
 
-        public function projets(): BelongsToMany
+    public function projets(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'projet_user')
             ->withPivot(['role', 'can_edit', 'can_delete', 'can_invite'])
             ->withTimestamps();
     }
 
-    
+
     public function activites()
-{
-    return $this->belongsToMany(Activite::class, 'activite_user')
-        ->withPivot([
-            'role',
-            'can_create_tasks',
-            'can_edit_tasks',
-            'can_delete_tasks',
-            'can_validate_results',
-            'can_assign_users',
-        ])
-        ->withTimestamps();
-}
+    {
+        return $this->belongsToMany(Activite::class, 'activite_user')
+            ->withPivot([
+                'role',
+                'can_create_tasks',
+                'can_edit_tasks',
+                'can_delete_tasks',
+                'can_validate_results',
+                'can_assign_users',
+            ])
+            ->withTimestamps();
+    }
 
 
     public function taches()
     {
         return $this->belongsToMany(Tache::class, 'tache_user')
-            ->withPivot('role')
-            ->withTimestamps();
+            ->withPivot('role', 'can_edit', 'can_complete', 'can_validate', 'statut_individuel', 'progression_individuelle', 'started_at', 'completed_at')
+            ->withTimestamps()
+             ->withCasts([
+                'started_at' => 'datetime',
+                'completed_at' => 'datetime',
+                'progression_individuelle' => 'integer',
+            ]);
     }
 
-    // public function comments()
-    // {
-    //     return $this->hasMany(Comment::class);
-    // }
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
 
     /**
      * Notification preferences
@@ -322,7 +329,7 @@ class User extends Authenticatable
         return false;
     }
 
-        /**
+    /**
      * Vérifie si l'utilisateur est super_admin
      */
     public function isSuperAdmin(): bool
@@ -353,7 +360,7 @@ class User extends Authenticatable
     {
         return $query->where('role', 'super_admin');
     }
-    
+
 
     public function updateLoginInfo(): void
     {

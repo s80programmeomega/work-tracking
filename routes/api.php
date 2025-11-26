@@ -218,6 +218,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Route::middleware(['super_admin'])->group(function () {
         Route::get('/all/activity', [ActiviteController::class, 'index']); // Toutes les activités (Super Admin)
         // });
+
+        // ✅ NOUVEAU : Vue coordination (tâches par utilisateur)
+        Route::get('/{activiteId}/taches-by-user', [TacheController::class, 'assignedByUser']);
     });
 
     // ======================================== TÂCHES  ========================================
@@ -233,8 +236,28 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/en-retard', [TacheController::class, 'overdue']);
         Route::post('/reorder', [TacheController::class, 'reorder']);
 
+        // ✅ NOUVEAU: Mon kanban personnel
+        Route::get('/my-kanban', [TacheController::class, 'myKanban']);
+
+        // ✅ NOUVEAU : Gestion statut individuel
+        Route::post('/{tache}/move-my-card', [TacheController::class, 'moveMyCard']);
+        
+        // Soumettre mon résultat individuel
+        Route::post('/{tache}/submit-my-result', [TacheResultatController::class, 'submitMyResult']);
+
         // ✅ Kanban pour une activité
         Route::get('/activite/{activiteId}/kanban', [TacheController::class, 'forActivite']);
+
+        // ✅ NOUVEAU : Tâches en attente de collègues
+        Route::get('/waiting-for-colleagues', [TacheController::class, 'waitingForColleagues']);
+
+        // Vérifier les permissions
+        Route::get('/activite/{activiteId}/check-permissions', [TacheController::class, 'checkPermissions']);
+
+        // ✅ NOUVEAU : Validation résultats individuels
+        Route::post('/resultats-individuels/{resultat}/validate-n1', [TacheController::class, 'validateIndividualResultN1']);
+        Route::post('/resultats-individuels/{resultat}/validate-n2', [TacheController::class, 'validateIndividualResultN2']);
+
 
         // CRUD basique
         Route::get('/{tache}', [TacheController::class, 'show']);
@@ -266,6 +289,17 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Task Labels
         Route::post('/{tache}/labels', [TacheController::class, 'attachLabel']);
         Route::delete('/{tache}/labels/{label}', [TacheController::class, 'detachLabel']);
+
+        // Routes pour les fichiers attachés
+        Route::post('{tache}/attachments', [TacheController::class, 'addAttachments']);
+        Route::get('{tache}/attachments', [TacheController::class, 'getAttachments']);
+        Route::get('{tache}/attachments/{attachment}/download', [TacheController::class, 'downloadAttachment']);
+        Route::delete('{tache}/attachments/{attachment}', [TacheController::class, 'deleteAttachment']);
+
+        // Routes pour les liens externes
+        Route::post('{tache}/external-links', [TacheController::class, 'addExternalLink']);
+        Route::delete('{tache}/external-links/{link}', [TacheController::class, 'deleteExternalLink']);
+
     });
 
     // ======================================== RÉSULTATS DE TÂCHES  ========================================
@@ -309,7 +343,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Dashboard général
         Route::get('/dashboard', [TacheController::class, 'evaluationDashboard']);
 
-           // Résultats en attente de validation
+        // Résultats en attente de validation
         Route::get('/resultats/en-attente', [TacheResultatController::class, 'pendingValidations']);
     });
 

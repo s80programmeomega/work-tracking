@@ -137,6 +137,18 @@ class Workspace extends Model
             ];
             });
     }
+    public function membres(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'workspace_members')
+            ->withPivot(['role', 'permissions', 'invited_at', 'invited_by'])
+            ->withTimestamps()
+            ->using(new class extends \Illuminate\Database\Eloquent\Relations\Pivot {
+            protected $casts = [
+                'permissions' => 'array', // ✅ Auto-decode JSON
+                'invited_at' => 'datetime',
+            ];
+            });
+    }
 
     /**
      * Get all projects in this workspace

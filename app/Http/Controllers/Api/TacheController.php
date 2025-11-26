@@ -4,15 +4,24 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Enums\TacheStatut;
+use App\Http\Resources\TacheAttachmentResource;
 use App\Models\Tache;
 use App\Services\TacheService;
 use App\Http\Resources\TacheResource;
+use App\Http\Resources\TacheResultatResource;
 use App\Models\Activite;
+use App\Models\Document;
+use App\Models\TacheAttachment;
+use App\Models\TacheExternalLink;
+use App\Models\TacheResultat;
 use App\Models\User;
+use App\Notifications\ResultatIndividuelSoumisNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 class TacheController extends Controller
@@ -156,18 +165,30 @@ class TacheController extends Controller
     /**
      * ✅ Tâches assignées à moi
      */
-    public function assignedToMe(Request $request): JsonResponse
-    {
-        $taches = Tache::assignedTo($request->user()->id)
-            ->with(['activite', 'labels', 'assignees'])
-            ->active()
-            ->ordered()
-            ->get();
+// Dans votre TacheController
+public function assignedToMe(Request $request)
+{
+    $user = $request->user();
+    
+    $taches = Tache::with([
+        'activite.projet',
+        'assignees',
+        'resultatsIndividuels.user',
+        'labels',
+        'sousTaches',
+        'attachments',
+        'externalLinks'
+    ])
+    ->assignedTo($user->id)
+    ->active()
+    ->ordered()
+    ->get();
 
-        return response()->json([
-            'data' => TacheResource::collection($taches),
-        ]);
-    }
+    return response()->json([
+        'success' => true,
+        'data' => TacheResource::collection($taches)
+    ]);
+}
 
     /**
      * ✅ Tâches en attente de validation (que JE peux valider)
@@ -285,11 +306,151 @@ class TacheController extends Controller
     }
 
     /**
-     * Créer une tâche
+     * ✅ Ajouter des fichiers à une tâche
      */
+    public function addAttachments(Request $request, Tache $tache)
+    {
+        $this->authorize('update', $tache);
 
+        $request->validate([
+            'files.*' => 'required|file|max:10240|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,zip,txt'
+        ]);
+
+        try {
+            $uploadedFiles = [];
+
+            if ($request->hasFile('files')) {
+                foreach ($request->file('files') as $file) {
+                    $attachment = $this->tacheService->uploadFile($tache, $file, $request->user());
+                    $uploadedFiles[] = new TacheAttachmentResource($attachment);
+                }
+            }
+
+            return response()->json([
+                'message' => 'Fichiers ajoutés avec succès',
+                'data' => $uploadedFiles
+            ], 201);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur ajout fichiers', [
+                'tache_id' => $tache->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'message' => 'Erreur lors de l\'ajout des fichiers',
+                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue'
+            ], 500);
+        }
+    }
+
+    /**
+     * ✅ Récupérer les fichiers d'une tâche
+     */
+    public function getAttachments(Tache $tache)
+    {
+        $this->authorize('view', $tache);
+
+        $attachments = $tache->attachments()->with('uploadedBy')->get();
+
+        return response()->json([
+            'data' => TacheAttachmentResource::collection($attachments)
+        ]);
+    }
+
+
+    /**
+     * ✅ Télécharger un fichier attaché
+     */
+    public function downloadAttachment(Tache $tache, TacheAttachment $attachment): Response
+    {
+        $this->authorize('view', $tache);
+
+        if ($attachment->tache_id !== $tache->id) {
+            abort(404, 'Fichier non trouvé pour cette tâche');
+        }
+
+        if (!Storage::disk('public')->exists($attachment->file_path)) {
+            abort(404, 'Fichier non trouvé sur le serveur');
+        }
+
+        return Storage::disk('public')->download(
+            $attachment->file_path,
+            $attachment->original_name
+        );
+    }
+
+
+    /**
+     * ✅ Ajouter un lien externe
+     */
+    public function addExternalLink(Request $request, Tache $tache): JsonResponse
+    {
+        $this->authorize('update', $tache);
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'url' => 'required|url|max:500',
+        ]);
+
+        try {
+            $link = TacheExternalLink::create([
+                'tache_id' => $tache->id,
+                'title' => $validated['title'],
+                'url' => $validated['url'],
+                'created_by' => $request->user()->id,
+            ]);
+
+            return response()->json([
+                'message' => 'Lien ajouté avec succès',
+                'data' => $link
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erreur lors de l\'ajout du lien',
+                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue'
+            ], 500);
+        }
+    }
+
+
+    /**
+     * Créer une tâche - VERSION ULTRA CORRIGÉE
+     */
     public function store(Request $request): JsonResponse
     {
+        // ✅ DEBUG: Vérifier ce que Laravel reçoit
+        Log::info('Request Files Debug', [
+            'has_uploaded_files' => $request->hasFile('uploaded_files'),
+            'has_cover_image' => $request->hasFile('cover_image'),
+            'uploaded_files_count' => $request->file('uploaded_files') ? count($request->file('uploaded_files')) : 0,
+            'all_files' => array_keys($request->allFiles()),
+        ]);
+
+        // Vérifier chaque fichier individuellement
+        if ($request->hasFile('uploaded_files')) {
+            foreach ($request->file('uploaded_files') as $index => $file) {
+                Log::info("File {$index}", [
+                    'name' => $file->getClientOriginalName(),
+                    'mime' => $file->getMimeType(),
+                    'size' => $file->getSize(),
+                    'is_valid' => $file->isValid(),
+                    'error' => $file->getError(),
+                ]);
+            }
+        }
+
+        if ($request->hasFile('cover_image')) {
+            $cover = $request->file('cover_image');
+            Log::info('Cover Image', [
+                'name' => $cover->getClientOriginalName(),
+                'mime' => $cover->getMimeType(),
+                'size' => $cover->getSize(),
+                'is_valid' => $cover->isValid(),
+            ]);
+        }
+
+        // ✅ Validation stricte avec messages personnalisés
         $validated = $request->validate([
             'activite_id' => 'required|exists:activites,id',
             'titre' => 'required|string|max:255',
@@ -298,30 +459,62 @@ class TacheController extends Controller
             'indicateurs_resultats' => 'nullable|string',
             'statut' => 'required|in:a_faire,en_cours,termine',
             'priorite' => 'required|in:faible,moyenne,elevee,critique',
-            'echeance' => 'nullable|date|after:today',
-            'date_debut' => 'nullable|date',
+
+            // ✅ Dates avec format flexible
+            'echeance' => 'nullable|date_format:Y-m-d',
+            'date_debut' => 'nullable|date_format:Y-m-d',
+            'date_fin_reelle' => 'nullable|date_format:Y-m-d',
+
             'estimated_hours' => 'nullable|numeric|min:0|max:999.99',
+            'actual_hours' => 'nullable|numeric|min:0|max:999.99',
+            'taux_realisation' => 'nullable|integer|min:0|max:100',
             'couleur' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
+            'commentaire' => 'nullable|string',
+            'visibility' => 'nullable|in:public,private,members_only',
+
+            // ✅ Booléens
+            'validation_n1_required' => 'nullable|boolean',
+            'validation_n2_required' => 'nullable|boolean',
+
+            // ✅ CORRECTION 1: Validation des fichiers uploadés
+            'uploaded_files' => 'nullable|array',
+            'uploaded_files.*' => [
+                'file',
+                'max:10240', // 10MB
+                'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,zip'
+            ],
+
+            // ✅ CORRECTION 2: Validation de l'image de couverture
+            'cover_image' => [
+                'nullable',
+                'file',
+                'image',
+                'mimes:jpeg,jpg,png,gif',
+                'max:2048' // 2MB
+            ],
+
+            // ✅ CORRECTION 3: Links en JSON ou array
+            'external_links' => 'nullable|json',
+
+            // ✅ Relations
             'assignee_ids' => 'nullable|array',
             'assignee_ids.*' => 'exists:users,id',
             'label_ids' => 'nullable|array',
             'label_ids.*' => 'exists:labels,id',
-            'validation_n1_required' => 'boolean',
-            'validation_n2_required' => 'boolean',
-            'visibility' => 'nullable|in:public,private,members_only',
+        ], [
+            'uploaded_files.*.file' => 'Chaque fichier doit être un fichier valide',
+            'uploaded_files.*.max' => 'Les fichiers ne doivent pas dépasser 10 Mo',
+            'uploaded_files.*.mimes' => 'Les fichiers doivent être : PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, JPG, PNG, GIF, ZIP',
+            'cover_image.image' => 'L\'image de couverture doit être une image valide',
+            'cover_image.mimes' => 'L\'image doit être au format JPEG, PNG, JPG ou GIF',
+            'cover_image.max' => 'L\'image ne doit pas dépasser 2 Mo',
         ]);
 
         try {
             $activite = Activite::with(['projet.workspace', 'membres'])->findOrFail($validated['activite_id']);
             $user = $request->user();
 
-            Log::info('Tentative de création de tâche', [
-                'user_id' => $user->id,
-                'activite_id' => $validated['activite_id'],
-                'titre' => $validated['titre']
-            ]);
-
-            // ✅ VÉRIFICATION COMPLÈTE DES PERMISSIONS
+            // ✅ Vérification des permissions
             $canCreate = $user->isSuperAdmin() ||
                 $activite->responsable_id === $user->id ||
                 ($activite->projet && $activite->projet->responsable_id === $user->id) ||
@@ -333,7 +526,7 @@ class TacheController extends Controller
                     })
                     ->exists();
 
-            // ✅ Si l'utilisateur est membre du workspace (owner/admin), autoriser
+            // Vérifier permissions workspace
             if (!$canCreate && $activite->projet && $activite->projet->workspace) {
                 $workspace = $activite->projet->workspace;
                 $workspaceMember = $workspace->membres()->where('user_id', $user->id)->first();
@@ -343,31 +536,75 @@ class TacheController extends Controller
             }
 
             if (!$canCreate) {
-                Log::warning('Permission refusée pour création de tâche', [
+                Log::warning('Permission refusée création tâche', [
                     'user_id' => $user->id,
-                    'activite_id' => $validated['activite_id'],
-                    'is_responsable' => $activite->responsable_id === $user->id,
-                    'is_membre' => $activite->membres()->where('user_id', $user->id)->exists()
+                    'activite_id' => $validated['activite_id']
                 ]);
-
                 return response()->json([
                     'message' => 'Vous n\'avez pas la permission de créer des tâches pour cette activité.',
-                    'error' => 'permission_denied',
-                    'debug' => [
-                        'user_id' => $user->id,
-                        'activite_responsable_id' => $activite->responsable_id,
-                        'is_membre' => $activite->membres()->where('user_id', $user->id)->exists(),
-                        'membre_role' => $activite->membres()->where('user_id', $user->id)->first()?->pivot->role ?? 'non-membre'
-                    ]
                 ], 403);
             }
 
-            // ✅ Créer la tâche
-            $tache = $this->tacheService->createTache($validated, $user);
+            // ✅ Préparer les données
+            $data = $validated;
+
+            // Convertir external_links de JSON string vers array
+            if (isset($data['external_links']) && is_string($data['external_links'])) {
+                $data['external_links'] = json_decode($data['external_links'], true) ?? [];
+            } else {
+                $data['external_links'] = [];
+            }
+
+            // ✅ Gérer les fichiers uploadés - ULTRA SÉCURISÉ
+            $uploadedFiles = [];
+            if ($request->hasFile('uploaded_files')) {
+                $files = $request->file('uploaded_files');
+
+                // S'assurer que c'est un tableau
+                if (!is_array($files)) {
+                    $files = [$files];
+                }
+
+                foreach ($files as $file) {
+                    // ✅ Vérification stricte
+                    if ($file && $file->isValid()) {
+                        $uploadedFiles[] = $file;
+                        Log::info('Fichier valide détecté', [
+                            'name' => $file->getClientOriginalName(),
+                            'mime' => $file->getMimeType(),
+                            'size' => $file->getSize()
+                        ]);
+                    }
+                }
+            }
+
+            $data['uploaded_files'] = $uploadedFiles;
+
+            Log::info('Avant création tâche', [
+                'files_count' => count($uploadedFiles),
+                'has_cover' => $request->hasFile('cover_image')
+            ]);
+
+            // ✅ Gérer l'image de couverture
+            if ($request->hasFile('cover_image')) {
+                $coverImage = $request->file('cover_image');
+                if ($coverImage->isValid()) {
+                    $coverImagePath = $coverImage->store('task-covers', 'public');
+                    $data['cover_image'] = $coverImagePath;
+                    Log::info('Image de couverture uploadée', [
+                        'path' => $coverImagePath
+                    ]);
+                }
+            }
+
+            // ✅ Créer la tâche via service
+            $tache = $this->tacheService->createTache($data, $user);
 
             Log::info('Tâche créée avec succès', [
                 'tache_id' => $tache->id,
-                'user_id' => $user->id
+                'user_id' => $user->id,
+                'activite_id' => $validated['activite_id'],
+                'files' => count($uploadedFiles)
             ]);
 
             return response()->json([
@@ -375,16 +612,16 @@ class TacheController extends Controller
                 'data' => new TacheResource($tache),
             ], 201);
 
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            Log::error('Activité non trouvée', ['activite_id' => $validated['activite_id']]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::warning('Erreur validation création tâche', [
+                'errors' => $e->errors()
+            ]);
             return response()->json([
-                'message' => 'Activité non trouvée',
-                'error' => 'not_found'
-            ], 404);
+                'message' => 'Erreur de validation',
+                'errors' => $e->errors()
+            ], 422);
         } catch (\Exception $e) {
             Log::error('Erreur création tâche', [
-                'user_id' => $user->id ?? null,
-                'activite_id' => $validated['activite_id'] ?? null,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
@@ -395,7 +632,6 @@ class TacheController extends Controller
             ], 500);
         }
     }
-
 
     /**
      * ✅ NOUVEAU : Endpoint pour vérifier les permissions d'une activité
@@ -470,7 +706,9 @@ class TacheController extends Controller
             'resultats',
             'sousTaches',
             'dependencies',
-            'createdBy'
+            'createdBy',
+            'attachments.uploadedBy', // ✅ AJOUT IMPORTANT
+            'externalLinks' // ✅ AJOUT IMPORTANT
         ]);
 
         return response()->json([
@@ -478,38 +716,243 @@ class TacheController extends Controller
         ]);
     }
 
+
     /**
-     * Mettre à jour une tâche
+     * Mettre à jour une tâche - VERSION COMPLÈTEMENT CORRIGÉE
      */
     public function update(Request $request, Tache $tache): JsonResponse
     {
+        // ✅ Vérification des permissions
         $this->authorize('update', $tache);
 
+        // ✅ DEBUG: Vérifier ce que Laravel reçoit pour la mise à jour
+        Log::info('Request Update Files Debug', [
+            'tache_id' => $tache->id,
+            'has_uploaded_files' => $request->hasFile('uploaded_files'),
+            'has_cover_image' => $request->hasFile('cover_image'),
+            'uploaded_files_count' => $request->file('uploaded_files') ? count($request->file('uploaded_files')) : 0,
+            'all_files' => array_keys($request->allFiles()),
+            'method' => $request->method(),
+            'has__method' => $request->has('_method')
+        ]);
+
+        // ✅ Validation COMPLÈTE similaire à store
         $validated = $request->validate([
-            'titre' => 'sometimes|string|max:255',
+            'titre' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
             'objectif' => 'nullable|string',
             'indicateurs_resultats' => 'nullable|string',
-            'statut' => 'sometimes|in:a_faire,en_cours,termine',
-            'priorite' => 'sometimes|in:faible,moyenne,elevee,critique',
-            'echeance' => 'nullable|date',
-            'date_debut' => 'nullable|date',
+            'statut' => 'sometimes|required|in:a_faire,en_cours,termine',
+            'priorite' => 'sometimes|required|in:faible,moyenne,elevee,critique',
+
+            // Dates
+            'echeance' => 'nullable|date_format:Y-m-d',
+            'date_debut' => 'nullable|date_format:Y-m-d',
+            'date_fin_reelle' => 'nullable|date_format:Y-m-d',
+
             'taux_realisation' => 'sometimes|integer|min:0|max:100',
             'estimated_hours' => 'nullable|numeric|min:0|max:999.99',
             'actual_hours' => 'nullable|numeric|min:0|max:999.99',
             'couleur' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
             'commentaire' => 'nullable|string',
-            'assignee_ids' => 'nullable|array',
-            'label_ids' => 'nullable|array',
             'visibility' => 'nullable|in:public,private,members_only',
+
+            // Booléens
+            'validation_n1_required' => 'nullable|boolean',
+            'validation_n2_required' => 'nullable|boolean',
+
+            // ✅ CORRECTION: Même validation des fichiers que pour store
+            'uploaded_files' => 'nullable|array',
+            'uploaded_files.*' => [
+                'file',
+                'max:10240',
+                'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,zip'
+            ],
+
+            // ✅ CORRECTION: Même validation de l'image
+            'cover_image' => [
+                'nullable',
+                'file',
+                'image',
+                'mimes:jpeg,jpg,png,gif',
+                'max:2048'
+            ],
+
+            // Links
+            'external_links' => 'nullable|json',
+
+            // Relations
+            'assignee_ids' => 'nullable|array',
+            'assignee_ids.*' => 'exists:users,id',
+            'label_ids' => 'nullable|array',
+            'label_ids.*' => 'exists:labels,id',
+        ], [
+            // ✅ CORRECTION: Messages d'erreur cohérents
+            'uploaded_files.*.file' => 'Chaque fichier doit être un fichier valide',
+            'uploaded_files.*.max' => 'Les fichiers ne doivent pas dépasser 10 Mo',
+            'uploaded_files.*.mimes' => 'Les fichiers doivent être : PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, JPG, PNG, GIF, ZIP',
+            'cover_image.image' => 'L\'image de couverture doit être une image valide',
+            'cover_image.mimes' => 'L\'image doit être au format JPEG, PNG, JPG ou GIF',
+            'cover_image.max' => 'L\'image ne doit pas dépasser 2 Mo',
         ]);
 
-        $tache = $this->tacheService->updateTache($tache, $validated);
+        try {
+            Log::info('Début mise à jour tâche', [
+                'tache_id' => $tache->id,
+                'user_id' => $request->user()->id,
+                'has_files' => $request->hasFile('uploaded_files'),
+                'files_count' => $request->hasFile('uploaded_files') ? count($request->file('uploaded_files')) : 0,
+                'has_cover' => $request->hasFile('cover_image')
+            ]);
 
-        return response()->json([
-            'message' => 'Tâche mise à jour avec succès.',
-            'data' => new TacheResource($tache),
-        ]);
+            // ✅ Préparer les données de la même manière que store
+            $data = $validated;
+
+            // Convertir external_links
+            if (isset($data['external_links']) && is_string($data['external_links'])) {
+                $data['external_links'] = json_decode($data['external_links'], true) ?? [];
+            } else {
+                $data['external_links'] = [];
+            }
+
+            // ✅ Gérer les fichiers uploadés - MÊME LOGIQUE QUE STORE
+            $uploadedFiles = [];
+            if ($request->hasFile('uploaded_files')) {
+                $files = $request->file('uploaded_files');
+
+                // S'assurer que c'est un tableau
+                if (!is_array($files)) {
+                    $files = [$files];
+                }
+
+                foreach ($files as $file) {
+                    if ($file && $file->isValid()) {
+                        $uploadedFiles[] = $file;
+                        Log::info('Fichier valide détecté pour mise à jour', [
+                            'name' => $file->getClientOriginalName(),
+                            'mime' => $file->getMimeType(),
+                            'size' => $file->getSize()
+                        ]);
+                    }
+                }
+            }
+
+            $data['uploaded_files'] = $uploadedFiles;
+
+            // ✅ Gérer l'image de couverture - MÊME LOGIQUE QUE STORE
+            if ($request->hasFile('cover_image')) {
+                $coverImage = $request->file('cover_image');
+                if ($coverImage->isValid()) {
+                    // Supprimer l'ancienne image si elle existe
+                    if ($tache->cover_image && Storage::disk('public')->exists($tache->cover_image)) {
+                        Storage::disk('public')->delete($tache->cover_image);
+                        Log::info('Ancienne image de couverture supprimée', [
+                            'old_path' => $tache->cover_image
+                        ]);
+                    }
+
+                    $coverImagePath = $coverImage->store('task-covers', 'public');
+                    $data['cover_image'] = $coverImagePath;
+                    Log::info('Nouvelle image de couverture uploadée', [
+                        'path' => $coverImagePath
+                    ]);
+                }
+            }
+
+            Log::info('Avant mise à jour tâche via service', [
+                'tache_id' => $tache->id,
+                'files_count' => count($uploadedFiles),
+                'has_cover' => isset($data['cover_image'])
+            ]);
+
+            // ✅ Mettre à jour via service
+            $tache = $this->tacheService->updateTache($tache, $data);
+
+            Log::info('Tâche mise à jour avec succès', [
+                'tache_id' => $tache->id,
+                'files_processed' => count($uploadedFiles)
+            ]);
+
+            return response()->json([
+                'message' => 'Tâche mise à jour avec succès.',
+                'data' => new TacheResource($tache),
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::warning('Erreur validation mise à jour tâche', [
+                'tache_id' => $tache->id,
+                'errors' => $e->errors()
+            ]);
+            return response()->json([
+                'message' => 'Erreur de validation',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Erreur mise à jour tâche', [
+                'tache_id' => $tache->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'message' => 'Erreur lors de la mise à jour de la tâche',
+                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue'
+            ], 500);
+        }
+    }
+
+    /**
+     * ✅ Supprimer un fichier attaché
+     */
+    public function deleteAttachment(Tache $tache, TacheAttachment $attachment): JsonResponse
+    {
+        $this->authorize('update', $tache);
+
+        if ($attachment->tache_id !== $tache->id) {
+            return response()->json([
+                'message' => 'Fichier non trouvé pour cette tâche'
+            ], 404);
+        }
+
+        try {
+            $this->tacheService->deleteAttachment($attachment);
+
+            return response()->json([
+                'message' => 'Fichier supprimé avec succès'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erreur lors de la suppression du fichier',
+                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue'
+            ], 500);
+        }
+    }
+
+    /**
+     * ✅ Supprimer un lien externe
+     */
+    public function deleteExternalLink(Tache $tache, TacheExternalLink $link): JsonResponse
+    {
+        $this->authorize('update', $tache);
+
+        if ($link->tache_id !== $tache->id) {
+            return response()->json([
+                'message' => 'Lien non trouvé pour cette tâche'
+            ], 404);
+        }
+
+        try {
+            $this->tacheService->deleteExternalLink($link);
+
+            return response()->json([
+                'message' => 'Lien supprimé avec succès'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erreur lors de la suppression du lien',
+                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue'
+            ], 500);
+        }
     }
 
     /**
@@ -732,8 +1175,6 @@ class TacheController extends Controller
         ], 201);
     }
 
-
-
     /**
      * ✅ Mon rapport hebdomadaire
      */
@@ -779,6 +1220,346 @@ class TacheController extends Controller
         $report = $this->tacheService->getWeeklyReport($user, $weekNumber, $year);
 
         return response()->json($report);
+    }
+
+    /**
+     * ✅ NOUVEAU : Déplacer MA carte (statut individuel)
+     */
+    public function moveMyCard(Request $request, Tache $tache): JsonResponse
+    {
+        $validated = $request->validate([
+            'statut' => 'required|in:a_faire,en_cours,termine',
+            'progression' => 'nullable|integer|min:0|max:100',
+            'notes_personnelles' => 'nullable|string|max:1000',
+        ]);
+
+        $user = $request->user();
+
+        try {
+            // Vérifier assignation
+            if (!$tache->isAssignedTo($user)) {
+                return response()->json([
+                    'message' => 'Vous n\'êtes pas assigné à cette tâche'
+                ], 403);
+            }
+
+            // Mettre à jour le statut individuel
+            $tache->updateStatutForUser(
+                $user,
+                $validated['statut'],
+                $validated['progression'] ?? null
+            );
+
+            // Mettre à jour les notes si fournies
+            if (isset($validated['notes_personnelles'])) {
+                $tache->assignees()->updateExistingPivot($user->id, [
+                    'notes_personnelles' => $validated['notes_personnelles']
+                ]);
+            }
+
+            Log::info('Statut individuel mis à jour', [
+                'tache_id' => $tache->id,
+                'user_id' => $user->id,
+                'nouveau_statut' => $validated['statut'],
+                'statut_global' => $tache->fresh()->statut->value
+            ]);
+
+            return response()->json([
+                'message' => 'Votre statut a été mis à jour avec succès',
+                'data' => new TacheResource($tache->fresh([
+                    'activite',
+                    'assignees',
+                    'labels',
+                    'resultatsIndividuels'
+                ])),
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur mise à jour statut individuel', [
+                'tache_id' => $tache->id,
+                'user_id' => $user->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+   
+
+    /**
+     * ✅ NOUVEAU : Mes tâches en attente de collègues
+     */
+    public function waitingForColleagues(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $taches = Tache::enAttenteCollegues($user)
+            ->with(['activite.projet', 'assignees', 'labels'])
+            ->active()
+            ->ordered()
+            ->get();
+
+        return response()->json([
+            'message' => 'Tâches où vous avez terminé mais vos collègues travaillent encore',
+            'data' => TacheResource::collection($taches),
+            'count' => $taches->count(),
+        ]);
+    }
+
+
+    /**
+     * ✅ NOUVEAU : Vue Tâches Assignées par utilisateur (pour coordination)
+     */
+    public function assignedByUser(Request $request, int $activiteId): JsonResponse
+    {
+        $activite = Activite::with(['projet', 'membres'])->findOrFail($activiteId);
+        $user = $request->user();
+
+        // Vérifier permissions (responsable activité/projet ou super admin)
+        if (
+            !$user->isSuperAdmin() &&
+            $activite->responsable_id !== $user->id &&
+            (!$activite->projet || $activite->projet->responsable_id !== $user->id)
+        ) {
+            return response()->json([
+                'message' => 'Accès non autorisé'
+            ], 403);
+        }
+
+        // Récupérer toutes les tâches de l'activité avec leurs assignés
+        $taches = Tache::forActivite($activiteId)
+            ->with(['assignees', 'labels', 'resultatsIndividuels'])
+            ->active()
+            ->get();
+
+        // Grouper par utilisateur
+        $byUser = [];
+
+        foreach ($taches as $tache) {
+            foreach ($tache->assignees as $assignee) {
+                if (!isset($byUser[$assignee->id])) {
+                    $byUser[$assignee->id] = [
+                        'user' => [
+                            'id' => $assignee->id,
+                            'nom' => $assignee->nom,
+                            'email' => $assignee->email,
+                            'avatar' => $assignee->avatar,
+                        ],
+                        'taches' => [],
+                        'stats' => [
+                            'total' => 0,
+                            'a_faire' => 0,
+                            'en_cours' => 0,
+                            'termine' => 0,
+                            'en_retard' => 0,
+                            'progression_moyenne' => 0,
+                        ]
+                    ];
+                }
+
+                $statutIndividuel = $assignee->pivot->statut_individuel;
+                $progression = $assignee->pivot->progression_individuelle;
+
+                $byUser[$assignee->id]['taches'][] = [
+                    'tache_id' => $tache->id,
+                    'titre' => $tache->titre,
+                    'code' => $tache->code,
+                    'statut_global' => $tache->statut->value,
+                    'statut_individuel' => $statutIndividuel,
+                    'progression_individuelle' => $progression,
+                    'echeance' => $tache->echeance?->format('Y-m-d'),
+                    'is_overdue' => $tache->is_overdue,
+                    'priorite' => $tache->priorite->value,
+                    'has_result' => $tache->monResultat($assignee) !== null,
+                ];
+
+                // Statistiques
+                $byUser[$assignee->id]['stats']['total']++;
+                $byUser[$assignee->id]['stats'][$statutIndividuel]++;
+
+                if ($tache->is_overdue && $statutIndividuel !== 'termine') {
+                    $byUser[$assignee->id]['stats']['en_retard']++;
+                }
+            }
+        }
+
+        // Calculer progression moyenne par utilisateur
+        foreach ($byUser as $userId => &$userData) {
+            $progressions = array_column($userData['taches'], 'progression_individuelle');
+            $userData['stats']['progression_moyenne'] = count($progressions) > 0
+                ? round(array_sum($progressions) / count($progressions))
+                : 0;
+        }
+
+        return response()->json([
+            'activite' => [
+                'id' => $activite->id,
+                'nom' => $activite->nom,
+                'projet' => $activite->projet->only(['id', 'nom']),
+            ],
+            'data' => array_values($byUser),
+            'total_users' => count($byUser),
+            'total_tasks' => $taches->count(),
+        ]);
+    }
+
+    
+    /**
+ * ✅ MODIFIÉ : Valider un résultat individuel (N1)
+ */
+public function validateIndividualResultN1(Request $request, TacheResultat $resultat): JsonResponse
+{
+    $validated = $request->validate([
+        'commentaire' => 'nullable|string|max:1000',
+    ]);
+
+    $user = $request->user();
+
+    try {
+        $tache = $resultat->tache;
+        
+        if (!$resultat->canBeValidatedByN1($user)) {
+            return response()->json([
+                'message' => 'Vous n\'avez pas la permission de valider ce résultat'
+            ], 403);
+        }
+
+        $resultat->validateByN1($user, $validated['commentaire'] ?? null);
+
+        return response()->json([
+            'message' => 'Résultat validé N1 avec succès',
+            'data' => [
+                'resultat' => new TacheResultatResource($resultat->fresh()),
+                'tache' => new TacheResource($tache->fresh()),
+            ],
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => $e->getMessage()
+        ], 422);
+    }
+}
+
+    /**
+     * ✅ MODIFIÉ : Valider un résultat individuel (N2)
+     */
+    public function validateIndividualResultN2(Request $request, TacheResultat $resultat): JsonResponse
+    {
+        $validated = $request->validate([
+            'commentaire' => 'nullable|string|max:1000',
+        ]);
+
+        $user = $request->user();
+
+        try {
+            $tache = $resultat->tache;
+
+            if (!$resultat->canBeValidatedByN2($user)) {
+                return response()->json([
+                    'message' => 'Vous n\'avez pas la permission de valider ce résultat'
+                ], 403);
+            }
+
+            $resultat->validateByN2($user, $validated['commentaire'] ?? null);
+
+            return response()->json([
+                'message' => 'Résultat validé N2 avec succès',
+                'data' => [
+                    'resultat' => new TacheResultatResource($resultat->fresh()),
+                    'tache' => new TacheResource($tache->fresh()),
+                ],
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    /**
+     * ✅ NOUVEAU : Obtenir mes résultats de la semaine
+     */
+    public function myWeekResults(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'week_number' => 'nullable|integer|min:1|max:53',
+            'year' => 'nullable|integer|min:2020',
+        ]);
+
+        $weekNumber = $validated['week_number'] ?? now()->weekOfYear;
+        $year = $validated['year'] ?? now()->year;
+
+        $user = $request->user();
+
+        $resultats = TacheResultat::forUser($user->id)
+            ->individual()
+            ->with(['tache.activite.projet', 'validateurN1', 'validateurN2', 'documents'])
+            ->whereHas('tache', function ($q) use ($weekNumber, $year) {
+                $q->where('week_number', $weekNumber)
+                    ->where('year', $year);
+            })
+            ->get();
+
+        return response()->json([
+            'week_number' => $weekNumber,
+            'year' => $year,
+            'data' => TacheResultatResource::collection($resultats),
+            'stats' => [
+                'total' => $resultats->count(),
+                'soumis' => $resultats->whereNotNull('soumis_le')->count(),
+                'valides_n1' => $resultats->where('valide_par_n1', true)->count(),
+                'valides_n2' => $resultats->where('valide_par_n2', true)->count(),
+            ]
+        ]);
+    }
+
+    /**
+     * Helper pour uploader un document
+     */
+    private function uploadDocument(TacheResultat $resultat, $file): Document
+    {
+        $originalName = $file->getClientOriginalName();
+        $extension = $file->getClientOriginalExtension();
+        $filename = Str::uuid() . '.' . $extension;
+        $path = $file->storeAs('resultats', $filename, 'public');
+
+        return $resultat->documents()->create([
+            'nom' => $originalName,
+            'nom_fichier' => $originalName,
+            'chemin_fichier' => $path,
+            'taille_fichier' => $file->getSize(),
+            'type_fichier' => $file->getMimeType(),
+            'extension' => $extension,
+            'uploaded_by' => auth()->id(),
+        ]);
+    }
+
+    /**
+     * Helper pour notifier les responsables
+     */
+    protected function notifyResponsablesOfResult(Tache $tache, User $assignee, TacheResultat $resultat): void
+    {
+        $responsables = collect();
+
+        // Responsable activité
+        if ($tache->activite->responsable) {
+            $responsables->push($tache->activite->responsable);
+        }
+
+        // Responsable projet
+        if ($tache->activite->projet && $tache->activite->projet->responsable) {
+            $responsables->push($tache->activite->projet->responsable);
+        }
+
+        // Notifier (sans doublon)
+        $responsables->unique('id')
+            ->reject(fn($r) => $r->id === $assignee->id)
+            ->each(fn($r) => $r->notify(new ResultatIndividuelSoumisNotification($tache, $assignee, $resultat)));
     }
 
     /**

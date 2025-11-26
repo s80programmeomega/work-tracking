@@ -3,13 +3,16 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\TacheResource;
 use App\Models\Tache;
 use App\Models\TacheResultat;
 use App\Http\Resources\TacheResultatResource;
 use App\Models\Document;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -222,6 +225,66 @@ class TacheResultatController extends Controller
             'message' => 'Résultat soumis pour validation',
             'data' => new TacheResultatResource($resultat->fresh())
         ]);
+    }
+
+    /**
+     * ✅ MODIFIÉ : Soumettre mon résultat individuel (utilise TacheResultat existant)
+     */
+    public function submitMyResult(Request $request, Tache $tache): JsonResponse
+    {
+        $validated = $request->validate([
+            'resultats_attendus' => 'required|string|min:10',
+            'resultats_obtenus' => 'required|string|min:10',
+            'taux_realisation' => 'required|integer|min:0|max:100',
+            'difficultes_rencontrees' => 'nullable|string',
+            'solutions_envisagees' => 'nullable|string',
+            'observations' => 'nullable|string',
+            'documents.*' => 'nullable|file|max:10240',
+        ]);
+
+        $user = $request->user();
+
+        try {
+            // Vérifier que l'utilisateur a terminé sa partie
+            $statutUser = $tache->getStatutForUser($user);
+            if ($statutUser !== 'termine') {
+                return response()->json([
+                    'message' => 'Vous devez d\'abord terminer votre partie de la tâche'
+                ], 422);
+            }
+
+            // Créer ou mettre à jour le résultat
+            $resultat = $tache->soumettreResultatIndividuel($user, $validated);
+
+            // Gérer les documents
+            if ($request->hasFile('documents')) {
+                foreach ($request->file('documents') as $file) {
+                    $this->uploadDocument($resultat, $file);
+                }
+            }
+
+            // Notifier les responsables
+            $this->notifyResponsablesOfResult($tache, $user, $resultat);
+
+            return response()->json([
+                'message' => 'Votre résultat a été soumis avec succès',
+                'data' => [
+                    'resultat' => new TacheResultatResource($resultat->fresh(['documents'])),
+                    'tache' => new TacheResource($tache->fresh()),
+                ],
+            ], 201);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur soumission résultat individuel', [
+                'tache_id' => $tache->id,
+                'user_id' => $user->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 422);
+        }
     }
 
     /**
