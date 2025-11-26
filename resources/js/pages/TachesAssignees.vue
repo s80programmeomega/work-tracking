@@ -12,14 +12,19 @@
               </svg>
             </div>
             <div>
-              <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Tâches Assignées</h1>
-              <p class="text-gray-500 dark:text-gray-400">Gérez vos tâches avec un contrôle individuel complet</p>
+              <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Mes Tâches Assignées</h1>
+              <p class="text-gray-500 dark:text-gray-400">Gérez votre avancement personnel de manière indépendante</p>
             </div>
           </div>
 
           <div class="flex items-center gap-3">
             <!-- Bouton refresh -->
-            <button @click="loadAssignedTasks" :disabled="loading" class="p-2 rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" title="Actualiser">
+            <button 
+              @click="loadAssignedTasks" 
+              :disabled="loading" 
+              class="p-2 rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" 
+              title="Actualiser"
+            >
               <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" :class="{ 'animate-spin': loading }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
@@ -27,13 +32,21 @@
 
             <!-- Toggle vue -->
             <div class="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
-              <button @click="currentView = 'kanban'" :class="['px-3 py-2 rounded-md transition-all flex items-center gap-2 text-sm', currentView === 'kanban' ? 'bg-white dark:bg-gray-700 shadow-sm text-brand-600 dark:text-brand-400' : 'text-gray-600 dark:text-gray-400']">
+              <button 
+                @click="currentView = 'kanban'" 
+                :class="['px-3 py-2 rounded-md transition-all flex items-center gap-2 text-sm', 
+                  currentView === 'kanban' ? 'bg-white dark:bg-gray-700 shadow-sm text-brand-600 dark:text-brand-400' : 'text-gray-600 dark:text-gray-400']"
+              >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
                 </svg>
                 Kanban
               </button>
-              <button @click="currentView = 'grouped'" :class="['px-3 py-2 rounded-md transition-all flex items-center gap-2 text-sm', currentView === 'grouped' ? 'bg-white dark:bg-gray-700 shadow-sm text-brand-600 dark:text-brand-400' : 'text-gray-600 dark:text-gray-400']">
+              <button 
+                @click="currentView = 'grouped'" 
+                :class="['px-3 py-2 rounded-md transition-all flex items-center gap-2 text-sm', 
+                  currentView === 'grouped' ? 'bg-white dark:bg-gray-700 shadow-sm text-brand-600 dark:text-brand-400' : 'text-gray-600 dark:text-gray-400']"
+              >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
@@ -122,8 +135,18 @@
         </div>
       </div>
 
+      <!-- Message d'erreur -->
+      <div v-if="error" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+        <div class="flex items-center gap-3">
+          <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+          </svg>
+          <p class="text-red-800 dark:text-red-300">{{ error }}</p>
+        </div>
+      </div>
+
       <!-- Vue Kanban Personnel -->
-      <div v-if="currentView === 'kanban'" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div v-if="currentView === 'kanban' && !loading" class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <KanbanColumnPersonal
           v-for="column in kanbanColumns"
           :key="column.statut"
@@ -135,12 +158,15 @@
           @move-card="handleMoveMyCard"
           @view-task="handleViewTask"
           @submit-result="handleSubmitResult"
-          @taches-updated="handleTachesUpdated"
         />
       </div>
 
       <!-- Vue groupée par activité -->
-      <div v-else-if="currentView === 'grouped'" class="space-y-6">
+      <div v-else-if="currentView === 'grouped' && !loading" class="space-y-6">
+        <div v-if="tasksByActivite.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">
+          Aucune tâche assignée pour le moment
+        </div>
+        
         <div v-for="group in tasksByActivite" :key="group.activite.id" class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] overflow-hidden">
           <!-- Header du groupe -->
           <div class="px-6 py-4 bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 border-b border-gray-200 dark:border-gray-700">
@@ -187,6 +213,17 @@
           </div>
         </div>
       </div>
+
+      <!-- Loading state -->
+      <div v-if="loading" class="flex items-center justify-center py-12">
+        <div class="text-center">
+          <svg class="animate-spin h-10 w-10 text-brand-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <p class="text-gray-600 dark:text-gray-400">Chargement de vos tâches...</p>
+        </div>
+      </div>
     </div>
 
     <!-- Modals -->
@@ -196,6 +233,7 @@
       @close="showViewModal = false"
       @move-my-card="handleMoveMyCard"
       @submit-result="handleSubmitResult"
+      @task-updated="handleTaskUpdated"
     />
 
     <SubmitResultModal
@@ -261,7 +299,13 @@ const tasksByActivite = computed(() => {
 
 // Methods
 function getMyStatus(tache) {
-  return tache.my_status?.statut || tache.statut
+  // ✅ CORRECTION: Utiliser my_status.statut en priorité
+  if (tache.my_status && tache.my_status.statut) {
+    return tache.my_status.statut
+  }
+  
+  // Fallback sur le statut global
+  return tache.statut
 }
 
 function getMyTasksByStatus(statut) {
@@ -275,7 +319,16 @@ async function loadAssignedTasks() {
   try {
     const { data } = await api.get('/taches/assignees')
     taches.value = data.data || []
-    console.log('✅ Tâches assignées chargées:', taches.value.length)
+    
+    console.log('✅ Tâches assignées chargées:', {
+      total: taches.value.length,
+      sample: taches.value.slice(0, 2).map(t => ({
+        id: t.id,
+        titre: t.titre,
+        statut_global: t.statut,
+        my_status: t.my_status
+      }))
+    })
   } catch (err) {
     console.error('❌ Erreur chargement:', err)
     error.value = err.response?.data?.message || 'Impossible de charger les tâches assignées'
@@ -286,15 +339,29 @@ async function loadAssignedTasks() {
 
 async function handleMoveMyCard({ tache, newStatut, progression, notes }) {
   try {
-    await api.post(`/taches/${tache.id}/move-my-card`, {
+    console.log('🔄 Déplacement carte:', {
+      tache_id: tache.id,
+      old_status: getMyStatus(tache),
+      new_status: newStatut,
+      progression
+    })
+
+    const { data } = await api.post(`/taches/${tache.id}/move-my-card`, {
       statut: newStatut,
       progression,
       notes_personnelles: notes
     })
+
+    console.log('✅ Carte déplacée:', data.changes)
+    
+    // Recharger les tâches pour avoir les données à jour
     await loadAssignedTasks()
+    
   } catch (err) {
-    console.error('❌ Erreur:', err)
-    alert(err.response?.data?.message || 'Erreur lors du déplacement')
+    console.error('❌ Erreur déplacement:', err)
+    error.value = err.response?.data?.message || 'Erreur lors du déplacement'
+    
+    // Recharger quand même pour restaurer l'état correct
     await loadAssignedTasks()
   }
 }
@@ -307,6 +374,8 @@ function handleSubmitResult(tache) {
 async function handleResultSubmitted() {
   showSubmitResultModal.value = false
   await loadAssignedTasks()
+  error.value = null
+  // Afficher une notification de succès
   alert('✅ Résultat soumis avec succès !')
 }
 
@@ -317,15 +386,12 @@ async function handleViewTask(tache) {
     showViewModal.value = true
   } catch (err) {
     console.error('Erreur:', err)
-    alert('Erreur lors du chargement')
+    error.value = 'Erreur lors du chargement de la tâche'
   }
 }
 
-// Gestion de la mise à jour de l'ordre des tâches
-function handleTachesUpdated({ statut, taches: newTaches }) {
-  // Mettre à jour l'ordre local si nécessaire
-  console.log('Ordre mis à jour pour le statut:', statut, newTaches)
-  // Ici vous pourriez envoyer une requête pour sauvegarder le nouvel ordre
+function handleTaskUpdated() {
+  loadAssignedTasks()
 }
 
 // Lifecycle
