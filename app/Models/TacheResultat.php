@@ -2,6 +2,11 @@
 
 namespace App\Models;
 
+use App\Notifications\ResultatEnAttenteN2Notification;
+use App\Notifications\ResultatRejeteNotification;
+use App\Notifications\ResultatSoumisNotification;
+use App\Notifications\ResultatValideN1Notification;
+use App\Notifications\ResultatValideN2Notification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

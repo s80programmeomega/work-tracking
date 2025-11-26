@@ -164,18 +164,30 @@ class TacheController extends Controller
     /**
      * ✅ Tâches assignées à moi
      */
-    public function assignedToMe(Request $request): JsonResponse
-    {
-        $taches = Tache::assignedTo($request->user()->id)
-            ->with(['activite', 'labels', 'assignees'])
-            ->active()
-            ->ordered()
-            ->get();
+// Dans votre TacheController
+public function assignedToMe(Request $request)
+{
+    $user = $request->user();
+    
+    $taches = Tache::with([
+        'activite.projet',
+        'assignees',
+        'resultatsIndividuels.user',
+        'labels',
+        'sousTaches',
+        'attachments',
+        'externalLinks'
+    ])
+    ->assignedTo($user->id)
+    ->active()
+    ->ordered()
+    ->get();
 
-        return response()->json([
-            'data' => TacheResource::collection($taches),
-        ]);
-    }
+    return response()->json([
+        'success' => true,
+        'data' => TacheResource::collection($taches)
+    ]);
+}
 
     /**
      * ✅ Tâches en attente de validation (que JE peux valider)
@@ -1274,7 +1286,7 @@ class TacheController extends Controller
         }
     }
 
-
+   
 
     /**
      * ✅ NOUVEAU : Mes tâches en attente de collègues
@@ -1393,102 +1405,43 @@ class TacheController extends Controller
         ]);
     }
 
+    
     /**
-     * ✅ MODIFIÉ : Soumettre mon résultat individuel (utilise TacheResultat existant)
-     */
-    public function submitMyResult(Request $request, Tache $tache): JsonResponse
-    {
-        $validated = $request->validate([
-            'resultats_attendus' => 'required|string|min:10',
-            'resultats_obtenus' => 'required|string|min:10',
-            'taux_realisation' => 'required|integer|min:0|max:100',
-            'difficultes_rencontrees' => 'nullable|string',
-            'solutions_envisagees' => 'nullable|string',
-            'observations' => 'nullable|string',
-            'documents.*' => 'nullable|file|max:10240',
+ * ✅ MODIFIÉ : Valider un résultat individuel (N1)
+ */
+public function validateIndividualResultN1(Request $request, TacheResultat $resultat): JsonResponse
+{
+    $validated = $request->validate([
+        'commentaire' => 'nullable|string|max:1000',
+    ]);
+
+    $user = $request->user();
+
+    try {
+        $tache = $resultat->tache;
+        
+        if (!$resultat->canBeValidatedByN1($user)) {
+            return response()->json([
+                'message' => 'Vous n\'avez pas la permission de valider ce résultat'
+            ], 403);
+        }
+
+        $resultat->validateByN1($user, $validated['commentaire'] ?? null);
+
+        return response()->json([
+            'message' => 'Résultat validé N1 avec succès',
+            'data' => [
+                'resultat' => new TacheResultatResource($resultat->fresh()),
+                'tache' => new TacheResource($tache->fresh()),
+            ],
         ]);
 
-        $user = $request->user();
-
-        try {
-            // Vérifier que l'utilisateur a terminé sa partie
-            $statutUser = $tache->getStatutForUser($user);
-            if ($statutUser !== 'termine') {
-                return response()->json([
-                    'message' => 'Vous devez d\'abord terminer votre partie de la tâche'
-                ], 422);
-            }
-
-            // Créer ou mettre à jour le résultat
-            $resultat = $tache->soumettreResultatIndividuel($user, $validated);
-
-            // Gérer les documents
-            if ($request->hasFile('documents')) {
-                foreach ($request->file('documents') as $file) {
-                    $this->uploadDocument($resultat, $file);
-                }
-            }
-
-            // Notifier les responsables
-            $this->notifyResponsablesOfResult($tache, $user, $resultat);
-
-            return response()->json([
-                'message' => 'Votre résultat a été soumis avec succès',
-                'data' => [
-                    'resultat' => new TacheResultatResource($resultat->fresh(['documents'])),
-                    'tache' => new TacheResource($tache->fresh()),
-                ],
-            ], 201);
-
-        } catch (\Exception $e) {
-            Log::error('Erreur soumission résultat individuel', [
-                'tache_id' => $tache->id,
-                'user_id' => $user->id,
-                'error' => $e->getMessage()
-            ]);
-
-            return response()->json([
-                'message' => $e->getMessage()
-            ], 422);
-        }
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => $e->getMessage()
+        ], 422);
     }
-
-    /**
-     * ✅ MODIFIÉ : Valider un résultat individuel (N1)
-     */
-    public function validateIndividualResultN1(Request $request, TacheResultat $resultat): JsonResponse
-    {
-        $validated = $request->validate([
-            'commentaire' => 'nullable|string|max:1000',
-        ]);
-
-        $user = $request->user();
-
-        try {
-            $tache = $resultat->tache;
-
-            if (!$resultat->canBeValidatedByN1($user)) {
-                return response()->json([
-                    'message' => 'Vous n\'avez pas la permission de valider ce résultat'
-                ], 403);
-            }
-
-            $resultat->validateByN1($user, $validated['commentaire'] ?? null);
-
-            return response()->json([
-                'message' => 'Résultat validé N1 avec succès',
-                'data' => [
-                    'resultat' => new TacheResultatResource($resultat->fresh()),
-                    'tache' => new TacheResource($tache->fresh()),
-                ],
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => $e->getMessage()
-            ], 422);
-        }
-    }
+}
 
     /**
      * ✅ MODIFIÉ : Valider un résultat individuel (N2)

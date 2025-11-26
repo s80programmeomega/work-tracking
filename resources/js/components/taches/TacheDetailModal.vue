@@ -50,6 +50,17 @@
               </svg>
             </button>
 
+            <!-- Bouton refresh -->
+            <button 
+              @click="refreshTask"
+              :disabled="isRefreshing"
+              class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors disabled:opacity-50"
+              title="Actualiser">
+              <svg class="w-5 h-5" :class="{ 'animate-spin': isRefreshing }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
+
             <button @click="$emit('close')" 
                     class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-2">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -158,6 +169,7 @@
             <ResultatsSection
               :tache="tache"
               @resultat-added="handleResultatAdded"
+              @refresh="refreshTask"
             />
           </div>
 
@@ -172,14 +184,14 @@
           </div>
 
           <!-- Onglet Documents -->
-          <div v-show="activeTab === 'documents'">
+          <!-- <div v-show="activeTab === 'documents'">
             <DocumentSection
               v-if="tache?.id"
               documentable-type="App\Models\Tache"
               :documentable-id="tache.id"
               :current-user-id="currentUser?.id"
             />
-          </div>
+          </div> -->
 
         </div>
       </div>
@@ -220,7 +232,8 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useTaches } from '@/composables/useTaches' 
+import { useTaches } from '@/composables/useTaches'
+import api from '@/api/axios'
 
 import QuickActionsPanel from './panels/QuickActionsPanel.vue'
 import EssentialInfoPanel from './panels/EssentialInfoPanel.vue'
@@ -230,7 +243,7 @@ import SectionCollapsible from './panels/SectionCollapsible.vue'
 import DetailedTaskView from './DetailedTaskView.vue'
 import ResultatsSection from './ResultatsSection.vue'
 import CommentSection from '@/components/comments/CommentSection.vue'
-import DocumentSection from '@/components/common/DocumentSection.vue'
+// import DocumentSection from '@/components/common/DocumentSection.vue'
 
 const props = defineProps({
   tache: {
@@ -247,6 +260,8 @@ const { completeTache } = useTaches()
 const isDetailedView = ref(false)
 const activeTab = ref('details')
 const latestComment = ref(null)
+const isRefreshing = ref(false)
+const localTache = ref(props.tache)
 
 // Computed
 const modalSizeClass = computed(() => 
@@ -255,9 +270,9 @@ const modalSizeClass = computed(() =>
 
 const tabs = computed(() => [
   { id: 'details', label: 'Détails' },
-  { id: 'resultats', label: 'Résultats', count: props.tache.resultats_count || 0 },
-  { id: 'commentaires', label: 'Commentaires', count: props.tache.comments_count || 0 },
-  { id: 'documents', label: 'Documents', count: props.tache.documents_count || 0 },
+  { id: 'resultats', label: 'Résultats', count: localTache.value.resultats_count || 0 },
+  { id: 'commentaires', label: 'Commentaires', count: localTache.value.comments_count || 0 },
+  // { id: 'documents', label: 'Documents', count: localTache.value.documents_count || 0 },
 ])
 
 const currentUser = computed(() => {
@@ -267,7 +282,7 @@ const currentUser = computed(() => {
 
 // Détection automatique du mode détaillé
 const shouldUseDetailedView = computed(() => {
-  const t = props.tache
+  const t = localTache.value
   return (
     (t.comments_count > 3) ||
     (t.documents_count > 2) ||
@@ -284,13 +299,13 @@ const enableDetailedView = (tab = 'details') => {
 }
 
 const handleCompleteTask = async () => {
-  if (!props.tache.permissions?.can_complete) {
+  if (!localTache.value.permissions?.can_complete) {
     alert('Vous n\'avez pas la permission de marquer cette tâche comme terminée')
     return
   }
 
   try {
-    await completeTache(props.tache.id)
+    await completeTache(localTache.value.id)
     emit('close')
   } catch (error) {
     console.error('Error completing task:', error)
@@ -303,8 +318,20 @@ const handleResultatAdded = () => {
   refreshTask()
 }
 
-const refreshTask = () => {
-  emit('refresh')
+// ✅ AMÉLIORATION : Méthode pour recharger complètement la tâche
+const refreshTask = async () => {
+  if (isRefreshing.value) return
+  
+  isRefreshing.value = true
+  try {
+    const { data } = await api.get(`/taches/${localTache.value.id}`)
+    localTache.value = data.data
+    emit('refresh', data.data)
+  } catch (error) {
+    console.error('Error refreshing task:', error)
+  } finally {
+    isRefreshing.value = false
+  }
 }
 
 // Méthodes utilitaires
@@ -372,6 +399,6 @@ const formatRelativeTime = (date) => {
 onMounted(() => {
   if (shouldUseDetailedView.value) {
     isDetailedView.value = true
-  } 
+  }
 })
 </script>

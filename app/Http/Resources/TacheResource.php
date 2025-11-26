@@ -7,24 +7,49 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class TacheResource extends JsonResource
 {
-
-
     public function toArray(Request $request): array
     {
         $user = $request->user();
+
+        // ✅ Helper pour formater les dates en toute sécurité
+        $formatDate = function ($date) {
+            if (!$date) return null;
+            if (is_string($date)) return $date;
+            if (method_exists($date, 'format')) return $date->format('Y-m-d H:i:s');
+            return null;
+        };
+
+        $formatDateOnly = function ($date) {
+            if (!$date) return null;
+            if (is_string($date)) return $date;
+            if (method_exists($date, 'format')) return $date->format('Y-m-d');
+            return null;
+        };
+
+        // ✅ Helper pour formater les dates du pivot
+        $formatPivotDate = function ($date) {
+            if (!$date) return null;
+            if (is_string($date)) return $date;
+            if (method_exists($date, 'format')) return $date->format('Y-m-d H:i:s');
+            return null;
+        };
+
         return [
             'id' => $this->id,
             'code' => $this->code,
 
-            // Activité
+            // ✅ Activité avec vérification null
             'activite_id' => $this->activite_id,
-            'activite' => [
-                'id' => $this->activite->id,
-                'nom' => $this->activite->nom,
-                'code' => $this->activite->code,
-                'projet_id' => $this->activite->projet_id,
-                'projet_nom' => $this->activite->projet->nom ?? null,
-            ],
+            'activite' => $this->when($this->activite, function () {
+                return [
+                    'id' => $this->activite->id,
+                    'nom' => $this->activite->nom,
+                    'code' => $this->activite->code,
+                    'projet_id' => $this->activite->projet_id,
+                    'projet_nom' => $this->activite->projet?->nom,
+                    'responsable_id' => $this->activite->responsable_id,
+                ];
+            }),
 
             // Informations de base
             'titre' => $this->titre,
@@ -32,57 +57,80 @@ class TacheResource extends JsonResource
             'objectif' => $this->objectif,
             'indicateurs_resultats' => $this->indicateurs_resultats,
             'commentaire' => $this->commentaire,
+
+            // Fichiers et liens
             'attachments' => TacheAttachmentResource::collection($this->whenLoaded('attachments')),
             'external_links' => TacheExternalLinkResource::collection($this->whenLoaded('externalLinks')),
 
-            // Statut et priorité
+            // Statut global
             'statut' => $this->statut->value,
             'statut_label' => $this->statut->label(),
             'statut_color' => $this->statut->color(),
+
             'priorite' => $this->priorite->value,
             'priorite_label' => $this->priorite->label(),
             'priorite_color' => $this->priorite->color(),
             'priorite_icon' => $this->priorite->icon(),
 
-            // ✅ NOUVEAU : Mon statut personnel
-            'my_status' => $this->when($user && $this->isAssignedTo($user), function () use ($user) {
-                $pivot = $this->assignees()->where('user_id', $user->id)->first();
+            // ✅ MON statut individuel avec helper de formatage
+            'my_status' => $this->when($user, function () use ($user, $formatPivotDate) {
+                if (!$this->isAssignedTo($user)) {
+                    return null;
+                }
+
+                $pivot = $this->assignees()
+                    ->where('user_id', $user->id)
+                    ->withPivot([
+                        'statut_individuel',
+                        'progression_individuelle',
+                        'started_at',
+                        'completed_at',
+                        'notes_personnelles',
+                        'role',
+                        'can_edit',
+                        'can_complete',
+                        'can_validate'
+                    ])
+                    ->first();
+
+                if (!$pivot) {
+                    return null;
+                }
 
                 return [
-                    'statut' => $pivot?->pivot->statut_individuel ?? $this->statut->value,
-                    'progression' => $pivot?->pivot->progression_individuelle ?? 0,
-                    'started_at' => $pivot?->pivot->started_at?->format('Y-m-d H:i:s'),
-                    'completed_at' => $pivot?->pivot->completed_at?->format('Y-m-d H:i:s'),
-                    'notes_personnelles' => $pivot?->pivot->notes_personnelles,
-                    'can_move' => true, // L'utilisateur peut toujours bouger sa propre carte
+                    'statut' => $pivot->pivot->statut_individuel ?? $this->statut->value,
+                    'progression' => $pivot->pivot->progression_individuelle ?? 0,
+                    'started_at' => $formatPivotDate($pivot->pivot->started_at),
+                    'completed_at' => $formatPivotDate($pivot->pivot->completed_at),
+                    'notes_personnelles' => $pivot->pivot->notes_personnelles,
+                    'can_edit' => (bool) ($pivot->pivot->can_edit ?? false),
+                    'can_complete' => (bool) ($pivot->pivot->can_complete ?? true),
+                    'can_validate' => (bool) ($pivot->pivot->can_validate ?? false),
+                    'role' => $pivot->pivot->role ?? 'collaborator',
+                    'can_move' => true,
+                    'can_submit_result' => ($pivot->pivot->statut_individuel ?? $this->statut->value) === 'termine',
                 ];
             }),
 
             // Dates
-            'date_debut' => $this->date_debut?->format('Y-m-d'),
-            'echeance' => $this->echeance?->format('Y-m-d'),
-            'date_fin_reelle' => $this->date_fin_reelle?->format('Y-m-d'),
+            'date_debut' => $formatDateOnly($this->date_debut),
+            'echeance' => $formatDateOnly($this->echeance),
+            'date_fin_reelle' => $formatDateOnly($this->date_fin_reelle),
 
-            // ✅ Suivi hebdomadaire
+            // Suivi hebdomadaire
             'week_number' => $this->week_number,
             'year' => $this->year,
 
-            // Progression
+            // Progression globale
             'taux_realisation' => $this->taux_realisation,
             'estimated_hours' => $this->estimated_hours,
             'actual_hours' => $this->actual_hours,
-            'time_variance' => $this->when(
-                $this->estimated_hours && $this->actual_hours,
-                function () {
-                    return $this->actual_hours - $this->estimated_hours;
-                }
-            ),
 
-            // ✅ DOUBLE VALIDATION
+            // ✅ CORRECTION CRITIQUE: Validation avec vérifications null-safe
             'validation' => [
                 'n1_required' => $this->validation_n1_required,
-                'n1_validated_at' => $this->validated_n1_at?->format('Y-m-d H:i:s'),
-                'n1_validated_by' => $this->when($this->validatedN1By, function () {
+                'n1_validated_at' => $formatDate($this->validated_n1_at),
+                'n1_validated_by' => $this->when($this->validatedN1By && $this->validatedN1By->id, function () {
                     return [
                         'id' => $this->validatedN1By->id,
                         'nom' => $this->validatedN1By->nom,
@@ -91,59 +139,73 @@ class TacheResource extends JsonResource
                 'n1_commentaire' => $this->commentaire_n1,
 
                 'n2_required' => $this->validation_n2_required,
-                'n2_validated_at' => $this->validated_n2_at?->format('Y-m-d H:i:s'),
-                'n2_validated_by' => $this->when($this->validatedN2By, [
-                    'id' => $this->validatedN2By?->id,
-                    'nom' => $this->validatedN2By?->nom,
-                ]),
+                'n2_validated_at' => $formatDate($this->validated_n2_at),
+                'n2_validated_by' => $this->when($this->validatedN2By && $this->validatedN2By->id, function () {
+                    return [
+                        'id' => $this->validatedN2By->id,
+                        'nom' => $this->validatedN2By->nom,
+                    ];
+                }),
                 'n2_commentaire' => $this->commentaire_n2,
 
                 'status' => $this->validation_status,
                 'is_fully_validated' => $this->isFullyValidated(),
             ],
 
-            // ✅ NOUVEAU : Assignés avec leurs statuts individuels
-            'assignees' => $this->assignees->map(function ($user) {
-                return [
-                    'id' => $user->id,
-                    'nom' => $user->nom,
-                    'email' => $user->email,
-                    'avatar' => $user->avatar,
-                    'pivot' => [
-                        'role' => $user->pivot->role,
-                        'can_edit' => (bool) $user->pivot->can_edit,
-                        'can_complete' => (bool) $user->pivot->can_complete,
-                        'can_validate' => (bool) $user->pivot->can_validate,
-                        // ✅ Statut individuel
-                        'statut_individuel' => $user->pivot->statut_individuel,
-                        'progression_individuelle' => $user->pivot->progression_individuelle,
-                        'started_at' => $user->pivot->started_at?->format('Y-m-d H:i:s'),
-                        'completed_at' => $user->pivot->completed_at?->format('Y-m-d H:i:s'),
-                    ],
-                ];
-            }),
+            // ✅ Assignés avec helper de formatage
+            'assignees' => $this->whenLoaded('assignees', function () use ($formatPivotDate) {
+                return $this->assignees->map(function ($assignedUser) use ($formatPivotDate) {
+                    return [
+                        'id' => $assignedUser->id,
+                        'nom' => $assignedUser->nom,
+                        'email' => $assignedUser->email,
+                        'avatar' => $assignedUser->avatar,
+                        'pivot' => [
+                            'role' => $assignedUser->pivot->role ?? 'collaborator',
+                            'can_edit' => (bool) ($assignedUser->pivot->can_edit ?? false),
+                            'can_complete' => (bool) ($assignedUser->pivot->can_complete ?? true),
+                            'can_validate' => (bool) ($assignedUser->pivot->can_validate ?? false),
+                            'statut_individuel' => $assignedUser->pivot->statut_individuel ?? 'a_faire',
+                            'progression_individuelle' => $assignedUser->pivot->progression_individuelle ?? 0,
+                            'started_at' => $formatPivotDate($assignedUser->pivot->started_at),
+                            'completed_at' => $formatPivotDate($assignedUser->pivot->completed_at),
+                        ],
+                    ];
+                });
+            }, []),
 
-            // ✅ NOUVEAU : Statistiques d'équipe
+            // ✅ Statistiques d'équipe avec gestion d'erreur
             'team_stats' => $this->when($this->assignees->count() > 1, function () {
-                $stats = $this->getStatistiquesAssignes();
-                $termine = collect($stats)->where('statut', 'termine')->count();
-                $enCours = collect($stats)->where('statut', 'en_cours')->count();
-                $aFaire = collect($stats)->where('statut', 'a_faire')->count();
-                $total = count($stats);
+                try {
+                    $stats = $this->getStatistiquesAssignes();
+                    $termine = collect($stats)->where('statut', 'termine')->count();
+                    $enCours = collect($stats)->where('statut', 'en_cours')->count();
+                    $aFaire = collect($stats)->where('statut', 'a_faire')->count();
+                    $total = count($stats);
 
-                return [
-                    'termine_count' => $termine,
-                    'en_cours_count' => $enCours,
-                    'a_faire_count' => $aFaire,
-                    'total' => $total,
-                    'completion_percentage' => $total > 0 ? round(($termine / $total) * 100) : 0,
-                    'tous_ont_termine' => $this->tousLesAssignesOntTermine(),
-                ];
+                    return [
+                        'termine_count' => $termine,
+                        'en_cours_count' => $enCours,
+                        'a_faire_count' => $aFaire,
+                        'total' => $total,
+                        'completion_percentage' => $total > 0 ? round(($termine / $total) * 100) : 0,
+                        'tous_ont_termine' => $this->tousLesAssignesOntTermine(),
+                    ];
+                } catch (\Exception $e) {
+                    return [
+                        'termine_count' => 0,
+                        'en_cours_count' => 0,
+                        'a_faire_count' => 0,
+                        'total' => 0,
+                        'completion_percentage' => 0,
+                        'tous_ont_termine' => false,
+                    ];
+                }
             }),
 
-            // ✅ NOUVEAU : Mon résultat individuel
-            'my_result' => $this->when($user && $this->isAssignedTo($user), function () use ($user) {
-                $resultat = $this->getResultatForUser($user);
+            // ✅ Mon résultat
+            'my_result' => $this->when($user && $this->isAssignedTo($user), function () use ($user, $formatDate) {
+                $resultat = $this->monResultat($user);
 
                 return $resultat ? [
                     'id' => $resultat->id,
@@ -154,51 +216,51 @@ class TacheResource extends JsonResource
                     'difficultes_rencontrees' => $resultat->difficultes_rencontrees,
                     'solutions_envisagees' => $resultat->solutions_envisagees,
                     'observations' => $resultat->observations,
-                    'soumis_le' => $resultat->soumis_le?->format('Y-m-d H:i:s'),
+                    'soumis_le' => $formatDate($resultat->soumis_le),
                     'valide_par_n1' => $resultat->valide_par_n1,
-                    'valide_le_n1' => $resultat->valide_le_n1?->format('Y-m-d H:i:s'),
+                    'valide_le_n1' => $formatDate($resultat->valide_le_n1),
                     'commentaire_n1' => $resultat->commentaire_n1,
                     'valide_par_n2' => $resultat->valide_par_n2,
-                    'valide_le_n2' => $resultat->valide_le_n2?->format('Y-m-d H:i:s'),
+                    'valide_le_n2' => $formatDate($resultat->valide_le_n2),
                     'commentaire_n2' => $resultat->commentaire_n2,
-                    'is_fully_validated' => $resultat->is_fully_validated,
-                    'validation_status' => $resultat->validation_status,
+                    'is_fully_validated' => $resultat->is_fully_validated ?? false,
+                    'validation_status' => $resultat->validation_status ?? 'not_submitted',
                     'documents_count' => $resultat->documents()->count(),
-                    'created_at' => $resultat->created_at->format('Y-m-d H:i:s'),
+                    'created_at' => $formatDate($resultat->created_at),
                 ] : null;
             }),
 
-            // ✅ NOUVEAU : Résultats de tous les assignés (visible par responsables)
+            // ✅ Tous les résultats avec vérifications complètes
             'all_results' => $this->when(
-                $user && ($this->activite->responsable_id === $user->id ||
-                    ($this->activite->projet && $this->activite->projet->responsable_id === $user->id)),
-                function () {
-                    return $this->getResultatsIndividuels()->map(function ($resultat) {
-                        return [
-                            'id' => $resultat->id,
-                            'user' => [
-                                'id' => $resultat->user->id,
-                                'nom' => $resultat->user->nom,
-                                'avatar' => $resultat->user->avatar,
-                            ],
-                            'is_individual' => $resultat->is_individual,
-                            'resultats_obtenus' => $resultat->resultats_obtenus,
-                            'taux_realisation' => $resultat->taux_realisation,
-                            'soumis_le' => $resultat->soumis_le?->format('Y-m-d H:i:s'),
-                            'valide_par_n1' => $resultat->valide_par_n1,
-                            'valide_par_n2' => $resultat->valide_par_n2,
-                            'is_fully_validated' => $resultat->is_fully_validated,
-                            'validation_status' => $resultat->validation_status,
-                            'documents_count' => $resultat->documents()->count(),
-                        ];
-                    });
+                $user && $this->activite && (
+                    $this->activite->responsable_id === $user->id ||
+                    ($this->activite->projet && $this->activite->projet->responsable_id === $user->id) ||
+                    $user->isSuperAdmin()
+                ),
+                function () use ($formatDate) {
+                    return $this->whenLoaded('resultatsIndividuels', function () use ($formatDate) {
+                        return $this->resultatsIndividuels->map(function ($resultat) use ($formatDate) {
+                            return [
+                                'id' => $resultat->id,
+                                'user' => $resultat->user ? [
+                                    'id' => $resultat->user->id,
+                                    'nom' => $resultat->user->nom,
+                                    'avatar' => $resultat->user->avatar,
+                                ] : null,
+                                'is_individual' => $resultat->is_individual,
+                                'resultats_obtenus' => $resultat->resultats_obtenus,
+                                'taux_realisation' => $resultat->taux_realisation,
+                                'soumis_le' => $formatDate($resultat->soumis_le),
+                                'valide_par_n1' => $resultat->valide_par_n1,
+                                'valide_par_n2' => $resultat->valide_par_n2,
+                                'is_fully_validated' => $resultat->is_fully_validated ?? false,
+                                'validation_status' => $resultat->validation_status ?? 'pending',
+                                'documents_count' => $resultat->documents()->count(),
+                            ];
+                        });
+                    }, []);
                 }
             ),
-
-            // ✅ AJOUTER : Statistiques des résultats
-            'resultats_stats' => $this->when($this->assignees->count() > 1, function () {
-                return $this->getStatsResultats();
-            }),
 
             // Labels
             'labels' => LabelResource::collection($this->whenLoaded('labels')),
@@ -206,14 +268,7 @@ class TacheResource extends JsonResource
             // Sous-tâches
             'parent_tache_id' => $this->parent_tache_id,
             'is_subtask' => (bool) $this->parent_tache_id,
-            'sous_taches_count' => $this->whenLoaded('sousTaches', function () {
-                return $this->sousTaches->count();
-            }),
-
-            // Résultats
-            'resultats_count' => $this->whenLoaded('resultats', function () {
-                return $this->resultats->count();
-            }),
+            'sous_taches_count' => $this->whenLoaded('sousTaches', fn() => $this->sousTaches->count()),
 
             // Apparence
             'position' => $this->position,
@@ -225,30 +280,28 @@ class TacheResource extends JsonResource
             'is_overdue' => $this->is_overdue,
             'can_be_completed' => $this->can_be_completed,
             'can_be_started' => $this->canBeStarted(),
-            'verrou_reevaluation' => $this->verrou_reevaluation,
 
             // Archive
             'archive_status' => $this->archive_status,
-            'archived_at' => $this->archived_at?->format('Y-m-d H:i:s'),
+            'archived_at' => $formatDate($this->archived_at),
 
             // Métadonnées
-            'metadata' => $this->metadata,
             'created_by' => $this->created_by,
-            'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
-            'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
+            'created_at' => $formatDate($this->created_at),
+            'updated_at' => $formatDate($this->updated_at),
 
-            // ✅ Permissions pour l'utilisateur actuel
-            'permissions' => $this->when($request->user(), function () use ($request) {
-                $user = $request->user();
+            // ✅ Permissions avec vérifications null-safe
+            'permissions' => $this->when($user, function () use ($user) {
                 return [
                     'can_view' => $this->isAccessibleBy($user),
                     'can_edit' => $this->canBeEditedBy($user),
                     'can_complete' => $this->canBeCompletedBy($user),
-                    'can_validate_n1' => $this->canBeValidatedN1By($user),
-                    'can_validate_n2' => $this->canBeValidatedN2By($user),
+                    'can_validate_n1' => $this->activite ? $this->canBeValidatedN1By($user) : false,
+                    'can_validate_n2' => $this->activite ? $this->canBeValidatedN2By($user) : false,
                     'can_move_my_card' => $this->isAssignedTo($user),
                     'can_submit_result' => $this->isAssignedTo($user) &&
-                        $this->getStatutForUser($user) === 'termine',
+                        $this->getStatutForUser($user) === 'termine' &&
+                        !$this->monResultat($user),
                 ];
             }),
         ];

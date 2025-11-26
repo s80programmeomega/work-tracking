@@ -333,7 +333,7 @@ const selectedResult = ref(null)
 // Computed
 const years = computed(() => {
   const currentYear = new Date().getFullYear()
-  return [currentYear - 1, currentYear, currentYear + 1]
+  return [currentYear - 5, currentYear, currentYear + 1]
 })
 
 const weekDates = computed(() => {

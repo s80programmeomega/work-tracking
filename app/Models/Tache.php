@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\TachePriorite;
 use App\Enums\TacheStatut;
 use App\Notifications\AssigneCompletedTaskNotification;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -157,8 +158,23 @@ class Tache extends Model
     public function assignees(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'tache_user')
-            ->withPivot(['role', 'can_edit', 'can_complete', 'can_validate'])
-            ->withTimestamps();
+            ->withPivot([
+                'role',
+                'can_edit',
+                'can_complete',
+                'can_validate',
+                'statut_individuel',
+                'progression_individuelle',
+                'started_at',
+                'completed_at',
+                'notes_personnelles'
+            ])
+            ->withTimestamps()
+            ->withCasts([
+                'started_at' => 'datetime',
+                'completed_at' => 'datetime',
+                'progression_individuelle' => 'integer',
+            ]);
     }
 
     public function validatedN1By(): BelongsTo
@@ -199,6 +215,13 @@ class Tache extends Model
     }
 
 
+    public function resultatsIndividuels(): HasMany
+    {
+        return $this->hasMany(TacheResultat::class)
+            ->where('is_individual', true)
+            ->with(['user', 'validateurN1', 'validateurN2', 'documents']);
+    }
+
     /**
      * ✅ NOUVEAU : Obtenir le résultat global (si existe)
      */
@@ -206,6 +229,24 @@ class Tache extends Model
     {
         return $this->resultats()
             ->where('is_individual', false)
+            ->first();
+    }
+
+    /**
+     * ✅ CORRECTION 2: Relation pour mon résultat (helper)
+     */
+    public function monResultat(?User $user = null): ?TacheResultat
+    {
+        if (!$user) {
+            $user = auth()->user();
+        }
+
+        if (!$user) {
+            return null;
+        }
+
+        return $this->resultatsIndividuels()
+            ->where('user_id', $user->id)
             ->first();
     }
 
@@ -218,8 +259,37 @@ class Tache extends Model
             ->where('user_id', $user->id)
             ->first();
 
-        return $pivot?->pivot->statut_individuel ?? $this->statut->value;
+        // ✅ CORRECTION: Retourner le statut individuel s'il existe
+        if ($pivot && $pivot->pivot->statut_individuel) {
+            return $pivot->pivot->statut_individuel;
+        }
+
+        // Sinon, retourner le statut global par défaut
+        return $this->statut->value;
     }
+
+    /**
+     * ✅ CORRECTION 4: Obtenir toutes les infos de statut pour un utilisateur
+     */
+    public function getMyStatusInfo(User $user): ?array
+    {
+        $pivot = $this->assignees()
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$pivot) {
+            return null;
+        }
+
+        return [
+            'statut' => $pivot->pivot->statut_individuel ?? $this->statut->value,
+            'progression' => $pivot->pivot->progression_individuelle ?? 0,
+            'started_at' => $pivot->pivot->started_at,
+            'completed_at' => $pivot->pivot->completed_at,
+            'notes_personnelles' => $pivot->pivot->notes_personnelles,
+        ];
+    }
+
 
     /**
      * ✅ NOUVEAU : Obtenir la progression individuelle
@@ -233,9 +303,6 @@ class Tache extends Model
         return $pivot?->pivot->progression_individuelle ?? 0;
     }
 
-    /**
-     * ✅ NOUVEAU : Mettre à jour le statut individuel
-     */
     public function updateStatutForUser(User $user, string $newStatut, ?int $progression = null): void
     {
         if (!$this->isAssignedTo($user)) {
@@ -251,7 +318,7 @@ class Tache extends Model
             $updateData['progression_individuelle'] = max(0, min(100, $progression));
         }
 
-        // Timestamps selon le statut
+        // ✅ AUTO-GÉRER les timestamps selon le statut
         if ($newStatut === 'en_cours') {
             $pivot = $this->assignees()->where('user_id', $user->id)->first();
             if (!$pivot->pivot->started_at) {
@@ -263,17 +330,22 @@ class Tache extends Model
         } elseif ($newStatut === 'a_faire') {
             $updateData['started_at'] = null;
             $updateData['completed_at'] = null;
+            $updateData['progression_individuelle'] = 0;
         }
 
+        // ✅ IMPORTANT: Mettre à jour le pivot sans toucher aux autres utilisateurs
         $this->assignees()->updateExistingPivot($user->id, $updateData);
 
-        // Recalculer le statut global de la tâche
+        // ✅ Recalculer le statut global de la tâche (APRÈS la mise à jour du pivot)
         $this->recalculateGlobalStatus();
 
-        // Notifier le responsable si l'utilisateur a terminé
-        if ($newStatut === 'termine') {
-            $this->notifyResponsableOfCompletion($user);
-        }
+        // Log de l'action
+        \Log::info('Statut individuel mis à jour', [
+            'tache_id' => $this->id,
+            'user_id' => $user->id,
+            'nouveau_statut' => $newStatut,
+            'progression' => $progression,
+        ]);
     }
 
     /**
@@ -281,6 +353,7 @@ class Tache extends Model
      */
     protected function recalculateGlobalStatus(): void
     {
+        // Recharger les assignés avec les pivots à jour
         $assignees = $this->assignees()
             ->withPivot('statut_individuel', 'progression_individuelle')
             ->get();
@@ -289,14 +362,14 @@ class Tache extends Model
             return;
         }
 
-        // Compter les statuts
+        // Compter les statuts individuels
         $countTermine = $assignees->where('pivot.statut_individuel', 'termine')->count();
         $countEnCours = $assignees->where('pivot.statut_individuel', 'en_cours')->count();
-        $countAFaire = $assignees->where('pivot.statut_individuel', 'a_faire')->count();
-
         $total = $assignees->count();
 
-        // Règles de calcul du statut global
+        // ✅ RÈGLES de calcul du statut global
+        $newStatut = null;
+
         if ($countTermine === $total) {
             // Tous ont terminé → Tâche terminée
             $newStatut = TacheStatut::TERMINE;
@@ -311,13 +384,53 @@ class Tache extends Model
         // Calculer la progression globale (moyenne)
         $progressionMoyenne = $assignees->avg('pivot.progression_individuelle') ?? 0;
 
-        // Mettre à jour uniquement si changement
+        // ✅ Mettre à jour UNIQUEMENT si changement
         if ($this->statut !== $newStatut || $this->taux_realisation !== round($progressionMoyenne)) {
             $this->update([
                 'statut' => $newStatut,
                 'taux_realisation' => round($progressionMoyenne),
             ]);
+
+            \Log::info('Statut global recalculé', [
+                'tache_id' => $this->id,
+                'nouveau_statut_global' => $newStatut->value,
+                'progression_moyenne' => round($progressionMoyenne),
+                'termine' => $countTermine,
+                'en_cours' => $countEnCours,
+                'total' => $total,
+            ]);
         }
+    }
+
+    /**
+     * ✅ NOUVEAU: Scope pour mes tâches avec mon statut
+     */
+    public function scopeWithMyStatus($query, User $user)
+    {
+        return $query->with([
+            'assignees' => function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                    ->withPivot([
+                        'statut_individuel',
+                        'progression_individuelle',
+                        'started_at',
+                        'completed_at',
+                        'notes_personnelles'
+                    ]);
+            }
+        ]);
+    }
+
+
+    /**
+     * ✅ NOUVEAU: Obtenir les tâches d'un utilisateur par statut individuel
+     */
+    public function scopeForUserByStatus($query, User $user, string $statut)
+    {
+        return $query->whereHas('assignees', function ($q) use ($user, $statut) {
+            $q->where('user_id', $user->id)
+                ->where('statut_individuel', $statut);
+        });
     }
 
     /**
@@ -376,8 +489,8 @@ class Tache extends Model
                 'progression' => $pivot->progression_individuelle,
                 'started_at' => $pivot->started_at,
                 'completed_at' => $pivot->completed_at,
-                'duree' => $pivot->started_at && $pivot->completed_at
-                    ? $pivot->started_at->diffInHours($pivot->completed_at)
+                'duree' => ($pivot->started_at && $pivot->completed_at)
+                    ? Carbon::parse($pivot->started_at)->diffInHours(Carbon::parse($pivot->completed_at))
                     : null,
                 'en_retard' => $pivot->statut_individuel !== 'termine' && $this->is_overdue,
             ];
@@ -428,7 +541,8 @@ class Tache extends Model
     /**
      * ✅ NOUVEAU : Soumettre un résultat individuel
      */
-    public function soumettreResultatIndividuel(User $user,array $data): TacheResultat {
+    public function soumettreResultatIndividuel(User $user, array $data): TacheResultat
+    {
         if (!$this->isAssignedTo($user)) {
             throw new \Exception('Vous n\'êtes pas assigné à cette tâche');
         }
