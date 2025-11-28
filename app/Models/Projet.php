@@ -61,8 +61,16 @@ class Projet extends Model
             if (empty($projet->code)) {
                 $projet->code = static::generateUniqueCode();
             }
+
+            // Met à jour la progression quand une activité est modifiée
+
+            // Si des activités ont été modifiées, recalculer la progression
+            if ($projet->isDirty('progression') === false) {
+                $projet->updateAutoProgression();
+            }
         });
     }
+
 
     public static function generateUniqueCode(): string
     {
@@ -91,45 +99,45 @@ class Projet extends Model
     public function members(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'projet_user')
-            ->withPivot(['role', 'can_edit', 'can_delete', 'can_invite','can_delete_member'])
+            ->withPivot(['role', 'can_edit', 'can_delete', 'can_invite', 'can_delete_member'])
             ->withTimestamps();
     }
 
     public function creator(): BelongsTo
-{
-    return $this->belongsTo(User::class, 'created_by');
-}
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 
-public function canUserValidateN2(User $user): bool
-{
-    // Responsable du projet = Manager N2
-    return $this->responsable_id === $user->id;
-}
-public function isAccessibleBy(User $user): bool
-{
-    // Super admin
-    if ($user->isSuperAdmin()) {
-        return true;
+    public function canUserValidateN2(User $user): bool
+    {
+        // Responsable du projet = Manager N2
+        return $this->responsable_id === $user->id;
     }
-    
-    // Workspace owner/admin can see all projects
-    if ($this->workspace && $user->canSeeAllWorkspaceProjects($this->workspace)) {
-        return true;
+    public function isAccessibleBy(User $user): bool
+    {
+        // Super admin
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        // Workspace owner/admin can see all projects
+        if ($this->workspace && $user->canSeeAllWorkspaceProjects($this->workspace)) {
+            return true;
+        }
+
+        // Responsable du projet
+        if ($this->responsable_id === $user->id) {
+            return true;
+        }
+
+        // Membre du projet
+        if ($this->isMember($user)) {
+            return true;
+        }
+
+        // Accès temporaire
+        return $user->hasTemporaryAccess($this);
     }
-    
-    // Responsable du projet
-    if ($this->responsable_id === $user->id) {
-        return true;
-    }
-    
-    // Membre du projet
-    if ($this->isMember($user)) {
-        return true;
-    }
-    
-    // Accès temporaire
-    return $user->hasTemporaryAccess($this);
-}
 
     public function tags(): BelongsToMany
     {
@@ -498,4 +506,110 @@ public function isAccessibleBy(User $user): bool
                 ->orWhere('visibility', 'public');
         });
     }
+
+
+    /**
+     * ✅ CALCUL DE LA PROGRESSION BASÉE SUR LA MOYENNE DES ACTIVITÉS AVEC POIDS
+     */
+    public function calculateAutoProgression(): int
+    {
+        // Si le projet est terminé ou archivé, on retourne la progression actuelle
+        if (in_array($this->status, ['completed', 'archived'])) {
+            return $this->progression ?? 100; // Projet terminé = 100%
+        }
+
+        $activites = $this->activites()->where('status', 'active')->get();
+
+        // Si pas d'activités actives, progression à 0
+        if ($activites->isEmpty()) {
+            return 0;
+        }
+
+        $totalProgressionPonderee = 0;
+        $totalPoids = 0;
+
+        foreach ($activites as $activite) {
+            // Calcul du poids de l'activité
+            $poids = $this->calculateActivityWeight($activite);
+
+            // Progression de l'activité (entre 0 et 100)
+            $progressionActivite = $activite->progression ?? 0;
+
+            // Contribution pondérée de cette activité
+            $totalProgressionPonderee += $progressionActivite * $poids;
+            $totalPoids += $poids;
+        }
+
+        // Éviter la division par zéro
+        if ($totalPoids === 0) {
+            return 0;
+        }
+
+        // Calcul de la moyenne pondérée
+        $progressionMoyenne = (int) round($totalProgressionPonderee / $totalPoids);
+
+        // Limiter entre 0 et 100
+        return max(0, min(100, $progressionMoyenne));
+    }
+
+    /**
+     * ✅ CALCULE LE POIDS D'UNE ACTIVITÉ POUR LA MOYENNE
+     */
+    private function calculateActivityWeight($activite): float
+    {
+        $poids = 1.0; // Poids de base
+
+        // FACTEUR 1: Nombre de tâches (plus il y a de tâches, plus l'activité est importante)
+        $tacheCount = $activite->tache_count ?? $activite->taches()->count();
+        if ($tacheCount > 20) {
+            $poids += 1.0; // Très importante
+        } elseif ($tacheCount > 10) {
+            $poids += 0.7; // Importante
+        } elseif ($tacheCount > 5) {
+            $poids += 0.4; // Moyennement importante
+        } elseif ($tacheCount > 0) {
+            $poids += 0.2; // Légèrement importante
+        }
+
+        // FACTEUR 2: Durée de l'activité (activités plus longues = plus de poids)
+        if ($activite->date_debut && $activite->date_fin) {
+            $dureeJours = $activite->date_debut->diffInDays($activite->date_fin);
+            if ($dureeJours > 90) { // +3 mois
+                $poids += 0.8;
+            } elseif ($dureeJours > 30) { // +1 mois
+                $poids += 0.4;
+            }
+        }
+
+        // FACTEUR 3: Retard (activités en retard ont plus d'impact sur la progression globale)
+        if ($activite->is_overdue) {
+            $poids += 0.5;
+        }
+
+        // FACTEUR 4: Nombre de membres (activités avec plus de collaborateurs = plus importantes)
+        $membresCount = $activite->membres_count ?? $activite->membres()->count();
+        if ($membresCount > 5) {
+            $poids += 0.6;
+        } elseif ($membresCount > 2) {
+            $poids += 0.3;
+        }
+
+        return $poids;
+    }
+
+    /**
+     * ✅ Mise à jour automatique de la progression
+     */
+    public function updateAutoProgression(): void
+    {
+        $nouvelleProgression = $this->calculateAutoProgression();
+
+        // Ne mettre à jour que si la progression a changé de manière significative
+        if (abs(($this->progression ?? 0) - $nouvelleProgression) >= 1) {
+            $this->update(['progression' => $nouvelleProgression]);
+        }
+    }
+
+
+
 }
