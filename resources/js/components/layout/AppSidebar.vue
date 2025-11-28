@@ -1,63 +1,38 @@
 <!-- resources\js\components\layout\AppSidebar.vue -->
 <template>
-       <aside
-        :class="[
-            'fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-40 border-r border-gray-200', // ← z-40 au lieu de z-99999
-            {
-                'lg:w-[290px]': isExpanded || isMobileOpen || isHovered,
-                'lg:w-[90px]': !isExpanded && !isHovered,
-                'translate-x-0 w-[290px]': isMobileOpen,
-                '-translate-x-full': !isMobileOpen,
-                'lg:translate-x-0': true,
-            },
-        ]"
-        @mouseenter="!isExpanded && (isHovered = true)"
-        @mouseleave="isHovered = false"
-    >
+    <aside :class="[
+        'fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-40 border-r border-gray-200',
+        {
+            'lg:w-[290px]': isExpanded || isMobileOpen || isHovered,
+            'lg:w-[90px]': !isExpanded && !isHovered,
+            'translate-x-0 w-[290px]': isMobileOpen,
+            '-translate-x-full': !isMobileOpen,
+            'lg:translate-x-0': true,
+        },
+    ]" @mouseenter="!isExpanded && (isHovered = true)" @mouseleave="isHovered = false">
         <!-- Logo Section (inchangé) -->
-        <div
-            :class="[
-                'py-8 flex',
-                !isExpanded && !isHovered
-                    ? 'lg:justify-center'
-                    : 'justify-start',
-            ]"
-        >
+        <!-- Logo Section -->
+        <div :class="[
+            'py-8 flex',
+            !isExpanded && !isHovered
+                ? 'lg:justify-center'
+                : 'justify-start',
+        ]">
             <router-link to="/">
-                <img
-                    v-if="isExpanded || isHovered || isMobileOpen"
-                    class="dark:hidden"
-                    src="@images/logo/Logo.png"
-                    alt="Logo"
-                    width="150"
-                    height="40"
-                />
-                <img
-                    v-if="isExpanded || isHovered || isMobileOpen"
-                    class="hidden dark:block"
-                    src="@images/logo/Logo-dark.jpg"
-                    alt="Logo"
-                    width="150"
-                    height="40"
-                />
-                <img
-                    v-else
-                    src="@images/logo/icon.jpg"
-                    alt="Logo"
-                    width="32"
-                    height="32"
-                />
+                <img v-if="isExpanded || isHovered || isMobileOpen" class="dark:hidden" src="@images/logo/Logo.png"
+                    alt="Logo" width="150" height="40" />
+                <img v-if="isExpanded || isHovered || isMobileOpen" class="hidden dark:block"
+                    src="@images/logo/Logo-dark.jpg" alt="Logo" width="150" height="40" />
+                <img v-else src="@images/logo/icon.jpg" alt="Logo" width="32" height="32" />
             </router-link>
         </div>
 
-        <!-- Workspace Selector (inchangé) -->
-        <div
-            v-if="isExpanded || isHovered || isMobileOpen"
-            class="mb-4 px-2" >
-            <button
-                @click="showWorkspaceSelector = !showWorkspaceSelector"
-                class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" >
-                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center text-white font-semibold text-sm">
+        <!-- Workspace Selector avec Filtre Dashboard -->
+        <div v-if="isExpanded || isHovered || isMobileOpen" class="mb-4 px-2">
+            <button @click="showWorkspaceSelector = !showWorkspaceSelector"
+                class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                <div
+                    class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center text-white font-semibold text-sm">
                     {{ currentWorkspaceInitials }}
                 </div>
                 <div class="flex-1 text-left overflow-hidden">
@@ -68,53 +43,101 @@
                         {{ workspaceProjectCount }} projets
                     </p>
                 </div>
-                <ChevronDownIcon
-                    :class="[
-                        'w-4 h-4 text-gray-400 transition-transform',
-                        { 'rotate-180': showWorkspaceSelector }
-                    ]"
-                />
+                <ChevronDownIcon :class="[
+                    'w-4 h-4 text-gray-400 transition-transform',
+                    { 'rotate-180': showWorkspaceSelector }
+                ]" />
             </button>
-            
-            <!-- Workspace Dropdown -->
+
+            <!-- Workspace Dropdown avec Filtre Dashboard -->
             <transition name="fade-slide">
-                <div
-                    v-if="showWorkspaceSelector"
-                    class="mt-2 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700" >
+                <div v-if="showWorkspaceSelector"
+                    class="mt-2 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+                    <!-- Section Filtre Dashboard -->
+                    <div class="px-3 pb-2 mb-2 border-b border-gray-200 dark:border-gray-700">
+                        <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">
+                            Filtre Dashboard
+                        </p>
+                        <button @click="selectWorkspaceForDashboard('all')" :class="[
+                            'w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs font-medium transition-colors mb-1',
+                            selectedDashboardWorkspace === 'all'
+                                ? 'bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400'
+                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                        ]">
+                            <GlobeIcon class="w-3 h-3" />
+                            <span>Tous les workspaces</span>
+                            <CheckIcon v-if="selectedDashboardWorkspace === 'all'" class="w-3 h-3 ml-auto" />
+                        </button>
+                    </div>
+
+                    <!-- Section Mes Workspaces -->
                     <div class="px-3 pb-2 mb-2 border-b border-gray-200 dark:border-gray-700">
                         <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
                             Mes Workspaces
                         </p>
                     </div>
-                    <button
-                        v-for="workspace in workspaces"
-                        :key="workspace.id"
-                        @click="selectWorkspace(workspace)"
-                        class="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" >
-                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white font-semibold text-sm">
-                            {{ getWorkspaceInitials(workspace.nom) }}
-                        </div>
-                        <div class="flex-1 text-left">
-                            <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                {{ workspace.nom }}
-                            </p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">
-                                {{ workspace.projets_count || 0 }} projets
-                            </p>
-                        </div>
-                        <CheckIcon
-                            v-if="currentWorkspace?.id === workspace.id"
-                            class="w-4 h-4 text-brand-500"
-                        />
-                    </button>
-                    <div class="px-3 pt-2 mt-2 border-t border-gray-200 dark:border-gray-700">
-                        <router-link
-                            to="/workspaces/create"
-                            class="flex items-center gap-2 text-sm text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300"
-                        >
+
+                     <div class="max-h-60 overflow-y-auto">
+          <!-- CORRECTION : Utiliser filteredWorkspaces et vérifier null -->
+          <button
+            v-for="workspace in filteredWorkspaces"
+            :key="workspace?.id || 'null'"
+            @click="selectWorkspace(workspace)"
+            class="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors group"
+          >
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white font-semibold text-sm">
+              {{ getWorkspaceInitials(workspace?.nom) }}
+            </div>
+            <div class="flex-1 text-left">
+              <p class="text-sm font-medium text-gray-900 dark:text-white">
+                {{ workspace?.nom || 'Workspace inconnu' }}
+              </p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">
+                {{ workspace?.projets_count || 0 }} projets
+              </p>
+            </div>
+            
+            <!-- Indicateur workspace actuel -->
+            <CheckIcon
+              v-if="currentWorkspace?.id === workspace?.id"
+              class="w-4 h-4 text-brand-500"
+            />
+            
+            <!-- Bouton filtre dashboard pour ce workspace -->
+            <button
+              @click.stop="selectWorkspaceForDashboard(workspace?.id)"
+              :class="[
+                'p-1 rounded transition-colors',
+                selectedDashboardWorkspace === workspace?.id
+                  ? 'bg-brand-500 text-white'
+                  : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 hover:bg-brand-500 hover:text-white'
+              ]"
+              :title="selectedDashboardWorkspace === workspace?.id ? 'Filtre actif' : 'Filtrer le dashboard'"
+            >
+              <FilterIcon class="w-3 h-3" />
+            </button>
+          </button>
+        </div>
+
+                    <!-- Actions -->
+                    <div class="px-3 pt-2 mt-2 border-t border-gray-200 dark:border-gray-700 space-y-2">
+                        <router-link to="/workspaces/create"
+                            class="flex items-center gap-2 text-sm text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 transition-colors">
                             <PlusIcon class="w-4 h-4" />
                             Créer un workspace
                         </router-link>
+
+                        <!-- Indicateur filtre actif -->
+                        <div v-if="selectedDashboardWorkspace && selectedDashboardWorkspace !== 'all'"
+                            class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/50 px-2 py-1 rounded">
+                            <FilterIcon class="w-3 h-3" />
+                            <span>Dashboard filtré</span>
+                            <button @click="clearDashboardFilter"
+                                class="ml-auto text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                title="Effacer le filtre">
+                                <XIcon class="w-3 h-3" />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </transition>
@@ -124,156 +147,106 @@
         <div class="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
             <nav class="mb-6">
                 <div class="flex flex-col gap-4">
-                    <div
-                        v-for="(menuGroup, groupIndex) in filteredMenuGroups"
-                        :key="groupIndex"
-                    >
-                        <h2
-                            :class="[
-                                'mb-4 text-xs uppercase flex leading-[20px] text-gray-400',
-                                !isExpanded && !isHovered
-                                    ? 'lg:justify-center'
-                                    : 'justify-start',
-                            ]"
-                        >
+                    <div v-for="(menuGroup, groupIndex) in filteredMenuGroups" :key="groupIndex">
+                        <h2 :class="[
+                            'mb-4 text-xs uppercase flex leading-[20px] text-gray-400',
+                            !isExpanded && !isHovered
+                                ? 'lg:justify-center'
+                                : 'justify-start',
+                        ]">
                             <template v-if="isExpanded || isHovered || isMobileOpen">
                                 {{ menuGroup.title }}
                             </template>
                             <HorizontalDots v-else />
                         </h2>
                         <ul class="flex flex-col gap-1.5">
-                            <li
-                                v-for="(item, index) in menuGroup.items"
-                                :key="item.name"
-                            >
+                            <li v-for="(item, index) in menuGroup.items" :key="item.name">
                                 <!-- Item with submenu -->
-                                <button
-                                    v-if="item.subItems"
-                                    @click="toggleSubmenu(groupIndex, index)"
-                                    :class="[
-                                        'menu-item group w-full',
-                                        {
-                                            'menu-item-active': isSubmenuOpen(groupIndex, index),
-                                            'menu-item-inactive': !isSubmenuOpen(groupIndex, index),
-                                        },
-                                        !isExpanded && !isHovered
-                                            ? 'lg:justify-center'
-                                            : 'lg:justify-start',
-                                    ]"
-                                >
-                                    <span
-                                        :class="[
-                                            isSubmenuOpen(groupIndex, index)
-                                                ? 'menu-item-icon-active'
-                                                : 'menu-item-icon-inactive',
-                                        ]"
-                                    >
+                                <button v-if="item.subItems" @click="toggleSubmenu(groupIndex, index)" :class="[
+                                    'menu-item group w-full',
+                                    {
+                                        'menu-item-active': isSubmenuOpen(groupIndex, index),
+                                        'menu-item-inactive': !isSubmenuOpen(groupIndex, index),
+                                    },
+                                    !isExpanded && !isHovered
+                                        ? 'lg:justify-center'
+                                        : 'lg:justify-start',
+                                ]">
+                                    <span :class="[
+                                        isSubmenuOpen(groupIndex, index)
+                                            ? 'menu-item-icon-active'
+                                            : 'menu-item-icon-inactive',
+                                    ]">
                                         <component :is="item.icon" />
                                     </span>
-                                    <span
-                                        v-if="isExpanded || isHovered || isMobileOpen"
-                                        class="menu-item-text flex-1"
-                                    >
+                                    <span v-if="isExpanded || isHovered || isMobileOpen" class="menu-item-text flex-1">
                                         {{ item.name }}
                                     </span>
-                                    <span
-                                        v-if="item.badge && (isExpanded || isHovered || isMobileOpen)"
-                                        class="ml-auto px-2 py-0.5 text-xs font-medium rounded-full bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400"
-                                    >
+                                    <span v-if="item.badge && (isExpanded || isHovered || isMobileOpen)"
+                                        class="ml-auto px-2 py-0.5 text-xs font-medium rounded-full bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400">
                                         {{ item.badge }}
                                     </span>
-                                    <ChevronDownIcon
-                                        v-if="isExpanded || isHovered || isMobileOpen"
-                                        :class="[
-                                            'ml-2 w-4 h-4 transition-transform duration-200',
-                                            {
-                                                'rotate-180 text-brand-500': isSubmenuOpen(groupIndex, index),
-                                            },
-                                        ]"
-                                    />
+                                    <ChevronDownIcon v-if="isExpanded || isHovered || isMobileOpen" :class="[
+                                        'ml-2 w-4 h-4 transition-transform duration-200',
+                                        {
+                                            'rotate-180 text-brand-500': isSubmenuOpen(groupIndex, index),
+                                        },
+                                    ]" />
                                 </button>
 
                                 <!-- Simple link item -->
-                                <router-link
-                                    v-else-if="item.path"
-                                    :to="item.path"
-                                    :class="[
-                                        'menu-item group',
-                                        {
-                                            'menu-item-active': isActive(item.path),
-                                            'menu-item-inactive': !isActive(item.path),
-                                        },
-                                    ]"
-                                >
-                                    <span
-                                        :class="[
-                                            isActive(item.path)
-                                                ? 'menu-item-icon-active'
-                                                : 'menu-item-icon-inactive',
-                                        ]"
-                                    >
+                                <router-link v-else-if="item.path" :to="item.path" :class="[
+                                    'menu-item group',
+                                    {
+                                        'menu-item-active': isActive(item.path),
+                                        'menu-item-inactive': !isActive(item.path),
+                                    },
+                                ]">
+                                    <span :class="[
+                                        isActive(item.path)
+                                            ? 'menu-item-icon-active'
+                                            : 'menu-item-icon-inactive',
+                                    ]">
                                         <component :is="item.icon" />
                                     </span>
-                                    <span
-                                        v-if="isExpanded || isHovered || isMobileOpen"
-                                        class="menu-item-text flex-1"
-                                    >
+                                    <span v-if="isExpanded || isHovered || isMobileOpen" class="menu-item-text flex-1">
                                         {{ item.name }}
                                     </span>
-                                    <span
-                                        v-if="item.badge && (isExpanded || isHovered || isMobileOpen)"
-                                        class="ml-auto px-2 py-0.5 text-xs font-medium rounded-full bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400"
-                                    >
+                                    <span v-if="item.badge && (isExpanded || isHovered || isMobileOpen)"
+                                        class="ml-auto px-2 py-0.5 text-xs font-medium rounded-full bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400">
                                         {{ item.badge }}
                                     </span>
                                 </router-link>
 
                                 <!-- Submenu items avec permissions -->
-                                <transition
-                                    @enter="startTransition"
-                                    @after-enter="endTransition"
-                                    @before-leave="startTransition"
-                                    @after-leave="endTransition"
-                                >
-                                    <div
-                                        v-show="
-                                            isSubmenuOpen(groupIndex, index) &&
-                                            (isExpanded || isHovered || isMobileOpen)
-                                        "
-                                    >
+                                <transition @enter="startTransition" @after-enter="endTransition"
+                                    @before-leave="startTransition" @after-leave="endTransition">
+                                    <div v-show="isSubmenuOpen(groupIndex, index) &&
+                                        (isExpanded || isHovered || isMobileOpen)
+                                        ">
                                         <ul class="mt-1 space-y-1 ml-9">
-                                            <li
-                                                v-for="subItem in getFilteredSubItems(item.subItems)"
-                                                :key="subItem.name"
-                                            >
-                                                <router-link
-                                                    :to="subItem.path"
-                                                    :class="[
-                                                        'menu-dropdown-item',
-                                                        {
-                                                            'menu-dropdown-item-active': isActive(subItem.path),
-                                                            'menu-dropdown-item-inactive': !isActive(subItem.path),
-                                                        },
-                                                    ]"
-                                                >
+                                            <li v-for="subItem in getFilteredSubItems(item.subItems)"
+                                                :key="subItem.name">
+                                                <router-link :to="subItem.path" :class="[
+                                                    'menu-dropdown-item',
+                                                    {
+                                                        'menu-dropdown-item-active': isActive(subItem.path),
+                                                        'menu-dropdown-item-inactive': !isActive(subItem.path),
+                                                    },
+                                                ]">
                                                     <span class="flex-1">{{ subItem.name }}</span>
                                                     <span class="flex items-center gap-1 ml-auto">
-                                                        <span
-                                                            v-if="subItem.new"
-                                                            :class="[
-                                                                'menu-dropdown-badge',
-                                                                {
-                                                                    'menu-dropdown-badge-active': isActive(subItem.path),
-                                                                    'menu-dropdown-badge-inactive': !isActive(subItem.path),
-                                                                },
-                                                            ]"
-                                                        >
+                                                        <span v-if="subItem.new" :class="[
+                                                            'menu-dropdown-badge',
+                                                            {
+                                                                'menu-dropdown-badge-active': isActive(subItem.path),
+                                                                'menu-dropdown-badge-inactive': !isActive(subItem.path),
+                                                            },
+                                                        ]">
                                                             new
                                                         </span>
-                                                        <span
-                                                            v-if="subItem.count"
-                                                            class="px-1.5 py-0.5 text-xs font-medium rounded bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
-                                                        >
+                                                        <span v-if="subItem.count"
+                                                            class="px-1.5 py-0.5 text-xs font-medium rounded bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
                                                             {{ subItem.count }}
                                                         </span>
                                                     </span>
@@ -290,14 +263,10 @@
         </div>
 
         <!-- Bottom Actions -->
-        <div
-            v-if="isExpanded || isHovered || isMobileOpen"
-            class="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2"
-        >
-            <router-link
-                to="/settings"
-                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            >
+        <div v-if="isExpanded || isHovered || isMobileOpen"
+            class="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+            <router-link to="/settings"
+                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                 <SettingsIcon class="w-5 h-5" />
                 <span>Paramètres</span>
             </router-link>
@@ -306,8 +275,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-import { useRoute } from 'vue-router';
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import {
     GridIcon,
     CalenderIcon,
@@ -317,33 +286,36 @@ import {
     ChevronDownIcon,
     HorizontalDots,
     ListIcon,
+    CheckIcon,
+    PlusIcon,
+    SettingsIcon,
+    XIcon
 } from '../../icons';
 import BoxCubeIcon from '@/icons/BoxCubeIcon.vue';
-import CheckIcon from '@/icons/CheckIcon.vue';
-import PlusIcon from '@/icons/PlusIcon.vue';
-import SettingsIcon from '@/icons/SettingsIcon.vue';
 import FolderIcon from '@/icons/FolderIcon.vue';
 import TaskIcon from '@/icons/TaskIcon.vue';
 import ClipboardCheckIcon from '@/icons/ClipboardCheckIcon.vue';
 import UsersIcon from '@/icons/UsersIcon.vue';
 import { useSidebar } from '@/composables/useSidebar';
 import api from '@/api/axios'
-import { useAuthStore } from '@/stores/auth';  
+import { useAuthStore } from '@/stores/auth';
 import { useWorkspace } from '@/composables/useWorkspace';
 
 const route = useRoute();
+const router = useRouter();
 const { isExpanded, isMobileOpen, isHovered, openSubmenu } = useSidebar();
 const authStore = useAuthStore();
+
 // ✅ Utiliser le composable workspace
 const {
-  currentWorkspace,
-  currentWorkspaceId,
-  workspaces,
-  loading: workspaceLoading,
-  selectWorkspace,
-  fetchWorkspaces,
-  onWorkspaceChanged,
-  initializeCurrentWorkspace
+    currentWorkspace,
+    currentWorkspaceId,
+    workspaces,
+    loading: workspaceLoading,
+    selectWorkspace,
+    fetchWorkspaces,
+    onWorkspaceChanged,
+    initializeCurrentWorkspace
 } = useWorkspace();
 
 // Workspace management
@@ -352,10 +324,45 @@ const showWorkspaceSelector = ref(false);
 // const workspaces = ref([]);
 // const loading = ref(false);
 
+const selectedDashboardWorkspace = ref('all'); // 'all' ou workspace_id
+
 // CORRECTION : Utiliser le getter isSuperAdmin du store
 const isSuperAdmin = computed(() => {
     return authStore.isSuperAdmin;
 });
+
+// Computed property avec fallback
+const filteredWorkspaces = computed(() => {
+  return (workspaces.value || [])
+    .filter(workspace => workspace && workspace.id)
+    .map(workspace => ({
+      id: workspace.id,
+      nom: workspace.nom || 'Workspace sans nom',
+      projets_count: workspace.projets_count || 0,
+      // autres propriétés avec fallback
+    }))
+})
+
+// ✅ Icônes supplémentaires pour le filtre
+const FilterIcon = {
+    template: `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="className">
+      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+    </svg>
+  `,
+    props: ['className']
+};
+
+const GlobeIcon = {
+    template: `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="className">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="2" y1="12" x2="22" y2="12"/>
+      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+    </svg>
+  `,
+    props: ['className']
+};
 
 const currentWorkspaceInitials = computed(() => {
     if (!currentWorkspace.value) return 'MW';
@@ -376,37 +383,62 @@ const getWorkspaceInitials = (name) => {
 };
 
 
-// ✅ Fonction de sélection de workspace optimisée
+// ✅ Fonction de sélection de workspace
 const handleSelectWorkspace = async (workspace) => {
-  if (currentWorkspace.value?.id === workspace.id) {
-    console.log('Sidebar: Même workspace, aucune action');
-    showWorkspaceSelector.value = false;
-    return;
-  }
+    if (currentWorkspace.value?.id === workspace.id) {
+        console.log('Sidebar: Même workspace, aucune action');
+        showWorkspaceSelector.value = false;
+        return;
+    }
 
-  console.log('Sidebar: Changement de workspace vers:', workspace.nom);
+    console.log('Sidebar: Changement de workspace vers:', workspace.nom);
 
-  try {
-    // Utiliser la fonction du composable qui gère tout
-    await selectWorkspace(workspace);
-    
-    // Fermer le sélecteur
-    showWorkspaceSelector.value = false;
-    
-    console.log('✅ Sidebar: Workspace changé avec succès');
-  } catch (error) {
-    console.error('❌ Sidebar: Erreur lors du changement de workspace:', error);
-  }
+    try {
+        await selectWorkspace(workspace);
+        showWorkspaceSelector.value = false;
+        console.log('✅ Sidebar: Workspace changé avec succès');
+    } catch (error) {
+        console.error('❌ Sidebar: Erreur lors du changement de workspace:', error);
+    }
 };
+
+// ✅ Fonction pour filtrer le dashboard
+const selectWorkspaceForDashboard = (workspaceId) => {
+    console.log('🔄 Filtrage dashboard pour workspace:', workspaceId);
+
+    selectedDashboardWorkspace.value = workspaceId;
+
+    // Émettre un événement pour le dashboard
+    window.dispatchEvent(new CustomEvent('dashboard-filter-changed', {
+        detail: { workspaceId }
+    }));
+
+    // Si on est sur le dashboard, recharger les données
+    if (route.path === '/') {
+        router.go(0); // Rechargement simple
+    }
+
+    showWorkspaceSelector.value = false;
+};
+
+// ✅ Effacer le filtre dashboard
+const clearDashboardFilter = () => {
+    selectedDashboardWorkspace.value = 'all';
+    window.dispatchEvent(new CustomEvent('dashboard-filter-changed', {
+        detail: { workspaceId: 'all' }
+    }));
+};
+
+
 
 // ✅ Écoute des changements externes
 let unsubscribeWorkspaceListener = null;
 
-const handleWorkspaceChange  = (event) => {
-  console.log('Sidebar: Changement externe détecté', event.detail);
-  // Le currentWorkspace est déjà mis à jour par le composable
-  // Fermer le dropdown si ouvert
-  showWorkspaceSelector.value = false;
+const handleWorkspaceChange = (event) => {
+    console.log('Sidebar: Changement externe détecté', event.detail);
+    // Le currentWorkspace est déjà mis à jour par le composable
+    // Fermer le dropdown si ouvert
+    showWorkspaceSelector.value = false;
 };
 
 // const selectWorkspace = async (workspace) => {
@@ -475,7 +507,7 @@ const menuGroups = computed(() => [
                     { name: 'Toutes les tâches', path: '/taches', superAdminOnly: false },
                     { name: 'Mes tâches', path: '/taches/mes-taches' },
                     { name: 'Assignées à moi', path: '/taches/assignees' },
-                    { name: 'Tache attente de validation', path: '/taches/resultats/en-attente'},
+                    { name: 'Tache attente de validation', path: '/taches/resultats/en-attente' },
                     // { name: 'En retard', path: '/taches/en-retard', count: 3 },
                     { name: 'En Attente de Collègues', path: '/taches/waiting-colleagues' },
                     { name: 'Vue Coordination', path: '/taches/coordination' },
@@ -558,12 +590,12 @@ const menuGroups = computed(() => [
 // CORRECTION : Filtrer les menus selon les permissions avec sécurité
 const filteredMenuGroups = computed(() => {
     if (!menuGroups.value) return [];
-    
+
     return menuGroups.value.map(group => ({
         ...group,
         items: (group.items || []).filter(item => {
             if (!item) return false;
-            
+
             // Si l'item a des subItems, on vérifie s'il en reste après filtrage
             if (item.subItems) {
                 const filteredSubItems = getFilteredSubItems(item.subItems);
@@ -578,36 +610,36 @@ const filteredMenuGroups = computed(() => {
 // CORRECTION : Filtrer les sous-items selon les permissions avec sécurité
 const getFilteredSubItems = (subItems) => {
     if (!subItems || !Array.isArray(subItems)) return [];
-    
+
     return subItems.filter(subItem => {
         if (!subItem) return false;
         return !subItem.superAdminOnly || isSuperAdmin.value;
     });
 };
- 
+
 
 // OU encore mieux : une solution par route spécifique
 const isActive = (path) => {
-  const currentPath = route.path;
-  
-  // Routes exactes qui ne doivent pas activer leurs parents
-  const exactRoutes = [
-    '/taches/mes-taches',
-    '/taches/assignees', 
-    '/taches/en-attente',
-    '/projets/mes-projets',
-    '/projets/archives',
-    '/activites/mes-activites',
-    '/activites/en-retard'
-  ];
-  
-  // Si c'est une route exacte, vérifier la correspondance exacte
-  if (exactRoutes.includes(path) || exactRoutes.includes(currentPath)) {
-    return currentPath === path;
-  }
-  
-  // Pour les autres routes, utiliser la logique normale
-  return currentPath === path || currentPath.startsWith(path + '/');
+    const currentPath = route.path;
+
+    // Routes exactes qui ne doivent pas activer leurs parents
+    const exactRoutes = [
+        '/taches/mes-taches',
+        '/taches/assignees',
+        '/taches/en-attente',
+        '/projets/mes-projets',
+        '/projets/archives',
+        '/activites/mes-activites',
+        '/activites/en-retard'
+    ];
+
+    // Si c'est une route exacte, vérifier la correspondance exacte
+    if (exactRoutes.includes(path) || exactRoutes.includes(currentPath)) {
+        return currentPath === path;
+    }
+
+    // Pour les autres routes, utiliser la logique normale
+    return currentPath === path || currentPath.startsWith(path + '/');
 };
 
 const toggleSubmenu = (groupIndex, itemIndex) => {
@@ -617,7 +649,7 @@ const toggleSubmenu = (groupIndex, itemIndex) => {
 
 const isAnySubmenuRouteActive = computed(() => {
     if (!menuGroups.value) return false;
-    
+
     return menuGroups.value.some((group) =>
         group.items?.some(
             (item) =>
@@ -629,9 +661,9 @@ const isAnySubmenuRouteActive = computed(() => {
 
 const isSubmenuOpen = (groupIndex, itemIndex) => {
     const key = `${groupIndex}-${itemIndex}`;
-    
+
     if (!menuGroups.value[groupIndex]?.items?.[itemIndex]) return false;
-    
+
     return (
         openSubmenu.value === key ||
         (isAnySubmenuRouteActive.value &&
@@ -654,30 +686,30 @@ const endTransition = (el) => {
 };
 
 onMounted(async () => {
-  console.log('🚀 Montage du Sidebar');
-  
-  try {
-    // Charger les workspaces
-    if (workspaces.value.length === 0) {
-      await fetchWorkspaces();
+    console.log('🚀 Montage du Sidebar');
+
+    try {
+        // Charger les workspaces
+        if (workspaces.value.length === 0) {
+            await fetchWorkspaces();
+        }
+
+        // Initialiser le workspace courant
+        await initializeCurrentWorkspace();
+
+        // Écouter les changements
+        unsubscribeWorkspaceListener = onWorkspaceChanged(handleWorkspaceChange);
+
+        console.log('✅ Sidebar initialisé, workspace courant:', currentWorkspace.value?.nom);
+    } catch (error) {
+        console.error('❌ Erreur lors de l\'initialisation du sidebar:', error);
     }
-    
-    // Initialiser le workspace courant
-    await initializeCurrentWorkspace();
-    
-    // Écouter les changements
-    unsubscribeWorkspaceListener = onWorkspaceChanged(handleWorkspaceChange);
-    
-    console.log('✅ Sidebar initialisé, workspace courant:', currentWorkspace.value?.nom);
-  } catch (error) {
-    console.error('❌ Erreur lors de l\'initialisation du sidebar:', error);
-  }
 });
 
 onBeforeUnmount(() => {
-  if (unsubscribeWorkspaceListener) {
-    unsubscribeWorkspaceListener();
-  }
+    if (unsubscribeWorkspaceListener) {
+        unsubscribeWorkspaceListener();
+    }
 });
 
 </script>
@@ -696,5 +728,31 @@ onBeforeUnmount(() => {
 .fade-slide-leave-to {
     opacity: 0;
     transform: translateY(-10px);
+}
+
+/* Style pour la scrollbar du dropdown */
+.max-h-60::-webkit-scrollbar {
+    width: 4px;
+}
+
+.max-h-60::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.max-h-60::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 2px;
+}
+
+.max-h-60::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+.dark .max-h-60::-webkit-scrollbar-thumb {
+    background: #4b5563;
+}
+
+.dark .max-h-60::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
 }
 </style>
