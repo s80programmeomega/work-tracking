@@ -18,6 +18,8 @@ return new class extends Migration
                   ->default('collaborator');
 
             // Permissions spécifiques aux activités
+            $table->boolean('can_edit_activity')->default(false);
+            $table->boolean('can_delete_activity')->default(false);
             $table->boolean('can_create_tasks')->default(false);
             $table->boolean('can_edit_tasks')->default(false);
             $table->boolean('can_delete_tasks')->default(false);

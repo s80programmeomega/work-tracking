@@ -548,13 +548,13 @@ class Tache extends Model
         }
 
         // Vérifier que l'utilisateur a terminé sa partie
-        $statutUser = $this->getStatutForUser($user);
-        if ($statutUser !== 'termine') {
-            throw new \Exception('Vous devez d\'abord terminer votre partie de la tâche');
-        }
+        // $statutUser = $this->getStatutForUser($user);
+        // if ($statutUser !== 'termine') {
+        //     throw new \Exception('Vous devez d\'abord terminer votre partie de la tâche');
+        // }
 
         // Créer ou mettre à jour le résultat
-        return TacheResultat::updateOrCreate(
+        $resultat = TacheResultat::updateOrCreate(
             [
                 'tache_id' => $this->id,
                 'user_id' => $user->id,
@@ -564,6 +564,9 @@ class Tache extends Model
                 'soumis_le' => now(),
             ])
         );
+        $resultat->notifyValidators();
+
+        return $resultat;
     }
 
     /**

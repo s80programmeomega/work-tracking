@@ -315,19 +315,23 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/{resultat}/submit', [TacheResultatController::class, 'submit']);
 
         // Validation N1 (Responsable Activité)
-        Route::post('/{resultat}/validate-n1', [TacheResultatController::class, 'validateN1']);
+        // Route::post('/{resultat}/validate-n1', [TacheResultatController::class, 'validateN1']);
 
         // Validation N2 (Responsable Projet)
-        Route::post('/{resultat}/validate-n2', [TacheResultatController::class, 'validateN2']);
+        // Route::post('/{resultat}/validate-n2', [TacheResultatController::class, 'validateN2']);
 
         // Rejeter un résultat
-        Route::post('/{resultat}/reject', [TacheResultatController::class, 'reject']);
+        // Route::post('/{resultat}/reject', [TacheResultatController::class, 'reject']);
 
         // Historique
-        Route::get('/{resultat}/history', [TacheResultatController::class, 'history']);
+        // Route::get('/{resultat}/history', [TacheResultatController::class, 'history']);
 
         Route::get('/documents', [TacheResultatController::class, 'getDocuments']);
         Route::delete('/documents/{document}', [TacheResultatController::class, 'deleteDocument']);
+        // Nouvelles routes pour les documents
+        Route::get('/{resultat}/documents/{document}/view', [TacheResultatController::class, 'viewDocument']);
+        Route::get('/{resultat}/documents/{document}/download', [TacheResultatController::class, 'downloadDocument']);
+        Route::get('/{resultat}/document-stats', [TacheResultatController::class, 'documentStats']);
     });
 
     // ========================================  ÉVALUATIONS  ========================================
@@ -348,18 +352,37 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/dashboard', [TacheController::class, 'evaluationDashboard']);
 
         // Résultats en attente de validation
-        Route::get('/resultats/en-attente', [TacheResultatController::class, 'pendingValidations']);
+        // Route::get('/resultats/en-attente', [TacheResultatController::class, 'pendingValidations']);
 
-        // ✅ Route pour l'historique des validations
-        Route::get('/evaluations/history', [EvaluationController::class, 'validationHistory']);
+        // 📋 Liste des résultats en attente de validation (personnalisée par rôle)
+        Route::get('/resultats/en-attente', [EvaluationController::class, 'pendingValidations']);
+
+        // 📊 Mes responsabilités (tous les résultats que je peux consulter)
+        Route::get('/mes-responsabilites', [EvaluationController::class, 'myResponsibilities']);
+
+        // ✅ Validation N1 (responsable activité uniquement)
+        Route::post('/resultats/{resultat}/validate-n1', [EvaluationController::class, 'validateN1']);
+
+        // ✅ Validation N2 (responsable projet uniquement)
+        Route::post('/resultats/{resultat}/validate-n2', [EvaluationController::class, 'validateN2']);
+
+        // ❌ Rejeter un résultat
+        Route::post('/resultats/{resultat}/reject', [EvaluationController::class, 'reject']);
+
+        // 🔍 Vérifier mes permissions sur un résultat
+        Route::get('/resultats/{resultat}/permissions', [EvaluationController::class, 'checkPermissions']);
+
+        // 📜 Historique des validations
+        Route::get('/history', [EvaluationController::class, 'validationHistory']);
+         
 
     });
 
-// Routes pour les rapports
-Route::prefix('reports')->group(function () {
-    Route::get('/activite/{activiteId}/performance', [TacheController::class, 'activityPerformanceReport']);
-    Route::get('/activite/{activiteId}/user-tasks', [TacheController::class, 'userTasksReport']);
-});
+    // Routes pour les rapports
+    Route::prefix('reports')->group(function () {
+        Route::get('/activite/{activiteId}/performance', [TacheController::class, 'activityPerformanceReport']);
+        Route::get('/activite/{activiteId}/user-tasks', [TacheController::class, 'userTasksReport']);
+    });
 
 
 

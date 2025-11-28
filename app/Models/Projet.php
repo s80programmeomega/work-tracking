@@ -91,7 +91,7 @@ class Projet extends Model
     public function members(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'projet_user')
-            ->withPivot(['role', 'can_edit', 'can_delete', 'can_invite'])
+            ->withPivot(['role', 'can_edit', 'can_delete', 'can_invite','can_delete_member'])
             ->withTimestamps();
     }
 

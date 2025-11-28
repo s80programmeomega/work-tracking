@@ -13,6 +13,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// Route de login minimal (pour éviter l'erreur)
+Route::get('/login', function () {
+    return response()->json([
+        'message' => 'Cette application utilise une API. Veuillez utiliser /api/login'
+    ], 401);
+})->name('login');
+
 Route::get('/{any?}', function () {
     return view('app');
 })->where('any', '.*');

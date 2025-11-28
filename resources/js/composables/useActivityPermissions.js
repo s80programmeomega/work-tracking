@@ -66,8 +66,8 @@ export function useActivityPermissions(activite) {
    */
   const userPermissions = computed(() => {
     const defaultPermissions = {
-      can_edit: false,
-      can_delete: false,
+      can_edit_activity: false,
+      can_delete_activity: false,
       can_manage_members: false,
       can_create_tasks: false,
       can_edit_tasks: false,
@@ -140,7 +140,7 @@ export function useActivityPermissions(activite) {
     if (isSuperAdmin.value) return true
     if (isActivityResponsable.value) return true
     if (isProjectResponsable.value) return true
-    return userPermissions.value.can_edit || false
+    return userPermissions.value.can_edit_activity || false
   })
 
   /**

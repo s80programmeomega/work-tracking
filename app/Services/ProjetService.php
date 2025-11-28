@@ -277,10 +277,11 @@ class ProjetService
             // Attach responsable as member with admin role
             if ($projet->responsable_id) {
                 $projet->members()->attach($projet->responsable_id, [
-                    'role' => 'admin',
+                    'role' => 'owner',
                     'can_edit' => true,
                     'can_delete' => true,
                     'can_invite' => true,
+                    'can_delete_member' => true,
                 ]);
             }
 
@@ -293,6 +294,7 @@ class ProjetService
                             'can_edit' => $member['can_edit'] ?? false,
                             'can_delete' => $member['can_delete'] ?? false,
                             'can_invite' => $member['can_invite'] ?? false,
+                            'can_delete_member' => $member['can_delete_member'] ?? false,
                         ]);
                     }
                 }
@@ -420,6 +422,7 @@ class ProjetService
                     'can_edit' => $member->pivot->can_edit,
                     'can_delete' => $member->pivot->can_delete,
                     'can_invite' => $member->pivot->can_invite,
+                    'can_delete_member' => $member->pivot->can_delete_member,
                 ]);
             }
 
@@ -440,6 +443,7 @@ class ProjetService
             'can_edit' => $permissions['can_edit'] ?? false,
             'can_delete' => $permissions['can_delete'] ?? false,
             'can_invite' => $permissions['can_invite'] ?? false,
+            'can_delete_member' => $permissions['can_delete_member'] ?? false,
         ]);
     }
 
@@ -452,7 +456,7 @@ class ProjetService
             ->where('user_id', $userId)
             ->first()
             ?->pivot
-                ?->only(['role', 'can_edit', 'can_delete', 'can_invite']) ?? [];
+                ?->only(['role', 'can_edit', 'can_delete', 'can_invite','can_delete_member']) ?? [];
 
         $newPermissions = array_merge($existingPermissions, $permissions);
 

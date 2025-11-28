@@ -201,6 +201,8 @@ class ActiviteService
                 foreach ($membres as $membre) {
                     $activite->membres()->attach($membre['user_id'], [
                         'role' => $membre['role'],
+                        'can_edit_activity' => $membre['can_edit_activity'] ?? false,
+                        'can_delete_activity' => $membre['can_delete_activity'] ?? false,
                         'can_create_tasks' => $membre['can_create_tasks'] ?? false,
                         'can_edit_tasks' => $membre['can_edit_tasks'] ?? false,
                         'can_delete_tasks' => $membre['can_delete_tasks'] ?? false,
@@ -292,6 +294,8 @@ class ActiviteService
                 foreach ($activite->membres as $membre) {
                     $newActivite->membres()->attach($membre->id, [
                         'role' => $membre->pivot->role,
+                        'can_edit_activity' => $membre->pivot->can_edit_activity,
+                        'can_delete_activity' => $membre->pivot->can_delete_activity,
                         'can_create_tasks' => $membre->pivot->can_create_tasks,
                         'can_edit_tasks' => $membre->pivot->can_edit_tasks,
                         'can_delete_tasks' => $membre->pivot->can_delete_tasks,
@@ -345,6 +349,8 @@ class ActiviteService
     {
         $activite->membres()->attach($userId, [
             'role' => $permissions['role'],
+            'can_edit_activity' => $permissions['can_edit_activity'] ?? false,
+            'can_delete_activity' => $permissions['can_delete_activity'] ?? false,
             'can_create_tasks' => $permissions['can_create_tasks'] ?? false,
             'can_edit_tasks' => $permissions['can_edit_tasks'] ?? false,
             'can_delete_tasks' => $permissions['can_delete_tasks'] ?? false,

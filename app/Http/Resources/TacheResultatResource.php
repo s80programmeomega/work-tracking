@@ -65,20 +65,37 @@ class TacheResultatResource extends JsonResource
                 'code' => $this->tache?->code,
                 'echeance' => $this->tache?->echeance?->format('Y-m-d'),
             ]),
-            
+             
             // Documents
-            'documents' => $this->when($this->relationLoaded('documents'), function() {
-                return $this->documents->map(function($doc) {
+            'documents' => $this->when($this->relationLoaded('documents'), function() use ($request) {
+                return $this->documents->map(function($doc) use ($request) {
                     return [
                         'id' => $doc->id,
                         'nom' => $doc->nom,
-                        'nom_fichier' => $doc->nom_fichier,
-                        'url' => $doc->url ?? asset('storage/' . $doc->chemin_fichier),
-                        'taille_fichier' => $doc->taille_fichier,
-                        'taille_humaine' => $this->formatBytes($doc->taille_fichier ?? 0),
-                        'type_fichier' => $doc->type_fichier,
+                        'nom_stockage' => $doc->nom_stockage,
+                        'url' => $doc->url,
+                        'thumbnail_url' => $doc->thumbnail_url,
                         'extension' => $doc->extension,
-                        'uploaded_at' => $doc->created_at->format('Y-m-d H:i:s'),
+                        'mime_type' => $doc->mime_type,
+                        'taille' => $doc->taille,
+                        'taille_humaine' => $doc->formatted_size,
+                        'is_image' => $doc->is_image,
+                        'is_pdf' => $doc->is_pdf,
+                        'is_video' => $doc->is_video,
+                        'is_audio' => $doc->is_audio,
+                        'version' => $doc->version,
+                        'is_latest_version' => $doc->is_latest_version,
+                        'parent_id' => $doc->parent_id,
+                        'uploaded_by' => $doc->user ? [
+                            'id' => $doc->user->id,
+                            'nom' => $doc->user->nom,
+                            'avatar' => $doc->user->avatar,
+                        ] : null,
+                        'uploaded_at' => $doc->created_at?->format('Y-m-d H:i:s'),
+                        'can_view' => $doc->canBeViewedBy($request->user()),
+                        'can_download' => $doc->canBeDownloadedBy($request->user()),
+                        'can_edit' => $doc->canBeEditedBy($request->user()),
+                        'can_delete' => $doc->canBeDeletedBy($request->user()),
                     ];
                 });
             }),

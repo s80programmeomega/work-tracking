@@ -8,14 +8,443 @@ use App\Models\TacheResultat;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
- * 📊 EvaluationController
+ * 🎯 EvaluationController - Gestion stricte des validations
  * 
- * Gestion de l'historique des validations et statistiques
- */
+ * Règles :
+ * - N1 : UNIQUEMENT le responsable de l'activité
+ * - N2 : UNIQUEMENT le responsable du projet
+ * - Consultation : Responsables N1 et N2 peuvent consulter tous les résultats
+ */ 
 class EvaluationController extends Controller
 {
+
+    /**
+     * 📋 Résultats en attente de validation
+     * Affiche uniquement ce que l'utilisateur peut réellement valider
+     */
+    public function pendingValidations(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        // 🔵 N1 : Résultats des activités dont je suis responsable
+        $pendingN1 = TacheResultat::query()
+            ->with(['tache.activite.projet', 'user', 'documents'])
+            ->whereNotNull('soumis_le')
+            ->where('valide_par_n1', false)
+            ->whereHas('tache.activite', function ($q) use ($user) {
+                $q->where('responsable_id', $user->id);
+            })
+            ->latest('soumis_le')
+            ->get();
+
+        // 🟢 N2 : Résultats des projets dont je suis responsable (et validés N1)
+        $pendingN2 = TacheResultat::query()
+            ->with(['tache.activite.projet', 'user', 'validateurN1', 'documents'])
+            ->where('valide_par_n1', true)
+            ->where('valide_par_n2', false)
+            ->whereHas('tache.activite.projet', function ($q) use ($user) {
+                $q->where('responsable_id', $user->id);
+            })
+            ->latest('valide_le_n1')
+            ->get();
+
+        // 📊 Statistiques
+        $counts = [
+            'n1' => $pendingN1->count(),
+            'n2' => $pendingN2->count(),
+            'total' => $pendingN1->count() + $pendingN2->count(),
+        ];
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'pending_n1' => TacheResultatResource::collection($pendingN1),
+                'pending_n2' => TacheResultatResource::collection($pendingN2),
+                'counts' => $counts,
+            ]
+        ]);
+    }
+
+    /**
+     * ✅ Validation N1 - STRICT
+     */
+    public function validateN1(Request $request, TacheResultat $resultat): JsonResponse
+    {
+        $validated = $request->validate([
+            'commentaire' => 'nullable|string|max:1000',
+        ]);
+
+        $user = $request->user();
+
+        // ⚠️ VÉRIFICATION STRICTE : Uniquement responsable de l'activité
+        if ($resultat->tache->activite->responsable_id !== $user->id) {
+            Log::warning('Tentative de validation N1 non autorisée', [
+                'user_id' => $user->id,
+                'resultat_id' => $resultat->id,
+                'responsable_activite_id' => $resultat->tache->activite->responsable_id
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Seul le responsable de l\'activité peut valider ce résultat (N1)'
+            ], 403);
+        }
+
+        // Vérifications supplémentaires
+        if (!$resultat->soumis_le) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ce résultat n\'a pas encore été soumis'
+            ], 422);
+        }
+
+        if ($resultat->valide_par_n1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ce résultat a déjà été validé N1'
+            ], 422);
+        }
+
+        if ($resultat->user_id === $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous ne pouvez pas valider votre propre résultat'
+            ], 422);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $resultat->validateByN1($user, $validated['commentaire'] ?? null);
+
+            Log::info('✅ Validation N1 effectuée', [
+                'resultat_id' => $resultat->id,
+                'validateur_id' => $user->id,
+                'user_id' => $resultat->user_id,
+                'tache_id' => $resultat->tache_id
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Résultat validé (Niveau 1) avec succès',
+                'data' => new TacheResultatResource($resultat->fresh([
+                    'user', 
+                    'validateurN1', 
+                    'validateurN2', 
+                    'documents',
+                    'tache.activite.projet'
+                ]))
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('❌ Erreur validation N1', [
+                'resultat_id' => $resultat->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    /**
+     * ✅ Validation N2 - STRICT
+     */
+    public function validateN2(Request $request, TacheResultat $resultat): JsonResponse
+    {
+        $validated = $request->validate([
+            'commentaire' => 'nullable|string|max:1000',
+        ]);
+
+        $user = $request->user();
+
+        // ⚠️ VÉRIFICATION STRICTE : Uniquement responsable du projet
+        if (!$resultat->tache->activite->projet || 
+            $resultat->tache->activite->projet->responsable_id !== $user->id) {
+            
+            Log::warning('Tentative de validation N2 non autorisée', [
+                'user_id' => $user->id,
+                'resultat_id' => $resultat->id,
+                'responsable_projet_id' => $resultat->tache->activite->projet?->responsable_id
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Seul le responsable du projet peut valider ce résultat (N2)'
+            ], 403);
+        }
+
+        // Vérifications supplémentaires
+        if (!$resultat->valide_par_n1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ce résultat doit d\'abord être validé N1'
+            ], 422);
+        }
+
+        if ($resultat->valide_par_n2) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ce résultat a déjà été validé N2'
+            ], 422);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $resultat->validateByN2($user, $validated['commentaire'] ?? null);
+
+            Log::info('✅ Validation N2 effectuée', [
+                'resultat_id' => $resultat->id,
+                'validateur_id' => $user->id,
+                'user_id' => $resultat->user_id,
+                'tache_id' => $resultat->tache_id
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Résultat validé (Niveau 2 - Final) avec succès',
+                'data' => new TacheResultatResource($resultat->fresh([
+                    'user', 
+                    'validateurN1', 
+                    'validateurN2', 
+                    'documents',
+                    'tache.activite.projet'
+                ]))
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('❌ Erreur validation N2', [
+                'resultat_id' => $resultat->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    /**
+     * ❌ Rejeter un résultat - STRICT
+     */
+    public function reject(Request $request, TacheResultat $resultat): JsonResponse
+    {
+        $validated = $request->validate([
+            'commentaire' => 'required|string|max:1000',
+            'level' => 'required|in:n1,n2',
+        ]);
+
+        $user = $request->user();
+        $level = $validated['level'];
+
+        // ⚠️ VÉRIFICATION STRICTE selon le niveau
+        if ($level === 'n1') {
+            if ($resultat->tache->activite->responsable_id !== $user->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Seul le responsable de l\'activité peut rejeter ce résultat (N1)'
+                ], 403);
+            }
+        } else {
+            if (!$resultat->tache->activite->projet || 
+                $resultat->tache->activite->projet->responsable_id !== $user->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Seul le responsable du projet peut rejeter ce résultat (N2)'
+                ], 403);
+            }
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $resultat->reject($user, $validated['commentaire'], $level);
+
+            // Remettre le statut individuel à "a_faire"
+            $resultat->tache->updateStatutForUser(
+                $resultat->user,
+                'a_faire',
+                0
+            );
+
+            Log::info('❌ Résultat rejeté', [
+                'resultat_id' => $resultat->id,
+                'level' => $level,
+                'rejecteur_id' => $user->id,
+                'user_id' => $resultat->user_id
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Résultat rejeté. L\'utilisateur devra le soumettre à nouveau.',
+                'data' => new TacheResultatResource($resultat->fresh())
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('❌ Erreur rejet résultat', [
+                'resultat_id' => $resultat->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    /**
+     * 👁️ Consulter tous les résultats (pour responsables)
+     */
+    public function myResponsibilities(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        // Résultats des activités dont je suis responsable
+        $asResponsableActivite = TacheResultat::query()
+            ->with(['tache.activite.projet', 'user', 'validateurN1', 'validateurN2', 'documents'])
+            ->whereHas('tache.activite', function ($q) use ($user) {
+                $q->where('responsable_id', $user->id);
+            })
+            ->latest('soumis_le')
+            ->get();
+
+        // Résultats des projets dont je suis responsable
+        $asResponsableProjet = TacheResultat::query()
+            ->with(['tache.activite.projet', 'user', 'validateurN1', 'validateurN2', 'documents'])
+            ->whereHas('tache.activite.projet', function ($q) use ($user) {
+                $q->where('responsable_id', $user->id);
+            })
+            ->latest('soumis_le')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'as_responsable_activite' => TacheResultatResource::collection($asResponsableActivite),
+                'as_responsable_projet' => TacheResultatResource::collection($asResponsableProjet),
+                'stats' => [
+                    'activites' => $asResponsableActivite->count(),
+                    'projets' => $asResponsableProjet->count(),
+                    'total' => $asResponsableActivite->count() + $asResponsableProjet->count(),
+                ]
+            ]
+        ]);
+    }
+
+    /**
+     * 📊 Vérifier mes permissions
+     */
+    public function checkPermissions(Request $request, TacheResultat $resultat): JsonResponse
+    {
+        $user = $request->user();
+
+        $permissions = [
+            'can_view' => $this->canView($user, $resultat),
+            'can_validate_n1' => $this->canValidateN1($user, $resultat),
+            'can_validate_n2' => $this->canValidateN2($user, $resultat),
+            'can_reject_n1' => $this->canRejectN1($user, $resultat),
+            'can_reject_n2' => $this->canRejectN2($user, $resultat),
+        ];
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'permissions' => $permissions,
+                'user_role' => $this->getUserRole($user, $resultat),
+            ]
+        ]);
+    }
+
+    // ==================== MÉTHODES PRIVÉES ====================
+
+    private function canView($user, TacheResultat $resultat): bool
+    {
+        // C'est son résultat
+        if ($resultat->user_id === $user->id) {
+            return true;
+        }
+
+        // Responsable de l'activité
+        if ($resultat->tache->activite->responsable_id === $user->id) {
+            return true;
+        }
+
+        // Responsable du projet
+        if ($resultat->tache->activite->projet && 
+            $resultat->tache->activite->projet->responsable_id === $user->id) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private function canValidateN1($user, TacheResultat $resultat): bool
+    {
+        return $resultat->soumis_le &&
+               !$resultat->valide_par_n1 &&
+               $resultat->user_id !== $user->id &&
+               $resultat->tache->activite->responsable_id === $user->id;
+    }
+
+    private function canValidateN2($user, TacheResultat $resultat): bool
+    {
+        return $resultat->valide_par_n1 &&
+               !$resultat->valide_par_n2 &&
+               $resultat->tache->activite->projet &&
+               $resultat->tache->activite->projet->responsable_id === $user->id;
+    }
+
+    private function canRejectN1($user, TacheResultat $resultat): bool
+    {
+        return $this->canValidateN1($user, $resultat);
+    }
+
+    private function canRejectN2($user, TacheResultat $resultat): bool
+    {
+        return $this->canValidateN2($user, $resultat);
+    }
+
+    private function getUserRole($user, TacheResultat $resultat): string
+    {
+        if ($resultat->user_id === $user->id) {
+            return 'auteur';
+        }
+
+        if ($resultat->tache->activite->responsable_id === $user->id) {
+            return 'responsable_activite';
+        }
+
+        if ($resultat->tache->activite->projet && 
+            $resultat->tache->activite->projet->responsable_id === $user->id) {
+            return 'responsable_projet';
+        }
+
+        return 'aucun';
+    }
+    
     /**
      * ✅ Historique des validations
      */

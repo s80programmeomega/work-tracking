@@ -19,6 +19,7 @@ return new class extends Migration
             $table->boolean('can_edit')->default(false);
             $table->boolean('can_delete')->default(false);
             $table->boolean('can_invite')->default(false);
+            $table->boolean('can_delete_member')->default(false);
             $table->timestamps();
 
             $table->unique(['projet_id', 'user_id']);

@@ -473,7 +473,7 @@ async function handleSubmit() {
     if (isEditing.value) {
       // Mise à jour
       formData.append('_method', 'PUT')
-      response = await api.post(
+      response = await api.put(
         `/taches/${props.tache.id}/resultats/${props.resultat.id}`,
         formData,
         {

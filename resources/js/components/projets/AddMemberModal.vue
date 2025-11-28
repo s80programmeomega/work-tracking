@@ -130,7 +130,7 @@
                       Peut modifier le projet
                     </label>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      Permet de modifier les informations du projet, créer des activités et tâches
+                      Permet de modifier les informations du projet
                     </p>
                   </div>
                 </div>
@@ -147,7 +147,7 @@
                       Peut supprimer
                     </label>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      Permet de supprimer des activités, tâches et documents
+                      Permet de supprimer le projet
                     </p>
                   </div>
                 </div>
@@ -164,7 +164,23 @@
                       Peut inviter des membres
                     </label>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      Permet d'ajouter ou retirer des membres du projet
+                      Permet d'ajouter des membres du projet
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-3">
+                  <input
+                    v-model="form.can_delete_member"
+                    type="checkbox"
+                    id="can_delete_member"
+                    class="mt-1 w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-brand-500 dark:focus:ring-brand-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                  />
+                  <div>
+                    <label for="can_delete_member" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Peut supprimer des membres
+                    </label>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Permet de retirer des membres du projet
                     </p>
                   </div>
                 </div>
@@ -250,7 +266,8 @@ const form = ref({
   role: '',
   can_edit: false,
   can_delete: false,
-  can_invite: false
+  can_invite: false,
+  can_delete_member: false
 })
 
 const filteredUsers = computed(() => {
@@ -283,14 +300,17 @@ watch(() => form.value.role, (newRole) => {
     form.value.can_edit = true
     form.value.can_delete = true
     form.value.can_invite = true
+    form.value.can_delete_member = true
   } else if (newRole === 'member') {
     form.value.can_edit = true
     form.value.can_delete = false
     form.value.can_invite = false
+    form.value.can_delete_member = false
   } else if (newRole === 'viewer') {
     form.value.can_edit = false
     form.value.can_delete = false
     form.value.can_invite = false
+    form.value.can_delete_member = false
   }
 })
 
