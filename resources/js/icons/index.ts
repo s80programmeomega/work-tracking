@@ -80,6 +80,12 @@ export { default as FolderKanbanIcon } from './FolderKanbanIcon.vue';
 export { default as ListTodoIcon } from './ListTodoIcon.vue';
 export { default as TargetIcon } from './TargetIcon.vue';
 
+
+export { default as ExclamationTriangleIcon } from './ExclamationTriangleIcon.vue';
+export { default as ExclamationCircleIcon } from './ExclamationCircleIcon.vue'; 
+export { default as FilterIcon } from './FilterIcon.vue';
+export { default as GlobeIcon } from './GlobeIcon.vue';
+
 export {
   EyeIcon,
   BellIcon,
