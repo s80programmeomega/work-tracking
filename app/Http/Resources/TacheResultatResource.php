@@ -45,7 +45,6 @@ class TacheResultatResource extends JsonResource
                 'valide_le' => $this->valide_le_n1?->format('Y-m-d H:i:s'),
                 'commentaire' => $this->commentaire_n1,
             ],
-            
             // Validation N2
             'validation_n2' => [
                 'valide' => $this->valide_par_n2,
@@ -58,12 +57,36 @@ class TacheResultatResource extends JsonResource
                 'commentaire' => $this->commentaire_n2,
             ],
             
-            // Tâche associée
+            // 🔥 IMPORTANT : Tâche avec TOUTES les relations
             'tache' => $this->when($this->relationLoaded('tache'), [
                 'id' => $this->tache?->id,
                 'titre' => $this->tache?->titre,
                 'code' => $this->tache?->code,
                 'echeance' => $this->tache?->echeance?->format('Y-m-d'),
+                
+                // 🔥 Activité (OBLIGATOIRE pour les permissions)
+                'activite' => $this->when($this->tache?->relationLoaded('activite'), [
+                    'id' => $this->tache->activite?->id,
+                    'titre' => $this->tache->activite?->titre,
+                    'responsable_id' => $this->tache->activite?->responsable_id,
+                    'responsable' => $this->when($this->tache->activite?->relationLoaded('responsable'), [
+                        'id' => $this->tache->activite->responsable?->id,
+                        'nom' => $this->tache->activite->responsable?->nom,
+                        'avatar' => $this->tache->activite->responsable?->avatar,
+                    ]),
+                    
+                    // 🔥 Projet (OBLIGATOIRE pour validation N2)
+                    'projet' => $this->when($this->tache->activite?->relationLoaded('projet'), [
+                        'id' => $this->tache->activite->projet?->id,
+                        'titre' => $this->tache->activite->projet?->titre,
+                        'responsable_id' => $this->tache->activite->projet?->responsable_id,
+                        'responsable' => $this->when($this->tache->activite->projet?->relationLoaded('responsable'), [
+                            'id' => $this->tache->activite->projet->responsable?->id,
+                            'nom' => $this->tache->activite->projet->responsable?->nom,
+                            'avatar' => $this->tache->activite->projet->responsable?->avatar,
+                        ]),
+                    ]),
+                ]),
             ]),
              
             // Documents
@@ -118,18 +141,5 @@ class TacheResultatResource extends JsonResource
             }),
         ];
     }
-    
-    /**
-     * Format bytes to human readable
-     */
-    private function formatBytes($bytes, $precision = 2)
-    {
-        $units = ['B', 'KB', 'MB', 'GB'];
-        
-        for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
-            $bytes /= 1024;
-        }
-        
-        return round($bytes, $precision) . ' ' . $units[$i];
-    }
+   
 }

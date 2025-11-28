@@ -152,11 +152,12 @@
       @confirmed="handleValidationConfirmed"
     />
 
-    <ResultatDetailModal
-      v-if="showDetailModal"
-      :resultat="selectedResultatForDetail"
-      @close="showDetailModal = false"
-    />
+   <ResultatDetailModal
+  v-if="showDetailModal && selectedResultatForDetail"
+  :resultat="selectedResultatForDetail"
+  @close="showDetailModal = false"
+/>
+
   </AdminLayout>
 </template>
 
@@ -374,6 +375,8 @@ async function handleValidationConfirmed(data) {
 }
 
 function viewResultatDetails(resultat) {
+  // console.log('resultat detail',resultat);
+  
   selectedResultatForDetail.value = resultat
   showDetailModal.value = true
 }

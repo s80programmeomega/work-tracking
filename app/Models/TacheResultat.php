@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TacheStatut;
 use App\Notifications\ResultatEnAttenteN2Notification;
 use App\Notifications\ResultatRejeteNotification;
 use App\Notifications\ResultatSoumisNotification;
@@ -10,8 +11,10 @@ use App\Notifications\ResultatValideN2Notification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Log;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
@@ -57,7 +60,7 @@ class TacheResultat extends Model
         'is_fully_validated',
         'validation_status',
     ];
- 
+
 
     /**
      * Relationships
@@ -299,12 +302,66 @@ class TacheResultat extends Model
                 'progression_individuelle' => 100,
             ]);
 
-            $this->tache->recalculateGlobalStatus();
+            $this->recalculateGlobalStatus();
         }
 
         // Notifier l'auteur
         $this->user->notify(new ResultatValideN2Notification($this, $validator, $commentaire));
     }
+
+
+    /**
+     * ✅ NOUVEAU : Recalculer le statut global de la tâche
+     */
+    protected function recalculateGlobalStatus(): void
+    {
+        $tache = $this->tache; // récupérer la tâche liée
+
+        if (!$tache)
+            return;
+
+        // Recharger les assignés avec les pivots
+        $assignees = $tache->assignees()
+            ->withPivot('statut_individuel', 'progression_individuelle')
+            ->get();
+
+        if ($assignees->isEmpty())
+            return;
+
+        $countTermine = $assignees->where('pivot.statut_individuel', 'termine')->count();
+        $countEnCours = $assignees->where('pivot.statut_individuel', 'en_cours')->count();
+        $total = $assignees->count();
+
+        // Déterminer le statut global
+        if ($countTermine === $total) {
+            $newStatut = TacheStatut::TERMINE;
+        } elseif ($countEnCours > 0 || $countTermine > 0) {
+            $newStatut = TacheStatut::EN_COURS;
+        } else {
+            $newStatut = TacheStatut::A_FAIRE;
+        }
+
+        // Calcul de la progression globale
+        $progressionMoyenne = $assignees->avg('pivot.progression_individuelle') ?? 0;
+
+        // Mettre à jour la tâche
+        if ($tache->statut !== $newStatut || $tache->taux_realisation !== round($progressionMoyenne)) {
+            $tache->update([
+                'statut' => $newStatut,
+                'taux_realisation' => round($progressionMoyenne),
+            ]);
+
+            Log::info('Statut global recalculé', [
+                'tache_id' => $tache->id,
+                'nouveau_statut_global' => $newStatut->value,
+                'progression_moyenne' => round($progressionMoyenne),
+                'termine' => $countTermine,
+                'en_cours' => $countEnCours,
+                'total' => $total,
+            ]);
+        }
+    }
+
 
     public function reject(User $validator, string $commentaire, string $level = 'n1'): void
     {
@@ -346,7 +403,7 @@ class TacheResultat extends Model
     }
 
 
- // ==================== HELPER METHODS ====================
+    // ==================== HELPER METHODS ====================
 
     protected function notifyValidators(): void
     {
@@ -365,7 +422,7 @@ class TacheResultat extends Model
         }
     }
 
-     public function getActivitylogOptions(): LogOptions
+    public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
             ->logOnly(['resultats_obtenus', 'taux_realisation', 'valide_par_n1', 'valide_par_n2'])
