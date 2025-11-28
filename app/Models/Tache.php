@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Spatie\Activitylog\LogOptions;
 
 class Tache extends Model
@@ -133,6 +134,43 @@ class Tache extends Model
         return $code;
     }
 
+        /**
+     * ✅ CORRECTION : Méthode pour vérifier si une tâche est en retard
+     */
+    public function isOverdue(): bool
+    {
+        // Si pas de date d'échéance ou tâche terminée, pas en retard
+        if (!$this->echeance || $this->statut === TacheStatut::TERMINE) {
+            return false;
+        }
+
+        // Vérifier si la date d'échéance est dépassée
+        return $this->echeance->isPast();
+    }
+
+    /**
+     * ✅ NOUVELLE : Scope pour les tâches en retard
+     */
+    public function scopeOverdue($query)
+    {
+        return $query->where('echeance', '<', now())
+            ->where('statut', '!=', TacheStatut::TERMINE->value)
+            ->where(function ($q) {
+                $q->whereNull('date_fin_reelle')
+                  ->orWhere('date_fin_reelle', '>', $this->echeance);
+            });
+    }
+
+    /**
+     * ✅ NOUVELLE : Scope pour les tâches urgentes (échéance dans 7 jours)
+     */
+    public function scopeUrgent($query)
+    {
+        return $query->where('echeance', '<=', now()->addDays(7))
+            ->where('echeance', '>=', now())
+            ->where('statut', '!=', TacheStatut::TERMINE->value)
+            ->whereIn('priorite', [TachePriorite::ELEVEE, TachePriorite::MOYENNE]);
+    }
     /**
      * Fichiers attachés
      */
@@ -340,7 +378,7 @@ class Tache extends Model
         $this->recalculateGlobalStatus();
 
         // Log de l'action
-        \Log::info('Statut individuel mis à jour', [
+        Log::info('Statut individuel mis à jour', [
             'tache_id' => $this->id,
             'user_id' => $user->id,
             'nouveau_statut' => $newStatut,
@@ -391,7 +429,7 @@ class Tache extends Model
                 'taux_realisation' => round($progressionMoyenne),
             ]);
 
-            \Log::info('Statut global recalculé', [
+            Log::info('Statut global recalculé', [
                 'tache_id' => $this->id,
                 'nouveau_statut_global' => $newStatut->value,
                 'progression_moyenne' => round($progressionMoyenne),
@@ -962,11 +1000,11 @@ class Tache extends Model
             ->whereNull('validated_n2_at');
     }
 
-    public function scopeOverdue($query)
-    {
-        return $query->where('echeance', '<', now())
-            ->where('statut', '!=', TacheStatut::TERMINE->value);
-    }
+    // public function scopeOverdue($query)
+    // {
+    //     return $query->where('echeance', '<', now())
+    //         ->where('statut', '!=', TacheStatut::TERMINE->value);
+    // }
 
     public function scopeAssignedTo($query, int $userId)
     {
