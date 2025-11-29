@@ -86,6 +86,10 @@ export { default as ExclamationCircleIcon } from './ExclamationCircleIcon.vue';
 export { default as FilterIcon } from './FilterIcon.vue';
 export { default as GlobeIcon } from './GlobeIcon.vue';
 
+export { default as ArchiveBoxArrowUpIcon } from './ArchiveBoxArrowUpIcon.vue';
+export { default as ArchiveBoxIcon } from './ArchiveBoxIcon.vue';
+export { default as ArrowLeftIcon } from './ArrowLeftIcon.vue';
+
 export {
   EyeIcon,
   BellIcon,
