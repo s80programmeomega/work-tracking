@@ -312,8 +312,7 @@ import { useRouter } from 'vue-router'
 import api from '@/api/axios'
 import Chart from 'chart.js/auto'
 import AdminLayout from '../components/layout/AdminLayout.vue'
-import KanbanColumn from './dashboard/KanbanColumn.vue'
-import KanbanTaskCard from './dashboard/KanbanTaskCard.vue'
+import KanbanColumn from './dashboard/KanbanColumn.vue' 
 import {
   RefreshIcon,
   TrendingUpIcon,
@@ -391,6 +390,13 @@ const teamMembers = computed(() => {
 
 // Colonnes Kanban
 const kanbanColumns = ref([
+    {
+    status: 'pending',
+    title: 'En attente',
+    color: 'bg-yellow-500',
+    textColor: 'text-yellow-700 dark:text-yellow-400',
+    bgColor: 'bg-yellow-50 dark:bg-yellow-900/20'
+  },
   {
     status: 'active',
     title: 'En cours',
@@ -398,13 +404,7 @@ const kanbanColumns = ref([
     textColor: 'text-green-700 dark:text-green-400',
     bgColor: 'bg-green-50 dark:bg-green-900/20'
   },
-  {
-    status: 'pending',
-    title: 'En attente',
-    color: 'bg-yellow-500',
-    textColor: 'text-yellow-700 dark:text-yellow-400',
-    bgColor: 'bg-yellow-50 dark:bg-yellow-900/20'
-  },
+
   {
     status: 'completed',
     title: 'Terminés',

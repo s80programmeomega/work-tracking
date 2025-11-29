@@ -300,4 +300,51 @@ class ProjetResource extends JsonResource
             'can_assign_users' => false,
         ];
     }
+    
+    /**
+     * ✅ Calcule les permissions de l'utilisateur pour une activité spécifique
+     */
+    private function calculateActivityPermissions($activite, $user): array
+    {
+        if (!$user) {
+            return $this->getDefaultPermissions();
+        }
+
+        // ✅ Super admin a tous les droits
+        if ($user->isSuperAdmin()) {
+            return $this->getFullPermissions();
+        }
+
+        // ✅ Responsable de l'activité a tous les droits
+        if ($activite->responsable_id === $user->id) {
+            return $this->getFullPermissions();
+        }
+
+        // ✅ Responsable du projet a tous les droits
+        if ($this->resource->responsable_id === $user->id) {
+            return $this->getFullPermissions();
+        }
+
+        // ✅ Membre de l'activité : permissions basées sur le pivot
+        $membre = $activite->membres->firstWhere('id', $user->id);
+        if ($membre) {
+            return [
+                'can_edit_activity' => (bool) $membre->pivot->can_edit_activity,
+                'can_delete_activity' => (bool) $membre->pivot->can_delete_activity,// Les membres simples ne peuvent pas supprimer l'activité
+                'can_manage_members' => (bool) $membre->pivot->can_assign_users,
+                'can_create_tasks' => (bool) $membre->pivot->can_create_tasks,
+                'can_edit_tasks' => (bool) $membre->pivot->can_edit_tasks,
+                'can_delete_tasks' => (bool) $membre->pivot->can_delete_tasks,
+                'can_validate_results' => (bool) $membre->pivot->can_validate_results,
+                'can_assign_users' => (bool) $membre->pivot->can_assign_users,
+            ];
+        }
+
+        // ✅ Aucun accès par défaut
+        return $this->getDefaultPermissions();
+    }
+    
+
 }
+
+ 

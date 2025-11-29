@@ -355,6 +355,33 @@ class WorkspaceController extends Controller
     }
   }
 
+  public function getWorkspaces(Request $request)
+{
+    $user = $request->user();
+    
+    $workspaces = Workspace::accessibleBy($user->id)
+        ->withCount(['projets' => function ($query) {
+            $query->where('status', 'active');
+        }])
+        ->whereNotNull('id') // ← Filtrer les workspaces sans ID
+        ->get()
+        ->map(function ($workspace) {
+            return [
+                'id' => $workspace->id,
+                'nom' => $workspace->nom,
+                'code' => $workspace->code,
+                'projets_count' => $workspace->projets_count,
+                'description' => $workspace->description,
+                'created_at' => $workspace->created_at,
+                'updated_at' => $workspace->updated_at,
+            ];
+        })
+        ->filter() // ← Filtrer les éventuels éléments null
+        ->values();
+
+    return response()->json($workspaces);
+}
+
   /**
    * ✅ Accepter l'invitation pour un utilisateur existant
    */
