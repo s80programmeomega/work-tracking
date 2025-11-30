@@ -220,7 +220,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useActiviteStore } from '@/stores/activiteStore'
-import ActiviteForm from './ActiviteForm.vue'
+// import ActiviteForm from './ActiviteForm.vue'
+import ActiviteForm from "@/components/activites/ActiviteForm.vue";
+
 
 const props = defineProps({
   viewType: {
