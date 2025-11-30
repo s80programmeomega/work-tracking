@@ -134,7 +134,12 @@ class Tache extends Model
         return $code;
     }
 
-        /**
+    public function documents()
+    {
+        return $this->morphMany(Document::class, 'documentable');
+    }
+
+    /**
      * ✅ CORRECTION : Méthode pour vérifier si une tâche est en retard
      */
     public function isOverdue(): bool
@@ -157,7 +162,7 @@ class Tache extends Model
             ->where('statut', '!=', TacheStatut::TERMINE->value)
             ->where(function ($q) {
                 $q->whereNull('date_fin_reelle')
-                  ->orWhere('date_fin_reelle', '>', $this->echeance);
+                    ->orWhere('date_fin_reelle', '>', $this->echeance);
             });
     }
 
@@ -974,11 +979,6 @@ class Tache extends Model
 
     // ==================== SCOPES ====================
 
-    public function scopeForWeek($query, int $weekNumber, int $year)
-    {
-        return $query->where('week_number', $weekNumber)
-            ->where('year', $year);
-    }
 
     public function scopeForActivite($query, int $activiteId)
     {
@@ -1165,6 +1165,146 @@ class Tache extends Model
 
         return true;
     }
+
+    /**
+     * ✅ Vérifie si la tâche doit être affichée sur la fiche d'évaluation
+     * 
+     * @param User $user
+     * @return bool
+     */
+    public function shouldShowOnEvaluation(User $user): bool
+    {
+        $monStatut = $this->getStatutForUser($user);
+
+        // Toujours afficher si en cours ou à faire
+        if (in_array($monStatut, ['en_cours', 'a_faire'])) {
+            return true;
+        }
+
+        // Si terminée, vérifier la validation
+        if ($monStatut === 'termine') {
+            $monResultat = $this->monResultat($user);
+
+            // Pas de résultat → afficher
+            if (!$monResultat || !$monResultat->soumis_le) {
+                return true;
+            }
+
+            // Vérifier si validation complète
+            return !$this->isValidationCompleteForUser($user);
+        }
+
+        return false;
+    }
+
+    /**
+     * ✅ Vérifie si la validation est complète pour un utilisateur
+     * 
+     * @param User $user
+     * @return bool
+     */
+    public function isValidationCompleteForUser(User $user): bool
+    {
+        $monResultat = $this->monResultat($user);
+
+        if (!$monResultat) {
+            return false;
+        }
+
+        // Si N2 requis → vérifier N1 ET N2
+        if ($this->validation_n2_required) {
+            return $monResultat->valide_par_n1 && $monResultat->valide_par_n2;
+        }
+
+        // Si seulement N1 requis → vérifier N1
+        return $monResultat->valide_par_n1;
+    }
+
+    /**
+     * ✅ Récupère le statut de validation pour l'affichage
+     * 
+     * @param User $user
+     * @return string
+     */
+    public function getValidationStatusForUser(User $user): string
+    {
+        $monResultat = $this->monResultat($user);
+
+        if (!$monResultat || !$monResultat->soumis_le) {
+            return 'not_submitted'; // Pas encore soumis
+        }
+
+        if ($this->validation_n2_required) {
+            if (!$monResultat->valide_par_n1) {
+                return 'pending_n1'; // En attente N1
+            }
+            if (!$monResultat->valide_par_n2) {
+                return 'pending_n2'; // En attente N2
+            }
+            return 'fully_validated'; // Complètement validé
+        } else {
+            if (!$monResultat->valide_par_n1) {
+                return 'pending_n1'; // En attente N1
+            }
+            return 'fully_validated'; // Complètement validé
+        }
+    }
+
+    /**
+     * ✅ Scope pour les tâches d'une semaine spécifique
+     * 
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param int $weekNumber
+     * @param int $year
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeForWeek($query, int $weekNumber, int $year)
+    {
+        return $query->where('week_number', $weekNumber)
+            ->where('year', $year);
+    }
+
+    /**
+     * ✅ Scope pour les tâches à afficher sur la fiche d'évaluation
+     * Filtre côté DB pour optimisation
+     * 
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param User $user
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeForEvaluation($query, User $user)
+    {
+        return $query->whereHas('assignees', function ($q) use ($user) {
+            $q->where('user_id', $user->id);
+        })
+            ->where(function ($q) use ($user) {
+                // Inclure les tâches en cours et à faire
+                $q->whereIn('statut', ['en_cours', 'a_faire'])
+                    // Ou les tâches terminées mais pas complètement validées
+                    ->orWhere(function ($subQ) use ($user) {
+                    $subQ->where('statut', 'termine')
+                        ->where(function ($validQ) use ($user) {
+                            // Sans résultat
+                            $validQ->whereDoesntHave('resultatsIndividuels', function ($resQ) use ($user) {
+                                $resQ->where('user_id', $user->id)
+                                    ->whereNotNull('soumis_le');
+                            })
+                                // Ou avec résultat non validé
+                                ->orWhereHas('resultatsIndividuels', function ($resQ) use ($user) {
+                                $resQ->where('user_id', $user->id)
+                                    ->where(function ($valQ) {
+                                        $valQ->where('valide_par_n1', false)
+                                            ->orWhere(function ($n2Q) {
+                                                $n2Q->whereColumn('taches.validation_n2_required', true)
+                                                    ->where('valide_par_n2', false);
+                                            });
+                                    });
+                            });
+                        });
+                });
+            });
+    }
+
 
 
 }

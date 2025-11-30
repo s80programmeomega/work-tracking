@@ -76,6 +76,11 @@ class Activite extends Model
         return $this->belongsTo(Projet::class);
     }
 
+    public function documents()
+{
+    return $this->morphMany(Document::class, 'documentable');
+}
+
 
     public function membres()
     {

@@ -314,18 +314,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Soumettre un résultat
         Route::post('/{resultat}/submit', [TacheResultatController::class, 'submit']);
 
-        // Validation N1 (Responsable Activité)
-        // Route::post('/{resultat}/validate-n1', [TacheResultatController::class, 'validateN1']);
-
-        // Validation N2 (Responsable Projet)
-        // Route::post('/{resultat}/validate-n2', [TacheResultatController::class, 'validateN2']);
-
-        // Rejeter un résultat
-        // Route::post('/{resultat}/reject', [TacheResultatController::class, 'reject']);
-
-        // Historique
-        // Route::get('/{resultat}/history', [TacheResultatController::class, 'history']);
-
         Route::get('/documents', [TacheResultatController::class, 'getDocuments']);
         Route::delete('/documents/{document}', [TacheResultatController::class, 'deleteDocument']);
         // Nouvelles routes pour les documents
@@ -374,8 +362,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         // 📜 Historique des validations
         Route::get('/history', [EvaluationController::class, 'validationHistory']);
-         
-
     });
 
     // Routes pour les rapports

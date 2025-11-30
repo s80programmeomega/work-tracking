@@ -1,7 +1,7 @@
 <!-- resources\js\components\layout\AppSidebar.vue -->
 <template>
     <aside :class="[
-        'fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-40 border-r border-gray-200',
+        'fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-40  border-r border-gray-100 dark:border-gray-800 shadow-sm',
         {
             'lg:w-[290px]': isExpanded || isMobileOpen || isHovered,
             'lg:w-[90px]': !isExpanded && !isHovered,
@@ -77,47 +77,40 @@
                         </p>
                     </div>
 
-                     <div class="max-h-60 overflow-y-auto">
-          <!-- CORRECTION : Utiliser filteredWorkspaces et vérifier null -->
-          <button
-            v-for="workspace in filteredWorkspaces"
-            :key="workspace?.id || 'null'"
-            @click="selectWorkspace(workspace)"
-            class="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors group"
-          >
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white font-semibold text-sm">
-              {{ getWorkspaceInitials(workspace?.nom) }}
-            </div>
-            <div class="flex-1 text-left">
-              <p class="text-sm font-medium text-gray-900 dark:text-white">
-                {{ workspace?.nom || 'Workspace inconnu' }}
-              </p>
-              <p class="text-xs text-gray-500 dark:text-gray-400">
-                {{ workspace?.projets_count || 0 }} projets
-              </p>
-            </div>
-            
-            <!-- Indicateur workspace actuel -->
-            <CheckIcon
-              v-if="currentWorkspace?.id === workspace?.id"
-              class="w-4 h-4 text-brand-500"
-            />
-            
-            <!-- Bouton filtre dashboard pour ce workspace -->
-            <button
-              @click.stop="selectWorkspaceForDashboard(workspace?.id)"
-              :class="[
-                'p-1 rounded transition-colors',
-                selectedDashboardWorkspace === workspace?.id
-                  ? 'bg-brand-500 text-white'
-                  : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 hover:bg-brand-500 hover:text-white'
-              ]"
-              :title="selectedDashboardWorkspace === workspace?.id ? 'Filtre actif' : 'Filtrer le dashboard'"
-            >
-              <FilterIcon class="w-3 h-3" />
-            </button>
-          </button>
-        </div>
+                    <div class="max-h-60 overflow-y-auto">
+                        <!-- CORRECTION : Utiliser filteredWorkspaces et vérifier null -->
+                        <button v-for="workspace in filteredWorkspaces" :key="workspace?.id || 'null'"
+                            @click="selectWorkspace(workspace)"
+                            class="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors group">
+                            <div
+                                class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white font-semibold text-sm">
+                                {{ getWorkspaceInitials(workspace?.nom) }}
+                            </div>
+                            <div class="flex-1 text-left">
+                                <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                    {{ workspace?.nom || 'Workspace inconnu' }}
+                                </p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">
+                                    {{ workspace?.projets_count || 0 }} projets
+                                </p>
+                            </div>
+
+                            <!-- Indicateur workspace actuel -->
+                            <CheckIcon v-if="currentWorkspace?.id === workspace?.id" class="w-4 h-4 text-brand-500" />
+
+                            <!-- Bouton filtre dashboard pour ce workspace -->
+                            <div role="button" tabindex="0" @click.stop="selectWorkspaceForDashboard(workspace?.id)"
+                                :class="[
+                                    'p-1 rounded transition-colors cursor-pointer',
+                                    selectedDashboardWorkspace === workspace?.id
+                                        ? 'bg-brand-500 text-white'
+                                        : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 hover:bg-brand-500 hover:text-white'
+                                ]" :title="selectedDashboardWorkspace === workspace?.id ? 'Filtre actif' : 'Filtrer le dashboard'">
+                                <FilterIcon class="w-3 h-3" />
+                            </div>
+
+                        </button>
+                    </div>
 
                     <!-- Actions -->
                     <div class="px-3 pt-2 mt-2 border-t border-gray-200 dark:border-gray-700 space-y-2">
@@ -333,14 +326,14 @@ const isSuperAdmin = computed(() => {
 
 // Computed property avec fallback
 const filteredWorkspaces = computed(() => {
-  return (workspaces.value || [])
-    .filter(workspace => workspace && workspace.id)
-    .map(workspace => ({
-      id: workspace.id,
-      nom: workspace.nom || 'Workspace sans nom',
-      projets_count: workspace.projets_count || 0,
-      // autres propriétés avec fallback
-    }))
+    return (workspaces.value || [])
+        .filter(workspace => workspace && workspace.id)
+        .map(workspace => ({
+            id: workspace.id,
+            nom: workspace.nom || 'Workspace sans nom',
+            projets_count: workspace.projets_count || 0,
+            // autres propriétés avec fallback
+        }))
 })
 
 // ✅ Icônes supplémentaires pour le filtre

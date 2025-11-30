@@ -174,14 +174,14 @@
           </div>
 
           <!-- Onglet Commentaires -->
-          <div v-show="activeTab === 'commentaires'">
+          <!-- <div v-show="activeTab === 'commentaires'">
             <CommentSection
               v-if="tache?.id"
               commentable-type="App\Models\Tache"
               :commentable-id="tache.id"
               :current-user-id="currentUser?.id"
             />
-          </div>
+          </div> -->
 
           <!-- Onglet Documents -->
           <div v-show="activeTab === 'documents'">
@@ -270,9 +270,9 @@ const modalSizeClass = computed(() =>
 
 const tabs = computed(() => [
   { id: 'details', label: 'Détails' },
-  { id: 'resultats', label: 'Résultats', count: localTache.value.resultats_count || 0 },
-  { id: 'commentaires', label: 'Commentaires', count: localTache.value.comments_count || 0 },
-  // { id: 'documents', label: 'Documents', count: localTache.value.documents_count || 0 },
+  // { id: 'resultats', label: 'Résultats', count: localTache.value.resultats_count || 0 },
+  // { id: 'commentaires', label: 'Commentaires', count: localTache.value.comments_count || 0 },
+  { id: 'documents', label: 'Documents de resultat', count: localTache.value.documents_count || 0 },
 ])
 
 const currentUser = computed(() => {

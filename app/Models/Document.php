@@ -17,6 +17,7 @@ class Document extends Model
     use HasFactory, SoftDeletes, LogsActivity;
 
     protected $fillable = [
+        'workspace_id',
         'documentable_type',
         'documentable_id',
         'nom',
@@ -72,6 +73,11 @@ class Document extends Model
             ->dontSubmitEmptyLogs();
     }
 
+    public function workspace(): BelongsTo
+    {
+        return $this->belongsTo(Workspace::class);
+    }
+
     /**
      * Polymorphic relation to any model
      */
@@ -79,7 +85,7 @@ class Document extends Model
     {
         return $this->morphTo();
     }
-
+ 
     /**
      * Uploader of the document
      */

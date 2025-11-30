@@ -165,30 +165,30 @@ class TacheController extends Controller
     /**
      * ✅ Tâches assignées à moi
      */
-// Dans votre TacheController
-public function assignedToMe(Request $request)
-{
-    $user = $request->user();
-    
-    $taches = Tache::with([
-        'activite.projet',
-        'assignees',
-        'resultatsIndividuels.user',
-        'labels',
-        'sousTaches',
-        'attachments',
-        'externalLinks'
-    ])
-    ->assignedTo($user->id)
-    ->active()
-    ->ordered()
-    ->get();
+    // Dans votre TacheController
+    public function assignedToMe(Request $request)
+    {
+        $user = $request->user();
 
-    return response()->json([
-        'success' => true,
-        'data' => TacheResource::collection($taches)
-    ]);
-}
+        $taches = Tache::with([
+            'activite.projet',
+            'assignees',
+            'resultatsIndividuels.user',
+            'labels',
+            'sousTaches',
+            'attachments',
+            'externalLinks'
+        ])
+            ->assignedTo($user->id)
+            ->active()
+            ->ordered()
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => TacheResource::collection($taches)
+        ]);
+    }
 
     /**
      * ✅ Tâches en attente de validation (que JE peux valider)
@@ -1175,22 +1175,216 @@ public function assignedToMe(Request $request)
         ], 201);
     }
 
-    /**
-     * ✅ Mon rapport hebdomadaire
-     */
-    public function myWeeklyReport(Request $request): JsonResponse
-    {
-        $weekNumber = $request->input('week_number');
-        $year = $request->input('year');
+/**
+ * ✅ NOUVELLE VERSION CORRIGÉE : Rapport hebdomadaire avec statuts individuels
+ * 
+ * Affiche les tâches où l'utilisateur :
+ * - Est assigné
+ * - N'a PAS terminé OU a terminé mais résultat pas complètement validé
+ * - Avec son statut INDIVIDUEL (statut_individuel dans tache_user)
+ */
+public function myWeeklyReport(Request $request): JsonResponse
+{
+    $validated = $request->validate([
+        'week_number' => 'nullable|integer|min:1|max:53',
+        'year' => 'nullable|integer|min:1990',
+    ]);
 
-        $report = $this->tacheService->getWeeklyReport(
-            $request->user(),
-            $weekNumber,
-            $year
-        );
+    $weekNumber = $validated['week_number'] ?? now()->weekOfYear;
+    $year = $validated['year'] ?? now()->year;
 
-        return response()->json($report);
-    }
+    $user = $request->user();
+
+    // ✅ Calculer les dates de début et fin de la semaine
+    $weekStart = $this->getWeekStartDate($year, $weekNumber);
+    $weekEnd = $this->getWeekEndDate($year, $weekNumber);
+
+    Log::info('📋 Chargement fiche évaluation', [
+        'user_id' => $user->id,
+        'week' => $weekNumber,
+        'year' => $year,
+        'week_start' => $weekStart,
+        'week_end' => $weekEnd,
+    ]);
+
+    // ✅ NOUVELLE LOGIQUE : Récupérer les tâches selon le statut individuel
+    $taches = Tache::with([
+        'activite.projet',
+        'assignees' => function ($query) use ($user) {
+            $query->where('user_id', $user->id)
+                ->withPivot([
+                    'statut_individuel',
+                    'progression_individuelle',
+                    'started_at',
+                    'completed_at',
+                    'notes_personnelles'
+                ]);
+        },
+        'labels',
+        'validatedN1By',
+        'validatedN2By',
+        'resultatsIndividuels' => function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        }
+    ])
+    ->whereHas('assignees', function ($query) use ($user) {
+        $query->where('user_id', $user->id);
+    })
+    // ✅ Filtrer par semaine (tâches dont l'échéance tombe dans cette semaine ou avant)
+    ->where(function ($q) use ($weekEnd) {
+        $q->where('echeance', '<=', $weekEnd)
+          ->orWhereNull('echeance');
+    })
+    ->active()
+    ->ordered()
+    ->get();
+
+    // ✅ FILTRAGE SELON LE PROCESSUS : 
+    // Afficher seulement si :
+    // 1. Statut individuel != terminé
+    // 2. OU statut individuel = terminé MAIS résultat pas complètement validé
+    $tasksToDisplay = $taches->filter(function ($tache) use ($user) {
+        $assignee = $tache->assignees->first();
+        
+        if (!$assignee) {
+            return false;
+        }
+
+        $statutIndividuel = $assignee->pivot->statut_individuel;
+        
+        // 1️⃣ Si pas terminé individuellement → TOUJOURS afficher
+        if ($statutIndividuel !== 'termine') {
+            return true;
+        }
+
+        // 2️⃣ Si terminé individuellement → vérifier la validation du résultat
+        $monResultat = $tache->monResultat($user);
+        
+        // Pas de résultat soumis → afficher
+        if (!$monResultat || !$monResultat->soumis_le) {
+            return true;
+        }
+
+        // Vérifier si validation complète
+        $validationComplete = false;
+
+        if ($tache->validation_n2_required) {
+            // N1 ET N2 requis → masquer seulement si les 2 sont validés
+            $validationComplete = $monResultat->valide_par_n1 && $monResultat->valide_par_n2;
+        } else {
+            // Seulement N1 requis → masquer si N1 validé
+            $validationComplete = $monResultat->valide_par_n1;
+        }
+
+        // ✅ Afficher si validation PAS complète
+        return !$validationComplete;
+    });
+
+    // ✅ Calculer les statistiques avec STATUTS INDIVIDUELS
+    $stats = [
+        'total' => $tasksToDisplay->count(),
+        'a_faire' => $tasksToDisplay->filter(function ($t) use ($user) {
+            $assignee = $t->assignees->first();
+            return $assignee && $assignee->pivot->statut_individuel === 'a_faire';
+        })->count(),
+        'en_cours' => $tasksToDisplay->filter(function ($t) use ($user) {
+            $assignee = $t->assignees->first();
+            return $assignee && $assignee->pivot->statut_individuel === 'en_cours';
+        })->count(),
+        'termine' => $tasksToDisplay->filter(function ($t) use ($user) {
+            $assignee = $t->assignees->first();
+            return $assignee && $assignee->pivot->statut_individuel === 'termine';
+        })->count(),
+        'avec_resultat' => $tasksToDisplay->filter(function ($t) {
+            return $t->resultatsIndividuels->isNotEmpty() && $t->resultatsIndividuels->first()->soumis_le;
+        })->count(),
+        'valide_n1' => $tasksToDisplay->filter(function ($t) {
+            $r = $t->resultatsIndividuels->first();
+            return $r && $r->valide_par_n1;
+        })->count(),
+        'valide_n2' => $tasksToDisplay->filter(function ($t) {
+            $r = $t->resultatsIndividuels->first();
+            return $r && $r->valide_par_n2;
+        })->count(),
+        'en_retard' => $tasksToDisplay->filter(function ($t) use ($user) {
+            $assignee = $t->assignees->first();
+            return $t->is_overdue && 
+                   $assignee && 
+                   $assignee->pivot->statut_individuel !== 'termine';
+        })->count(),
+        'estimated_hours' => $tasksToDisplay->sum(fn($t) => (float) $t->estimated_hours),
+        'actual_hours' => $tasksToDisplay->sum(fn($t) => (float) $t->actual_hours),
+    ];
+
+    // ✅ Grouper par activité
+    $byActivite = $tasksToDisplay->groupBy('activite_id')->map(function ($tasks, $activiteId) use ($user) {
+        $activite = $tasks->first()->activite;
+
+        return [
+            'activite' => [
+                'id' => $activite->id,
+                'nom' => $activite->nom,
+                'code' => $activite->code,
+                'projet_nom' => $activite->projet?->nom,
+            ],
+            'taches' => TacheResource::collection($tasks),
+            'stats' => [
+                'total' => $tasks->count(),
+                'a_faire' => $tasks->filter(function ($t) use ($user) {
+                    $assignee = $t->assignees->first();
+                    return $assignee && $assignee->pivot->statut_individuel === 'a_faire';
+                })->count(),
+                'en_cours' => $tasks->filter(function ($t) use ($user) {
+                    $assignee = $t->assignees->first();
+                    return $assignee && $assignee->pivot->statut_individuel === 'en_cours';
+                })->count(),
+                'termine' => $tasks->filter(function ($t) use ($user) {
+                    $assignee = $t->assignees->first();
+                    return $assignee && $assignee->pivot->statut_individuel === 'termine';
+                })->count(),
+            ]
+        ];
+    })->values();
+
+    Log::info('✅ Fiche évaluation chargée', [
+        'user_id' => $user->id,
+        'total_tasks' => $stats['total'],
+        'activites' => $byActivite->count()
+    ]);
+
+    return response()->json([
+        'week_info' => [
+            'week_number' => $weekNumber,
+            'year' => $year,
+            'start_date' => $weekStart,
+            'end_date' => $weekEnd,
+        ],
+        'all_tasks' => TacheResource::collection($tasksToDisplay),
+        'by_activite' => $byActivite,
+        'stats' => $stats,
+    ]);
+}
+
+/**
+ * ✅ Helper pour obtenir la date de début de semaine (Lundi)
+ */
+private function getWeekStartDate(int $year, int $week): string
+{
+    $dto = new \DateTime();
+    $dto->setISODate($year, $week);
+    return $dto->format('Y-m-d');
+}
+
+/**
+ * ✅ Helper pour obtenir la date de fin de semaine (Dimanche)
+ */
+private function getWeekEndDate(int $year, int $week): string
+{
+    $dto = new \DateTime();
+    $dto->setISODate($year, $week, 7);
+    return $dto->format('Y-m-d');
+}
+ 
 
     /**
      * ✅ Rapport hebdomadaire d'un utilisateur (managers)
@@ -1287,7 +1481,7 @@ public function assignedToMe(Request $request)
         }
     }
 
-   
+
 
     /**
      * ✅ NOUVEAU : Mes tâches en attente de collègues
@@ -1406,43 +1600,43 @@ public function assignedToMe(Request $request)
         ]);
     }
 
-    
+
     /**
- * ✅ MODIFIÉ : Valider un résultat individuel (N1)
- */
-public function validateIndividualResultN1(Request $request, TacheResultat $resultat): JsonResponse
-{
-    $validated = $request->validate([
-        'commentaire' => 'nullable|string|max:1000',
-    ]);
-
-    $user = $request->user();
-
-    try {
-        $tache = $resultat->tache;
-        
-        if (!$resultat->canBeValidatedByN1($user)) {
-            return response()->json([
-                'message' => 'Vous n\'avez pas la permission de valider ce résultat'
-            ], 403);
-        }
-
-        $resultat->validateByN1($user, $validated['commentaire'] ?? null);
-
-        return response()->json([
-            'message' => 'Résultat validé N1 avec succès',
-            'data' => [
-                'resultat' => new TacheResultatResource($resultat->fresh()),
-                'tache' => new TacheResource($tache->fresh()),
-            ],
+     * ✅ MODIFIÉ : Valider un résultat individuel (N1)
+     */
+    public function validateIndividualResultN1(Request $request, TacheResultat $resultat): JsonResponse
+    {
+        $validated = $request->validate([
+            'commentaire' => 'nullable|string|max:1000',
         ]);
 
-    } catch (\Exception $e) {
-        return response()->json([
-            'message' => $e->getMessage()
-        ], 422);
+        $user = $request->user();
+
+        try {
+            $tache = $resultat->tache;
+
+            if (!$resultat->canBeValidatedByN1($user)) {
+                return response()->json([
+                    'message' => 'Vous n\'avez pas la permission de valider ce résultat'
+                ], 403);
+            }
+
+            $resultat->validateByN1($user, $validated['commentaire'] ?? null);
+
+            return response()->json([
+                'message' => 'Résultat validé N1 avec succès',
+                'data' => [
+                    'resultat' => new TacheResultatResource($resultat->fresh()),
+                    'tache' => new TacheResource($tache->fresh()),
+                ],
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 422);
+        }
     }
-}
 
     /**
      * ✅ MODIFIÉ : Valider un résultat individuel (N2)

@@ -83,6 +83,11 @@ class Projet extends Model
         return $code;
     }
 
+    public function documents()
+{
+    return $this->morphMany(Document::class, 'documentable');
+}
+
     /**
      * Relationships
      */
