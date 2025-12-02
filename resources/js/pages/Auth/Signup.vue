@@ -71,8 +71,8 @@
                                             </label>
                                             <input v-model="form.prenom" type="text" id="prenom" name="prenom"
                                                 :placeholder="$t('auth.first_name_placeholder')" :class="validationErrors.first_name || validationErrors.name
-                                                        ? 'border-error-500 focus:border-error-500 focus:ring-error-500/10'
-                                                        : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
+                                                    ? 'border-error-500 focus:border-error-500 focus:ring-error-500/10'
+                                                    : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
                                                     "
                                                 class="dark:bg-dark-900 h-11 w-full rounded-lg border bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                                                 :disabled="loading" />
@@ -92,8 +92,8 @@
                                             </label>
                                             <input v-model="form.nom" type="text" id="nom" name="nom"
                                                 :placeholder="$t('auth.last_name_placeholder')" :class="validationErrors.last_name
-                                                        ? 'border-error-500 focus:border-error-500 focus:ring-error-500/10'
-                                                        : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
+                                                    ? 'border-error-500 focus:border-error-500 focus:ring-error-500/10'
+                                                    : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
                                                     "
                                                 class="dark:bg-dark-900 h-11 w-full rounded-lg border bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                                                 :disabled="loading" />
@@ -111,8 +111,8 @@
                                         </label>
                                         <input v-model="form.email" type="email" id="email" name="email"
                                             :placeholder="$t('auth.email_placeholder')" :class="validationErrors.email
-                                                    ? 'border-error-500 focus:border-error-500 focus:ring-error-500/10'
-                                                    : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
+                                                ? 'border-error-500 focus:border-error-500 focus:ring-error-500/10'
+                                                : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
                                                 "
                                             class="dark:bg-dark-900 h-11 w-full rounded-lg border bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                                             :disabled="loading" />
@@ -130,8 +130,8 @@
                                         <div class="relative">
                                             <input v-model="form.password" :type="showPassword ? 'text' : 'password'"
                                                 id="password" :placeholder="$t('auth.password_placeholder')" :class="validationErrors.password
-                                                        ? 'border-error-500 focus:border-error-500 focus:ring-error-500/10'
-                                                        : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
+                                                    ? 'border-error-500 focus:border-error-500 focus:ring-error-500/10'
+                                                    : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
                                                     "
                                                 class="dark:bg-dark-900 h-11 w-full rounded-lg border bg-transparent py-2.5 pl-4 pr-11 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                                                 :disabled="loading" />
@@ -166,8 +166,8 @@
                                                 :type="showConfirmPassword ? 'text' : 'password'"
                                                 id="passwordConfirmation"
                                                 :placeholder="$t('auth.confirm_password_placeholder')" :class="validationErrors.password_confirmation
-                                                        ? 'border-error-500 focus:border-error-500 focus:ring-error-500/10'
-                                                        : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
+                                                    ? 'border-error-500 focus:border-error-500 focus:ring-error-500/10'
+                                                    : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
                                                     "
                                                 class="dark:bg-dark-900 h-11 w-full rounded-lg border bg-transparent py-2.5 pl-4 pr-11 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                                                 :disabled="loading" />
@@ -202,13 +202,13 @@
                                                     <input v-model="form.agreeToTerms" type="checkbox" id="agreeToTerms"
                                                         class="sr-only" :disabled="loading" />
                                                     <div :class="form.agreeToTerms
-                                                            ? 'border-brand-500 bg-brand-500'
-                                                            : 'bg-transparent border-gray-300 dark:border-gray-700'
+                                                        ? 'border-brand-500 bg-brand-500'
+                                                        : 'bg-transparent border-gray-300 dark:border-gray-700'
                                                         "
                                                         class="mr-3 flex h-5 w-5 items-center justify-center rounded-md border-[1.25px]">
                                                         <span :class="form.agreeToTerms
-                                                                ? ''
-                                                                : 'opacity-0'
+                                                            ? ''
+                                                            : 'opacity-0'
                                                             ">
                                                             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
                                                                 xmlns="http://www.w3.org/2000/svg">
@@ -298,9 +298,10 @@
                         <div class="flex flex-col items-center max-w-xs text-center">
                             <!-- Logo Uptiimun -->
                             <div class="block mb-6">
-                                <img width="200" height="180" src="@images/logo/Logo-dark.jpg" alt="Uptiimun Work Tracking"
+                                <img width="200" height="180" :src="LogoDark" alt="Uptiimun Work Tracking"
                                     class="mx-auto rounded-lg" />
                             </div>
+
 
                             <!-- Nom de l'application -->
                             <h2 class="mb-4 text-2xl font-bold text-white">
@@ -355,8 +356,10 @@ import CommonGridShape from "@/components/common/CommonGridShape.vue";
 import FullScreenLayout from "@/components/layout/FullScreenLayout.vue";
 import LanguageSwitcher from "@/components/common/LanguageSwitcher.vue";
 import { useAuthStore } from "@/stores/authStore";
+// import LogoDark from '@/assets/images/logo/Logo-dark.jpg'
 
 // Composables et stores
+const LogoDark = new URL('@/assets/images/logo/Logo-dark.jpg', import.meta.url).href
 const { t, locale } = useI18n();
 const router = useRouter();
 const authStore = useAuthStore();
