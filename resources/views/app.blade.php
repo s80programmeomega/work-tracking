@@ -1,4 +1,3 @@
-{{-- resources/views/app.blade.php --}}
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -8,6 +7,7 @@
     <link rel="alternate icon" type="image/png" href="{{ asset('favicons/favicon-32x32.png') }}"/>
     <title>{{ config('app.name', 'Work Tracking') }}</title>
 
+    {{-- Vite assets --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>

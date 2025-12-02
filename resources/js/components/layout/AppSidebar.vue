@@ -19,11 +19,11 @@
                 : 'justify-start',
         ]">
             <router-link to="/">
-                <img v-if="isExpanded || isHovered || isMobileOpen" class="dark:hidden" src="@images/logo/Logo.png"
-                    alt="Logo" width="150" height="40" />
-                <img v-if="isExpanded || isHovered || isMobileOpen" class="hidden dark:block"
-                    src="@images/logo/Logo-dark.jpg" alt="Logo" width="150" height="40" />
-                <img v-else src="@images/logo/icon.jpg" alt="Logo" width="32" height="32" />
+                <img v-if="isExpanded || isHovered || isMobileOpen" class="dark:hidden" :src="Logo" alt="Logo"
+                    width="150" height="40" />
+                <img v-if="isExpanded || isHovered || isMobileOpen" class="hidden dark:block" :src="LogoDark" alt="Logo"
+                    width="150" height="40" />
+                <img v-else :src="Icon" alt="Logo" width="32" height="32" />
             </router-link>
         </div>
 
@@ -105,7 +105,8 @@
                                     selectedDashboardWorkspace === workspace?.id
                                         ? 'bg-brand-500 text-white'
                                         : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 hover:bg-brand-500 hover:text-white'
-                                ]" :title="selectedDashboardWorkspace === workspace?.id ? 'Filtre actif' : 'Filtrer le dashboard'">
+                                ]"
+                                :title="selectedDashboardWorkspace === workspace?.id ? 'Filtre actif' : 'Filtrer le dashboard'">
                                 <FilterIcon class="w-3 h-3" />
                             </div>
 
@@ -293,6 +294,13 @@ import { useSidebar } from '@/composables/useSidebar';
 import api from '@/api/axios'
 import { useAuthStore } from '@/stores/auth';
 import { useWorkspace } from '@/composables/useWorkspace';
+// import Logo from '@/assets/images/logo/Logo.png'
+// import LogoDark from '@/assets/images/logo/Logo-dark.jpg'
+// import Icon from '@/assets/images/logo/icon.jpg'
+
+const LogoDark = new URL('@/assets/images/logo/Logo-dark.jpg', import.meta.url).href
+const Logo = new URL('@/assets/images/logo/Logo.png', import.meta.url).href
+const Icon = new URL('@/assets/images/logo/icon.jpg', import.meta.url).href
 
 const route = useRoute();
 const router = useRouter();
@@ -526,9 +534,9 @@ const menuGroups = computed(() => [
                 name: 'Évaluations',
                 subItems: [
                     { name: 'Tableau de bord', path: '/evaluations/dashboard' },
-                    { name: 'Rapport hebdomadaire', path: '/evaluations/rapport-hebdomadaire' },
+                    // { name: 'Rapport hebdomadaire', path: '/evaluations/rapport-hebdomadaire' },
                     { name: 'Fiches d\'évaluation', path: '/evaluations/fiches' },
-                    { name: 'Performance d\'équipe', path: '/evaluations/performance' },
+                    // { name: 'Performance d\'équipe', path: '/evaluations/performance' },
                 ],
             },
         ],

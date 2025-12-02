@@ -1,3 +1,4 @@
+<!-- resources\js\components\layout\SidebarProvider.vue -->
 <template>
   <slot></slot>
 </template>

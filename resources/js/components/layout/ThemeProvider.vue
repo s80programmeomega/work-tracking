@@ -1,3 +1,4 @@
+<!-- resources\js\components\layout\ThemeProvider.vue -->
 <template>
   <slot></slot>
 </template>
