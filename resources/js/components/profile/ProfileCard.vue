@@ -149,7 +149,7 @@
 import { ref, computed, watch, nextTick } from 'vue'
 import EditProfileModal from './EditProfileModal.vue'
 import { useUsers } from '@/composables/useUsers'
-import { useNotification } from '@/composables/useNotification'
+// import { useNotification } from '@/composables/useNotification'
 
 const props = defineProps({
   user: {
