@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Spatie\Activitylog\Facades\Activity;
 
 class UserService
 {
@@ -111,47 +112,66 @@ class UserService
     /**
      * Update user profile
      */
-    public function updateProfile(User $user, array $data): User
+  public function updateProfile(User $user, array $data)
     {
         // Handle avatar upload
-        if (isset($data['avatar']) && $data['avatar'] instanceof \Illuminate\Http\UploadedFile) {
-            // Delete old avatar
-            if ($user->avatar) {
-                Storage::disk('public')->delete($user->avatar);
-            }
+        if (request()->hasFile('avatar')) {
+            $data['avatar'] = $this->handleAvatarUpload($user, request()->file('avatar'));
+        }
 
-            $data['avatar'] = $data['avatar']->store('avatars', 'public');
+        // Handle social links
+        if (isset($data['social_links'])) {
+            $data['social_links'] = json_encode($data['social_links']);
         }
 
         $user->update($data);
 
-        activity()
-            ->performedOn($user)
+        // Log activity
+        Activity()
             ->causedBy($user)
-            ->log('Profile updated');
+            ->performedOn($user)
+            ->withProperties(['attributes' => $data])
+            ->log('updated profile');
 
         return $user->fresh();
     }
 
+    protected function handleAvatarUpload(User $user, $file)
+    {
+        // Delete old avatar if exists
+        if ($user->avatar) {
+            Storage::disk('public')->delete($user->avatar);
+        }
+
+        // Generate unique filename
+        $filename = 'avatars/' . $user->id . '/' . time() . '.' . $file->getClientOriginalExtension();
+
+        // Store the file
+        $path = $file->storeAs('public', $filename);
+
+        return str_replace('public/', '', $path);
+    }
+
+
     /**
      * Change user password
      */
-    public function changePassword(User $user, string $currentPassword, string $newPassword): bool
+   public function changePassword(User $user, string $currentPassword, string $newPassword)
     {
         if (!Hash::check($currentPassword, $user->password)) {
-            throw new \Exception('Current password is incorrect');
+            throw new \Exception('Le mot de passe actuel est incorrect');
         }
 
         $user->update([
-            'password' => Hash::make($newPassword),
+            'password' => Hash::make($newPassword)
         ]);
 
         activity()
-            ->performedOn($user)
             ->causedBy($user)
-            ->log('Password changed');
+            ->performedOn($user)
+            ->log('changed password');
 
-        return true;
+        return $user;
     }
 
     /**
@@ -186,29 +206,30 @@ class UserService
     /**
      * Get user statistics
      */
-    public function getUserStats(User $user): array
+   public function getUserStats(User $user)
     {
-        // TODO: Implement when Projet, Activite, Tache models are created
         return [
-            'total_projets' => 0,
-            'total_activites' => 0,
-            'total_taches' => 0,
-            'taches_completed' => 0,
-            'taches_in_progress' => 0,
-            'taches_pending' => 0,
+            'projects_count' => $user->projects()->count(),
+            'tasks_count' => $user->tasks()->count(),
+            'completed_tasks_count' => $user->tasks()->where('status', 'completed')->count(),
+            'productivity_rate' => $this->calculateProductivity($user),
+            'last_active' => $user->last_login_at,
+            'member_since' => $user->created_at->diffForHumans(),
         ];
-
-        // Will be implemented later:
-        // return [
-        //     'total_projets' => $user->projets()->count(),
-        //     'total_activites' => $user->activites()->count(),
-        //     'total_taches' => $user->taches()->count(),
-        //     'taches_completed' => $user->taches()->where('statut', 'termine')->count(),
-        //     'taches_in_progress' => $user->taches()->where('statut', 'en_cours')->count(),
-        //     'taches_pending' => $user->taches()->where('statut', 'a_faire')->count(),
-        // ];
     }
 
+    protected function calculateProductivity(User $user)
+    {
+        $totalTasks = $user->tasks()->count();
+        $completedTasks = $user->tasks()->where('status', 'completed')->count();
+
+        if ($totalTasks === 0) {
+            return 0;
+        }
+
+        return round(($completedTasks / $totalTasks) * 100, 1);
+    }
+    
     /**
      * Get user activity log
      */
