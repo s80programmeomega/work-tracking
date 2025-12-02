@@ -1,21 +1,22 @@
-<!-- resources\js\App.vue (version finale) -->
+<!-- resources\js\App.vue -->
 <template>
     <ThemeProvider>
         <SidebarProvider>
-            <!-- Overlay de chargement initial -->
-            <div v-if="isAppLoading" class="app-loading">
-                <div class="app-loader">
-                    <div class="logo">WT</div>
+             <!-- Notifications -->
+      <NotificationContainer
+        :notifications="notifications"
+        @remove="removeNotification"
+      />
+
+            <!-- Overlay de chargement global -->
+            <div v-if="isLoading" class="loading-overlay">
+                <div class="spinner-container">
                     <div class="spinner"></div>
-                    <p class="app-loading-text">Work Tracking</p>
+                    <p class="loading-text">Chargement de l'application...</p>
                 </div>
             </div>
             
-            <!-- Application principale -->
-            <div v-else class="app-container">
-                <GlobalLoader />
-                <RouterView />
-            </div>
+            <RouterView v-else />
         </SidebarProvider>
     </ThemeProvider>
 </template>
@@ -23,12 +24,52 @@
 <script setup>
 import ThemeProvider from "@/components/layout/ThemeProvider.vue";
 import SidebarProvider from "@/components/layout/SidebarProvider.vue";
-import GlobalLoader from "@/components/ui/GlobalLoader.vue";
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onErrorCaptured,provide  } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
+import NotificationContainer from "@/components/ui/NotificationContainer.vue"
+
 
 const authStore = useAuthStore();
-const isAppLoading = ref(true);
+const isLoading = ref(true);
+const error = ref(null);
+const notifications = ref([])
+
+const showNotification = (message, type = 'info', duration = 5000) => {
+  const id = Date.now()
+  notifications.value.push({
+    id,
+    message,
+    type,
+    duration
+  })
+  
+  setTimeout(() => {
+    removeNotification(id)
+  }, duration)
+  
+  return id
+}
+
+const removeNotification = (id) => {
+  const index = notifications.value.findIndex(n => n.id === id)
+  if (index !== -1) {
+    notifications.value.splice(index, 1)
+  }
+}
+
+// Provide notification functions to all components
+provide('notifications', {
+  show: showNotification,
+  remove: removeNotification
+})
+
+
+// Capturer les erreurs globales
+onErrorCaptured((err) => {
+    console.error('Erreur capturée dans App.vue:', err);
+    error.value = err;
+    return false; // Empêche la propagation de l'erreur
+});
 
 onMounted(async () => {
     try {
@@ -37,22 +78,21 @@ onMounted(async () => {
         // Initialiser l'authentification
         authStore.initialize();
         
-        // Simulation d'un délai de chargement minimum
-        await Promise.all([
-            new Promise(resolve => setTimeout(resolve, 1000))
-        ]);
+        // Attendre un peu pour s'assurer que tout est chargé
+        await new Promise(resolve => setTimeout(resolve, 500));
         
         console.log('✅ Application initialisée');
     } catch (err) {
         console.error('❌ Erreur lors de l\'initialisation:', err);
+        error.value = err;
     } finally {
-        isAppLoading.value = false;
+        isLoading.value = false;
     }
 });
 </script>
 
 <style scoped>
-.app-loading {
+.loading-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -63,43 +103,33 @@ onMounted(async () => {
     justify-content: center;
     align-items: center;
     z-index: 9999;
+    transition: opacity 0.3s ease;
 }
 
-.app-loader {
+.spinner-container {
     text-align: center;
     color: white;
 }
 
-.logo {
-    font-size: 48px;
-    font-weight: bold;
-    margin-bottom: 20px;
-    color: white;
-}
-
-.app-loading .spinner {
+.spinner {
     width: 60px;
     height: 60px;
     border: 4px solid rgba(255, 255, 255, 0.3);
     border-top: 4px solid #ffffff;
     border-radius: 50%;
     animation: spin 1s linear infinite;
-    margin: 0 auto 15px;
+    margin: 0 auto 20px;
 }
 
-.app-loading-text {
-    font-size: 18px;
+.loading-text {
+    font-size: 16px;
     font-weight: 500;
-    margin-top: 10px;
-    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.9);
+    margin-top: 15px;
 }
 
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
-}
-
-.app-container {
-    min-height: 100vh;
 }
 </style>
