@@ -1,13 +1,16 @@
 // resources\js\router\index.ts
+import { ref, onMounted, nextTick } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/authStore'
 import AcceptProjetInvitation from '../pages/AcceptProjetInvitation.vue'
 import TachesAttendantCollegues from '../pages/TachesAttendantCollegues.vue'
 import TachesParUtilisateur from '../pages/TachesParUtilisateur.vue'
-
+ 
+const loading = ref(false)
+export const isLoading = ref(false)
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory('/'),
   scrollBehavior(to, from, savedPosition) {
     return savedPosition || { left: 0, top: 0 }
   },
@@ -558,6 +561,70 @@ const router = createRouter({
   ],
 })
 
+
+
+// Navigation guard améliorée
+router.beforeEach(async (to, from, next) => {
+  const authStore = useAuthStore()
+  
+  // Début du chargement
+  isLoading.value = true
+  
+  // Set document title
+  document.title = `${to.meta.title || 'Dashboard'} | Work Tracking`
+  
+  // Vérifier si l'utilisateur est connecté
+  const isLoggedIn = authStore.isAuthenticated
+  
+  try {
+    // Routes protégées
+    if (to.meta.requiresAuth) {
+      if (!isLoggedIn) {
+        isLoading.value = false
+        return next({ 
+          name: 'Signin', 
+          query: { redirect: to.fullPath } 
+        })
+      }
+      
+      // Charger l'utilisateur si nécessaire
+      if (isLoggedIn && !authStore.user) {
+        try {
+          await authStore.fetchUser()
+        } catch (error) {
+          console.error('Erreur chargement utilisateur:', error)
+          isLoading.value = false
+          return next({ name: 'Signin' })
+        }
+      }
+    }
+    
+    // Routes pour invités seulement
+    if (to.meta.guest && isLoggedIn) {
+      isLoading.value = false
+      return next({ name: 'Dashboard' })
+    }
+    
+    // Vérifier les rôles (décommenter si nécessaire)
+    // if (to.meta.roles && !authStore.hasAnyRole(to.meta.roles)) {
+    //   return next({ name: 'Unauthorized' })
+    // }
+    
+    next()
+  } catch (error) {
+    console.error('Erreur navigation:', error)
+    isLoading.value = false
+    next({ name: 'Signin' })
+  }
+})
+
+// Après chaque navigation
+router.afterEach(() => {
+  loading.value = false
+})
+
+export { loading }
+
 export default router
 
 // Global navigation guards
@@ -574,7 +641,7 @@ router.beforeEach(async (to, from, next) => {
 
   // Check if route is for guests only (signin, signup)
   if (to.meta.guest && authStore.isAuthenticated) {
-    return next({ name: 'Ecommerce' })
+    return next({ name: 'dashboard' })
   }
 
   // Check role requirements
