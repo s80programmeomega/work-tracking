@@ -17,8 +17,12 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
-    {
-        //
+   public function boot(): void
+    { 
+        
+        // Enregistrer automatiquement la relation documents() sur tous les modèles
+        \Illuminate\Database\Eloquent\Model::resolveRelationUsing('documents', function ($model) {
+            return $model->morphMany(\App\Models\Document::class, 'documentable');
+        });
     }
 }

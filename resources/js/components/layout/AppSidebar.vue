@@ -567,7 +567,7 @@ const menuGroups = computed(() => [
                 icon: MailIcon,
                 name: 'Notifications',
                 path: '/notifications',
-                badge: '15',
+                badge: '',
             },
         ],
     },

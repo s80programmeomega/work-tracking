@@ -222,4 +222,6 @@ class UserController extends Controller
             'data' => UserResource::collection($users),
         ]);
     }
+
+    
 }
