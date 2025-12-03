@@ -196,12 +196,18 @@
       @close="showPasswordModal = false"
     />
   </div>
+
+   <div class="tab-content" v-if="activeTab === 'security'">
+        <SessionSettings />
+    </div>
+
 </template>
 
 <script>
 import EditProfileModal from './EditProfileModal.vue'
 import ChangePasswordModal from './ChangePasswordModal.vue'
 import { useAuthStore } from '../../stores/auth'
+import SessionSettings from '@/components/settings/SessionSettings.vue'
 
 export default {
   name: 'UserProfile',

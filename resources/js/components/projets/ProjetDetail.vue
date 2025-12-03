@@ -1,4 +1,4 @@
-<!-- resources/js/components/projets/ProjetDetail.vue - VERSION CORRIGÉE -->
+<!-- resources/js/components/projets/ProjetDetail.vue - VERSION AMÉLIORÉE --> 
 <template>
   <div class="space-y-6">
     <!-- Loading -->
@@ -37,7 +37,9 @@
               </div>
 
               <div class="flex items-center gap-2 ml-4">
-                <button @click.stop="editProjet(projet)"
+                  <button 
+                  v-if="canEditProjet"
+                  @click.stop="editProjet(projet)"
                   class="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-t-lg">
                   <EditIcon class="w-4 h-4" />
                   Modifier
@@ -141,15 +143,15 @@
                     {{ projectStats.activites_count || 0 }}
                   </div>
                   <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    Activités
+                    Activités totales
                   </div>
                 </div>
                 <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
                   <div class="text-2xl font-bold text-gray-900 dark:text-white">
-                    {{ projectStats.taches_count || 0 }}
+                    {{ displayedActivities.length }}
                   </div>
                   <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    Tâches
+                    Mes activités
                   </div>
                 </div>
                 <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
@@ -216,253 +218,325 @@
               <div class="flex items-center justify-between mb-6">
                 <div>
                   <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                    Activités du projet
+                    Mes activités dans ce projet
                   </h3>
                   <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    Gérez les activités et les tâches de votre projet
+                    Activités où vous êtes responsable ou membre
                   </p>
                 </div>
 
                 <!-- Bouton Nouvelle Activité -->
-                <button @click="showCreateActivityModal = true"
+                <button v-if="canCreateActivities" @click="showCreateActivityModal = true"
                   class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors shadow-sm">
                   <PlusIcon class="w-4 h-4" />
                   Nouvelle activité
                 </button>
               </div>
 
-              <!-- Message de débogage -->
-              <div v-if="projectStats.activites_count > 0 && activities.length === 0"
-                class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <p class="text-yellow-800 text-sm">
-                  ⚠️ Les statistiques indiquent {{ projectStats.activites_count }} activité(s)
-                  mais aucune n'est affichée.
-                  <button @click="loadProjet" class="underline ml-2">Recharger</button>
-                </p>
+              <!-- Filtre d'accès -->
+              <div v-if="showAccessFilter"
+                class="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor"
+                      viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                      <p class="text-sm font-medium text-blue-900 dark:text-blue-300">
+                        Filtrage des activités
+                      </p>
+                      <p class="text-xs text-blue-700 dark:text-blue-400">
+                        {{ showAllActivities ? 'Affichage de toutes les activités du projet' : 'Affichage uniquement des activités où vous êtes responsable ou membre' }}
+                      </p>
+                    </div>
+                  </div>
+                  <button v-if="canViewAllActivities" @click="toggleViewAllActivities"
+                    class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline">
+                    {{ showAllActivities ? 'Voir mes activités seulement' : 'Voir toutes les activités' }}
+                  </button>
+                </div>
               </div>
 
               <!-- État vide -->
-              <div v-if="activities.length === 0 && projectStats.activites_count === 0"
+              <div v-if="displayedActivities.length === 0"
                 class="text-center py-12 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
                 <ListIcon class="mx-auto h-12 w-12 text-gray-400" />
                 <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">
-                  Aucune activité
+                  {{ showAllActivities ? 'Aucune activité dans ce projet' : 'Aucune activité accessible' }}
                 </h3>
                 <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-                  Commencez par créer votre première activité pour organiser les tâches de ce projet.
+                  {{ showAllActivities
+                    ? 'Ce projet ne contient aucune activité.'
+                    : 'Vous n\'êtes pas membre ou responsable d\'activités dans ce projet.'
+                  }}
                 </p>
-                <button @click="showCreateActivityModal = true"
+                <button v-if="!showAllActivities && canViewAllActivities" @click="toggleViewAllActivities"
+                  class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                  Voir toutes les activités du projet
+                </button>
+                <button v-else-if="canCreateActivities" @click="showCreateActivityModal = true"
                   class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors">
                   <PlusIcon class="w-4 h-4" />
                   Créer une activité
                 </button>
               </div>
 
-              <!-- Liste des activités -->
-              <div v-else class="space-y-4">
-                <!-- En-tête de liste -->
-                <div class="flex items-center justify-between px-4 py-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {{ activities.length }} activité(s)
-                  </span>
-                  <span class="text-sm text-gray-500">
-                    Progression moyenne: {{ calculateAverageProgress() }}%
-                  </span>
-                </div>
+              <!-- Liste des activités - STYLE SIMILAIRE À MES ACTIVITÉS -->
+              <div v-else class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                <div class="overflow-x-auto">
+                  <table class="w-full text-sm text-left">
+                    <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700">
+                      <tr>
+                        <th class="px-6 py-3">Activité</th>
+                        <th class="px-6 py-3">Responsable</th>
+                        <th class="px-6 py-3">Équipe</th>
+                        <th class="px-6 py-3">Statut</th>
+                        <th class="px-6 py-3">Progression</th>
+                        <th class="px-6 py-3">Date fin</th>
+                        <th class="px-6 py-3">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="activity in displayedActivities" :key="activity.id"
+                        class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <!-- Activité -->
+                        <td class="px-6 py-4">
+                          <div class="cursor-pointer" @click="navigateToActivityDetail(activity)">
+                            <div class="font-medium text-gray-900 dark:text-white hover:text-brand-600">
+                              {{ activity.nom }}
+                            </div>
+                            <div class="text-gray-500 dark:text-gray-400 text-xs">{{ activity.code }}</div>
+                          </div>
+                        </td>
 
-                <!-- Cartes des activités -->
-                <div class="grid gap-4">
-                  <div v-for="activity in activities" :key="activity.id" 
-                    class="group cursor-pointer">
-                    <div
-                      class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200 group-hover:shadow-sm"
-                      @click="navigateToActivityDetail(activity)">
-                      <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-3 mb-2">
-                          <!-- Indicateur de couleur -->
-                          <div class="w-3 h-3 rounded-full flex-shrink-0"
-                            :style="{ backgroundColor: activity.couleur || '#3B82F6' }"></div>
-                          <h4 class="font-semibold text-gray-900 dark:text-white truncate">
-                            {{ activity.nom || 'Activité sans nom' }}
-                          </h4>
-                          <!-- Badge statut -->
-                          <span :class="[
-                            'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
-                            activity.status === 'archived'
-                              ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-                              : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                          ]">
-                            {{ activity.status === 'archived' ? 'Archivée' : 'Active' }}
-                          </span>
-                        </div>
+                        <!-- Responsable -->
+                        <td class="px-6 py-4">
+                          <div v-if="activity.responsable" class="flex items-center gap-2">
+                            <div
+                              class="w-6 h-6 rounded-full bg-brand-500 flex items-center justify-center text-white text-xs font-medium">
+                              {{ getInitials(activity.responsable.nom) }}
+                            </div>
+                            <span class="text-gray-700 dark:text-gray-300">{{ activity.responsable.nom }}</span>
+                          </div>
+                          <span v-else class="text-gray-500 text-sm">Non assigné</span>
+                        </td>
 
-                        <p v-if="activity.description" class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-2">
-                          {{ activity.description }}
-                        </p>
+                        <!-- Équipe -->
+                        <td class="px-6 py-4">
+                          <button v-if="getActivityPermissions(activity).canManageMembers"
+                            @click.stop="openActivityMembersModal(activity)"
+                            class="flex items-center gap-2 px-3 py-1.5 text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors">
+                            <UsersIcon class="w-4 h-4" />
+                            {{ activity.membres_count || 0 }} membre(s)
+                          </button>
+                          <div v-else class="flex items-center gap-2 px-3 py-1.5 text-xs text-gray-500">
+                            <UsersIcon class="w-4 h-4" />
+                            {{ activity.membres_count || 0 }} membre(s)
+                          </div>
+                        </td>
 
-                        <div class="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                          <span class="flex items-center gap-1">
-                            <UsersIcon class="w-3 h-3" />
-                            {{ activity.responsable?.nom || 'Non assigné' }}
+                        <!-- Statut -->
+                        <td class="px-6 py-4">
+                          <span
+                            :class="['px-2 py-1 text-xs font-medium rounded-full', getActivityStatusClass(activity.status)]">
+                            {{ getActivityStatusLabel(activity.status) }}
                           </span>
-                          <span class="flex items-center gap-1">
-                            <ListIcon class="w-3 h-3" />
-                            {{ activity.tache_count || 0 }} tâche(s)
-                          </span>
-                          <span v-if="activity.date_debut && activity.date_fin" class="flex items-center gap-1">
-                            <CalendarIcon class="w-3 h-3" />
-                            {{ formatActivityDates(activity) }}
-                          </span>
-                        </div>
-                      </div>
+                        </td>
 
-                      <div class="flex items-center gap-4 ml-4 flex-shrink-0">
                         <!-- Progression -->
-                        <div class="text-right min-w-20">
-                          <div class="text-sm font-semibold text-gray-900 dark:text-white mb-1">
-                            {{ activity.progression || 0 }}%
+                        <td class="px-6 py-4">
+                          <div class="flex items-center gap-2 min-w-32">
+                            <div class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                              <div class="h-full bg-brand-500 transition-all duration-500"
+                                :style="{ width: `${activity.progression || 0}%` }"></div>
+                            </div>
+                            <span class="text-xs text-gray-600 dark:text-gray-400 min-w-8">
+                              {{ activity.progression || 0 }}%
+                            </span>
                           </div>
-                          <div class="w-20 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                            <div class="bg-green-500 h-2 rounded-full transition-all duration-300"
-                              :style="{ width: `${activity.progression || 0}%` }"></div>
+                        </td>
+
+                        <!-- Date fin -->
+                        <td class="px-6 py-4">
+                          <span :class="activity.is_overdue ? 'text-red-600 font-medium' : 'text-gray-600'">
+                            {{ activity.date_fin ? formatDate(activity.date_fin) : '-' }}
+                          </span>
+                          <div v-if="activity.is_overdue" class="text-xs text-red-500 mt-1">
+                            En retard
                           </div>
-                        </div>
+                        </td>
 
-                        <ChevronRightIcon
-                          class="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" />
-                      </div>
-                    </div>
+                        <!-- Actions -->
+                        <td class="px-6 py-4">
+                          <div class="flex items-center gap-2">
+                            <button @click="navigateToActivityDetail(activity)"
+                              class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg"
+                              title="Voir">
+                              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                              </svg>
+                            </button>
 
-                    <!-- Actions rapides sous la carte -->
-                    <div class="flex items-center gap-2 mt-2 px-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button 
-                        @click.stop="editActivity(activity)"
-                        class="inline-flex items-center gap-1 px-3 py-1 text-xs text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                      >
-                        <EditIcon class="w-3 h-3" />
-                        Modifier
-                      </button>
-                      <button 
-                        @click.stop="navigateToActivityTasks(activity)"
-                        class="inline-flex items-center gap-1 px-3 py-1 text-xs text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
-                      >
-                        <ListIcon class="w-3 h-3" />
-                        Voir les tâches
-                      </button>
-                      <button 
-                        v-if="canCreateTasks(activity)"
-                        @click.stop="navigateToCreateTask(activity)"
-                        class="inline-flex items-center gap-1 px-3 py-1 text-xs text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
-                      >
-                        <PlusIcon class="w-3 h-3" />
-                        Nouvelle tâche
-                      </button>
-                    </div>
-                  </div>
+                            <button v-if="getActivityPermissions(activity).canEdit" @click.stop="editActivity(activity)"
+                              class="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg"
+                              title="Modifier">
+                              <EditIcon class="w-4 h-4" />
+                            </button>
+
+                            <button v-if="getActivityPermissions(activity).canDelete"
+                              @click.stop="deleteActivity(activity)"
+                              class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
+                              title="Supprimer">
+                              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+
+                            <!-- Indicateur si aucune action disponible -->
+                            <span
+                              v-if="!getActivityPermissions(activity).canEdit && !getActivityPermissions(activity).canDelete"
+                              class="text-xs text-gray-400 px-2">
+                              Lecture seule
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
 
-            <!-- Members Tab -->
+            <!-- Members Tab - VERSION CORRIGÉE -->
             <div v-if="activeTab === 'members'" class="space-y-4">
               <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                  Membres du projet
-                </h3>
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    Membres du projet ({{ members.length }})
+                  </h3>
+                  <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    Gestion des membres et de leurs permissions
+                  </p>
+                </div>
 
-                <!-- Bouton Inviter -->
-                <button @click="showInviteModal = true"
+                <button v-if="canManageMembers" @click="showInviteModal = true"
                   class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors">
                   <PlusIcon class="w-4 h-4" /> Inviter des membres
                 </button>
               </div>
 
-              <div
-                class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                  <thead class="bg-gray-50 dark:bg-gray-700">
-                    <tr>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                        Membre
-                      </th>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                        Rôle
-                      </th>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                        Permissions
-                      </th>
-                      <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                    <tr v-for="member in members" :key="member.id">
-                      <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="flex items-center gap-3">
-                          <div v-if="member.avatar" class="w-10 h-10 rounded-full overflow-hidden">
-                            <img :src="member.avatar" :alt="member.nom" class="w-full h-full object-cover" />
-                          </div>
-                          <div v-else
-                            class="w-10 h-10 rounded-full bg-brand-600 flex items-center justify-center text-white font-medium">
-                            {{ getInitials(member.nom) }}
-                          </div>
-                          <div>
-                            <div class="text-sm font-medium text-gray-900 dark:text-white">
-                              {{ member.nom }}
-                            </div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400">
-                              {{ member.email }}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="px-6 py-4 whitespace-nowrap">
-                        <span :class="[
-                          'px-2 py-1 rounded-full text-xs font-medium',
-                          getRoleColor(member.pivot?.role)
-                        ]">
-                          {{ getRoleLabel(member.pivot?.role) }}
-                        </span>
-                      </td>
-                      <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="flex items-center gap-2">
-                          <span v-if="member.pivot?.can_edit"
-                            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                            Éditer
-                          </span>
-                          <span v-if="member.pivot?.can_delete"
-                            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
-                            Supprimer
-                          </span>
-                          <span v-if="member.pivot?.can_invite"
-                            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
-                            Inviter
-                          </span>
-                        </div>
-                      </td>
-                      <td class="px-6 py-4 whitespace-nowrap text-right">
-                        <div class="flex items-center justify-end gap-2">
-                          <button v-if="member.pivot?.role !== 'owner'" @click="editMember(member)"
-                            class="text-brand-600 hover:text-brand-900 dark:text-brand-400 text-sm">
-                            Modifier
-                          </button>
+              <!-- Debug des permissions -->
+              <!-- <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h4 class="font-medium text-blue-800">Structure des données membres:</h4>
+                <pre class="text-xs mt-2">{{ JSON.stringify(members, null, 2) }}</pre>
+              </div> -->
 
-                          <button @click="removeMember(member)"
-                            class="text-red-600 hover:text-red-900 dark:text-red-400 text-sm">
-                            Retirer
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+              <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                <div class="overflow-x-auto">
+                  <table class="w-full text-sm text-left">
+                    <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700">
+                      <tr>
+                        <th class="px-6 py-3">Membre</th>
+                        <th class="px-6 py-3">Rôle</th>
+                        <th class="px-6 py-3">Permissions</th>
+                        <th class="px-6 py-3">Statut</th>
+                        <th v-if="canManageMembers" class="px-6 py-3 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="member in members" :key="member.id"
+                        class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <div class="flex items-center gap-3">
+                            <div v-if="member.avatar" class="w-8 h-8 rounded-full overflow-hidden">
+                              <img :src="member.avatar" :alt="member.nom" class="w-full h-full object-cover" />
+                            </div>
+                            <div v-else
+                              class="w-8 h-8 rounded-full bg-brand-600 flex items-center justify-center text-white text-xs font-medium">
+                              {{ getInitials(member.nom) }}
+                            </div>
+                            <div>
+                              <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                {{ member.nom }}
+                                <span v-if="member.id === projet.responsable_id" class="ml-1 text-purple-600">★</span>
+                              </div>
+                              <div class="text-xs text-gray-500 dark:text-gray-400">
+                                {{ member.email }}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <!-- ✅ CORRECTION: Utiliser member.role au lieu de member.pivot.role -->
+                          <span :class="[
+                            'px-2 py-1 rounded-full text-xs font-medium',
+                            getRoleColor(member.role)
+                          ]">
+                            {{ getRoleLabel(member.role) }}
+                          </span>
+                          <div v-if="member.id === projet.responsable_id" class="text-xs text-purple-600 mt-1">
+                            Responsable projet
+                          </div>
+                        </td>
+                        <td class="px-6 py-4">
+                          <div class="flex flex-wrap gap-1">
+                            <!-- ✅ CORRECTION: Utiliser member.can_edit directement -->
+                            <span v-if="member.can_edit === true || member.can_edit === 1"
+                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                              Éditer un projet
+                            </span>
+                            <span v-if="member.can_delete === true || member.can_delete === 1"
+                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                              Supprimer un projet
+                            </span>
+                            <span v-if="member.can_invite === true || member.can_invite === 1"
+                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                              Inviter des membres
+                            </span>
+                            <span v-if="member.can_delete_member === true || member.can_delete_member === 1"
+                               class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                              Supprimer des membres
+                            </span>
+                            <span v-if="!hasAnyPermission(member)"
+                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                              Lecture seule
+                            </span>
+                          </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <span class="text-xs text-gray-500 dark:text-gray-400">
+                            Ajouté le {{ formatDateTime(member.joined_at) }}
+                          </span>
+                        </td>
+                        <td v-if="canManageMembers" class="px-6 py-4 whitespace-nowrap text-right">
+                          <div class="flex items-center justify-end gap-2">
+                            <button v-if="canEditMember(member)" @click="editMember(member)"
+                              class="text-brand-600 hover:text-brand-900 dark:text-brand-400 dark:hover:text-brand-300 text-sm font-medium">
+                              Modifier
+                            </button>
+
+                            <button v-if="canRemoveMember(member)" @click="removeMember(member)"
+                              class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium">
+                              Retirer
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </template>
+    </template> <!-- ✅ CORRECTION: Fermeture correcte de la balise template -->
 
     <!-- Modaux -->
     <ActiviteForm v-if="showCreateActivityModal" :activite="null" :projet-id="projetId"
@@ -483,6 +557,10 @@
 
     <ProjetFormModal v-if="showFormModal" :projet="selectedProjet" :workspace-id="workspaceId" @close="closeFormModal"
       @saved="handleProjetSaved" />
+
+    <!-- Modal pour gérer les membres d'activité -->
+    <ManageMembersModal v-if="showActivityMembersModal" :activite="selectedActivityForMembers"
+      @close="showActivityMembersModal = false" @updated="handleActivityMembersUpdated" />
   </div>
 </template>
 
@@ -492,6 +570,7 @@ import { useRouter } from 'vue-router'
 import { useProjets } from '@/composables/useProjets'
 import { useActivites } from '@/composables/useActivites'
 import { useActivityPermissions } from '@/composables/useActivityPermissions'
+import { useAuthStore } from '@/stores/auth'
 
 import {
   ChevronLeftIcon,
@@ -514,6 +593,7 @@ import EditMemberModal from './EditMemberModal.vue'
 import ProjetFormModal from './ProjetFormModal.vue'
 import InviteExternalMemberModal from '@/components/projets/InviteExternalMemberModal.vue'
 import RemoveMemberWithTransferModal from '@/components/projets/RemoveMemberWithTransferModal.vue'
+import ManageMembersModal from '@/components/activites/ManageMembersModal.vue'
 
 const props = defineProps({
   projetId: {
@@ -529,86 +609,292 @@ const props = defineProps({
 const emit = defineEmits(['back', 'create-activity', 'view-activity'])
 
 const router = useRouter()
+const authStore = useAuthStore()
 const { fetchProjet, removeMember: removeMemberService, fetchProjets } = useProjets()
-const { fetchActiviteTaches } = useActivites()
+const { deleteActivite: deleteActiviteService } = useActivites()
 
 const loading = ref(false)
-
-const projet = ref({
-  activites: [],
-  members: [],
-  responsable: {},
-  progression: 0,
-  budget: 0
-})
+const projet = ref({})
 const projectStats = ref({})
 const activities = ref([])
 const members = ref([])
+const showAllActivities = ref(false)
 
 // États pour la gestion des activités
 const selectedActivity = ref(null)
 const showEditActivityModal = ref(false)
-
-const activeTab = ref('overview')
 const showCreateActivityModal = ref(false)
+const showActivityMembersModal = ref(false)
+const selectedActivityForMembers = ref(null)
+
+// États pour la gestion des membres
 const showEditMemberModal = ref(false)
 const showRemoveMemberModal = ref(false)
-const selectedMember = ref(null)
-const activeMenuId = ref(null)
-
 const showInviteModal = ref(false)
+const selectedMember = ref(null)
 const memberToRemove = ref(null)
 
+// États pour la gestion du projet
 const showFormModal = ref(false)
 const selectedProjet = ref(null)
 
+const activeTab = ref('overview')
+
+// ==================== COMPUTED PROPERTIES ====================
+
 const tabs = computed(() => [
   { id: 'overview', label: 'Vue d\'ensemble', icon: TrendingUpIcon },
-  { id: 'activities', label: 'Activités', icon: ListIcon, count: activities.value.length },
-  { id: 'members', label: 'Membres', icon: UsersIcon, count: members.value.length }
+  {
+    id: 'activities',
+    label: 'Activités',
+    icon: ListIcon,
+    count: displayedActivities.value.length
+  },
+  {
+    id: 'members',
+    label: 'Membres',
+    icon: UsersIcon,
+    count: members.value.length
+  }
 ])
 
-// ✅ NOUVEAU : Navigation vers la page ActiviteDetail
+/**
+ * ✅ Activités accessibles à l'utilisateur (membre ou responsable)
+ */
+const accessibleActivities = computed(() => {
+  if (!activities.value.length || !authStore.user) return []
+
+  return activities.value.filter(activity => {
+    return isUserInActivity(activity)
+  })
+})
+
+/**
+ * ✅ Activités affichées (selon le filtre)
+ */
+const displayedActivities = computed(() => {
+  return showAllActivities.value ? activities.value : accessibleActivities.value
+})
+
+/**
+ * ✅ Vérifie si l'utilisateur peut voir toutes les activités
+ */
+const canViewAllActivities = computed(() => {
+  const user = authStore.user
+  if (!user || !projet.value) return false
+
+  // Super admin peut tout voir
+  if (user.is_super_admin) return true
+
+  // Responsable du projet peut tout voir
+  if (projet.value.responsable_id === user.id) return true
+
+  // Membre avec permissions étendues
+  const userMember = projet.value.members?.find(m => m.id === user.id)
+  return userMember?.pivot?.can_edit || false
+})
+
+/**
+ * ✅ Vérifie si le filtre d'accès doit être affiché
+ */
+const showAccessFilter = computed(() => {
+  return accessibleActivities.value.length !== activities.value.length && activities.value.length > 0
+})
+
+/**
+ * ✅ Vérifie si l'utilisateur peut créer des activités
+ */
+const canCreateActivities = computed(() => {
+  const user = authStore.user
+  if (!user || !projet.value) return false
+
+  if (user.is_super_admin) return true
+  if (projet.value.responsable_id === user.id) return true
+
+  const userMember = projet.value.members?.find(m => m.id === user.id)
+  return userMember?.pivot?.can_edit || false
+})
+ 
+
+// ==================== MÉTHODES D'ACCÈS ====================
+
+/**
+ * ✅ Vérifie si l'utilisateur est dans l'activité (membre ou responsable)
+ */
+const isUserInActivity = (activity) => {
+  const user = authStore.user
+  if (!user) return false
+
+  // Super admin a accès à tout
+  if (user.is_super_admin) return true
+
+  // Responsable de l'activité
+  if (activity.responsable_id === user.id) return true
+
+  // Membre de l'activité
+  if (activity.membres?.some(membre => membre.id === user.id)) return true
+
+  // Responsable du projet parent
+  if (projet.value.responsable_id === user.id) return true
+
+  return false
+}
+
+
+/**
+ * ✅ CORRECTION: Obtient les permissions pour une activité spécifique
+ * Utilise d'abord user_permissions, sinon vérifie dans les membres
+ */
+const getActivityPermissions = (activity) => {
+  const user = authStore.user
+  if (!user) {
+    return getDefaultActivityPermissions()
+  }
+
+  // ✅ PRIORITÉ: Utiliser user_permissions s'il existe (permissions calculées côté serveur)
+  if (activity.user_permissions) {
+    return {
+      canEdit: activity.user_permissions.can_edit_activity || false,
+      canDelete: activity.user_permissions.can_delete_activity || false,
+      canManageMembers: activity.user_permissions.can_manage_members || false,
+      canCreateTasks: activity.user_permissions.can_create_tasks || false,
+      canEditTasks: activity.user_permissions.can_edit_tasks || false,
+      canDeleteTasks: activity.user_permissions.can_delete_tasks || false,
+      canValidateResults: activity.user_permissions.can_validate_results || false,
+      canAssignUsers: activity.user_permissions.can_assign_users || false
+    }
+  }
+
+  // ✅ Fallback: Super admin a tous les droits
+  if (user.is_super_admin) {
+    return getFullActivityPermissions()
+  }
+
+  // ✅ Fallback: Vérifier si l'utilisateur est dans les membres de l'activité
+  const userMember = activity.membres?.find(m => m.id === user.id)
+  
+  if (userMember) {
+    return {
+      canEdit: userMember.permissions?.can_edit_activity || false,
+      canDelete: userMember.permissions?.can_delete_activity || false,
+      canManageMembers: userMember.permissions?.can_assign_users || false,
+      canCreateTasks: userMember.permissions?.can_create_tasks || false,
+      canEditTasks: userMember.permissions?.can_edit_tasks || false,
+      canDeleteTasks: userMember.permissions?.can_delete_tasks || false,
+      canValidateResults: userMember.permissions?.can_validate_results || false,
+      canAssignUsers: userMember.permissions?.can_assign_users || false
+    }
+  }
+
+  // ✅ Fallback: Responsable de l'activité a tous les droits
+  if (activity.responsable_id === user.id) {
+    return getFullActivityPermissions()
+  }
+
+  // ✅ Fallback: Responsable du projet a tous les droits sur les activités
+  if (projet.value.responsable_id === user.id) {
+    return getFullActivityPermissions()
+  }
+
+  return getDefaultActivityPermissions()
+}
+
+/**
+ * ✅ Permissions complètes pour une activité
+ */
+const getFullActivityPermissions = () => {
+  return {
+    canEdit: true,
+    canDelete: true,
+    canManageMembers: true,
+    canCreateTasks: true,
+    canEditTasks: true,
+    canDeleteTasks: true,
+    canValidateResults: true,
+    canAssignUsers: true
+  }
+}
+
+/**
+ * ✅ Permissions par défaut (aucun accès)
+ */
+const getDefaultActivityPermissions = () => {
+  return {
+    canEdit: false,
+    canDelete: false,
+    canManageMembers: false,
+    canCreateTasks: false,
+    canEditTasks: false,
+    canDeleteTasks: false,
+    canValidateResults: false,
+    canAssignUsers: false
+  }
+}
+
+
+/**
+ * ✅ Bascule entre la vue "mes activités" et "toutes les activités"
+ */
+const toggleViewAllActivities = () => {
+  showAllActivities.value = !showAllActivities.value
+}
+
+// ==================== MÉTHODES DE NAVIGATION ====================
+
 const navigateToActivityDetail = (activity) => {
   console.log('Navigating to activity detail:', activity.id)
   router.push(`/activites/${activity.id}`)
 }
 
-// ✅ NOUVEAU : Navigation vers les tâches de l'activité
 const navigateToActivityTasks = (activity) => {
   console.log('Navigating to activity tasks:', activity.id)
   router.push(`/activites/${activity.id}/taches`)
 }
 
-// ✅ NOUVEAU : Navigation pour créer une tâche
-const navigateToCreateTask = (activity) => {
-  console.log('Navigating to create task for activity:', activity.id)
-  router.push(`/activites/${activity.id}/taches/create`)
-}
+// ==================== MÉTHODES DE GESTION DES ACTIVITÉS ====================
 
-// ✅ NOUVEAU : Vérifier les permissions pour créer des tâches
-const canCreateTasks = (activity) => {
-  // Pour une vérification basique, on peut utiliser les permissions de l'activité
-  // Une implémentation plus complète utiliserait useActivityPermissions
-  return activity.user_permissions?.can_create_tasks || false
-}
-
-// Les autres méthodes restent identiques...
 const editActivity = (activity) => {
   selectedActivity.value = activity
   showEditActivityModal.value = true
 }
 
-const handleActivityUpdated = () => {
-  showEditActivityModal.value = false
-  selectedActivity.value = null
+const deleteActivity = async (activity) => {
+  if (!confirm(`Êtes-vous sûr de vouloir supprimer "${activity.nom}" ?`)) {
+    return
+  }
+
+  try {
+    await deleteActiviteService(activity.id)
+    await loadProjet()
+  } catch (error) {
+    console.error('Error deleting activity:', error)
+    alert('Erreur lors de la suppression')
+  }
+}
+
+const openActivityMembersModal = (activity) => {
+  selectedActivityForMembers.value = activity
+  showActivityMembersModal.value = true
+}
+
+const handleActivityMembersUpdated = () => {
+  showActivityMembersModal.value = false
   loadProjet()
 }
 
-const handleInvited = () => {
-  showInviteModal.value = false
-  loadProjet()
+// ==================== MÉTHODES DE GESTION DES MEMBRES ====================
+
+const editMember = (member) => {
+  selectedMember.value = member
+  showEditMemberModal.value = true
 }
+
+const removeMember = (member) => {
+  memberToRemove.value = member
+  showRemoveMemberModal.value = true
+}
+
+// ==================== MÉTHODES EXISTANTES ====================
 
 const loadProjet = async () => {
   try {
@@ -624,6 +910,9 @@ const loadProjet = async () => {
       projectStats.value = response.stats || {}
       activities.value = Array.isArray(response.data.activites) ? response.data.activites : []
       members.value = Array.isArray(response.data.members) ? response.data.members : []
+
+      // Réinitialiser le filtre à "mes activités" par défaut
+      showAllActivities.value = false
     } else {
       projet.value = response || {}
       projectStats.value = {}
@@ -646,30 +935,31 @@ const handleActivityCreated = () => {
   loadProjet()
 }
 
-const calculateAverageProgress = () => {
-  if (activities.value.length === 0) return 0
-  const total = activities.value.reduce((sum, activity) => sum + (activity.progression || 0), 0)
-  return Math.round(total / activities.value.length)
+const handleActivityUpdated = () => {
+  showEditActivityModal.value = false
+  selectedActivity.value = null
+  loadProjet()
 }
 
-const formatActivityDates = (activity) => {
-  const start = activity.date_debut ? new Date(activity.date_debut).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : ''
-  const end = activity.date_fin ? new Date(activity.date_fin).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : ''
+const handleInvited = () => {
+  showInviteModal.value = false
+  loadProjet()
+}
 
-  if (start && end) {
-    return `${start} - ${end}`
-  } else if (start) {
-    return `Débute ${start}`
-  } else if (end) {
-    return `Termine ${end}`
-  }
-  return ''
+const handleMemberUpdated = () => {
+  showEditMemberModal.value = false
+  selectedMember.value = null
+  loadProjet()
+}
+
+const handleMemberRemoved = () => {
+  showRemoveMemberModal.value = false
+  loadProjet()
 }
 
 const editProjet = (projet) => {
   selectedProjet.value = projet
   showFormModal.value = true
-  activeMenuId.value = null
 }
 
 const closeFormModal = () => {
@@ -682,36 +972,24 @@ const handleProjetSaved = () => {
   closeFormModal()
 }
 
-const editMember = (member) => {
-  selectedMember.value = member
-  showEditMemberModal.value = true
-}
+// ==================== MÉTHODES D'AFFICHAGE ====================
 
-const removeMember = (member) => {
-  memberToRemove.value = member
-  showRemoveMemberModal.value = true
-}
-
-const confirmRemoveMember = async () => {
-  try {
-    await removeMemberService(props.projetId, memberToRemove.value.id)
-    showRemoveMemberModal.value = false
-    memberToRemove.value = null
-    await loadProjet()
-  } catch (error) {
-    console.error('Error removing member:', error)
+const getActivityStatusClass = (status) => {
+  const classes = {
+    active: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+    archived: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+    completed: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
   }
+  return classes[status] || classes.active
 }
 
-const handleMemberUpdated = () => {
-  showEditMemberModal.value = false
-  selectedMember.value = null
-  loadProjet()
-}
-
-const handleMemberRemoved = () => {
-  showRemoveMemberModal.value = false
-  loadProjet()
+const getActivityStatusLabel = (status) => {
+  const labels = {
+    active: 'Active',
+    archived: 'Archivée',
+    completed: 'Terminée'
+  }
+  return labels[status] || status
 }
 
 const getStatusColor = (status) => {
@@ -743,7 +1021,86 @@ const getStatusIcon = (status) => {
   }
   return icons[status] || ClockIcon
 }
+// ✅ Méthodes pour vérifier les permissions - VERSION CORRIGÉE
+const hasAnyPermission = (member) => {
+  // ✅ CORRECTION: Utiliser member.can_edit directement, pas member.pivot.can_edit
+  return member.can_edit || member.can_delete || member.can_invite || member.can_delete_member
+}
 
+/**
+ * ✅ CORRECTION: Vérifie si l'utilisateur peut éditer le projet
+ */
+const canEditProjet = computed(() => {
+  const user = authStore.user
+  if (!user || !projet.value) return false
+  
+  // Super admin peut tout éditer
+  if (user.is_super_admin) return true
+  
+  // Responsable du projet peut tout éditer
+  if (projet.value.responsable_id === user.id) return true
+  
+  // Chercher l'utilisateur courant dans les membres
+  const currentUserMember = members.value.find(m => m.id === user.id)
+  
+  // Vérifier si l'utilisateur a la permission d'éditer
+  return currentUserMember?.can_edit === true || currentUserMember?.can_edit === 1
+})
+
+const canEditMember = (member) => {
+  const currentUser = authStore.user
+  if (!currentUser) return false
+  
+  // Ne pas permettre de modifier soi-même (l'utilisateur modifie ses propres permissions via un autre écran)
+  if (member.id === currentUser.id) return false
+  
+  // Vérifier si l'utilisateur courant a la permission de gérer les membres
+  if (!canManageMembers.value) return false
+  
+    // Ne pas permettre de retirer le responsable du projet
+  if (member.id === projet.value.responsable_id) return false
+
+  return true
+}
+
+const canRemoveMember = (member) => {
+  const currentUser = authStore.user
+  if (!currentUser) return false
+  
+  // Ne pas permettre de se retirer soi-même
+  if (member.id === currentUser.id) return false
+  
+  // Ne pas permettre de retirer le responsable du projet
+  if (member.id === projet.value.responsable_id) return false 
+  
+  // Vérifier si l'utilisateur courant a la permission de supprimer
+  const currentUserMember = members.value.find(m => m.id === currentUser.id)
+  const hasDeletePermission = currentUserMember?.can_delete_member === true || currentUserMember?.can_delete_member === 1
+  
+  if (!hasDeletePermission) return false
+  
+  return true
+}
+
+// ✅ CORRECTION: Méthodes pour déterminer si l'utilisateur peut gérer les membres
+const canManageMembers = computed(() => {
+  const user = authStore.user
+  if (!user || !projet.value) return false
+  
+  // Super admin peut tout gérer
+  if (user.is_super_admin) return true
+  
+  // Responsable du projet peut tout gérer
+  if (projet.value.responsable_id === user.id) return true
+  
+  // Chercher l'utilisateur courant dans les membres
+  const currentUserMember = members.value.find(m => m.id === user.id)
+  
+  // Vérifier si l'utilisateur a la permission d'inviter
+  return currentUserMember?.can_invite === true || currentUserMember?.can_invite === 1
+})
+
+// ✅ CORRECTION: Méthodes de formatage des rôles
 const getRoleColor = (role) => {
   const colors = {
     owner: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
@@ -769,6 +1126,15 @@ const formatDate = (date) => {
   return new Date(date).toLocaleDateString('fr-FR', {
     year: 'numeric',
     month: 'long',
+    day: 'numeric'
+  })
+}
+
+const formatDateTime = (dateTime) => {
+  if (!dateTime) return '-'
+  return new Date(dateTime).toLocaleDateString('fr-FR', {
+    year: 'numeric',
+    month: 'short',
     day: 'numeric'
   })
 }

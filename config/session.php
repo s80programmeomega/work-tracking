@@ -2,8 +2,7 @@
 
 use Illuminate\Support\Str;
 
-return [
-
+return [ 
     /*
     |--------------------------------------------------------------------------
     | Default Session Driver

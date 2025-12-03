@@ -173,28 +173,81 @@ class ProjetController extends Controller
 
     /**
      * Display the specified project.
+     * ✅ AMÉLIORATION : Retourne uniquement les activités où l'utilisateur est membre ou responsable
      */
     public function show(Projet $projet): JsonResponse
     {
         $this->authorize('view', $projet);
 
+        $userId = auth()->id();
+        $user = auth()->user();
+
+        // ✅ Charger le projet avec ses relations
         $projet->load([
             'responsable',
-            'members',
+            // ✅ CORRECTION : Charger members avec withPivot, pas 'members.pivot'
+            'members' => function ($query) {
+                $query->withPivot([
+                    'role',
+                    'can_edit',
+                    'can_delete',
+                    'can_invite',
+                    'created_at'
+                ]);
+            },
             'tags',
-            'workspace', // ✅ Charge les infos du workspace
-            'activites' => function ($query) {
+            'workspace',
+            'activites' => function ($query) use ($userId, $user, $projet) {
+                // ✅ FILTRE : Uniquement les activités où l'utilisateur est impliqué
+                // SAUF si super admin OU responsable du projet
+                if (!$user->isSuperAdmin() && $projet->responsable_id !== $userId) {
+                    $query->where(function ($q) use ($userId) {
+                        // Responsable de l'activité
+                        $q->where('responsable_id', $userId)
+                            // OU membre de l'activité
+                            ->orWhereHas('membres', function ($mq) use ($userId) {
+                            $mq->where('user_id', $userId);
+                        });
+                    });
+                }
+
+                // Charger les relations nécessaires
                 $query->with([
-                    'responsable',
-                    'taches' => function ($q) {
-                        $q->select('id', 'activite_id', 'titre', 'statut', 'priorite');
-                    }
-                ])->withCount('taches');
+                    'responsable:id,nom,prenom,email,avatar',
+                    'membres' => function ($mq) {
+                    $mq->select('users.id', 'users.nom', 'users.prenom', 'users.email', 'users.avatar')
+                        ->withPivot([
+                            'role',
+                            'can_create_tasks',
+                            'can_edit_tasks',
+                            'can_delete_tasks',
+                            'can_validate_results',
+                            'can_assign_users',
+                            'created_at'
+                        ]);
+                },
+                    'taches' => function ($tq) {
+                    $tq->select('id', 'activite_id', 'titre', 'statut', 'priorite', 'echeance');
+                }
+                ])
+                    ->withCount('taches')
+                    ->orderBy('ordre');
             }
         ]);
 
-        $stats = $this->projetService->getProjetStats($projet);
+        // ✅ Calculer les statistiques basées sur les activités FILTRÉES
+        $stats = [
+            'activites_count' => $projet->activites->count(),
+            'taches_count' => $projet->activites->sum('tache_count'),
+            'taches_terminees' => $projet->activites->sum(function ($activite) {
+                return $activite->taches->where('statut', 'completed')->count();
+            }),
+            'membres_count' => $projet->members->count(),
+            'progression_moyenne' => $projet->activites->avg('progression') ?? 0,
+        ];
+
         return response()->json([
+            'success' => true,
             'data' => new ProjetResource($projet),
             'stats' => $stats,
         ]);
@@ -442,6 +495,7 @@ class ProjetController extends Controller
             'can_edit' => 'nullable|boolean',
             'can_delete' => 'nullable|boolean',
             'can_invite' => 'nullable|boolean',
+            'can_delete_member' => 'nullable|boolean',
         ]);
 
         // Vérifier si membre
@@ -455,7 +509,7 @@ class ProjetController extends Controller
             $this->projetService->updateMember(
                 $projet,
                 $user->id,
-                $request->only(['role', 'can_edit', 'can_delete', 'can_invite'])
+                $request->only(['role', 'can_edit', 'can_delete', 'can_invite', 'can_delete_member'])
             );
 
             return response()->json([
@@ -672,19 +726,19 @@ class ProjetController extends Controller
     }
 
 
-public function accessible()
-{
-    $user = auth()->user();
+    public function accessible()
+    {
+        $user = auth()->user();
 
-    $projets = Projet::with('workspace')
-        ->whereHas('workspace', function ($q) use ($user) {
-            $q->where('owner_id', $user->id)
-              ->orWhereHas('members', fn($m) => $m->where('user_id', $user->id));
-        })
-        ->get();
+        $projets = Projet::with('workspace')
+            ->whereHas('workspace', function ($q) use ($user) {
+                $q->where('owner_id', $user->id)
+                    ->orWhereHas('members', fn($m) => $m->where('user_id', $user->id));
+            })
+            ->get();
 
-    return response()->json($projets);
-}
+        return response()->json($projets);
+    }
 
 
 

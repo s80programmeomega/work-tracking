@@ -76,11 +76,19 @@ class Activite extends Model
         return $this->belongsTo(Projet::class);
     }
 
+    public function documents()
+{
+    return $this->morphMany(Document::class, 'documentable');
+}
+
+
     public function membres()
     {
         return $this->belongsToMany(User::class, 'activite_user')
             ->withPivot([
                 'role',
+                'can_edit_activity',
+                'can_delete_activity',
                 'can_create_tasks',
                 'can_edit_tasks',
                 'can_delete_tasks',
@@ -106,13 +114,15 @@ class Activite extends Model
     public function members(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'activite_user')
-            ->withPivot([
+           ->withPivot([
                 'role',
+                'can_edit_activity',
+                'can_delete_activity',
                 'can_create_tasks',
                 'can_edit_tasks',
                 'can_delete_tasks',
                 'can_validate_results',
-                'can_assign_users'
+                'can_assign_users',
             ])
             ->withTimestamps();
     }
@@ -170,7 +180,7 @@ class Activite extends Model
 
         // Membre avec permission can_edit_tasks
         $member = $this->members()->where('user_id', $user->id)->first();
-        return $member && $member->pivot->can_edit_tasks === true;
+        return $member && $member->pivot->can_edit_activity === true;
     }
 
     /**

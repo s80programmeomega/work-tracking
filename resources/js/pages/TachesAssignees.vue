@@ -253,6 +253,10 @@ import TacheCardPersonal from '@/components/taches/TacheCardPersonal.vue'
 import TacheDetailModal from '@/components/taches/TacheDetailModal.vue'
 import SubmitResultModal from '@/components/taches/SubmitResultModal.vue'
 import api from '@/api/axios'
+import { useToast } from 'vue-toastification'
+
+// Notifications
+const toast = useToast()
 
 // State
 const taches = ref([])
@@ -299,12 +303,9 @@ const tasksByActivite = computed(() => {
 
 // Methods
 function getMyStatus(tache) {
-  // ✅ CORRECTION: Utiliser my_status.statut en priorité
   if (tache.my_status && tache.my_status.statut) {
     return tache.my_status.statut
   }
-  
-  // Fallback sur le statut global
   return tache.statut
 }
 
@@ -319,7 +320,7 @@ async function loadAssignedTasks() {
   try {
     const { data } = await api.get('/taches/assignees')
     taches.value = data.data || []
-    
+
     console.log('✅ Tâches assignées chargées:', {
       total: taches.value.length,
       sample: taches.value.slice(0, 2).map(t => ({
@@ -332,6 +333,7 @@ async function loadAssignedTasks() {
   } catch (err) {
     console.error('❌ Erreur chargement:', err)
     error.value = err.response?.data?.message || 'Impossible de charger les tâches assignées'
+    toast.error(error.value)
   } finally {
     loading.value = false
   }
@@ -353,15 +355,15 @@ async function handleMoveMyCard({ tache, newStatut, progression, notes }) {
     })
 
     console.log('✅ Carte déplacée:', data.changes)
-    
-    // Recharger les tâches pour avoir les données à jour
+
     await loadAssignedTasks()
-    
+
+    toast.success("Carte mise à jour avec succès !")
   } catch (err) {
     console.error('❌ Erreur déplacement:', err)
     error.value = err.response?.data?.message || 'Erreur lors du déplacement'
-    
-    // Recharger quand même pour restaurer l'état correct
+    toast.error(error.value)
+
     await loadAssignedTasks()
   }
 }
@@ -375,8 +377,8 @@ async function handleResultSubmitted() {
   showSubmitResultModal.value = false
   await loadAssignedTasks()
   error.value = null
-  // Afficher une notification de succès
-  alert('✅ Résultat soumis avec succès !')
+
+  toast.success("Résultat soumis avec succès !")
 }
 
 async function handleViewTask(tache) {
@@ -387,6 +389,7 @@ async function handleViewTask(tache) {
   } catch (err) {
     console.error('Erreur:', err)
     error.value = 'Erreur lors du chargement de la tâche'
+    toast.error(error.value)
   }
 }
 

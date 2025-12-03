@@ -171,14 +171,15 @@ class User extends Authenticatable
     public function projets(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'projet_user')
-            ->withPivot(['role', 'can_edit', 'can_delete', 'can_invite'])
+            ->withPivot(['role', 'can_edit', 'can_delete', 'can_invite','can_delete_member'])
             ->withTimestamps();
     }
 
 
+
     public function activites()
     {
-        return $this->belongsToMany(Activite::class, 'activite_user')
+        return $this->belongsToMany(Activite::class, 'activite_user', 'user_id', 'activite_id')
             ->withPivot([
                 'role',
                 'can_create_tasks',

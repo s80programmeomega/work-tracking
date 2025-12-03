@@ -21,7 +21,7 @@
 
           <div class="flex items-center gap-3">
             <!-- Sélecteur d'activité -->
-            <select v-model="selectedActiviteId" @change="loadData" class="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+            <select v-model="selectedActiviteId" @change="handleActiviteChange" class="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
               <option value="">Sélectionner une activité</option>
               <option v-for="act in activites" :key="act.id" :value="act.id">
                 {{ act.nom }} ({{ act.projet?.nom }})
@@ -33,6 +33,71 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
             </button>
+          </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+          <!-- Filtre par membre -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filtrer par membre</label>
+            <select v-model="filters.user_id" @change="loadData" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+              <option value="">Tous les membres</option>
+              <option v-for="member in activityMembers" :key="member.id" :value="member.id">
+                {{ member.nom }} ({{ member.email }})
+              </option>
+            </select>
+          </div>
+
+          <!-- Filtre par période -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Période</label>
+            <select v-model="filters.period" @change="handlePeriodChange" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+              <option value="current_week">Semaine en cours</option>
+              <option value="last_week">Semaine dernière</option>
+              <option value="current_month">Mois en cours</option>
+              <option value="last_month">Mois dernier</option>
+              <option value="custom">Personnalisée</option>
+            </select>
+          </div>
+
+          <!-- Dates personnalisées -->
+          <div v-if="filters.period === 'custom'" class="flex items-end gap-2">
+            <div class="flex-1">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Du</label>
+              <DatePicker
+                v-model="filters.start_date"
+                :enable-time-picker="false"
+                auto-apply
+                :format="'dd/MM/yyyy'"
+                :locale="'fr'"
+                :dark="isDark"
+                placeholder="Date de début"
+                class="w-full date-input"
+              >
+                <template #input-icon>
+                  <CalendarIcon class="w-4 h-4 text-gray-400" />
+                </template>
+              </DatePicker>
+            </div>
+            <div class="flex-1">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Au</label>
+              <DatePicker
+                v-model="filters.end_date"
+                :enable-time-picker="false"
+                auto-apply
+                :format="'dd/MM/yyyy'"
+                :locale="'fr'"
+                :dark="isDark"
+                :min-date="filters.start_date"
+                placeholder="Date de fin"
+                class="w-full date-input"
+              >
+                <template #input-icon>
+                  <CalendarIcon class="w-4 h-4 text-gray-400" />
+                </template>
+              </DatePicker>
+            </div>
           </div>
         </div>
 
@@ -55,6 +120,37 @@
             <p class="text-2xl font-bold text-orange-600 dark:text-orange-400 mt-1">{{ totalPendingValidation }}</p>
           </div>
         </div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-between mt-4">
+          <div class="flex items-center gap-3">
+            <button
+              @click="generateReport"
+              :disabled="!selectedActiviteId"
+              class="px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors flex items-center gap-2"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Générer Rapport
+            </button>
+
+            <button
+              @click="exportToExcel"
+              :disabled="!selectedActiviteId || usersData.length === 0"
+              class="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center gap-2"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Exporter Excel
+            </button>
+          </div>
+
+          <div class="text-sm text-gray-500 dark:text-gray-400">
+            Données mises à jour: {{ lastUpdate }}
+          </div>
+        </div>
       </div>
 
       <!-- Loading -->
@@ -75,13 +171,13 @@
         <p class="text-gray-500 dark:text-gray-400">Sélectionnez une activité pour voir la répartition des tâches</p>
       </div>
 
-      <div v-else-if="usersData.length === 0" class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] p-12 text-center">
-        <p class="text-gray-500 dark:text-gray-400">Aucune tâche assignée dans cette activité</p>
+      <div v-else-if="filteredUsersData.length === 0" class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] p-12 text-center">
+        <p class="text-gray-500 dark:text-gray-400">Aucune tâche ne correspond aux critères sélectionnés</p>
       </div>
 
       <!-- Grille des utilisateurs -->
       <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div v-for="userData in usersData" :key="userData.user.id" class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] overflow-hidden">
+        <div v-for="userData in filteredUsersData" :key="userData.user.id" class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] overflow-hidden">
           <!-- User Header -->
           <div class="p-6 bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 border-b border-gray-200 dark:border-gray-700">
             <div class="flex items-center gap-4">
@@ -93,6 +189,11 @@
               <div class="flex-1">
                 <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ userData.user.nom }}</h3>
                 <p class="text-sm text-gray-600 dark:text-gray-400">{{ userData.user.email }}</p>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-xs px-2 py-1 rounded-full" :class="getRoleBadgeClass(userData.user.role)">
+                    {{ getUserRoleLabel(userData.user.role) }}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -128,6 +229,24 @@
                 <div class="h-2 rounded-full transition-all" :class="getProgressColor(userData.stats.progression_moyenne)" :style="{ width: `${userData.stats.progression_moyenne}%` }"></div>
               </div>
             </div>
+
+            <!-- Indicateurs de performance -->
+            <div class="grid grid-cols-3 gap-2 mt-3 text-center">
+              <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Taux réalisation</p>
+                <p class="text-sm font-bold" :class="getPerformanceColor(userData.stats.taux_realisation_moyen)">
+                  {{ userData.stats.taux_realisation_moyen }}%
+                </p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Heures estimées</p>
+                <p class="text-sm font-bold text-gray-900 dark:text-white">{{ userData.stats.heures_estimees }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Heures réelles</p>
+                <p class="text-sm font-bold text-gray-900 dark:text-white">{{ userData.stats.heures_reelles }}</p>
+              </div>
+            </div>
           </div>
 
           <!-- Liste des tâches -->
@@ -150,7 +269,7 @@
                       {{ getStatusLabel(tache.statut_individuel) }}
                     </span>
                     <span class="text-xs text-gray-500 dark:text-gray-400">{{ tache.progression_individuelle }}%</span>
-                    
+
                     <!-- Badge résultat -->
                     <span v-if="tache.has_result" class="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
                       <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -197,57 +316,73 @@
     </div>
 
     <!-- Modal détails tâche -->
-    <TacheDetailModal
-      v-if="showDetailModal"
-      :tache="currentTache"
-      @close="showDetailModal = false"
-    />
+    <TacheDetailModal v-if="showDetailModal" :tache="currentTache" @close="showDetailModal=false" />
 
     <!-- Modal validation -->
-    <ValidationModal
-      v-if="showValidationModal"
-      :tache="currentTacheForValidation"
-      :user="currentUserForValidation"
-      :action="validationAction"
-      @close="showValidationModal = false"
-      @validated="handleValidationComplete"
-    />
+    <ValidationModal v-if="showValidationModal" :tache="currentTacheForValidation" :user="currentUserForValidation" :action="validationAction" @close="showValidationModal=false" @validated="handleValidationComplete" />
+
+    <!-- Modal rapport -->
+    <ReportModal v-if="showReportModal" :activite="activite" :usersData="filteredUsersData" :filters="filters" @close="showReportModal=false" />
+
   </AdminLayout>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { CalendarIcon } from '@heroicons/vue/24/outline'
+import DatePicker from '@vuepic/vue-datepicker'
+import '@vuepic/vue-datepicker/dist/main.css'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import TacheDetailModal from '@/components/taches/TacheDetailModal.vue'
 import ValidationModal from '@/components/taches/ValidationModal.vue'
+import ReportModal from '@/components/reports/ReportModal.vue'
 import api from '@/api/axios'
 
 // State
 const activites = ref([])
 const selectedActiviteId = ref(null)
 const usersData = ref([])
+const activityMembers = ref([])
 const activite = ref(null)
 const loading = ref(false)
 const error = ref(null)
 const showDetailModal = ref(false)
 const showValidationModal = ref(false)
+const showReportModal = ref(false)
 const currentTache = ref(null)
 const currentTacheForValidation = ref(null)
 const currentUserForValidation = ref(null)
 const validationAction = ref('validate')
+const lastUpdate = ref(null)
+
+const filters = ref({
+  period: 'current_week',
+  start_date: null,
+  end_date: null,
+  user_id: ''
+})
+
+const isDark = computed(() => document.documentElement.classList.contains('dark'))
 
 // Computed
-const totalUsers = computed(() => usersData.value.length)
-const totalTasks = computed(() => usersData.value.reduce((sum, u) => sum + u.stats.total, 0))
+const totalUsers = computed(() => filteredUsersData.value.length)
+const totalTasks = computed(() => filteredUsersData.value.reduce((sum, u) => sum + u.stats.total, 0))
 const totalPendingValidation = computed(() => {
-  return usersData.value.reduce((sum, u) => {
+  return filteredUsersData.value.reduce((sum, u) => {
     return sum + u.taches.filter(t => t.has_result && t.validation_status === 'pending').length
   }, 0)
 })
 const averageProgress = computed(() => {
-  if (usersData.value.length === 0) return 0
-  const sum = usersData.value.reduce((acc, u) => acc + u.stats.progression_moyenne, 0)
-  return Math.round(sum / usersData.value.length)
+  if (filteredUsersData.value.length === 0) return 0
+  const sum = filteredUsersData.value.reduce((acc, u) => acc + u.stats.progression_moyenne, 0)
+  return Math.round(sum / filteredUsersData.value.length)
+})
+
+const filteredUsersData = computed(() => {
+  if (!filters.value.user_id) {
+    return usersData.value
+  }
+  return usersData.value.filter(userData => userData.user.id.toString() === filters.value.user_id.toString())
 })
 
 const canValidate = computed(() => {
@@ -265,6 +400,21 @@ async function loadActivites() {
   }
 }
 
+async function loadActivityMembers() {
+  if (!selectedActiviteId.value) {
+    activityMembers.value = []
+    return
+  }
+
+  try {
+    const { data } = await api.get(`/activites/${selectedActiviteId.value}/membres`)
+    activityMembers.value = data.data || data || []
+  } catch (err) {
+    console.error('Erreur chargement membres:', err)
+    activityMembers.value = []
+  }
+}
+
 async function loadData() {
   if (!selectedActiviteId.value) return
 
@@ -272,15 +422,124 @@ async function loadData() {
   error.value = null
 
   try {
-    const { data } = await api.get(`/activites/${selectedActiviteId.value}/taches-by-user`)
+    const params = {
+      period: filters.value.period,
+      user_id: filters.value.user_id
+    }
+
+    if (filters.value.period === 'custom' && filters.value.start_date && filters.value.end_date) {
+      params.start_date = formatDateForApi(filters.value.start_date)
+      params.end_date = formatDateForApi(filters.value.end_date)
+    }
+
+    const { data } = await api.get(`/activites/${selectedActiviteId.value}/taches-by-user`, { params })
     usersData.value = data.data || []
     activite.value = data.activite
+    lastUpdate.value = new Date().toLocaleString('fr-FR')
+    
     console.log('✅ Données chargées:', usersData.value.length, 'utilisateurs')
   } catch (err) {
     console.error('❌ Erreur:', err)
     error.value = err.response?.data?.message || 'Erreur de chargement'
   } finally {
     loading.value = false
+  }
+}
+
+function handleActiviteChange() {
+  filters.value.user_id = ''
+  loadActivityMembers()
+  loadData()
+}
+
+function handlePeriodChange() {
+  if (filters.value.period !== 'custom') {
+    initializeDates()
+  }
+  loadData()
+}
+
+function initializeDates() {
+  const today = new Date()
+  let startDate, endDate
+
+  switch (filters.value.period) {
+    case 'current_week':
+      startDate = new Date(today.setDate(today.getDate() - today.getDay() + 1))
+      endDate = new Date(today.setDate(today.getDate() - today.getDay() + 7))
+      break
+    case 'last_week':
+      startDate = new Date(today.setDate(today.getDate() - today.getDay() - 6))
+      endDate = new Date(today.setDate(today.getDate() - today.getDay() + 0))
+      break
+    case 'current_month':
+      startDate = new Date(today.getFullYear(), today.getMonth(), 1)
+      endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0)
+      break
+    case 'last_month':
+      startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+      endDate = new Date(today.getFullYear(), today.getMonth(), 0)
+      break
+    default:
+      startDate = new Date(today.setDate(today.getDate() - today.getDay() + 1))
+      endDate = new Date(today.setDate(today.getDate() - today.getDay() + 7))
+  }
+
+  filters.value.start_date = startDate
+  filters.value.end_date = endDate
+}
+
+function formatDateForApi(date) {
+  if (!date) return null
+  const d = new Date(date)
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function generateReport() {
+  if (!selectedActiviteId.value) {
+    alert('Veuillez sélectionner une activité')
+    return
+  }
+  showReportModal.value = true
+}
+
+async function exportToExcel() {
+  if (!selectedActiviteId.value || filteredUsersData.value.length === 0) {
+    alert('Aucune donnée à exporter')
+    return
+  }
+
+  try {
+    const params = {
+      period: filters.value.period,
+      user_id: filters.value.user_id,
+      export: 'excel'
+    }
+
+    if (filters.value.period === 'custom' && filters.value.start_date && filters.value.end_date) {
+      params.start_date = formatDateForApi(filters.value.start_date)
+      params.end_date = formatDateForApi(filters.value.end_date)
+    }
+
+    const response = await api.get(`/reports/activite/${selectedActiviteId.value}/user-tasks`, {
+      params,
+      responseType: 'blob'
+    })
+
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `rapport-taches-${activite.value.nom}-${new Date().toISOString().split('T')[0]}.xlsx`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (err) {
+    console.error('Erreur export Excel:', err)
+    alert('Erreur lors de l\'export Excel')
   }
 }
 
@@ -320,6 +579,12 @@ const getProgressColor = (progress) => {
   if (progress < 30) return 'bg-red-500'
   if (progress < 70) return 'bg-amber-500'
   return 'bg-green-500'
+}
+
+const getPerformanceColor = (value) => {
+  if (value >= 90) return 'text-green-600 dark:text-green-400'
+  if (value >= 70) return 'text-amber-600 dark:text-amber-400'
+  return 'text-red-600 dark:text-red-400'
 }
 
 const getTacheCardClass = (tache) => {
@@ -371,6 +636,24 @@ const getPriorityIcon = (priorite) => {
   return icons[priorite] || '⚪'
 }
 
+const getRoleBadgeClass = (role) => {
+  const classes = {
+    responsable: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
+    membre: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+    observateur: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300'
+  }
+  return classes[role] || classes.membre
+}
+
+const getUserRoleLabel = (role) => {
+  const labels = {
+    responsable: 'Responsable',
+    membre: 'Membre',
+    observateur: 'Observateur'
+  }
+  return labels[role] || 'Membre'
+}
+
 const formatDate = (date) => {
   return new Date(date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
 }
@@ -398,5 +681,29 @@ const getInitials = (name) => {
 // Lifecycle
 onMounted(async () => {
   await loadActivites()
+  initializeDates()
 })
 </script>
+
+<style scoped>
+.date-input :deep(.dp__input) {
+  width: 100%;
+  padding: 0.5rem 0.75rem 0.5rem 2rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  background-color: white;
+  color: #1f2937;
+  font-size: 0.875rem;
+}
+
+.dark .date-input :deep(.dp__input) {
+  border-color: #4b5563;
+  background-color: #1f2937;
+  color: white;
+}
+
+.date-input :deep(.dp__input_icon) {
+  left: 0.5rem;
+  padding: 0;
+}
+</style>

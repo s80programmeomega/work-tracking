@@ -1,3 +1,4 @@
+<!-- resources\js\components\profile\Modal.vue -->
 <template>
   <div class="fixed inset-0 flex items-center justify-center overflow-y-auto modal z-99999">
     <div

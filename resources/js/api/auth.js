@@ -1,10 +1,11 @@
+// resources\js\api\auth.js
 import api from './axios';
 
 export const authAPI = {
     // Get CSRF cookie first (for session-based auth)
     async getCsrfCookie() {
         await api.get('/sanctum/csrf-cookie');
-            // await axios.get('http://localhost:8000/sanctum/csrf-cookie', { withCredentials: true });
+             
     },
 
     async register(data) {

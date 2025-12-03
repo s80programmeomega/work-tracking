@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -13,27 +14,37 @@ class TacheResource extends JsonResource
 
         // ✅ Helper pour formater les dates en toute sécurité
         $formatDate = function ($date) {
-            if (!$date) return null;
-            if (is_string($date)) return $date;
-            if (method_exists($date, 'format')) return $date->format('Y-m-d H:i:s');
+            if (!$date)
+                return null;
+            if (is_string($date))
+                return $date;
+            if (method_exists($date, 'format'))
+                return $date->format('Y-m-d H:i:s');
             return null;
         };
 
         $formatDateOnly = function ($date) {
-            if (!$date) return null;
-            if (is_string($date)) return $date;
-            if (method_exists($date, 'format')) return $date->format('Y-m-d');
+            if (!$date)
+                return null;
+            if (is_string($date))
+                return $date;
+            if (method_exists($date, 'format'))
+                return $date->format('Y-m-d');
             return null;
         };
 
         // ✅ Helper pour formater les dates du pivot
         $formatPivotDate = function ($date) {
-            if (!$date) return null;
-            if (is_string($date)) return $date;
-            if (method_exists($date, 'format')) return $date->format('Y-m-d H:i:s');
+            if (!$date)
+                return null;
+            if (is_string($date))
+                return $date;
+            if (method_exists($date, 'format'))
+                return $date->format('Y-m-d H:i:s');
             return null;
         };
 
+        
         return [
             'id' => $this->id,
             'code' => $this->code,
@@ -304,6 +315,43 @@ class TacheResource extends JsonResource
                         !$this->monResultat($user),
                 ];
             }),
+            // ✅ NOUVEAUX CHAMPS pour la fiche d'évaluation
+            'evaluation' => $this->when($user, function () use ($user) {
+                return [
+                    // Doit être affiché sur la fiche
+                    'should_show' => $this->shouldShowOnEvaluation($user),
+
+                    // Statut de validation détaillé
+                    'validation_status' => $this->getValidationStatusForUser($user),
+
+                    // Labels lisibles
+                    'validation_status_label' => $this->getValidationStatusLabel($user),
+
+                    // Validation complète ou non
+                    'is_validation_complete' => $this->isValidationCompleteForUser($user),
+
+                    // Peut soumettre un résultat
+                    'can_submit_result' => $this->getStatutForUser($user) === 'termine'
+                        && !$this->monResultat($user)?->soumis_le,
+
+                    // Peut éditer le résultat (non validé N1)
+                    'can_edit_result' => $this->monResultat($user)
+                        && !$this->monResultat($user)->valide_par_n1,
+                ];
+            }),
         ];
+    }
+
+    protected function getValidationStatusLabel(User $user): string
+    {
+        $status = $this->getValidationStatusForUser($user);
+
+        return match ($status) {
+            'not_submitted' => 'Résultat non soumis',
+            'pending_n1' => 'En attente validation N1',
+            'pending_n2' => 'En attente validation N2',
+            'fully_validated' => 'Validé complètement',
+            default => 'Inconnu'
+        };
     }
 }

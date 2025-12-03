@@ -59,7 +59,7 @@ export function useProjets() {
 
     try {
       const params = {}
-      
+
       // ✅ Si workspace_id fourni, l'utiliser
       if (workspaceId) {
         params.workspace_id = workspaceId
@@ -143,7 +143,7 @@ export function useProjets() {
       console.error('Error fetching projets:', error)
       projets.value = []
       errors.value.fetch = error.response?.data?.message || 'Erreur lors du chargement des projets'
-      
+
       if (error.response?.status !== 404) {
         showToast('Impossible de charger les projets', 'error')
       }
@@ -355,6 +355,210 @@ export function useProjets() {
   }
 
   /**
+ * ✅ Fetch archived projects for current user
+ */
+  const fetchArchivedProjets = async (filters = {}) => {
+    loading.value = true
+    errors.value = {}
+
+    try {
+      const params = {
+        page: filters.page || 1,
+        per_page: filters.per_page || 15,
+        ...filters
+      }
+
+      // ✅ Si workspace_id fourni, l'utiliser
+      if (filters.workspace_id) {
+        params.workspace_id = filters.workspace_id
+      } else if (authStore.user?.current_workspace_id) {
+        // Sinon utiliser le workspace courant
+        params.workspace_id = authStore.user.current_workspace_id
+      }
+
+      const { data } = await api.get('/projets/archives', { params })
+
+      if (data?.data) {
+        projets.value = Array.isArray(data.data) ? data.data : []
+
+        if (data.meta) {
+          pagination.value = {
+            current_page: data.meta.current_page || 1,
+            last_page: data.meta.last_page || 1,
+            per_page: data.meta.per_page || 15,
+            total: data.meta.total || 0
+          }
+        }
+      } else if (Array.isArray(data)) {
+        projets.value = data
+      } else {
+        projets.value = []
+      }
+
+      return projets.value
+    } catch (error) {
+      console.error('Error fetching archived projets:', error)
+      projets.value = []
+      errors.value.fetch = error.response?.data?.message || 'Erreur lors du chargement des projets archivés'
+
+      if (error.response?.status !== 404) {
+        showToast('Impossible de charger les projets archivés', 'error')
+      }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  /**
+   * ✅ Fetch ALL archived projects (SUPER ADMIN ONLY)
+   */
+  const fetchAllArchivedProjets = async (filters = {}) => {
+    if (!isSuperAdmin.value) {
+      console.warn('fetchAllArchivedProjets is only available for super admins')
+      return []
+    }
+
+    loading.value = true
+    errors.value = {}
+
+    try {
+      const params = {
+        page: filters.page || 1,
+        per_page: filters.per_page || 15,
+        ...filters
+      }
+
+      // ✅ Super admin peut voir tous les projets archivés sans workspace_id
+      const { data } = await api.get('/projets/archives', { params })
+
+      if (data?.data) {
+        projets.value = Array.isArray(data.data) ? data.data : []
+
+        if (data.meta) {
+          pagination.value = {
+            current_page: data.meta.current_page || 1,
+            last_page: data.meta.last_page || 1,
+            per_page: data.meta.per_page || 15,
+            total: data.meta.total || 0
+          }
+        }
+      } else {
+        projets.value = []
+      }
+
+      return projets.value
+    } catch (error) {
+      console.error('Error fetching all archived projets:', error)
+      projets.value = []
+      errors.value.fetch = error.response?.data?.message || 'Erreur lors du chargement des projets archivés'
+      showToast('Impossible de charger les projets archivés', 'error')
+    } finally {
+      loading.value = false
+    }
+  }
+
+
+
+  /**
+   * ✅ Fetch archived projects statistics
+   */
+  const fetchArchivedStats = async (workspaceId = null) => {
+    loading.value = true
+    errors.value = {}
+
+    try {
+      const params = {}
+
+      if (workspaceId) {
+        params.workspace_id = workspaceId
+      } else if (authStore.user?.current_workspace_id) {
+        params.workspace_id = authStore.user.current_workspace_id
+      }
+
+      // On pourrait créer un endpoint spécifique pour les stats des archives
+      // Pour l'instant, on utilise les stats générales et on filtre
+      const { data } = await api.get('/projets/dashboard-stats', { params })
+
+      if (data?.data) {
+        // Enrichir les stats avec des données spécifiques aux archives
+        stats.value = {
+          ...stats.value,
+          ...data.data,
+          // Calculs spécifiques aux archives
+          duree_moyenne_archivage: calculateAverageArchiveDuration(projets.value),
+          taux_completion_archives: calculateAverageCompletion(projets.value),
+          archives_recentes: countRecentArchives(projets.value),
+          archives_anciennes: countOldArchives(projets.value),
+          archives_100_percent: count100PercentArchives(projets.value),
+          archives_incomplets: countIncompleteArchives(projets.value)
+        }
+        return data.data
+      }
+    } catch (error) {
+      console.error('Error fetching archived stats:', error)
+      errors.value.stats = error.response?.data?.message || 'Erreur lors du chargement des statistiques des archives'
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // Helper functions pour les statistiques des archives
+  const calculateAverageArchiveDuration = (projets) => {
+    if (!projets.length) return 0
+
+    const totalDays = projets.reduce((sum, projet) => {
+      if (!projet.archived_at) return sum
+      const archivedDate = new Date(projet.archived_at)
+      const now = new Date()
+      const diffTime = Math.abs(now - archivedDate)
+      return sum + Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    }, 0)
+
+    return Math.round(totalDays / projets.length)
+  }
+
+  const calculateAverageCompletion = (projets) => {
+    if (!projets.length) return 0
+
+    const totalCompletion = projets.reduce((sum, projet) => {
+      return sum + (projet.progression || 0)
+    }, 0)
+
+    return Math.round(totalCompletion / projets.length)
+  }
+
+  const countRecentArchives = (projets) => {
+    const now = new Date()
+    const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30))
+
+    return projets.filter(projet => {
+      if (!projet.archived_at) return false
+      return new Date(projet.archived_at) > thirtyDaysAgo
+    }).length
+  }
+
+  const countOldArchives = (projets) => {
+    const now = new Date()
+    const oneYearAgo = new Date(now.setFullYear(now.getFullYear() - 1))
+
+    return projets.filter(projet => {
+      if (!projet.archived_at) return false
+      return new Date(projet.archived_at) < oneYearAgo
+    }).length
+  }
+
+  const count100PercentArchives = (projets) => {
+    return projets.filter(projet => (projet.progression || 0) === 100).length
+  }
+
+  const countIncompleteArchives = (projets) => {
+    return projets.filter(projet => (projet.progression || 0) < 100).length
+  }
+
+
+
+
+  /**
    * Unarchive project
    */
   const unarchiveProjet = async (id) => {
@@ -521,6 +725,12 @@ export function useProjets() {
     toggleFavorite,
     addMember,
     updateMember,
-    removeMember
+    removeMember,
+
+    // ✅ NOUVELLES FONCTIONS POUR LES ARCHIVES
+    fetchArchivedProjets,
+    fetchAllArchivedProjets,
+    fetchArchivedStats
+
   }
 }

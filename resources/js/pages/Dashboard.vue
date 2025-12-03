@@ -1,62 +1,146 @@
+<!-- resources/js/pages/Dashboard.vue - VERSION AMÉLIORÉE AVEC KANBAN -->
 <template>
   <AdminLayout>
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 p-6 transition-colors duration-200">
-      <!-- Header -->
+    <div
+      class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-6 transition-all duration-300">
+      <!-- Header avec navigation workspace et membre -->
       <div class="mb-8">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div>
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Tableau de Bord</h1>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Vue d'ensemble de vos projets et tâches
-            </p>
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div class="flex items-center gap-4">
+            <div
+              class="p-3 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 shadow-sm">
+              <FolderKanbanIcon class="w-8 h-8 text-brand-600 dark:text-brand-400" />
+            </div>
+            <div>
+              <h1
+                class="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                Tableau de Bord
+              </h1>
+              <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                {{ currentWorkspaceName || 'Vue d\'ensemble de vos projets et performances' }}
+              </p>
+            </div>
           </div>
+
           <div class="flex items-center gap-3 flex-wrap">
-            <select
-              v-model="selectedPeriod"
-              @change="loadDashboardData"
-              class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-colors"
-            >
-              <option value="week">Cette semaine</option>
-              <option value="month">Ce mois</option>
-              <option value="quarter">Ce trimestre</option>
-              <option value="year">Cette année</option>
-            </select>
-            <button
-              @click="loadDashboardData"
-              class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors flex items-center gap-2"
-            >
-              <RefreshIcon class="w-4 h-4" />
+            <!-- Filtre Workspace -->
+            <div class="relative group">
+              <select v-model="selectedWorkspace" @change="onWorkspaceChange"
+                class="appearance-none rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 pl-10 pr-8 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all duration-200 cursor-pointer">
+                <option value="all">Tous les workspaces</option>
+                <option v-for="workspace in workspaces" :key="workspace.id" :value="workspace.id">
+                  {{ workspace.nom }}
+                </option>
+              </select>
+              <BuildingOfficeIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <ChevronDownIcon class="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+            </div>
+
+            <!-- Filtre Membre -->
+            <!-- <div class="relative group" v-if="workspaceMembers.length > 0 && selectedWorkspace !== 'all'">
+              <select v-model="selectedMember" @change="loadDashboardData"
+                class="appearance-none rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 pl-10 pr-8 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all duration-200 cursor-pointer">
+                <option value="all">Tous les membres</option>
+                <option v-for="member in workspaceMembers" :key="member.id" :value="member.id">
+                  {{ member.prenom }} {{ member.nom }}
+                </option>
+              </select>
+              <UsersIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <ChevronDownIcon class="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+            </div> -->
+
+            <!-- Filtre Période -->
+            <div class="relative">
+              <select v-model="selectedPeriod" @change="loadDashboardData"
+                class="rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 pr-8 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all duration-200 cursor-pointer">
+                <option value="week">Cette semaine</option>
+                <option value="month">Ce mois</option>
+                <option value="quarter">Ce trimestre</option>
+                <option value="year">Cette année</option>
+              </select>
+            </div>
+
+            <!-- Bouton Actualiser -->
+            <button @click="loadDashboardData"
+              class="rounded-xl bg-gradient-to-r from-brand-600 to-brand-700 px-4 py-2.5 text-sm font-medium text-white hover:from-brand-700 hover:to-brand-800 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105">
+              <RefreshIcon class="w-4 h-4" :class="{ 'animate-spin': loading }" />
               Actualiser
             </button>
           </div>
         </div>
+
+        <!-- Filtres avancés -->
+        <div class="mt-4 flex flex-wrap gap-2">
+          <div class="relative">
+            <select v-model="filters.projectStatus" @change="loadDashboardData"
+              class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all duration-200 cursor-pointer">
+              <option value="all">Tous les statuts</option>
+              <option value="active">Projets actifs</option>
+              <option value="completed">Projets terminés</option>
+              <option value="archived">Projets archivés</option>
+            </select>
+          </div>
+
+          <div class="relative">
+            <select v-model="filters.priority" @change="loadDashboardData"
+              class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all duration-200 cursor-pointer">
+              <option value="all">Toutes priorités</option>
+              <option value="high">Priorité élevée</option>
+              <option value="medium">Priorité moyenne</option>
+              <option value="low">Priorité faible</option>
+            </select>
+          </div>
+
+          <button v-if="hasActiveFilters" @click="resetFilters"
+            class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 flex items-center gap-1">
+            <XIcon class="w-3 h-3" />
+            Réinitialiser
+          </button>
+        </div>
       </div>
 
       <!-- Loading State -->
-      <div v-if="loading" class="flex items-center justify-center py-12">
-        <div class="h-12 w-12 animate-spin rounded-full border-4 border-brand-600 border-t-transparent"></div>
+      <div v-if="loading" class="flex items-center justify-center py-20">
+        <div class="text-center">
+          <div class="relative">
+            <div class="w-16 h-16 border-4 border-brand-200 dark:border-brand-800 rounded-full animate-spin"></div>
+            <div
+              class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 border-4 border-transparent border-t-brand-600 rounded-full animate-spin">
+            </div>
+          </div>
+          <p class="mt-4 text-gray-600 dark:text-gray-400 font-medium">Chargement des données...</p>
+        </div>
       </div>
 
       <!-- Dashboard Content -->
-      <div v-else>
+      <div v-else class="space-y-8">
         <!-- Stats Cards -->
-        <div class="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          <div
-            v-for="(stat, index) in statsCards"
-            :key="index"
-            class="relative overflow-hidden rounded-xl bg-white dark:bg-gray-800 p-6 shadow-sm transition-all hover:shadow-md border border-gray-200 dark:border-gray-700 group"
-          >
-            <!-- Background gradient effect -->
-            <div class="absolute inset-0 bg-gradient-to-br from-brand-500/5 to-accent-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div v-for="(stat, index) in statsCards" :key="index"
+            class="group relative overflow-hidden rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-6 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-200/50 dark:border-gray-700/50 hover:border-brand-300/30 dark:hover:border-brand-600/30"
+            :style="`--hover-color: ${stat.hoverColor}`">
+
+            <div
+              class="absolute inset-0 bg-gradient-to-br from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+            </div>
+            <div
+              class="absolute -inset-1 bg-gradient-to-r from-transparent via-[var(--hover-color)]/10 to-transparent opacity-0 group-hover:opacity-100 blur-lg transition-all duration-500">
+            </div>
+
             <div class="relative flex items-start justify-between">
               <div class="flex-1">
-                <p class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ stat.title }}</p>
-                <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ stat.value }}</p>
-                <div class="mt-2 flex items-center">
+                <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                  {{ stat.title }}
+                </p>
+                <p class="mt-3 text-4xl font-bold text-gray-900 dark:text-white">
+                  {{ stat.value }}
+                </p>
+                <div class="mt-3 flex items-center">
                   <span :class="[
-                    'flex items-center text-sm font-medium',
-                    stat.trend === 'up' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                    'flex items-center text-sm font-semibold px-2 py-1 rounded-full transition-all duration-300',
+                    stat.trend === 'up'
+                      ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                      : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
                   ]">
                     <TrendingUpIcon v-if="stat.trend === 'up'" class="mr-1 h-4 w-4" />
                     <TrendingDownIcon v-else class="mr-1 h-4 w-4" />
@@ -65,33 +149,55 @@
                   <span class="ml-2 text-xs text-gray-500 dark:text-gray-400">vs mois dernier</span>
                 </div>
               </div>
-              <div :class="['rounded-lg p-3 transition-colors duration-200', stat.lightColor]">
-                <component :is="stat.icon" :class="['h-6 w-6', stat.textColor]" />
+              <div :class="['rounded-xl p-3 transition-all duration-300 group-hover:scale-110', stat.lightColor]">
+                <component :is="stat.icon"
+                  :class="['h-7 w-7 transition-transform duration-300 group-hover:scale-110', stat.textColor]" />
               </div>
             </div>
           </div>
         </div>
 
         <!-- Main Grid -->
-        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
           <!-- Left Column - 2/3 width -->
-          <div class="space-y-6 lg:col-span-2">
+          <div class="space-y-8 lg:col-span-2">
+            <!-- Vue Kanban des Projets -->
+            <div
+              class="rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
+              <div class="flex items-center justify-between mb-6">
+                <div>
+                  <h2 class="text-xl font-bold text-gray-900 dark:text-white">Vue Kanban des Projets</h2>
+                  <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Organisez vos projets par statut</p>
+                </div>
+                <router-link to="/projets/mes-projets"
+                  class="group flex items-center gap-2 text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 transition-all duration-200 font-semibold text-sm">
+                  Voir tout
+                  <ArrowRightIcon
+                    class="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-200" />
+                </router-link>
+              </div>
+
+              <!-- Kanban Board -->
+              <div
+                class="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+                <KanbanColumn v-for="column in kanbanColumns" :key="column.status" :column="column"
+                  :tasks="getProjectsByStatus(column.status)" @task-click="goToProject"
+                  @task-drop="handleProjectDrop" />
+              </div>
+            </div>
+
             <!-- Progression Mensuelle -->
-            <div class="rounded-xl bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-              <div class="mb-6 flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Progression Mensuelle</h2>
-                <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                  <div class="flex items-center gap-1">
-                    <div class="w-3 h-3 rounded-full bg-brand-500"></div>
-                    <span>Projets</span>
-                  </div>
-                  <div class="flex items-center gap-1">
-                    <div class="w-3 h-3 rounded-full bg-accent-500"></div>
-                    <span>Tâches</span>
-                  </div>
-                  <div class="flex items-center gap-1">
-                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                    <span>Complétées</span>
+            <div
+              class="rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
+              <div class="flex items-center justify-between mb-6">
+                <div>
+                  <h2 class="text-xl font-bold text-gray-900 dark:text-white">Progression Mensuelle</h2>
+                  <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Évolution des projets et tâches</p>
+                </div>
+                <div class="flex items-center gap-4 text-sm">
+                  <div v-for="legend in chartLegends" :key="legend.label" class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: legend.color }"></div>
+                    <span class="text-gray-600 dark:text-gray-400">{{ legend.label }}</span>
                   </div>
                 </div>
               </div>
@@ -99,149 +205,97 @@
                 <canvas ref="monthlyChart"></canvas>
               </div>
             </div>
-
-            <!-- Projets Récents -->
-            <div class="rounded-xl bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-              <div class="mb-6 flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Projets Récents</h2>
-                <router-link
-                  to="/projets/mes-projets"
-                  class="text-sm font-medium text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 transition-colors flex items-center gap-1"
-                >
-                  Voir tout
-                  <ArrowRightIcon class="w-4 h-4" />
-                </router-link>
-              </div>
-              <div class="space-y-4">
-                <div
-                  v-for="project in dashboardData.recent_projects"
-                  :key="project.id"
-                  class="rounded-lg border border-gray-200 dark:border-gray-600 p-4 transition-all hover:border-brand-300 dark:hover:border-brand-500 hover:shadow-sm cursor-pointer group"
-                  @click="goToProject(project.id)"
-                >
-                  <div class="flex items-start justify-between">
-                    <div class="flex-1">
-                      <div class="flex items-center gap-3 mb-2">
-                        <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
-                          {{ project.name }}
-                        </h3>
-                        <span class="rounded-full bg-gray-100 dark:bg-gray-700 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-400">
-                          {{ project.code }}
-                        </span>
-                      </div>
-                      
-                      <div class="mt-3 flex items-center gap-6 text-sm text-gray-600 dark:text-gray-400 flex-wrap">
-                        <div class="flex items-center gap-1">
-                          <UsersIcon class="h-4 w-4" />
-                          <span>{{ project.team }} membres</span>
-                        </div>
-                        <div class="flex items-center gap-1">
-                          <CheckCircleIcon class="h-4 w-4" />
-                          <span>{{ project.tasks.completed }}/{{ project.tasks.total }} tâches</span>
-                        </div>
-                        <div v-if="project.due_date" class="flex items-center gap-1">
-                          <CalendarIcon class="h-4 w-4" />
-                          <span>{{ project.due_date }}</span>
-                        </div>
-                      </div>
-                      
-                      <div class="mt-4">
-                        <div class="flex items-center justify-between text-sm mb-2">
-                          <span class="font-medium text-gray-700 dark:text-gray-300">Progression</span>
-                          <span class="font-semibold text-gray-900 dark:text-white">{{ project.progress }}%</span>
-                        </div>
-                        <div class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                          <div
-                            class="h-full rounded-full bg-gradient-to-r from-brand-500 to-accent-500 transition-all duration-500"
-                            :style="{ width: `${project.progress}%` }"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
 
           <!-- Right Column - 1/3 width -->
-          <div class="space-y-6">
-            <!-- Répartition par Statut -->
-            <div class="rounded-xl bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-              <h2 class="mb-6 text-lg font-semibold text-gray-900 dark:text-white">Répartition par Statut</h2>
-              <div class="h-48">
-                <canvas ref="statusChart"></canvas>
+          <div class="space-y-8">
+            <!-- Mes Tâches Assignées -->
+            <div
+              class="rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
+              <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white">Mes Tâches</h2>
+                <span
+                  class="rounded-full bg-brand-100 dark:bg-brand-900/30 px-3 py-1 text-sm font-semibold text-brand-700 dark:text-brand-400">
+                  {{ myTasks.length }}
+                </span>
               </div>
-              <div class="mt-4 space-y-2">
-                <div
-                  v-for="item in dashboardData.status_distribution"
-                  :key="item.name"
-                  class="flex items-center justify-between py-1"
-                >
-                  <div class="flex items-center gap-2">
-                    <div
-                      class="h-3 w-3 rounded-full"
-                      :style="{ backgroundColor: item.color }" />
-                    <span class="text-sm text-gray-600 dark:text-gray-400">{{ item.name }}</span>
+
+              <div class="space-y-3">
+                <div v-for="task in myTasks" :key="task.id"
+                  class="group bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all duration-300 cursor-pointer"
+                  :class="taskBorderClass(task)" @click="goToTask(task.id)">
+                  <div class="flex items-start justify-between mb-2">
+                    <h4
+                      class="font-medium text-gray-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors line-clamp-2 flex-1">
+                      {{ task.title }}
+                    </h4>
+                    <span class="text-xs font-medium px-2 py-1 rounded-full ml-2" :class="priorityClass(task)">
+                      {{ task.priority }}
+                    </span>
                   </div>
-                  <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ item.value }}</span>
+
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mb-2 line-clamp-1">{{ task.project }}</p>
+
+                  <div class="flex items-center justify-between text-xs">
+                    <span class="text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                      <ClockIcon class="w-3 h-3" />
+                      {{ task.due_date }}
+                    </span>
+                    <span class="font-medium" :class="statusClass(task)">
+                      {{ task.status }}
+                    </span>
+                  </div>
+                </div>
+
+                <div v-if="myTasks.length === 0" class="text-center py-8">
+                  <CheckCircleIcon class="mx-auto h-12 w-12 text-green-500 dark:text-green-400 mb-3" />
+                  <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Aucune tâche assignée</p>
+                  <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Vous êtes à jour !</p>
                 </div>
               </div>
             </div>
 
-            <!-- Répartition par Priorité -->
-            <div class="rounded-xl bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-              <h2 class="mb-6 text-lg font-semibold text-gray-900 dark:text-white">Répartition par Priorité</h2>
-              <div class="h-48">
-                <canvas ref="priorityChart"></canvas>
-              </div>
-            </div>
-
-            <!-- Tâches Urgentes -->
-            <div class="rounded-xl bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-              <div class="mb-6 flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Tâches Urgentes</h2>
-                <span class="rounded-full bg-red-100 dark:bg-red-900/30 px-2 py-1 text-xs font-semibold text-red-700 dark:text-red-400">
-                  {{ dashboardData.urgent_tasks?.length || 0 }}
-                </span>
-              </div>
+            <!-- Membres de l'équipe -->
+            <div
+              class="rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
+              <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Membres de l'équipe</h2>
               <div class="space-y-3">
-                <div
-                  v-for="task in dashboardData.urgent_tasks"
-                  :key="task.id"
-                  class="rounded-lg border-l-4 p-3 transition-all cursor-pointer group"
-                  :class="[
-                    task.is_overdue 
-                      ? 'border-red-500 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30' 
-                      : 'border-accent-500 bg-accent-50 dark:bg-accent-900/20 hover:bg-accent-100 dark:hover:bg-accent-900/30'
-                  ]"
-                  @click="goToTask(task.id)"
-                >
-                  <div class="flex items-start justify-between">
-                    <div class="flex-1">
-                      <h4 class="font-medium text-gray-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
-                        {{ task.title }}
-                      </h4>
-                      <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">{{ task.project }}</p>
-                      <div class="mt-2 flex items-center gap-2 flex-wrap">
-                        <span :class="[
-                          'rounded-full px-2 py-0.5 text-xs font-medium transition-colors',
-                          getPriorityColor(task.priority)
-                        ]">
-                          {{ task.priority }}
-                        </span>
-                        <span class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                          <ClockIcon class="w-3 h-3" />
-                          {{ task.due_date }}
-                        </span>
-                      </div>
+                <div v-for="member in teamMembers" :key="member.id"
+                  class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 group">
+                  <div class="flex-shrink-0">
+                    <div v-if="member.avatar"
+                      class="w-10 h-10 rounded-full overflow-hidden ring-2 ring-white dark:ring-gray-700">
+                      <img :src="member.avatar" :alt="memberName(member)" class="w-full h-full object-cover">
+                    </div>
+                    <div v-else
+                      class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm ring-2 ring-white dark:ring-gray-700">
+                      {{ memberInitials(member) }}
+                    </div>
+                  </div>
+
+                  <div class="flex-1 min-w-0">
+                    <h4 class="text-sm font-medium text-gray-900 dark:text-white truncate">
+                      {{ memberName(member) }}
+                    </h4>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                      {{ member.email }}
+                    </p>
+                  </div>
+
+                  <div class="flex-shrink-0 text-right">
+                    <div class="text-sm font-bold text-gray-900 dark:text-white">
+                      {{ member.taches_count || 0 }}
+                    </div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                      tâches
                     </div>
                   </div>
                 </div>
-                
-                <div v-if="!dashboardData.urgent_tasks?.length" class="text-center py-4">
-                  <CheckCircleIcon class="mx-auto h-8 w-8 text-green-500 dark:text-green-400 mb-2" />
-                  <p class="text-sm text-gray-500 dark:text-gray-400">Aucune tâche urgente</p>
+
+                <div v-if="teamMembers.length === 0" class="text-center py-8">
+                  <UsersIcon class="mx-auto h-12 w-12 text-gray-400 mb-3" />
+                  <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Aucun membre</p>
+                  <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Les membres de l'équipe apparaîtront ici</p>
                 </div>
               </div>
             </div>
@@ -253,11 +307,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, nextTick, computed, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/api/axios'
 import Chart from 'chart.js/auto'
 import AdminLayout from '../components/layout/AdminLayout.vue'
+import KanbanColumn from './dashboard/KanbanColumn.vue' 
 import {
   RefreshIcon,
   TrendingUpIcon,
@@ -265,39 +320,101 @@ import {
   ArrowRightIcon,
   UsersIcon,
   CheckCircleIcon,
-  CalendarIcon,
   ClockIcon,
   FolderKanbanIcon,
   ListTodoIcon,
   TargetIcon,
-  AlertCircleIcon
+  AlertCircleIcon,
+  BuildingOfficeIcon,
+  ChevronDownIcon,
+  XIcon
 } from '@/icons'
+import { useWorkspace } from '@/composables/useWorkspace'
 
 const router = useRouter()
 const loading = ref(true)
 const selectedPeriod = ref('month')
+const selectedWorkspace = ref('all')
+const selectedMember = ref('all')
+
+// Utiliser le composable workspace
+const {
+  currentWorkspace,
+  workspaces,
+  fetchWorkspaces,
+  selectWorkspace,
+  onWorkspaceChanged,
+  fetchMembers
+} = useWorkspace()
+
+const workspaceMembers = ref([])
+
+// Filtres avancés
+const filters = ref({
+  projectStatus: 'all',
+  priority: 'all'
+})
+
+// Données du dashboard
 const dashboardData = ref({
   stats: {},
   monthly_progress: [],
-  status_distribution: [],
-  priority_distribution: [],
   recent_projects: [],
-  urgent_tasks: [],
-  workspace_stats: []
+  my_tasks: [],
+  team_members: []
 })
 
-const monthlyChart = ref(null)
-const statusChart = ref(null)
-const priorityChart = ref(null)
+// Computed
+const currentWorkspaceName = computed(() => {
+  if (selectedWorkspace.value === 'all') {
+    return 'Tous les workspaces'
+  }
+  const workspace = workspaces.value.find(w => w.id === selectedWorkspace.value)
+  return workspace?.nom || 'Vue d\'ensemble'
+})
 
-let monthlyChartInstance = null
-let statusChartInstance = null
-let priorityChartInstance = null
+const hasActiveFilters = computed(() => {
+  return selectedWorkspace.value !== 'all' ||
+    selectedMember.value !== 'all' ||
+    filters.value.projectStatus !== 'all' ||
+    filters.value.priority !== 'all'
+})
 
-// Couleurs de la charte graphique
-const brandColor = '#4b71f9'
-const accentColor = '#ecb73d'
+const myTasks = computed(() => {
+  return dashboardData.value.my_tasks || []
+})
 
+const teamMembers = computed(() => {
+  return dashboardData.value.team_members || []
+})
+
+// Colonnes Kanban
+const kanbanColumns = ref([
+    {
+    status: 'pending',
+    title: 'En attente',
+    color: 'bg-yellow-500',
+    textColor: 'text-yellow-700 dark:text-yellow-400',
+    bgColor: 'bg-yellow-50 dark:bg-yellow-900/20'
+  },
+  {
+    status: 'active',
+    title: 'En cours',
+    color: 'bg-green-500',
+    textColor: 'text-green-700 dark:text-green-400',
+    bgColor: 'bg-green-50 dark:bg-green-900/20'
+  },
+
+  {
+    status: 'completed',
+    title: 'Terminés',
+    color: 'bg-blue-500',
+    textColor: 'text-blue-700 dark:text-blue-400',
+    bgColor: 'bg-blue-50 dark:bg-blue-900/20'
+  }
+])
+
+// Stats cards
 const statsCards = ref([
   {
     title: 'Projets Actifs',
@@ -305,17 +422,19 @@ const statsCards = ref([
     change: '+0%',
     trend: 'up',
     icon: FolderKanbanIcon,
-    lightColor: 'bg-blue-50 dark:bg-blue-900/20',
-    textColor: 'text-blue-600 dark:text-blue-400'
+    lightColor: 'bg-blue-50 dark:bg-blue-900/20 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30',
+    textColor: 'text-blue-600 dark:text-blue-400',
+    hoverColor: '#3b82f6'
   },
   {
-    title: 'Tâches En Cours',
+    title: 'Mes Tâches',
     value: 0,
     change: '+0%',
     trend: 'up',
     icon: ListTodoIcon,
-    lightColor: 'bg-purple-50 dark:bg-purple-900/20',
-    textColor: 'text-purple-600 dark:text-purple-400'
+    lightColor: 'bg-purple-50 dark:bg-purple-900/20 group-hover:bg-purple-100 dark:group-hover:bg-purple-900/30',
+    textColor: 'text-purple-600 dark:text-purple-400',
+    hoverColor: '#8b5cf6'
   },
   {
     title: 'Taux Complétion',
@@ -323,47 +442,44 @@ const statsCards = ref([
     change: '+0%',
     trend: 'up',
     icon: TargetIcon,
-    lightColor: 'bg-green-50 dark:bg-green-900/20',
-    textColor: 'text-green-600 dark:text-green-400'
+    lightColor: 'bg-green-50 dark:bg-green-900/20 group-hover:bg-green-100 dark:group-hover:bg-green-900/30',
+    textColor: 'text-green-600 dark:text-green-400',
+    hoverColor: '#10b981'
   },
   {
-    title: 'Tâches En Retard',
+    title: 'En Retard',
     value: 0,
     change: '0%',
     trend: 'down',
     icon: AlertCircleIcon,
-    lightColor: 'bg-red-50 dark:bg-red-900/20',
-    textColor: 'text-red-600 dark:text-red-400'
+    lightColor: 'bg-red-50 dark:bg-red-900/20 group-hover:bg-red-100 dark:group-hover:bg-red-900/30',
+    textColor: 'text-red-600 dark:text-red-400',
+    hoverColor: '#ef4444'
   }
 ])
 
+const chartLegends = ref([
+  { label: 'Projets', color: '#6366f1' },
+  { label: 'Tâches totales', color: '#f59e0b' },
+  { label: 'Complétées', color: '#10b981' }
+])
+
+// Méthodes
 const loadDashboardData = async () => {
   loading.value = true
   try {
-    const response = await api.get('/dashboard', {
-      params: { period: selectedPeriod.value }
-    })
-    
+    const params = {
+      period: selectedPeriod.value,
+      workspace_id: selectedWorkspace.value === 'all' ? null : selectedWorkspace.value,
+      member_id: selectedMember.value === 'all' ? null : selectedMember.value,
+      project_status: filters.value.projectStatus === 'all' ? null : filters.value.projectStatus,
+      priority: filters.value.priority === 'all' ? null : filters.value.priority
+    }
+
+    const response = await api.get('/dashboard', { params })
     dashboardData.value = response.data
-    
-    // Update stats cards
-    statsCards.value[0].value = response.data.stats.projets_actifs.value
-    statsCards.value[0].change = response.data.stats.projets_actifs.change
-    statsCards.value[0].trend = response.data.stats.projets_actifs.trend
-    
-    statsCards.value[1].value = response.data.stats.taches_en_cours.value
-    statsCards.value[1].change = response.data.stats.taches_en_cours.change
-    statsCards.value[1].trend = response.data.stats.taches_en_cours.trend
-    
-    statsCards.value[2].value = response.data.stats.taux_completion.value + '%'
-    statsCards.value[2].change = response.data.stats.taux_completion.change
-    statsCards.value[2].trend = response.data.stats.taux_completion.trend
-    
-    statsCards.value[3].value = response.data.stats.taches_en_retard.value
-    statsCards.value[3].change = response.data.stats.taches_en_retard.change
-    statsCards.value[3].trend = response.data.stats.taches_en_retard.trend
-    
-    // Wait for DOM update before creating charts
+
+    updateStatsCards()
     await nextTick()
     createCharts()
   } catch (error) {
@@ -373,19 +489,134 @@ const loadDashboardData = async () => {
   }
 }
 
+const onWorkspaceChange = async () => {
+  selectedMember.value = 'all'
+
+  if (selectedWorkspace.value !== 'all') {
+    await loadWorkspaceMembers()
+  } else {
+    workspaceMembers.value = []
+  }
+
+  loadDashboardData()
+}
+
+const loadWorkspaceMembers = async () => {
+  if (selectedWorkspace.value === 'all') {
+    workspaceMembers.value = []
+    return
+  }
+
+  try {
+    const members = await fetchMembers(selectedWorkspace.value)
+    workspaceMembers.value = members
+  } catch (error) {
+    console.error('Error loading workspace members:', error)
+    workspaceMembers.value = []
+  }
+}
+
+const updateStatsCards = () => {
+  const stats = dashboardData.value.stats || {}
+  console.log('Dashboard', dashboardData);
+  console.log('Dashboard value', dashboardData.value);
+  
+  statsCards.value[0].value = stats.projets_actifs?.value || 0
+  statsCards.value[0].change = stats.projets_actifs?.change || '+0%'
+  statsCards.value[0].trend = stats.projets_actifs?.trend || 'up'
+
+  // 2️⃣ Mes tâches (count uniquement)
+  const myTasksCount = Array.isArray(dashboardData.value.my_tasks)
+    ? dashboardData.value.my_tasks.length
+    : 0
+
+  statsCards.value[1].value = myTasksCount
+  statsCards.value[1].change = '+0%'          // ou calcul personnalisé
+  statsCards.value[1].trend = 'neutral'        // ou "up/down"
+
+  statsCards.value[2].value = (stats.taux_completion?.value || 0) + '%'
+  statsCards.value[2].change = stats.taux_completion?.change || '+0%'
+  statsCards.value[2].trend = stats.taux_completion?.trend || 'up'
+
+  statsCards.value[3].value = stats.taches_en_retard?.value || 0
+  statsCards.value[3].change = stats.taches_en_retard?.change || '0%'
+  statsCards.value[3].trend = stats.taches_en_retard?.trend || 'down'
+}
+
+const getProjectsByStatus = (status) => {
+  const projects = dashboardData.value.recent_projects || []
+  return projects.filter(p => p.status === status)
+}
+
+const handleProjectDrop = async (projectId, newStatus) => {
+  console.log('Project drop:', projectId, newStatus)
+  // TODO: Implémenter la mise à jour du statut du projet
+}
+
+
+
+const resetFilters = () => {
+  selectedWorkspace.value = 'all'
+  selectedMember.value = 'all'
+  selectedPeriod.value = 'month'
+  filters.value = {
+    projectStatus: 'all',
+    priority: 'all'
+  }
+  workspaceMembers.value = []
+  loadDashboardData()
+}
+const goToProject = (project) => {
+  router.push({ name: 'ProjectDetail', params: { id: project.id } })
+}
+const goToTask = (taskId) => {
+  router.push({ name: 'TaskDetail', params: { id: taskId } })
+}
+const taskBorderClass = (task) => {
+  if (task.is_overdue) {
+    return 'border-l-4 border-l-red-500 bg-red-50/50 dark:bg-red-900/10'
+  }
+  if (task.priority === 'Élevée') {
+    return 'border-l-4 border-l-orange-500 bg-orange-50/50 dark:bg-orange-900/10'
+  }
+  return ''
+}
+const priorityClass = (task) => {
+  const classes = {
+    'Élevée': 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+    'Moyenne': 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
+    'Faible': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+  }
+  return classes[task.priority] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+}
+const statusClass = (task) => {
+  const classes = {
+    'Terminé': 'text-green-600 dark:text-green-400',
+    'En cours': 'text-blue-600 dark:text-blue-400',
+    'À faire': 'text-gray-600 dark:text-gray-400'
+  }
+  return classes[task.status] || 'text-gray-600 dark:text-gray-400'
+}
+ 
+const memberName = (member) => {
+  return `${member.prenom} ${member.nom}`.trim()
+}
+
+const memberInitials = (member) => {
+  return `${member?.prenom?.[0] ?? ''}${member?.nom?.[0] ?? ''}`.toUpperCase() || 'U'
+}
+
+// Gestion des charts
+const monthlyChart = ref(null)
+let monthlyChartInstance = null
 const createCharts = () => {
-  // Destroy existing charts
   if (monthlyChartInstance) monthlyChartInstance.destroy()
-  if (statusChartInstance) statusChartInstance.destroy()
-  if (priorityChartInstance) priorityChartInstance.destroy()
-  
-  // Get theme for chart colors
-  const isDark = document.documentElement.classList.contains('dark')
-  const textColor = isDark ? '#f9fafb' : '#111827'
-  const gridColor = isDark ? '#374151' : '#e5e7eb'
-  
-  // Monthly Progress Chart
-  if (monthlyChart.value) {
+  if (monthlyChart.value && dashboardData.value.monthly_progress?.length) {
+    const isDark = document.documentElement.classList.contains('dark')
+    const textColor = isDark ? '#d1d5db' : '#4b5563'
+    const gridColor = isDark ? '#374151' : '#e5e7eb'
+
+
     monthlyChartInstance = new Chart(monthlyChart.value, {
       type: 'line',
       data: {
@@ -394,16 +625,18 @@ const createCharts = () => {
           {
             label: 'Projets',
             data: dashboardData.value.monthly_progress.map(d => d.projets),
-            borderColor: brandColor,
-            backgroundColor: `${brandColor}20`,
+            borderColor: '#6366f1',
+            backgroundColor: '#6366f120',
+            borderWidth: 3,
             tension: 0.4,
             fill: true
           },
           {
             label: 'Tâches totales',
             data: dashboardData.value.monthly_progress.map(d => d.taches),
-            borderColor: accentColor,
-            backgroundColor: `${accentColor}20`,
+            borderColor: '#f59e0b',
+            backgroundColor: '#f59e0b20',
+            borderWidth: 3,
             tension: 0.4,
             fill: true
           },
@@ -412,6 +645,7 @@ const createCharts = () => {
             data: dashboardData.value.monthly_progress.map(d => d.completes),
             borderColor: '#10b981',
             backgroundColor: '#10b98120',
+            borderWidth: 3,
             tension: 0.4,
             fill: true
           }
@@ -422,182 +656,86 @@ const createCharts = () => {
         maintainAspectRatio: false,
         plugins: {
           legend: {
-            position: 'bottom',
-            labels: {
-              color: textColor,
-              usePointStyle: true
-            }
+            labels: { color: textColor }
           }
         },
         scales: {
-          x: {
-            grid: {
-              color: gridColor
-            },
-            ticks: {
-              color: textColor
-            }
-          },
-          y: {
-            grid: {
-              color: gridColor
-            },
-            ticks: {
-              color: textColor
-            }
-          }
-        }
-      }
-    })
-  }
-  
-  // Status Distribution Chart
-  if (statusChart.value) {
-    statusChartInstance = new Chart(statusChart.value, {
-      type: 'doughnut',
-      data: {
-        labels: dashboardData.value.status_distribution.map(d => d.name),
-        datasets: [{
-          data: dashboardData.value.status_distribution.map(d => d.value),
-          backgroundColor: [
-            brandColor,
-            accentColor,
-            '#10b981',
-            '#f59e0b',
-            '#ef4444'
-          ]
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false
-          }
-        }
-      }
-    })
-  }
-  
-  // Priority Distribution Chart
-  if (priorityChart.value) {
-    priorityChartInstance = new Chart(priorityChart.value, {
-      type: 'bar',
-      data: {
-        labels: dashboardData.value.priority_distribution.map(d => d.name),
-        datasets: [{
-          label: 'Tâches',
-          data: dashboardData.value.priority_distribution.map(d => d.value),
-          backgroundColor: [
-            brandColor,
-            accentColor,
-            '#10b981',
-            '#f59e0b'
-          ]
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false
-          }
-        },
-        scales: {
-          x: {
-            grid: {
-              color: gridColor
-            },
-            ticks: {
-              color: textColor
-            }
-          },
-          y: {
-            grid: {
-              color: gridColor
-            },
-            ticks: {
-              color: textColor
-            }
-          }
+          x: { grid: { color: gridColor }, ticks: { color: textColor } },
+          y: { grid: { color: gridColor }, ticks: { color: textColor } }
         }
       }
     })
   }
 }
-
-const getPriorityColor = (priority) => {
-  const colors = {
-    'Élevée': 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
-    'Moyenne': 'bg-accent-100 dark:bg-accent-900/30 text-accent-700 dark:text-accent-400',
-    'faible': 'bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-400'
-  }
-  return colors[priority] || 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-}
-
-const goToProject = (projectId) => {
-  router.push({ name: 'ProjectDetail', params: { id: projectId } })
-}
-
-const goToTask = (taskId) => {
-  router.push({ name: 'TaskDetail', params: { id: taskId } })
-}
-
-onMounted(() => {
+// Écoute des changements depuis la sidebar
+const handleWorkspaceChange = (event) => {
+  console.log('🔄 Dashboard: Workspace changé depuis sidebar', event.detail)
+  selectedWorkspace.value = event.detail.workspace.id
   loadDashboardData()
+}
+// Lifecycle
+let unsubscribeWorkspace = null
+onMounted(async () => {
+  console.log('🚀 Montage du Dashboard')
+  try {
+    // Charger les workspaces
+    await fetchWorkspaces()
+
+    // Si un workspace est sélectionné, charger ses membres
+    if (currentWorkspace.value) {
+      selectedWorkspace.value = currentWorkspace.value.id
+      await loadWorkspaceMembers()
+    }
+
+    // Charger les données du dashboard
+    await loadDashboardData()
+
+    // Écouter les changements de workspace
+    unsubscribeWorkspace = onWorkspaceChanged(handleWorkspaceChange)
+
+    console.log('✅ Dashboard initialisé')
+  } catch (error) {
+    console.error('❌ Erreur initialisation dashboard:', error)
+  }
+})
+onBeforeUnmount(() => {
+  if (unsubscribeWorkspace) {
+    unsubscribeWorkspace()
+  }
+  if (monthlyChartInstance) {
+    monthlyChartInstance.destroy()
+  }
 })
 </script>
-
 <style scoped>
-/* Custom styles for the gradient progress bars */
-.bg-brand-500 {
-  background-color: #4b71f9;
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
 }
 
-.bg-accent-500 {
-  background-color: #ecb73d;
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
-.text-brand-600 {
-  color: #4b71f9;
+.scrollbar-thin::-webkit-scrollbar {
+  height: 6px;
 }
 
-.text-accent-600 {
-  color: #ecb73d;
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-.border-brand-300 {
-  border-color: #93c5fd;
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
 }
 
-.border-brand-500 {
-  border-color: #4b71f9;
-}
-
-.hover\:text-brand-600:hover {
-  color: #4b71f9;
-}
-
-.hover\:text-brand-700:hover {
-  color: #3b56c7;
-}
-
-.hover\:bg-brand-700:hover {
-  background-color: #3b56c7;
-}
-
-/* Dark mode variants */
-.dark .text-brand-400 {
-  color: #7c9cff;
-}
-
-.dark .hover\:text-brand-300:hover {
-  color: #a3c4ff;
-}
-
-.dark .border-brand-500 {
-  border-color: #4b71f9;
+.dark .scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #4b5563;
 }
 </style>

@@ -84,9 +84,12 @@ return [
     |
     */
 
-    'thumbnail_width' => env('DOCUMENTS_THUMBNAIL_WIDTH', 300),
-    'thumbnail_height' => env('DOCUMENTS_THUMBNAIL_HEIGHT', 300),
-    'thumbnail_quality' => env('DOCUMENTS_THUMBNAIL_QUALITY', 85),
+    'thumbnails' => [
+        'enabled' => true,
+        'width' => 300,
+        'height' => 300,
+        'quality' => 80,
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -102,6 +105,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Storage Paths
+    |--------------------------------------------------------------------------
+    */
+    
+    'paths' => [
+        'workspaces' => 'workspaces',
+        'projets' => 'projets',
+        'activites' => 'activites',
+        'taches' => 'taches',
+        'resultats' => 'resultats',
+    ],
+    
+    /*
+    |--------------------------------------------------------------------------
     | Versioning
     |--------------------------------------------------------------------------
     |
@@ -109,8 +126,23 @@ return [
     |
     */
 
-    'versioning_enabled' => env('DOCUMENTS_VERSIONING', true),
-    'max_versions' => env('DOCUMENTS_MAX_VERSIONS', 10),
+    'versioning' => [
+        'enabled' => true,
+        'max_versions' => 10, // Nombre max de versions à conserver
+        'auto_cleanup' => true, // Supprimer les anciennes versions automatiquement
+    ],
+
+     /*
+    |--------------------------------------------------------------------------
+    | Permissions
+    |--------------------------------------------------------------------------
+    */
+    
+    'permissions' => [
+        'default_expiry_days' => null, // null = pas d'expiration par défaut
+        'allow_share' => true,
+        'allow_public_share' => false,
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -145,8 +177,12 @@ return [
     |
     */
 
-    'default_visibility' => env('DOCUMENTS_DEFAULT_VISIBILITY', 'team'),
-
+    'default_visibility' => 'private',
+    'visibility_options' => [
+        'private' => 'Privé (propriétaire seulement)',
+        'team' => 'Équipe (membres de l\'entité)',
+        'public' => 'Public (tous les utilisateurs du workspace)',
+    ],
     /*
     |--------------------------------------------------------------------------
     | Cloud Storage Configuration

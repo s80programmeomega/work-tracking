@@ -1,3 +1,4 @@
+resources\js\pages\workspaces\Index.vue
 <template>
   <AdminLayout>
     <PageBreadcrumb :pageTitle="'Mes Workspaces'" />

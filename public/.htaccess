@@ -19,3 +19,54 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# <IfModule mod_rewrite.c>
+#     <IfModule mod_negotiation.c>
+#         Options -MultiViews -Indexes
+#     </IfModule>
+
+#     RewriteEngine On
+
+#     # ========================================
+#     # BLOQUER ACCÈS DIRECT AU DOSSIER /build/
+#     # ========================================
+#     RewriteRule ^build/?$ - [F,L]
+#     RewriteRule ^build/index\.html$ - [F,L]
+
+#     # ========================================
+#     # AUTORISER LES ASSETS STATIQUES
+#     # ========================================
+#     RewriteCond %{REQUEST_URI} \.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map)$ [NC]
+#     RewriteRule ^ - [L]
+
+#     # Handle Authorization Header
+#     RewriteCond %{HTTP:Authorization} .
+#     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+#     # Redirect Trailing Slashes
+#     RewriteCond %{REQUEST_FILENAME} !-d
+#     RewriteCond %{REQUEST_URI} (.+)/$
+#     RewriteRule ^ %1 [L,R=301]
+
+#     # ========================================
+#     # VUE ROUTER: Tout vers index.php
+#     # ========================================
+#     RewriteCond %{REQUEST_FILENAME} !-d
+#     RewriteCond %{REQUEST_FILENAME} !-f
+#     RewriteRule ^ index.php [L]
+# </IfModule>
+
+# # Cache headers pour performance
+# <IfModule mod_headers.c>
+#     # Cache agressif pour les assets hashés
+#     <FilesMatch "\.(css|js|jpg|jpeg|png|gif|ico|svg|woff|woff2|ttf|eot)$">
+#         Header set Cache-Control "max-age=31536000, public, immutable"
+#     </FilesMatch>
+    
+#     # Pas de cache pour HTML
+#     <FilesMatch "\.(html|htm)$">
+#         Header set Cache-Control "no-cache, no-store, must-revalidate"
+#         Header set Pragma "no-cache"
+#         Header set Expires 0
+#     </FilesMatch>
+# </IfModule>

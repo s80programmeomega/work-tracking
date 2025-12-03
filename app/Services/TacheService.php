@@ -661,13 +661,9 @@ class TacheService
             ? round(($stats['completed'] / $stats['total']) * 100, 2)
             : 0;
 
-        $stats['validation_rate'] = $stats['completed'] > 0
-            ? round(($stats['validated_n2'] / $stats['completed']) * 100, 2)
-            : 0;
+        $stats['validation_rate'] = $stats['completed'] > 0 ? round(($stats['validated_n2'] / $stats['completed']) * 100, 2) : 0;
 
-        $stats['time_variance'] = $stats['estimated_hours'] > 0
-            ? round((($stats['actual_hours'] - $stats['estimated_hours']) / $stats['estimated_hours']) * 100, 2)
-            : 0;
+        $stats['time_variance'] = $stats['estimated_hours'] > 0 ? round((($stats['actual_hours'] - $stats['estimated_hours']) / $stats['estimated_hours']) * 100, 2) : 0;
 
         // Grouper par activité
         $tachesByActivite = $taches->groupBy('activite_id')->map(function ($groupedTaches) {

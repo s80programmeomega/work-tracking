@@ -7,6 +7,52 @@ export function useNotifications() {
     const loading = ref(false);
     const error = ref(null);
 
+    const showNotification = (message, type = 'info', duration = 5000) => {
+        const id = Date.now()
+        const notification = {
+            id,
+            message,
+            type,
+            duration
+        }
+
+        notifications.value.push(notification)
+
+        // Auto remove after duration
+        setTimeout(() => {
+            removeNotification(id)
+        }, duration)
+
+        return id
+    }
+
+    const showSuccess = (message, duration = 5000) => {
+        return showNotification(message, 'success', duration)
+    }
+
+    const showError = (message, duration = 5000) => {
+        return showNotification(message, 'error', duration)
+    }
+
+    const showWarning = (message, duration = 5000) => {
+        return showNotification(message, 'warning', duration)
+    }
+
+    const showInfo = (message, duration = 5000) => {
+        return showNotification(message, 'info', duration)
+    }
+
+    const removeNotification = (id) => {
+        const index = notifications.value.findIndex(n => n.id === id)
+        if (index !== -1) {
+            notifications.value.splice(index, 1)
+        }
+    }
+
+    const clearAll = () => {
+        notifications.value = []
+    }
+
     /**
      * Fetch unread notifications
      */
@@ -233,5 +279,14 @@ export function useNotifications() {
         fetchStatistics,
         getNotificationIcon,
         getNotificationColor,
+
+        showNotification,
+        showSuccess,
+        showError,
+        showWarning,
+        showInfo,
+        removeNotification,
+        clearAll
+
     };
 }

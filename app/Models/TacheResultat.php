@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TacheStatut;
 use App\Notifications\ResultatEnAttenteN2Notification;
 use App\Notifications\ResultatRejeteNotification;
 use App\Notifications\ResultatSoumisNotification;
@@ -10,8 +11,10 @@ use App\Notifications\ResultatValideN2Notification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Log;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
@@ -20,7 +23,7 @@ class TacheResultat extends Model
     use HasFactory, SoftDeletes, LogsActivity;
 
     protected $fillable = [
-         'tache_id',
+        'tache_id',
         'user_id',
         'is_individual',
         'resultats_attendus',
@@ -58,16 +61,6 @@ class TacheResultat extends Model
         'validation_status',
     ];
 
-    /**
-     * Activity logging configuration
-     */
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logOnly(['resultats_obtenus', 'taux_realisation', 'valide_par_n1', 'valide_par_n2'])
-            ->logOnlyDirty()
-            ->dontSubmitEmptyLogs();
-    }
 
     /**
      * Relationships
@@ -109,36 +102,54 @@ class TacheResultat extends Model
         if ($this->tache->validation_n1_required && $this->tache->validation_n2_required) {
             return $this->valide_par_n1 && $this->valide_par_n2;
         }
-        
+
         // Si seulement N1 requise
         if ($this->tache->validation_n1_required) {
             return $this->valide_par_n1;
         }
-        
+
         // Si seulement N2 requise (rare)
         if ($this->tache->validation_n2_required) {
             return $this->valide_par_n2;
         }
-        
+
         // Aucune validation requise
         return true;
     }
 
     public function getValidationStatusAttribute(): string
     {
-         if ($this->is_fully_validated) {
+        if (!$this->soumis_le) {
+            return 'not_submitted';
+        }
+
+        if ($this->rejete_le) {
+            return 'rejected';
+        }
+
+        if ($this->tache->validation_n2_required) {
+            if (!$this->valide_par_n1) {
+                return 'pending_n1';
+            }
+            if (!$this->valide_par_n2) {
+                return 'pending_n2';
+            }
             return 'fully_validated';
         }
-        
-        if ($this->valide_par_n1) {
-            return 'validated_n1';
+
+        if ($this->tache->validation_n1_required) {
+            if (!$this->valide_par_n1) {
+                return 'pending_n1';
+            }
+            return 'fully_validated';
         }
-        
-        if ($this->soumis_le) {
-            return 'submitted';
-        }
-        
-        return 'draft';
+
+        return 'submitted';
+    }
+
+    public function getCanBeEditedAttribute(): bool
+    {
+        return !$this->is_fully_validated && !$this->rejete_le;
     }
 
     /**
@@ -164,10 +175,21 @@ class TacheResultat extends Model
 
     public function scopeFullyValidated($query)
     {
-        return $query->where('valide_par_n1', true)
-            ->where('valide_par_n2', true);
+        return $query->where(function ($q) {
+            $q->where('valide_par_n2', true)
+                ->orWhere(function ($sq) {
+                    $sq->where('valide_par_n1', true)
+                        ->whereHas('tache', function ($tq) {
+                            $tq->where('validation_n2_required', false);
+                        });
+                });
+        });
     }
 
+    // public function scopeRejected($query)
+    // {
+    //     return $query->whereNotNull('rejete_le');
+    // }
     public function scopeForUser($query, int $userId)
     {
         return $query->where('user_id', $userId);
@@ -194,29 +216,36 @@ class TacheResultat extends Model
     {
         $startDate = $startDate ?? now()->startOfWeek();
         $endDate = $endDate ?? now()->endOfWeek();
-        
+
         return $query->whereBetween('soumis_le', [$startDate, $endDate]);
     }
 
     public function scopeRequiringValidationFrom($query, User $user)
     {
-        return $query->where(function ($q) use ($user) {
-            // N1 validations
-            $q->whereHas('tache.activite', function ($actQuery) use ($user) {
-                $actQuery->where('responsable_id', $user->id);
-            })->where('valide_par_n1', false)
-            
-            // Or N2 validations
-            ->orWhere(function ($subQ) use ($user) {
-                $subQ->whereHas('tache.activite.projet', function ($projQuery) use ($user) {
-                    $projQuery->where('responsable_id', $user->id);
+        return $query->submitted()
+            ->where(function ($q) use ($user) {
+                // N1
+                $q->where(function ($n1) use ($user) {
+                    $n1->where('valide_par_n1', false)
+                        ->whereHas('tache.activite', function ($aq) use ($user) {
+                            $aq->where('responsable_id', $user->id)
+                                ->orWhereHas('membres', function ($mq) use ($user) {
+                                    $mq->where('user_id', $user->id)
+                                        ->where('can_validate_results', true);
+                                });
+                        });
                 })
-                ->where('valide_par_n1', true)
-                ->where('valide_par_n2', false);
+                    // N2
+                    ->orWhere(function ($n2) use ($user) {
+                    $n2->where('valide_par_n1', true)
+                        ->where('valide_par_n2', false)
+                        ->whereHas('tache.activite.projet', function ($pq) use ($user) {
+                            $pq->where('responsable_id', $user->id);
+                        });
+                });
             });
-        })
-        ->whereNotNull('soumis_le');
     }
+
 
     /**
      * Validation Methods
@@ -226,12 +255,12 @@ class TacheResultat extends Model
         $this->update([
             'soumis_le' => now(),
         ]);
-        
+
         // Notifier les validateurs
         $this->notifyValidators();
     }
 
-    public function validateByN1(User $validator, string $commentaire = null): void
+    public function validateByN1(User $validator, ?string $commentaire = null): void
     {
         $this->update([
             'valide_par_n1' => true,
@@ -239,11 +268,11 @@ class TacheResultat extends Model
             'valide_le_n1' => now(),
             'commentaire_n1' => $commentaire,
         ]);
-       
-         // Notifier l'auteur
+
+        // Notifier l'auteur
         $this->user->notify(new ResultatValideN1Notification($this, $validator, $commentaire));
-        
-        // Si N2 requis, notifier le validateur N2
+
+        // Si N2 requis, notifier le responsable projet
         if ($this->tache->validation_n2_required) {
             $responsableN2 = $this->tache->activite->projet->responsable;
             if ($responsableN2) {
@@ -252,34 +281,87 @@ class TacheResultat extends Model
         }
     }
 
-public function validateByN2(User $validator, string $commentaire ): void
+    public function validateByN2(User $validator, ?string $commentaire = null): void
     {
         if (!$this->valide_par_n1) {
             throw new \Exception('Le résultat doit d\'abord être validé par le N1');
         }
-        
+
         $this->update([
             'valide_par_n2' => true,
             'validateur_n2_id' => $validator->id,
             'valide_le_n2' => now(),
             'commentaire_n2' => $commentaire,
         ]);
-        
-        // ✅ Mettre à jour le statut individuel de l'assigné si nécessaire
+
+        // Mettre à jour le statut individuel
         if ($this->is_individual) {
             $this->tache->assignees()->updateExistingPivot($this->user_id, [
                 'statut_individuel' => 'termine',
                 'completed_at' => now(),
                 'progression_individuelle' => 100,
             ]);
-            
-            // Recalculer le statut global
-            $this->tache->recalculateGlobalStatus();
+
+            $this->recalculateGlobalStatus();
         }
-        
+
         // Notifier l'auteur
         $this->user->notify(new ResultatValideN2Notification($this, $validator, $commentaire));
     }
+
+
+    /**
+     * ✅ NOUVEAU : Recalculer le statut global de la tâche
+     */
+    protected function recalculateGlobalStatus(): void
+    {
+        $tache = $this->tache; // récupérer la tâche liée
+
+        if (!$tache)
+            return;
+
+        // Recharger les assignés avec les pivots
+        $assignees = $tache->assignees()
+            ->withPivot('statut_individuel', 'progression_individuelle')
+            ->get();
+
+        if ($assignees->isEmpty())
+            return;
+
+        $countTermine = $assignees->where('pivot.statut_individuel', 'termine')->count();
+        $countEnCours = $assignees->where('pivot.statut_individuel', 'en_cours')->count();
+        $total = $assignees->count();
+
+        // Déterminer le statut global
+        if ($countTermine === $total) {
+            $newStatut = TacheStatut::TERMINE;
+        } elseif ($countEnCours > 0 || $countTermine > 0) {
+            $newStatut = TacheStatut::EN_COURS;
+        } else {
+            $newStatut = TacheStatut::A_FAIRE;
+        }
+
+        // Calcul de la progression globale
+        $progressionMoyenne = $assignees->avg('pivot.progression_individuelle') ?? 0;
+
+        // Mettre à jour la tâche
+        if ($tache->statut !== $newStatut || $tache->taux_realisation !== round($progressionMoyenne)) {
+            $tache->update([
+                'statut' => $newStatut,
+                'taux_realisation' => round($progressionMoyenne),
+            ]);
+
+            Log::info('Statut global recalculé', [
+                'tache_id' => $tache->id,
+                'nouveau_statut_global' => $newStatut->value,
+                'progression_moyenne' => round($progressionMoyenne),
+                'termine' => $countTermine,
+                'en_cours' => $countEnCours,
+                'total' => $total,
+            ]);
+        }
+    }
+
 
     public function reject(User $validator, string $commentaire, string $level = 'n1'): void
     {
@@ -298,14 +380,31 @@ public function validateByN2(User $validator, string $commentaire ): void
                 'commentaire_n2' => $commentaire,
             ]);
         }
-        
-        // Notifier l'auteur du rejet
+
+        // Remettre le statut individuel à "a_faire"
+        $this->tache->updateStatutForUser($this->user, 'a_faire', 0);
+
+        // Notifier l'auteur
         $this->user->notify(new ResultatRejeteNotification($this, $validator, $commentaire, $level));
     }
 
     /**
-     * ✅ NOUVEAU : Notifier les validateurs
+     * Réinitialiser après rejet (pour resoumission)
      */
+    public function resetAfterRejection(): void
+    {
+        $this->update([
+            'soumis_le' => null,
+            'rejete_par' => null,
+            'rejete_le' => null,
+            'motif_rejet' => null,
+            'niveau_rejet' => null,
+        ]);
+    }
+
+
+    // ==================== HELPER METHODS ====================
+
     protected function notifyValidators(): void
     {
         // Notifier responsable N1 (activité)
@@ -313,7 +412,7 @@ public function validateByN2(User $validator, string $commentaire ): void
         if ($responsableN1 && $responsableN1->id !== $this->user_id) {
             $responsableN1->notify(new ResultatSoumisNotification($this));
         }
-        
+
         // Si pas de N1 requis, notifier directement N2
         if (!$this->tache->validation_n1_required && $this->tache->validation_n2_required) {
             $responsableN2 = $this->tache->activite->projet->responsable;
@@ -323,35 +422,92 @@ public function validateByN2(User $validator, string $commentaire ): void
         }
     }
 
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['resultats_obtenus', 'taux_realisation', 'valide_par_n1', 'valide_par_n2'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
+    }
+
+    // ==================== PERMISSION METHODS (STRICT) ====================
+
     /**
-     * Check if user can validate this result
+     * ✅ STRICT : Uniquement le responsable de l'activité
      */
     public function canBeValidatedByN1(User $user): bool
     {
-        $activite = $this->tache->activite;
-        
-        // Responsable activité
-        if ($activite->responsable_id === $user->id) {
-            return true;
+        // Doit être soumis
+        if (!$this->soumis_le) {
+            return false;
         }
-        
-        // Membre avec permission validation
-        $membre = $activite->membres()->where('user_id', $user->id)->first();
-        if ($membre && $membre->pivot->can_validate_results) {
-            return true;
+
+        // Pas déjà validé
+        if ($this->valide_par_n1) {
+            return false;
         }
-        
-        return false;
+
+        // Pas son propre résultat
+        if ($this->user_id === $user->id) {
+            return false;
+        }
+
+        // ⚠️ STRICT : Uniquement responsable de l'activité
+        return $this->tache->activite &&
+            $this->tache->activite->responsable_id === $user->id;
     }
 
-   public function canBeValidatedByN2(User $user): bool
+    /**
+     * ✅ STRICT : Uniquement le responsable du projet
+     */
+    public function canBeValidatedByN2(User $user): bool
     {
+        // N1 doit être validé
         if (!$this->valide_par_n1) {
             return false;
         }
-        
-        $projet = $this->tache->activite->projet;
-        return $projet && $projet->responsable_id === $user->id;
+
+        // Pas déjà validé
+        if ($this->valide_par_n2) {
+            return false;
+        }
+
+        // Pas son propre résultat
+        if ($this->user_id === $user->id) {
+            return false;
+        }
+
+        // ⚠️ STRICT : Uniquement responsable du projet
+        return $this->tache->activite &&
+            $this->tache->activite->projet &&
+            $this->tache->activite->projet->responsable_id === $user->id;
+    }
+
+    /**
+     * 👁️ Peut consulter ce résultat
+     */
+    public function canBeViewedBy(User $user): bool
+    {
+        // C'est son résultat
+        if ($this->user_id === $user->id) {
+            return true;
+        }
+
+        // Responsable de l'activité
+        if ($this->tache->activite && $this->tache->activite->responsable_id === $user->id) {
+            return true;
+        }
+
+        // Responsable du projet
+        if (
+            $this->tache->activite &&
+            $this->tache->activite->projet &&
+            $this->tache->activite->projet->responsable_id === $user->id
+        ) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -370,7 +526,7 @@ public function validateByN2(User $validator, string $commentaire ): void
         return $this->tache->activite->projet->responsable;
     }
 
-     /**
+    /**
      * ✅ NOUVEAU : Vérifier si c'est le résultat de l'utilisateur
      */
     public function belongsToUser(User $user): bool
@@ -417,4 +573,6 @@ public function validateByN2(User $validator, string $commentaire ): void
             ],
         ];
     }
+
+
 }

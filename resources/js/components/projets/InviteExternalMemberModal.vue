@@ -166,10 +166,11 @@
               <select
                 v-model="form.role"
                 required
+                @change="handleRoleChange"
                 class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               >
                 <option value="">Sélectionner un rôle</option>
-                <option value="admin">Administrateur - Tous les droits sauf suppression</option>
+                <option value="admin">Administrateur - Tous les droits</option>
                 <option value="member">Membre - Peut voir et éditer le projet</option>
                 <option value="viewer">Observateur - Lecture seule</option>
               </select>
@@ -184,6 +185,7 @@
                 <div class="flex items-start gap-3">
                   <input
                     v-model="form.can_edit"
+                    :disabled="form.role === 'viewer'"
                     type="checkbox"
                     id="inv_can_edit"
                     class="mt-1 w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-brand-500"
@@ -193,7 +195,7 @@
                       Peut modifier le projet
                     </label>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      Permet de modifier les informations du projet, créer des activités et tâches
+                      Permet de modifier les informations du projet
                     </p>
                   </div>
                 </div>
@@ -201,16 +203,17 @@
                 <div class="flex items-start gap-3">
                   <input
                     v-model="form.can_delete"
+                    :disabled="form.role === 'member' || form.role === 'viewer'"
                     type="checkbox"
                     id="inv_can_delete"
                     class="mt-1 w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-brand-500"
                   />
                   <div>
                     <label for="inv_can_delete" class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Peut supprimer
+                      Peut supprimer le projet
                     </label>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      Permet de supprimer des activités, tâches et documents
+                      Permet de supprimer un projet
                     </p>
                   </div>
                 </div>
@@ -218,6 +221,7 @@
                 <div class="flex items-start gap-3">
                   <input
                     v-model="form.can_invite"
+                    :disabled="form.role === 'member' || form.role === 'viewer'"
                     type="checkbox"
                     id="inv_can_invite"
                     class="mt-1 w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-brand-500"
@@ -227,10 +231,35 @@
                       Peut inviter des membres
                     </label>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      Permet d'ajouter ou retirer des membres du projet
+                      Permet d'ajouter des membres au projet
                     </p>
                   </div>
                 </div>
+
+                <div class="flex items-start gap-3">
+                  <input
+                    v-model="form.can_delete_member"
+                    :disabled="form.role === 'member' || form.role === 'viewer'"
+                    type="checkbox"
+                    id="can_delete_member"
+                    class="mt-1 w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-brand-500 dark:focus:ring-brand-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                  />
+                  <div>
+                    <label for="can_delete_member" class="text-sm font-medium text-orange-700 dark:text-orange-300">
+                      Peut supprimer des membres
+                    </label>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Permet de retirer des membres du projet
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Avertissement pour le rôle membre -->
+              <div v-if="form.role === 'member'" class="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                <p class="text-xs text-yellow-800 dark:text-yellow-300">
+                  ⚠️ Les membres ne peuvent pas avoir les permissions de suppression ou d'invitation
+                </p>
               </div>
             </div>
 
@@ -335,6 +364,7 @@ const form = ref({
   can_edit: false,
   can_delete: false,
   can_invite: false,
+  can_delete_member: false,
   message: ''
 })
 
@@ -387,20 +417,38 @@ const removeEmail = (index) => {
   emailsInput.value = emails.join(', ')
 }
 
-// Auto-set permissions based on role
-watch(() => form.value.role, (newRole) => {
-  if (newRole === 'admin') {
+// ✅ Gestion intelligente des permissions basées sur le rôle
+const handleRoleChange = () => {
+  const role = form.value.role
+  
+  if (role === 'admin') {
+    // Admin a toutes les permissions
     form.value.can_edit = true
     form.value.can_delete = true
     form.value.can_invite = true
-  } else if (newRole === 'member') {
+    form.value.can_delete_member = true
+  } else if (role === 'member') {
+    // Membre peut seulement éditer
     form.value.can_edit = true
     form.value.can_delete = false
     form.value.can_invite = false
-  } else if (newRole === 'viewer') {
+    form.value.can_delete_member = false
+  } else if (role === 'viewer') {
+    // Viewer n'a aucune permission
     form.value.can_edit = false
     form.value.can_delete = false
     form.value.can_invite = false
+    form.value.can_delete_member = false
+  }
+}
+
+// ✅ Empêcher la modification manuelle des permissions pour les rôles restreints
+watch(() => form.value.role, (newRole) => {
+  if (newRole === 'member' || newRole === 'viewer') {
+    // Forcer les valeurs correctes si l'utilisateur essaie de les modifier manuellement
+    if (form.value.can_delete) form.value.can_delete = false
+    if (form.value.can_invite) form.value.can_invite = false
+    if (form.value.can_delete_member) form.value.can_delete_member = false
   }
 })
 
@@ -415,15 +463,24 @@ const handleSubmit = async () => {
       return
     }
 
+    // ✅ Validation des permissions selon le rôle
+    if (form.value.role === 'member' && (form.value.can_delete || form.value.can_invite || form.value.can_delete_member)) {
+      error.value = 'Les membres ne peuvent pas avoir les permissions de suppression ou d\'invitation'
+      return
+    }
+
+    if (form.value.role === 'viewer' && (form.value.can_edit || form.value.can_delete || form.value.can_invite || form.value.can_delete_member)) {
+      error.value = 'Les observateurs ne peuvent avoir aucune permission'
+      return
+    }
+
     let emails = []
 
     if (activeTab.value === 'workspace') {
-      // Récupérer les emails des membres sélectionnés
       emails = workspaceMembers.value
         .filter(m => selectedMembers.value.includes(m.id))
         .map(m => m.email)
     } else {
-      // Utiliser les emails saisis
       emails = parsedEmails.value
     }
 
@@ -438,6 +495,7 @@ const handleSubmit = async () => {
       can_edit: form.value.can_edit,
       can_delete: form.value.can_delete,
       can_invite: form.value.can_invite,
+      can_delete_member: form.value.can_delete_member,
       message: form.value.message,
       send_email: true
     })
@@ -465,7 +523,6 @@ onMounted(async () => {
     
     const projetResponse = await api.get(`/projets/${props.projetId}`)
     const workspaceId = projetResponse.data.data.workspace_id
-    console.log(projetResponse);
     
     if (workspaceId) {
       const allMembers = await fetchMembers(workspaceId)
@@ -480,5 +537,4 @@ onMounted(async () => {
     loadingMembers.value = false
   }
 })
-
 </script>

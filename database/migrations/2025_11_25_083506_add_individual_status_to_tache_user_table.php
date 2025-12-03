@@ -36,7 +36,7 @@ return new class extends Migration {
                     ->comment('Date de début de travail sur la tâche');
             }
 
-           if (!Schema::hasColumn('tache_user', 'completed_at')) {
+            if (!Schema::hasColumn('tache_user', 'completed_at')) {
                 $table->timestamp('completed_at')
                     ->nullable()
                     ->after('started_at')
@@ -52,7 +52,7 @@ return new class extends Migration {
             }
         });
 
-        
+
         // ✅ Initialiser les statuts individuels existants avec le statut global
         DB::statement("
             UPDATE tache_user tu
@@ -75,13 +75,15 @@ return new class extends Migration {
 
             // ✅ Ajouter index unique pour éviter les doublons
             // Un utilisateur = un résultat par tâche
-            $table->unique(['tache_id', 'user_id'], 'unique_tache_user_resultat');
+            // $table->unique(['tache_id', 'user_id'], 'unique_tache_user_resultat');
 
             // ✅ Ajouter flag pour différencier résultat global vs individuel
-            $table->boolean('is_individual')
-                ->default(true)
-                ->after('user_id')
-                ->comment('true = résultat individuel, false = résultat global de la tâche');
+            if (!Schema::hasColumn('tache_resultats', 'is_individual')) {
+                $table->boolean('is_individual')
+                    ->default(true)
+                    ->comment("true = résultat individuel, false = résultat global de la tâche")
+                    ->after('user_id');
+            }
         });
     }
 
@@ -90,7 +92,7 @@ return new class extends Migration {
      */
     public function down(): void
     {
-       Schema::table('tache_user', function (Blueprint $table) {
+        Schema::table('tache_user', function (Blueprint $table) {
             $table->dropColumn([
                 'statut_individuel',
                 'progression_individuelle',

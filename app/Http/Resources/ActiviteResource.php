@@ -39,6 +39,8 @@ class ActiviteResource extends JsonResource
                         'email' => $membre->email,
                         'role' => $membre->pivot->role,
                         'permissions' => [
+                            'can_edit_activity' => (bool) $membre->pivot->can_edit_activity,
+                            'can_delete_activity' => (bool) $membre->pivot->can_delete_activity,
                             'can_create_tasks' => (bool) $membre->pivot->can_create_tasks,
                             'can_edit_tasks' => (bool) $membre->pivot->can_edit_tasks,
                             'can_delete_tasks' => (bool) $membre->pivot->can_delete_tasks,
@@ -62,8 +64,8 @@ class ActiviteResource extends JsonResource
                 // Super admin a tous les droits
                 if ($user->isSuperAdmin()) {
                     return [
-                        'can_edit' => true,
-                        'can_delete' => true,
+                        'can_edit_activity' => true,
+                        'can_delete_activity' => true,
                         'can_manage_members' => true,
                         'can_create_tasks' => true,
                         'can_edit_tasks' => true,
@@ -76,8 +78,8 @@ class ActiviteResource extends JsonResource
                 // Responsable de l'activité
                 if ($this->responsable_id === $user->id) {
                     return [
-                        'can_edit' => true,
-                        'can_delete' => true,
+                        'can_edit_activity' => true,
+                        'can_delete_activity' => true,
                         'can_manage_members' => true,
                         'can_create_tasks' => true,
                         'can_edit_tasks' => true,
@@ -90,8 +92,8 @@ class ActiviteResource extends JsonResource
                 // Admin du projet
                 if ($this->projet && $this->projet->responsable_id === $user->id) {
                     return [
-                        'can_edit' => true,
-                        'can_delete' => true,
+                        'can_edit_activity' => true,
+                        'can_delete_activity' => true,
                         'can_manage_members' => true,
                         'can_create_tasks' => true,
                         'can_edit_tasks' => true,
@@ -105,8 +107,8 @@ class ActiviteResource extends JsonResource
                 $membre = $this->membres->firstWhere('id', $user->id);
                 if ($membre) {
                     return [
-                        'can_edit' => (bool) $membre->pivot->can_edit_tasks,
-                        'can_delete' => false,
+                        'can_edit_activity' => (bool) $membre->pivot->can_edit_activity,
+                        'can_delete_activity' => false,
                         'can_manage_members' => (bool) $membre->pivot->can_assign_users,
                         'can_create_tasks' => (bool) $membre->pivot->can_create_tasks,
                         'can_edit_tasks' => (bool) $membre->pivot->can_edit_tasks,
@@ -118,8 +120,8 @@ class ActiviteResource extends JsonResource
                 
                 // Aucun accès
                 return [
-                    'can_edit' => false,
-                    'can_delete' => false,
+                    'can_edit_activity' => false,
+                    'can_delete_activity' => false,
                     'can_manage_members' => false,
                     'can_create_tasks' => false,
                     'can_edit_tasks' => false,

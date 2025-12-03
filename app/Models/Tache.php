@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Spatie\Activitylog\LogOptions;
 
 class Tache extends Model
@@ -133,6 +134,48 @@ class Tache extends Model
         return $code;
     }
 
+    public function documents()
+    {
+        return $this->morphMany(Document::class, 'documentable');
+    }
+
+    /**
+     * ✅ CORRECTION : Méthode pour vérifier si une tâche est en retard
+     */
+    public function isOverdue(): bool
+    {
+        // Si pas de date d'échéance ou tâche terminée, pas en retard
+        if (!$this->echeance || $this->statut === TacheStatut::TERMINE) {
+            return false;
+        }
+
+        // Vérifier si la date d'échéance est dépassée
+        return $this->echeance->isPast();
+    }
+
+    /**
+     * ✅ NOUVELLE : Scope pour les tâches en retard
+     */
+    public function scopeOverdue($query)
+    {
+        return $query->where('echeance', '<', now())
+            ->where('statut', '!=', TacheStatut::TERMINE->value)
+            ->where(function ($q) {
+                $q->whereNull('date_fin_reelle')
+                    ->orWhere('date_fin_reelle', '>', $this->echeance);
+            });
+    }
+
+    /**
+     * ✅ NOUVELLE : Scope pour les tâches urgentes (échéance dans 7 jours)
+     */
+    public function scopeUrgent($query)
+    {
+        return $query->where('echeance', '<=', now()->addDays(7))
+            ->where('echeance', '>=', now())
+            ->where('statut', '!=', TacheStatut::TERMINE->value)
+            ->whereIn('priorite', [TachePriorite::ELEVEE, TachePriorite::MOYENNE]);
+    }
     /**
      * Fichiers attachés
      */
@@ -340,7 +383,7 @@ class Tache extends Model
         $this->recalculateGlobalStatus();
 
         // Log de l'action
-        \Log::info('Statut individuel mis à jour', [
+        Log::info('Statut individuel mis à jour', [
             'tache_id' => $this->id,
             'user_id' => $user->id,
             'nouveau_statut' => $newStatut,
@@ -391,7 +434,7 @@ class Tache extends Model
                 'taux_realisation' => round($progressionMoyenne),
             ]);
 
-            \Log::info('Statut global recalculé', [
+            Log::info('Statut global recalculé', [
                 'tache_id' => $this->id,
                 'nouveau_statut_global' => $newStatut->value,
                 'progression_moyenne' => round($progressionMoyenne),
@@ -548,13 +591,13 @@ class Tache extends Model
         }
 
         // Vérifier que l'utilisateur a terminé sa partie
-        $statutUser = $this->getStatutForUser($user);
-        if ($statutUser !== 'termine') {
-            throw new \Exception('Vous devez d\'abord terminer votre partie de la tâche');
-        }
+        // $statutUser = $this->getStatutForUser($user);
+        // if ($statutUser !== 'termine') {
+        //     throw new \Exception('Vous devez d\'abord terminer votre partie de la tâche');
+        // }
 
         // Créer ou mettre à jour le résultat
-        return TacheResultat::updateOrCreate(
+        $resultat = TacheResultat::updateOrCreate(
             [
                 'tache_id' => $this->id,
                 'user_id' => $user->id,
@@ -564,6 +607,9 @@ class Tache extends Model
                 'soumis_le' => now(),
             ])
         );
+        $resultat->notifyValidators();
+
+        return $resultat;
     }
 
     /**
@@ -933,11 +979,6 @@ class Tache extends Model
 
     // ==================== SCOPES ====================
 
-    public function scopeForWeek($query, int $weekNumber, int $year)
-    {
-        return $query->where('week_number', $weekNumber)
-            ->where('year', $year);
-    }
 
     public function scopeForActivite($query, int $activiteId)
     {
@@ -959,11 +1000,11 @@ class Tache extends Model
             ->whereNull('validated_n2_at');
     }
 
-    public function scopeOverdue($query)
-    {
-        return $query->where('echeance', '<', now())
-            ->where('statut', '!=', TacheStatut::TERMINE->value);
-    }
+    // public function scopeOverdue($query)
+    // {
+    //     return $query->where('echeance', '<', now())
+    //         ->where('statut', '!=', TacheStatut::TERMINE->value);
+    // }
 
     public function scopeAssignedTo($query, int $userId)
     {
@@ -1124,6 +1165,146 @@ class Tache extends Model
 
         return true;
     }
+
+    /**
+     * ✅ Vérifie si la tâche doit être affichée sur la fiche d'évaluation
+     * 
+     * @param User $user
+     * @return bool
+     */
+    public function shouldShowOnEvaluation(User $user): bool
+    {
+        $monStatut = $this->getStatutForUser($user);
+
+        // Toujours afficher si en cours ou à faire
+        if (in_array($monStatut, ['en_cours', 'a_faire'])) {
+            return true;
+        }
+
+        // Si terminée, vérifier la validation
+        if ($monStatut === 'termine') {
+            $monResultat = $this->monResultat($user);
+
+            // Pas de résultat → afficher
+            if (!$monResultat || !$monResultat->soumis_le) {
+                return true;
+            }
+
+            // Vérifier si validation complète
+            return !$this->isValidationCompleteForUser($user);
+        }
+
+        return false;
+    }
+
+    /**
+     * ✅ Vérifie si la validation est complète pour un utilisateur
+     * 
+     * @param User $user
+     * @return bool
+     */
+    public function isValidationCompleteForUser(User $user): bool
+    {
+        $monResultat = $this->monResultat($user);
+
+        if (!$monResultat) {
+            return false;
+        }
+
+        // Si N2 requis → vérifier N1 ET N2
+        if ($this->validation_n2_required) {
+            return $monResultat->valide_par_n1 && $monResultat->valide_par_n2;
+        }
+
+        // Si seulement N1 requis → vérifier N1
+        return $monResultat->valide_par_n1;
+    }
+
+    /**
+     * ✅ Récupère le statut de validation pour l'affichage
+     * 
+     * @param User $user
+     * @return string
+     */
+    public function getValidationStatusForUser(User $user): string
+    {
+        $monResultat = $this->monResultat($user);
+
+        if (!$monResultat || !$monResultat->soumis_le) {
+            return 'not_submitted'; // Pas encore soumis
+        }
+
+        if ($this->validation_n2_required) {
+            if (!$monResultat->valide_par_n1) {
+                return 'pending_n1'; // En attente N1
+            }
+            if (!$monResultat->valide_par_n2) {
+                return 'pending_n2'; // En attente N2
+            }
+            return 'fully_validated'; // Complètement validé
+        } else {
+            if (!$monResultat->valide_par_n1) {
+                return 'pending_n1'; // En attente N1
+            }
+            return 'fully_validated'; // Complètement validé
+        }
+    }
+
+    /**
+     * ✅ Scope pour les tâches d'une semaine spécifique
+     * 
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param int $weekNumber
+     * @param int $year
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeForWeek($query, int $weekNumber, int $year)
+    {
+        return $query->where('week_number', $weekNumber)
+            ->where('year', $year);
+    }
+
+    /**
+     * ✅ Scope pour les tâches à afficher sur la fiche d'évaluation
+     * Filtre côté DB pour optimisation
+     * 
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param User $user
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeForEvaluation($query, User $user)
+    {
+        return $query->whereHas('assignees', function ($q) use ($user) {
+            $q->where('user_id', $user->id);
+        })
+            ->where(function ($q) use ($user) {
+                // Inclure les tâches en cours et à faire
+                $q->whereIn('statut', ['en_cours', 'a_faire'])
+                    // Ou les tâches terminées mais pas complètement validées
+                    ->orWhere(function ($subQ) use ($user) {
+                    $subQ->where('statut', 'termine')
+                        ->where(function ($validQ) use ($user) {
+                            // Sans résultat
+                            $validQ->whereDoesntHave('resultatsIndividuels', function ($resQ) use ($user) {
+                                $resQ->where('user_id', $user->id)
+                                    ->whereNotNull('soumis_le');
+                            })
+                                // Ou avec résultat non validé
+                                ->orWhereHas('resultatsIndividuels', function ($resQ) use ($user) {
+                                $resQ->where('user_id', $user->id)
+                                    ->where(function ($valQ) {
+                                        $valQ->where('valide_par_n1', false)
+                                            ->orWhere(function ($n2Q) {
+                                                $n2Q->whereColumn('taches.validation_n2_required', true)
+                                                    ->where('valide_par_n2', false);
+                                            });
+                                    });
+                            });
+                        });
+                });
+            });
+    }
+
 
 
 }

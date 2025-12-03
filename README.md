@@ -2,7 +2,7 @@
 
 ## 📋 Vue d'ensemble
 
-**Work Tracking** est une application web de suivi des travaux et projets avec une hiérarchie **Projet → Activité → Tâches**. L'objectif est de centraliser la gestion, faciliter la collaboration et permettre un suivi précis de l'avancement des activités.
+**Work Tracking** est une application web de suivi des travaux et projets avec une hiérarchie **workspace -> Projet → Activité → Tâches**. L'objectif est de centraliser la gestion, faciliter la collaboration et permettre un suivi précis de l'avancement des activités.
 
 ### Stack Technique
 - **Backend** : Laravel 10 + PostgreSQL/MySQL

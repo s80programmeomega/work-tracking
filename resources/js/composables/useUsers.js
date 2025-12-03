@@ -1,9 +1,12 @@
 import { computed } from 'vue'
 import { useUserStore } from '@/stores/userStore'
+import { useAuthStore } from '@/stores/authStore'
+
 import { storeToRefs } from 'pinia'
 
 export function useUsers() {
   const userStore = useUserStore()
+  const authStore = useAuthStore()
 
   const {
     users,
@@ -14,6 +17,81 @@ export function useUsers() {
     pagination,
     filters,
   } = storeToRefs(userStore)
+
+
+
+  const fetchProfile = async () => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response = await axios.get('/api/users/profile')
+      return response.data.data
+    } catch (err) {
+      error.value = err.response?.data?.message || 'Erreur lors du chargement du profil'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const updateProfile = async (data) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response = await axios.put('/api/users/profile', data, {
+        headers: {
+          'Content-Type': data instanceof FormData ? 'multipart/form-data' : 'application/json'
+        }
+      })
+
+      // Update auth store
+      if (response.data.data) {
+        authStore.setUser(response.data.data)
+      }
+
+      return response.data.data
+    } catch (err) {
+      error.value = err.response?.data?.message || 'Erreur lors de la mise à jour'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const changePassword = async (data) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response = await axios.post('/api/users/change-password', data)
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data?.message || 'Erreur lors du changement de mot de passe'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const exportProfileData = async () => {
+    try {
+      const response = await axios.get('/api/users/export', {
+        responseType: 'blob'
+      })
+
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `profile-export-${Date.now()}.json`)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+    } catch (err) {
+      throw new Error('Erreur lors de l\'export des données')
+    }
+  }
 
   return {
     // State
@@ -47,5 +125,10 @@ export function useUsers() {
 
     // Helper
     usersByRole: userStore.usersByRole,
+
+    fetchProfile,
+    updateProfile,
+    changePassword,
+    exportProfileData,
   }
 }

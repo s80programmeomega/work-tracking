@@ -213,6 +213,7 @@ const loadMembers = async () => {
 
 // Émettre des événements pour ouvrir les sous-modaux
 const editMember = (member) => {
+  console.log('Editing member:', member)
   emit('edit-member', member)
 }
 

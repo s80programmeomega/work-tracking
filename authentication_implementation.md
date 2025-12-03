@@ -1,7 +1,7 @@
 # Authentication Module - Complete Implementation Flow
 
 ## 🎯 Overview
-Complete authentication and authorization system using Laravel Fortify + Sanctum + Spatie Permissions with Vue.js 3 frontend.
+Complete authentication and authorization system using Laravel Fortify + Sanctum + with Vue.js 3 frontend.
 
 ---
 

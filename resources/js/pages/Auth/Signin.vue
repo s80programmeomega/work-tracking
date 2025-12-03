@@ -219,9 +219,15 @@
                         <div class="flex flex-col items-center max-w-xs text-center">
                             <!-- Nouveau logo -->
                             <div class="block mb-6">
-                                <img width="200" height="180" src="@images/logo/Logo-dark.jpg" alt="Uptiimun Work Tracking"
-                                    class="mx-auto rounded-lg" />
-                            </div>
+    <img
+        width="200"
+        height="180"
+        :src="LogoDark"
+        alt="Uptiimun Work Tracking"
+        class="mx-auto rounded-lg"
+    />
+</div>
+
 
                             <!-- Nom de l'application -->
                             <h2 class="mb-4 text-2xl font-bold text-white">
@@ -276,7 +282,11 @@ import CommonGridShape from "@/components/common/CommonGridShape.vue";
 import FullScreenLayout from "@/components/layout/FullScreenLayout.vue";
 import LanguageSwitcher from "@/components/common/LanguageSwitcher.vue";
 import { useAuthStore } from "@/stores/authStore";
+// import LogoDark from '@/assets/images/logo/Logo-dark.jpg'
+
+
 // Composables et stores
+const LogoDark = new URL('@/assets/images/logo/Logo-dark.jpg', import.meta.url).href
 const { t, locale } = useI18n();
 const router = useRouter();
 const authStore = useAuthStore();
