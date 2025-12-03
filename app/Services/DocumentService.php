@@ -2,158 +2,219 @@
 
 namespace App\Services;
 
+use App\Models\Activite;
 use App\Models\Document;
 use App\Models\DocumentDownload;
 use App\Models\DocumentPermission;
+use App\Models\Projet;
+use App\Models\Tache;
+use App\Models\TacheResultat;
 use App\Models\User;
+use App\Models\Workspace;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Intervention\Image\Facades\Image;
 
+/**
+ * Service de gestion des documents
+ * 
+ * Gère l'upload, le téléchargement, les versions et les permissions des documents
+ */
+
 class DocumentService
 {
+     protected DocumentAccessResolver $accessResolver;
+
+    public function __construct(DocumentAccessResolver $accessResolver)
+    {
+        $this->accessResolver = $accessResolver;
+    }
+
+     /**
+     * ===================================================================
+     * UPLOAD DE DOCUMENTS
+     * ===================================================================
+     */
+
     /**
-     * Upload a document
+     * Upload un document unique
      */
     public function upload(
         UploadedFile $file,
-        string $documentableType,
-        int $documentableId,
+        string $entityType,
+        int $entityId,
         User $user,
         array $options = []
     ): Document {
-        DB::beginTransaction();
+        // Vérifier que l'user peut uploader sur cette entité
+        if (!$this->accessResolver->canUpload($user, $entityType, $entityId)) {
+            throw new \Exception("Vous n'avez pas la permission d'uploader des documents ici");
+        }
 
-        try {
-            // Generate file hash for deduplication
+        // Vérifier l'entité
+        $entity = $this->getEntity($entityType, $entityId);
+        
+        if (!$entity) {
+            throw new \Exception("Entité non trouvée");
+        }
+
+        // Vérifier le workspace
+        $workspace = $this->getWorkspaceFromEntity($entity, $entityType);
+        
+        if (!$workspace) {
+            throw new \Exception("Workspace non trouvé");
+        }
+
+        // Vérifier les doublons si non autorisés
+        if (!($options['allow_duplicates'] ?? false)) {
             $hash = hash_file('sha256', $file->getRealPath());
+            
+            $existing = Document::where('documentable_type', $entityType)
+                ->where('documentable_id', $entityId)
+                ->where('hash_sha256', $hash)
+                ->first();
 
-            // Check if file already exists
-            $existingDocument = Document::where('hash_sha256', $hash)->first();
-
-            if ($existingDocument && ($options['allow_duplicates'] ?? false) === false) {
-                // Return existing document if deduplication is enabled
-                DB::commit();
-                return $existingDocument;
+            if ($existing) {
+                throw new \Exception("Ce fichier existe déjà");
             }
+        }
 
-            // Prepare file information
+        return DB::transaction(function () use ($file, $entityType, $entityId, $user, $options, $workspace) {
+            // Générer les noms de fichier
             $originalName = $file->getClientOriginalName();
             $extension = $file->getClientOriginalExtension();
-            $mimeType = $file->getMimeType();
-            $size = $file->getSize();
-
-            // Generate unique storage name
             $storageName = Str::uuid() . '.' . $extension;
+            
+            // Définir le chemin de stockage (organisé par workspace et type)
+            $disk = $options['disk'] ?? config('documents.default_disk', 'public');
+            $basePath = $this->getStoragePath($workspace, $entityType, $entityId);
+            $storagePath = $basePath . '/' . $storageName;
 
-            // Determine storage disk
-            $disk = $options['disk'] ?? config('documents.default_disk', 'local');
+            // Uploader le fichier
+            $path = $file->storeAs($basePath, $storageName, $disk);
 
-            // Build storage path
-            $path = $this->buildStoragePath($documentableType, $documentableId, $storageName);
+            if (!$path) {
+                throw new \Exception("Erreur lors de l'upload du fichier");
+            }
 
-            // Store the file
-            $storedPath = $file->storeAs(
-                dirname($path),
-                basename($path),
-                ['disk' => $disk]
-            );
-
-            // Create document record
+            // Créer le document
             $document = Document::create([
-                'documentable_type' => $documentableType,
-                'documentable_id' => $documentableId,
+                'documentable_type' => $entityType,
+                'documentable_id' => $entityId,
                 'nom' => $originalName,
                 'nom_stockage' => $storageName,
                 'extension' => $extension,
-                'mime_type' => $mimeType,
-                'taille' => $size,
-                'chemin' => $storedPath,
+                'mime_type' => $file->getMimeType(),
+                'taille' => $file->getSize(),
+                'chemin' => $path,
                 'disk' => $disk,
                 'description' => $options['description'] ?? null,
-                'metadata' => $options['metadata'] ?? null,
-                'hash_sha256' => $hash,
+                'visibility' => $options['visibility'] ?? 'private',
+                'hash_sha256' => hash_file('sha256', $file->getRealPath()),
                 'user_id' => $user->id,
-                'visibility' => $options['visibility'] ?? 'team',
                 'version' => 1,
                 'is_latest_version' => true,
+                'metadata' => $this->extractMetadata($file, $options),
             ]);
 
-            // Generate thumbnail for images
-            if (str_starts_with($mimeType, 'image/')) {
+            // Générer une miniature si c'est une image
+            if ($document->is_image) {
                 $this->generateThumbnail($document);
             }
 
-            DB::commit();
+            // Log de l'action
+            activity()
+                ->causedBy($user)
+                ->performedOn($document)
+                ->withProperties([
+                    'entity_type' => $entityType,
+                    'entity_id' => $entityId,
+                    'workspace_id' => $workspace->id,
+                ])
+                ->log('Document uploadé');
 
             return $document;
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
+        });
     }
 
-    /**
+   /**
      * Upload multiple documents
      */
     public function uploadMultiple(
         array $files,
-        string $documentableType,
-        int $documentableId,
+        string $entityType,
+        int $entityId,
         User $user,
         array $options = []
     ): array {
         $documents = [];
+        $errors = [];
 
         foreach ($files as $file) {
-            $documents[] = $this->upload($file, $documentableType, $documentableId, $user, $options);
+            try {
+                $documents[] = $this->upload($file, $entityType, $entityId, $user, $options);
+            } catch (\Exception $e) {
+                $errors[] = [
+                    'file' => $file->getClientOriginalName(),
+                    'error' => $e->getMessage(),
+                ];
+            }
+        }
+
+        if (!empty($errors)) {
+            throw new \Exception("Certains fichiers n'ont pas pu être uploadés : " . json_encode($errors));
         }
 
         return $documents;
     }
 
     /**
-     * Create a new version of a document
+     * Créer une nouvelle version d'un document
      */
-    public function createVersion(Document $parent, UploadedFile $file, User $user): Document
-    {
-        DB::beginTransaction();
+    public function createVersion(
+        Document $document,
+        UploadedFile $file,
+        User $user
+    ): Document {
+        // Vérifier les permissions
+        if (!$this->accessResolver->canEdit($user, $document)) {
+            throw new \Exception("Vous n'avez pas la permission de créer une nouvelle version");
+        }
 
-        try {
-            // Mark parent and all siblings as not latest
-            Document::where('parent_id', $parent->parent_id ?? $parent->id)
-                ->orWhere('id', $parent->parent_id ?? $parent->id)
-                ->update(['is_latest_version' => false]);
+        return DB::transaction(function () use ($document, $file, $user) {
+            // Marquer l'ancienne version comme non-latest
+            $document->update(['is_latest_version' => false]);
 
-            // Upload new version
+            // Upload la nouvelle version
             $newVersion = $this->upload(
                 $file,
-                $parent->documentable_type,
-                $parent->documentable_id,
+                $document->documentable_type,
+                $document->documentable_id,
                 $user,
                 [
-                    'disk' => $parent->disk,
-                    'visibility' => $parent->visibility,
-                    'description' => $parent->description,
+                    'description' => $document->description,
+                    'visibility' => $document->visibility,
+                    'disk' => $document->disk,
                 ]
             );
 
-            // Set version information
+            // Mettre à jour les champs de versioning
             $newVersion->update([
-                'parent_id' => $parent->parent_id ?? $parent->id,
-                'version' => ($parent->version ?? 1) + 1,
-                'is_latest_version' => true,
+                'parent_id' => $document->id,
+                'version' => $document->version + 1,
             ]);
 
-            DB::commit();
+            // Log
+            activity()
+                ->causedBy($user)
+                ->performedOn($newVersion)
+                ->withProperties(['previous_version' => $document->id])
+                ->log('Nouvelle version créée');
 
             return $newVersion;
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
+        });
     }
 
     /**
@@ -171,8 +232,14 @@ class DocumentService
         return Storage::disk($document->disk)->path($document->chemin);
     }
 
+     /**
+     * ===================================================================
+     * TÉLÉCHARGEMENT
+     * ===================================================================
+     */
+
     /**
-     * Record a download event
+     * Enregistrer un téléchargement
      */
     public function recordDownload(Document $document, User $user, string $method = 'direct'): DocumentDownload
     {
@@ -187,73 +254,127 @@ class DocumentService
     }
 
     /**
-     * Delete a document
+     * Obtenir les statistiques de téléchargement
+     */
+    public function getDownloadStats(Document $document): array
+    {
+        $downloads = $document->downloads();
+
+        return [
+            'total_downloads' => $downloads->count(),
+            'unique_users' => $downloads->distinct('user_id')->count('user_id'),
+            'last_download' => $document->last_downloaded_at,
+            'downloads_last_7_days' => $downloads->recent(7)->count(),
+            'downloads_last_30_days' => $downloads->recent(30)->count(),
+            'top_downloaders' => $downloads
+                ->select('user_id', DB::raw('COUNT(*) as download_count'))
+                ->groupBy('user_id')
+                ->orderByDesc('download_count')
+                ->limit(5)
+                ->with('user:id,nom,email')
+                ->get(),
+        ];
+    }
+
+     /**
+     * ===================================================================
+     * SUPPRESSION
+     * ===================================================================
+     */
+
+    /**
+     * Supprimer un document (soft delete)
      */
     public function delete(Document $document): bool
     {
-        DB::beginTransaction();
-
-        try {
-            // Delete physical file
-            $document->deleteFile();
-
-            // Delete all versions if this is a parent
-            if (!$document->parent_id) {
-                foreach ($document->versions as $version) {
-                    $version->deleteFile();
-                    $version->forceDelete();
-                }
-            }
-
-            // Soft delete the document
+        return DB::transaction(function () use ($document) {
+            // Soft delete du document
             $document->delete();
 
-            DB::commit();
+            // Log
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($document)
+                ->log('Document supprimé');
 
             return true;
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
+        });
     }
 
     /**
-     * Grant permission to user
+     * Supprimer définitivement un document
+     */
+    public function forceDelete(Document $document): bool
+    {
+        return DB::transaction(function () use ($document) {
+            // Supprimer le fichier physique
+            $document->deleteFile();
+
+            // Supprimer les permissions
+            $document->permissions()->delete();
+
+            // Supprimer l'historique des téléchargements
+            $document->downloads()->delete();
+
+            // Supprimer le document
+            $document->forceDelete();
+
+            // Log
+            activity()
+                ->causedBy(auth()->user())
+                ->log('Document supprimé définitivement : ' . $document->nom);
+
+            return true;
+        });
+    }
+
+     /**
+     * ===================================================================
+     * PERMISSIONS
+     * ===================================================================
+     */
+
+    /**
+     * Accorder une permission à un utilisateur
      */
     public function grantPermission(
         Document $document,
-        User $user,
-        array $permissions = [],
+        User $targetUser,
+        array $permissions,
         ?\DateTime $expiresAt = null
     ): DocumentPermission {
-        return DocumentPermission::updateOrCreate(
-            [
-                'document_id' => $document->id,
-                'permissionable_type' => User::class,
-                'permissionable_id' => $user->id,
-            ],
-            array_merge([
-                'can_view' => true,
-                'can_download' => true,
-                'can_edit' => false,
-                'can_delete' => false,
-                'can_share' => false,
-            ], $permissions, [
-                'expires_at' => $expiresAt,
-            ])
+        return $document->grantPermissionTo(
+            $targetUser,
+            $permissions['can_view'] ?? false,
+            $permissions['can_download'] ?? false,
+            $permissions['can_edit'] ?? false,
+            $permissions['can_delete'] ?? false,
+            $permissions['can_share'] ?? false,
+            $expiresAt
         );
     }
 
-    /**
-     * Revoke permission from user
+     /**
+     * Révoquer une permission
      */
-    public function revokePermission(Document $document, User $user): bool
+    public function revokePermission(Document $document, User $targetUser): bool
     {
-        return DocumentPermission::where('document_id', $document->id)
-            ->where('permissionable_type', User::class)
-            ->where('permissionable_id', $user->id)
-            ->delete();
+        return $document->revokePermissionFrom($targetUser);
     }
+
+    /**
+     * Partager avec plusieurs utilisateurs
+     */
+    public function shareWithUsers(
+        Document $document,
+        array $userIds,
+        array $permissions = [],
+        ?\DateTime $expiresAt = null
+    ): void {
+        $document->shareWithUsers($userIds, $permissions, $expiresAt);
+    }
+
+    
 
     /**
      * Get download statistics for a document
@@ -337,39 +458,97 @@ class DocumentService
         return $pathInfo['dirname'] . '/thumbs/' . $pathInfo['basename'];
     }
 
+
+     /**
+     * ===================================================================
+     * RÉCUPÉRATION DES DOCUMENTS
+     * ===================================================================
+     */
+
     /**
-     * Search documents
+     * Récupère les documents d'une entité
+     */
+    public function getForEntity(
+        string $entityType,
+        int $entityId,
+        array $options = []
+    ) {
+        $user = auth()->user();
+        
+        // Vérifier que l'entité existe et que l'user a accès
+        $entity = $this->getEntity($entityType, $entityId);
+        
+        if (!$entity) {
+            throw new \Exception("Entité non trouvée");
+        }
+
+        // Vérifier l'accès au workspace parent
+        $workspace = $this->getWorkspaceFromEntity($entity, $entityType);
+        
+        if (!$workspace) {
+            throw new \Exception("Workspace non trouvé pour cette entité");
+        }
+
+        if (!$this->userCanAccessWorkspace($user, $workspace)) {
+            throw new \Exception("Vous n'avez pas accès à ce workspace");
+        }
+
+        // Construire la requête
+        $query = Document::where('documentable_type', $entityType)
+            ->where('documentable_id', $entityId)
+            ->accessibleBy($user);
+
+        // Inclure les versions si demandé
+        if ($options['with_versions'] ?? false) {
+            $query->with('versions');
+        }
+
+        // Inclure les relations standard
+        $query->with(['user:id,nom,email,avatar', 'permissions']);
+
+        // Trier par date de création (plus récent en premier)
+        $query->latest('created_at');
+
+        return $query->get();
+    }
+    
+
+  /**
+     * Recherche de documents
      */
     public function search(string $query, array $filters = [])
     {
-        $documents = Document::query()
-            ->latestVersions()
+        $user = auth()->user();
+        
+        $documentsQuery = Document::query()
+            ->accessibleBy($user)
             ->search($query);
 
-        // Apply filters
-        if (isset($filters['type'])) {
-            $documents->byType($filters['type']);
+        // Filtres optionnels
+        if (!empty($filters['type'])) {
+            $documentsQuery->byType($filters['type']);
         }
 
-        if (isset($filters['user_id'])) {
-            $documents->where('user_id', $filters['user_id']);
+        if (!empty($filters['mime_type'])) {
+            $documentsQuery->where('mime_type', 'like', $filters['mime_type'] . '%');
         }
 
-        if (isset($filters['documentable_type'])) {
-            $documents->where('documentable_type', $filters['documentable_type']);
+        if (!empty($filters['user_id'])) {
+            $documentsQuery->where('user_id', $filters['user_id']);
         }
 
-        if (isset($filters['documentable_id'])) {
-            $documents->where('documentable_id', $filters['documentable_id']);
+        if (!empty($filters['documentable_type']) && !empty($filters['documentable_id'])) {
+            $documentsQuery->where('documentable_type', $filters['documentable_type'])
+                ->where('documentable_id', $filters['documentable_id']);
         }
 
-        if (isset($filters['mime_type'])) {
-            $documents->where('mime_type', 'like', $filters['mime_type'] . '%');
-        }
+        // Inclure les relations
+        $documentsQuery->with(['user:id,nom,email,avatar', 'documentable']);
 
-        return $documents->with(['user:id,name', 'documentable'])
-            ->orderBy('created_at', 'desc')
-            ->paginate($filters['per_page'] ?? 15);
+        // Pagination
+        $perPage = $filters['per_page'] ?? 15;
+        
+        return $documentsQuery->paginate($perPage);
     }
 
     /**
@@ -388,5 +567,202 @@ class DocumentService
         return $query->with(['user:id,name'])
             ->orderBy('created_at', 'desc')
             ->get();
+    }
+
+     /**
+     * ===================================================================
+     * HELPERS
+     * ===================================================================
+     */
+
+    /**
+     * Récupère une entité par son type et son ID
+     */
+    protected function getEntity(string $type, int $id)
+    {
+        return match ($type) {
+            Workspace::class => Workspace::find($id),
+            Projet::class => Projet::find($id),
+            Activite::class => Activite::find($id),
+            Tache::class => Tache::find($id),
+            TacheResultat::class => TacheResultat::find($id),
+            default => null,
+        };
+    }
+
+     /**
+     * Récupère le workspace parent d'une entité
+     */
+    protected function getWorkspaceFromEntity($entity, string $entityType): ?Workspace
+    {
+        if (!$entity) {
+            return null;
+        }
+
+        return match ($entityType) {
+            Workspace::class => $entity,
+            Projet::class => $entity->workspace,
+            Activite::class => $entity->projet?->workspace,
+            Tache::class => $entity->activite?->projet?->workspace,
+            TacheResultat::class => $entity->tache?->activite?->projet?->workspace,
+            default => null,
+        };
+    }
+
+    /**
+     * Vérifie si un user a accès à un workspace
+     */
+    protected function userCanAccessWorkspace(User $user, Workspace $workspace): bool
+    {
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        if ($workspace->owner_id === $user->id) {
+            return true;
+        }
+
+        return $workspace->members()->where('user_id', $user->id)->exists();
+    }
+
+     /**
+     * Génère le chemin de stockage pour un document
+     */
+    protected function getStoragePath(Workspace $workspace, string $entityType, int $entityId): string
+    {
+        $entityTypeName = match ($entityType) {
+            Workspace::class => 'workspace',
+            Projet::class => 'projet',
+            Activite::class => 'activite',
+            Tache::class => 'tache',
+            TacheResultat::class => 'resultat',
+            default => 'other',
+        };
+
+        return sprintf(
+            'workspaces/%s/%s/%s',
+            $workspace->id,
+            $entityTypeName,
+            $entityId
+        );
+    }
+
+    /**
+     * Extrait les métadonnées d'un fichier
+     */
+    protected function extractMetadata(UploadedFile $file, array $options = []): array
+    {
+        $metadata = [
+            'original_name' => $file->getClientOriginalName(),
+            'uploaded_at' => now()->toISOString(),
+        ];
+
+        // Métadonnées d'image
+        if (str_starts_with($file->getMimeType(), 'image/')) {
+            try {
+                $imageInfo = getimagesize($file->getRealPath());
+                
+                if ($imageInfo) {
+                    $metadata['width'] = $imageInfo[0];
+                    $metadata['height'] = $imageInfo[1];
+                    $metadata['type'] = $imageInfo[2];
+                }
+            } catch (\Exception $e) {
+                // Ignorer les erreurs
+            }
+        }
+
+        // Métadonnées personnalisées
+        if (!empty($options['custom_metadata'])) {
+            $metadata = array_merge($metadata, $options['custom_metadata']);
+        }
+
+        return $metadata;
+    }
+
+     /**
+     * ===================================================================
+     * GESTION PAR WORKSPACE
+     * ===================================================================
+     */
+
+    /**
+     * Récupère tous les documents d'un workspace
+     */
+    public function getWorkspaceDocuments(Workspace $workspace, User $user, array $filters = [])
+    {
+        if (!$this->userCanAccessWorkspace($user, $workspace)) {
+            throw new \Exception("Vous n'avez pas accès à ce workspace");
+        }
+
+        $query = Document::query()
+            ->accessibleBy($user)
+            ->where(function ($q) use ($workspace) {
+                // Documents directs du workspace
+                $q->where('documentable_type', Workspace::class)
+                    ->where('documentable_id', $workspace->id);
+
+                // Documents des projets du workspace
+                $projetIds = $workspace->projets()->pluck('id');
+                if ($projetIds->isNotEmpty()) {
+                    $q->orWhere(function ($pq) use ($projetIds) {
+                        $pq->where('documentable_type', Projet::class)
+                            ->whereIn('documentable_id', $projetIds);
+                    });
+                }
+
+                // Documents des activités du workspace
+                $activiteIds = Activite::whereIn('projet_id', $projetIds)->pluck('id');
+                if ($activiteIds->isNotEmpty()) {
+                    $q->orWhere(function ($aq) use ($activiteIds) {
+                        $aq->where('documentable_type', Activite::class)
+                            ->whereIn('documentable_id', $activiteIds);
+                    });
+                }
+
+                // Documents des tâches du workspace
+                $tacheIds = Tache::whereIn('activite_id', $activiteIds)->pluck('id');
+                if ($tacheIds->isNotEmpty()) {
+                    $q->orWhere(function ($tq) use ($tacheIds) {
+                        $tq->where('documentable_type', Tache::class)
+                            ->whereIn('documentable_id', $tacheIds);
+                    });
+                }
+            });
+
+        // Filtres
+        if (!empty($filters['type'])) {
+            $query->byType($filters['type']);
+        }
+
+        if (!empty($filters['search'])) {
+            $query->search($filters['search']);
+        }
+
+        $query->with(['user:id,nom,email,avatar', 'documentable']);
+        $query->latest('created_at');
+
+        return $query->paginate($filters['per_page'] ?? 15);
+    }
+
+    /**
+     * Statistiques des documents d'un workspace
+     */
+    public function getWorkspaceStats(Workspace $workspace, User $user): array
+    {
+        if (!$this->userCanAccessWorkspace($user, $workspace)) {
+            throw new \Exception("Vous n'avez pas accès à ce workspace");
+        }
+
+        $allDocuments = $this->getWorkspaceDocuments($workspace, $user, ['per_page' => 999999]);
+
+        return [
+            'total_documents' => $allDocuments->total(),
+            'total_size' => $allDocuments->sum('taille'),
+            'total_downloads' => $allDocuments->sum('download_count'),
+            'by_type' => $allDocuments->groupBy('documentable_type')->map->count(),
+            'by_mime_type' => $allDocuments->groupBy('mime_type')->map->count(),
+            'recent_uploads' => $allDocuments->sortByDesc('created_at')->take(10)->values(),
+        ];
     }
 }
