@@ -5,7 +5,9 @@ namespace App\Providers;
 // use Illuminate\Support\Facades\Gate;
 
 use App\Models\Workspace;
+use App\Policies\DocumentPolicy;
 use App\Policies\WorkspacePolicy;
+use Dom\Document;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -21,6 +23,7 @@ class AuthServiceProvider extends ServiceProvider
         \App\Models\Projet::class => \App\Policies\ProjetPolicy::class,
         \App\Models\Activite::class => \App\Policies\ActivitePolicy::class,
         \App\Models\Tache::class => \App\Policies\TachePolicy::class,
+        Document::class => DocumentPolicy::class,
 
     ];
 
