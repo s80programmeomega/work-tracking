@@ -505,6 +505,63 @@ const router = createRouter({
       },
     },
 
+    // ==========================================
+// DOCUMENTS
+// ==========================================
+{
+  path: '/documents',
+  name: 'Documents',
+  component: () => import('../pages/documents.vue'),
+  meta: {
+    title: 'Documents',
+    requiresAuth: true,
+  },
+},
+// {
+//   path: '/documents/:id',
+//   name: 'DocumentDetails',
+//   component: () => import('../pages/documents/Show.vue'),
+//   meta: {
+//     title: 'Détails du document',
+//     requiresAuth: true,
+//   },
+// },
+// {
+//   path: '/workspaces/:workspaceId/documents',
+//   name: 'WorkspaceDocuments',
+//   component: () => import('../pages/documents/WorkspaceDocuments.vue'),
+//   meta: {
+//     title: 'Documents du workspace',
+//     requiresAuth: true,
+//   },
+// },
+{
+  path: '/projets/:projetId/documents',
+  name: 'ProjetDocuments',
+  component: () => import('../pages/documents/ProjetDocuments.vue'),
+  meta: {
+    title: 'Documents du projet',
+    requiresAuth: true,
+  },
+},
+// {
+//   path: '/activites/:activiteId/documents',
+//   name: 'ActiviteDocuments',
+//   component: () => import('../pages/documents/ActiviteDocuments.vue'),
+//   meta: {
+//     title: 'Documents de l\'activité',
+//     requiresAuth: true,
+//   },
+// },
+// {
+//   path: '/taches/:tacheId/documents',
+//   name: 'TacheDocuments',
+//   component: () => import('../pages/documents/TacheDocuments.vue'),
+//   meta: {
+//     title: 'Documents de la tâche',
+//     requiresAuth: true,
+//   },
+// },
     {
       path: '/error-404',
       name: '404 Error',
