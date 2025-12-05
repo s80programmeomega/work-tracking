@@ -15,7 +15,10 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Intervention\Image\Facades\Image;
+use Intervention\Image\Laravel\Facades\Image;
+
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 /**
  * Service de gestion des documents
@@ -25,14 +28,15 @@ use Intervention\Image\Facades\Image;
 
 class DocumentService
 {
-     protected DocumentAccessResolver $accessResolver;
-
+    protected DocumentAccessResolver $accessResolver;
+    protected ImageManager $imageManager;
     public function __construct(DocumentAccessResolver $accessResolver)
     {
         $this->accessResolver = $accessResolver;
+        $this->imageManager = new ImageManager(new Driver());
     }
 
-     /**
+    /**
      * ===================================================================
      * UPLOAD DE DOCUMENTS
      * ===================================================================
@@ -55,14 +59,14 @@ class DocumentService
 
         // Vérifier l'entité
         $entity = $this->getEntity($entityType, $entityId);
-        
+
         if (!$entity) {
             throw new \Exception("Entité non trouvée");
         }
 
         // Vérifier le workspace
         $workspace = $this->getWorkspaceFromEntity($entity, $entityType);
-        
+
         if (!$workspace) {
             throw new \Exception("Workspace non trouvé");
         }
@@ -70,7 +74,7 @@ class DocumentService
         // Vérifier les doublons si non autorisés
         if (!($options['allow_duplicates'] ?? false)) {
             $hash = hash_file('sha256', $file->getRealPath());
-            
+
             $existing = Document::where('documentable_type', $entityType)
                 ->where('documentable_id', $entityId)
                 ->where('hash_sha256', $hash)
@@ -86,9 +90,9 @@ class DocumentService
             $originalName = $file->getClientOriginalName();
             $extension = $file->getClientOriginalExtension();
             $storageName = Str::uuid() . '.' . $extension;
-            
+
             // Définir le chemin de stockage (organisé par workspace et type)
-            $disk = $options['disk'] ?? config('documents.default_disk', 'public');
+            $disk = $options['disk'] ?? config('documents.default_disk', 'private');
             $basePath = $this->getStoragePath($workspace, $entityType, $entityId);
             $storagePath = $basePath . '/' . $storageName;
 
@@ -120,9 +124,9 @@ class DocumentService
             ]);
 
             // Générer une miniature si c'est une image
-            if ($document->is_image) {
-                $this->generateThumbnail($document);
-            }
+            // if ($document->is_image) {
+            //     $this->generateThumbnail($document);
+            // }
 
             // Log de l'action
             activity()
@@ -139,7 +143,7 @@ class DocumentService
         });
     }
 
-   /**
+    /**
      * Upload multiple documents
      */
     public function uploadMultiple(
@@ -232,7 +236,7 @@ class DocumentService
         return Storage::disk($document->disk)->path($document->chemin);
     }
 
-     /**
+    /**
      * ===================================================================
      * TÉLÉCHARGEMENT
      * ===================================================================
@@ -253,30 +257,9 @@ class DocumentService
         ]);
     }
 
+
+
     /**
-     * Obtenir les statistiques de téléchargement
-     */
-    public function getDownloadStats(Document $document): array
-    {
-        $downloads = $document->downloads();
-
-        return [
-            'total_downloads' => $downloads->count(),
-            'unique_users' => $downloads->distinct('user_id')->count('user_id'),
-            'last_download' => $document->last_downloaded_at,
-            'downloads_last_7_days' => $downloads->recent(7)->count(),
-            'downloads_last_30_days' => $downloads->recent(30)->count(),
-            'top_downloaders' => $downloads
-                ->select('user_id', DB::raw('COUNT(*) as download_count'))
-                ->groupBy('user_id')
-                ->orderByDesc('download_count')
-                ->limit(5)
-                ->with('user:id,nom,email')
-                ->get(),
-        ];
-    }
-
-     /**
      * ===================================================================
      * SUPPRESSION
      * ===================================================================
@@ -328,7 +311,7 @@ class DocumentService
         });
     }
 
-     /**
+    /**
      * ===================================================================
      * PERMISSIONS
      * ===================================================================
@@ -354,7 +337,7 @@ class DocumentService
         );
     }
 
-     /**
+    /**
      * Révoquer une permission
      */
     public function revokePermission(Document $document, User $targetUser): bool
@@ -374,7 +357,7 @@ class DocumentService
         $document->shareWithUsers($userIds, $permissions, $expiresAt);
     }
 
-    
+
 
     /**
      * Get download statistics for a document
@@ -403,7 +386,7 @@ class DocumentService
     }
 
     /**
-     * Generate thumbnail for image
+     * Generate thumbnail for image (INTERVENTION IMAGE V3)
      */
     protected function generateThumbnail(Document $document): void
     {
@@ -412,29 +395,19 @@ class DocumentService
         }
 
         try {
-            $thumbnailWidth = config('documents.thumbnail_width', 300);
-            $thumbnailHeight = config('documents.thumbnail_height', 300);
+            $sourcePath = Storage::disk($document->disk)->path($document->chemin);
 
-            $image = Image::make(Storage::disk($document->disk)->path($document->chemin));
+            $image = $this->imageManager->read($sourcePath)
+                ->cover(300, 300);
 
-            // Resize maintaining aspect ratio
-            $image->fit($thumbnailWidth, $thumbnailHeight, function ($constraint) {
-                $constraint->aspectRatio();
-                $constraint->upsize();
-            });
-
-            // Generate thumbnail path
             $thumbnailPath = $this->buildThumbnailPath($document->chemin);
-
-            // Save thumbnail
             $thumbnailFullPath = Storage::disk($document->disk)->path($thumbnailPath);
-            $image->save($thumbnailFullPath);
 
-            // Update document with thumbnail path
+            $image->save($thumbnailFullPath, quality: 80);
+
             $document->update(['thumbnail_path' => $thumbnailPath]);
         } catch (\Exception $e) {
-            // Log error but don't fail the upload
-            logger()->error('Failed to generate thumbnail: ' . $e->getMessage());
+            logger()->error('Thumbnail generation failed: ' . $e->getMessage());
         }
     }
 
@@ -449,17 +422,23 @@ class DocumentService
         return "documents/{$typeSlug}/{$id}/{$date}/{$filename}";
     }
 
+
     /**
      * Build thumbnail path from original path
      */
     protected function buildThumbnailPath(string $originalPath): string
     {
         $pathInfo = pathinfo($originalPath);
-        return $pathInfo['dirname'] . '/thumbs/' . $pathInfo['basename'];
+        $directory = $pathInfo['dirname'];
+        $filename = $pathInfo['filename'];
+        $extension = $pathInfo['extension'];
+
+        // Structure : documents/workspace_1/projet/123/2024/12/thumbs/uuid.jpg
+        return $directory . '/thumbs/' . $filename . '.' . $extension;
     }
 
 
-     /**
+    /**
      * ===================================================================
      * RÉCUPÉRATION DES DOCUMENTS
      * ===================================================================
@@ -474,17 +453,17 @@ class DocumentService
         array $options = []
     ) {
         $user = auth()->user();
-        
+
         // Vérifier que l'entité existe et que l'user a accès
         $entity = $this->getEntity($entityType, $entityId);
-        
+
         if (!$entity) {
             throw new \Exception("Entité non trouvée");
         }
 
         // Vérifier l'accès au workspace parent
         $workspace = $this->getWorkspaceFromEntity($entity, $entityType);
-        
+
         if (!$workspace) {
             throw new \Exception("Workspace non trouvé pour cette entité");
         }
@@ -511,15 +490,15 @@ class DocumentService
 
         return $query->get();
     }
-    
 
-  /**
+
+    /**
      * Recherche de documents
      */
     public function search(string $query, array $filters = [])
     {
         $user = auth()->user();
-        
+
         $documentsQuery = Document::query()
             ->accessibleBy($user)
             ->search($query);
@@ -547,29 +526,13 @@ class DocumentService
 
         // Pagination
         $perPage = $filters['per_page'] ?? 15;
-        
+
         return $documentsQuery->paginate($perPage);
     }
 
+
+
     /**
-     * Get documents for entity
-     */
-    public function getForEntity(string $type, int $id, array $options = [])
-    {
-        $query = Document::where('documentable_type', $type)
-            ->where('documentable_id', $id)
-            ->latestVersions();
-
-        if ($options['with_versions'] ?? false) {
-            $query->with('versions');
-        }
-
-        return $query->with(['user:id,name'])
-            ->orderBy('created_at', 'desc')
-            ->get();
-    }
-
-     /**
      * ===================================================================
      * HELPERS
      * ===================================================================
@@ -590,7 +553,7 @@ class DocumentService
         };
     }
 
-     /**
+    /**
      * Récupère le workspace parent d'une entité
      */
     protected function getWorkspaceFromEntity($entity, string $entityType): ?Workspace
@@ -625,7 +588,7 @@ class DocumentService
         return $workspace->members()->where('user_id', $user->id)->exists();
     }
 
-     /**
+    /**
      * Génère le chemin de stockage pour un document
      */
     protected function getStoragePath(Workspace $workspace, string $entityType, int $entityId): string
@@ -661,7 +624,7 @@ class DocumentService
         if (str_starts_with($file->getMimeType(), 'image/')) {
             try {
                 $imageInfo = getimagesize($file->getRealPath());
-                
+
                 if ($imageInfo) {
                     $metadata['width'] = $imageInfo[0];
                     $metadata['height'] = $imageInfo[1];
@@ -680,7 +643,7 @@ class DocumentService
         return $metadata;
     }
 
-     /**
+    /**
      * ===================================================================
      * GESTION PAR WORKSPACE
      * ===================================================================
