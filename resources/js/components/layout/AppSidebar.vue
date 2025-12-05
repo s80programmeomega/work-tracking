@@ -283,8 +283,9 @@ import {
     CheckIcon,
     PlusIcon,
     SettingsIcon,
-    XIcon
+    XIcon,StarIcon 
 } from '../../icons';
+
 import BoxCubeIcon from '@/icons/BoxCubeIcon.vue';
 import FolderIcon from '@/icons/FolderIcon.vue';
 import TaskIcon from '@/icons/TaskIcon.vue';
@@ -294,9 +295,7 @@ import { useSidebar } from '@/composables/useSidebar';
 import api from '@/api/axios'
 import { useAuthStore } from '@/stores/auth';
 import { useWorkspace } from '@/composables/useWorkspace';
-// import Logo from '@/assets/images/logo/Logo.png'
-// import LogoDark from '@/assets/images/logo/Logo-dark.jpg'
-// import Icon from '@/assets/images/logo/icon.jpg'
+ 
 
 const LogoDark = new URL('@/assets/images/logo/Logo-dark.jpg', import.meta.url).href
 const Logo = new URL('@/assets/images/logo/Logo.png', import.meta.url).href
@@ -442,26 +441,6 @@ const handleWorkspaceChange = (event) => {
     showWorkspaceSelector.value = false;
 };
 
-// const selectWorkspace = async (workspace) => {
-//     try {
-//         const response = await api.post(`/workspaces/switch/${workspace.id}`, {}, {
-//             headers: { Authorization: `Bearer ${authStore.token}` }
-//         });
-
-//         currentWorkspace.value = response.data.workspace;
-//         authStore.setCurrentWorkspace(response.data.current_workspace_id);
-//         showWorkspaceSelector.value = false;
-
-//         window.dispatchEvent(new CustomEvent('workspace-changed', {
-//             detail: { workspace }
-//         }));
-
-//     } catch (error) {
-//         console.error('Erreur lors du changement de workspace :', error);
-//     }
-// };
-
-// Menu structure
 
 const menuGroups = computed(() => [
     {
@@ -537,6 +516,20 @@ const menuGroups = computed(() => [
                     // { name: 'Rapport hebdomadaire', path: '/evaluations/rapport-hebdomadaire' },
                     { name: 'Fiches d\'évaluation', path: '/evaluations/fiches' },
                     // { name: 'Performance d\'équipe', path: '/evaluations/performance' },
+                ],
+            },
+        ],
+    },
+    {
+        title: 'Documentation & Ressources',
+        items: [
+            {
+                icon: XIcon ,
+                name: 'Documents',
+                subItems: [
+                    { name: 'Tous les Documents', path: '/documents' },
+                    // { name: 'Mes Documents', path: '/documents/me' }, // Optionnel
+                    // { name: 'Partagés avec moi', path: '/documents/shared' }, // Optionnel
                 ],
             },
         ],
