@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Http\Controllers\Controller;
+use App\Models\Activite;
+use App\Models\Projet;
+use App\Models\Tache;
+use App\Models\User;
 
 class DocumentController extends Controller
 {
@@ -22,12 +26,6 @@ class DocumentController extends Controller
         $this->documentService = $documentService;
     }
 
-   /**
-     * ===================================================================
-     * LISTE ET RECHERCHE
-     * ===================================================================
-     */
-
     /**
      * Récupère les documents d'une entité (Projet, Activité, Tâche, etc.)
      */
@@ -37,7 +35,7 @@ class DocumentController extends Controller
             $request->validate([
                 'documentable_type' => 'required|string',
                 'documentable_id' => 'required|integer',
-                'with_versions' => 'nullable|boolean',
+                'with_versions' => 'sometimes|boolean', // ✅ FIX: sometimes au lieu de nullable
             ]);
 
             $documents = $this->documentService->getForEntity(
@@ -64,51 +62,6 @@ class DocumentController extends Controller
         }
     }
 
- /**
-     * Recherche de documents
-     */
-    public function search(Request $request): JsonResponse
-    {
-        $request->validate([
-            'query' => 'required|string|min:2',
-            'type' => 'nullable|string',
-            'user_id' => 'nullable|integer',
-            'documentable_type' => 'nullable|string',
-            'documentable_id' => 'nullable|integer',
-            'mime_type' => 'nullable|string',
-            'per_page' => 'nullable|integer|min:1|max:100',
-        ]);
-
-        try {
-            $results = $this->documentService->search(
-                $request->query,
-                $request->only(['type', 'user_id', 'documentable_type', 'documentable_id', 'mime_type', 'per_page'])
-            );
-
-            return response()->json([
-                'success' => true,
-                'data' => DocumentResource::collection($results->items()),
-                'meta' => [
-                    'current_page' => $results->currentPage(),
-                    'last_page' => $results->lastPage(),
-                    'per_page' => $results->perPage(),
-                    'total' => $results->total(),
-                ],
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ], 500);
-        }
-    }
-
-     /**
-     * ===================================================================
-     * GESTION PAR WORKSPACE
-     * ===================================================================
-     */
-
     /**
      * Récupère tous les documents d'un workspace
      */
@@ -116,9 +69,9 @@ class DocumentController extends Controller
     {
         try {
             $request->validate([
-                'type' => 'nullable|string',
-                'search' => 'nullable|string|min:2',
-                'per_page' => 'nullable|integer|min:1|max:100',
+                'type' => 'sometimes|string',
+                'search' => 'sometimes|string|min:2',
+                'per_page' => 'sometimes|integer|min:1|max:100',
             ]);
 
             $documents = $this->documentService->getWorkspaceDocuments(
@@ -149,7 +102,7 @@ class DocumentController extends Controller
         }
     }
 
-     /**
+    /**
      * Statistiques des documents d'un workspace
      */
     public function workspaceStats(Request $request, Workspace $workspace): JsonResponse
@@ -169,12 +122,6 @@ class DocumentController extends Controller
         }
     }
 
-  /**
-     * ===================================================================
-     * UPLOAD DE DOCUMENTS
-     * ===================================================================
-     */
-
     /**
      * Upload un ou plusieurs documents
      */
@@ -185,11 +132,11 @@ class DocumentController extends Controller
             'documentable_id' => 'required|integer',
             'files' => 'required|array',
             'files.*' => 'required|file|max:' . config('documents.max_file_size', 10240),
-            'description' => 'nullable|string|max:1000',
-            'visibility' => 'nullable|in:private,team,public',
-            'disk' => 'nullable|string',
-            'allow_duplicates' => 'nullable|boolean',
-            'custom_metadata' => 'nullable|array',
+            'description' => 'sometimes|string|max:1000',
+            'visibility' => 'sometimes|in:private,team,public',
+            'disk' => 'sometimes|string',
+            'allow_duplicates' => 'sometimes|boolean',
+            'custom_metadata' => 'sometimes|array',
         ]);
 
         try {
@@ -256,13 +203,6 @@ class DocumentController extends Controller
         }
     }
 
-
-     /**
-     * ===================================================================
-     * CONSULTER UN DOCUMENT
-     * ===================================================================
-     */
-
     /**
      * Affiche les détails d'un document
      */
@@ -291,20 +231,14 @@ class DocumentController extends Controller
     }
 
     /**
-     * ===================================================================
-     * MODIFIER UN DOCUMENT
-     * ===================================================================
-     */
-
-    /**
      * Met à jour les métadonnées d'un document
      */
     public function update(Request $request, Document $document): JsonResponse
     {
         $request->validate([
-            'nom' => 'nullable|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'visibility' => 'nullable|in:private,team,public',
+            'nom' => 'sometimes|string|max:255',
+            'description' => 'sometimes|string|max:1000',
+            'visibility' => 'sometimes|in:private,team,public',
         ]);
 
         try {
@@ -329,12 +263,6 @@ class DocumentController extends Controller
             ], 403);
         }
     }
-
-   /**
-     * ===================================================================
-     * SUPPRIMER UN DOCUMENT
-     * ===================================================================
-     */
 
     /**
      * Supprime un document (soft delete)
@@ -362,11 +290,6 @@ class DocumentController extends Controller
             ], 500);
         }
     }
- /**
-     * ===================================================================
-     * TÉLÉCHARGER UN DOCUMENT
-     * ===================================================================
-     */
 
     /**
      * Télécharge un document
@@ -383,7 +306,7 @@ class DocumentController extends Controller
             $document->incrementDownloadCount();
 
             // Retourner le fichier
-            return \Storage::disk($document->disk)->download(
+            return Storage::disk($document->disk)->download(
                 $document->chemin,
                 $document->nom
             );
@@ -399,12 +322,6 @@ class DocumentController extends Controller
             ], 500);
         }
     }
-
-    /**
-     * ===================================================================
-     * VERSIONING
-     * ===================================================================
-     */
 
     /**
      * Crée une nouvelle version d'un document
@@ -442,10 +359,46 @@ class DocumentController extends Controller
         }
     }
 
-     /**
+
+    /**
+     * Liste les versions d'un document
+     */
+    public function versions(Document $document)
+    {
+        try {
+            $versions = Document::where(function ($q) use ($document) {
+                $q->where('parent_id', $document->id)
+                    ->orWhere('id', $document->parent_id)
+                    ->orWhere(function ($q) use ($document) {
+                        if ($document->parent_id) {
+                            $q->where('parent_id', $document->parent_id);
+                        }
+                    });
+            })
+                ->where('id', '!=', $document->id)
+                ->with('user:id,nom,email,avatar')
+                ->orderByDesc('version')
+                ->get();
+
+            // Ajouter le document actuel
+            $versions->prepend($document);
+
+            return response()->json([
+                'success' => true,
+                'data' => $versions
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Récupère toutes les versions d'un document
      */
-    public function versions(Request $request, Document $document): JsonResponse
+    public function _versions(Request $request, Document $document): JsonResponse
     {
         try {
             Gate::authorize('view', $document);
@@ -457,7 +410,7 @@ class DocumentController extends Controller
                 'data' => DocumentResource::collection($versions),
                 'meta' => [
                     'current_version' => $document->version,
-                    'total_versions' => $versions->count() + 1, // +1 pour le document actuel
+                    'total_versions' => $versions->count() + 1,
                 ],
             ]);
         } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
@@ -467,13 +420,6 @@ class DocumentController extends Controller
             ], 403);
         }
     }
-
-    
-    /**
-     * ===================================================================
-     * STATISTIQUES
-     * ===================================================================
-     */
 
     /**
      * Récupère les statistiques de téléchargement
@@ -497,12 +443,249 @@ class DocumentController extends Controller
         }
     }
 
+    /**
+     * Statistiques globales
+     */
+    public function globalStats(Request $request)
+    {
+        $user = auth()->user();
+
+        try {
+            // Compter les workspaces accessibles
+            $workspacesCount = Workspace::where(function ($q) use ($user) {
+                $q->where('owner_id', $user->id)
+                    ->orWhereHas('members', function ($q) use ($user) {
+                        $q->where('user_id', $user->id);
+                    });
+            })->count();
+
+            // Compter les projets accessibles
+            $projectsCount = Projet::whereHas('workspace', function ($q) use ($user) {
+                $q->where('owner_id', $user->id)
+                    ->orWhereHas('members', function ($q) use ($user) {
+                        $q->where('user_id', $user->id);
+                    });
+            })->count();
+
+            // Compter les activités accessibles
+            $activitiesCount = Activite::whereHas('projet.workspace', function ($q) use ($user) {
+                $q->where('owner_id', $user->id)
+                    ->orWhereHas('members', function ($q) use ($user) {
+                        $q->where('user_id', $user->id);
+                    });
+            })->count();
+
+            // Compter les tâches accessibles
+            $tasksCount = Tache::whereHas('activite.projet.workspace', function ($q) use ($user) {
+                $q->where('owner_id', $user->id)
+                    ->orWhereHas('members', function ($q) use ($user) {
+                        $q->where('user_id', $user->id);
+                    });
+            })->count();
+
+            // Stats documents
+            $documentsQuery = Document::accessibleBy($user);
+            $documentsCount = $documentsQuery->count();
+            $totalSize = $documentsQuery->sum('taille');
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'workspaces' => $workspacesCount,
+                    'projects' => $projectsCount,
+                    'activities' => $activitiesCount,
+                    'tasks' => $tasksCount,
+                    'documents' => $documentsCount,
+                    'totalSize' => $totalSize
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
 
     /**
-     * ===================================================================
-     * GESTION DES PERMISSIONS
-     * ===================================================================
+     * Documents récents de l'utilisateur
      */
+    public function recent(Request $request)
+    {
+        $user = auth()->user();
+
+        try {
+            $documents = Document::accessibleBy($user)
+                ->with(['user:id,nom,email,avatar', 'documentable'])
+                ->latest('created_at')
+                ->limit(50)
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $documents
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Documents partagés avec l'utilisateur
+     */
+    public function sharedWithMe(Request $request)
+    {
+        $user = auth()->user();
+
+        try {
+            $documents = Document::whereHas('permissions', function ($q) use ($user) {
+                $q->where('permissionable_type', User::class)
+                    ->where('permissionable_id', $user->id)
+                    ->where(function ($q) {
+                        $q->whereNull('expires_at')
+                            ->orWhere('expires_at', '>', now());
+                    });
+            })
+                ->with([
+                    'user:id,nom,email,avatar',
+                    'documentable',
+                    'permissions' => function ($q) use ($user) {
+                        $q->where('permissionable_type', User::class)
+                            ->where('permissionable_id', $user->id);
+                    }
+                ])
+                ->latest('created_at')
+                ->get();
+
+            // Ajouter la permission directement sur chaque document
+            $documents->each(function ($doc) {
+                $doc->permission = $doc->permissions->first();
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => $documents
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Documents créés par l'utilisateur
+     */
+    public function myDocuments(Request $request)
+    {
+        $user = auth()->user();
+
+        try {
+            $documents = Document::where('user_id', $user->id)
+                ->with(['user:id,nom,email,avatar', 'documentable'])
+                ->withCount('permissions as shared_with_count')
+                ->latest('created_at')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $documents
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+    /**
+     * Récupère la hiérarchie d'une entité
+     */
+    public function hierarchy(Request $request)
+    {
+        $entityType = $request->input('documentable_type');
+        $entityId = $request->input('documentable_id');
+
+        try {
+            $hierarchy = [];
+            $entity = $this->documentService->getEntity($entityType, $entityId);
+
+            if (!$entity) {
+                return response()->json(['success' => false, 'message' => 'Entité non trouvée'], 404);
+            }
+
+            // Construire la hiérarchie selon le type
+            switch ($entityType) {
+                case 'App\\Models\\TacheResultat':
+                    $tache = $entity->tache;
+                    $activite = $tache?->activite;
+                    $projet = $activite?->projet;
+                    $workspace = $projet?->workspace;
+
+                    if ($workspace)
+                        $hierarchy[] = ['type' => 'Workspace', 'label' => $workspace->nom];
+                    if ($projet)
+                        $hierarchy[] = ['type' => 'Projet', 'label' => $projet->nom];
+                    if ($activite)
+                        $hierarchy[] = ['type' => 'Activité', 'label' => $activite->nom];
+                    if ($tache)
+                        $hierarchy[] = ['type' => 'Tâche', 'label' => $tache->titre];
+                    $hierarchy[] = ['type' => 'Résultat', 'label' => 'Résultat'];
+                    break;
+
+                case 'App\\Models\\Tache':
+                    $activite = $entity->activite;
+                    $projet = $activite?->projet;
+                    $workspace = $projet?->workspace;
+
+                    if ($workspace)
+                        $hierarchy[] = ['type' => 'Workspace', 'label' => $workspace->nom];
+                    if ($projet)
+                        $hierarchy[] = ['type' => 'Projet', 'label' => $projet->nom];
+                    if ($activite)
+                        $hierarchy[] = ['type' => 'Activité', 'label' => $activite->nom];
+                    $hierarchy[] = ['type' => 'Tâche', 'label' => $entity->titre];
+                    break;
+
+                case 'App\\Models\\Activite':
+                    $projet = $entity->projet;
+                    $workspace = $projet?->workspace;
+
+                    if ($workspace)
+                        $hierarchy[] = ['type' => 'Workspace', 'label' => $workspace->nom];
+                    if ($projet)
+                        $hierarchy[] = ['type' => 'Projet', 'label' => $projet->nom];
+                    $hierarchy[] = ['type' => 'Activité', 'label' => $entity->nom];
+                    break;
+
+                case 'App\\Models\\Projet':
+                    $workspace = $entity->workspace;
+
+                    if ($workspace)
+                        $hierarchy[] = ['type' => 'Workspace', 'label' => $workspace->nom];
+                    $hierarchy[] = ['type' => 'Projet', 'label' => $entity->nom];
+                    break;
+
+                case 'App\\Models\\Workspace':
+                    $hierarchy[] = ['type' => 'Workspace', 'label' => $entity->nom];
+                    break;
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $hierarchy
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
 
     /**
      * Accorde une permission à un utilisateur
@@ -511,12 +694,12 @@ class DocumentController extends Controller
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'can_view' => 'nullable|boolean',
-            'can_download' => 'nullable|boolean',
-            'can_edit' => 'nullable|boolean',
-            'can_delete' => 'nullable|boolean',
-            'can_share' => 'nullable|boolean',
-            'expires_at' => 'nullable|date|after:now',
+            'can_view' => 'sometimes|boolean',
+            'can_download' => 'sometimes|boolean',
+            'can_edit' => 'sometimes|boolean',
+            'can_delete' => 'sometimes|boolean',
+            'can_share' => 'sometimes|boolean',
+            'expires_at' => 'sometimes|date|after:now',
         ]);
 
         try {
@@ -544,7 +727,35 @@ class DocumentController extends Controller
         }
     }
 
-   /**
+    /**
+     * Révoque une permission
+     */
+    public function revokePermission(Request $request, Document $document): JsonResponse
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        try {
+            Gate::authorize('managePermissions', $document);
+
+            $targetUser = \App\Models\User::findOrFail($request->user_id);
+
+            $this->documentService->revokePermission($document, $targetUser);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Permission révoquée avec succès',
+            ]);
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous n\'avez pas la permission de gérer les permissions',
+            ], 403);
+        }
+    }
+
+    /**
      * Partage avec plusieurs utilisateurs
      */
     public function shareWithUsers(Request $request, Document $document): JsonResponse
@@ -552,13 +763,13 @@ class DocumentController extends Controller
         $request->validate([
             'user_ids' => 'required|array',
             'user_ids.*' => 'exists:users,id',
-            'permissions' => 'nullable|array',
-            'permissions.can_view' => 'nullable|boolean',
-            'permissions.can_download' => 'nullable|boolean',
-            'permissions.can_edit' => 'nullable|boolean',
-            'permissions.can_delete' => 'nullable|boolean',
-            'permissions.can_share' => 'nullable|boolean',
-            'expires_at' => 'nullable|date|after:now',
+            'permissions' => 'sometimes|array',
+            'permissions.can_view' => 'sometimes|boolean',
+            'permissions.can_download' => 'sometimes|boolean',
+            'permissions.can_edit' => 'sometimes|boolean',
+            'permissions.can_delete' => 'sometimes|boolean',
+            'permissions.can_share' => 'sometimes|boolean',
+            'expires_at' => 'sometimes|date|after:now',
         ]);
 
         try {
@@ -582,6 +793,7 @@ class DocumentController extends Controller
             ], 403);
         }
     }
+
     /**
      * Liste les permissions d'un document
      */
@@ -604,6 +816,45 @@ class DocumentController extends Controller
                 'success' => false,
                 'message' => 'Vous n\'avez pas la permission de voir les permissions',
             ], 403);
+        }
+    }
+
+    /**
+     * Recherche de documents
+     */
+    public function search(Request $request): JsonResponse
+    {
+        $request->validate([
+            'query' => 'required|string|min:2',
+            'type' => 'sometimes|string',
+            'user_id' => 'sometimes|integer',
+            'documentable_type' => 'sometimes|string',
+            'documentable_id' => 'sometimes|integer',
+            'mime_type' => 'sometimes|string',
+            'per_page' => 'sometimes|integer|min:1|max:100',
+        ]);
+
+        try {
+            $results = $this->documentService->search(
+                $request->query,
+                $request->only(['type', 'user_id', 'documentable_type', 'documentable_id', 'mime_type', 'per_page'])
+            );
+
+            return response()->json([
+                'success' => true,
+                'data' => DocumentResource::collection($results->items()),
+                'meta' => [
+                    'current_page' => $results->currentPage(),
+                    'last_page' => $results->lastPage(),
+                    'per_page' => $results->perPage(),
+                    'total' => $results->total(),
+                ],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
         }
     }
 }
