@@ -379,106 +379,137 @@ Route::middleware(['auth:sanctum'])->group(function () {
          * Récupère les documents d'une entité (Projet, Activité, Tâche, etc.)
          * Query params: documentable_type, documentable_id, with_versions
          */
-        Route::get('/', [DocumentController::class, 'index']);
+        Route::get('/', [DocumentController::class, 'index'])->name('documents.index');
 
         /**
          * GET /api/documents/search
          * Recherche de documents
          * Query params: query, type, user_id, documentable_type, documentable_id, mime_type, per_page
          */
-        Route::get('/search', [DocumentController::class, 'search']);
+        Route::get('/search', [DocumentController::class, 'search'])->name('documents.search');
 
         /**
          * GET /api/documents/workspace/{workspace}
          * Récupère tous les documents d'un workspace (projets, activités, tâches)
          * Query params: type, search, per_page
          */
-        Route::get('/workspace/{workspace}', [DocumentController::class, 'workspaceDocuments']);
+        Route::get('/workspace/{workspace}', [DocumentController::class, 'workspaceDocuments'])->name('documents.workspace');
 
         /**
          * GET /api/documents/workspace/{workspace}/stats
          * Statistiques des documents d'un workspace
          */
-        Route::get('/workspace/{workspace}/stats', [DocumentController::class, 'workspaceStats']);
+        Route::get('/workspace/{workspace}/stats', [DocumentController::class, 'workspaceStats'])->name('documents.workspace.stats');
 
         /**
          * POST /api/documents
          * Upload un ou plusieurs documents
          * Body: files[], documentable_type, documentable_id, description, visibility, disk
          */
-        Route::post('/', [DocumentController::class, 'store']);
+        Route::post('/', [DocumentController::class, 'store'])->name('documents.store');
 
         /**
          * GET /api/documents/{document}
          * Affiche les détails d'un document
          */
-        Route::get('/{document}', [DocumentController::class, 'show']);
+        Route::get('/{document}', [DocumentController::class, 'show'])->name('documents.show');
 
         /**
          * PUT/PATCH /api/documents/{document}
          * Met à jour les métadonnées d'un document
          * Body: nom, description, visibility
          */
-        Route::put('/{document}', [DocumentController::class, 'update']);
-        Route::patch('/{document}', [DocumentController::class, 'update']);
+        Route::put('/{document}', [DocumentController::class, 'update'])->name('documents.update');
+        Route::patch('/{document}', [DocumentController::class, 'update'])->name('documents.patch');
 
         /**
          * DELETE /api/documents/{document}
          * Supprime un document (soft delete)
          */
-        Route::delete('/{document}', [DocumentController::class, 'destroy']);
+        Route::delete('/{document}', [DocumentController::class, 'destroy'])->name('documents.destroy');
 
         /**
          * GET /api/documents/{document}/download
          * Télécharge un document
          */
-        Route::get('/{document}/download', [DocumentController::class, 'download']);
+        Route::get('/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
+
+        /**
+         * GET /api/documents/stats
+         * Statistiques globales des documents
+         */
+        Route::get('/stats', [DocumentController::class, 'globalStats'])->name('documents.global-stats');
+
+        /**
+         * GET /api/documents/hierarchy
+         * Récupère la hiérarchie d'une entité
+         */
+        Route::get('/hierarchy', [DocumentController::class, 'hierarchy'])->name('documents.hierarchy');
+
+        /**
+         * GET /api/documents/recent
+         * Documents récents de l'utilisateur
+         */
+        Route::get('/recent', [DocumentController::class, 'recent'])->name('documents.recent');
+
+        /**
+         * GET /api/documents/shared-with-me
+         * Documents partagés avec l'utilisateur
+         */
+        Route::get('/shared-with-me', [DocumentController::class, 'sharedWithMe'])->name('documents.shared-with-me');
+
+        /**
+         * GET /api/documents/my-documents
+         * Documents créés par l'utilisateur
+         */
+        Route::get('/my-documents', [DocumentController::class, 'myDocuments'])->name('documents.my-documents');
+
 
         /**
          * POST /api/documents/{document}/versions
          * Crée une nouvelle version d'un document
          * Body: file
          */
-        Route::post('/{document}/versions', [DocumentController::class, 'createVersion']);
+        Route::post('/{document}/versions', [DocumentController::class, 'createVersion'])->name('documents.versions.create');
 
         /**
          * GET /api/documents/{document}/versions
          * Récupère toutes les versions d'un document
          */
-        Route::get('/{document}/versions', [DocumentController::class, 'versions']);
+        Route::get('/{document}/versions', [DocumentController::class, 'versions'])->name('documents.versions');
 
         /**
          * GET /api/documents/{document}/stats
          * Récupère les statistiques de téléchargement
          */
-        Route::get('/{document}/stats', [DocumentController::class, 'stats']);
+        Route::get('/{document}/stats', [DocumentController::class, 'stats'])->name('documents.stats');
 
         /**
          * GET /api/documents/{document}/permissions
          * Liste les permissions d'un document
          */
-        Route::get('/{document}/permissions', [DocumentController::class, 'listPermissions']);
+        Route::get('/{document}/permissions', [DocumentController::class, 'listPermissions'])->name('documents.permissions.list');
 
         /**
          * POST /api/documents/{document}/permissions/grant
          * Accorde une permission à un utilisateur
          * Body: user_id, can_view, can_download, can_edit, can_delete, can_share, expires_at
          */
-        Route::post('/{document}/permissions/grant', [DocumentController::class, 'grantPermission']);
+        Route::post('/{document}/permissions/grant', [DocumentController::class, 'grantPermission'])->name('documents.permissions.grant');
 
         /**
          * POST /api/documents/{document}/permissions/revoke
          * Révoque une permission
          * Body: user_id
          */
-        Route::post('/{document}/permissions/revoke', [DocumentController::class, 'revokePermission']);
+        Route::post('/{document}/permissions/revoke', [DocumentController::class, 'revokePermission'])->name('documents.permissions.revoke');
 
         /**
          * POST /api/documents/{document}/share
          * Partage avec plusieurs utilisateurs
          * Body: user_ids[], permissions{}, expires_at
          */
-        Route::post('/{document}/share', [DocumentController::class, 'shareWithUsers']);
+        Route::post('/{document}/share', [DocumentController::class, 'shareWithUsers'])->name('documents.share');
     });
 
 

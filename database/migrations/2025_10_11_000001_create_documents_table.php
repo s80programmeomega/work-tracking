@@ -36,6 +36,7 @@ return new class extends Migration
             $table->foreignId('parent_id')->nullable()->constrained('documents')->cascadeOnDelete();
             $table->unsignedInteger('version')->default(1);
             $table->boolean('is_latest_version')->default(true);
+            $table->boolean('allow_duplicates')->default(true);
 
             // Thumbnail for images
             $table->string('thumbnail_path')->nullable();

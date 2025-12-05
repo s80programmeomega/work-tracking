@@ -81,7 +81,7 @@
                     <div class="document-footer">
                         <span class="document-user">
                             <i class="fas fa-user"></i>
-                            {{ document.user.name }}
+                            {{ document.user.nom }}
                         </span>
                         <span class="document-date">
                             {{ formatDate(document.created_at) }}

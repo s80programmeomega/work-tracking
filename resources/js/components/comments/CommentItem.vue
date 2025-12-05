@@ -7,11 +7,11 @@
           <div class="d-flex align-items-center">
             <div class="avatar mr-2">
               <div class="avatar-circle">
-                {{ comment.user.name.charAt(0).toUpperCase() }}
+                {{ comment.user.nom.charAt(0).toUpperCase() }}
               </div>
             </div>
             <div>
-              <strong>{{ comment.user.name }}</strong>
+              <strong>{{ comment.user.nom }}</strong>
               <small class="text-muted ml-2">
                 {{ formatDate(comment.created_at) }}
                 <span v-if="comment.is_edited" class="badge badge-sm badge-secondary ml-1">
