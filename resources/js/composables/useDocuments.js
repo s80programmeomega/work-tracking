@@ -8,7 +8,7 @@ export function useDocuments() {
     const error = ref(null);
     const uploadProgress = ref(0);
 
-    /**
+     /**
      * Fetch documents for an entity
      */
     const fetchDocuments = async (documentableType, documentableId, withVersions = false) => {
@@ -20,13 +20,16 @@ export function useDocuments() {
                 params: {
                     documentable_type: documentableType,
                     documentable_id: documentableId,
-                    with_versions: withVersions,
+                    with_versions: withVersions ? 1 : 0, // Convertir booléen en 1/0
                 },
             });
 
             documents.value = response.data.data;
+            console.log('Documents chargés:', documents.value);
+            
             return response.data;
         } catch (err) {
+            console.error('Erreur fetchDocuments:', err);
             error.value = err.response?.data?.message || 'Erreur lors du chargement des documents';
             throw err;
         } finally {
@@ -72,7 +75,7 @@ export function useDocuments() {
                 formData.append('disk', options.disk);
             }
             if (options.allow_duplicates !== undefined) {
-                formData.append('allow_duplicates', options.allow_duplicates);
+                formData.append('allow_duplicates', options.allow_duplicates ? '1' : '0')
             }
 
             const response = await api.post('/documents', formData, {
