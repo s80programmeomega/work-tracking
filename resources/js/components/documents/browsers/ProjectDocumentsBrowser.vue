@@ -219,7 +219,7 @@ const getStatusBadgeClass = (status) => {
 const loadProjects = async () => {
   loading.value = true
   try {
-    const response = await api.get('/projets', {
+    const response = await api.get('projets/mes-projets', {
       params: {
         with_counts: true
       }
