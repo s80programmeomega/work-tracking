@@ -337,7 +337,7 @@ const loadTasks = async () => {
 
 const loadActivities = async () => {
   try {
-    const response = await api.get('/activites')
+    const response = await api.get('activites/mes-activites')
     activities.value = response.data.data
   } catch (error) {
     console.error('Error loading activities:', error)
