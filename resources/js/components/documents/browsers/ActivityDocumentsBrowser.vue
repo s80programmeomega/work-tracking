@@ -205,7 +205,7 @@ const filteredActivities = computed(() => {
 const loadActivities = async () => {
   loading.value = true
   try {
-    const response = await api.get('/activites', {
+    const response = await api.get('activites/mes-activites', {
       params: {
         with_counts: true
       }
@@ -220,7 +220,7 @@ const loadActivities = async () => {
 
 const loadProjects = async () => {
   try {
-    const response = await api.get('/projets')
+    const response = await api.get('projets/mes-projets')
     projects.value = response.data.data
   } catch (error) {
     console.error('Error loading projects:', error)
