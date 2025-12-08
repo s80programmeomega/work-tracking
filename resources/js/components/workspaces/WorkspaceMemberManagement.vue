@@ -64,28 +64,20 @@
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
       <div class="border-b border-gray-200 dark:border-gray-700">
         <nav class="flex space-x-8 px-6" aria-label="Tabs">
-          <button
-            v-for="tab in tabs"
-            :key="tab.id"
-            @click="activeTab = tab.id"
-            :class="[
-              activeTab === tab.id
-                ? 'border-brand-500 text-brand-600 dark:text-brand-400'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
-              'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2'
-            ]"
-          >
+          <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id" :class="[
+            activeTab === tab.id
+              ? 'border-brand-500 text-brand-600 dark:text-brand-400'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
+            'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2'
+          ]">
             <component :is="tab.icon" class="w-5 h-5" />
             {{ tab.label }}
-            <span
-              v-if="tab.count"
-              :class="[
-                'ml-2 py-0.5 px-2 rounded-full text-xs font-medium',
-                activeTab === tab.id
-                  ? 'bg-brand-100 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400'
-                  : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
-              ]"
-            >
+            <span v-if="tab.count" :class="[
+              'ml-2 py-0.5 px-2 rounded-full text-xs font-medium',
+              activeTab === tab.id
+                ? 'bg-brand-100 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400'
+                : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+            ]">
               {{ tab.count }}
             </span>
           </button>
@@ -102,19 +94,13 @@
               <!-- Search -->
               <div class="relative flex-1 max-w-md">
                 <SearchIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  v-model="searchTerm"
-                  type="text"
-                  placeholder="Rechercher un membre..."
-                  class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                />
+                <input v-model="searchTerm" type="text" placeholder="Rechercher un membre..."
+                  class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
               </div>
 
               <!-- Filter by Role -->
-              <select
-                v-model="filterRole"
-                class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500"
-              >
+              <select v-model="filterRole"
+                class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500">
                 <option value="all">Tous les rôles</option>
                 <option value="owner">Propriétaire</option>
                 <option value="admin">Administrateur</option>
@@ -123,10 +109,8 @@
               </select>
             </div>
 
-            <button
-              @click="showInviteModal = true"
-              class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
-            >
+            <button v-if="canManageMembers" @click="showInviteModal = true"
+              class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors">
               <UserPlusIcon class="w-5 h-5" />
               Inviter un membre
             </button>
@@ -138,7 +122,8 @@
           </div>
 
           <!-- Members List -->
-          <div v-else class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+          <div v-else
+            class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead class="bg-gray-50 dark:bg-gray-700">
                 <tr>
@@ -163,23 +148,15 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                <tr
-                  v-for="member in filteredMembers"
-                  :key="member.id"
-                  class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-                >
+                <tr v-for="member in filteredMembers" :key="member.id"
+                  class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center gap-3">
-                      <div
-                        v-if="member.avatar"
-                        class="w-10 h-10 rounded-full overflow-hidden"
-                      >
+                      <div v-if="member.avatar" class="w-10 h-10 rounded-full overflow-hidden">
                         <img :src="member.avatar" :alt="member.nom" class="w-full h-full object-cover" />
                       </div>
-                      <div
-                        v-else
-                        class="w-10 h-10 rounded-full bg-brand-600 flex items-center justify-center text-white font-medium"
-                      >
+                      <div v-else
+                        class="w-10 h-10 rounded-full bg-brand-600 flex items-center justify-center text-white font-medium">
                         {{ getInitials(member.nom) }}
                       </div>
                       <div>
@@ -193,12 +170,10 @@
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <span
-                      :class="[
-                        'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
-                        getRoleColor(member.pivot?.role)
-                      ]"
-                    >
+                    <span :class="[
+                      'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
+                      getRoleColor(member.pivot?.role)
+                    ]">
                       {{ getRoleLabel(member.pivot?.role) }}
                     </span>
                   </td>
@@ -213,37 +188,27 @@
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <span
-                      :class="[
-                        'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
-                        member.is_active
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                          : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-                      ]"
-                    >
+                    <span :class="[
+                      'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
+                      member.is_active
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                        : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                    ]">
                       {{ member.is_active ? 'Actif' : 'Inactif' }}
                     </span>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-right">
                     <div class="flex items-center justify-end gap-2">
-                      <button
-                        @click="viewMemberDetails(member)"
-                        class="text-brand-600 hover:text-brand-900 dark:text-brand-400 text-sm font-medium"
-                      >
+                      <button @click="viewMemberDetails(member)"
+                        class="text-brand-600 hover:text-brand-900 dark:text-brand-400 text-sm font-medium">
                         Voir
                       </button>
-                      <button
-                        v-if="member.pivot?.role !== 'owner' && canManageMembers"
-                        @click="editMember(member)"
-                        class="text-gray-600 hover:text-gray-900 dark:text-gray-400 text-sm font-medium"
-                      >
+                      <button v-if="canPerformMemberAction(member, 'edit')" @click="editMember(member)"
+                        class="text-gray-600 hover:text-gray-900 dark:text-gray-400 text-sm font-medium">
                         Modifier
                       </button>
-                      <button
-                        v-if="member.pivot?.role !== 'owner' && canManageMembers"
-                        @click="removeMember(member)"
-                        class="text-red-600 hover:text-red-900 dark:text-red-400 text-sm font-medium"
-                      >
+                      <button v-if="canPerformMemberAction(member, 'delete')" @click="removeMember(member)"
+                        class="text-red-600 hover:text-red-900 dark:text-red-400 text-sm font-medium">
                         Retirer
                       </button>
                     </div>
@@ -260,10 +225,8 @@
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
               Invitations en attente
             </h3>
-            <button
-              @click="showInviteModal = true"
-              class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
-            >
+            <button @click="showInviteModal = true"
+              class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors">
               <UserPlusIcon class="w-5 h-5" />
               Nouvelle invitation
             </button>
@@ -277,11 +240,8 @@
           </div>
 
           <div v-else class="space-y-3">
-            <div
-              v-for="invitation in invitations"
-              :key="invitation.id"
-              class="flex items-center justify-between p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg"
-            >
+            <div v-for="invitation in invitations" :key="invitation.id"
+              class="flex items-center justify-between p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
               <div class="flex items-center gap-4">
                 <div class="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
                   <MailIcon class="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
@@ -291,22 +251,18 @@
                     {{ invitation.email }}
                   </div>
                   <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Invité le {{ formatDate(invitation.invited_at) }} • 
+                    Invité le {{ formatDate(invitation.invited_at) }} •
                     Rôle: {{ getRoleLabel(invitation.role) }}
                   </div>
                 </div>
               </div>
               <div class="flex items-center gap-2">
-                <button
-                  @click="resendInvitation(invitation)"
-                  class="px-3 py-1.5 text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400 font-medium"
-                >
+                <button @click="resendInvitation(invitation)"
+                  class="px-3 py-1.5 text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400 font-medium">
                   Renvoyer
                 </button>
-                <button
-                  @click="cancelInvitation(invitation)"
-                  class="px-3 py-1.5 text-sm text-red-600 hover:text-red-700 dark:text-red-400 font-medium"
-                >
+                <button @click="cancelInvitation(invitation)"
+                  class="px-3 py-1.5 text-sm text-red-600 hover:text-red-700 dark:text-red-400 font-medium">
                   Annuler
                 </button>
               </div>
@@ -321,21 +277,13 @@
           </h3>
 
           <div class="space-y-4">
-            <div
-              v-for="activity in recentActivities"
-              :key="activity.id"
-              class="flex items-start gap-4 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg"
-            >
-              <div
-                v-if="activity.user?.avatar"
-                class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0"
-              >
+            <div v-for="activity in recentActivities" :key="activity.id"
+              class="flex items-start gap-4 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <div v-if="activity.user?.avatar" class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
                 <img :src="activity.user.avatar" :alt="activity.user.nom" class="w-full h-full object-cover" />
               </div>
-              <div
-                v-else
-                class="w-10 h-10 rounded-full bg-brand-600 flex items-center justify-center text-white font-medium flex-shrink-0"
-              >
+              <div v-else
+                class="w-10 h-10 rounded-full bg-brand-600 flex items-center justify-center text-white font-medium flex-shrink-0">
                 {{ getInitials(activity.user?.nom) }}
               </div>
               <div class="flex-1">
@@ -354,47 +302,29 @@
     </div>
 
     <!-- Invite Member Modal -->
-    <InviteMemberModal
-      v-if="showInviteModal"
-      :workspace-id="workspaceId"
-      @close="showInviteModal = false"
-      @invited="handleMemberInvited"
-    />
+    <InviteMemberModal v-if="showInviteModal" :workspace-id="workspaceId" @close="showInviteModal = false"
+      @invited="handleMemberInvited" />
 
     <!-- Edit Member Modal -->
-    <EditWorkspaceMemberModal
-      v-if="showEditModal"
-      :member="selectedMember"
-      :workspace-id="workspaceId"
-      @close="showEditModal = false"
-      @updated="handleMemberUpdated"
-    />
+    <EditWorkspaceMemberModal v-if="showEditModal" :member="selectedMember" :workspace-id="workspaceId"
+      @close="showEditModal = false" @updated="handleMemberUpdated" />
 
     <!-- Member Details Modal -->
-    <MemberDetailsModal
-      v-if="showDetailsModal"
-      :member="selectedMember"
-      :workspace-id="workspaceId"
-      @close="showDetailsModal = false"
-    />
+    <MemberDetailsModal v-if="showDetailsModal" :member="selectedMember" :workspace-id="workspaceId"
+      @close="showDetailsModal = false" />
 
     <!-- Remove Member Confirmation -->
-    <ConfirmModal
-      v-if="showRemoveModal"
-      title="Retirer le membre du workspace"
+    <ConfirmModal v-if="showRemoveModal" title="Retirer le membre du workspace"
       :message="`Êtes-vous sûr de vouloir retirer ${memberToRemove?.nom} du workspace ? Cette action révoquera son accès à tous les projets, activités et tâches du workspace.`"
-      confirm-text="Retirer définitivement"
-      confirm-class="bg-red-600 hover:bg-red-700"
-      type="danger"
-      @confirm="confirmRemoveMember"
-      @cancel="showRemoveModal = false"
-    />
+      confirm-text="Retirer définitivement" confirm-class="bg-red-600 hover:bg-red-700" type="danger"
+      @confirm="confirmRemoveMember" @cancel="showRemoveModal = false" />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useWorkspace } from '@/composables/useWorkspace'
+import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 import {
   UsersIcon,
   CheckCircleIcon,
@@ -415,6 +345,9 @@ const props = defineProps({
   }
 })
 
+// Créer une référence réactive pour le workspace
+const workspace = ref(null)
+
 const emit = defineEmits(['member-updated'])
 
 const {
@@ -424,10 +357,18 @@ const {
   removeMember: removeMemberService,
   resendInvitation: resendInvitationService,
   cancelInvitation: cancelInvitationService,
-    getRoleLabel,
+  getRoleLabel,
   getRoleColor,
-  canManageMembers
 } = useWorkspace()
+
+// Initialiser les permissions avec le workspace
+const {
+  canManageMembers,
+  canDeleteMembers,
+  canPerformMemberAction,
+  debugPermissions
+} = useWorkspacePermissions(workspace)
+
 
 const members = ref([])
 const invitations = ref([])
@@ -444,7 +385,7 @@ const showDetailsModal = ref(false)
 const showRemoveModal = ref(false)
 const selectedMember = ref(null)
 const memberToRemove = ref(null)
- 
+
 
 const tabs = computed(() => [
   { id: 'members', label: 'Membres', icon: UsersIcon, count: members.value.length },
@@ -469,6 +410,11 @@ const filteredMembers = computed(() => {
     result = result.filter(m => m.pivot?.role === filterRole.value)
   }
 
+  // Filtrer les membres que l'utilisateur peut voir 
+  result = result.filter(member =>
+    canPerformMemberAction(member, 'view')
+  )
+
   return result
 })
 
@@ -481,7 +427,7 @@ const getInitials = (name) => {
     .toUpperCase()
     .slice(0, 2)
 }
-  
+
 const formatDate = (date) => {
   if (!date) return 'Jamais'
   return new Date(date).toLocaleDateString('fr-FR', {
@@ -555,6 +501,15 @@ const loadData = async () => {
     const membersResponse = await fetchMembers(props.workspaceId)
     members.value = membersResponse || []
 
+    // Mettre à jour l'objet workspace avec les membres
+    workspace.value = {
+      id: props.workspaceId,
+      members: members.value,
+      // Ajoutez d'autres propriétés si nécessaire
+      // owner_id: ...,
+      // settings: ...,
+    }
+
     // Load invitations
     const invitationsResponse = await fetchInvitations(props.workspaceId)
     invitations.value = invitationsResponse || []
@@ -564,7 +519,7 @@ const loadData = async () => {
       total_members: members.value.length,
       active_members: members.value.filter(m => m.is_active).length,
       pending_invitations: invitations.value.length,
-      admin_count: members.value.filter(m => ['owner', 'admin','manager'].includes(m.pivot?.role)).length
+      admin_count: members.value.filter(m => ['owner', 'admin', 'member', 'viewer'].includes(m.pivot?.role)).length
     }
 
     // TODO: Charger les activités récentes depuis l'API

@@ -68,8 +68,7 @@
                   Modifier
                 </button>
                
-                <button 
-                  v-if="canManageMembers" 
+                <button v-if="canManageMembers" 
                   @click="openMembersModal"
                   class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
                 >
