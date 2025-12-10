@@ -37,17 +37,20 @@ class ResultatEnAttenteN2Notification extends Notification implements ShouldQueu
             ->line('Ce résultat a déjà été validé au niveau 1.');
     }
 
-    public function toArray($notifiable): array
-    {
-        return [
-            'type' => 'resultat_attente_n2',
-            'resultat_id' => $this->resultat->id,
-            'tache_id' => $this->resultat->tache->id,
-            'tache_titre' => $this->resultat->tache->titre,
-            'auteur_id' => $this->resultat->user->id,
-            'auteur_nom' => $this->resultat->user->nom,
-            'url' => "/taches/{$this->resultat->tache->id}/resultats/{$this->resultat->id}"
-        ];
-    }
+public function toArray($notifiable): array
+{
+    return [
+        'type' => 'resultat_attente_n2',
+        'resultat_id' => $this->resultat->id,
+        'tache_id' => $this->resultat->tache->id,
+        'tache_titre' => $this->resultat->tache->titre,
+        'auteur_id' => $this->resultat->user->id,
+        'auteur_nom' => $this->resultat->user->nom,
+        'taux_realisation' => $this->resultat->taux_realisation,
+        'url' => "/resultats/{$this->resultat->id}", 
+        'title' => 'Résultat en attente de validation',
+        'message' => "Un résultat de {$this->resultat->user->nom} pour « {$this->resultat->tache->titre} » attend votre validation (N2)"
+    ];
+}
 }
 

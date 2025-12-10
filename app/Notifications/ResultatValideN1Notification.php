@@ -20,7 +20,9 @@ class ResultatValideN1Notification extends Notification implements ShouldQueue
         public TacheResultat $resultat,
         public User $validateur,
         public ?string $commentaire
-    ) {}
+    ) {
+    }
+
 
     public function via($notifiable): array
     {
@@ -59,7 +61,10 @@ class ResultatValideN1Notification extends Notification implements ShouldQueue
             'validateur_id' => $this->validateur->id,
             'validateur_nom' => $this->validateur->nom,
             'commentaire' => $this->commentaire,
-            'url' => "/taches/{$this->resultat->tache->id}"
+            'taux_realisation' => $this->resultat->taux_realisation,
+            'url' => "/resultats/{$this->resultat->id}",
+            'title' => 'Résultat validé (N1)',
+            'message' => "Votre résultat pour « {$this->resultat->tache->titre} » a été validé par {$this->validateur->nom}"
         ];
     }
 }
