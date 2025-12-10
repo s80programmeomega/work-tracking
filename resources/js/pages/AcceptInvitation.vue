@@ -20,10 +20,10 @@
           <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">Invitation invalide</h3>
           <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ error }}</p>
           <router-link
-            to="/signin"
+            to="/workspaces"
             class="mt-6 inline-block px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700"
           >
-            Retour à la connexion
+            Retour a l'espace de travail
           </router-link>
         </div>
       </div>
