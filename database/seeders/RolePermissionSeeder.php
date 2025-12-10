@@ -28,6 +28,7 @@ class RolePermissionSeeder extends Seeder
             'projets.update',
             'projets.delete',
             'can_create_projects',
+            'can_delete_members',
             'can_invite_members',
             'can_manage_settings',
 
