@@ -18,7 +18,6 @@ export function useNotifications() {
 
         notifications.value.push(notification)
 
-        // Auto remove after duration
         setTimeout(() => {
             removeNotification(id)
         }, duration)
@@ -53,9 +52,6 @@ export function useNotifications() {
         notifications.value = []
     }
 
-    /**
-     * Fetch unread notifications
-     */
     const fetchUnread = async (limit = 50) => {
         loading.value = true;
         error.value = null;
@@ -77,9 +73,6 @@ export function useNotifications() {
         }
     };
 
-    /**
-     * Fetch all notifications with pagination
-     */
     const fetchAll = async (page = 1, perPage = 20) => {
         loading.value = true;
         error.value = null;
@@ -98,14 +91,10 @@ export function useNotifications() {
         }
     };
 
-    /**
-     * Mark notification as read
-     */
     const markAsRead = async (notificationId) => {
         try {
             await api.post(`/notifications/${notificationId}/mark-read`);
 
-            // Update local state
             const notification = notifications.value.find((n) => n.id === notificationId);
             if (notification) {
                 notification.read_at = new Date().toISOString();
@@ -119,14 +108,10 @@ export function useNotifications() {
         }
     };
 
-    /**
-     * Mark all notifications as read
-     */
     const markAllAsRead = async () => {
         try {
             const response = await api.post('/notifications/mark-all-read');
 
-            // Update local state
             notifications.value.forEach((n) => {
                 n.read_at = new Date().toISOString();
             });
@@ -139,14 +124,10 @@ export function useNotifications() {
         }
     };
 
-    /**
-     * Delete notification
-     */
     const deleteNotification = async (notificationId) => {
         try {
             await api.delete(`/notifications/${notificationId}`);
 
-            // Remove from local state
             const index = notifications.value.findIndex((n) => n.id === notificationId);
             if (index !== -1) {
                 const wasUnread = !notifications.value[index].read_at;
@@ -164,14 +145,10 @@ export function useNotifications() {
         }
     };
 
-    /**
-     * Delete all read notifications
-     */
     const deleteAllRead = async () => {
         try {
             const response = await api.delete('/notifications/delete-all-read');
 
-            // Remove read notifications from local state
             notifications.value = notifications.value.filter((n) => !n.read_at);
 
             return response.data;
@@ -181,9 +158,6 @@ export function useNotifications() {
         }
     };
 
-    /**
-     * Get notification statistics
-     */
     const fetchStatistics = async () => {
         try {
             const response = await api.get('/notifications/statistics');
@@ -194,54 +168,94 @@ export function useNotifications() {
         }
     };
 
-    /**
-     * Get notification icon based on type
-     */
     const getNotificationIcon = (type) => {
         const icons = {
+            // Tâches
             task_assigned: 'fa-user-plus',
             task_due_soon: 'fa-clock',
             task_completed: 'fa-check-circle',
+            
+            // Résultats - Soumission
+            resultat_soumis: 'fa-file-upload',
+            
+            // Résultats - Validations
+            resultat_valide_n1: 'fa-check',
+            resultat_valide_n2: 'fa-trophy',
+            resultat_attente_n2: 'fa-exclamation-circle',
+            validation_n1_confirmee: 'fa-check-circle',
+            validation_n2_confirmee: 'fa-trophy',
+            resultat_validation_complete: 'fa-certificate',
+            
+            // Résultats - Rejets
+            resultat_rejete: 'fa-times-circle',
+            rejet_confirme: 'fa-clipboard-check',
+            resultat_rejete_n2_info: 'fa-info-circle',
+            
+            // Commentaires
             mentioned_in_comment: 'fa-at',
             comment_added: 'fa-comment',
+            
+            // Projets
             project_updated: 'fa-project-diagram',
+            projet_invitation: 'fa-envelope',
+            
+            // Workspace
+            workspace_invitation: 'fa-envelope',
+            
+            // Autres
             deadline_approaching: 'fa-exclamation-triangle',
             document_uploaded: 'fa-file-upload',
-            workspace_invitation: 'fa-envelope',
         };
 
         return icons[type] || 'fa-bell';
     };
 
-    /**
-     * Get notification color based on type
-     */
     const getNotificationColor = (type) => {
         const colors = {
+            // Tâches
             task_assigned: 'blue',
             task_due_soon: 'orange',
             task_completed: 'green',
+            
+            // Résultats - Soumission
+            resultat_soumis: 'blue',
+            
+            // Résultats - Validations
+            resultat_valide_n1: 'green',
+            resultat_valide_n2: 'emerald',
+            resultat_attente_n2: 'orange',
+            validation_n1_confirmee: 'green',
+            validation_n2_confirmee: 'emerald',
+            resultat_validation_complete: 'cyan',
+            
+            // Résultats - Rejets
+            resultat_rejete: 'red',
+            rejet_confirme: 'orange',
+            resultat_rejete_n2_info: 'yellow',
+            
+            // Commentaires
             mentioned_in_comment: 'purple',
             comment_added: 'cyan',
+            
+            // Projets
             project_updated: 'indigo',
+            projet_invitation: 'purple',
+            
+            // Workspace
+            workspace_invitation: 'brand',
+            
+            // Autres
             deadline_approaching: 'red',
             document_uploaded: 'yellow',
-            workspace_invitation: 'brand',
         };
 
         return colors[type] || 'gray';
     };
 
-    /**
-     * Computed: Unread notifications only
-     */
     const unreadNotifications = computed(() => {
         return notifications.value.filter((n) => !n.read_at);
     });
 
-    /**
-     * Computed: Recent notifications (last 24h)
-     */
     const recentNotifications = computed(() => {
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
@@ -251,11 +265,23 @@ export function useNotifications() {
         });
     });
 
-    /**
-     *  Vérifier si une notification est une invitation
-     */
     const isInvitationNotification = (notification) => {
-        return notification.type === 'workspace_invitation';
+        return ['workspace_invitation', 'projet_invitation'].includes(notification.type);
+    };
+
+    const isResultatNotification = (notification) => {
+        return [
+            'resultat_soumis',
+            'resultat_attente_n2',
+            'resultat_valide_n1',
+            'resultat_valide_n2',
+            'resultat_rejete',
+            'validation_n1_confirmee',
+            'validation_n2_confirmee',
+            'rejet_confirme',
+            'resultat_validation_complete',
+            'resultat_rejete_n2_info'
+        ].includes(notification.type);
     };
 
     return {
@@ -279,6 +305,8 @@ export function useNotifications() {
         fetchStatistics,
         getNotificationIcon,
         getNotificationColor,
+        isInvitationNotification,
+        isResultatNotification,
 
         showNotification,
         showSuccess,
@@ -287,6 +315,5 @@ export function useNotifications() {
         showInfo,
         removeNotification,
         clearAll
-
     };
 }
