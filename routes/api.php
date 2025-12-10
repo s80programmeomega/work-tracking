@@ -257,8 +257,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/activite/{activiteId}/check-permissions', [TacheController::class, 'checkPermissions']);
 
         // ✅ NOUVEAU : Validation résultats individuels
-        Route::post('/resultats-individuels/{resultat}/validate-n1', [TacheController::class, 'validateIndividualResultN1']);
-        Route::post('/resultats-individuels/{resultat}/validate-n2', [TacheController::class, 'validateIndividualResultN2']);
+        // Route::post('/resultats-individuels/{resultat}/validate-n1', [TacheController::class, 'validateIndividualResultN1']);
+        // Route::post('/resultats-individuels/{resultat}/validate-n2', [TacheController::class, 'validateIndividualResultN2']);
 
 
         // CRUD basique
@@ -268,8 +268,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         // ✅ Actions principales
         Route::post('/{tache}/complete', [TacheController::class, 'complete']); // Marquer terminé
-        Route::post('/{tache}/validate-n1', [TacheController::class, 'validateN1']); // Validation N1
-        Route::post('/{tache}/validate-n2', [TacheController::class, 'validateN2']); // Validation N2
+        // Route::post('/{tache}/validate-n1', [TacheController::class, 'validateN1']); // Validation N1
+        // Route::post('/{tache}/validate-n2', [TacheController::class, 'validateN2']); // Validation N2
         Route::post('/{tache}/move', [TacheController::class, 'move']); // Déplacer (Kanban)
         Route::post('/{tache}/archive', [TacheController::class, 'archive']);
         Route::post('/{tache}/unarchive', [TacheController::class, 'unarchive']);
@@ -308,7 +308,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('taches/{tache}/resultats')->group(function () {
         Route::get('/', [TacheResultatController::class, 'index']);
         Route::post('/', [TacheResultatController::class, 'store']);
-        Route::get('/{resultat}', [TacheResultatController::class, 'show']);
+        // Route::get('/{resultat}', [TacheResultatController::class, 'show']);
         Route::put('/{resultat}', [TacheResultatController::class, 'update']);
         Route::delete('/{resultat}', [TacheResultatController::class, 'destroy']);
 
@@ -323,25 +323,45 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/{resultat}/document-stats', [TacheResultatController::class, 'documentStats']);
     });
 
+    // 📋 Récupérer un résultat spécifique
+    Route::get('/tache-resultats/{resultat}', [TacheResultatController::class, 'show'])
+    ->name('tache-resultats.show');
+
     // ========================================  ÉVALUATIONS  ========================================
     Route::prefix('evaluations')->group(function () {
         // ✅ Rapport hebdomadaire personnel
-        Route::get('/mon-rapport-hebdomadaire', [TacheController::class, 'myWeeklyReport']);
+        // Route::get('/mon-rapport-hebdomadaire', [TacheController::class, 'myWeeklyReport']);
+        Route::get('/mon-rapport-hebdomadaire', [EvaluationController::class, 'myWeeklyReportImproved']);
 
         // ✅ Rapport hebdomadaire d'un utilisateur (managers)
-        Route::get('/rapport-hebdomadaire/{userId}', [TacheController::class, 'userWeeklyReport']);
+        // Route::get('/rapport-hebdomadaire/{userId}', [TacheController::class, 'userWeeklyReport']);
+        Route::get('/rapport-hebdomadaire/{userId}', [EvaluationController::class, 'userWeeklyReport']);
+
+        // 📊 PERFORMANCE WORKSPACE (NOUVEAU)
+        // Vue d'ensemble de la performance d'un workspace
+        Route::get('/workspace/{workspaceId}/performance', [EvaluationController::class, 'workspacePerformanceReport']);
 
         // ✅ Performance d'équipe
         Route::get('/performance-equipe/{activiteId}', [TacheController::class, 'teamPerformance']);
 
+        // Détail de performance d'un membre spécifique
+        Route::get('/membre/{userId}/performance', [EvaluationController::class, 'memberDetailedPerformance']);
+
         // ✅ Export PDF
         Route::post('/export-pdf', [TacheController::class, 'exportWeeklyReportPdf']);
+
+        // Export PDF du rapport de performance workspace
+        Route::post('/workspace/{workspaceId}/export-pdf', [EvaluationController::class, 'exportWorkspacePerformancePdf']);
+
 
         // Dashboard général
         Route::get('/dashboard', [TacheController::class, 'evaluationDashboard']);
 
-        // Résultats en attente de validation
-        // Route::get('/resultats/en-attente', [TacheResultatController::class, 'pendingValidations']);
+        // Statistiques de validation utilisateur
+        Route::get('/stats/user/{userId}', [EvaluationController::class, 'userValidationStats']);
+
+        // Statistiques globales de validation
+        Route::get('/stats/global', [EvaluationController::class, 'globalValidationStats']);
 
         // 📋 Liste des résultats en attente de validation (personnalisée par rôle)
         Route::get('/resultats/en-attente', [EvaluationController::class, 'pendingValidations']);
@@ -350,10 +370,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/mes-responsabilites', [EvaluationController::class, 'myResponsibilities']);
 
         // ✅ Validation N1 (responsable activité uniquement)
-        Route::post('/resultats/{resultat}/validate-n1', [EvaluationController::class, 'validateN1']);
+        Route::post('/resultats-individuels/{resultat}/validate-n1', [EvaluationController::class, 'validateN1']);
 
         // ✅ Validation N2 (responsable projet uniquement)
-        Route::post('/resultats/{resultat}/validate-n2', [EvaluationController::class, 'validateN2']);
+        Route::post('/resultats-individuels/{resultat}/validate-n2', [EvaluationController::class, 'validateN2']);
 
         // ❌ Rejeter un résultat
         Route::post('/resultats/{resultat}/reject', [EvaluationController::class, 'reject']);
