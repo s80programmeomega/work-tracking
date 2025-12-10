@@ -14,7 +14,7 @@
             </div>
             <div>
               <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
-                Inviter des membres
+                Inviter des membres 
               </h2>
               <p class="text-sm text-gray-500 dark:text-gray-400">
                 Ajoutez de nouveaux membres à votre workspace
@@ -322,16 +322,17 @@
     </div>
   </Teleport>
 </template>
-
+ 
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { useWorkspace } from '@/composables/useWorkspace'
+import { useInvitationPermissions } from '@/composables/useInvitationPermissions'
+import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 import { 
   XIcon, 
   MailIcon, 
   AlertCircleIcon, 
   CheckCircleIcon,
-  // BadgeCheckIcon,
   TrashIcon
 } from '@/icons'
 
@@ -341,6 +342,11 @@ const props = defineProps({
     required: true
   }
 })
+
+// Initialiser les permissions
+const workspace = ref({ id: props.workspaceId })
+const permissions = useWorkspacePermissions(workspace)
+const invitationPermissions = useInvitationPermissions(workspace)
 
 const emit = defineEmits(['close', 'invited'])
 
@@ -356,37 +362,21 @@ const errorResults = ref([])
 
 const availableRoles = getAvailableRoles()
 
-const availablePermissions = ref([
-  {
-    key: 'can_create_projects',
-    label: 'Créer des projets',
-    description: 'Autoriser la création de nouveaux projets dans le workspace',
-    recommended: true,
-    disabled: false
-  },
-  {
-    key: 'can_invite_members',
-    label: 'Inviter des membres',
-    description: 'Autoriser l\'invitation de nouveaux membres au workspace',
-    recommended: false,
-    disabled: false
-  },
-  {
-    key: 'can_manage_settings',
-    label: 'Gérer les paramètres',
-    description: 'Autoriser la modification des paramètres du workspace',
-    recommended: false,
-    disabled: false
-  }
-])
+// Computed property pour les permissions disponibles
+const availablePermissions = computed(() => {
+  return invitationPermissions.getAvailablePermissionsForRole(form.value.role)
+})
 
 const form = ref({
   role: 'member',
   message: '',
   permissions: {
     can_create_projects: true,
+    can_view_all_projects: false,
     can_invite_members: false,
-    can_manage_settings: false
+    can_manage_settings: false,
+    can_transfer_ownership: false,
+    can_delete_members: false
   },
   send_email: true
 })
@@ -414,11 +404,10 @@ const processEmailInput = () => {
 
 // Handle paste event
 const handlePaste = (event) => {
+  event.preventDefault()
   const pastedData = event.clipboardData.getData('text')
-  // Auto-process pasted emails
-  setTimeout(() => {
-    processEmailInput()
-  }, 0)
+  emailInput.value = pastedData
+  processEmailInput()
 }
 
 // Validate emails
@@ -430,6 +419,12 @@ const validateEmails = () => {
       emailErrors.value.push(`"${email}" n'est pas une adresse email valide`)
     }
   })
+  
+  // Check for duplicate emails
+  const uniqueEmails = new Set(emailTags.value)
+  if (uniqueEmails.size !== emailTags.value.length) {
+    emailErrors.value.push('Certaines adresses email sont en double')
+  }
 }
 
 // Remove email tag
@@ -443,6 +438,8 @@ const clearEmails = () => {
   emailTags.value = []
   emailInput.value = ''
   emailErrors.value = []
+  successResults.value = []
+  errorResults.value = []
 }
 
 // Update email input from tags
@@ -450,36 +447,21 @@ const updateEmailInput = () => {
   emailInput.value = emailTags.value.join(', ')
 }
 
-// Auto-set permissions based on role
+// Watch for role changes to update permissions
 watch(() => form.value.role, (newRole) => {
-  if (newRole === 'admin') {
-    form.value.permissions = {
-      can_create_projects: true,
-      can_invite_members: true,
-      can_manage_settings: true
-    }
-    // Disable checkboxes for admin role
-    availablePermissions.value.forEach(p => p.disabled = true)
-  } else {
-    // Re-enable checkboxes for other roles
-    availablePermissions.value.forEach(p => p.disabled = false)
+  if (newRole) {
+    const defaultPermissions = invitationPermissions.getDefaultPermissionsForRole(newRole)
+    form.value.permissions = { ...defaultPermissions }
     
-    if (newRole === 'member') {
-      form.value.permissions = {
-        can_create_projects: true,
-        can_invite_members: false,
-        can_manage_settings: false
-      }
-    } else if (newRole === 'viewer') {
-      form.value.permissions = {
-        can_create_projects: false,
-        can_invite_members: false,
-        can_manage_settings: false
-      }
+    // Validation optionnelle (pour le debug)
+    const validation = invitationPermissions.validatePermissions(form.value.permissions, newRole)
+    if (!validation.isValid) {
+      console.warn('Permissions validation errors:', validation.errors)
     }
   }
 }, { immediate: true })
 
+// La fonction handleSubmit corrigée
 const handleSubmit = async () => {
   try {
     submitting.value = true
@@ -487,23 +469,44 @@ const handleSubmit = async () => {
     successResults.value = []
     errorResults.value = []
 
-    // Final validation
+    // 1. Validation de base des emails
     validateEmails()
     if (emailErrors.value.length > 0) {
       generalError.value = 'Veuillez corriger les erreurs dans les adresses email'
+      submitting.value = false
       return
     }
 
     if (emailTags.value.length === 0) {
       generalError.value = 'Veuillez saisir au moins une adresse email valide'
+      submitting.value = false
       return
     }
 
     if (!form.value.role) {
       generalError.value = 'Veuillez sélectionner un rôle'
+      submitting.value = false
       return
     }
 
+    // 2. Validation des permissions
+    const permissionValidation = invitationPermissions.validatePermissions(form.value.permissions, form.value.role)
+    if (!permissionValidation.isValid) {
+      generalError.value = permissionValidation.errors.join(', ')
+      submitting.value = false
+      return
+    }
+
+    console.log('Données à envoyer:', {
+      workspaceId: props.workspaceId,
+      emails: emailTags.value,
+      role: form.value.role,
+      permissions: form.value.permissions,
+      message: form.value.message,
+      send_email: form.value.send_email
+    })
+
+    // 3. Envoi de l'invitation via l'API
     const response = await inviteMembers(props.workspaceId, {
       emails: emailTags.value,
       role: form.value.role,
@@ -512,32 +515,88 @@ const handleSubmit = async () => {
       send_email: form.value.send_email
     })
 
-    // Process results
-    if (response.invitations) {
-      response.invitations.forEach(invitation => {
-        successResults.value.push({
-          email: invitation.email,
-          status: invitation.status
-        })
-      })
-    }
+    console.log('Réponse API:', response)
 
-    if (response.errors && response.errors.length > 0) {
-      errorResults.value = response.errors
-    }
+    // 4. Traitement des résultats
+    if (response.data) {
+      const { success_count, error_count, invitations = [], errors = [] } = response.data
+      
+      // Remplir les résultats de succès
+      if (invitations && invitations.length > 0) {
+        successResults.value = invitations.map(inv => ({
+          email: inv.email,
+          status: inv.status || 'invited'
+        }))
+      }
+      
+      // Remplir les erreurs
+      if (errors && errors.length > 0) {
+        errorResults.value = errors.map(err => ({
+          email: err.email,
+          message: err.message
+        }))
+      }
 
-    // If no errors, close modal after success
-    if (errorResults.value.length === 0) {
-      setTimeout(() => {
-        emit('invited')
-      }, 2000)
+      // Afficher un message de synthèse
+      if (success_count > 0) {
+        generalError.value = null
+        // Émettre l'événement d'invitation réussie
+        setTimeout(() => {
+          if (error_count === 0) {
+            emit('invited')
+            emit('close')
+          }
+        }, 3000)
+      } else {
+        generalError.value = 'Aucune invitation n\'a pu être envoyée'
+      }
+    } else {
+      generalError.value = 'Réponse inattendue du serveur'
     }
 
   } catch (err) {
-    generalError.value = err.response?.data?.message || 'Une erreur est survenue lors de l\'envoi des invitations'
-    console.error('Error inviting members:', err)
+    console.error('Erreur détaillée lors de l\'invitation:', err)
+    
+    // Gestion d'erreur détaillée
+    if (err.response) {
+      // Erreur de réponse HTTP
+      if (err.response.status === 422) {
+        // Validation errors from Laravel
+        const validationErrors = err.response.data.errors
+        if (validationErrors) {
+          const errorMessages = []
+          Object.keys(validationErrors).forEach(key => {
+            validationErrors[key].forEach(msg => errorMessages.push(msg))
+          })
+          generalError.value = errorMessages.join(', ')
+        } else {
+          generalError.value = err.response.data.message || 'Erreur de validation'
+        }
+      } else if (err.response.status === 403) {
+        generalError.value = 'Vous n\'avez pas la permission d\'inviter des membres'
+      } else if (err.response.status === 404) {
+        generalError.value = 'Workspace non trouvé'
+      } else {
+        generalError.value = err.response.data?.message || `Erreur serveur (${err.response.status})`
+      }
+    } else if (err.request) {
+      // Aucune réponse reçue
+      generalError.value = 'Impossible de contacter le serveur. Vérifiez votre connexion.'
+    } else {
+      // Erreur de configuration
+      generalError.value = err.message || 'Une erreur inattendue est survenue'
+    }
   } finally {
     submitting.value = false
   }
 }
+
+// Debug: Afficher l'état du formulaire
+watch(() => form.value, (newForm) => {
+  console.log('Form updated:', newForm)
+}, { deep: true })
+
+watch(() => emailTags.value, (newTags) => {
+  console.log('Email tags updated:', newTags)
+})
 </script>

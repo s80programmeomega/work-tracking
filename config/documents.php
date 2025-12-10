@@ -1,3 +1,4 @@
+<!-- config\documents.php -->
 <?php
 
 return [

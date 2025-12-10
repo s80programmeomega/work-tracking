@@ -48,14 +48,17 @@ class ResultatValideN2Notification extends Notification implements ShouldQueue
     public function toArray($notifiable): array
     {
         return [
-            'type' => 'resultat_valide_n2',
-            'resultat_id' => $this->resultat->id,
-            'tache_id' => $this->resultat->tache->id,
-            'tache_titre' => $this->resultat->tache->titre,
-            'validateur_id' => $this->validateur->id,
-            'validateur_nom' => $this->validateur->nom,
-            'commentaire' => $this->commentaire,
-            'url' => "/taches/{$this->resultat->tache->id}"
-        ];
+        'type' => 'resultat_valide_n2',
+        'resultat_id' => $this->resultat->id,
+        'tache_id' => $this->resultat->tache->id,
+        'tache_titre' => $this->resultat->tache->titre,
+        'validateur_id' => $this->validateur->id,
+        'validateur_nom' => $this->validateur->nom,
+        'commentaire' => $this->commentaire,
+        'taux_realisation' => $this->resultat->taux_realisation,
+        'url' => "/resultats/{$this->resultat->id}",  
+        'title' => 'Validation complète !',
+        'message' => "Félicitations ! Votre résultat pour « {$this->resultat->tache->titre} » est entièrement validé (N1 + N2)"
+    ];
     }
 }

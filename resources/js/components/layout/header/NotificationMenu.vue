@@ -1,11 +1,9 @@
-<!-- resources\js\components\layout\header\NotificationMenu.vue -->
 <template>
   <div class="relative" ref="dropdownRef">
     <button
       class="relative flex items-center justify-center text-gray-500 transition-colors bg-white border border-gray-200 rounded-full hover:text-dark-900 h-11 w-11 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
       @click="toggleDropdown"
     >
-      <!-- Badge with count -->
       <span
         v-if="unreadCount > 0"
         class="absolute -right-1 -top-1 z-10 flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold text-white bg-red-500 rounded-full"
@@ -30,7 +28,6 @@
       </svg>
     </button>
 
-    <!-- Dropdown Start -->
     <div
       v-if="dropdownOpen"
       class="absolute -right-[240px] mt-[17px] flex h-[480px] w-[350px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark sm:w-[361px] lg:right-0"
@@ -74,18 +71,15 @@
         </div>
       </div>
 
-      <!-- Loading state -->
       <div v-if="loading" class="flex items-center justify-center py-8">
         <i class="fas fa-spinner fa-spin text-2xl text-gray-400"></i>
       </div>
 
-      <!-- Empty state -->
       <div v-else-if="displayedNotifications.length === 0" class="flex flex-col items-center justify-center py-8">
         <i class="fas fa-bell-slash text-4xl text-gray-400 mb-3"></i>
         <p class="text-gray-600 dark:text-gray-400">Aucune notification</p>
       </div>
 
-      <!-- Notifications List -->
       <div v-else class="flex flex-col h-auto overflow-y-auto custom-scrollbar">
         <NotificationItem
           v-for="notification in displayedNotifications"
@@ -94,6 +88,7 @@
           @click="handleNotificationClick"
           @mark-read="handleMarkAsRead"
           @delete="handleDelete"
+          @open-resultat-modal="handleOpenResultatModal"
         />
       </div>
 
@@ -102,10 +97,9 @@
         class="mt-3 flex justify-center rounded-lg border border-gray-300 bg-white p-3 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
         @click="closeDropdown"
       >
-        Voir toutes les notifications
+        Voir toutes les notifications 
       </router-link>
     </div>
-    <!-- Dropdown End -->
 
     <!-- Notification Detail Modal -->
     <NotificationDetailModal
@@ -114,6 +108,13 @@
       @close="closeDetailModal"
       @mark-read="handleMarkAsRead"
       @delete="handleDelete"
+    />
+
+    <!-- Resultat Detail Modal -->
+    <ResultatDetailModal
+      :is-open="showResultatModal"
+      :resultat-id="selectedResultatId"
+      @close="closeResultatModal"
     />
   </div>
 </template>
@@ -124,6 +125,7 @@ import { RouterLink, useRouter } from 'vue-router'
 import { useNotifications } from '@/composables/useNotifications'
 import NotificationItem from './NotificationItem.vue'
 import NotificationDetailModal from './NotificationDetailModal.vue'
+import ResultatDetailModal from '@/components/modals/ResultatDetailModal.vue'
 
 const router = useRouter()
 const dropdownOpen = ref(false)
@@ -131,6 +133,8 @@ const dropdownRef = ref(null)
 const maxDisplayed = 5
 const showDetailModal = ref(false)
 const selectedNotification = ref(null)
+const showResultatModal = ref(false)
+const selectedResultatId = ref(null)
 
 const {
   notifications,
@@ -174,6 +178,17 @@ const closeDetailModal = () => {
   selectedNotification.value = null
 }
 
+const handleOpenResultatModal = (resultatId) => {
+  selectedResultatId.value = resultatId
+  showResultatModal.value = true
+  closeDropdown()
+}
+
+const closeResultatModal = () => {
+  showResultatModal.value = false
+  selectedResultatId.value = null
+}
+
 const handleMarkAsRead = async (notificationId) => {
   try {
     await markAsRead(notificationId)
@@ -200,11 +215,8 @@ const handleDelete = async (notificationId) => {
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
-
-  // Fetch unread notifications on mount
   fetchUnread()
 
-  // Refresh every 30 seconds
   const interval = setInterval(() => {
     fetchUnread()
   }, 30000)

@@ -257,8 +257,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/activite/{activiteId}/check-permissions', [TacheController::class, 'checkPermissions']);
 
         // ✅ NOUVEAU : Validation résultats individuels
-        Route::post('/resultats-individuels/{resultat}/validate-n1', [TacheController::class, 'validateIndividualResultN1']);
-        Route::post('/resultats-individuels/{resultat}/validate-n2', [TacheController::class, 'validateIndividualResultN2']);
+        // Route::post('/resultats-individuels/{resultat}/validate-n1', [TacheController::class, 'validateIndividualResultN1']);
+        // Route::post('/resultats-individuels/{resultat}/validate-n2', [TacheController::class, 'validateIndividualResultN2']);
 
 
         // CRUD basique
@@ -268,8 +268,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         // ✅ Actions principales
         Route::post('/{tache}/complete', [TacheController::class, 'complete']); // Marquer terminé
-        Route::post('/{tache}/validate-n1', [TacheController::class, 'validateN1']); // Validation N1
-        Route::post('/{tache}/validate-n2', [TacheController::class, 'validateN2']); // Validation N2
+        // Route::post('/{tache}/validate-n1', [TacheController::class, 'validateN1']); // Validation N1
+        // Route::post('/{tache}/validate-n2', [TacheController::class, 'validateN2']); // Validation N2
         Route::post('/{tache}/move', [TacheController::class, 'move']); // Déplacer (Kanban)
         Route::post('/{tache}/archive', [TacheController::class, 'archive']);
         Route::post('/{tache}/unarchive', [TacheController::class, 'unarchive']);
@@ -308,7 +308,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('taches/{tache}/resultats')->group(function () {
         Route::get('/', [TacheResultatController::class, 'index']);
         Route::post('/', [TacheResultatController::class, 'store']);
-        Route::get('/{resultat}', [TacheResultatController::class, 'show']);
+        // Route::get('/{resultat}', [TacheResultatController::class, 'show']);
         Route::put('/{resultat}', [TacheResultatController::class, 'update']);
         Route::delete('/{resultat}', [TacheResultatController::class, 'destroy']);
 
@@ -323,25 +323,45 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/{resultat}/document-stats', [TacheResultatController::class, 'documentStats']);
     });
 
+    // 📋 Récupérer un résultat spécifique
+    Route::get('/tache-resultats/{resultat}', [TacheResultatController::class, 'show'])
+    ->name('tache-resultats.show');
+
     // ========================================  ÉVALUATIONS  ========================================
     Route::prefix('evaluations')->group(function () {
         // ✅ Rapport hebdomadaire personnel
-        Route::get('/mon-rapport-hebdomadaire', [TacheController::class, 'myWeeklyReport']);
+        // Route::get('/mon-rapport-hebdomadaire', [TacheController::class, 'myWeeklyReport']);
+        Route::get('/mon-rapport-hebdomadaire', [EvaluationController::class, 'myWeeklyReportImproved']);
 
         // ✅ Rapport hebdomadaire d'un utilisateur (managers)
-        Route::get('/rapport-hebdomadaire/{userId}', [TacheController::class, 'userWeeklyReport']);
+        // Route::get('/rapport-hebdomadaire/{userId}', [TacheController::class, 'userWeeklyReport']);
+        Route::get('/rapport-hebdomadaire/{userId}', [EvaluationController::class, 'userWeeklyReport']);
+
+        // 📊 PERFORMANCE WORKSPACE (NOUVEAU)
+        // Vue d'ensemble de la performance d'un workspace
+        Route::get('/workspace/{workspaceId}/performance', [EvaluationController::class, 'workspacePerformanceReport']);
 
         // ✅ Performance d'équipe
         Route::get('/performance-equipe/{activiteId}', [TacheController::class, 'teamPerformance']);
 
+        // Détail de performance d'un membre spécifique
+        Route::get('/membre/{userId}/performance', [EvaluationController::class, 'memberDetailedPerformance']);
+
         // ✅ Export PDF
         Route::post('/export-pdf', [TacheController::class, 'exportWeeklyReportPdf']);
+
+        // Export PDF du rapport de performance workspace
+        Route::post('/workspace/{workspaceId}/export-pdf', [EvaluationController::class, 'exportWorkspacePerformancePdf']);
+
 
         // Dashboard général
         Route::get('/dashboard', [TacheController::class, 'evaluationDashboard']);
 
-        // Résultats en attente de validation
-        // Route::get('/resultats/en-attente', [TacheResultatController::class, 'pendingValidations']);
+        // Statistiques de validation utilisateur
+        Route::get('/stats/user/{userId}', [EvaluationController::class, 'userValidationStats']);
+
+        // Statistiques globales de validation
+        Route::get('/stats/global', [EvaluationController::class, 'globalValidationStats']);
 
         // 📋 Liste des résultats en attente de validation (personnalisée par rôle)
         Route::get('/resultats/en-attente', [EvaluationController::class, 'pendingValidations']);
@@ -350,10 +370,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/mes-responsabilites', [EvaluationController::class, 'myResponsibilities']);
 
         // ✅ Validation N1 (responsable activité uniquement)
-        Route::post('/resultats/{resultat}/validate-n1', [EvaluationController::class, 'validateN1']);
+        Route::post('/resultats-individuels/{resultat}/validate-n1', [EvaluationController::class, 'validateN1']);
 
         // ✅ Validation N2 (responsable projet uniquement)
-        Route::post('/resultats/{resultat}/validate-n2', [EvaluationController::class, 'validateN2']);
+        Route::post('/resultats-individuels/{resultat}/validate-n2', [EvaluationController::class, 'validateN2']);
 
         // ❌ Rejeter un résultat
         Route::post('/resultats/{resultat}/reject', [EvaluationController::class, 'reject']);
@@ -379,106 +399,137 @@ Route::middleware(['auth:sanctum'])->group(function () {
          * Récupère les documents d'une entité (Projet, Activité, Tâche, etc.)
          * Query params: documentable_type, documentable_id, with_versions
          */
-        Route::get('/', [DocumentController::class, 'index']);
+        Route::get('/', [DocumentController::class, 'index'])->name('documents.index');
 
         /**
          * GET /api/documents/search
          * Recherche de documents
          * Query params: query, type, user_id, documentable_type, documentable_id, mime_type, per_page
          */
-        Route::get('/search', [DocumentController::class, 'search']);
+        Route::get('/search', [DocumentController::class, 'search'])->name('documents.search');
 
         /**
          * GET /api/documents/workspace/{workspace}
          * Récupère tous les documents d'un workspace (projets, activités, tâches)
          * Query params: type, search, per_page
          */
-        Route::get('/workspace/{workspace}', [DocumentController::class, 'workspaceDocuments']);
+        Route::get('/workspace/{workspace}', [DocumentController::class, 'workspaceDocuments'])->name('documents.workspace');
 
         /**
          * GET /api/documents/workspace/{workspace}/stats
          * Statistiques des documents d'un workspace
          */
-        Route::get('/workspace/{workspace}/stats', [DocumentController::class, 'workspaceStats']);
+        Route::get('/workspace/{workspace}/stats', [DocumentController::class, 'workspaceStats'])->name('documents.workspace.stats');
 
         /**
          * POST /api/documents
          * Upload un ou plusieurs documents
          * Body: files[], documentable_type, documentable_id, description, visibility, disk
          */
-        Route::post('/', [DocumentController::class, 'store']);
+        Route::post('/', [DocumentController::class, 'store'])->name('documents.store');
 
         /**
          * GET /api/documents/{document}
          * Affiche les détails d'un document
          */
-        Route::get('/{document}', [DocumentController::class, 'show']);
+        Route::get('/{document}', [DocumentController::class, 'show'])->name('documents.show');
 
         /**
          * PUT/PATCH /api/documents/{document}
          * Met à jour les métadonnées d'un document
          * Body: nom, description, visibility
          */
-        Route::put('/{document}', [DocumentController::class, 'update']);
-        Route::patch('/{document}', [DocumentController::class, 'update']);
+        Route::put('/{document}', [DocumentController::class, 'update'])->name('documents.update');
+        Route::patch('/{document}', [DocumentController::class, 'update'])->name('documents.patch');
 
         /**
          * DELETE /api/documents/{document}
          * Supprime un document (soft delete)
          */
-        Route::delete('/{document}', [DocumentController::class, 'destroy']);
+        Route::delete('/{document}', [DocumentController::class, 'destroy'])->name('documents.destroy');
 
         /**
          * GET /api/documents/{document}/download
          * Télécharge un document
          */
-        Route::get('/{document}/download', [DocumentController::class, 'download']);
+        Route::get('/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
+
+        /**
+         * GET /api/documents/stats
+         * Statistiques globales des documents
+         */
+        Route::get('/stats', [DocumentController::class, 'globalStats'])->name('documents.global-stats');
+
+        /**
+         * GET /api/documents/hierarchy
+         * Récupère la hiérarchie d'une entité
+         */
+        Route::get('/hierarchy', [DocumentController::class, 'hierarchy'])->name('documents.hierarchy');
+
+        /**
+         * GET /api/documents/recent
+         * Documents récents de l'utilisateur
+         */
+        Route::get('/recent', [DocumentController::class, 'recent'])->name('documents.recent');
+
+        /**
+         * GET /api/documents/shared-with-me
+         * Documents partagés avec l'utilisateur
+         */
+        Route::get('/shared-with-me', [DocumentController::class, 'sharedWithMe'])->name('documents.shared-with-me');
+
+        /**
+         * GET /api/documents/my-documents
+         * Documents créés par l'utilisateur
+         */
+        Route::get('/my-documents', [DocumentController::class, 'myDocuments'])->name('documents.my-documents');
+
 
         /**
          * POST /api/documents/{document}/versions
          * Crée une nouvelle version d'un document
          * Body: file
          */
-        Route::post('/{document}/versions', [DocumentController::class, 'createVersion']);
+        Route::post('/{document}/versions', [DocumentController::class, 'createVersion'])->name('documents.versions.create');
 
         /**
          * GET /api/documents/{document}/versions
          * Récupère toutes les versions d'un document
          */
-        Route::get('/{document}/versions', [DocumentController::class, 'versions']);
+        Route::get('/{document}/versions', [DocumentController::class, 'versions'])->name('documents.versions');
 
         /**
          * GET /api/documents/{document}/stats
          * Récupère les statistiques de téléchargement
          */
-        Route::get('/{document}/stats', [DocumentController::class, 'stats']);
+        Route::get('/{document}/stats', [DocumentController::class, 'stats'])->name('documents.stats');
 
         /**
          * GET /api/documents/{document}/permissions
          * Liste les permissions d'un document
          */
-        Route::get('/{document}/permissions', [DocumentController::class, 'listPermissions']);
+        Route::get('/{document}/permissions', [DocumentController::class, 'listPermissions'])->name('documents.permissions.list');
 
         /**
          * POST /api/documents/{document}/permissions/grant
          * Accorde une permission à un utilisateur
          * Body: user_id, can_view, can_download, can_edit, can_delete, can_share, expires_at
          */
-        Route::post('/{document}/permissions/grant', [DocumentController::class, 'grantPermission']);
+        Route::post('/{document}/permissions/grant', [DocumentController::class, 'grantPermission'])->name('documents.permissions.grant');
 
         /**
          * POST /api/documents/{document}/permissions/revoke
          * Révoque une permission
          * Body: user_id
          */
-        Route::post('/{document}/permissions/revoke', [DocumentController::class, 'revokePermission']);
+        Route::post('/{document}/permissions/revoke', [DocumentController::class, 'revokePermission'])->name('documents.permissions.revoke');
 
         /**
          * POST /api/documents/{document}/share
          * Partage avec plusieurs utilisateurs
          * Body: user_ids[], permissions{}, expires_at
          */
-        Route::post('/{document}/share', [DocumentController::class, 'shareWithUsers']);
+        Route::post('/{document}/share', [DocumentController::class, 'shareWithUsers'])->name('documents.share');
     });
 
 

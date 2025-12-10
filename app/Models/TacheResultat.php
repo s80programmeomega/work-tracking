@@ -3,11 +3,16 @@
 namespace App\Models;
 
 use App\Enums\TacheStatut;
+use App\Notifications\RejetConfirmeNotification;
 use App\Notifications\ResultatEnAttenteN2Notification;
+use App\Notifications\ResultatRejeteN2InfoNotification;
 use App\Notifications\ResultatRejeteNotification;
 use App\Notifications\ResultatSoumisNotification;
+use App\Notifications\ResultatValidationCompleteNotification;
 use App\Notifications\ResultatValideN1Notification;
 use App\Notifications\ResultatValideN2Notification;
+use App\Notifications\ValidationN1ConfirmeeNotification;
+use App\Notifications\ValidationN2ConfirmeeNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -254,12 +259,16 @@ class TacheResultat extends Model
     {
         $this->update([
             'soumis_le' => now(),
+            // Réinitialiser les rejets s'il y en avait
+            'rejete_par' => null,
+            'rejete_le' => null,
+            'motif_rejet' => null,
+            'niveau_rejet' => null,
         ]);
 
         // Notifier les validateurs
         $this->notifyValidators();
     }
-
     public function validateByN1(User $validator, ?string $commentaire = null): void
     {
         $this->update([
@@ -269,19 +278,31 @@ class TacheResultat extends Model
             'commentaire_n1' => $commentaire,
         ]);
 
-        // Notifier l'auteur
+       
+
+        // 📧 1. Notifier l'auteur du résultat
         $this->user->notify(new ResultatValideN1Notification($this, $validator, $commentaire));
 
-        // Si N2 requis, notifier le responsable projet
+        // 📧 2. Notifier le validateur N1 (confirmation de sa validation)
+        $validator->notify(new ValidationN1ConfirmeeNotification($this));
+
+        // 📧 3. Si N2 requis, notifier le responsable projet
         if ($this->tache->validation_n2_required) {
-            $responsableN2 = $this->tache->activite->projet->responsable;
-            if ($responsableN2) {
+            $responsableN2 = $this->tache->activite->projet?->responsable;
+            if ($responsableN2 && $responsableN2->id !== $validator->id) {
                 $responsableN2->notify(new ResultatEnAttenteN2Notification($this));
             }
         }
+
+        Log::info('✅ Notifications N1 envoyées', [
+            'resultat_id' => $this->id,
+            'auteur_id' => $this->user_id,
+            'validateur_id' => $validator->id,
+            'n2_required' => $this->tache->validation_n2_required,
+        ]);
     }
 
-    public function validateByN2(User $validator, ?string $commentaire = null): void
+        public function validateByN2(User $validator, ?string $commentaire = null): void
     {
         if (!$this->valide_par_n1) {
             throw new \Exception('Le résultat doit d\'abord être validé par le N1');
@@ -305,8 +326,23 @@ class TacheResultat extends Model
             $this->recalculateGlobalStatus();
         }
 
-        // Notifier l'auteur
+        // 📧 1. Notifier l'auteur du résultat
         $this->user->notify(new ResultatValideN2Notification($this, $validator, $commentaire));
+
+        // 📧 2. Notifier le validateur N2 (confirmation)
+        $validator->notify(new ValidationN2ConfirmeeNotification($this));
+
+        // 📧 3. Notifier le validateur N1 (validation complète)
+        if ($this->validateurN1 && $this->validateurN1->id !== $validator->id) {
+            $this->validateurN1->notify(new ResultatValidationCompleteNotification($this));
+        }
+
+        Log::info('✅ Notifications N2 envoyées', [
+            'resultat_id' => $this->id,
+            'auteur_id' => $this->user_id,
+            'validateur_n2_id' => $validator->id,
+            'validateur_n1_id' => $this->validateur_n1_id,
+        ]);
     }
 
 
@@ -371,6 +407,10 @@ class TacheResultat extends Model
                 'validateur_n1_id' => $validator->id,
                 'valide_le_n1' => now(),
                 'commentaire_n1' => $commentaire,
+                'rejete_par' => $validator->id,
+                'rejete_le' => now(),
+                'motif_rejet' => $commentaire,
+                'niveau_rejet' => 'n1',
             ]);
         } else {
             $this->update([
@@ -378,14 +418,33 @@ class TacheResultat extends Model
                 'validateur_n2_id' => $validator->id,
                 'valide_le_n2' => now(),
                 'commentaire_n2' => $commentaire,
+                'rejete_par' => $validator->id,
+                'rejete_le' => now(),
+                'motif_rejet' => $commentaire,
+                'niveau_rejet' => 'n2',
             ]);
         }
 
         // Remettre le statut individuel à "a_faire"
         $this->tache->updateStatutForUser($this->user, 'a_faire', 0);
 
-        // Notifier l'auteur
+        // 📧 1. Notifier l'auteur du résultat (PRIORITAIRE)
         $this->user->notify(new ResultatRejeteNotification($this, $validator, $commentaire, $level));
+
+        // 📧 2. Notifier le validateur (confirmation de son rejet)
+        $validator->notify(new RejetConfirmeNotification($this, $level));
+
+        // 📧 3. Si rejet N2, notifier aussi le validateur N1 (pour info)
+        if ($level === 'n2' && $this->validateurN1 && $this->validateurN1->id !== $validator->id) {
+            $this->validateurN1->notify(new ResultatRejeteN2InfoNotification($this, $commentaire));
+        }
+
+        Log::info('❌ Notifications rejet envoyées', [
+            'resultat_id' => $this->id,
+            'auteur_id' => $this->user_id,
+            'validateur_id' => $validator->id,
+            'level' => $level,
+        ]);
     }
 
     /**
@@ -405,19 +464,32 @@ class TacheResultat extends Model
 
     // ==================== HELPER METHODS ====================
 
+    /**
+     * 🔔 Notifier les validateurs appropriés
+     */
     protected function notifyValidators(): void
     {
         // Notifier responsable N1 (activité)
         $responsableN1 = $this->tache->activite->responsable;
         if ($responsableN1 && $responsableN1->id !== $this->user_id) {
             $responsableN1->notify(new ResultatSoumisNotification($this));
+
+            Log::info('📧 Notification N1 envoyée', [
+                'resultat_id' => $this->id,
+                'responsable_n1_id' => $responsableN1->id,
+            ]);
         }
 
         // Si pas de N1 requis, notifier directement N2
         if (!$this->tache->validation_n1_required && $this->tache->validation_n2_required) {
-            $responsableN2 = $this->tache->activite->projet->responsable;
+            $responsableN2 = $this->tache->activite->projet?->responsable;
             if ($responsableN2 && $responsableN2->id !== $this->user_id) {
                 $responsableN2->notify(new ResultatSoumisNotification($this));
+
+                Log::info('📧 Notification N2 directe envoyée', [
+                    'resultat_id' => $this->id,
+                    'responsable_n2_id' => $responsableN2->id,
+                ]);
             }
         }
     }

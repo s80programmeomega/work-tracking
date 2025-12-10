@@ -159,19 +159,19 @@ class DocumentAccessResolver
         switch ($entityType) {
             case Workspace::class:
                 return $this->canUploadToWorkspace($user, $entityId);
-            
+
             case Projet::class:
                 return $this->canUploadToProjet($user, $entityId);
-            
+
             case Activite::class:
                 return $this->canUploadToActivite($user, $entityId);
-            
+
             case Tache::class:
                 return $this->canUploadToTache($user, $entityId);
-            
+
             case TacheResultat::class:
                 return $this->canUploadToResultat($user, $entityId);
-            
+
             default:
                 return false;
         }
@@ -191,7 +191,7 @@ class DocumentAccessResolver
             ->where($permission, true)
             ->where(function ($q) {
                 $q->whereNull('expires_at')
-                  ->orWhere('expires_at', '>', now());
+                    ->orWhere('expires_at', '>', now());
             })
             ->first();
 
@@ -216,19 +216,19 @@ class DocumentAccessResolver
         switch ($entityType) {
             case Workspace::class:
                 return $this->checkWorkspaceAccess($user, $entity, $action);
-            
+
             case Projet::class:
                 return $this->checkProjetAccess($user, $entity, $action);
-            
+
             case Activite::class:
                 return $this->checkActiviteAccess($user, $entity, $action);
-            
+
             case Tache::class:
                 return $this->checkTacheAccess($user, $entity, $action);
-            
+
             case TacheResultat::class:
                 return $this->checkResultatAccess($user, $entity, $action);
-            
+
             default:
                 return false;
         }
@@ -240,34 +240,31 @@ class DocumentAccessResolver
      * ===================================================================
      */
 
-    protected function checkWorkspaceAccess(User $user, Workspace $workspace, string $action): bool
+   protected function checkWorkspaceAccess(User $user, Workspace $workspace, string $action): bool
     {
-        // Owner du workspace
         if ($workspace->owner_id === $user->id) {
             return true;
         }
 
-        // Admin du workspace (par défaut, tous les droits)
         $member = $workspace->members()->where('user_id', $user->id)->first();
         if (!$member) {
             return false;
         }
 
-        $role = $member->pivot->role;
+        $role = $member->pivot->role ?? null;
         $permissions = $member->pivot->permissions ?? [];
-
-        // Admin a tous les droits par défaut (modifiable par owner)
-        if ($role === 'admin') {
-            // Vérifier si les permissions ont été restreintes par l'owner
-            if (empty($permissions)) {
-                return true; // Admin par défaut = tous les droits
-            }
-            
-            // Sinon, vérifier les permissions explicites
-            return $this->checkPermissionInArray($permissions, "documents_{$action}");
+        
+        // FIX: Décoder si JSON string
+        if (is_string($permissions)) {
+            $permissions = json_decode($permissions, true) ?? [];
         }
 
-        // Membre classique : vérifier permissions explicites
+        // Admins ont tous les droits par défaut
+        if ($role === 'admin' || $role === 'owner') {
+            return true;
+        }
+
+        // Vérifier la permission spécifique
         return $this->checkPermissionInArray($permissions, "documents_{$action}");
     }
 
@@ -305,7 +302,7 @@ class DocumentAccessResolver
         ];
 
         $pivotPermission = $permissionMap[$action] ?? null;
-        
+
         if ($pivotPermission && isset($member->pivot->{$pivotPermission})) {
             return $member->pivot->{$pivotPermission} === true;
         }
@@ -354,7 +351,7 @@ class DocumentAccessResolver
         ];
 
         $pivotPermission = $permissionMap[$action] ?? null;
-        
+
         if ($pivotPermission && isset($member->pivot->{$pivotPermission})) {
             return $member->pivot->{$pivotPermission} === true;
         }
@@ -403,7 +400,7 @@ class DocumentAccessResolver
         ];
 
         $pivotPermission = $permissionMap[$action] ?? null;
-        
+
         if ($pivotPermission && isset($assignee->pivot->{$pivotPermission})) {
             return $assignee->pivot->{$pivotPermission} === true;
         }
@@ -432,7 +429,7 @@ class DocumentAccessResolver
         // Validateurs N1 et N2 peuvent voir et télécharger
         if ($resultat->tache) {
             $tache = $resultat->tache;
-            
+
             // Responsable de l'activité (Validateur N1)
             if ($tache->activite && $tache->activite->responsable_id === $user->id) {
                 return in_array($action, ['view', 'download', 'share']);

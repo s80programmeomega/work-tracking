@@ -69,426 +69,462 @@ A comprehensive Trello-like task management system built with **Laravel 10** (ba
 
 ```sql
 -- Users & Authentication
-users
-├── id (PK)
-├── nom
-├── email (unique)
-├── email_verified_at
-├── password
-├── role (enum)
-├── fonction
-├── avatar
-├── preferences (JSON)
-├── last_login_at
-├── created_at
-└── updated_at
+CREATE TABLE `users` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`nom` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`prenom` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`nom_complet` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`email` VARCHAR(255) NOT NULL COLLATE 'utf8mb4_unicode_ci',
+	`is_super_admin` TINYINT(1) NOT NULL DEFAULT '0',
+	`email_verified_at` TIMESTAMP NULL DEFAULT NULL,
+	`password` VARCHAR(255) NOT NULL COLLATE 'utf8mb4_unicode_ci',
+	`profile_photo_path` VARCHAR(2048) NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`is_active` TINYINT(1) NOT NULL DEFAULT '1',
+	`last_login_at` TIMESTAMP NULL DEFAULT NULL,
+	`last_login_ip` VARCHAR(45) NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`roless` ENUM('super_admin','manager','member','viewer','admin','cadre','stagiaire') NULL DEFAULT 'admin' COLLATE 'utf8mb4_unicode_ci',
+	`fonction` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`avatar` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`bio` TEXT NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`adresse` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`language` VARCHAR(10) NOT NULL DEFAULT 'fr' COLLATE 'utf8mb4_unicode_ci',
+	`timezone` VARCHAR(50) NOT NULL DEFAULT 'UTC' COLLATE 'utf8mb4_unicode_ci',
+	`notification_preferences` JSON NULL DEFAULT NULL,
+	`two_factor_secret` TEXT NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`two_factor_recovery_codes` TEXT NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`two_factor_confirmed_at` TIMESTAMP NULL DEFAULT NULL,
+	`remember_token` VARCHAR(100) NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`created_at` TIMESTAMP NULL DEFAULT NULL,
+	`updated_at` TIMESTAMP NULL DEFAULT NULL,
+	`deleted_at` TIMESTAMP NULL DEFAULT NULL,
+	`current_workspace_id` BIGINT(20) UNSIGNED NULL DEFAULT NULL,
+	PRIMARY KEY (`id`) USING BTREE,
+	UNIQUE INDEX `users_email_unique` (`email`) USING BTREE,
+	INDEX `users_is_active_index` (`is_active`) USING BTREE,
+	INDEX `users_current_workspace_id_foreign` (`current_workspace_id`) USING BTREE,
+	INDEX `users_role_index` (`roless`) USING BTREE,
+	INDEX `idx_super_admin` (`is_super_admin`) USING BTREE,
+	CONSTRAINT `users_current_workspace_id_foreign` FOREIGN KEY (`current_workspace_id`) REFERENCES `workspaces` (`id`) ON UPDATE NO ACTION ON DELETE SET NULL
+)
+COLLATE='utf8mb4_unicode_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=7
+;
+
+CREATE TABLE `workspaces` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`nom` VARCHAR(255) NOT NULL COLLATE 'utf8mb4_unicode_ci',
+	`description` TEXT NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`code` VARCHAR(255) NOT NULL COLLATE 'utf8mb4_unicode_ci',
+	`owner_id` BIGINT(20) UNSIGNED NOT NULL,
+	`settings` JSON NULL DEFAULT NULL,
+	`is_active` TINYINT(1) NOT NULL DEFAULT '1',
+	`logo` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`created_at` TIMESTAMP NULL DEFAULT NULL,
+	`updated_at` TIMESTAMP NULL DEFAULT NULL,
+	`deleted_at` TIMESTAMP NULL DEFAULT NULL,
+	PRIMARY KEY (`id`) USING BTREE,
+	UNIQUE INDEX `workspaces_code_unique` (`code`) USING BTREE,
+	INDEX `workspaces_owner_id_index` (`owner_id`) USING BTREE,
+	INDEX `workspaces_is_active_index` (`is_active`) USING BTREE,
+	INDEX `workspaces_created_at_index` (`created_at`) USING BTREE,
+	CONSTRAINT `workspaces_owner_id_foreign` FOREIGN KEY (`owner_id`) REFERENCES `users` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE
+)
+COLLATE='utf8mb4_unicode_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=9
+;
+
+CREATE TABLE `workspace_members` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`workspace_id` BIGINT(20) UNSIGNED NOT NULL,
+	`user_id` BIGINT(20) UNSIGNED NOT NULL,
+	`role` ENUM('owner','admin','member','viewer') NOT NULL DEFAULT 'member' COLLATE 'utf8mb4_unicode_ci',
+	`permissions` JSON NULL DEFAULT NULL,
+	`invited_at` TIMESTAMP NULL DEFAULT NULL,
+	`invited_by` BIGINT(20) UNSIGNED NULL DEFAULT NULL,
+	`created_at` TIMESTAMP NULL DEFAULT NULL,
+	`updated_at` TIMESTAMP NULL DEFAULT NULL,
+	PRIMARY KEY (`id`) USING BTREE,
+	UNIQUE INDEX `workspace_members_workspace_id_user_id_unique` (`workspace_id`, `user_id`) USING BTREE,
+	INDEX `workspace_members_invited_by_foreign` (`invited_by`) USING BTREE,
+	INDEX `workspace_members_workspace_id_index` (`workspace_id`) USING BTREE,
+	INDEX `workspace_members_user_id_index` (`user_id`) USING BTREE,
+	INDEX `workspace_members_role_index` (`role`) USING BTREE,
+	CONSTRAINT `workspace_members_invited_by_foreign` FOREIGN KEY (`invited_by`) REFERENCES `users` (`id`) ON UPDATE NO ACTION ON DELETE SET NULL,
+	CONSTRAINT `workspace_members_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE,
+	CONSTRAINT `workspace_members_workspace_id_foreign` FOREIGN KEY (`workspace_id`) REFERENCES `workspaces` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE
+)
+COLLATE='utf8mb4_unicode_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=14
+;
+Ex:           
+workspace_members.persmission:"{\"can_invite_members\":false,\"can_create_projects\":true,\"can_manage_settings\":false}"
 
 -- Projects (Top-level)
-projets
-├── id (PK)
-├── uuid (unique, for public URLs)
-├── nom
-├── description (text)
-├── date_debut
-├── date_fin
-├── responsable_id (FK → users)
-├── status (enum: active, archived, completed)
-├── visibility (enum: public, private, team)
-├── settings (JSON)
-├── created_at
-└── updated_at
+CREATE TABLE `projets` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`workspace_id` BIGINT(20) UNSIGNED NULL DEFAULT NULL,
+	`nom` VARCHAR(255) NOT NULL COLLATE 'utf8mb4_unicode_ci',
+	`description` TEXT NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`code` VARCHAR(255) NOT NULL COLLATE 'utf8mb4_unicode_ci',
+	`date_debut` DATE NOT NULL DEFAULT '2025-11-07',
+	`date_fin` DATE NOT NULL,
+	`responsable_id` BIGINT(20) UNSIGNED NOT NULL,
+	`budget` DECIMAL(15,2) NULL DEFAULT NULL,
+	`progression` INT(10) NOT NULL DEFAULT '0',
+	`is_template` TINYINT(1) NOT NULL DEFAULT '0',
+	`is_favorite` TINYINT(1) NOT NULL DEFAULT '0',
+	`objectifs` TEXT NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`metadata` JSON NULL DEFAULT NULL,
+	`archived_at` TIMESTAMP NULL DEFAULT NULL,
+	`status` ENUM('active','archived','completed') NULL DEFAULT 'active' COLLATE 'utf8mb4_unicode_ci',
+	`visibility` ENUM('public','private','team') NOT NULL DEFAULT 'team' COLLATE 'utf8mb4_unicode_ci',
+	`couleur` VARCHAR(255) NOT NULL DEFAULT '#3B82F6' COLLATE 'utf8mb4_unicode_ci',
+	`priorite` ENUM('basse','normale','haute','critique') NOT NULL DEFAULT 'normale' COLLATE 'utf8mb4_unicode_ci',
+	`created_at` TIMESTAMP NULL DEFAULT NULL,
+	`updated_at` TIMESTAMP NULL DEFAULT NULL,
+	`deleted_at` TIMESTAMP NULL DEFAULT NULL,
+	`created_by` BIGINT(20) UNSIGNED NULL DEFAULT NULL,
+	PRIMARY KEY (`id`) USING BTREE,
+	UNIQUE INDEX `projets_code_unique` (`code`) USING BTREE,
+	INDEX `projets_responsable_id_foreign` (`responsable_id`) USING BTREE,
+	INDEX `projets_workspace_id_index` (`workspace_id`) USING BTREE,
+	INDEX `projets_created_by_foreign` (`created_by`) USING BTREE,
+	CONSTRAINT `projets_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON UPDATE NO ACTION ON DELETE SET NULL,
+	CONSTRAINT `projets_responsable_id_foreign` FOREIGN KEY (`responsable_id`) REFERENCES `users` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE,
+	CONSTRAINT `projets_workspace_id_foreign` FOREIGN KEY (`workspace_id`) REFERENCES `workspaces` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE
+)
+COLLATE='utf8mb4_unicode_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=15
+;
+
+CREATE TABLE `projet_user` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`projet_id` BIGINT(20) UNSIGNED NOT NULL,
+	`user_id` BIGINT(20) UNSIGNED NOT NULL,
+	`role` ENUM('owner','admin','member','viewer') NOT NULL DEFAULT 'member' COLLATE 'utf8mb4_unicode_ci',
+	`can_edit` TINYINT(1) NOT NULL DEFAULT '0',
+	`can_delete` TINYINT(1) NOT NULL DEFAULT '0',
+	`can_invite` TINYINT(1) NOT NULL DEFAULT '0',
+	`can_delete_member` TINYINT(1) NOT NULL DEFAULT '0',
+	`created_at` TIMESTAMP NULL DEFAULT NULL,
+	`updated_at` TIMESTAMP NULL DEFAULT NULL,
+	`Column 10` INT(10) NULL DEFAULT NULL,
+	PRIMARY KEY (`id`) USING BTREE,
+	UNIQUE INDEX `projet_user_projet_id_user_id_unique` (`projet_id`, `user_id`) USING BTREE,
+	INDEX `projet_user_projet_id_index` (`projet_id`) USING BTREE,
+	INDEX `projet_user_user_id_index` (`user_id`) USING BTREE,
+	CONSTRAINT `projet_user_projet_id_foreign` FOREIGN KEY (`projet_id`) REFERENCES `projets` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE,
+	CONSTRAINT `projet_user_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE
+)
+COLLATE='utf8mb4_unicode_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=23
+;
+
+
 
 -- Activities (Middle-tier)
-activites
-├── id (PK)
-├── uuid (unique)
-├── projet_id (FK → projets, cascade delete)
-├── nom
-├── description (text)
-├── responsable_id (FK → users)
-├── date_debut
-├── date_fin
-├── ordre (int, for sorting)
-├── status (enum: active, archived)
-├── created_at
-└── updated_at
+CREATE TABLE `activites` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`projet_id` BIGINT(20) UNSIGNED NOT NULL,
+	`nom` VARCHAR(255) NOT NULL COLLATE 'utf8mb4_unicode_ci',
+	`description` TEXT NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`code` VARCHAR(255) NOT NULL COLLATE 'utf8mb4_unicode_ci',
+	`responsable_id` BIGINT(20) UNSIGNED NOT NULL,
+	`created_by` BIGINT(20) UNSIGNED NULL DEFAULT NULL,
+	`date_debut` DATE NULL DEFAULT NULL,
+	`date_fin` DATE NULL DEFAULT NULL,
+	`ordre` INT(10) NOT NULL DEFAULT '0',
+	`status` ENUM('active','archived') NOT NULL DEFAULT 'active' COLLATE 'utf8mb4_unicode_ci',
+	`progression` INT(10) NOT NULL DEFAULT '0',
+	`couleur` VARCHAR(7) NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`metadata` JSON NULL DEFAULT NULL,
+	`archived_at` TIMESTAMP NULL DEFAULT NULL,
+	`created_at` TIMESTAMP NULL DEFAULT NULL,
+	`updated_at` TIMESTAMP NULL DEFAULT NULL,
+	`deleted_at` TIMESTAMP NULL DEFAULT NULL,
+	PRIMARY KEY (`id`) USING BTREE,
+	UNIQUE INDEX `activites_code_unique` (`code`) USING BTREE,
+	INDEX `activites_projet_id_index` (`projet_id`) USING BTREE,
+	INDEX `activites_responsable_id_index` (`responsable_id`) USING BTREE,
+	INDEX `activites_status_index` (`status`) USING BTREE,
+	INDEX `activites_ordre_index` (`ordre`) USING BTREE,
+	INDEX `activites_created_by_foreign` (`created_by`) USING BTREE,
+	CONSTRAINT `activites_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION,
+	CONSTRAINT `activites_projet_id_foreign` FOREIGN KEY (`projet_id`) REFERENCES `projets` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE,
+	CONSTRAINT `activites_responsable_id_foreign` FOREIGN KEY (`responsable_id`) REFERENCES `users` (`id`) ON UPDATE NO ACTION ON DELETE RESTRICT
+)
+COLLATE='utf8mb4_unicode_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=20
+;
 
--- Tasks (Cards/Items)
-taches
-├── id (PK)
-├── uuid (unique)
-├── activite_id (FK → activites, cascade delete)
-├── titre
-├── description (text, markdown)
-├── objectif (text)
-├── indicateurs_resultats (text)
-├── statut (enum: a_faire, en_cours, termine)
-├── priorite (enum: faible, moyenne, elevee, critique)
-├── echeance (datetime)
-├── date_debut (datetime)
-├── taux_realisation (int 0-100)
-├── validation_superieur (boolean)
-├── verrou_reevaluation (boolean)
-├── position (int, for Kanban ordering)
-├── estimated_hours (decimal)
-├── actual_hours (decimal)
-├── cover_image (string)
-├── is_template (boolean)
-├── parent_id (FK → taches, for subtasks)
-├── created_by (FK → users)
-├── created_at
-├── updated_at
-└── deleted_at (soft delete)
+-- Activities-User (Many-to-Many)
+activite_user
+CREATE TABLE `activite_user` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`activite_id` BIGINT(20) UNSIGNED NOT NULL,
+	`user_id` BIGINT(20) UNSIGNED NOT NULL,
+	`role` ENUM('responsable','collaborator','viewer') NOT NULL DEFAULT 'collaborator' COLLATE 'utf8mb4_unicode_ci',
+	`can_edit_activity` TINYINT(1) NOT NULL DEFAULT '0',
+	`can_delete_activity` TINYINT(1) NOT NULL DEFAULT '0',
+	`can_create_tasks` TINYINT(1) NOT NULL DEFAULT '0',
+	`can_edit_tasks` TINYINT(1) NOT NULL DEFAULT '0',
+	`can_delete_tasks` TINYINT(1) NOT NULL DEFAULT '0',
+	`can_validate_results` TINYINT(1) NOT NULL DEFAULT '0',
+	`can_assign_users` TINYINT(1) NOT NULL DEFAULT '0',
+	`created_at` TIMESTAMP NULL DEFAULT NULL,
+	`updated_at` TIMESTAMP NULL DEFAULT NULL,
+	PRIMARY KEY (`id`) USING BTREE,
+	UNIQUE INDEX `activite_user_unique` (`activite_id`, `user_id`) USING BTREE,
+	INDEX `idx_role` (`role`) USING BTREE,
+	INDEX `activite_user_user_id_foreign` (`user_id`) USING BTREE,
+	CONSTRAINT `activite_user_activite_id_foreign` FOREIGN KEY (`activite_id`) REFERENCES `activites` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE,
+	CONSTRAINT `activite_user_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE
+)
+COLLATE='utf8mb4_unicode_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=26
+;
 
--- Task-User Assignment (Many-to-Many)
-tache_user
-├── id (PK)
-├── tache_id (FK → taches, cascade delete)
-├── user_id (FK → users, cascade delete)
-├── is_responsable (boolean)
-├── assigned_at
-└── assigned_by (FK → users)
+CREATE TABLE `taches` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`activite_id` BIGINT(20) UNSIGNED NOT NULL,
+	`parent_tache_id` BIGINT(20) UNSIGNED NULL DEFAULT NULL,
+	`titre` VARCHAR(255) NOT NULL COLLATE 'utf8mb4_unicode_ci',
+	`code` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`description` TEXT NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`objectif` TEXT NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`indicateurs_resultats` TEXT NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`statut` ENUM('a_faire','en_cours','termine') NOT NULL DEFAULT 'a_faire' COLLATE 'utf8mb4_unicode_ci',
+	`priorite` ENUM('faible','moyenne','elevee','critique') NOT NULL DEFAULT 'moyenne' COLLATE 'utf8mb4_unicode_ci',
+	`echeance` DATE NULL DEFAULT NULL,
+	`date_debut` DATE NULL DEFAULT NULL,
+	`date_fin_reelle` DATE NULL DEFAULT NULL,
+	`taux_realisation` INT(10) NOT NULL DEFAULT '0',
+	`estimated_hours` INT(10) NOT NULL DEFAULT '0',
+	`actual_hours` INT(10) NOT NULL DEFAULT '0',
+	`week_number` INT(10) NULL DEFAULT NULL,
+	`year` INT(10) NULL DEFAULT NULL,
+	`validation_n1_required` TINYINT(1) NOT NULL DEFAULT '1',
+	`validated_n1_by` BIGINT(20) UNSIGNED NULL DEFAULT NULL,
+	`validated_n1_at` TIMESTAMP NULL DEFAULT NULL,
+	`commentaire_n1` TEXT NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`validation_n2_required` TINYINT(1) NOT NULL DEFAULT '1',
+	`validated_n2_by` BIGINT(20) UNSIGNED NULL DEFAULT NULL,
+	`validated_n2_at` TIMESTAMP NULL DEFAULT NULL,
+	`commentaire_n2` TEXT NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`validation_superieur` TINYINT(1) NOT NULL DEFAULT '0',
+	`verrou_reevaluation` TINYINT(1) NOT NULL DEFAULT '0',
+	`commentaire` TEXT NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`validateur_id` BIGINT(20) UNSIGNED NULL DEFAULT NULL,
+	`created_by` BIGINT(20) UNSIGNED NULL DEFAULT NULL,
+	`position` INT(10) NULL DEFAULT NULL,
+	`couleur` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`cover_image` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`metadata` JSON NULL DEFAULT NULL,
+	`visibility` ENUM('public','private','members_only') NOT NULL DEFAULT 'members_only' COLLATE 'utf8mb4_unicode_ci',
+	`archive_status` ENUM('active','archived') NOT NULL DEFAULT 'active' COLLATE 'utf8mb4_unicode_ci',
+	`archived_at` TIMESTAMP NULL DEFAULT NULL,
+	`deleted_at` TIMESTAMP NULL DEFAULT NULL,
+	`created_at` TIMESTAMP NULL DEFAULT NULL,
+	`updated_at` TIMESTAMP NULL DEFAULT NULL,
+	PRIMARY KEY (`id`) USING BTREE,
+	UNIQUE INDEX `taches_activite_id_titre_unique` (`activite_id`, `titre`) USING BTREE,
+	UNIQUE INDEX `taches_code_unique` (`code`) USING BTREE,
+	INDEX `taches_validateur_id_foreign` (`validateur_id`) USING BTREE,
+	INDEX `taches_archive_status_index` (`archive_status`) USING BTREE,
+	INDEX `taches_parent_tache_id_index` (`parent_tache_id`) USING BTREE,
+	INDEX `taches_visibility_index` (`visibility`) USING BTREE,
+	INDEX `taches_created_by_foreign` (`created_by`) USING BTREE,
+	INDEX `taches_week_number_year_index` (`week_number`, `year`) USING BTREE,
+	INDEX `taches_validated_n1_at_index` (`validated_n1_at`) USING BTREE,
+	INDEX `taches_validated_n2_at_index` (`validated_n2_at`) USING BTREE,
+	INDEX `taches_validated_n1_by_foreign` (`validated_n1_by`) USING BTREE,
+	INDEX `taches_validated_n2_by_foreign` (`validated_n2_by`) USING BTREE,
+	CONSTRAINT `taches_activite_id_foreign` FOREIGN KEY (`activite_id`) REFERENCES `activites` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE,
+	CONSTRAINT `taches_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION,
+	CONSTRAINT `taches_parent_tache_id_foreign` FOREIGN KEY (`parent_tache_id`) REFERENCES `taches` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE,
+	CONSTRAINT `taches_validated_n1_by_foreign` FOREIGN KEY (`validated_n1_by`) REFERENCES `users` (`id`) ON UPDATE NO ACTION ON DELETE SET NULL,
+	CONSTRAINT `taches_validated_n2_by_foreign` FOREIGN KEY (`validated_n2_by`) REFERENCES `users` (`id`) ON UPDATE NO ACTION ON DELETE SET NULL,
+	CONSTRAINT `taches_validateur_id_foreign` FOREIGN KEY (`validateur_id`) REFERENCES `users` (`id`) ON UPDATE NO ACTION ON DELETE SET NULL
+)
+COLLATE='utf8mb4_unicode_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=27
+;
 
--- Comments
-commentaires
-├── id (PK)
-├── commentable_type (polymorphic)
-├── commentable_id (polymorphic)
-├── user_id (FK → users)
-├── parent_id (FK → commentaires, for threads)
-├── content (text, markdown)
-├── mentions (JSON, user IDs)
-├── created_at
-├── updated_at
-└── deleted_at (soft delete)
+CREATE TABLE `tache_user` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`tache_id` BIGINT(20) UNSIGNED NOT NULL,
+	`user_id` BIGINT(20) UNSIGNED NOT NULL,
+	`role` ENUM('assignee','validator','observer') NOT NULL DEFAULT 'assignee' COLLATE 'utf8mb4_unicode_ci',
+	`can_edit` TINYINT(1) NOT NULL DEFAULT '1',
+	`can_complete` TINYINT(1) NOT NULL DEFAULT '1',
+	`can_validate` TINYINT(1) NOT NULL DEFAULT '0',
+	`statut_individuel` ENUM('a_faire','en_cours','termine') NOT NULL DEFAULT 'a_faire' COMMENT 'Statut individuel de l\'utilisateur pour cette tâche' COLLATE 'utf8mb4_unicode_ci',
+	`progression_individuelle` INT(10) NOT NULL DEFAULT '0' COMMENT 'Progression personnelle en pourcentage',
+	`started_at` TIMESTAMP NULL DEFAULT NULL COMMENT 'Date de début personnel',
+	`completed_at` TIMESTAMP NULL DEFAULT NULL COMMENT 'Date de complétion personnelle',
+	`notes_personnelles` TEXT NULL DEFAULT NULL COMMENT 'Notes privées de l\'assigné' COLLATE 'utf8mb4_unicode_ci',
+	`created_at` TIMESTAMP NULL DEFAULT NULL,
+	`updated_at` TIMESTAMP NULL DEFAULT NULL,
+	PRIMARY KEY (`id`) USING BTREE,
+	UNIQUE INDEX `tache_user_tache_id_user_id_unique` (`tache_id`, `user_id`) USING BTREE,
+	INDEX `tache_user_user_id_foreign` (`user_id`) USING BTREE,
+	CONSTRAINT `tache_user_tache_id_foreign` FOREIGN KEY (`tache_id`) REFERENCES `taches` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE,
+	CONSTRAINT `tache_user_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE
+)
+COLLATE='utf8mb4_unicode_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=22
+;
 
--- Documents/Attachments
-documents
-├── id (PK)
-├── uuid (unique)
-├── documentable_type (polymorphic)
-├── documentable_id (polymorphic)
-├── user_id (FK → users)
-├── nom (filename)
-├── original_name
-├── type (mime_type)
-├── taille (bytes)
-├── chemin (path/URL)
-├── thumbnail_path
-├── is_cover (boolean)
-├── created_at
-└── updated_at
+CREATE TABLE `tache_resultats` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`tache_id` BIGINT(20) UNSIGNED NOT NULL,
+	`user_id` BIGINT(20) UNSIGNED NOT NULL,
+	`is_individual` TINYINT(1) NOT NULL DEFAULT '1' COMMENT 'true = résultat individuel, false = résultat global de la tâche',
+	`resultats_attendus` TEXT NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`resultats_obtenus` TEXT NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`taux_realisation` INT(10) NOT NULL DEFAULT '0',
+	`difficultes_rencontrees` TEXT NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`solutions_envisagees` TEXT NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`observations` TEXT NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`soumis_le` TIMESTAMP NULL DEFAULT NULL,
+	`valide_par_n1` TINYINT(1) NOT NULL DEFAULT '0',
+	`validateur_n1_id` BIGINT(20) UNSIGNED NULL DEFAULT NULL,
+	`valide_le_n1` TIMESTAMP NULL DEFAULT NULL,
+	`commentaire_n1` TEXT NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`valide_par_n2` TINYINT(1) NOT NULL DEFAULT '0',
+	`validateur_n2_id` BIGINT(20) UNSIGNED NULL DEFAULT NULL,
+	`valide_le_n2` TIMESTAMP NULL DEFAULT NULL,
+	`commentaire_n2` TEXT NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`created_at` TIMESTAMP NULL DEFAULT NULL,
+	`updated_at` TIMESTAMP NULL DEFAULT NULL,
+	`deleted_at` TIMESTAMP NULL DEFAULT NULL,
+	PRIMARY KEY (`id`) USING BTREE,
+	UNIQUE INDEX `unique_tache_user_resultat` (`tache_id`, `user_id`) USING BTREE,
+	INDEX `tache_resultats_validateur_n1_id_foreign` (`validateur_n1_id`) USING BTREE,
+	INDEX `tache_resultats_validateur_n2_id_foreign` (`validateur_n2_id`) USING BTREE,
+	INDEX `tache_resultats_tache_id_index` (`tache_id`) USING BTREE,
+	INDEX `tache_resultats_user_id_index` (`user_id`) USING BTREE,
+	INDEX `tache_resultats_valide_par_n1_valide_par_n2_index` (`valide_par_n1`, `valide_par_n2`) USING BTREE,
+	INDEX `tache_resultats_soumis_le_index` (`soumis_le`) USING BTREE,
+	CONSTRAINT `tache_resultats_tache_id_foreign` FOREIGN KEY (`tache_id`) REFERENCES `taches` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE,
+	CONSTRAINT `tache_resultats_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE,
+	CONSTRAINT `tache_resultats_validateur_n1_id_foreign` FOREIGN KEY (`validateur_n1_id`) REFERENCES `users` (`id`) ON UPDATE NO ACTION ON DELETE SET NULL,
+	CONSTRAINT `tache_resultats_validateur_n2_id_foreign` FOREIGN KEY (`validateur_n2_id`) REFERENCES `users` (`id`) ON UPDATE NO ACTION ON DELETE SET NULL
+)
+COLLATE='utf8mb4_unicode_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=27
+;
+CREATE TABLE `documents` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`workspace_id` BIGINT(20) UNSIGNED NULL DEFAULT NULL,
+	`documentable_type` VARCHAR(255) NOT NULL COLLATE 'utf8mb4_unicode_ci',
+	`documentable_id` BIGINT(20) UNSIGNED NOT NULL,
+	`nom` VARCHAR(255) NOT NULL COLLATE 'utf8mb4_unicode_ci',
+	`nom_stockage` VARCHAR(255) NOT NULL COLLATE 'utf8mb4_unicode_ci',
+	`extension` VARCHAR(10) NOT NULL COLLATE 'utf8mb4_unicode_ci',
+	`mime_type` VARCHAR(100) NOT NULL COLLATE 'utf8mb4_unicode_ci',
+	`taille` BIGINT(20) UNSIGNED NOT NULL,
+	`chemin` VARCHAR(255) NOT NULL COLLATE 'utf8mb4_unicode_ci',
+	`disk` VARCHAR(255) NOT NULL DEFAULT 'local' COLLATE 'utf8mb4_unicode_ci',
+	`description` TEXT NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`metadata` JSON NULL DEFAULT NULL,
+	`hash_sha256` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`parent_id` BIGINT(20) UNSIGNED NULL DEFAULT NULL,
+	`version` INT(10) UNSIGNED NOT NULL DEFAULT '1',
+	`is_latest_version` TINYINT(1) NOT NULL DEFAULT '1',
+	`allow_duplicates` TINYINT(1) NOT NULL DEFAULT '1',
+	`thumbnail_path` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`user_id` BIGINT(20) UNSIGNED NOT NULL,
+	`download_count` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+	`last_downloaded_at` TIMESTAMP NULL DEFAULT NULL,
+	`visibility` ENUM('private','team','public') NOT NULL DEFAULT 'team' COLLATE 'utf8mb4_unicode_ci',
+	`created_at` TIMESTAMP NULL DEFAULT NULL,
+	`updated_at` TIMESTAMP NULL DEFAULT NULL,
+	`deleted_at` TIMESTAMP NULL DEFAULT NULL,
+	PRIMARY KEY (`id`) USING BTREE,
+	UNIQUE INDEX `documents_nom_stockage_unique` (`nom_stockage`) USING BTREE,
+	INDEX `documents_parent_id_foreign` (`parent_id`) USING BTREE,
+	INDEX `documents_documentable_type_documentable_id_index` (`documentable_type`, `documentable_id`) USING BTREE,
+	INDEX `documents_user_id_index` (`user_id`) USING BTREE,
+	INDEX `documents_created_at_index` (`created_at`) USING BTREE,
+	INDEX `documents_documentable_type_index` (`documentable_type`) USING BTREE,
+	INDEX `documents_documentable_id_index` (`documentable_id`) USING BTREE,
+	INDEX `documents_hash_sha256_index` (`hash_sha256`) USING BTREE,
+	INDEX `FK_documents_workspaces` (`workspace_id`) USING BTREE,
+	CONSTRAINT `documents_parent_id_foreign` FOREIGN KEY (`parent_id`) REFERENCES `documents` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE,
+	CONSTRAINT `documents_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE,
+	CONSTRAINT `FK_documents_workspaces` FOREIGN KEY (`workspace_id`) REFERENCES `workspaces` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION
+)
+COLLATE='utf8mb4_unicode_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=23
+;
 
--- Labels/Tags
-labels
-├── id (PK)
-├── projet_id (FK → projets, nullable for global labels)
-├── nom
-├── couleur (hex color)
-├── created_at
-└── updated_at
-
--- Task-Label Assignment
-label_tache
-├── tache_id (FK → taches, cascade delete)
-├── label_id (FK → labels, cascade delete)
-└── created_at
-
--- Checklists
-checklists
-├── id (PK)
-├── tache_id (FK → taches, cascade delete)
-├── titre
-├── position (int)
-├── created_at
-└── updated_at
-
--- Checklist Items
-checklist_items
-├── id (PK)
-├── checklist_id (FK → checklists, cascade delete)
-├── content
-├── is_completed (boolean)
-├── completed_at
-├── completed_by (FK → users)
-├── position (int)
-├── assignee_id (FK → users, nullable)
-├── due_date (datetime, nullable)
-├── created_at
-└── updated_at
-
--- Notifications
-notifications (Laravel default + custom columns)
-├── id (PK, UUID)
-├── type (notification class)
-├── notifiable_type (polymorphic)
-├── notifiable_id (polymorphic)
-├── data (JSON)
-├── read_at
-└── created_at
+CREATE TABLE `document_permissions` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`document_id` BIGINT(20) UNSIGNED NOT NULL,
+	`permissionable_type` VARCHAR(255) NOT NULL COLLATE 'utf8mb4_unicode_ci',
+	`permissionable_id` BIGINT(20) UNSIGNED NOT NULL,
+	`can_view` TINYINT(1) NOT NULL DEFAULT '1',
+	`can_download` TINYINT(1) NOT NULL DEFAULT '1',
+	`can_edit` TINYINT(1) NOT NULL DEFAULT '0',
+	`can_delete` TINYINT(1) NOT NULL DEFAULT '0',
+	`can_share` TINYINT(1) NOT NULL DEFAULT '0',
+	`expires_at` TIMESTAMP NULL DEFAULT NULL,
+	`created_at` TIMESTAMP NULL DEFAULT NULL,
+	`updated_at` TIMESTAMP NULL DEFAULT NULL,
+	PRIMARY KEY (`id`) USING BTREE,
+	UNIQUE INDEX `doc_permission_unique` (`document_id`, `permissionable_type`, `permissionable_id`) USING BTREE,
+	INDEX `document_permissions_permissionable_type_permissionable_id_index` (`permissionable_type`, `permissionable_id`) USING BTREE,
+	INDEX `document_permissions_document_id_index` (`document_id`) USING BTREE,
+	CONSTRAINT `document_permissions_document_id_foreign` FOREIGN KEY (`document_id`) REFERENCES `documents` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE
+)
+COLLATE='utf8mb4_unicode_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=21
+;
+   
 
 -- Activity Logs (Audit Trail)
-activity_log (spatie/laravel-activitylog)
-├── id (PK)
-├── log_name
-├── description
-├── subject_type (polymorphic)
-├── subject_id (polymorphic)
-├── causer_type (polymorphic, user)
-├── causer_id (polymorphic)
-├── properties (JSON)
-├── created_at
-└── updated_at
+CREATE TABLE `activity_log` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`log_name` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`description` TEXT NOT NULL COLLATE 'utf8mb4_unicode_ci',
+	`subject_type` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`event` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`subject_id` BIGINT(20) UNSIGNED NULL DEFAULT NULL,
+	`causer_type` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`causer_id` BIGINT(20) UNSIGNED NULL DEFAULT NULL,
+	`properties` JSON NULL DEFAULT NULL,
+	`batch_uuid` CHAR(36) NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',
+	`created_at` TIMESTAMP NULL DEFAULT NULL,
+	`updated_at` TIMESTAMP NULL DEFAULT NULL,
+	PRIMARY KEY (`id`) USING BTREE,
+	INDEX `subject` (`subject_type`, `subject_id`) USING BTREE,
+	INDEX `causer` (`causer_type`, `causer_id`) USING BTREE,
+	INDEX `activity_log_log_name_index` (`log_name`) USING BTREE
+)
+COLLATE='utf8mb4_unicode_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=356
+;
+ 
 
--- Automations/Workflows
-automations
-├── id (PK)
-├── projet_id (FK → projets, nullable)
-├── nom
-├── description
-├── trigger_type (enum: task_moved, status_changed, etc.)
-├── trigger_config (JSON)
-├── action_type (enum: assign_user, move_task, etc.)
-├── action_config (JSON)
-├── is_active (boolean)
-├── created_by (FK → users)
-├── created_at
-└── updated_at
+ 
 
--- Team Workspaces
-workspaces
-├── id (PK)
-├── nom
-├── description
-├── owner_id (FK → users)
-├── created_at
-└── updated_at
-
--- Workspace Members
-workspace_user
-├── workspace_id (FK → workspaces, cascade delete)
-├── user_id (FK → users, cascade delete)
-├── role (enum: owner, admin, member)
-├── joined_at
-└── invited_by (FK → users)
-```
-
----
-
-## 🏗️ Backend Implementation Plan
-
-### 1. Models & Relationships
-
-```php
-// app/Models/User.php
-class User extends Authenticatable
-{
-    use HasApiTokens, HasFactory, Notifiable, HasRoles;
-
-    public function projets() { return $this->hasMany(Projet::class, 'responsable_id'); }
-    public function taches() { return $this->belongsToMany(Tache::class)->withPivot('is_responsable'); }
-    public function commentaires() { return $this->hasMany(Commentaire::class); }
-    public function activites() { return $this->hasMany(Activite::class, 'responsable_id'); }
-}
-
-// app/Models/Projet.php
-class Projet extends Model
-{
-    use HasUuids, SoftDeletes;
-
-    protected $casts = [
-        'settings' => 'array',
-        'date_debut' => 'date',
-        'date_fin' => 'date',
-        'status' => StatusProjet::class,
-        'visibility' => VisibilityProjet::class,
-    ];
-
-    public function activites() { return $this->hasMany(Activite::class); }
-    public function responsable() { return $this->belongsTo(User::class, 'responsable_id'); }
-    public function labels() { return $this->hasMany(Label::class); }
-    public function members() { return $this->belongsToMany(User::class, 'projet_user'); }
-}
-
-// app/Models/Activite.php
-class Activite extends Model
-{
-    use HasUuids, SoftDeletes;
-
-    public function projet() { return $this->belongsTo(Projet::class); }
-    public function taches() { return $this->hasMany(Tache::class)->orderBy('position'); }
-    public function responsable() { return $this->belongsTo(User::class, 'responsable_id'); }
-}
-
-// app/Models/Tache.php
-class Tache extends Model
-{
-    use HasUuids, SoftDeletes;
-
-    protected $casts = [
-        'statut' => StatusTache::class,
-        'priorite' => PrioriteTache::class,
-        'echeance' => 'datetime',
-        'date_debut' => 'datetime',
-        'validation_superieur' => 'boolean',
-        'verrou_reevaluation' => 'boolean',
-    ];
-
-    public function activite() { return $this->belongsTo(Activite::class); }
-    public function assignees() { return $this->belongsToMany(User::class, 'tache_user'); }
-    public function commentaires() { return $this->morphMany(Commentaire::class, 'commentable'); }
-    public function documents() { return $this->morphMany(Document::class, 'documentable'); }
-    public function labels() { return $this->belongsToMany(Label::class, 'label_tache'); }
-    public function checklists() { return $this->hasMany(Checklist::class); }
-    public function parent() { return $this->belongsTo(Tache::class, 'parent_id'); }
-    public function subtasks() { return $this->hasMany(Tache::class, 'parent_id'); }
-}
-```
-
-### 2. Controllers Structure
-
-```
-app/Http/Controllers/
-├── Api/
-│   ├── V1/
-│   │   ├── ProjetController.php
-│   │   ├── ActiviteController.php
-│   │   ├── TacheController.php
-│   │   ├── CommentaireController.php
-│   │   ├── DocumentController.php
-│   │   ├── LabelController.php
-│   │   ├── ChecklistController.php
-│   │   ├── UserController.php
-│   │   ├── NotificationController.php
-│   │   ├── SearchController.php
-│   │   ├── ReportController.php
-│   │   └── AutomationController.php
-│   └── Auth/
-│       ├── LoginController.php
-│       ├── RegisterController.php
-│       └── ProfileController.php
-└── Web/
-    └── DashboardController.php
-```
-
-### 3. Services Layer
-
-```php
-// app/Services/TacheService.php
-class TacheService
-{
-    public function create(array $data): Tache;
-    public function update(Tache $tache, array $data): Tache;
-    public function move(Tache $tache, int $newActiviteId, int $position): bool;
-    public function assignUsers(Tache $tache, array $userIds): void;
-    public function updateProgress(Tache $tache, int $percentage): void;
-    public function duplicate(Tache $tache): Tache;
-    public function archive(Tache $tache): bool;
-}
-
-// app/Services/NotificationService.php
-class NotificationService
-{
-    public function notifyTaskAssigned(Tache $tache, User $user): void;
-    public function notifyMentioned(User $user, Commentaire $comment): void;
-    public function notifyDueSoon(Tache $tache): void;
-    public function sendDigest(User $user, string $frequency): void;
-}
-
-// app/Services/AutomationService.php
-class AutomationService
-{
-    public function processAutomations(string $triggerType, array $context): void;
-    public function executeAutomation(Automation $automation, array $context): void;
-}
-```
-
-### 4. API Routes Structure
-
-```php
-// routes/api.php
-Route::middleware('auth:sanctum')->group(function () {
-    // Projects
-    Route::apiResource('projets', ProjetController::class);
-    Route::post('projets/{projet}/duplicate', [ProjetController::class, 'duplicate']);
-    Route::post('projets/{projet}/archive', [ProjetController::class, 'archive']);
-    Route::get('projets/{projet}/members', [ProjetController::class, 'members']);
-
-    // Activities
-    Route::apiResource('projets.activites', ActiviteController::class);
-    Route::post('activites/{activite}/reorder', [ActiviteController::class, 'reorder']);
-
-    // Tasks
-    Route::apiResource('activites.taches', TacheController::class);
-    Route::post('taches/{tache}/move', [TacheController::class, 'move']);
-    Route::post('taches/{tache}/assign', [TacheController::class, 'assign']);
-    Route::post('taches/{tache}/duplicate', [TacheController::class, 'duplicate']);
-    Route::patch('taches/{tache}/progress', [TacheController::class, 'updateProgress']);
-
-    // Comments
-    Route::apiResource('taches.commentaires', CommentaireController::class);
-
-    // Documents
-    Route::post('taches/{tache}/documents', [DocumentController::class, 'upload']);
-    Route::delete('documents/{document}', [DocumentController::class, 'destroy']);
-
-    // Labels
-    Route::apiResource('projets.labels', LabelController::class);
-    Route::post('taches/{tache}/labels', [TacheController::class, 'attachLabel']);
-
-    // Checklists
-    Route::apiResource('taches.checklists', ChecklistController::class);
-    Route::patch('checklist-items/{item}/toggle', [ChecklistItemController::class, 'toggle']);
-
-    // Search
-    Route::get('search', [SearchController::class, 'index']);
-
-    // Notifications
-    Route::get('notifications', [NotificationController::class, 'index']);
-    Route::post('notifications/{id}/read', [NotificationController::class, 'markAsRead']);
-    Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead']);
-
-    // Reports
-    Route::get('reports/dashboard', [ReportController::class, 'dashboard']);
-    Route::get('reports/tasks', [ReportController::class, 'tasks']);
-    Route::post('reports/export', [ReportController::class, 'export']);
-});
-```
-
-### 5. Enums
-
-```php
-// app/Enums/StatusTache.php
-enum StatusTache: string
-{
-    case A_FAIRE = 'a_faire';
-    case EN_COURS = 'en_cours';
-    case TERMINE = 'termine';
-    case BLOQUE = 'bloque';
-    case EN_REVUE = 'en_revue';
-}
-
-// app/Enums/PrioriteTache.php
-enum PrioriteTache: string
-{
-    case FAIBLE = 'faible';
-    case MOYENNE = 'moyenne';
-    case ELEVEE = 'elevee';
-    case CRITIQUE = 'critique';
-}
-
-// app/Enums/Role.php
-enum Role: string
-{
-    case SUPER_ADMIN = 'super_admin';
-    case MANAGER = 'manager';
-    case RESPONSABLE_N1 = 'responsable_n1';
-    case RESPONSABLE_N2 = 'responsable_n2';
-    case CADRE = 'cadre';
-    case STAGIAIRE = 'stagiaire';
-}
-```
-
+--- 
+ 
+  
 ### 6. Events & Listeners
 
 ```php

@@ -273,7 +273,8 @@ class Workspace extends Model
     public function getLogoUrlAttribute(): ?string
     {
         if ($this->logo) {
-            return asset('storage/' . $this->logo);
+            return $this->logo ? asset('uploads/' . $this->logo) : null;
+
         }
         return null;
     }

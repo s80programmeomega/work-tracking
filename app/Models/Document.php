@@ -14,7 +14,7 @@ use Spatie\Activitylog\LogOptions;
 
 class Document extends Model
 {
-    use HasFactory, SoftDeletes, LogsActivity;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'workspace_id',
@@ -38,6 +38,7 @@ class Document extends Model
         'download_count',
         'last_downloaded_at',
         'visibility',
+        'allow_duplicates',
     ];
 
     protected $casts = [
@@ -45,6 +46,7 @@ class Document extends Model
         'taille' => 'integer',
         'version' => 'integer',
         'is_latest_version' => 'boolean',
+        'allow_duplicates' => 'boolean',
         'download_count' => 'integer',
         'last_downloaded_at' => 'datetime',
         'created_at' => 'datetime',

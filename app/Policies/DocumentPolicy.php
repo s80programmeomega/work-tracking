@@ -4,87 +4,74 @@ namespace App\Policies;
 
 use App\Models\Document;
 use App\Models\User;
+use App\Services\DocumentAccessResolver;
+use Illuminate\Auth\Access\HandlesAuthorization;
 
 class DocumentPolicy
 {
-    /**
-     * Determine if the user can view any documents.
-     */
-    public function viewAny(User $user): bool
+    use HandlesAuthorization;
+
+    protected DocumentAccessResolver $accessResolver;
+
+    public function __construct(DocumentAccessResolver $accessResolver)
     {
-        return true;
+        $this->accessResolver = $accessResolver;
     }
 
     /**
-     * Determine if the user can view the document.
+     * Determine if user can create documents for an entity
+     */
+    public function create(User $user, string $entityType, int $entityId): bool
+    {
+        return $this->accessResolver->canUpload($user, $entityType, $entityId);
+    }
+
+    /**
+     * Determine if user can view the document
      */
     public function view(User $user, Document $document): bool
     {
-        return $document->canBeViewedBy($user);
+        return $this->accessResolver->canView($user, $document);
     }
 
     /**
-     * Determine if the user can create documents.
-     */
-    public function create(User $user): bool
-    {
-        return true;
-    }
-
-    /**
-     * Determine if the user can update the document.
-     */
-    public function update(User $user, Document $document): bool
-    {
-        return $document->canBeEditedBy($user);
-    }
-
-    /**
-     * Determine if the user can delete the document.
-     */
-    public function delete(User $user, Document $document): bool
-    {
-        return $document->canBeDeletedBy($user);
-    }
-
-    /**
-     * Determine if the user can download the document.
+     * Determine if user can download the document
      */
     public function download(User $user, Document $document): bool
     {
-        return $document->canBeDownloadedBy($user);
+        return $this->accessResolver->canDownload($user, $document);
     }
 
     /**
-     * Determine if the user can manage permissions for the document.
+     * Determine if user can update the document
+     */
+    public function update(User $user, Document $document): bool
+    {
+        return $this->accessResolver->canEdit($user, $document);
+    }
+
+    /**
+     * Determine if user can delete the document
+     */
+    public function delete(User $user, Document $document): bool
+    {
+        return $this->accessResolver->canDelete($user, $document);
+    }
+
+    /**
+     * Determine if user can share the document
+     */
+    public function share(User $user, Document $document): bool
+    {
+        return $this->accessResolver->canShare($user, $document);
+    }
+
+    /**
+     * Determine if user can manage permissions
      */
     public function managePermissions(User $user, Document $document): bool
     {
-        // Only the owner can manage permissions
-        return $document->user_id === $user->id;
-    }
-
-    /**
-     * Determine if the user can create a new version of the document.
-     */
-    public function createVersion(User $user, Document $document): bool
-    {
-        return $document->canBeEditedBy($user);
-    }
-
-    /**
-     * Determine if the user can restore the document.
-     */
-    public function restore(User $user, Document $document): bool
-    {
-        return $document->user_id === $user->id;
-    }
-
-    /**
-     * Determine if the user can permanently delete the document.
-     */
-    public function forceDelete(User $user, Document $document): bool
-    {
-        return $document->user_id === $user->id;
+        // Only owner can manage permissions
+        return $user->id === $document->user_id || $user->isSuperAdmin();
     }
 }

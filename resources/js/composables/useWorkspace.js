@@ -783,6 +783,8 @@ const getMemberPermissions = (member) => {
       return true;
     }
 
+    console.log('canManageMembers',workspace);
+    
     // Vérifier les permissions via le pivot
     const member = workspace.members?.find(m => m.id === user.id);
     if (!member || !member.pivot) return false;

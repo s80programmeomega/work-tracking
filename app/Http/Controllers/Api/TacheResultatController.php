@@ -102,7 +102,7 @@ class TacheResultatController extends Controller
     /**
      * 👁️ Voir un résultat
      */
-    public function show(Tache $tache, TacheResultat $resultat)
+    public function show_(Tache $tache, TacheResultat $resultat)
     {
         Gate::authorize('view', $tache);
 
@@ -115,6 +115,36 @@ class TacheResultatController extends Controller
             'data' => new TacheResultatResource(
                 $resultat->load(['user', 'validateurN1', 'validateurN2', 'documents'])
             )
+        ]);
+    }
+
+    /**
+     * 📋 Afficher un résultat spécifique
+     */
+    public function show(Request $request, TacheResultat $resultat): JsonResponse
+    {
+        $user = $request->user();
+
+        // Vérifier les permissions
+        if (!$resultat->canBeViewedBy($user)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous n\'avez pas la permission de voir ce résultat'
+            ], 403);
+        }
+
+        // Charger les relations
+        $resultat->load([
+            'user',
+            'tache.activite.projet',
+            'validateurN1',
+            'validateurN2',
+            'documents'
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => new TacheResultatResource($resultat)
         ]);
     }
 

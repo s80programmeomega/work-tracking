@@ -32,11 +32,11 @@
             <td class="px-5 py-4 sm:px-6">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 overflow-hidden rounded-full">
-                  <img :src="user.avatar" :alt="user.name" />
+                  <img :src="user.avatar" :alt="user.nom" />
                 </div>
                 <div>
                   <span class="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                    {{ user.name }}
+                    {{ user.nom }}
                   </span>
                   <span class="block text-gray-500 text-theme-xs dark:text-gray-400">
                     {{ user.role }}

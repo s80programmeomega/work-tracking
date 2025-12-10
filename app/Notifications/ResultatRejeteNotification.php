@@ -44,16 +44,19 @@ class ResultatRejeteNotification extends Notification implements ShouldQueue
 
     public function toArray($notifiable): array
     {
-        return [
-            'type' => 'resultat_rejete',
-            'resultat_id' => $this->resultat->id,
-            'tache_id' => $this->resultat->tache->id,
-            'tache_titre' => $this->resultat->tache->titre,
-            'validateur_id' => $this->validateur->id,
-            'validateur_nom' => $this->validateur->nom,
-            'commentaire' => $this->commentaire,
-            'level' => $this->level,
-            'url' => "/taches/{$this->resultat->tache->id}/resultats/{$this->resultat->id}/edit"
-        ];
+       return [
+        'type' => 'resultat_rejete',
+        'resultat_id' => $this->resultat->id,
+        'tache_id' => $this->resultat->tache->id,
+        'tache_titre' => $this->resultat->tache->titre,
+        'validateur_id' => $this->validateur->id,
+        'validateur_nom' => $this->validateur->nom,
+        'commentaire' => $this->commentaire,
+        'level' => $this->level,
+        'taux_realisation' => $this->resultat->taux_realisation,
+        'url' => "/resultats/{$this->resultat->id}",  
+        'title' => 'Résultat rejeté',
+        'message' => "Votre résultat pour « {$this->resultat->tache->titre} » nécessite des corrections"
+    ];
     }
 }
