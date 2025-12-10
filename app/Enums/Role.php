@@ -33,15 +33,15 @@ enum Role: string
                 'projets.create', 'projets.update', 'projets.delete',
                 'activites.create', 'activites.update', 'activites.delete',
                 'taches.create', 'taches.update', 'taches.delete',
-                'users.view', 'users.assign', 'reports.view',
-                'can_invite_members', "can_create_projects", "can_manage_settings"
+                'users.view', 'users.assign', 'reports.view','can_view_all_projects',
+                'can_invite_members', "can_create_projects", "can_manage_settings", "can_delete_members"
             ],
             self::MANAGER => [
                 'projets.create', 'projets.update',
                 'activites.create', 'activites.update',
                 'taches.create', 'taches.update', 'taches.delete',
-                'users.view', 'users.assign', 'reports.view',
-                'can_invite_members', "can_create_projects", "can_manage_settings"
+                'users.view', 'users.assign', 'reports.view', 'can_view_all_projects',
+                'can_invite_members', "can_create_projects", "can_manage_settings", "can_delete_members"
 
             ],
             self::MEMBER => [
