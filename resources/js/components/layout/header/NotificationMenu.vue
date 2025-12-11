@@ -1,3 +1,4 @@
+<!-- resources\js\components\layout\header\NotificationMenu.vue -->
 <template>
   <div class="relative" ref="dropdownRef">
     <button
@@ -167,11 +168,27 @@ const handleClickOutside = (event) => {
   }
 }
 
-const handleNotificationClick = (notification) => {
+// const handleNotificationClick = (notification) => {
+//   selectedNotification.value = notification
+//   showDetailModal.value = true
+//   closeDropdown()
+// }
+
+const handleNotificationClick = async (notification) => {
   selectedNotification.value = notification
   showDetailModal.value = true
   closeDropdown()
+
+  // Marquer comme lu directement
+  if (!notification.read_at) {
+    try {
+      await markAsRead(notification.id)
+    } catch (error) {
+      console.error('Erreur lors du marquage comme lu :', error)
+    }
+  }
 }
+
 
 const closeDetailModal = () => {
   showDetailModal.value = false
