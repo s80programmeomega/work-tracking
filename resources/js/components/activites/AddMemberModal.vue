@@ -146,8 +146,7 @@
                             class="rounded border-gray-300 dark:border-gray-600 text-brand-600 focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             @click.stop />
                           <span class="text-xs text-gray-700 dark:text-gray-300"
-                            :class="memberPermissions[member.id].role === 'viewer' ? 'opacity-50' : ''">Créer
-                            tâches</span>
+                            :class="memberPermissions[member.id].role === 'viewer' ? 'opacity-50' : ''">Créer tâches</span>
                         </label>
 
                         <label class="flex items-center gap-2 cursor-pointer" @click.stop>
@@ -156,8 +155,7 @@
                             class="rounded border-gray-300 dark:border-gray-600 text-brand-600 focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             @click.stop />
                           <span class="text-xs text-gray-700 dark:text-gray-300"
-                            :class="memberPermissions[member.id].role === 'viewer' ? 'opacity-50' : ''">Modifier
-                            tâches</span>
+                            :class="memberPermissions[member.id].role === 'viewer' ? 'opacity-50' : ''">Modifier tâches</span>
                         </label>
 
                         <label class="flex items-center gap-2 cursor-pointer" @click.stop>
@@ -166,8 +164,7 @@
                             class="rounded border-gray-300 dark:border-gray-600 text-brand-600 focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             @click.stop />
                           <span class="text-xs text-gray-700 dark:text-gray-300"
-                            :class="memberPermissions[member.id].role === 'viewer' ? 'opacity-50' : ''">Supprimer
-                            tâches</span>
+                            :class="memberPermissions[member.id].role === 'viewer' ? 'opacity-50' : ''">Supprimer tâches</span>
                         </label>
 
                         <label class="flex items-center gap-2 cursor-pointer" @click.stop>
@@ -186,8 +183,15 @@
                             class="rounded border-gray-300 dark:border-gray-600 text-brand-600 focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             @click.stop />
                           <span class="text-xs text-gray-700 dark:text-gray-300"
-                            :class="memberPermissions[member.id].role === 'viewer' ? 'opacity-50' : ''">Assigner
-                            membres</span>
+                            :class="memberPermissions[member.id].role === 'viewer' ? 'opacity-50' : ''">Assigner membres</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer col-span-2" @click.stop>
+                          <input v-model="memberPermissions[member.id].can_delete_member" type="checkbox"
+                            :disabled="memberPermissions[member.id].role === 'viewer'"
+                            class="rounded border-gray-300 dark:border-gray-600 text-brand-600 focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            @click.stop />
+                          <span class="text-xs text-gray-700 dark:text-gray-300"
+                            :class="memberPermissions[member.id].role === 'viewer' ? 'opacity-50' : ''">Supprimer membres</span>
                         </label>
                       </div>
 
@@ -297,7 +301,8 @@ const toggleMemberSelection = (member) => {
       can_edit_tasks: false,
       can_delete_tasks: false,
       can_validate_results: false,
-      can_assign_users: false
+      can_assign_users: false,
+      can_delete_member: false,
     }
   }
 }
@@ -320,6 +325,7 @@ watch(() => memberPermissions.value, (newPermissions) => {
       permissions.can_delete_tasks = false;
       permissions.can_validate_results = false;
       permissions.can_assign_users = false;
+      permissions.can_delete_member = false;
     }
   });
 }, { deep: true });
@@ -332,6 +338,7 @@ const handleRoleChange = (memberId) => {
     memberPermissions.value[memberId].can_delete_tasks = false
     memberPermissions.value[memberId].can_validate_results = false
     memberPermissions.value[memberId].can_assign_users = false
+    memberPermissions.value[memberId].can_delete_member = false
   }
 }
 

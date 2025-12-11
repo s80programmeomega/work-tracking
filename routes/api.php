@@ -192,6 +192,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/{activite}', [ActiviteController::class, 'show']);
         Route::put('/{activite}', [ActiviteController::class, 'update']);
         Route::delete('/{activite}', [ActiviteController::class, 'destroy']);
+        Route::put('/{activite}/change-responsable', [ActiviteController::class, 'changeResponsable']);
 
         // Actions
         Route::post('/{activite}/archive', [ActiviteController::class, 'archive']);
@@ -202,7 +203,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         // Available members for projet
         Route::get('/available-members/{projetId}', [ActiviteController::class, 'availableMembers']);
-        //  Membres d'une activité spécifique
+
+        // Membres d'une activité spécifique
         Route::get('/{activite}/membres', [ActiviteController::class, 'membres']);
 
         // ✅ Gestion des membres d'activité

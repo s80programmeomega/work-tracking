@@ -20,6 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class ActiviteController extends Controller
@@ -132,32 +133,32 @@ class ActiviteController extends Controller
     }
 
     /**
- * ✅ Kanban pour une activité (spécifique pour ActiviteDetail)
- */
-public function kanban(Request $request, Activite $activite): JsonResponse
-{
-    $user = $request->user();
-    
-    // Vérification d'accès
-    if (!$user->isSuperAdmin() && !$activite->canUserAccess($user)) {
-        return response()->json(['message' => 'Accès non autorisé'], 403);
+     * ✅ Kanban pour une activité (spécifique pour ActiviteDetail)
+     */
+    public function kanban(Request $request, Activite $activite): JsonResponse
+    {
+        $user = $request->user();
+
+        // Vérification d'accès
+        if (!$user->isSuperAdmin() && !$activite->canUserAccess($user)) {
+            return response()->json(['message' => 'Accès non autorisé'], 403);
+        }
+
+        $tacheService = app(TacheService::class);
+        $kanban = $tacheService->getKanbanForActivite($activite->id);
+
+        return response()->json([
+            'a_faire' => TacheResource::collection($kanban['a_faire']),
+            'en_cours' => TacheResource::collection($kanban['en_cours']),
+            'termine' => TacheResource::collection($kanban['termine']),
+            'stats' => [
+                'total' => count($kanban['a_faire']) + count($kanban['en_cours']) + count($kanban['termine']),
+                'a_faire' => count($kanban['a_faire']),
+                'en_cours' => count($kanban['en_cours']),
+                'termine' => count($kanban['termine']),
+            ]
+        ]);
     }
-
-    $tacheService = app(TacheService::class);
-    $kanban = $tacheService->getKanbanForActivite($activite->id);
-
-    return response()->json([
-        'a_faire' => TacheResource::collection($kanban['a_faire']),
-        'en_cours' => TacheResource::collection($kanban['en_cours']),
-        'termine' => TacheResource::collection($kanban['termine']),
-        'stats' => [
-            'total' => count($kanban['a_faire']) + count($kanban['en_cours']) + count($kanban['termine']),
-            'a_faire' => count($kanban['a_faire']),
-            'en_cours' => count($kanban['en_cours']),
-            'termine' => count($kanban['termine']),
-        ]
-    ]);
-}
 
     public function store(Request $request): JsonResponse
     {
@@ -180,6 +181,7 @@ public function kanban(Request $request, Activite $activite): JsonResponse
             'membres.*.can_delete_tasks' => 'boolean',
             'membres.*.can_validate_results' => 'boolean',
             'membres.*.can_assign_users' => 'boolean',
+            'membres.*.can_delete_member' => 'boolean',
         ]);
 
         $user = $request->user();
@@ -233,6 +235,7 @@ public function kanban(Request $request, Activite $activite): JsonResponse
                 'can_delete_tasks' => true,
                 'can_validate_results' => true,
                 'can_assign_users' => true,
+                'can_delete_member' => true,
             ]);
 
             // Ajouter les autres membres
@@ -247,6 +250,7 @@ public function kanban(Request $request, Activite $activite): JsonResponse
                             'can_delete_tasks' => $membre['can_delete_tasks'] ?? false,
                             'can_validate_results' => $membre['can_validate_results'] ?? false,
                             'can_assign_users' => $membre['can_assign_users'] ?? false,
+                            'can_delete_member' => $membre['can_delete_member'] ?? false,
                         ]);
                     }
                 }
@@ -505,6 +509,7 @@ public function kanban(Request $request, Activite $activite): JsonResponse
                 'can_delete_tasks' => true,
                 'can_validate_results' => true,
                 'can_assign_users' => true,
+                'can_delete_member' => true,
             ]);
 
             // Copier les autres membres si demandé
@@ -518,6 +523,7 @@ public function kanban(Request $request, Activite $activite): JsonResponse
                             'can_delete_tasks' => $membre->pivot->can_delete_tasks,
                             'can_validate_results' => $membre->pivot->can_validate_results,
                             'can_assign_users' => $membre->pivot->can_assign_users,
+                            'can_delete_member' => $membre->pivot->can_delete_member,
                         ]);
                     }
                 }
@@ -557,7 +563,7 @@ public function kanban(Request $request, Activite $activite): JsonResponse
         }
     }
 
-   /**
+    /**
      * ✅ Get available members for an activity (from project)
      * Cette méthode charge TOUS les membres du projet parent
      */
@@ -593,77 +599,78 @@ public function kanban(Request $request, Activite $activite): JsonResponse
             'data' => $members->unique('id')->values()
         ]);
     }
- 
 
-/**
- * ✅ NOUVEAU : Récupérer les membres d'une activité spécifique
- * Compatible avec l'endpoint attendu par le frontend
- */
-public function membres($id): JsonResponse
-{
-    try {
-        $activite = Activite::with([
-            'membres' => function ($query) {
-                $query->select('users.id', 'users.nom', 'users.email', 'users.avatar')
-                    ->where('is_active', true);
-            },
-            'projet.members' => function ($query) {
-                $query->select('users.id', 'users.nom', 'users.email', 'users.avatar')
-                    ->where('is_active', true);
+
+    /**
+     * ✅ NOUVEAU : Récupérer les membres d'une activité spécifique
+     * Compatible avec l'endpoint attendu par le frontend
+     */
+    public function membres($id): JsonResponse
+    {
+        try {
+            $activite = Activite::with([
+                'membres' => function ($query) {
+                    $query->select('users.id', 'users.nom', 'users.email', 'users.avatar')
+                        ->where('is_active', true);
+                },
+                'projet.members' => function ($query) {
+                    $query->select('users.id', 'users.nom', 'users.email', 'users.avatar')
+                        ->where('is_active', true);
+                }
+            ])->findOrFail($id);
+
+            $user = request()->user();
+
+            // Vérifier l'accès à l'activité
+            if (!$user->isSuperAdmin() && !$activite->projet->hasAccess($user)) {
+                return response()->json([
+                    'message' => 'Accès non autorisé'
+                ], 403);
             }
-        ])->findOrFail($id);
 
-        $user = request()->user();
+            // Combiner les membres de l'activité et du projet
+            $membres = $activite->membres->merge($activite->projet->membres ?? collect())->unique('id');
 
-        // Vérifier l'accès à l'activité
-        if (!$user->isSuperAdmin() && !$activite->projet->hasAccess($user)) {
-            return response()->json([
-                'message' => 'Accès non autorisé'
-            ], 403);
-        }
-
-        // Combiner les membres de l'activité et du projet
-        $membres = $activite->membres->merge($activite->projet->membres ?? collect())->unique('id');
-
-        // Formater la réponse
-        $formattedMembers = $membres->map(function ($membre) use ($activite) {
-            $memberData = [
-                'id' => $membre->id,
-                'nom' => $membre->nom,
-                'email' => $membre->email,
-                'avatar' => $membre->avatar,
-                'is_active' => $membre->is_active ?? true,
-            ];
-
-            // Ajouter les informations de rôle si disponibles
-            if ($membre->pivot) {
-                $memberData['role'] = $membre->pivot->role;
-                $memberData['permissions'] = [
-                    'can_create_tasks' => $membre->pivot->can_create_tasks ?? false,
-                    'can_edit_tasks' => $membre->pivot->can_edit_tasks ?? false,
-                    'can_delete_tasks' => $membre->pivot->can_delete_tasks ?? false,
-                    'can_validate_results' => $membre->pivot->can_validate_results ?? false,
-                    'can_assign_users' => $membre->pivot->can_assign_users ?? false,
+            // Formater la réponse
+            $formattedMembers = $membres->map(function ($membre) use ($activite) {
+                $memberData = [
+                    'id' => $membre->id,
+                    'nom' => $membre->nom,
+                    'email' => $membre->email,
+                    'avatar' => $membre->avatar,
+                    'is_active' => $membre->is_active ?? true,
                 ];
-            }
 
-            return $memberData;
-        });
+                // Ajouter les informations de rôle si disponibles
+                if ($membre->pivot) {
+                    $memberData['role'] = $membre->pivot->role;
+                    $memberData['permissions'] = [
+                        'can_create_tasks' => $membre->pivot->can_create_tasks ?? false,
+                        'can_edit_tasks' => $membre->pivot->can_edit_tasks ?? false,
+                        'can_delete_tasks' => $membre->pivot->can_delete_tasks ?? false,
+                        'can_validate_results' => $membre->pivot->can_validate_results ?? false,
+                        'can_assign_users' => $membre->pivot->can_assign_users ?? false,
+                        'can_delete_member' => $membre->pivot->can_delete_member ?? false,
+                    ];
+                }
 
-        return response()->json($formattedMembers->values());
+                return $memberData;
+            });
 
-    } catch (\Exception $e) {
-        \Log::error('Erreur chargement membres activité', [
-            'activite_id' => $id,
-            'error' => $e->getMessage()
-        ]);
+            return response()->json($formattedMembers->values());
 
-        return response()->json([
-            'message' => 'Erreur lors du chargement des membres',
-            'error' => config('app.debug') ? $e->getMessage() : 'Erreur serveur'
-        ], 500);
+        } catch (\Exception $e) {
+            Log::error('Erreur chargement membres activité', [
+                'activite_id' => $id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'message' => 'Erreur lors du chargement des membres',
+                'error' => config('app.debug') ? $e->getMessage() : 'Erreur serveur'
+            ], 500);
+        }
     }
-}
 
     // ==================== ✅ NOUVELLES MÉTHODES POUR GESTION DES MEMBRES ====================
 
@@ -692,14 +699,70 @@ public function membres($id): JsonResponse
                     'can_delete_tasks' => $membre->pivot->can_delete_tasks,
                     'can_validate_results' => $membre->pivot->can_validate_results,
                     'can_assign_users' => $membre->pivot->can_assign_users,
+                    'can_delete_member' => $membre->pivot->can_delete_member,
                 ];
             })
         ]);
     }
 
-  /**
+    public function changeResponsable(Request $request, $id): JsonResponse
+    {
+        $request->validate([
+            'new_responsable_id' => 'required|integer|exists:users,id'
+        ]);
+
+        $activite = Activite::findOrFail($id);
+        $user = $request->user();
+        $newResponsableId = $request->input('new_responsable_id');
+
+        // Vérifier les permissions
+        if (!$user->isSuperAdmin() && $user->id !== $activite->responsable_id) {
+            return response()->json(['message' => 'Seul le responsable actuel ou un super admin peut changer le responsable'], 403);
+        }
+
+        // Vérifier que le nouveau responsable est membre de l'activité
+        $isMember = $activite->membres()->where('user_id', $newResponsableId)->exists();
+        if (!$isMember) {
+            return response()->json(['message' => 'Le nouveau responsable doit être membre de l\'activité'], 400);
+        }
+
+        // Mettre à jour le responsable
+        $activite->update([
+            'responsable_id' => $newResponsableId
+        ]);
+
+        // Optionnel : Donner tous les droits au nouveau responsable
+        $activite->membres()->updateExistingPivot($newResponsableId, [
+            'can_create_tasks' => true,
+            'can_edit_tasks' => true,
+            'can_delete_tasks' => true,
+            'can_validate_results' => true,
+            'can_assign_users' => true,
+            'can_delete_member' => true,
+        ]);
+
+        // Optionnel : Retirer les droits spéciaux de l'ancien responsable (sauf si c'est un super admin)
+        if ($user->id !== $newResponsableId && !$user->isSuperAdmin()) {
+            $activite->membres()->updateExistingPivot($user->id, [
+                'can_create_tasks' => true,
+                'can_edit_tasks' => true,
+                'can_delete_tasks' => false,
+                'can_validate_results' => true,
+                'can_assign_users' => false,
+                'can_delete_member' => false,
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Responsable mis à jour avec succès',
+            'data' => $activite->fresh()
+        ]);
+    }
+
+    /**
      * ✅ Add a member to an activity with notifications
      */
+
     public function addMember(Request $request, $id): JsonResponse
     {
         $activite = Activite::with('projet')->findOrFail($id);
@@ -728,6 +791,7 @@ public function membres($id): JsonResponse
             'can_delete_tasks' => 'boolean',
             'can_validate_results' => 'boolean',
             'can_assign_users' => 'boolean',
+            'can_delete_member' => 'boolean',
         ]);
 
         // ✅ Vérifier que le membre est dans le projet
@@ -755,6 +819,7 @@ public function membres($id): JsonResponse
                 'can_delete_tasks' => $validated['can_delete_tasks'] ?? false,
                 'can_validate_results' => $validated['can_validate_results'] ?? false,
                 'can_assign_users' => $validated['can_assign_users'] ?? false,
+                'can_delete_member' => $validated['can_delete_member'] ?? false,
             ]);
 
             // ✅ ENVOYER LA NOTIFICATION
@@ -764,6 +829,7 @@ public function membres($id): JsonResponse
                 'can_delete_tasks' => $validated['can_delete_tasks'] ?? false,
                 'can_validate_results' => $validated['can_validate_results'] ?? false,
                 'can_assign_users' => $validated['can_assign_users'] ?? false,
+                'can_delete_member' => $validated['can_delete_member'] ?? false,
             ];
 
             $membreUser->notify(new ActiviteMemberAdded(
@@ -817,6 +883,7 @@ public function membres($id): JsonResponse
             'can_delete_tasks' => 'sometimes|boolean',
             'can_validate_results' => 'sometimes|boolean',
             'can_assign_users' => 'sometimes|boolean',
+            'can_delete_member' => 'sometimes|boolean',
         ]);
 
         // Vérifier que le membre existe
@@ -837,6 +904,7 @@ public function membres($id): JsonResponse
                 'can_delete_tasks' => $currentMember->pivot->can_delete_tasks,
                 'can_validate_results' => $currentMember->pivot->can_validate_results,
                 'can_assign_users' => $currentMember->pivot->can_assign_users,
+                'can_delete_member' => $currentMember->pivot->can_delete_member,
             ];
 
             // Mettre à jour
@@ -879,7 +947,7 @@ public function membres($id): JsonResponse
             || $activite->projet->canUserEdit($user)
             || $activite->responsable_id === $user->id
             || $activite->membres()->where('user_id', $user->id)
-                ->wherePivot('can_assign_users', true)
+                ->wherePivot('can_delete_member', true)
                 ->exists();
 
         if (!$canManage) {
