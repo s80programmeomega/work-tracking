@@ -202,6 +202,9 @@ export function useNotifications() {
             // Workspace
             workspace_invitation: 'fa-envelope',
             
+            // Responsable activité changé
+            responsable_changed: 'fa-user-check',
+
             // Autres
             deadline_approaching: 'fa-exclamation-triangle',
             document_uploaded: 'fa-file-upload',
@@ -243,7 +246,11 @@ export function useNotifications() {
             
             // Workspace
             workspace_invitation: 'brand',
-            
+
+            // Responsable activité changé
+            responsable_changed: 'purple',
+ 
+
             // Autres
             deadline_approaching: 'red',
             document_uploaded: 'yellow',
