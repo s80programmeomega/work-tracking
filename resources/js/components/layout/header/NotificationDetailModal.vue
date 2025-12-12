@@ -71,7 +71,7 @@
                     <p class="text-xs font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wider mb-1">Tâche
                     </p>
                     <p class="text-2xl font-black text-gray-900 dark:text-white mb-1">{{ notification.data.tache_titre
-                      }}</p>
+                    }}</p>
                     <div v-if="notification.data.taux_realisation" class="flex items-center gap-2">
                       <div class="flex-1 h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                         <div
@@ -110,7 +110,7 @@
                   <p class="text-xs font-bold text-blue-700 dark:text-blue-400 mb-2 uppercase tracking-wide">Commentaire
                   </p>
                   <p class="text-gray-700 dark:text-gray-300 italic leading-relaxed">"{{ notification.data.commentaire
-                    }}"</p>
+                  }}"</p>
                 </div>
               </div>
 
@@ -210,7 +210,7 @@
                   <div class="p-4 bg-white dark:bg-gray-800 rounded-xl">
                     <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
                       <strong class="text-gray-900 dark:text-white font-black">{{ notification.data.inviter_name
-                        }}</strong> vous invite à rejoindre ce workspace
+                      }}</strong> vous invite à rejoindre ce workspace
                     </p>
                   </div>
                   <div class="p-4 bg-white dark:bg-gray-800 rounded-xl">
@@ -297,11 +297,278 @@
 
               <!-- Bouton pour visiter l'activité -->
               <div class="flex justify-center">
-                <button @click="$router.push(`/activites/${notification.data.activite_id}`)" class="px-6 py-3 font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-2xl shadow-lg transition-all duration-200">
+                <button @click="$router.push(`/activites/${notification.data.activite_id}`)"
+                  class="px-6 py-3 font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-2xl shadow-lg transition-all duration-200">
                   Voir l’activité
                 </button>
               </div>
 
+            </div>
+
+            <!-- ========== TÂCHES ASSIGNÉES ========== -->
+            <div v-else-if="notification?.type === 'task_assigned'" class="space-y-6">
+              <div class="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50 
+    rounded-2xl border-2 border-blue-200 dark:border-blue-800 shadow-lg">
+
+                <div class="flex items-center gap-4 mb-6">
+                  <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 
+        flex items-center justify-center shadow-xl">
+                    <i class="fas fa-tasks text-white text-3xl"></i>
+                  </div>
+
+                  <div class="flex-1">
+                    <p class="text-xs font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wider mb-1">
+                      Tâche assignée
+                    </p>
+                    <p class="text-2xl font-black text-gray-900 dark:text-white mb-1">
+                      {{ notification.data.tache_titre }}
+                    </p>
+                    <div v-if="notification.data.tache_priorite" class="flex items-center gap-2">
+                      <span class="px-3 py-1 rounded-full text-xs font-bold" :class="{
+                        'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400': notification.data.tache_priorite === 'haute',
+                        'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400': notification.data.tache_priorite === 'moyenne',
+                        'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400': notification.data.tache_priorite === 'basse'
+                      }">
+                        Priorité {{ notification.data.tache_priorite }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div class="flex items-start gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl">
+                    <i class="fas fa-user text-blue-600 dark:text-blue-400 text-xl mt-1"></i>
+                    <div>
+                      <p class="text-xs text-gray-600 dark:text-gray-400 font-semibold mb-1">Assigné par</p>
+                      <p class="font-bold text-gray-900 dark:text-white">
+                        {{ notification.data.assigned_by_nom }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div v-if="notification.data.tache_echeance"
+                    class="flex items-start gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl">
+                    <i class="fas fa-calendar-alt text-orange-600 dark:text-orange-400 text-xl mt-1"></i>
+                    <div>
+                      <p class="text-xs text-gray-600 dark:text-gray-400 font-semibold mb-1">Échéance</p>
+                      <p class="font-bold text-gray-900 dark:text-white">
+                        {{ formatDate(notification.data.tache_echeance) }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div v-if="notification.data.activite_nom"
+                    class="flex items-start gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl">
+                    <i class="fas fa-folder text-purple-600 dark:text-purple-400 text-xl mt-1"></i>
+                    <div>
+                      <p class="text-xs text-gray-600 dark:text-gray-400 font-semibold mb-1">Activité</p>
+                      <p class="font-bold text-gray-900 dark:text-white">
+                        {{ notification.data.activite_nom }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div v-if="notification.data.projet_nom"
+                    class="flex items-start gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl">
+                    <i class="fas fa-project-diagram text-indigo-600 dark:text-indigo-400 text-xl mt-1"></i>
+                    <div>
+                      <p class="text-xs text-gray-600 dark:text-gray-400 font-semibold mb-1">Projet</p>
+                      <p class="font-bold text-gray-900 dark:text-white">
+                        {{ notification.data.projet_nom }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div v-if="notification.data.tache_description"
+                  class="mt-4 p-4 bg-white dark:bg-gray-800 rounded-xl border-l-4 border-blue-500">
+                  <p class="text-xs font-bold text-blue-700 dark:text-blue-400 mb-2 uppercase tracking-wide">
+                    Description
+                  </p>
+                  <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+                    {{ notification.data.tache_description }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- ========== FICHIER AJOUTÉ ========== -->
+            <div v-else-if="notification?.type === 'task_file_added'" class="space-y-6">
+              <div class="p-6 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/50 dark:to-emerald-950/50 
+    rounded-2xl border-2 border-green-200 dark:border-green-800 shadow-lg">
+
+                <div class="flex items-center gap-4 mb-6">
+                  <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-green-600 to-emerald-600 
+        flex items-center justify-center shadow-xl">
+                    <i :class="['fas', notification.data.file_icon, 'text-white text-3xl']"></i>
+                  </div>
+
+                  <div class="flex-1">
+                    <p class="text-xs font-bold text-green-700 dark:text-green-400 uppercase tracking-wider mb-1">
+                      Nouveau fichier
+                    </p>
+                    <p class="text-2xl font-black text-gray-900 dark:text-white mb-1">
+                      {{ notification.data.file_name }}
+                    </p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                      Ajouté à : {{ notification.data.tache_titre }}
+                    </p>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div class="flex items-start gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl">
+                    <i class="fas fa-user text-green-600 dark:text-green-400 text-xl mt-1"></i>
+                    <div>
+                      <p class="text-xs text-gray-600 dark:text-gray-400 font-semibold mb-1">Ajouté par</p>
+                      <p class="font-bold text-gray-900 dark:text-white">
+                        {{ notification.data.uploaded_by_nom }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="flex items-start gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl">
+                    <i class="fas fa-weight text-gray-600 dark:text-gray-400 text-xl mt-1"></i>
+                    <div>
+                      <p class="text-xs text-gray-600 dark:text-gray-400 font-semibold mb-1">Taille</p>
+                      <p class="font-bold text-gray-900 dark:text-white">
+                        {{ formatFileSize(notification.data.file_size) }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-4 flex gap-3">
+                  <button @click="downloadFile" class="flex-1 px-6 py-3 rounded-xl text-sm font-bold bg-gradient-to-r from-green-600 to-emerald-600 
+        text-white hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-lg 
+        hover:shadow-xl hover:scale-105 flex items-center justify-center gap-2">
+                    <i class="fas fa-download"></i>
+                    Télécharger le fichier
+                  </button>
+                  <button @click="viewTask" class="px-6 py-3 rounded-xl text-sm font-bold bg-white dark:bg-gray-800 text-gray-700 
+        dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border-2 border-gray-300 
+        dark:border-gray-600 transition-all duration-200 flex items-center gap-2">
+                    <i class="fas fa-eye"></i>
+                    Voir la tâche
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- ========== LIEN AJOUTÉ ========== -->
+            <div v-else-if="notification?.type === 'task_link_added'" class="space-y-6">
+              <div class="p-6 bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-950/50 dark:to-blue-950/50 
+    rounded-2xl border-2 border-cyan-200 dark:border-cyan-800 shadow-lg">
+
+                <div class="flex items-center gap-4 mb-6">
+                  <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-600 to-blue-600 
+        flex items-center justify-center shadow-xl">
+                    <i :class="['fab', notification.data.link_icon, 'text-white text-3xl']"></i>
+                  </div>
+
+                  <div class="flex-1">
+                    <p class="text-xs font-bold text-cyan-700 dark:text-cyan-400 uppercase tracking-wider mb-1">
+                      Nouveau lien
+                    </p>
+                    <p class="text-2xl font-black text-gray-900 dark:text-white mb-1">
+                      {{ notification.data.link_title }}
+                    </p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                      {{ notification.data.link_domain }}
+                    </p>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4">
+                  <div class="flex items-start gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl">
+                    <i class="fas fa-user text-cyan-600 dark:text-cyan-400 text-xl mt-1"></i>
+                    <div>
+                      <p class="text-xs text-gray-600 dark:text-gray-400 font-semibold mb-1">Ajouté par</p>
+                      <p class="font-bold text-gray-900 dark:text-white">
+                        {{ notification.data.added_by_nom }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="flex items-start gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl">
+                    <i class="fas fa-tasks text-purple-600 dark:text-purple-400 text-xl mt-1"></i>
+                    <div>
+                      <p class="text-xs text-gray-600 dark:text-gray-400 font-semibold mb-1">Tâche</p>
+                      <p class="font-bold text-gray-900 dark:text-white">
+                        {{ notification.data.tache_titre }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-4 flex gap-3">
+                  <a :href="notification.data.link_url" target="_blank" class="flex-1 px-6 py-3 rounded-xl text-sm font-bold bg-gradient-to-r from-cyan-600 to-blue-600 
+        text-white hover:from-cyan-700 hover:to-blue-700 transition-all duration-200 shadow-lg 
+        hover:shadow-xl hover:scale-105 flex items-center justify-center gap-2">
+                    <i class="fas fa-external-link-alt"></i>
+                    Ouvrir le lien
+                  </a>
+                  <button @click="viewTask" class="px-6 py-3 rounded-xl text-sm font-bold bg-white dark:bg-gray-800 text-gray-700 
+        dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border-2 border-gray-300 
+        dark:border-gray-600 transition-all duration-200 flex items-center gap-2">
+                    <i class="fas fa-eye"></i>
+                    Voir la tâche
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- ========== TÂCHE MISE À JOUR ========== -->
+            <div v-else-if="notification?.type === 'task_updated'" class="space-y-6">
+              <div class="p-6 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/50 dark:to-purple-950/50 
+    rounded-2xl border-2 border-indigo-200 dark:border-indigo-800 shadow-lg">
+
+                <div class="flex items-center gap-4 mb-6">
+                  <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 
+        flex items-center justify-center shadow-xl">
+                    <i class="fas fa-edit text-white text-3xl"></i>
+                  </div>
+
+                  <div class="flex-1">
+                    <p class="text-xs font-bold text-indigo-700 dark:text-indigo-400 uppercase tracking-wider mb-1">
+                      Tâche modifiée
+                    </p>
+                    <p class="text-2xl font-black text-gray-900 dark:text-white mb-1">
+                      {{ notification.data.tache_titre }}
+                    </p>
+                    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold 
+          bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
+                      <i class="fas fa-edit"></i>
+                      {{ notification.data.changes_count }} modification(s)
+                    </span>
+                  </div>
+                </div>
+
+                <div class="flex items-start gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl mb-4">
+                  <i class="fas fa-user text-indigo-600 dark:text-indigo-400 text-xl mt-1"></i>
+                  <div>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 font-semibold mb-1">Modifié par</p>
+                    <p class="font-bold text-gray-900 dark:text-white">
+                      {{ notification.data.updated_by_nom }}
+                    </p>
+                  </div>
+                </div>
+
+                <div v-if="notification.data.changes && notification.data.changes.length" class="space-y-2">
+                  <p class="text-xs font-bold text-indigo-700 dark:text-indigo-400 mb-3 uppercase tracking-wide">
+                    Modifications effectuées
+                  </p>
+                  <div v-for="change in notification.data.changes" :key="change.field"
+                    class="p-3 bg-white dark:bg-gray-800 rounded-lg border-l-4 border-indigo-500">
+                    <p class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ change.label }}</p>
+                    <div class="flex items-center gap-2 text-sm">
+                      <span class="text-red-600 dark:text-red-400 line-through">{{ change.old_value || 'Vide' }}</span>
+                      <i class="fas fa-arrow-right text-gray-400"></i>
+                      <span class="text-green-600 dark:text-green-400 font-bold">{{ change.new_value || 'Vide' }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- ========== AUTRES NOTIFICATIONS ========== -->
@@ -438,6 +705,37 @@ const { getNotificationIcon, getNotificationColor } = useNotifications();
 
 const icon = computed(() => getNotificationIcon(props.notification?.type));
 const iconColor = computed(() => getNotificationColor(props.notification?.type));
+
+const formatDate = (dateString) => {
+  return new Date(dateString).toLocaleDateString('fr-FR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+const formatFileSize = (bytes) => {
+  if (!bytes) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+};
+
+const downloadFile = () => {
+  if (props.notification?.data?.download_url) {
+    window.open(props.notification.data.download_url, '_blank');
+  }
+};
+
+const viewTask = () => {
+  if (props.notification?.data?.tache_id) {
+    router.push(`/taches/${props.notification.data.tache_id}`);
+    emit('close');
+  }
+};
 
 const isResultatNotification = computed(() => {
   return ['resultat_soumis', 'resultat_attente_n2', 'resultat_valide_n1', 'resultat_valide_n2'].includes(props.notification?.type);

@@ -370,11 +370,11 @@ class TacheController extends Controller
             abort(404, 'Fichier non trouvé pour cette tâche');
         }
 
-        if (!Storage::disk('public')->exists($attachment->file_path)) {
+        if (!Storage::disk('uploads')->exists($attachment->file_path)) {
             abort(404, 'Fichier non trouvé sur le serveur');
         }
 
-        return Storage::disk('public')->download(
+        return Storage::disk('uploads')->download(
             $attachment->file_path,
             $attachment->original_name
         );
@@ -419,13 +419,6 @@ class TacheController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        // ✅ DEBUG: Vérifier ce que Laravel reçoit
-        Log::info('Request Files Debug', [
-            'has_uploaded_files' => $request->hasFile('uploaded_files'),
-            'has_cover_image' => $request->hasFile('cover_image'),
-            'uploaded_files_count' => $request->file('uploaded_files') ? count($request->file('uploaded_files')) : 0,
-            'all_files' => array_keys($request->allFiles()),
-        ]);
 
         // Vérifier chaque fichier individuellement
         if ($request->hasFile('uploaded_files')) {
@@ -442,12 +435,6 @@ class TacheController extends Controller
 
         if ($request->hasFile('cover_image')) {
             $cover = $request->file('cover_image');
-            Log::info('Cover Image', [
-                'name' => $cover->getClientOriginalName(),
-                'mime' => $cover->getMimeType(),
-                'size' => $cover->getSize(),
-                'is_valid' => $cover->isValid(),
-            ]);
         }
 
         // ✅ Validation stricte avec messages personnalisés
@@ -580,16 +567,11 @@ class TacheController extends Controller
 
             $data['uploaded_files'] = $uploadedFiles;
 
-            Log::info('Avant création tâche', [
-                'files_count' => count($uploadedFiles),
-                'has_cover' => $request->hasFile('cover_image')
-            ]);
-
             // ✅ Gérer l'image de couverture
             if ($request->hasFile('cover_image')) {
                 $coverImage = $request->file('cover_image');
                 if ($coverImage->isValid()) {
-                    $coverImagePath = $coverImage->store('task-covers', 'public');
+                    $coverImagePath = $coverImage->store('task-covers', 'uploads');
                     $data['cover_image'] = $coverImagePath;
                     Log::info('Image de couverture uploadée', [
                         'path' => $coverImagePath
@@ -693,7 +675,7 @@ class TacheController extends Controller
     /**
      * Afficher une tâche
      */
-    public function show(Tache $tache): JsonResponse
+    public function show_(Tache $tache): JsonResponse
     {
         $this->authorize('view', $tache);
 
@@ -714,6 +696,109 @@ class TacheController extends Controller
         return response()->json([
             'data' => new TacheResource($tache),
         ]);
+    }
+
+
+    /**
+     * Afficher les détails d'une tâche
+     */
+    public function show(Tache $tache)
+    {
+        try {
+            $this->authorize('view', $tache);
+
+            // Charger toutes les relations nécessaires
+            $tache->load([
+                'activite:id,nom,code,projet_id,responsable_id',
+                'activite.projet:id,nom,workspace_id',
+                'activite.projet.workspace:id,nom',
+                'assignees:id,nom,email,avatar',
+                'labels:id,nom,couleur',
+                'attachments' => function ($query) {
+                    $query->orderBy('created_at', 'desc');
+                },
+                'attachments.uploadedBy:id,nom,avatar',
+                'externalLinks' => function ($query) {
+                    $query->orderBy('created_at', 'desc');
+                },
+                'externalLinks.createdBy:id,nom,avatar',
+                'resultats' => function ($query) {
+                    $query->with(['user:id,nom,avatar', 'validateurN1:id,nom', 'validateurN2:id,nom'])
+                        ->orderBy('created_at', 'desc');
+                },
+                // 'comments' => function ($query) {
+                //     $query->with('user:id,nom,avatar')
+                //         ->orderBy('created_at', 'desc');
+                // },
+                // 'validateurN1:id,nom',
+                // 'validateurN2:id,nom',
+                'createdBy:id,nom,avatar',
+            ]);
+
+            // Ajouter des informations supplémentaires
+            $additionalInfo = [
+                // Statistiques de la tâche
+                'stats' => [
+                    'assignees_count' => $tache->assignees->count(),
+                    'attachments_count' => $tache->attachments->count(),
+                    'links_count' => $tache->externalLinks->count(),
+                    // 'comments_count' => $tache->comments->count(),
+                    'resultats_count' => $tache->resultats->count(),
+                    'is_overdue' => $tache->is_overdue,
+                    'days_until_due' => $tache->echeance ? now()->diffInDays($tache->echeance, false) : null,
+                ],
+
+                // Permissions de l'utilisateur actuel
+                'permissions' => [
+                    'can_update' => auth()->user()->can('update', $tache),
+                    'can_delete' => auth()->user()->can('delete', $tache),
+                    'can_validate_n1' => auth()->user()->can('validateN1', $tache),
+                    'can_validate_n2' => auth()->user()->can('validateN2', $tache),
+                    'can_add_attachments' => auth()->user()->can('addAttachments', $tache),
+                    'can_add_links' => auth()->user()->can('addLinks', $tache),
+                    'can_comment' => auth()->user()->can('comment', $tache),
+                ],
+
+                // Informations de navigation
+                'breadcrumb' => [
+                    'workspace' => [
+                        'id' => $tache->activite->projet->workspace->id,
+                        'nom' => $tache->activite->projet->workspace->nom,
+                    ],
+                    'projet' => [
+                        'id' => $tache->activite->projet->id,
+                        'nom' => $tache->activite->projet->nom,
+                    ],
+                    'activite' => [
+                        'id' => $tache->activite->id,
+                        'nom' => $tache->activite->nom,
+                    ],
+                ],
+            ];
+
+            return response()->json([
+                'success' => true,
+                'data' => $tache,
+                'additional_info' => $additionalInfo,
+            ]);
+
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous n\'avez pas la permission de voir cette tâche.',
+            ], 403);
+        } catch (\Exception $e) {
+            Log::error('Erreur lors de la récupération de la tâche', [
+                'tache_id' => $tache->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la récupération de la tâche.',
+            ], 500);
+        }
     }
 
 
@@ -844,14 +929,14 @@ class TacheController extends Controller
                 $coverImage = $request->file('cover_image');
                 if ($coverImage->isValid()) {
                     // Supprimer l'ancienne image si elle existe
-                    if ($tache->cover_image && Storage::disk('public')->exists($tache->cover_image)) {
-                        Storage::disk('public')->delete($tache->cover_image);
+                    if ($tache->cover_image && Storage::disk('uploads')->exists($tache->cover_image)) {
+                        Storage::disk('uploads')->delete($tache->cover_image);
                         Log::info('Ancienne image de couverture supprimée', [
                             'old_path' => $tache->cover_image
                         ]);
                     }
 
-                    $coverImagePath = $coverImage->store('task-covers', 'public');
+                    $coverImagePath = $coverImage->store('task-covers', 'uploads');
                     $data['cover_image'] = $coverImagePath;
                     Log::info('Nouvelle image de couverture uploadée', [
                         'path' => $coverImagePath
@@ -1175,216 +1260,216 @@ class TacheController extends Controller
         ], 201);
     }
 
-/**
- * ✅ NOUVELLE VERSION CORRIGÉE : Rapport hebdomadaire avec statuts individuels
- * 
- * Affiche les tâches où l'utilisateur :
- * - Est assigné
- * - N'a PAS terminé OU a terminé mais résultat pas complètement validé
- * - Avec son statut INDIVIDUEL (statut_individuel dans tache_user)
- */
-public function myWeeklyReport(Request $request): JsonResponse
-{
-    $validated = $request->validate([
-        'week_number' => 'nullable|integer|min:1|max:53',
-        'year' => 'nullable|integer|min:1990',
-    ]);
+    /**
+     * ✅ NOUVELLE VERSION CORRIGÉE : Rapport hebdomadaire avec statuts individuels
+     * 
+     * Affiche les tâches où l'utilisateur :
+     * - Est assigné
+     * - N'a PAS terminé OU a terminé mais résultat pas complètement validé
+     * - Avec son statut INDIVIDUEL (statut_individuel dans tache_user)
+     */
+    public function myWeeklyReport(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'week_number' => 'nullable|integer|min:1|max:53',
+            'year' => 'nullable|integer|min:1990',
+        ]);
 
-    $weekNumber = $validated['week_number'] ?? now()->weekOfYear;
-    $year = $validated['year'] ?? now()->year;
+        $weekNumber = $validated['week_number'] ?? now()->weekOfYear;
+        $year = $validated['year'] ?? now()->year;
 
-    $user = $request->user();
+        $user = $request->user();
 
-    // ✅ Calculer les dates de début et fin de la semaine
-    $weekStart = $this->getWeekStartDate($year, $weekNumber);
-    $weekEnd = $this->getWeekEndDate($year, $weekNumber);
+        // ✅ Calculer les dates de début et fin de la semaine
+        $weekStart = $this->getWeekStartDate($year, $weekNumber);
+        $weekEnd = $this->getWeekEndDate($year, $weekNumber);
 
-    Log::info('📋 Chargement fiche évaluation', [
-        'user_id' => $user->id,
-        'week' => $weekNumber,
-        'year' => $year,
-        'week_start' => $weekStart,
-        'week_end' => $weekEnd,
-    ]);
-
-    // ✅ NOUVELLE LOGIQUE : Récupérer les tâches selon le statut individuel
-    $taches = Tache::with([
-        'activite.projet',
-        'assignees' => function ($query) use ($user) {
-            $query->where('user_id', $user->id)
-                ->withPivot([
-                    'statut_individuel',
-                    'progression_individuelle',
-                    'started_at',
-                    'completed_at',
-                    'notes_personnelles'
-                ]);
-        },
-        'labels',
-        'validatedN1By',
-        'validatedN2By',
-        'resultatsIndividuels' => function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        }
-    ])
-    ->whereHas('assignees', function ($query) use ($user) {
-        $query->where('user_id', $user->id);
-    })
-    // ✅ Filtrer par semaine (tâches dont l'échéance tombe dans cette semaine ou avant)
-    ->where(function ($q) use ($weekEnd) {
-        $q->where('echeance', '<=', $weekEnd)
-          ->orWhereNull('echeance');
-    })
-    ->active()
-    ->ordered()
-    ->get();
-
-    // ✅ FILTRAGE SELON LE PROCESSUS : 
-    // Afficher seulement si :
-    // 1. Statut individuel != terminé
-    // 2. OU statut individuel = terminé MAIS résultat pas complètement validé
-    $tasksToDisplay = $taches->filter(function ($tache) use ($user) {
-        $assignee = $tache->assignees->first();
-        
-        if (!$assignee) {
-            return false;
-        }
-
-        $statutIndividuel = $assignee->pivot->statut_individuel;
-        
-        // 1️⃣ Si pas terminé individuellement → TOUJOURS afficher
-        if ($statutIndividuel !== 'termine') {
-            return true;
-        }
-
-        // 2️⃣ Si terminé individuellement → vérifier la validation du résultat
-        $monResultat = $tache->monResultat($user);
-        
-        // Pas de résultat soumis → afficher
-        if (!$monResultat || !$monResultat->soumis_le) {
-            return true;
-        }
-
-        // Vérifier si validation complète
-        $validationComplete = false;
-
-        if ($tache->validation_n2_required) {
-            // N1 ET N2 requis → masquer seulement si les 2 sont validés
-            $validationComplete = $monResultat->valide_par_n1 && $monResultat->valide_par_n2;
-        } else {
-            // Seulement N1 requis → masquer si N1 validé
-            $validationComplete = $monResultat->valide_par_n1;
-        }
-
-        // ✅ Afficher si validation PAS complète
-        return !$validationComplete;
-    });
-
-    // ✅ Calculer les statistiques avec STATUTS INDIVIDUELS
-    $stats = [
-        'total' => $tasksToDisplay->count(),
-        'a_faire' => $tasksToDisplay->filter(function ($t) use ($user) {
-            $assignee = $t->assignees->first();
-            return $assignee && $assignee->pivot->statut_individuel === 'a_faire';
-        })->count(),
-        'en_cours' => $tasksToDisplay->filter(function ($t) use ($user) {
-            $assignee = $t->assignees->first();
-            return $assignee && $assignee->pivot->statut_individuel === 'en_cours';
-        })->count(),
-        'termine' => $tasksToDisplay->filter(function ($t) use ($user) {
-            $assignee = $t->assignees->first();
-            return $assignee && $assignee->pivot->statut_individuel === 'termine';
-        })->count(),
-        'avec_resultat' => $tasksToDisplay->filter(function ($t) {
-            return $t->resultatsIndividuels->isNotEmpty() && $t->resultatsIndividuels->first()->soumis_le;
-        })->count(),
-        'valide_n1' => $tasksToDisplay->filter(function ($t) {
-            $r = $t->resultatsIndividuels->first();
-            return $r && $r->valide_par_n1;
-        })->count(),
-        'valide_n2' => $tasksToDisplay->filter(function ($t) {
-            $r = $t->resultatsIndividuels->first();
-            return $r && $r->valide_par_n2;
-        })->count(),
-        'en_retard' => $tasksToDisplay->filter(function ($t) use ($user) {
-            $assignee = $t->assignees->first();
-            return $t->is_overdue && 
-                   $assignee && 
-                   $assignee->pivot->statut_individuel !== 'termine';
-        })->count(),
-        'estimated_hours' => $tasksToDisplay->sum(fn($t) => (float) $t->estimated_hours),
-        'actual_hours' => $tasksToDisplay->sum(fn($t) => (float) $t->actual_hours),
-    ];
-
-    // ✅ Grouper par activité
-    $byActivite = $tasksToDisplay->groupBy('activite_id')->map(function ($tasks, $activiteId) use ($user) {
-        $activite = $tasks->first()->activite;
-
-        return [
-            'activite' => [
-                'id' => $activite->id,
-                'nom' => $activite->nom,
-                'code' => $activite->code,
-                'projet_nom' => $activite->projet?->nom,
-            ],
-            'taches' => TacheResource::collection($tasks),
-            'stats' => [
-                'total' => $tasks->count(),
-                'a_faire' => $tasks->filter(function ($t) use ($user) {
-                    $assignee = $t->assignees->first();
-                    return $assignee && $assignee->pivot->statut_individuel === 'a_faire';
-                })->count(),
-                'en_cours' => $tasks->filter(function ($t) use ($user) {
-                    $assignee = $t->assignees->first();
-                    return $assignee && $assignee->pivot->statut_individuel === 'en_cours';
-                })->count(),
-                'termine' => $tasks->filter(function ($t) use ($user) {
-                    $assignee = $t->assignees->first();
-                    return $assignee && $assignee->pivot->statut_individuel === 'termine';
-                })->count(),
-            ]
-        ];
-    })->values();
-
-    Log::info('✅ Fiche évaluation chargée', [
-        'user_id' => $user->id,
-        'total_tasks' => $stats['total'],
-        'activites' => $byActivite->count()
-    ]);
-
-    return response()->json([
-        'week_info' => [
-            'week_number' => $weekNumber,
+        Log::info('📋 Chargement fiche évaluation', [
+            'user_id' => $user->id,
+            'week' => $weekNumber,
             'year' => $year,
-            'start_date' => $weekStart,
-            'end_date' => $weekEnd,
-        ],
-        'all_tasks' => TacheResource::collection($tasksToDisplay),
-        'by_activite' => $byActivite,
-        'stats' => $stats,
-    ]);
-}
+            'week_start' => $weekStart,
+            'week_end' => $weekEnd,
+        ]);
 
-/**
- * ✅ Helper pour obtenir la date de début de semaine (Lundi)
- */
-private function getWeekStartDate(int $year, int $week): string
-{
-    $dto = new \DateTime();
-    $dto->setISODate($year, $week);
-    return $dto->format('Y-m-d');
-}
+        // ✅ NOUVELLE LOGIQUE : Récupérer les tâches selon le statut individuel
+        $taches = Tache::with([
+            'activite.projet',
+            'assignees' => function ($query) use ($user) {
+                $query->where('user_id', $user->id)
+                    ->withPivot([
+                        'statut_individuel',
+                        'progression_individuelle',
+                        'started_at',
+                        'completed_at',
+                        'notes_personnelles'
+                    ]);
+            },
+            'labels',
+            'validatedN1By',
+            'validatedN2By',
+            'resultatsIndividuels' => function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            }
+        ])
+            ->whereHas('assignees', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            // ✅ Filtrer par semaine (tâches dont l'échéance tombe dans cette semaine ou avant)
+            ->where(function ($q) use ($weekEnd) {
+                $q->where('echeance', '<=', $weekEnd)
+                    ->orWhereNull('echeance');
+            })
+            ->active()
+            ->ordered()
+            ->get();
 
-/**
- * ✅ Helper pour obtenir la date de fin de semaine (Dimanche)
- */
-private function getWeekEndDate(int $year, int $week): string
-{
-    $dto = new \DateTime();
-    $dto->setISODate($year, $week, 7);
-    return $dto->format('Y-m-d');
-}
- 
+        // ✅ FILTRAGE SELON LE PROCESSUS : 
+        // Afficher seulement si :
+        // 1. Statut individuel != terminé
+        // 2. OU statut individuel = terminé MAIS résultat pas complètement validé
+        $tasksToDisplay = $taches->filter(function ($tache) use ($user) {
+            $assignee = $tache->assignees->first();
+
+            if (!$assignee) {
+                return false;
+            }
+
+            $statutIndividuel = $assignee->pivot->statut_individuel;
+
+            // 1️⃣ Si pas terminé individuellement → TOUJOURS afficher
+            if ($statutIndividuel !== 'termine') {
+                return true;
+            }
+
+            // 2️⃣ Si terminé individuellement → vérifier la validation du résultat
+            $monResultat = $tache->monResultat($user);
+
+            // Pas de résultat soumis → afficher
+            if (!$monResultat || !$monResultat->soumis_le) {
+                return true;
+            }
+
+            // Vérifier si validation complète
+            $validationComplete = false;
+
+            if ($tache->validation_n2_required) {
+                // N1 ET N2 requis → masquer seulement si les 2 sont validés
+                $validationComplete = $monResultat->valide_par_n1 && $monResultat->valide_par_n2;
+            } else {
+                // Seulement N1 requis → masquer si N1 validé
+                $validationComplete = $monResultat->valide_par_n1;
+            }
+
+            // ✅ Afficher si validation PAS complète
+            return !$validationComplete;
+        });
+
+        // ✅ Calculer les statistiques avec STATUTS INDIVIDUELS
+        $stats = [
+            'total' => $tasksToDisplay->count(),
+            'a_faire' => $tasksToDisplay->filter(function ($t) use ($user) {
+                $assignee = $t->assignees->first();
+                return $assignee && $assignee->pivot->statut_individuel === 'a_faire';
+            })->count(),
+            'en_cours' => $tasksToDisplay->filter(function ($t) use ($user) {
+                $assignee = $t->assignees->first();
+                return $assignee && $assignee->pivot->statut_individuel === 'en_cours';
+            })->count(),
+            'termine' => $tasksToDisplay->filter(function ($t) use ($user) {
+                $assignee = $t->assignees->first();
+                return $assignee && $assignee->pivot->statut_individuel === 'termine';
+            })->count(),
+            'avec_resultat' => $tasksToDisplay->filter(function ($t) {
+                return $t->resultatsIndividuels->isNotEmpty() && $t->resultatsIndividuels->first()->soumis_le;
+            })->count(),
+            'valide_n1' => $tasksToDisplay->filter(function ($t) {
+                $r = $t->resultatsIndividuels->first();
+                return $r && $r->valide_par_n1;
+            })->count(),
+            'valide_n2' => $tasksToDisplay->filter(function ($t) {
+                $r = $t->resultatsIndividuels->first();
+                return $r && $r->valide_par_n2;
+            })->count(),
+            'en_retard' => $tasksToDisplay->filter(function ($t) use ($user) {
+                $assignee = $t->assignees->first();
+                return $t->is_overdue &&
+                    $assignee &&
+                    $assignee->pivot->statut_individuel !== 'termine';
+            })->count(),
+            'estimated_hours' => $tasksToDisplay->sum(fn($t) => (float) $t->estimated_hours),
+            'actual_hours' => $tasksToDisplay->sum(fn($t) => (float) $t->actual_hours),
+        ];
+
+        // ✅ Grouper par activité
+        $byActivite = $tasksToDisplay->groupBy('activite_id')->map(function ($tasks, $activiteId) use ($user) {
+            $activite = $tasks->first()->activite;
+
+            return [
+                'activite' => [
+                    'id' => $activite->id,
+                    'nom' => $activite->nom,
+                    'code' => $activite->code,
+                    'projet_nom' => $activite->projet?->nom,
+                ],
+                'taches' => TacheResource::collection($tasks),
+                'stats' => [
+                    'total' => $tasks->count(),
+                    'a_faire' => $tasks->filter(function ($t) use ($user) {
+                        $assignee = $t->assignees->first();
+                        return $assignee && $assignee->pivot->statut_individuel === 'a_faire';
+                    })->count(),
+                    'en_cours' => $tasks->filter(function ($t) use ($user) {
+                        $assignee = $t->assignees->first();
+                        return $assignee && $assignee->pivot->statut_individuel === 'en_cours';
+                    })->count(),
+                    'termine' => $tasks->filter(function ($t) use ($user) {
+                        $assignee = $t->assignees->first();
+                        return $assignee && $assignee->pivot->statut_individuel === 'termine';
+                    })->count(),
+                ]
+            ];
+        })->values();
+
+        Log::info('✅ Fiche évaluation chargée', [
+            'user_id' => $user->id,
+            'total_tasks' => $stats['total'],
+            'activites' => $byActivite->count()
+        ]);
+
+        return response()->json([
+            'week_info' => [
+                'week_number' => $weekNumber,
+                'year' => $year,
+                'start_date' => $weekStart,
+                'end_date' => $weekEnd,
+            ],
+            'all_tasks' => TacheResource::collection($tasksToDisplay),
+            'by_activite' => $byActivite,
+            'stats' => $stats,
+        ]);
+    }
+
+    /**
+     * ✅ Helper pour obtenir la date de début de semaine (Lundi)
+     */
+    private function getWeekStartDate(int $year, int $week): string
+    {
+        $dto = new \DateTime();
+        $dto->setISODate($year, $week);
+        return $dto->format('Y-m-d');
+    }
+
+    /**
+     * ✅ Helper pour obtenir la date de fin de semaine (Dimanche)
+     */
+    private function getWeekEndDate(int $year, int $week): string
+    {
+        $dto = new \DateTime();
+        $dto->setISODate($year, $week, 7);
+        return $dto->format('Y-m-d');
+    }
+
 
     /**
      * ✅ Rapport hebdomadaire d'un utilisateur (managers)

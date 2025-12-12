@@ -170,14 +170,26 @@ export function useNotifications() {
 
     const getNotificationIcon = (type) => {
         const icons = {
-            // Tâches
+            // Tâches - Assignation
             task_assigned: 'fa-user-plus',
+            task_unassigned: 'fa-user-times',
+            task_updated: 'fa-edit',
+
+            // Tâches - Fichiers
+            task_file_added: 'fa-file-upload',
+            task_file_removed: 'fa-file-circle-minus',
+
+            // Tâches - Liens
+            task_link_added: 'fa-link',
+            task_link_removed: 'fa-unlink',
+
+            // Tâches - États
             task_due_soon: 'fa-clock',
             task_completed: 'fa-check-circle',
-            
+
             // Résultats - Soumission
             resultat_soumis: 'fa-file-upload',
-            
+
             // Résultats - Validations
             resultat_valide_n1: 'fa-check',
             resultat_valide_n2: 'fa-trophy',
@@ -185,23 +197,23 @@ export function useNotifications() {
             validation_n1_confirmee: 'fa-check-circle',
             validation_n2_confirmee: 'fa-trophy',
             resultat_validation_complete: 'fa-certificate',
-            
+
             // Résultats - Rejets
             resultat_rejete: 'fa-times-circle',
             rejet_confirme: 'fa-clipboard-check',
             resultat_rejete_n2_info: 'fa-info-circle',
-            
+
             // Commentaires
             mentioned_in_comment: 'fa-at',
             comment_added: 'fa-comment',
-            
+
             // Projets
             project_updated: 'fa-project-diagram',
             projet_invitation: 'fa-envelope',
-            
+
             // Workspace
             workspace_invitation: 'fa-envelope',
-            
+
             // Responsable activité changé
             responsable_changed: 'fa-user-check',
 
@@ -217,12 +229,18 @@ export function useNotifications() {
         const colors = {
             // Tâches
             task_assigned: 'blue',
+            task_unassigned: 'red',
+            task_updated: 'indigo',
+            task_file_added: 'green',
+            task_file_removed: 'orange',
+            task_link_added: 'cyan',
+            task_link_removed: 'yellow',
             task_due_soon: 'orange',
             task_completed: 'green',
-            
+
             // Résultats - Soumission
             resultat_soumis: 'blue',
-            
+
             // Résultats - Validations
             resultat_valide_n1: 'green',
             resultat_valide_n2: 'emerald',
@@ -230,26 +248,25 @@ export function useNotifications() {
             validation_n1_confirmee: 'green',
             validation_n2_confirmee: 'emerald',
             resultat_validation_complete: 'cyan',
-            
+
             // Résultats - Rejets
             resultat_rejete: 'red',
             rejet_confirme: 'orange',
             resultat_rejete_n2_info: 'yellow',
-            
+
             // Commentaires
             mentioned_in_comment: 'purple',
             comment_added: 'cyan',
-            
+
             // Projets
             project_updated: 'indigo',
             projet_invitation: 'purple',
-            
+
             // Workspace
             workspace_invitation: 'brand',
 
             // Responsable activité changé
             responsable_changed: 'purple',
- 
 
             // Autres
             deadline_approaching: 'red',
@@ -291,6 +308,20 @@ export function useNotifications() {
         ].includes(notification.type);
     };
 
+    const isTaskNotification = (notification) => {
+        return [
+            'task_assigned',
+            'task_unassigned',
+            'task_updated',
+            'task_file_added',
+            'task_file_removed',
+            'task_link_added',
+            'task_link_removed',
+            'task_due_soon',
+            'task_completed'
+        ].includes(notification.type);
+    };
+
     return {
         // State
         notifications,
@@ -314,7 +345,8 @@ export function useNotifications() {
         getNotificationColor,
         isInvitationNotification,
         isResultatNotification,
-
+        isTaskNotification,
+        
         showNotification,
         showSuccess,
         showError,
