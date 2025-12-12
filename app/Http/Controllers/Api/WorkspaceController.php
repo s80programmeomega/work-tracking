@@ -74,8 +74,7 @@ class WorkspaceController extends Controller
 
       // Fusionner avec les settings envoyées
       $settings = $request->has('settings_array') && is_array($request->settings_array)
-        ? array_merge($defaultSettings, $request->settings_array)
-        : $defaultSettings;
+        ? array_merge($defaultSettings, $request->settings_array) : $defaultSettings;
 
       // Créer le workspace
       $workspace = Workspace::create([
@@ -87,10 +86,14 @@ class WorkspaceController extends Controller
         'is_active' => true,
       ]);
 
-      // Gérer l'upload du logo si présent
+      // Gérer l'upload du logo si présent 
       if ($request->hasFile('logo')) {
         try {
-          $logoPath = $request->file('logo')->store('workspaces/logos', 'public');
+          // Stocker directement dans public/uploads/workspaces/logos
+          $logoPath = $request->file('logo')->store(
+            'workspaces/logos',
+            'uploads' // Utiliser un disk custom
+          );
           $workspace->update(['logo' => $logoPath]);
         } catch (\Exception $e) {
           Log::warning('Erreur upload logo workspace: ' . $e->getMessage());
@@ -356,31 +359,33 @@ class WorkspaceController extends Controller
   }
 
   public function getWorkspaces(Request $request)
-{
+  {
     $user = $request->user();
-    
+
     $workspaces = Workspace::accessibleBy($user->id)
-        ->withCount(['projets' => function ($query) {
-            $query->where('status', 'active');
-        }])
-        ->whereNotNull('id') // ← Filtrer les workspaces sans ID
-        ->get()
-        ->map(function ($workspace) {
-            return [
-                'id' => $workspace->id,
-                'nom' => $workspace->nom,
-                'code' => $workspace->code,
-                'projets_count' => $workspace->projets_count,
-                'description' => $workspace->description,
-                'created_at' => $workspace->created_at,
-                'updated_at' => $workspace->updated_at,
-            ];
-        })
-        ->filter() // ← Filtrer les éventuels éléments null
-        ->values();
+      ->withCount([
+        'projets' => function ($query) {
+          $query->where('status', 'active');
+        }
+      ])
+      ->whereNotNull('id') // ← Filtrer les workspaces sans ID
+      ->get()
+      ->map(function ($workspace) {
+        return [
+          'id' => $workspace->id,
+          'nom' => $workspace->nom,
+          'code' => $workspace->code,
+          'projets_count' => $workspace->projets_count,
+          'description' => $workspace->description,
+          'created_at' => $workspace->created_at,
+          'updated_at' => $workspace->updated_at,
+        ];
+      })
+      ->filter() // ← Filtrer les éventuels éléments null
+      ->values();
 
     return response()->json($workspaces);
-}
+  }
 
   /**
    * ✅ Accepter l'invitation pour un utilisateur existant
@@ -1227,32 +1232,35 @@ class WorkspaceController extends Controller
 
       // 1. D'abord vérifier si on doit supprimer le logo
       if ($request->has('remove_logo') && $request->boolean('remove_logo')) {
-        if ($workspace->logo && Storage::disk('public')->exists($workspace->logo)) {
-          Storage::disk('public')->delete($workspace->logo);
+        if ($workspace->logo && file_exists(public_path('uploads/' . $workspace->logo))) {
+          unlink(public_path('uploads/' . $workspace->logo));
         }
         $dataToUpdate['logo'] = null;
 
         Log::info('Logo supprimé', ['workspace_id' => $workspace->id]);
       }
       // 2. Ensuite vérifier si on upload un nouveau logo
-      elseif ($request->hasFile('logo')) {
+     elseif ($request->hasFile('logo')) {
         try {
-          // Supprimer l'ancien logo si existe
-          if ($workspace->logo && Storage::disk('public')->exists($workspace->logo)) {
-            Storage::disk('public')->delete($workspace->logo);
-          }
+            // Supprimer l'ancien logo si existe
+            if ($workspace->logo && file_exists(public_path('uploads/' . $workspace->logo))) {
+                unlink(public_path('uploads/' . $workspace->logo));
+            }
 
-          // Enregistrer le nouveau logo
-          $logoPath = $request->file('logo')->store('workspaces/logos', 'public');
-          $dataToUpdate['logo'] = $logoPath;
+            // Enregistrer le nouveau logo directement dans public/uploads
+            $logoPath = $request->file('logo')->store(
+                'workspaces/logos',
+                'uploads' // Utiliser le disk custom
+            );
+            $dataToUpdate['logo'] = $logoPath;
 
-          Log::info('Logo mis à jour avec succès', [
-            'workspace_id' => $workspace->id,
-            'logo_path' => $logoPath
-          ]);
+            Log::info('Logo mis à jour avec succès', [
+                'workspace_id' => $workspace->id,
+                'logo_path' => $logoPath
+            ]);
         } catch (\Exception $e) {
-          Log::error('Erreur upload logo workspace: ' . $e->getMessage());
-          throw $e; // Propager l'erreur pour rollback
+            Log::error('Erreur upload logo workspace: ' . $e->getMessage());
+            throw $e; // Propager l'erreur pour rollback
         }
       }
 
@@ -1335,8 +1343,8 @@ class WorkspaceController extends Controller
 
     try {
       // Delete logo if exists
-      if ($workspace->logo) {
-        Storage::disk('public')->delete($workspace->logo);
+      if ($workspace->logo && file_exists(public_path('uploads/' . $workspace->logo))) {
+          unlink(public_path('uploads/' . $workspace->logo));
       }
 
       // Detach all members
