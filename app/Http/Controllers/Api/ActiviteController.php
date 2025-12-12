@@ -13,6 +13,9 @@ use App\Models\User;
 use App\Notifications\ActiviteMemberAdded;
 use App\Notifications\ActiviteMemberPermissionsUpdated;
 use App\Notifications\ActiviteMemberRemoved;
+use App\Notifications\ProjetResponsableNotification;
+use App\Notifications\ResponsableActiviteChanged;
+use App\Notifications\ResponsableChangedNotification;
 use App\Services\ActiviteService;
 use App\Services\TacheService;
 use Illuminate\Http\JsonResponse;
@@ -21,6 +24,7 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 
 class ActiviteController extends Controller
@@ -705,59 +709,84 @@ class ActiviteController extends Controller
         ]);
     }
 
-    public function changeResponsable(Request $request, $id): JsonResponse
-    {
-        $request->validate([
-            'new_responsable_id' => 'required|integer|exists:users,id'
-        ]);
+public function changeResponsable(Request $request, $id): JsonResponse
+{
+    $request->validate([
+        'new_responsable_id' => 'required|integer|exists:users,id'
+    ]);
 
-        $activite = Activite::findOrFail($id);
-        $user = $request->user();
-        $newResponsableId = $request->input('new_responsable_id');
+    $activite = Activite::with('projet.responsable')->findOrFail($id);
+    $user = $request->user();
+    $newResponsableId = $request->input('new_responsable_id');
 
-        // Vérifier les permissions
-        if (!$user->isSuperAdmin() && $user->id !== $activite->responsable_id) {
-            return response()->json(['message' => 'Seul le responsable actuel ou un super admin peut changer le responsable'], 403);
-        }
+    $oldResponsable = $activite->responsable; // ancien responsable
+    $newResponsable = User::findOrFail($newResponsableId);
 
-        // Vérifier que le nouveau responsable est membre de l'activité
-        $isMember = $activite->membres()->where('user_id', $newResponsableId)->exists();
-        if (!$isMember) {
-            return response()->json(['message' => 'Le nouveau responsable doit être membre de l\'activité'], 400);
-        }
+    // Vérifier permissions : super admin ou responsable actuel
+    if (!$user->isSuperAdmin() && $user->id !== $activite->responsable_id) {
+        return response()->json(['message' => 'Seul le responsable actuel ou un super admin peut changer le responsable'], 403);
+    }
 
-        // Mettre à jour le responsable
-        $activite->update([
-            'responsable_id' => $newResponsableId
-        ]);
+    // Vérifier que le nouveau responsable est membre de l'activité
+    $isMember = $activite->membres()->where('user_id', $newResponsableId)->exists();
+    if (!$isMember) {
+        return response()->json(['message' => 'Le nouveau responsable doit être membre de l\'activité'], 400);
+    }
 
-        // Optionnel : Donner tous les droits au nouveau responsable
-        $activite->membres()->updateExistingPivot($newResponsableId, [
+    // Mettre à jour le responsable
+    $activite->update(['responsable_id' => $newResponsableId]);
+
+    // Donner tous les droits au nouveau responsable
+    $activite->membres()->updateExistingPivot($newResponsableId, [
+        'can_create_tasks' => true,
+        'can_edit_tasks' => true,
+        'can_delete_tasks' => true,
+        'can_validate_results' => true,
+        'can_assign_users' => true,
+        'can_delete_member' => true,
+    ]);
+
+    // Retirer certains droits à l'ancien responsable (s'il n'est pas super admin)
+    if (!$oldResponsable->isSuperAdmin()) {
+        $activite->membres()->updateExistingPivot($oldResponsable->id, [
             'can_create_tasks' => true,
             'can_edit_tasks' => true,
-            'can_delete_tasks' => true,
+            'can_delete_tasks' => false,
             'can_validate_results' => true,
-            'can_assign_users' => true,
-            'can_delete_member' => true,
-        ]);
-
-        // Optionnel : Retirer les droits spéciaux de l'ancien responsable (sauf si c'est un super admin)
-        if ($user->id !== $newResponsableId && !$user->isSuperAdmin()) {
-            $activite->membres()->updateExistingPivot($user->id, [
-                'can_create_tasks' => true,
-                'can_edit_tasks' => true,
-                'can_delete_tasks' => false,
-                'can_validate_results' => true,
-                'can_assign_users' => false,
-                'can_delete_member' => false,
-            ]);
-        }
-
-        return response()->json([
-            'message' => 'Responsable mis à jour avec succès',
-            'data' => $activite->fresh()
+            'can_assign_users' => false,
+            'can_delete_member' => false,
         ]);
     }
+
+    /**
+     * 📩 ENVOI DES NOTIFICATIONS
+     * 1. Nouveau responsable → notification + email
+     * 2. Responsable du projet (chef de projet) → notification + email
+     */
+
+    // À : nouveau responsable
+    $newResponsable->notify(new ResponsableChangedNotification(
+        $activite,
+        $oldResponsable,
+        $newResponsable
+    ));
+
+    // À : responsable du projet parent (si présent)
+    if ($activite->projet && $activite->projet->responsable) {
+        $projectManager = $activite->projet->responsable;
+
+        $projectManager->notify(new ResponsableChangedNotification(
+            $activite,
+            $oldResponsable,
+            $newResponsable
+        ));
+    }
+
+    return response()->json([
+        'message' => 'Responsable mis à jour avec succès',
+        'data' => $activite->fresh()
+    ]);
+}
 
     /**
      * ✅ Add a member to an activity with notifications
