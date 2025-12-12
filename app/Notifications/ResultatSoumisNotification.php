@@ -15,6 +15,7 @@ class ResultatSoumisNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
+
     public function __construct(
         public TacheResultat $resultat
     ) {}
