@@ -73,7 +73,8 @@ export function useActivityPermissions(activite) {
       can_edit_tasks: false,
       can_delete_tasks: false,
       can_validate_results: false,
-      can_assign_users: false
+      can_assign_users: false,
+      can_delete_member: false
     }
 
     if (!activite.value?.user_permissions) {
@@ -163,6 +164,16 @@ export function useActivityPermissions(activite) {
     if (isActivityResponsable.value) return true
     if (isProjectResponsable.value) return true
     return userPermissions.value.can_manage_members || false
+  })
+  /**
+   * PERMISSION: Peut supprimer les membres
+   * SuperAdmin + Responsables
+   */
+  const canDeleteMembers = computed(() => {
+    if (isSuperAdmin.value) return true
+    if (isActivityResponsable.value) return true
+    if (isProjectResponsable.value) return true
+    return userPermissions.value.can_delete_member || false
   })
 
   /**
@@ -260,7 +271,8 @@ export function useActivityPermissions(activite) {
       'delete_tasks': canDeleteTasks.value,
       'validate_results': canValidateResults.value,
       'assign_users': canAssignUsers.value,
-      'edit_own_tasks': canEditOwnTasks.value
+      'edit_own_tasks': canEditOwnTasks.value,
+      'delete_members': canDeleteMembers.value
     }
 
     return permissionMap[permissionName] || false
@@ -397,7 +409,8 @@ export function useActivityPermissions(activite) {
         canEditTasks: canEditTasks.value,
         canDeleteTasks: canDeleteTasks.value,
         canValidateResults: canValidateResults.value,
-        canAssignUsers: canAssignUsers.value
+        canAssignUsers: canAssignUsers.value,
+        canDeleteMembers: canDeleteMembers.value
       },
       apiPermissions: userPermissions.value
     }
@@ -427,6 +440,7 @@ export function useActivityPermissions(activite) {
     canEdit,
     canDelete,
     canManageMembers,
+    canDeleteMembers,
     canCreateTasks,
     canEditTasks,
     canDeleteTasks,

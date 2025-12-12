@@ -5,7 +5,7 @@ import { useAuthStore } from '../stores/authStore'
 import AcceptProjetInvitation from '../pages/AcceptProjetInvitation.vue'
 import TachesAttendantCollegues from '../pages/TachesAttendantCollegues.vue'
 import TachesParUtilisateur from '../pages/TachesParUtilisateur.vue'
- 
+
 const loading = ref(false)
 export const isLoading = ref(false)
 
@@ -367,6 +367,15 @@ const router = createRouter({
         permissions: ['responsable_activite', 'responsable_projet', 'super_admin']
       }
     },
+    {
+      path: '/taches/:id',
+      name: 'taches.show',
+      component: () => import('../pages/taches/TacheDetail.vue'),
+      meta: {
+        requiresAuth: true,
+        title: 'Détails de la tâche'
+      }
+    },
     // {
     //   path: '/taches/en-retard',
     //   name: 'taches.overdue',
@@ -506,62 +515,62 @@ const router = createRouter({
     },
 
     // ==========================================
-// DOCUMENTS
-// ==========================================
-{
-  path: '/documents',
-  name: 'Documents',
-  component: () => import('../pages/documents.vue'),
-  meta: {
-    title: 'Documents',
-    requiresAuth: true,
-  },
-},
-// {
-//   path: '/documents/:id',
-//   name: 'DocumentDetails',
-//   component: () => import('../pages/documents/Show.vue'),
-//   meta: {
-//     title: 'Détails du document',
-//     requiresAuth: true,
-//   },
-// },
-// {
-//   path: '/workspaces/:workspaceId/documents',
-//   name: 'WorkspaceDocuments',
-//   component: () => import('../pages/documents/WorkspaceDocuments.vue'),
-//   meta: {
-//     title: 'Documents du workspace',
-//     requiresAuth: true,
-//   },
-// },
-{
-  path: '/projets/:projetId/documents',
-  name: 'ProjetDocuments',
-  component: () => import('../pages/documents/ProjetDocuments.vue'),
-  meta: {
-    title: 'Documents du projet',
-    requiresAuth: true,
-  },
-},
-// {
-//   path: '/activites/:activiteId/documents',
-//   name: 'ActiviteDocuments',
-//   component: () => import('../pages/documents/ActiviteDocuments.vue'),
-//   meta: {
-//     title: 'Documents de l\'activité',
-//     requiresAuth: true,
-//   },
-// },
-// {
-//   path: '/taches/:tacheId/documents',
-//   name: 'TacheDocuments',
-//   component: () => import('../pages/documents/TacheDocuments.vue'),
-//   meta: {
-//     title: 'Documents de la tâche',
-//     requiresAuth: true,
-//   },
-// },
+    // DOCUMENTS
+    // ==========================================
+    {
+      path: '/documents',
+      name: 'Documents',
+      component: () => import('../pages/documents.vue'),
+      meta: {
+        title: 'Documents',
+        requiresAuth: true,
+      },
+    },
+    // {
+    //   path: '/documents/:id',
+    //   name: 'DocumentDetails',
+    //   component: () => import('../pages/documents/Show.vue'),
+    //   meta: {
+    //     title: 'Détails du document',
+    //     requiresAuth: true,
+    //   },
+    // },
+    // {
+    //   path: '/workspaces/:workspaceId/documents',
+    //   name: 'WorkspaceDocuments',
+    //   component: () => import('../pages/documents/WorkspaceDocuments.vue'),
+    //   meta: {
+    //     title: 'Documents du workspace',
+    //     requiresAuth: true,
+    //   },
+    // },
+    {
+      path: '/projets/:projetId/documents',
+      name: 'ProjetDocuments',
+      component: () => import('../pages/documents/ProjetDocuments.vue'),
+      meta: {
+        title: 'Documents du projet',
+        requiresAuth: true,
+      },
+    },
+    // {
+    //   path: '/activites/:activiteId/documents',
+    //   name: 'ActiviteDocuments',
+    //   component: () => import('../pages/documents/ActiviteDocuments.vue'),
+    //   meta: {
+    //     title: 'Documents de l\'activité',
+    //     requiresAuth: true,
+    //   },
+    // },
+    // {
+    //   path: '/taches/:tacheId/documents',
+    //   name: 'TacheDocuments',
+    //   component: () => import('../pages/documents/TacheDocuments.vue'),
+    //   meta: {
+    //     title: 'Documents de la tâche',
+    //     requiresAuth: true,
+    //   },
+    // },
     {
       path: '/error-404',
       name: '404 Error',
@@ -623,27 +632,27 @@ const router = createRouter({
 // Navigation guard améliorée
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
-  
+
   // Début du chargement
   isLoading.value = true
-  
+
   // Set document title
   document.title = `${to.meta.title || 'Dashboard'} | Work Tracking`
-  
+
   // Vérifier si l'utilisateur est connecté
   const isLoggedIn = authStore.isAuthenticated
-  
+
   try {
     // Routes protégées
     if (to.meta.requiresAuth) {
       if (!isLoggedIn) {
         isLoading.value = false
-        return next({ 
-          name: 'Signin', 
-          query: { redirect: to.fullPath } 
+        return next({
+          name: 'Signin',
+          query: { redirect: to.fullPath }
         })
       }
-      
+
       // Charger l'utilisateur si nécessaire
       if (isLoggedIn && !authStore.user) {
         try {
@@ -655,18 +664,18 @@ router.beforeEach(async (to, from, next) => {
         }
       }
     }
-    
+
     // Routes pour invités seulement
     if (to.meta.guest && isLoggedIn) {
       isLoading.value = false
       return next({ name: 'Dashboard' })
     }
-    
+
     // Vérifier les rôles (décommenter si nécessaire)
     // if (to.meta.roles && !authStore.hasAnyRole(to.meta.roles)) {
     //   return next({ name: 'Unauthorized' })
     // }
-    
+
     next()
   } catch (error) {
     console.error('Erreur navigation:', error)
