@@ -81,6 +81,8 @@ class WorkspaceInvitation extends Model
             'can_create_projects' => $this->permissions['can_create_projects'] ?? false,
             'can_invite_members' => $this->permissions['can_invite_members'] ?? false,
             'can_manage_settings' => $this->permissions['can_manage_settings'] ?? false,
+            'can_transfer_ownership' => $this->permissions['can_transfer_ownership'] ?? false,
+            'can_delete_members' => $this->permissions['can_delete_members'] ?? false,
             'invited_at' => now(),
         ]);
 
