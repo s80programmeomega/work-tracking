@@ -2,7 +2,7 @@
 <template>
   <div class="space-y-6">
     <!-- Header avec actions - Conditionnel -->
-    <div v-if="showHeader" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <!-- <div v-if="showHeader" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
           Projets
@@ -13,12 +13,12 @@
       </div>
       
       <button
-        @click="openCreateModal"
-        class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors" >
+        @click="openCreateModal" class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors" >
         <PlusIcon class="w-5 h-5" />
-        Nouveau projet
+        Nouveau projet 
       </button>
-    </div>
+
+    </div> -->
 
    <!-- Filtres et recherche - Conditionnel -->
     <div v-if="showFilters" class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 space-y-4">

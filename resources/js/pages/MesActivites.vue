@@ -198,8 +198,7 @@
                 <td class="px-6 py-4">
                   <div class="flex items-center gap-2 min-w-32">
                     <div class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                      <div class="h-full bg-brand-500 transition-all duration-500"
-                        :style="{ width: `${activite.progression || 0}%` }"></div>
+                      <div class="h-full bg-brand-500 transition-all duration-500" :style="{ width: `${activite.progression || 0}%` }"></div>
                     </div>
                     <span class="text-xs text-gray-600 dark:text-gray-400 min-w-8">
                       {{ activite.progression || 0 }}%
@@ -308,7 +307,6 @@ import { useRouter } from 'vue-router'
 import { useActivites } from '@/composables/useActivites'
 import { useProjets } from '@/composables/useProjets'
 import { useWorkspace } from '@/composables/useWorkspace'
-import { useActivityPermissions } from '@/composables/useActivityPermissions'
 
 // Components
 import AdminLayout from '@/components/layout/AdminLayout.vue'
@@ -394,17 +392,17 @@ const getPermissions = (activite) => {
     return permissionsCache.value.get(cacheKey)
   }
 
+  // console.log('Calcul des permissions pour l\'activité ID:', activite);
   // Calculer les permissions
   const permissions = {
     // Utiliser les permissions de l'API depuis user_permissions
-    canEdit: activite.user_permissions?.can_edit || false,
-    canDelete: activite.user_permissions?.can_delete || false,
+    canEdit: activite.user_permissions?.can_edit_activity || false,
+    canDelete: activite.user_permissions?.can_delete_activity || false,
     canManageMembers: activite.user_permissions?.can_manage_members || false,
     canView: true // Par défaut, si l'activité est dans la liste, l'utilisateur peut la voir
 
-    // Vous pouvez aussi utiliser le composable si nécessaire :
-    // const { canEdit, canDelete, canManageMembers } = useActivityPermissions(ref(activite))
   }
+
 
   // Mettre en cache
   permissionsCache.value.set(cacheKey, permissions)

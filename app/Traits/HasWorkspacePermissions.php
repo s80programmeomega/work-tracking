@@ -70,7 +70,8 @@ trait HasWorkspacePermissions
                 'can_delete_projects',
                 'can_invite_members',
                 'can_manage_settings',
-                'can_transfer_ownership'
+                'can_transfer_ownership',
+                'can_delete_members',
             ],
             'admin' => [
                 'can_view_all_projects',

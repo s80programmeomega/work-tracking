@@ -821,7 +821,7 @@ const newLink = ref({ url: '', title: '' })
 // Variables labels et apparence
 const showLabelModal = ref(false)
 const coverImagePreview = ref(null)
-const coverImageFile = ref(null) // ✅ NOUVEAU : Référence séparée pour le fichier
+const coverImageFile = ref(null) 
 
 // Refs pour les inputs
 const fileInputRef = ref(null)
