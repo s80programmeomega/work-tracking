@@ -1,3 +1,4 @@
+<!-- resources\js\pages\taches\TacheDetail.vue -->
 <template>
   <AdminLayout>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-950">
@@ -166,13 +167,13 @@ import api from '@/api/axios';
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 
-// import TacheDetailsTab from '@/components/taches/TacheDetailsTab.vue';
-// import TacheAssigneesTab from '@/components/taches/TacheAssigneesTab.vue';
+import TacheDetailsTab from '@/components/taches/tacheDetail/TacheDetailsTab.vue';
+import TacheAssigneesTab from '@/components/taches/tacheDetail/TacheAssigneesTab.vue';
 import TacheAttachmentsTab from '@/components/taches/tacheDetail/TacheAttachmentsTab.vue';
 import TacheLinksTab from '@/components/taches/tacheDetail/TacheLinksTab.vue';
-// import TacheResultsTab from '@/components/taches/TacheResultsTab.vue';
-// import TacheCommentsTab from '@/components/taches/TacheCommentsTab.vue';
-// import TacheActivityTab from '@/components/taches/TacheActivityTab.vue';
+import TacheResultsTab from '@/components/taches/tacheDetail/TacheResultsTab.vue';
+// import TacheCommentsTab from '@/components/taches/tacheDetail/TacheCommentsTab.vue';
+import TacheActivityTab from '@/components/taches/tacheDetail/TacheActivityTab.vue';
 
 const route = useRoute();
 const tache = ref(null);
