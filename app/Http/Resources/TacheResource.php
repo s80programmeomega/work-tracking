@@ -44,7 +44,7 @@ class TacheResource extends JsonResource
             return null;
         };
 
-        
+
         return [
             'id' => $this->id,
             'code' => $this->code,
@@ -285,6 +285,7 @@ class TacheResource extends JsonResource
             'position' => $this->position,
             'couleur' => $this->couleur,
             'cover_image' => $this->cover_image,
+            // 'cover_image' => $this->getFileUrlAttribute,
             'visibility' => $this->visibility,
 
             // État et indicateurs
@@ -353,5 +354,10 @@ class TacheResource extends JsonResource
             'fully_validated' => 'Validé complètement',
             default => 'Inconnu'
         };
+    }
+
+    public function getFileUrlAttribute(): string
+    {
+        return asset('uploads/' . $this->cover_image);
     }
 }

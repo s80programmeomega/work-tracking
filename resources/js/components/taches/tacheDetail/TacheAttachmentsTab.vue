@@ -1,3 +1,4 @@
+<!-- resources\js\components\taches\tacheDetail\TacheAttachmentsTab.vue -->
 <template>
   <div class="space-y-4">
     <!-- Upload section -->

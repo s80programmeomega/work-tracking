@@ -1,100 +1,114 @@
 <template>
-  <div 
-    class="tache-card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:shadow-lg transition-all cursor-pointer"
-    :class="{ 'border-l-4': tache.priorite }"
-    :style="{ borderLeftColor: tache.priorite_color }"
-    @click="$emit('view', tache)"
+  <div
+    class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-move border border-gray-200 dark:border-gray-700"
+    :style="{ borderLeftColor: tache.couleur, borderLeftWidth: '4px' }"
   >
-    <!-- Header -->
-    <div class="flex items-start justify-between mb-3">
-      <div class="flex-1">
-        <div class="flex items-center gap-2 mb-1">
-          <span class="text-xs font-mono text-gray-500">{{ tache.code }}</span>
-          <span 
-            class="px-2 py-0.5 text-xs rounded-full"
-            :class="getStatusClass(tache.statut)"
-          >
-            {{ tache.statut_label }}
-          </span>
-          <span 
-            class="px-2 py-0.5 text-xs rounded-full"
-            :style="{ 
-              backgroundColor: tache.priorite_color + '20', 
-              color: tache.priorite_color 
-            }"
-          >
-            {{ tache.priorite_icon }} {{ tache.priorite_label }}
-          </span>
-        </div>
-        <h3 class="font-semibold text-gray-900 dark:text-white line-clamp-2">
-          {{ tache.titre }}
-        </h3>
+    <!-- Cover Image -->
+    <div v-if="tache.cover_image" class="mb-3 -mx-4 -mt-4">
+      <img
+        :src="tache.cover_image"
+        alt="Cover"
+        class="w-full h-32 object-cover rounded-t-lg"
+      />
+    </div>
+
+    <!-- Header with priority and menu -->
+    <div class="flex items-start justify-between mb-2">
+      <div class="flex items-center gap-2 flex-wrap">
+        <!-- Task Code -->
+        <span
+          v-if="tache.code"
+          class="px-2 py-1 text-xs font-mono font-medium rounded bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+        >
+          {{ tache.code }}
+        </span>
+
+        <!-- Priority badge -->
+        <span
+          class="px-2 py-1 text-xs font-medium rounded"
+          :class="getPriorityClass(tache.priorite)"
+        >
+          {{ tache.priorite_label }}
+        </span>
+
+        <!-- Overdue indicator -->
+        <span
+          v-if="tache.is_overdue"
+          class="px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+        >
+          En retard
+        </span>
+
+        <!-- Archived indicator -->
+        <span
+          v-if="tache.archive_status === 'archived'"
+          class="px-2 py-1 text-xs font-medium rounded bg-gray-500 text-white"
+        >
+          Archivée
+        </span>
       </div>
 
-      <!-- Actions dropdown -->
-      <div class="relative" @click.stop>
+      <!-- Actions menu -->
+      <div class="relative">
         <button
-          @click="showActions = !showActions"
-          class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+          @click.stop="showMenu = !showMenu"
+          class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
         >
           <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
             <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
           </svg>
         </button>
-        
+
+        <!-- Dropdown menu -->
         <div
-          v-if="showActions"
-          v-click-outside="() => showActions = false"
-          class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-10"
+          v-if="showMenu"
+          v-click-outside="() => showMenu = false"
+          class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-lg z-10 py-1"
         >
           <button
-            v-if="tache.permissions?.can_edit"
-            @click="$emit('edit', tache)"
-            class="w-full px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+            @click.stop="$emit('edit', tache)"
+            class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
             Modifier
           </button>
-          
           <button
-            @click="$emit('duplicate', tache)"
-            class="w-full px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+            @click.stop="$emit('duplicate', tache)"
+            class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
             </svg>
             Dupliquer
           </button>
-
           <button
-            v-if="canValidate"
-            @click="$emit('validate', tache)"
-            class="w-full px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 text-green-600"
+            v-if="!tache.validation_superieur"
+            @click.stop="$emit('validate', tache)"
+            class="w-full px-4 py-2 text-left text-sm text-green-600 hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             Valider
           </button>
-
-          <hr class="my-1 border-gray-200 dark:border-gray-700">
-
           <button
-            @click="$emit('archive', tache)"
-            class="w-full px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 text-gray-600"
+            @click.stop="$emit('archive', tache)"
+            class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2"
+            :class="{ 'text-blue-600': tache.archive_status === 'archived' }"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg v-if="tache.archive_status === 'archived'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+            </svg>
+            <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
             </svg>
-            Archiver
+            {{ tache.archive_status === 'archived' ? 'Désarchiver' : 'Archiver' }}
           </button>
-
           <button
-            v-if="tache.permissions?.can_delete"
-            @click="$emit('delete', tache)"
-            class="w-full px-4 py-2 text-left hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 text-red-600"
+            @click.stop="$emit('delete', tache)"
+            class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -105,137 +119,126 @@
       </div>
     </div>
 
-    <!-- ✅ NOUVEAU : Mon statut vs Statut global (si multi-assignés) -->
-    <div v-if="tache.my_status && tache.assignees?.length > 1" class="mb-3 p-2 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
-      <div class="flex items-center justify-between text-xs">
-        <div class="flex items-center gap-2">
-          <span class="text-gray-500">Mon statut:</span>
-          <span 
-            class="px-2 py-0.5 rounded-full font-medium"
-            :class="getStatusClass(tache.my_status.statut)"
-          >
-            {{ tache.my_status.statut_label }}
-          </span>
-          <span class="text-gray-400">{{ tache.my_status.progression }}%</span>
-        </div>
-        
-        <div class="flex items-center gap-2">
-          <span class="text-gray-500">Équipe:</span>
-          <span 
-            class="px-2 py-0.5 rounded-full font-medium"
-            :class="getStatusClass(tache.statut)"
-          >
-            {{ tache.statut_label }}
-          </span>
-        </div>
-      </div>
-    </div>
+    <!-- Title -->
+    <h3
+      class="font-semibold text-gray-900 dark:text-white mb-2 cursor-pointer hover:text-brand-500"
+      @click="$emit('view', tache)"
+    >
+      {{ tache.titre }}
+    </h3>
 
-    <!-- ✅ NOUVEAU : Indicateur de collaboration -->
-    <div v-if="tache.collaboration" class="mb-3">
-      <div class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 mb-1">
-        <span>Progression équipe</span>
-        <span class="font-medium">{{ Math.round(tache.collaboration.avg_progression) }}%</span>
-      </div>
-      <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-        <div 
-          class="h-full bg-gradient-to-r from-blue-500 to-green-500 transition-all duration-300"
-          :style="{ width: tache.collaboration.avg_progression + '%' }"
-        ></div>
-      </div>
-      <div class="flex items-center gap-3 mt-2 text-xs">
-        <span class="text-green-600">✓ {{ tache.collaboration.completed_count }}</span>
-        <span class="text-blue-600">→ {{ tache.collaboration.in_progress_count }}</span>
-        <span class="text-gray-400">○ {{ tache.collaboration.not_started_count }}</span>
-      </div>
-    </div>
-
-    <!-- Description -->
-    <p v-if="tache.description" class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
+    <!-- Description (truncated) -->
+    <p
+      v-if="tache.description"
+      class="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2"
+    >
       {{ tache.description }}
     </p>
 
     <!-- Labels -->
-    <div v-if="tache.labels?.length" class="flex flex-wrap gap-1 mb-3">
+    <div v-if="tache.labels?.length > 0" class="mb-3 flex flex-wrap gap-1">
       <span
-        v-for="label in tache.labels.slice(0, 3)"
+        v-for="label in tache.labels"
         :key="label.id"
-        class="px-2 py-0.5 text-xs rounded-full"
-        :style="{ 
-          backgroundColor: label.couleur + '20', 
-          color: label.couleur 
+        class="px-2 py-1 text-xs font-medium rounded-md"
+        :style="{
+          backgroundColor: label.couleur + '20',
+          color: label.couleur,
+          border: `1px solid ${label.couleur}`
         }"
+        :title="label.description"
       >
         {{ label.nom }}
       </span>
-      <span v-if="tache.labels.length > 3" class="px-2 py-0.5 text-xs text-gray-500">
-        +{{ tache.labels.length - 3 }}
+    </div>
+
+    <!-- Progress bar -->
+    <div v-if="tache.taux_realisation > 0" class="mb-3">
+      <div class="flex justify-between text-xs text-gray-600 dark:text-gray-400 mb-1">
+        <span>Progression</span>
+        <span>{{ tache.taux_realisation }}%</span>
+      </div>
+      <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+        <div
+          class="bg-brand-500 h-2 rounded-full transition-all"
+          :style="{ width: `${tache.taux_realisation}%` }"
+        ></div>
+      </div>
+    </div>
+
+    <!-- Time Tracking -->
+    <div
+      v-if="tache.estimated_hours || tache.actual_hours"
+      class="mb-3 flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span v-if="tache.estimated_hours">
+        Est: {{ tache.estimated_hours }}h
+      </span>
+      <span v-if="tache.actual_hours" :class="getTimeVarianceClass()">
+        / Réel: {{ tache.actual_hours }}h
       </span>
     </div>
 
-    <!-- Footer -->
-    <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
-      <!-- ✅ AMÉLIORÉ : Avatars avec indicateurs de statut -->
+    <!-- Footer with assignees and due date -->
+    <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+      <!-- Assignees -->
       <div class="flex -space-x-2">
         <div
-          v-for="assignee in (tache.assignees_status || tache.assignees)?.slice(0, 3)"
+          v-for="assignee in tache.assignees.slice(0, 3)"
           :key="assignee.id"
-          class="relative group"
+          class="relative"
+          :title="assignee.nom"
         >
-          <img
-            :src="assignee.avatar || '/default-avatar.png'"
-            :alt="assignee.nom"
-            class="w-8 h-8 rounded-full border-2 bg-white dark:bg-gray-800 transition-all"
-            :class="getAssigneeBorderClass(assignee)"
-            :title="getAssigneeTooltip(assignee)"
-          />
-          <!-- Indicateur de complétion -->
           <div
-            v-if="assignee.is_completed || assignee.statut === 'termine'"
-            class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center"
+            v-if="assignee.avatar"
+            class="w-6 h-6 rounded-full border-2 border-white dark:border-gray-800 overflow-hidden"
           >
-            <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/>
-            </svg>
+            <img :src="assignee.avatar" :alt="assignee.nom" class="w-full h-full object-cover" />
           </div>
-          <!-- Indicateur en cours -->
           <div
-            v-else-if="assignee.statut === 'en_cours'"
-            class="absolute -bottom-1 -right-1 w-4 h-4 bg-blue-500 rounded-full border-2 border-white dark:border-gray-800"
+            v-else
+            class="w-6 h-6 rounded-full border-2 border-white dark:border-gray-800 bg-brand-500 text-white flex items-center justify-center text-xs font-medium"
           >
-            <div class="w-full h-full rounded-full bg-blue-400 animate-ping"></div>
+            {{ assignee.nom.charAt(0).toUpperCase() }}
           </div>
         </div>
-        <span
-          v-if="(tache.assignees_status || tache.assignees)?.length > 3"
-          class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 border-2 border-white dark:border-gray-800 flex items-center justify-center text-xs font-medium text-gray-600 dark:text-gray-400"
+        <div
+          v-if="tache.assignees.length > 3"
+          class="w-6 h-6 rounded-full border-2 border-white dark:border-gray-800 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 flex items-center justify-center text-xs font-medium"
         >
-          +{{ (tache.assignees_status || tache.assignees).length - 3 }}
-        </span>
+          +{{ tache.assignees.length - 3 }}
+        </div>
       </div>
 
-      <!-- Date échéance -->
-      <div class="flex items-center gap-2 text-xs">
-        <svg 
-          v-if="tache.echeance" 
-          class="w-4 h-4"
-          :class="tache.is_overdue ? 'text-red-500' : 'text-gray-400'"
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
-        >
+      <!-- Due date -->
+      <div v-if="tache.echeance" class="flex items-center gap-1">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
-        <span :class="tache.is_overdue ? 'text-red-500 font-medium' : 'text-gray-500'">
+        <span :class="{ 'text-red-600 font-medium': tache.is_overdue }">
           {{ formatDate(tache.echeance) }}
         </span>
       </div>
+    </div>
+
+    <!-- Validated indicator -->
+    <div
+      v-if="tache.validation_superieur"
+      class="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700 flex items-center gap-1 text-xs text-green-600 dark:text-green-400"
+    >
+      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+      </svg>
+      <span>Validée</span>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 
 const props = defineProps({
   tache: {
@@ -244,51 +247,45 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['view', 'edit', 'duplicate', 'archive', 'delete', 'validate'])
+console.log('tachesss sss',props.tache.cover_image);
 
-const showActions = ref(false)
+defineEmits(['view', 'edit', 'duplicate', 'archive', 'delete', 'validate'])
 
-const canValidate = computed(() => {
-  const validation = props.tache.validation
-  if (!validation) return false
+// Debug: Log labels
+console.log('TacheCard - tache:', props.tache.titre, 'labels:', JSON.parse(JSON.stringify(props.tache.labels)))
 
-  const needsN1 = validation.n1_required && !validation.n1_validated_at
-  const needsN2 = validation.n2_required && validation.n1_validated_at && !validation.n2_validated_at
+const showMenu = ref(false)
 
-  return (needsN1 && props.tache.permissions?.can_validate_n1) ||
-         (needsN2 && props.tache.permissions?.can_validate_n2)
-})
-
-function getStatusClass(statut) {
+const getPriorityClass = (priorite) => {
   const classes = {
-    'a_faire': 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
-    'en_cours': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-    'termine': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+    faible: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+    moyenne: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300',
+    elevee: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
+    critique: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
   }
-  return classes[statut] || classes['a_faire']
+  return classes[priorite] || classes.moyenne
 }
 
-function getAssigneeBorderClass(assignee) {
-  if (assignee.is_completed || assignee.statut === 'termine') {
-    return 'border-green-500 ring-2 ring-green-200'
-  }
-  if (assignee.statut === 'en_cours') {
-    return 'border-blue-500 ring-2 ring-blue-200'
-  }
-  return 'border-gray-300 dark:border-gray-600'
-}
-
-function getAssigneeTooltip(assignee) {
-  if (assignee.statut_label) {
-    return `${assignee.nom} - ${assignee.statut_label} (${assignee.progression || 0}%)`
-  }
-  return assignee.nom
-}
-
-function formatDate(date) {
-  if (!date) return 'Pas de date'
+const formatDate = (date) => {
+  if (!date) return ''
   const d = new Date(date)
-  return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
+  const today = new Date()
+  const diffDays = Math.ceil((d - today) / (1000 * 60 * 60 * 24))
+
+  if (diffDays === 0) return "Aujourd'hui"
+  if (diffDays === 1) return 'Demain'
+  if (diffDays === -1) return 'Hier'
+
+  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+}
+
+const getTimeVarianceClass = () => {
+  if (!props.tache.estimated_hours || !props.tache.actual_hours) return ''
+
+  const variance = props.tache.actual_hours - props.tache.estimated_hours
+  if (variance > 0) return 'text-red-600 dark:text-red-400 font-medium' // Over budget
+  if (variance < 0) return 'text-green-600 dark:text-green-400 font-medium' // Under budget
+  return '' // On budget
 }
 
 // Click outside directive
@@ -306,3 +303,12 @@ const vClickOutside = {
   }
 }
 </script>
+
+<style scoped>
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+</style>

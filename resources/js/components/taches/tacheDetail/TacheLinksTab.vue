@@ -1,3 +1,4 @@
+<!-- resources\js\components\taches\tacheDetail\TacheLinksTab.vue -->
 <template>
   <div class="space-y-4">
     <!-- Add link form -->
