@@ -209,19 +209,19 @@ class UserService
    public function getUserStats(User $user)
     {
         return [
-            'projects_count' => $user->projects()->count(),
-            'tasks_count' => $user->tasks()->count(),
-            'completed_tasks_count' => $user->tasks()->where('status', 'completed')->count(),
+            'projects_count' => $user->projets()->count(),
+            'tasks_count' => $user->taches()->count(),
+            'completed_tasks_count' => $user->taches()->where('statut', 'completed')->count(),
             'productivity_rate' => $this->calculateProductivity($user),
             'last_active' => $user->last_login_at,
-            'member_since' => $user->created_at->diffForHumans(),
+            'member_since' => $user->created_at?->diffForHumans(),
         ];
     }
 
     protected function calculateProductivity(User $user)
     {
-        $totalTasks = $user->tasks()->count();
-        $completedTasks = $user->tasks()->where('status', 'completed')->count();
+        $totalTasks = $user->taches()->count();
+        $completedTasks = $user->taches()->where('statut', 'completed')->count();
 
         if ($totalTasks === 0) {
             return 0;

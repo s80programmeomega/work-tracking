@@ -87,12 +87,12 @@
 
           <!-- Actions -->
           <div class="flex items-center gap-2">
-            <button v-if="permissions.can_update" @click="openEditModal" 
+            <!-- <button v-if="permissions.can_update" @click="openEditModal" 
               class="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors">
               <i class="fas fa-edit mr-2"></i>Modifier
-            </button>
+            </button> -->
             <button @click="$router.back()" 
-              class="px-4 py-2 bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">
+              class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">
               <i class="fas fa-arrow-left mr-2"></i>Retour
             </button>
           </div>
@@ -172,7 +172,7 @@ import TacheAssigneesTab from '@/components/taches/tacheDetail/TacheAssigneesTab
 import TacheAttachmentsTab from '@/components/taches/tacheDetail/TacheAttachmentsTab.vue';
 import TacheLinksTab from '@/components/taches/tacheDetail/TacheLinksTab.vue';
 import TacheResultsTab from '@/components/taches/tacheDetail/TacheResultsTab.vue';
-// import TacheCommentsTab from '@/components/taches/tacheDetail/TacheCommentsTab.vue';
+import TacheCommentsTab from '@/components/taches/tacheDetail/TacheCommentsTab.vue';
 import TacheActivityTab from '@/components/taches/tacheDetail/TacheActivityTab.vue';
 
 const route = useRoute();

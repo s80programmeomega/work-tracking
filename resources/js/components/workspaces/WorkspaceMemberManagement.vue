@@ -200,15 +200,17 @@
                   <td class="px-6 py-4 whitespace-nowrap text-right">
                     <div class="flex items-center justify-end gap-2">
                       <button @click="viewMemberDetails(member)"
-                        class="text-brand-600 hover:text-brand-900 dark:text-brand-400 text-sm font-medium">
+                        class="text-brand-600 hover:text-brand-900 text-sm font-medium">
                         Voir
                       </button>
                       <button v-if="canPerformMemberAction(member, 'edit')" @click="editMember(member)"
-                        class="text-gray-600 hover:text-gray-900 dark:text-gray-400 text-sm font-medium">
+                        class="text-gray-600 hover:text-gray-900 text-sm font-medium">
                         Modifier
                       </button>
-                      <button v-if="canPerformMemberAction(member, 'delete')" @click="removeMember(member)"
-                        class="text-red-600 hover:text-red-900 dark:text-red-400 text-sm font-medium">
+
+                      <!-- ✅ NOUVEAU : Bouton avec modal amélioré -->
+                      <button v-if="canPerformMemberAction(member, 'delete')" @click="showRemovalModal(member)"
+                        class="text-red-600 hover:text-red-900 text-sm font-medium">
                         Retirer
                       </button>
                     </div>
@@ -318,6 +320,17 @@
       :message="`Êtes-vous sûr de vouloir retirer ${memberToRemove?.nom} du workspace ? Cette action révoquera son accès à tous les projets, activités et tâches du workspace.`"
       confirm-text="Retirer définitivement" confirm-class="bg-red-600 hover:bg-red-700" type="danger"
       @confirm="confirmRemoveMember" @cancel="showRemoveModal = false" />
+
+      <!-- ✅ NOUVEAU : Modal de retrait amélioré -->
+    <RemoveMemberModal
+      v-if="showRemoveModal"
+      :member="memberToRemove"
+      :workspace-id="workspaceId"
+      context="workspace"
+      @close="closeRemovalModal"
+      @removed="handleMemberRemoved"
+    />
+
   </div>
 </template>
 
@@ -325,6 +338,11 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useWorkspace } from '@/composables/useWorkspace'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
+import RemoveMemberModal from './RemoveMemberModal.vue'
+import { useToast } from "vue-toastification"
+const toast = useToast()
+
+
 import {
   UsersIcon,
   CheckCircleIcon,
@@ -386,6 +404,21 @@ const showRemoveModal = ref(false)
 const selectedMember = ref(null)
 const memberToRemove = ref(null)
 
+/**
+ * ✅ Ouvrir le modal de retrait
+ */
+const showRemovalModal = (member) => {
+  memberToRemove.value = member
+  showRemoveModal.value = true
+}
+
+/**
+ * ✅ Fermer le modal
+ */
+const closeRemovalModal = () => {
+  showRemoveModal.value = false
+  memberToRemove.value = null
+}
 
 const tabs = computed(() => [
   { id: 'members', label: 'Membres', icon: UsersIcon, count: members.value.length },
@@ -492,6 +525,35 @@ const handleMemberUpdated = () => {
   showEditModal.value = false
   selectedMember.value = null
   loadData()
+  emit('member-updated')
+}
+
+
+/**
+ * ✅ Gérer la confirmation du retrait
+ */
+const handleMemberRemoved = async (result) => {
+  closeRemovalModal()
+  
+  // Afficher un message de succès détaillé
+  const stats = result.stats
+  const summary = result.summary
+  
+  let message = `${result.removed_user.nom} a été retiré avec succès.`
+  
+  if (summary.projets_impactes > 0) {
+    message += ` ${summary.projets_impactes} projet(s) traité(s).`
+  }
+  if (summary.taches_transferees > 0) {
+    message += ` ${summary.taches_transferees} tâche(s) transférée(s).`
+  }
+  
+  toast.success(message)
+  
+  // Recharger les données
+  await loadData()
+  
+  // Émettre l'événement
   emit('member-updated')
 }
 

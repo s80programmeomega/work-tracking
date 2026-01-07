@@ -23,6 +23,13 @@ use Illuminate\Validation\Rule;
 
 class WorkspaceController extends Controller
 {
+   protected $removalService;
+
+    public function __construct(MemberRemovalService $removalService)
+    {
+        $this->removalService = $removalService;
+    }
+    
   /**
    * Display a listing of workspaces for authenticated user
    */
@@ -828,145 +835,133 @@ class WorkspaceController extends Controller
   }
 
 
-  /**
-   * Update member permissions
-   */
-  public function updateMember_(Request $request, Workspace $workspace, User $user)
-  {
-    $this->authorize('manageMembers', $workspace);
+    /**
+     * ✅ Retirer un membre avec transfert de responsabilités
+     * 
+     * DELETE /workspaces/{workspace}/members/{user}/remove
+     */
+    public function removeMemberWithTransfer(Request $request, Workspace $workspace, User $user)
+    {
+        $this->authorize('manageMembers', $workspace);
 
-    $request->validate([
-      'role' => 'sometimes|in:admin,member,viewer',
-      'permissions' => 'nullable|array',
-      'permissions.can_create_projects' => 'boolean',
-      'permissions.can_invite_members' => 'boolean',
-      'permissions.can_manage_settings' => 'boolean',
-    ]);
-
-    // Check if user is member
-    if (!$workspace->members()->where('user_id', $user->id)->exists()) {
-      abort(404, 'Cet utilisateur n\'est pas membre du workspace');
-    }
-
-    // Don't allow changing owner role
-    $member = $workspace->members()->where('user_id', $user->id)->first();
-    if ($member->pivot->role === 'owner') {
-      abort(403, 'Impossible de modifier le rôle du propriétaire');
-    }
-
-    // Update permissions
-    $workspace->members()->updateExistingPivot($user->id, [
-      'role' => $request->input('role', $member->pivot->role),
-      'can_create_projects' => $request->input('permissions.can_create_projects', $member->pivot->can_create_projects),
-      'can_invite_members' => $request->input('permissions.can_invite_members', $member->pivot->can_invite_members),
-      'can_manage_settings' => $request->input('permissions.can_manage_settings', $member->pivot->can_manage_settings),
-    ]);
-
-    return response()->json([
-      'message' => 'Permissions mises à jour avec succès',
-    ]);
-  }
-
-  /**
-   * Remove a member from workspace
-   */
-  public function removeMember(Request $request, Workspace $workspace, User $user)
-  {
-    if (!$this->userCanManageMembers($request->user(), $workspace)) {
-      return response()->json([
-        'message' => 'Vous n\'avez pas la permission de retirer des membres'
-      ], 403);
-    }
-
-    // Cannot remove workspace owner
-    if ($workspace->owner_id === $user->id) {
-      return response()->json([
-        'message' => 'Impossible de retirer le propriétaire du workspace'
-      ], 422);
-    }
-
-    if (!$workspace->members()->where('user_id', $user->id)->exists()) {
-      return response()->json([
-        'message' => 'Cet utilisateur n\'est pas membre du workspace'
-      ], 404);
-    }
-
-    DB::beginTransaction();
-
-    try {
-      // Detach member from workspace
-      $workspace->members()->detach($user->id);
-
-      // Remove from all projects in this workspace
-      $projets = $workspace->projets;
-      foreach ($projets as $projet) {
-        $projet->members()->detach($user->id);
-
-        // Revoke access to project tasks and documents
-        foreach ($projet->activites as $activite) {
-          foreach ($activite->taches as $tache) {
-            $tache->assignees()->detach($user->id);
-          }
+        // Ne peut pas retirer le owner
+        if ($workspace->owner_id === $user->id) {
+            return response()->json([
+                'message' => 'Impossible de retirer le propriétaire du workspace. Transférez d\'abord la propriété.'
+            ], 422);
         }
-      }
 
-      DB::commit();
+        // Vérifier que l'utilisateur est membre
+        if (!$workspace->members()->where('user_id', $user->id)->exists()) {
+            return response()->json([
+                'message' => 'Cet utilisateur n\'est pas membre du workspace'
+            ], 404);
+        }
 
-      // TODO: Send notification to removed user
+        $request->validate([
+            'new_responsable_id' => 'nullable|exists:users,id',
+        ]);
 
-      return response()->json([
-        'message' => 'Membre retiré avec succès',
-      ]);
+        try {
+            $newResponsable = null;
+            
+            if ($request->new_responsable_id) {
+                $newResponsable = User::findOrFail($request->new_responsable_id);
+                
+                // Vérifier que le nouveau responsable est membre du workspace
+                if (!$workspace->members()->where('user_id', $newResponsable->id)->exists()) {
+                    return response()->json([
+                        'message' => 'Le nouveau responsable doit être membre du workspace'
+                    ], 422);
+                }
+            }
 
-    } catch (\Exception $e) {
-      DB::rollBack();
-      return response()->json([
-        'message' => 'Erreur lors du retrait du membre',
-        'error' => $e->getMessage(),
-      ], 500);
+            $stats = $this->removalService->removeFromWorkspace($workspace, $user, $newResponsable);
+
+            return response()->json([
+                'message' => 'Membre retiré avec succès du workspace',
+                'data' => [
+                    'removed_user' => [
+                        'id' => $user->id,
+                        'nom' => $user->nom,
+                        'email' => $user->email,
+                    ],
+                    'new_responsable' => $newResponsable ? [
+                        'id' => $newResponsable->id,
+                        'nom' => $newResponsable->nom,
+                    ] : [
+                        'id' => $workspace->owner->id,
+                        'nom' => $workspace->owner->nom,
+                        'is_default' => true,
+                    ],
+                    'stats' => $stats,
+                    'summary' => [
+                        'projets_impactes' => $stats['projets_transferred'] + $stats['projets_membership_removed'],
+                        'activites_impactees' => $stats['activites_transferred'] + $stats['activites_membership_removed'],
+                        'taches_transferees' => $stats['taches_reassigned'],
+                        'taches_desassignees' => $stats['taches_unassigned'],
+                    ],
+                ],
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erreur lors du retrait du membre',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
-  }
 
-  /**
-   * Remove member from workspace
-   */
-  public function removeMember_(Workspace $workspace, User $user)
-  {
-    $this->authorize('manageMembers', $workspace);
+ /**
+     * ✅ BONUS : Retrait simple sans transfert (si aucune responsabilité)
+     * 
+     * DELETE /workspaces/{workspace}/members/{user}
+     */
+    public function removeMember(Request $request, Workspace $workspace, User $user)
+    {
+        $this->authorize('manageMembers', $workspace);
 
-    // Check if user is member
-    if (!$workspace->members()->where('user_id', $user->id)->exists()) {
-      abort(404, 'Cet utilisateur n\'est pas membre du workspace');
+        // Ne peut pas retirer le owner
+        if ($workspace->owner_id === $user->id) {
+            return response()->json([
+                'message' => 'Impossible de retirer le propriétaire du workspace'
+            ], 422);
+        }
+
+        if (!$workspace->members()->where('user_id', $user->id)->exists()) {
+            return response()->json([
+                'message' => 'Cet utilisateur n\'est pas membre du workspace'
+            ], 404);
+        }
+
+        // Vérifier s'il a des responsabilités
+        $preview = $this->removalService->getRemovalPreview($workspace, $user);
+
+        if ($preview['requires_transfer']) {
+            return response()->json([
+                'message' => 'Ce membre a des responsabilités. Utilisez l\'endpoint de transfert.',
+                'impact' => $preview,
+            ], 422);
+        }
+
+        try {
+            // Pas de responsabilités → retrait simple avec transfert automatique au owner
+            $stats = $this->removalService->removeFromWorkspace($workspace, $user);
+
+            return response()->json([
+                'message' => 'Membre retiré avec succès',
+                'data' => ['stats' => $stats],
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erreur lors du retrait du membre',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
-    // Don't allow removing owner
-    $member = $workspace->members()->where('user_id', $user->id)->first();
-    if ($member->pivot->role === 'owner') {
-      abort(403, 'Impossible de retirer le propriétaire du workspace');
-    }
-
-    DB::transaction(function () use ($workspace, $user) {
-      // Remove from workspace
-      $workspace->members()->detach($user->id);
-
-      // Remove from all projects in this workspace
-      $projects = $workspace->projets;
-      foreach ($projects as $projet) {
-        $projet->revokeAccess($user);
-      }
-
-      // Log the action
-      activity()
-        ->causedBy(auth()->user())
-        ->performedOn($workspace)
-        ->withProperties(['removed_user' => $user->id])
-        ->log('member_removed');
-    });
-
-    return response()->json([
-      'message' => 'Membre retiré avec succès',
-    ]);
-  }
+ 
 
 
   /**
@@ -1585,95 +1580,109 @@ class WorkspaceController extends Controller
   }
 
 
-  /**
-   * ✅ Obtenir les projets où l'user est responsable
-   */
-  public function getUserProjects(Request $request, Workspace $workspace, User $user)
-  {
-    $this->authorize('manageMembers', $workspace);
+      /**
+     * ✅ Obtenir un aperçu de l'impact du retrait d'un membre
+     * 
+     * GET /workspaces/{workspace}/members/{user}/removal-preview
+     */
+    public function getRemovalPreview(Request $request, Workspace $workspace, User $user)
+    {
+        $this->authorize('manageMembers', $workspace);
 
-    $removalService = app(MemberRemovalService::class);
-    $projects = $removalService->getUserProjectsAsResponsable($user, $workspace);
+        // Vérifier que l'utilisateur est membre
+        if (!$workspace->members()->where('user_id', $user->id)->exists()) {
+            return response()->json([
+                'message' => 'Cet utilisateur n\'est pas membre du workspace'
+            ], 404);
+        }
 
-    return response()->json([
-      'data' => $projects,
-      'count' => $projects->count(),
-    ]);
-  }
+        // Ne peut pas retirer le owner
+        if ($workspace->owner_id === $user->id) {
+            return response()->json([
+                'message' => 'Impossible de retirer le propriétaire du workspace'
+            ], 422);
+        }
 
-  /**
-   * ✅ Obtenir les candidats pour le transfert
-   */
-  public function getTransferCandidates(Request $request, Workspace $workspace)
-  {
-    $this->authorize('manageMembers', $workspace);
+        try {
+            $preview = $this->removalService->getRemovalPreview($workspace, $user);
 
-    $request->validate([
-      'exclude_user_id' => 'required|exists:users,id',
-    ]);
-
-    $removalService = app(MemberRemovalService::class);
-    $excludeUser = User::findOrFail($request->exclude_user_id);
-
-    $candidates = $removalService->getTransferCandidates($workspace, $excludeUser);
-
-    return response()->json([
-      'data' => $candidates,
-    ]);
-  }
-
-  /**
-   * ✅ Retirer un membre avec transfert de projets
-   */
-  public function removeMemberWithTransfer(Request $request, Workspace $workspace, User $user)
-  {
-    $this->authorize('manageMembers', $workspace);
-
-    // Ne peut pas retirer le owner
-    if ($workspace->owner_id === $user->id) {
-      return response()->json([
-        'message' => 'Impossible de retirer le propriétaire du workspace'
-      ], 422);
+            return response()->json([
+                'data' => [
+                    'user' => [
+                        'id' => $user->id,
+                        'nom' => $user->nom,
+                        'email' => $user->email,
+                        'avatar' => $user->avatar,
+                    ],
+                    'impact' => $preview,
+                    'default_responsable' => [
+                        'id' => $workspace->owner->id,
+                        'nom' => $workspace->owner->nom,
+                    ],
+                ],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erreur lors de l\'analyse',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
-    $request->validate([
-      'new_responsable_id' => 'nullable|exists:users,id',
-    ]);
+    /**
+     * ✅ Obtenir les projets où l'utilisateur est responsable
+     * 
+     * GET /workspaces/{workspace}/members/{user}/projects
+     */
+    public function getUserProjects(Request $request, Workspace $workspace, User $user)
+    {
+        $this->authorize('manageMembers', $workspace);
 
-    if (!$workspace->members()->where('user_id', $user->id)->exists()) {
-      return response()->json([
-        'message' => 'Cet utilisateur n\'est pas membre du workspace'
-      ], 404);
+        $projects = $this->removalService->getUserProjectsAsResponsable($user, $workspace);
+
+        return response()->json([
+            'data' => $projects->map(function ($projet) {
+                return [
+                    'id' => $projet->id,
+                    'nom' => $projet->nom,
+                    'code' => $projet->code,
+                    'couleur' => $projet->couleur,
+                    'activites_count' => $projet->activites_count,
+                    'members_count' => $projet->members_count,
+                ];
+            }),
+            'count' => $projects->count(),
+        ]);
     }
 
-    try {
-      $newResponsable = $request->new_responsable_id
-        ? User::findOrFail($request->new_responsable_id)
-        : null;
+   
+    /**
+     * ✅ Obtenir les candidats pour le transfert
+     * 
+     * GET /workspaces/{workspace}/transfer-candidates
+     */
+    public function getTransferCandidates(Request $request, Workspace $workspace)
+    {
+        $this->authorize('manageMembers', $workspace);
 
-      $removalService = app(MemberRemovalService::class);
-      $stats = $removalService->removeFromWorkspace($workspace, $user, $newResponsable);
+        $request->validate([
+            'exclude_user_id' => 'required|exists:users,id',
+        ]);
 
-      return response()->json([
-        'message' => 'Membre retiré avec succès',
-        'data' => [
-          'stats' => $stats,
-          'removed_user' => [
-            'id' => $user->id,
-            'nom' => $user->nom,
-          ],
-          'new_responsable' => $newResponsable ? [
-            'id' => $newResponsable->id,
-            'nom' => $newResponsable->nom,
-          ] : null,
-        ],
-      ]);
+        $excludeUser = User::findOrFail($request->exclude_user_id);
+        $candidates = $this->removalService->getTransferCandidates($workspace, $excludeUser);
 
-    } catch (\Exception $e) {
-      return response()->json([
-        'message' => 'Erreur lors du retrait du membre',
-        'error' => $e->getMessage(),
-      ], 500);
+        return response()->json([
+            'data' => $candidates,
+            'default_candidate' => [
+                'id' => $workspace->owner->id,
+                'nom' => $workspace->owner->nom,
+                'email' => $workspace->owner->email,
+                'avatar' => $workspace->owner->avatar,
+                'is_owner' => true,
+            ],
+        ]);
     }
-  }
+
+  
 }

@@ -1,3 +1,4 @@
+<!-- resources\js\components\taches\tacheDetail\TacheDetailsTab.vue -->
 <template>
   <div class="space-y-6">
     <!-- Informations principales -->

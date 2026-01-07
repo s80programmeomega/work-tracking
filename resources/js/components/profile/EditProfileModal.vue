@@ -49,31 +49,31 @@
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div>
                 <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Prénom *
+                  Nom * 
                 </label>
                 <input
-                  v-model="form.firstName"
+                  v-model="form.nom"
                   type="text"
                   class="w-full px-4 py-3 text-gray-800 bg-gray-50 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  :class="{ 'border-red-500': errors.firstName }"
+                  :class="{ 'border-red-500': errors.nom }"
                 />
-                <p v-if="errors.firstName" class="mt-1 text-sm text-red-600">
-                  {{ errors.firstName }}
+                <p v-if="errors.nom" class="mt-1 text-sm text-red-600">
+                  {{ errors.nom }}
                 </p>
               </div>
 
               <div>
                 <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Nom *
+                  Prénom *
                 </label>
                 <input
-                  v-model="form.lastName"
+                  v-model="form.prenom"
                   type="text"
                   class="w-full px-4 py-3 text-gray-800 bg-gray-50 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  :class="{ 'border-red-500': errors.lastName }"
+                  :class="{ 'border-red-500': errors.prenom }"
                 />
-                <p v-if="errors.lastName" class="mt-1 text-sm text-red-600">
-                  {{ errors.lastName }}
+                <p v-if="errors.prenom" class="mt-1 text-sm text-red-600">
+                  {{ errors.prenom }}
                 </p>
               </div>
 
@@ -279,8 +279,8 @@ const tabs = [
 ]
 
 const form = reactive({
-  firstName: '',
-  lastName: '',
+  nom: '',
+  prenom: '',
   email: '',
   phone: '',
   bio: '',
@@ -302,13 +302,13 @@ const validateForm = () => {
 
   let isValid = true
 
-  if (!form.firstName.trim()) {
-    errors.firstName = 'Le prénom est requis'
+  if (!form.nom.trim()) {
+    errors.nom = 'Le prénom est requis'
     isValid = false
   }
 
-  if (!form.lastName.trim()) {
-    errors.lastName = 'Le nom est requis'
+  if (!form.prenom.trim()) {
+    errors.prenom = 'Le nom est requis'
     isValid = false
   }
 
@@ -332,7 +332,7 @@ const handleSave = async () => {
 
   try {
     const data = {
-      nom: `${form.firstName} ${form.lastName}`.trim(),
+      nom: `${form.nom} ${form.prenom}`.trim(),
       email: form.email,
       numero_telephone: form.phone,
       bio: form.bio,

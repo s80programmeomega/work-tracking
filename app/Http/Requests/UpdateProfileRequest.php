@@ -17,6 +17,7 @@ class UpdateProfileRequest extends FormRequest
 
         return [
             'nom' => ['sometimes', 'required', 'string', 'max:255'],
+            'prenom' => ['sometimes', 'nullable', 'string', 'max:255'],
             'email' => ['sometimes', 'required', 'string', 'email', 'max:255', 'unique:users,email,' . $userId],
             'numero_telephone' => ['nullable', 'string', 'max:20'],
             'fonction' => ['nullable', 'string', 'max:100'],

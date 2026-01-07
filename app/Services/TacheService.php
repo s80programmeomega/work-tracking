@@ -369,6 +369,7 @@ class TacheService
                         'can_edit' => true,
                         'can_complete' => true,
                         'can_validate' => false,
+                        'assigned_at' => now()
                     ]);
 
                     // Notifier assignés

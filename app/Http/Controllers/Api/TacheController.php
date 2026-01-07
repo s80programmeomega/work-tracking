@@ -502,8 +502,7 @@ class TacheController extends Controller
             $user = $request->user();
 
             // ✅ Vérification des permissions
-            $canCreate = $user->isSuperAdmin() ||
-                $activite->responsable_id === $user->id ||
+            $canCreate = $user->isSuperAdmin() || $activite->responsable_id === $user->id ||
                 ($activite->projet && $activite->projet->responsable_id === $user->id) ||
                 $activite->membres()
                     ->where('user_id', $user->id)
@@ -522,11 +521,7 @@ class TacheController extends Controller
                 }
             }
 
-            if (!$canCreate) {
-                Log::warning('Permission refusée création tâche', [
-                    'user_id' => $user->id,
-                    'activite_id' => $validated['activite_id']
-                ]);
+            if (!$canCreate) { 
                 return response()->json([
                     'message' => 'Vous n\'avez pas la permission de créer des tâches pour cette activité.',
                 ], 403);
@@ -556,11 +551,7 @@ class TacheController extends Controller
                     // ✅ Vérification stricte
                     if ($file && $file->isValid()) {
                         $uploadedFiles[] = $file;
-                        Log::info('Fichier valide détecté', [
-                            'name' => $file->getClientOriginalName(),
-                            'mime' => $file->getMimeType(),
-                            'size' => $file->getSize()
-                        ]);
+                        
                     }
                 }
             }
@@ -573,21 +564,13 @@ class TacheController extends Controller
                 if ($coverImage->isValid()) {
                     $coverImagePath = $coverImage->store('task-covers', 'uploads');
                     $data['cover_image'] = $coverImagePath;
-                    Log::info('Image de couverture uploadée', [
-                        'path' => $coverImagePath
-                    ]);
+                     
                 }
             }
 
             // ✅ Créer la tâche via service
             $tache = $this->tacheService->createTache($data, $user);
-
-            Log::info('Tâche créée avec succès', [
-                'tache_id' => $tache->id,
-                'user_id' => $user->id,
-                'activite_id' => $validated['activite_id'],
-                'files' => count($uploadedFiles)
-            ]);
+ 
 
             return response()->json([
                 'message' => 'Tâche créée avec succès.',
@@ -595,19 +578,13 @@ class TacheController extends Controller
             ], 201);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::warning('Erreur validation création tâche', [
-                'errors' => $e->errors()
-            ]);
+            
             return response()->json([
                 'message' => 'Erreur de validation',
                 'errors' => $e->errors()
             ], 422);
         } catch (\Exception $e) {
-            Log::error('Erreur création tâche', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
+            
             return response()->json([
                 'message' => 'Erreur lors de la création de la tâche',
                 'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue'

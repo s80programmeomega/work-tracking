@@ -201,7 +201,7 @@
     </div>
 
     <!-- Modal de soumission -->
-    <ResultSubmitModal 
+    <SubmitResultModal 
       v-if="showSubmitModal"
       :tache="tache"
       @close="showSubmitModal = false"
@@ -212,8 +212,9 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { useNotifications } from '@/composables/useNotifications';
-// import ResultSubmitModal from './ResultSubmitModal.vue';
+import { useNotifications } from '@/composables/useNotifications'; 
+import SubmitResultModal from '../../../components/taches/SubmitResultModal.vue';
+ 
 
 const props = defineProps({
   tache: {

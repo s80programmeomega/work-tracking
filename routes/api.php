@@ -107,15 +107,27 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/{workspace}/statistics', [WorkspaceController::class, 'statistics']);
 
         // ========================================  MEMBRE REMOVAL WITH TRANSFER  ========================================
-        Route::prefix('{workspace}')->group(function () {
-            // Obtenir les projets où l'user est responsable (pour UI de transfert)
-            Route::get('/members/{user}/projects', [WorkspaceController::class, 'getUserProjects']);
+        Route::prefix('/{workspace}')->group(function () {
+
+            // Aperçu de l'impact du retrait d'un membre
+            Route::get('members/{user}/removal-preview', [WorkspaceController::class, 'getRemovalPreview'])
+                ->name('workspaces.members.removal-preview');
+
+            // Obtenir les projets où l'utilisateur est responsable
+            Route::get('members/{user}/projects', [WorkspaceController::class, 'getUserProjects'])
+                ->name('workspaces.members.projects');
 
             // Obtenir les candidats pour le transfert
-            Route::get('/transfer-candidates', [WorkspaceController::class, 'getTransferCandidates']);
+            Route::get('transfer-candidates', [WorkspaceController::class, 'getTransferCandidates'])
+                ->name('workspaces.transfer-candidates');
 
-            // Retirer membre avec transfert optionnel
-            Route::delete('/members/{user}/remove', [WorkspaceController::class, 'removeMemberWithTransfer']);
+            // Retirer un membre avec transfert de responsabilités
+            Route::delete('members/{user}/remove', [WorkspaceController::class, 'removeMemberWithTransfer'])
+                ->name('workspaces.members.remove-with-transfer');
+
+            // Retirer un membre (simple, vérifie les responsabilités)
+            Route::delete('members/{user}', [WorkspaceController::class, 'removeMember'])
+                ->name('workspaces.members.remove');
         });
     });
 
@@ -327,7 +339,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // 📋 Récupérer un résultat spécifique
     Route::get('/tache-resultats/{resultat}', [TacheResultatController::class, 'show'])
-    ->name('tache-resultats.show');
+        ->name('tache-resultats.show');
 
     // ========================================  ÉVALUATIONS  ========================================
     Route::prefix('evaluations')->group(function () {
