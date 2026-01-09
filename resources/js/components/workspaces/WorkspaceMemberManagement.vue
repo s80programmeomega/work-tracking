@@ -237,7 +237,7 @@
           <div v-if="invitations.length === 0" class="text-center py-12 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
             <MailIcon class="mx-auto h-12 w-12 text-gray-400" />
             <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-              Aucune invitation en attente
+              Aucune invitation en attente 
             </p>
           </div>
 
@@ -253,7 +253,7 @@
                     {{ invitation.email }}
                   </div>
                   <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Invité le {{ formatDate(invitation.invited_at) }} •
+                    Invité le {{ formatDate(invitation.created_at) }} •
                     Rôle: {{ getRoleLabel(invitation.role) }}
                   </div>
                 </div>

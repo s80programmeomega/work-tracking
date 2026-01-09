@@ -17,175 +17,245 @@ use Illuminate\Validation\Rule;
 
 class ProjetInvitationController extends Controller
 {
-    /**
-     * ✅ Inviter des membres au projet
-     */
+
 public function invite(Projet $projet, Request $request)
-    {
-        $this->authorize('manageMembers', $projet);
+{
+    $this->authorize('manageMembers', $projet);
 
-        $request->validate([
-            'emails' => 'required|array|min:1',
-            'emails.*' => 'required|email',
-            'role' => 'required|in:admin,member,viewer',
-            'message' => 'nullable|string|max:500',
-            'can_edit' => 'boolean',
-            'can_delete' => 'boolean',
-            'can_invite' => 'boolean',
-            'send_email' => 'boolean',
-        ]);
+    $request->validate([
+        'emails' => 'required|array|min:1',
+        'emails.*' => 'required|email',
+        'role' => 'required|in:admin,member,viewer',
+        'message' => 'nullable|string|max:500',
+        'can_edit' => 'boolean',
+        'can_delete' => 'boolean',
+        'can_invite' => 'boolean',
+        'can_delete_member' => 'boolean',
+        'send_email' => 'boolean',
+    ]);
 
-        $invitations = [];
-        $errors = [];
-        $sendEmail = $request->input('send_email', true);
+    $invitations = [];
+    $errors = [];
+    $warnings = []; // Pour les invitations déjà existantes
+    $sendEmail = $request->input('send_email', true);
 
-        foreach ($request->emails as $email) {
-            try {
-                // Vérifier si l'utilisateur existe
-                $user = User::where('email', $email)->first();
+    foreach ($request->emails as $email) {
+        try {
+            // Vérifier si l'utilisateur existe
+            $user = User::where('email', $email)->first();
 
-                if ($user) {
-                    // ✅ Utilisateur existant
-                    
-                    // Vérifier si déjà membre du projet
-                    if ($projet->members()->where('user_id', $user->id)->exists()) {
-                        $errors[] = [
-                            'email' => $email,
-                            'message' => 'Cet utilisateur est déjà membre du projet'
-                        ];
-                        continue;
-                    }
-
-                    // Vérifier si déjà une invitation en attente
-                    $existingInvitation = ProjetInvitation::where('projet_id', $projet->id)
-                        ->where('email', $email)
-                        ->where('status', 'pending')
-                        ->where('expires_at', '>', now())
-                        ->first();
-
-                    if ($existingInvitation) {
-                        $errors[] = [
-                            'email' => $email,
-                            'message' => 'Une invitation est déjà en attente pour cet utilisateur'
-                        ];
-                        continue;
-                    }
-
-                    // Créer l'invitation
-                    $invitation = ProjetInvitation::create([
-                        'projet_id' => $projet->id,
+            if ($user) {
+                // ✅ Utilisateur existant
+                
+                // Vérifier si déjà membre du projet
+                if ($projet->members()->where('user_id', $user->id)->exists()) {
+                    $errors[] = [
                         'email' => $email,
-                        'role' => $request->role,
-                        'can_edit' => $request->input('can_edit', false),
-                        'can_delete' => $request->input('can_delete', false),
-                        'can_invite' => $request->input('can_invite', false),
-                        'token' => Str::random(64),
-                        'invited_by' => auth()->id(),
-                        'message' => $request->message,
-                        'status' => 'pending',
-                        'expires_at' => now()->addDays(7),
-                    ]);
-
-                    // Envoyer l'email
-                    if ($sendEmail) {
-                        try {
-                            $user->notify(new ProjetInvitationNotification($invitation));
-                        } catch (\Exception $e) {
-                            Log::error('Failed to send projet invitation email', [
-                                'email' => $email,
-                                'error' => $e->getMessage()
-                            ]);
-                        }
-                    }
-
-                    $invitations[] = [
-                        'email' => $email,
-                        'status' => 'invited',
+                        'message' => 'Cet utilisateur est déjà membre de ce projet',
+                        'type' => 'already_member',
                         'user_id' => $user->id,
-                        'user_name' => $user->nom,
-                        'invitation_id' => $invitation->id,
-                        'expires_at' => $invitation->expires_at->toISOString(),
+                        'user_name' => $user->nom
                     ];
-                } else {
-                    // ✅ Utilisateur externe (n'existe pas dans le système)
-                    
-                    // Vérifier si déjà invité
-                    $existingInvitation = ProjetInvitation::where('projet_id', $projet->id)
-                        ->where('email', $email)
-                        ->where('status', 'pending')
-                        ->where('expires_at', '>', now())
-                        ->first();
+                    continue;
+                }
 
-                    if ($existingInvitation) {
-                        $errors[] = [
+                // Vérifier si déjà une invitation en attente
+                $existingInvitation = ProjetInvitation::where('projet_id', $projet->id)
+                    ->where('email', $email)
+                    ->where('status', 'pending')
+                    ->first();
+
+                if ($existingInvitation) {
+                    if ($existingInvitation->expires_at < now()) {
+                        // Invitation expirée - on peut la supprimer ou la renouveler
+                        $existingInvitation->update(['status' => 'expired']);
+                    } else {
+                        // Invitation encore valide - ajouter aux warnings au lieu des erreurs
+                        $expiresIn = $existingInvitation->expires_at->diffForHumans();
+                        
+                        $warnings[] = [
                             'email' => $email,
-                            'message' => 'Une invitation est déjà en attente pour cet email'
+                            'message' => 'Une invitation est déjà en attente pour cet utilisateur. Elle expire ' . $expiresIn,
+                            'type' => 'pending_invitation',
+                            'expires_at' => $existingInvitation->expires_at->toISOString(),
+                            'invitation_id' => $existingInvitation->id,
+                            'user_name' => $user->nom
                         ];
                         continue;
                     }
-
-                    // Créer l'invitation
-                    $invitation = ProjetInvitation::create([
-                        'projet_id' => $projet->id,
-                        'email' => $email,
-                        'role' => $request->role,
-                        'can_edit' => $request->input('can_edit', false),
-                        'can_delete' => $request->input('can_delete', false),
-                        'can_invite' => $request->input('can_invite', false),
-                        'token' => Str::random(64),
-                        'invited_by' => auth()->id(),
-                        'message' => $request->message,
-                        'status' => 'pending',
-                        'expires_at' => now()->addDays(7),
-                    ]);
-
-                    // Envoyer l'email d'invitation
-                    if ($sendEmail) {
-                        try {
-                            Notification::route('mail', $email)
-                                ->notify(new ProjetInvitationNotification($invitation));
-                        } catch (\Exception $e) {
-                            Log::error('Failed to send invitation email', [
-                                'email' => $email,
-                                'error' => $e->getMessage()
-                            ]);
-                        }
-                    }
-
-                    $invitations[] = [
-                        'email' => $email,
-                        'status' => 'invited',
-                        'requires_registration' => true,
-                        'invitation_id' => $invitation->id,
-                        'expires_at' => $invitation->expires_at->toISOString(),
-                    ];
                 }
-            } catch (\Exception $e) {
-                Log::error('Error inviting member to projet', [
-                    'email' => $email,
+
+                // Créer l'invitation
+                $invitation = ProjetInvitation::create([
                     'projet_id' => $projet->id,
-                    'error' => $e->getMessage()
+                    'email' => $email,
+                    'role' => $request->role,
+                    'can_edit' => $request->input('can_edit', false),
+                    'can_delete' => $request->input('can_delete', false),
+                    'can_invite' => $request->input('can_invite', false),
+                    'can_delete_member' => $request->input('can_delete_member', false),
+                    'token' => Str::random(64),
+                    'invited_by' => auth()->id(),
+                    'message' => $request->message,
+                    'status' => 'pending',
+                    'expires_at' => now()->addDays(7),
                 ]);
 
-                $errors[] = [
+                // Envoyer l'email
+                if ($sendEmail) {
+                    try {
+                        $user->notify(new ProjetInvitationNotification($invitation));
+                    } catch (\Exception $e) {
+                        Log::error('Failed to send projet invitation email', [
+                            'email' => $email,
+                            'error' => $e->getMessage()
+                        ]);
+                    }
+                }
+
+                $invitations[] = [
                     'email' => $email,
-                    'message' => 'Erreur lors de l\'invitation: ' . $e->getMessage()
+                    'status' => 'invited',
+                    'user_id' => $user->id,
+                    'user_name' => $user->nom,
+                    'invitation_id' => $invitation->id,
+                    'expires_at' => $invitation->expires_at->toISOString(),
+                    'requires_registration' => false,
+                ];
+            } else {
+                // ✅ Utilisateur externe (n'existe pas dans le système)
+                
+                // Vérifier si déjà invité
+                $existingInvitation = ProjetInvitation::where('projet_id', $projet->id)
+                    ->where('email', $email)
+                    ->where('status', 'pending')
+                    ->first();
+
+                if ($existingInvitation) {
+                    if ($existingInvitation->expires_at < now()) {
+                        // Invitation expirée
+                        $existingInvitation->update(['status' => 'expired']);
+                    } else {
+                        // Invitation encore valide - ajouter aux warnings
+                        $expiresIn = $existingInvitation->expires_at->diffForHumans();
+                        
+                        $warnings[] = [
+                            'email' => $email,
+                            'message' => 'Une invitation est déjà en attente pour cette adresse. Elle expire ' . $expiresIn,
+                            'type' => 'pending_invitation',
+                            'expires_at' => $existingInvitation->expires_at->toISOString(),
+                            'invitation_id' => $existingInvitation->id
+                        ];
+                        continue;
+                    }
+                }
+
+                // Créer l'invitation
+                $invitation = ProjetInvitation::create([
+                    'projet_id' => $projet->id,
+                    'email' => $email,
+                    'role' => $request->role,
+                    'can_edit' => $request->input('can_edit', false),
+                    'can_delete' => $request->input('can_delete', false),
+                    'can_invite' => $request->input('can_invite', false),
+                    'can_delete_member' => $request->input('can_delete_member', false),
+                    'token' => Str::random(64),
+                    'invited_by' => auth()->id(),
+                    'message' => $request->message,
+                    'status' => 'pending',
+                    'expires_at' => now()->addDays(7),
+                ]);
+
+                // Envoyer l'email d'invitation
+                if ($sendEmail) {
+                    try {
+                        Notification::route('mail', $email)
+                            ->notify(new ProjetInvitationNotification($invitation));
+                    } catch (\Exception $e) {
+                        Log::error('Failed to send invitation email', [
+                            'email' => $email,
+                            'error' => $e->getMessage()
+                        ]);
+                    }
+                }
+
+                $invitations[] = [
+                    'email' => $email,
+                    'status' => 'invited',
+                    'requires_registration' => true,
+                    'invitation_id' => $invitation->id,
+                    'expires_at' => $invitation->expires_at->toISOString(),
                 ];
             }
-        }
+        } catch (\Exception $e) {
+            Log::error('Error inviting member to projet', [
+                'email' => $email,
+                'projet_id' => $projet->id,
+                'error' => $e->getMessage()
+            ]);
 
-        return response()->json([
-            'message' => count($invitations) > 0
-                ? 'Invitations envoyées avec succès' 
-                : 'Aucune invitation n\'a pu être envoyée',
-            'data' => [
-                'invitations' => $invitations,
-                'errors' => $errors,
-                'success_count' => count($invitations),
-                'error_count' => count($errors),
-            ],
-        ], count($invitations) > 0 ? 200 : 422);
+            $errors[] = [
+                'email' => $email,
+                'message' => 'Erreur lors de l\'invitation: ' . $e->getMessage(),
+                'type' => 'server_error'
+            ];
+        }
     }
+
+    // Logique améliorée pour les messages avec distinction warnings/errors
+    $successCount = count($invitations);
+    $errorCount = count($errors);
+    $warningCount = count($warnings);
+    $totalAttempts = count($request->emails);
+    
+    // Construction du message principal
+    $messageParts = [];
+    
+    if ($successCount > 0) {
+        $messageParts[] = "{$successCount} invitation(s) envoyée(s) avec succès";
+    }
+    
+    if ($warningCount > 0) {
+        $messageParts[] = "{$warningCount} invitation(s) déjà en attente";
+    }
+    
+    if ($errorCount > 0) {
+        $messageParts[] = "{$errorCount} erreur(s)";
+    }
+    
+    // Déterminer le message et le code de statut
+    if ($successCount > 0) {
+        // Au moins une invitation envoyée
+        $message = implode(', ', $messageParts);
+        $statusCode = 200;
+    } elseif ($warningCount > 0 && $errorCount === 0) {
+        // Uniquement des invitations déjà en attente
+        $message = "Toutes les invitations sont déjà en attente de réponse";
+        $statusCode = 200;
+    } elseif ($warningCount === 0 && $errorCount > 0) {
+        // Uniquement des erreurs
+        $message = "Aucune invitation n'a pu être envoyée : " . implode(', ', array_unique(array_column($errors, 'type')));
+        $statusCode = 422;
+    } else {
+        // Mix de warnings et erreurs
+        $message = implode(', ', $messageParts);
+        $statusCode = 422;
+    }
+
+    return response()->json([
+        'message' => $message,
+        'data' => [
+            'invitations' => $invitations,
+            'warnings' => $warnings, // Nouveau: invitations déjà existantes
+            'errors' => $errors,     // Vraies erreurs uniquement
+            'success_count' => $successCount,
+            'warning_count' => $warningCount,
+            'error_count' => $errorCount,
+            'total_attempts' => $totalAttempts,
+        ],
+    ], $statusCode);
+}
+
 
     /**
      * ✅ Accepter une invitation

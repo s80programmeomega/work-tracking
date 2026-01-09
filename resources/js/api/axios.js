@@ -3,8 +3,8 @@ import axios from 'axios';
 import router from '@/router';
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'https://work-tracking.online/',
-    // baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
+    // baseURL: import.meta.env.VITE_API_URL || 'https://work-tracking.online/',
+    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
     withCredentials: true,
     timeout: 30000, // 30 seconds timeout
     headers: {
@@ -38,8 +38,7 @@ api.interceptors.response.use(
         const originalRequest = error.config;
 
         // Skip token refresh for auth routes (login, register, etc.)
-        const isAuthRoute = originalRequest.url?.includes('/auth/login') ||
-                           originalRequest.url?.includes('/auth/register') ||
+        const isAuthRoute = originalRequest.url?.includes('/auth/login') || originalRequest.url?.includes('/auth/register') ||
                            originalRequest.url?.includes('/auth/refresh');
 
         // 401 Unauthorized - Token expired (but not for auth routes)

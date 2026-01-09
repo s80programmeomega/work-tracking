@@ -386,11 +386,10 @@ const fetchInvitations = async (workspaceId) => {
   error.value = null
   
   try {
-    const response = await api.get(`/workspaces/${workspaceId}/invitations`)
+    // ✅ Nouvelle route
+    const response = await api.get(`/workspaces/${workspaceId}/members/invitations`)
     
     console.log('✅ Invitations chargées:', response.data)
-    
-    // La réponse contient déjà les données formatées du backend
     return response.data.data || []
   } catch (err) {
     console.error('❌ Erreur chargement invitations:', err)

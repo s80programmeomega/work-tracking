@@ -134,6 +134,7 @@
 
           <!-- Tab Content -->
           <div class="p-6">
+
             <!-- Overview Tab -->
             <div v-if="activeTab === 'overview'" class="space-y-6">
               <!-- Stats -->
@@ -421,7 +422,7 @@
                     Membres du projet ({{ members.length }})
                   </h3>
                   <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    Gestion des membres et de leurs permissions
+                    Gestion des membres et de leurs permissions 
                   </p>
                 </div>
 
@@ -533,6 +534,253 @@
                 </div>
               </div>
             </div>
+           
+            <!-- Invitations Tab -->
+            <div v-if="activeTab === 'invitations'" class="space-y-4">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    Invitations en attente ({{ pendingInvitations.length }})
+                  </h3>
+                  <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    Gestion des invitations envoyées aux membres
+                  </p>
+                </div>
+              </div>
+
+              <!-- Loading -->
+              <div v-if="loadingInvitations" class="flex justify-center py-12">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
+              </div>
+
+              <!-- État vide -->
+              <div
+                v-else-if="pendingInvitations.length === 0"
+                class="text-center py-12 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg"
+              >
+                <svg
+                  class="mx-auto h-12 w-12 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  />
+                </svg>
+                <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">
+                  Aucune invitation en attente
+                </h3>
+                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                  Toutes les invitations ont été acceptées, refusées ou ont expiré.
+                </p>
+              </div>
+
+              <!-- Liste des invitations -->
+              <div v-else class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                <div class="overflow-x-auto">
+                  <table class="w-full text-sm text-left">
+                    <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700">
+                      <tr>
+                        <th class="px-6 py-3">Invité</th>
+                        <th class="px-6 py-3">Rôle</th>
+                        <th class="px-6 py-3">Permissions</th>
+                        <th class="px-6 py-3">Invité par</th>
+                        <th class="px-6 py-3">Date d'envoi</th>
+                        <th class="px-6 py-3">Expire le</th>
+                        <th class="px-6 py-3">Statut</th>
+                        <th v-if="canManageMembers" class="px-6 py-3 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr
+                        v-for="invitation in pendingInvitations"
+                        :key="invitation.id"
+                        class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700" >
+                        <!-- Invité -->
+                        <td class="px-6 py-4">
+                          <div class="flex items-center gap-3">
+                            <div
+                              class="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300 text-xs font-medium" >
+                              {{ getInitials(invitation.email) }}
+                            </div>
+                            <div>
+                              <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                {{ invitation.email }}
+                              </div>
+                              <div v-if="invitation.user_id" class="text-xs text-gray-500 dark:text-gray-400">
+                                Utilisateur existant
+                              </div>
+                              <div v-else class="text-xs text-orange-600 dark:text-orange-400">
+                                Nouveau compte requis
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+
+                        <!-- Rôle -->
+                        <td class="px-6 py-4">
+                          <span
+                            :class="[
+                              'px-2 py-1 rounded-full text-xs font-medium',
+                              getRoleColor(invitation.role)
+                            ]"
+                          >
+                            {{ getRoleLabel(invitation.role) }}
+                          </span>
+                        </td>
+
+                        <!-- Permissions -->
+                        <td class="px-6 py-4">
+                          <div class="flex flex-wrap gap-1">
+                            <span
+                              v-if="invitation.can_edit"
+                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                            >
+                              Éditer
+                            </span>
+                            <span
+                              v-if="invitation.can_delete"
+                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                            >
+                              Supprimer
+                            </span>
+                            <span
+                              v-if="invitation.can_invite"
+                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
+                            >
+                              Inviter
+                            </span>
+                            <span
+                              v-if="invitation.can_delete_member"
+                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400"
+                            >
+                              Retirer membres
+                            </span>
+                            <span
+                              v-if="!invitation.can_edit && !invitation.can_delete && !invitation.can_invite && !invitation.can_delete_member"
+                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+                            >
+                              Lecture seule
+                            </span>
+                          </div>
+                        </td>
+
+                        <!-- Invité par -->
+                        <td class="px-6 py-4">
+                          <div class="flex items-center gap-2">
+                            <div
+                              class="w-6 h-6 rounded-full bg-brand-500 flex items-center justify-center text-white text-xs font-medium"
+                            >
+                              {{ getInitials(invitation.invited_by?.nom || 'U') }}
+                            </div>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">
+                              {{ invitation.invited_by?.nom || 'Inconnu' }}
+                            </span>
+                          </div>
+                        </td>
+
+                        <!-- Date d'envoi -->
+                        <td class="px-6 py-4">
+                          <span class="text-xs text-gray-500 dark:text-gray-400">
+                            {{ formatDateTime(invitation.created_at) }}
+                          </span>
+                        </td>
+
+                        <!-- Expiration -->
+                        <td class="px-6 py-4">
+                          <div>
+                            <span
+                              :class="[
+                                'text-xs',
+                                isExpiringSoon(invitation.expires_at)
+                                  ? 'text-red-600 dark:text-red-400 font-medium'
+                                  : 'text-gray-500 dark:text-gray-400'
+                              ]"
+                            >
+                              {{ formatDateTime(invitation.expires_at) }}
+                            </span>
+                            <div v-if="isExpiringSoon(invitation.expires_at)" class="text-xs text-red-500 mt-1">
+                              ⚠️ Expire bientôt
+                            </div>
+                          </div>
+                        </td>
+
+                        <!-- Statut -->
+                        <td class="px-6 py-4">
+                          <span
+                            class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
+                          >
+                            <svg
+                              class="w-3 h-3 mr-1"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                              />
+                            </svg>
+                            En attente
+                          </span>
+                        </td>
+
+                        <!-- Actions -->
+                        <td v-if="canManageMembers" class="px-6 py-4 text-right">
+                          <div class="flex items-center justify-end gap-2">
+                            <button
+                              @click="resendInvitation(invitation)"
+                              :disabled="resendingInvitation === invitation.id"
+                              class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium disabled:opacity-50"
+                              title="Renvoyer l'invitation"
+                            >
+                              <svg
+                                v-if="resendingInvitation === invitation.id"
+                                class="animate-spin h-4 w-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  class="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  stroke-width="4"
+                                />
+                                <path
+                                  class="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                />
+                              </svg>
+                              <span v-else>Renvoyer</span>
+                            </button>
+
+                            <button
+                              @click="cancelInvitation(invitation)"
+                              :disabled="cancelingInvitation === invitation.id"
+                              class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium disabled:opacity-50"
+                              title="Annuler l'invitation"
+                            >
+                              <span v-if="cancelingInvitation === invitation.id">Annulation...</span>
+                              <span v-else>Annuler</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -561,6 +809,12 @@
     <!-- Modal pour gérer les membres d'activité -->
     <ManageMembersModal v-if="showActivityMembersModal" :activite="selectedActivityForMembers"
       @close="showActivityMembersModal = false" @updated="handleActivityMembersUpdated" />
+
+      <!-- Modal pour ajouter des membres à une activité -->
+    <AddMemberModal v-if="showAddMemberModal" :show="showAddMemberModal"
+      :activite-id="selectedActivityForMembers?.id" :projet-id="projetId"
+      @close="showAddMemberModal = false" @members-added="handleMembersAddedToActivity" />
+
   </div>
 </template>
 
@@ -571,6 +825,8 @@ import { useProjets } from '@/composables/useProjets'
 import { useActivites } from '@/composables/useActivites'
 import { useActivityPermissions } from '@/composables/useActivityPermissions'
 import { useAuthStore } from '@/stores/auth'
+import { useProjetInvitations } from '@/composables/useProjetInvitations'
+ 
 
 import {
   ChevronLeftIcon,
@@ -585,7 +841,8 @@ import {
   CheckCircleIcon,
   TrendingUpIcon,
   ArchiveIcon,
-  ClockIcon
+  ClockIcon,
+  MailIcon
 } from '@/icons'
 
 import ActiviteForm from '@/components/activites/ActiviteForm.vue'
@@ -594,6 +851,8 @@ import ProjetFormModal from './ProjetFormModal.vue'
 import InviteExternalMemberModal from '@/components/projets/InviteExternalMemberModal.vue'
 import RemoveMemberWithTransferModal from '@/components/projets/RemoveMemberWithTransferModal.vue'
 import ManageMembersModal from '@/components/activites/ManageMembersModal.vue'
+// import AddMemberModal from '@/components/activites/AddMemberModal'
+import { useToast } from "vue-toastification"
 
 const props = defineProps({
   projetId: {
@@ -640,22 +899,111 @@ const selectedProjet = ref(null)
 
 const activeTab = ref('overview')
 
+//etats pour la gestion des invitations
+// Dans le setup(), ajoutez ces variables et fonctions :
+const { 
+  fetchInvitations, 
+  resendInvitation: resendInvitationService,
+  cancelInvitation: cancelInvitationService 
+} = useProjetInvitations()
+
+const toast = useToast()
+
+const pendingInvitations = ref([])
+const loadingInvitations = ref(false)
+const resendingInvitation = ref(null)
+const cancelingInvitation = ref(null)
+
+// Charger les invitations en attente
+const loadInvitations = async () => {
+  try {
+    loadingInvitations.value = true
+    const invitations = await fetchInvitations(props.projetId)
+    pendingInvitations.value = invitations || []
+  } catch (error) {
+    console.error('Error loading invitations:', error)
+    pendingInvitations.value = []
+  } finally {
+    loadingInvitations.value = false
+  }
+}
+
+// Renvoyer une invitation
+const resendInvitation = async (invitation) => {
+  if (!confirm(`Renvoyer l'invitation à ${invitation.email} ?`)) {
+    return
+  }
+
+  try {
+    resendingInvitation.value = invitation.id
+    await resendInvitationService(props.projetId, invitation.id)
+    
+    toast.success(
+      `L'invitation a été renvoyée avec succès`,
+      'Invitation renvoyée',
+      [`Email envoyé à ${invitation.email}`]
+    )
+    
+    await loadInvitations()
+  } catch (error) {
+    console.error('Error resending invitation:', error)
+    toast.error(
+      error.response?.data?.message || 'Une erreur est survenue lors du renvoi',
+      'Erreur'
+    )
+  } finally {
+    resendingInvitation.value = null
+  }
+}
+
+// Annuler une invitation
+const cancelInvitation = async (invitation) => {
+  if (!confirm(`Êtes-vous sûr de vouloir annuler l'invitation de ${invitation.email} ?`)) {
+    return
+  }
+
+  try {
+    cancelingInvitation.value = invitation.id
+    await cancelInvitationService(props.projetId, invitation.id)
+    
+    toast.warning(
+      `L'invitation a été annulée`,
+      'Invitation annulée',
+      [`${invitation.email} ne pourra plus accepter cette invitation`]
+    )
+    
+    await loadInvitations()
+  } catch (error) {
+    console.error('Error canceling invitation:', error)
+    toast.error(
+      error.response?.data?.message || 'Une erreur est survenue lors de l\'annulation',
+      'Erreur'
+    )
+  } finally {
+    cancelingInvitation.value = null
+  }
+}
+
+// Vérifier si une invitation expire bientôt (dans moins de 24h)
+const isExpiringSoon = (expiresAt) => {
+  if (!expiresAt) return false
+  const now = new Date()
+  const expiration = new Date(expiresAt)
+  const hoursUntilExpiration = (expiration - now) / (1000 * 60 * 60)
+  return hoursUntilExpiration < 24 && hoursUntilExpiration > 0
+}
+
+ 
+ 
+
+
 // ==================== COMPUTED PROPERTIES ====================
 
 const tabs = computed(() => [
   { id: 'overview', label: 'Vue d\'ensemble', icon: TrendingUpIcon },
-  {
-    id: 'activities',
-    label: 'Activités',
-    icon: ListIcon,
-    count: displayedActivities.value.length
-  },
-  {
-    id: 'members',
-    label: 'Membres',
-    icon: UsersIcon,
-    count: members.value.length
-  }
+  { id: 'activities', label: 'Activités', icon: ListIcon, count: displayedActivities.value.length },
+  { id: 'members', label: 'Membres', icon: UsersIcon, count: members.value.length },
+  { id: 'invitations', label: 'Invitations', icon: MailIcon, count: pendingInvitations.value.length }
 ])
 
 /**

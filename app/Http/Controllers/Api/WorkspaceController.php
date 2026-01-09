@@ -573,7 +573,7 @@ class WorkspaceController extends Controller
    */
   public function invitations(Workspace $workspace)
   {
-    $this->authorize('manageMembers', $workspace);
+    // $this->authorize('manageMembers', $workspace);
 
     $invitations = WorkspaceInvitation::where('workspace_id', $workspace->id)
       ->where('status', 'pending')
@@ -592,7 +592,7 @@ class WorkspaceController extends Controller
    */
   public function resendInvitation(Workspace $workspace, WorkspaceInvitation $invitation)
   {
-    $this->authorize('manageMembers', $workspace);
+    // $this->authorize('manageMembers', $workspace);
 
     if ($invitation->workspace_id !== $workspace->id) {
       abort(403, 'Cette invitation n\'appartient pas à ce workspace');
