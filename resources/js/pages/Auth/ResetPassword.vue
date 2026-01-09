@@ -112,7 +112,7 @@
             <common-grid-shape />
             <div class="flex flex-col items-center max-w-xs">
               <router-link to="/" class="block mb-4">
-                <img width="200" height="180" :src="LogoDark" alt="Uptiimun Work Tracking" class="mx-auto rounded-lg" />
+                <img width="200" height="180" :src="LogoDark" alt="Uptiimum Work Tracking" class="mx-auto rounded-lg" />
               </router-link>
               <p class="text-center text-gray-400 dark:text-white/60">
                 Free and Open-Source Tailwind CSS Admin Dashboard Template
