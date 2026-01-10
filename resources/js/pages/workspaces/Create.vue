@@ -198,7 +198,9 @@ import { useWorkspace } from '@/composables/useWorkspace';
 import axios from 'axios';
 import AdminLayout from '@/components/layout/AdminLayout.vue'; // ← Importez le layout
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'; // ← Optionnel
-
+import { useToast } from "vue-toastification"
+const toast = useToast()
+ 
 const router = useRouter();
 const { createWorkspace, fetchWorkspaces } = useWorkspace();
 
@@ -237,12 +239,16 @@ const handleLogoChange = (event: Event) => {
     // Validate file size (2MB)
     if (file.size > 2 * 1024 * 1024) {
       errors.value.logo = 'Le fichier est trop volumineux (max 2 MB)';
+      toast.error('Le fichier est trop volumineux (max 2 MB)')
+
       return;
     }
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
       errors.value.logo = 'Le fichier doit être une image';
+      toast.error('Le fichier doit être une image')
+
       return;
     }
 
@@ -310,11 +316,13 @@ const handleSubmit = async () => {
     // Success notification
     // TODO: Add toast notification
     console.log('Workspace créé avec succès', response);
+    toast.success('Workspace créé avec succès')
 
     // Redirect to workspace details
     router.push({ name: 'workspaces.show', params: { id: response.id } });
   } catch (error: any) {
     console.error('Erreur lors de la création du workspace:', error);
+    toast.error('Erreur lors de la création du workspace')
 
     if (error.response?.data?.errors) {
       errors.value = error.response.data.errors;

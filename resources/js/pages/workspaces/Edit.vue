@@ -353,7 +353,9 @@ import { useWorkspace } from '@/composables/useWorkspace';
 import { useAuthStore } from '@/stores/authStore';
 import AdminLayout from '@/components/layout/AdminLayout.vue';
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue';
+import { useToast } from "vue-toastification"
 
+const toast = useToast()
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
@@ -431,6 +433,8 @@ const loadWorkspace = async () => {
         };
     } catch (error) {
         console.error('Erreur lors du chargement du workspace:', error);
+        toast.warning('Erreur lors du chargement du workspace')
+
         router.push({ name: 'workspaces.index' });
     } finally {
         loadingWorkspace.value = false;
@@ -444,11 +448,15 @@ const handleLogoChange = (event: Event) => {
     if (file) {
         if (file.size > 2 * 1024 * 1024) {
             errors.value.logo = 'Le fichier est trop volumineux (max 2 MB)';
+            toast.error('Le fichier est trop volumineux (max 2 MB)')
+
             return;
         }
 
         if (!file.type.startsWith('image/')) {
             errors.value.logo = 'Le fichier doit être une image';
+            toast.error('Le fichier doit être une image')
+
             return;
         }
 
@@ -518,10 +526,14 @@ const handleSubmit = async () => {
             // Nouveau fichier sélectionné
             formData.append('logo', form.value.logo);
             console.log('Nouveau logo ajouté au FormData');
+            toast.info('Nouveau logo ajouté')
+
         } else if (logoRemoved.value && workspace.value?.logo_url) {
             // L'utilisateur a explicitement supprimé le logo existant
             formData.append('remove_logo', 'true');
             console.log('Logo marqué pour suppression');
+            toast.info('Logo marqué pour suppression')
+
         }
         // Sinon, ne rien faire (garder le logo existant)
         // ✅ Debug: Afficher le contenu du FormData
@@ -535,11 +547,13 @@ const handleSubmit = async () => {
         }
 
         await updateWorkspace(workspace.value.id, formData);
+        toast.success('workspace mise à jour avec success');
 
         // Success - redirect to workspace details
         router.push({ name: 'workspaces.show', params: { id: workspace.value.id } });
     } catch (error: any) {
         console.error('Erreur lors de la mise à jour du workspace:', error);
+        toast.warning('Erreur lors de la mise à jour du workspace')
 
         if (error.response?.data?.errors) {
             errors.value = error.response.data.errors;
@@ -557,9 +571,13 @@ const handleDelete = async () => {
 
     try {
         await deleteWorkspace(workspace.value.id);
+        toast.success(' workspace supprimé avec success');
+
         router.push({ name: 'workspaces.index' });
     } catch (error: any) {
         console.error('Erreur lors de la suppression du workspace:', error);
+        toast.warning('Erreur lors de la suppression du workspace')
+
         alert(error.response?.data?.message || 'Erreur lors de la suppression');
     } finally {
         deleting.value = false;
