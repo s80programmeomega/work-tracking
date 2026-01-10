@@ -23,13 +23,13 @@ use Illuminate\Validation\Rule;
 
 class WorkspaceController extends Controller
 {
-   protected $removalService;
+  protected $removalService;
 
-    public function __construct(MemberRemovalService $removalService)
-    {
-        $this->removalService = $removalService;
-    }
-    
+  public function __construct(MemberRemovalService $removalService)
+  {
+    $this->removalService = $removalService;
+  }
+
   /**
    * Display a listing of workspaces for authenticated user
    */
@@ -174,6 +174,9 @@ class WorkspaceController extends Controller
   /**
    * Invite members to workspace - VERSION CORRIGÉE
    */
+  /**
+   * Invite members to workspace - VERSION CORRIGÉE (sans routes nommées)
+   */
   public function inviteMembers(Request $request, Workspace $workspace)
   {
     $this->authorize('manageMembers', $workspace);
@@ -192,6 +195,7 @@ class WorkspaceController extends Controller
 
     $invitations = [];
     $errors = [];
+    $warnings = [];
     $sendEmail = $request->input('send_email', true);
 
     foreach ($request->emails as $email) {
@@ -200,16 +204,80 @@ class WorkspaceController extends Controller
         $user = User::where('email', $email)->first();
 
         if ($user) {
-          // Check if already a member
+          // ✅ Vérifier si déjà membre du workspace
           if ($workspace->members()->where('user_id', $user->id)->exists()) {
+            // Récupérer le membre existant avec son rôle
+            $existingMember = $workspace->members()
+              ->where('user_id', $user->id)
+              ->withPivot(['role', 'permissions'])
+              ->first();
+
+            // Créer un message plus informatif
+            $roleLabel = $this->getRoleLabel($existingMember->pivot->role);
+            $joinedAt = $existingMember->pivot->created_at
+              ? $existingMember->pivot->created_at->format('d/m/Y')
+              : 'Date inconnue';
+
+            // Récupérer les statistiques du membre - CORRECTION
+            $projectsCount = $user->projets()
+              ->whereHas('workspace', function ($query) use ($workspace) {
+                $query->where('id', $workspace->id);
+              })
+              ->count();
+
+            $tasksCount = $user->taches()
+              ->whereHas('activite.projet', function ($query) use ($workspace) {
+                $query->where('workspace_id', $workspace->id);
+              })->count();
+
             $errors[] = [
               'email' => $email,
-              'message' => 'Cet utilisateur est déjà membre du workspace'
+              'message' => "{$user->nom} est déjà {$roleLabel} de ce workspace depuis le {$joinedAt}.",
+              'type' => 'already_member',
+              'user_id' => $user->id,
+              'user_name' => $user->nom,
+              'existing_role' => $existingMember->pivot->role,
+              'existing_role_label' => $roleLabel,
+              'joined_at' => $joinedAt,
+              'stats' => [
+                'projects_count' => $projectsCount,
+                'tasks_count' => $tasksCount,
+              ],
+              'suggestions' => [
+                'view_profile_url' => "/workspaces/{$workspace->id}/members/{$user->id}",
+                'update_role_url' => "/workspaces/{$workspace->id}/members/{$user->id}",
+              ]
             ];
             continue;
           }
 
-          // ✅ Créer une invitation même pour utilisateur existant
+          // ✅ Vérifier si déjà une invitation en attente
+          $existingInvitation = WorkspaceInvitation::where('workspace_id', $workspace->id)
+            ->where('email', $email)
+            ->where('status', 'pending')
+            ->first();
+
+          if ($existingInvitation) {
+            if ($existingInvitation->expires_at < now()) {
+              // Invitation expirée - on peut la supprimer
+              $existingInvitation->update(['status' => 'expired']);
+            } else {
+              // Invitation encore valide - ajouter aux warnings
+              $expiresIn = $existingInvitation->expires_at->diffForHumans();
+
+              $warnings[] = [
+                'email' => $email,
+                'message' => 'Une invitation est déjà en attente pour cet utilisateur. Elle expire ' . $expiresIn,
+                'type' => 'pending_invitation',
+                'expires_at' => $existingInvitation->expires_at->toISOString(),
+                'invitation_id' => $existingInvitation->id,
+                'user_name' => $user->nom
+              ];
+              continue;
+            }
+          }
+
+          // ✅ Créer une invitation
           $invitation = WorkspaceInvitation::create([
             'workspace_id' => $workspace->id,
             'email' => $email,
@@ -245,9 +313,37 @@ class WorkspaceController extends Controller
             'user_name' => $user->nom,
             'invitation_id' => $invitation->id,
             'expires_at' => $invitation->expires_at->toISOString(),
+            'requires_registration' => false,
           ];
         } else {
-          // Create invitation for non-existing user
+          // ✅ Utilisateur externe (n'existe pas dans le système)
+
+          // Vérifier si déjà invité
+          $existingInvitation = WorkspaceInvitation::where('workspace_id', $workspace->id)
+            ->where('email', $email)
+            ->where('status', 'pending')
+            ->first();
+
+          if ($existingInvitation) {
+            if ($existingInvitation->expires_at < now()) {
+              // Invitation expirée
+              $existingInvitation->update(['status' => 'expired']);
+            } else {
+              // Invitation encore valide - ajouter aux warnings
+              $expiresIn = $existingInvitation->expires_at->diffForHumans();
+
+              $warnings[] = [
+                'email' => $email,
+                'message' => 'Une invitation est déjà en attente pour cette adresse. Elle expire ' . $expiresIn,
+                'type' => 'pending_invitation',
+                'expires_at' => $existingInvitation->expires_at->toISOString(),
+                'invitation_id' => $existingInvitation->id
+              ];
+              continue;
+            }
+          }
+
+          // Créer l'invitation
           $invitation = WorkspaceInvitation::create([
             'workspace_id' => $workspace->id,
             'email' => $email,
@@ -280,6 +376,7 @@ class WorkspaceController extends Controller
           $invitations[] = [
             'email' => $email,
             'status' => 'invited',
+            'requires_registration' => true,
             'invitation_id' => $invitation->id,
             'expires_at' => $invitation->expires_at->toISOString(),
           ];
@@ -293,21 +390,80 @@ class WorkspaceController extends Controller
 
         $errors[] = [
           'email' => $email,
-          'message' => 'Erreur lors de l\'invitation: ' . $e->getMessage()
+          'message' => 'Erreur lors de l\'invitation: ' . $e->getMessage(),
+          'type' => 'server_error'
         ];
       }
     }
 
+    // Logique améliorée pour les messages avec distinction warnings/errors
+    $successCount = count($invitations);
+    $errorCount = count($errors);
+    $warningCount = count($warnings);
+    $totalAttempts = count($request->emails);
+
+    // Construction du message principal
+    $messageParts = [];
+
+    if ($successCount > 0) {
+      $messageParts[] = "{$successCount} invitation(s) envoyée(s) avec succès";
+    }
+
+    if ($warningCount > 0) {
+      $messageParts[] = "{$warningCount} invitation(s) déjà en attente";
+    }
+
+    if ($errorCount > 0) {
+      $messageParts[] = "{$errorCount} erreur(s)";
+    }
+
+    // Déterminer le message et le code de statut
+    if ($successCount > 0) {
+      // Au moins une invitation envoyée
+      $message = implode(', ', $messageParts);
+      $statusCode = 200;
+    } elseif ($warningCount > 0 && $errorCount === 0) {
+      // Uniquement des invitations déjà en attente
+      $message = "Toutes les invitations sont déjà en attente de réponse";
+      $statusCode = 200;
+    } elseif ($warningCount === 0 && $errorCount > 0) {
+      // Uniquement des erreurs
+      $message = "Aucune invitation n'a pu être envoyée";
+      $statusCode = 422;
+    } else {
+      // Mix de warnings et erreurs
+      $message = implode(', ', $messageParts);
+      $statusCode = 422;
+    }
+
     return response()->json([
-      'message' => count($invitations) > 0
-        ? 'Invitations envoyées avec succès' : 'Aucune invitation n\'a pu être envoyée',
+      'message' => $message,
       'data' => [
         'invitations' => $invitations,
+        'warnings' => $warnings,
         'errors' => $errors,
-        'success_count' => count($invitations),
-        'error_count' => count($errors),
+        'success_count' => $successCount,
+        'warning_count' => $warningCount,
+        'error_count' => $errorCount,
+        'total_attempts' => $totalAttempts,
       ],
-    ], count($invitations) > 0 ? 200 : 422);
+    ], $statusCode);
+  }
+
+  /**
+   * Helper pour obtenir le label d'un rôle
+   */
+  private function getRoleLabel(string $role): string
+  {
+    $labels = [
+      'owner' => 'Propriétaire',
+      'super_admin' => 'Super Administrateur',
+      'admin' => 'Administrateur',
+      'member' => 'Membre',
+      'viewer' => 'Observateur',
+    ];
+
+    return $labels[$role] ?? $role;
   }
 
   /**
@@ -835,133 +991,133 @@ class WorkspaceController extends Controller
   }
 
 
-    /**
-     * ✅ Retirer un membre avec transfert de responsabilités
-     * 
-     * DELETE /workspaces/{workspace}/members/{user}/remove
-     */
-    public function removeMemberWithTransfer(Request $request, Workspace $workspace, User $user)
-    {
-        $this->authorize('manageMembers', $workspace);
+  /**
+   * ✅ Retirer un membre avec transfert de responsabilités
+   * 
+   * DELETE /workspaces/{workspace}/members/{user}/remove
+   */
+  public function removeMemberWithTransfer(Request $request, Workspace $workspace, User $user)
+  {
+    $this->authorize('manageMembers', $workspace);
 
-        // Ne peut pas retirer le owner
-        if ($workspace->owner_id === $user->id) {
-            return response()->json([
-                'message' => 'Impossible de retirer le propriétaire du workspace. Transférez d\'abord la propriété.'
-            ], 422);
-        }
-
-        // Vérifier que l'utilisateur est membre
-        if (!$workspace->members()->where('user_id', $user->id)->exists()) {
-            return response()->json([
-                'message' => 'Cet utilisateur n\'est pas membre du workspace'
-            ], 404);
-        }
-
-        $request->validate([
-            'new_responsable_id' => 'nullable|exists:users,id',
-        ]);
-
-        try {
-            $newResponsable = null;
-            
-            if ($request->new_responsable_id) {
-                $newResponsable = User::findOrFail($request->new_responsable_id);
-                
-                // Vérifier que le nouveau responsable est membre du workspace
-                if (!$workspace->members()->where('user_id', $newResponsable->id)->exists()) {
-                    return response()->json([
-                        'message' => 'Le nouveau responsable doit être membre du workspace'
-                    ], 422);
-                }
-            }
-
-            $stats = $this->removalService->removeFromWorkspace($workspace, $user, $newResponsable);
-
-            return response()->json([
-                'message' => 'Membre retiré avec succès du workspace',
-                'data' => [
-                    'removed_user' => [
-                        'id' => $user->id,
-                        'nom' => $user->nom,
-                        'email' => $user->email,
-                    ],
-                    'new_responsable' => $newResponsable ? [
-                        'id' => $newResponsable->id,
-                        'nom' => $newResponsable->nom,
-                    ] : [
-                        'id' => $workspace->owner->id,
-                        'nom' => $workspace->owner->nom,
-                        'is_default' => true,
-                    ],
-                    'stats' => $stats,
-                    'summary' => [
-                        'projets_impactes' => $stats['projets_transferred'] + $stats['projets_membership_removed'],
-                        'activites_impactees' => $stats['activites_transferred'] + $stats['activites_membership_removed'],
-                        'taches_transferees' => $stats['taches_reassigned'],
-                        'taches_desassignees' => $stats['taches_unassigned'],
-                    ],
-                ],
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Erreur lors du retrait du membre',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+    // Ne peut pas retirer le owner
+    if ($workspace->owner_id === $user->id) {
+      return response()->json([
+        'message' => 'Impossible de retirer le propriétaire du workspace. Transférez d\'abord la propriété.'
+      ], 422);
     }
 
- /**
-     * ✅ BONUS : Retrait simple sans transfert (si aucune responsabilité)
-     * 
-     * DELETE /workspaces/{workspace}/members/{user}
-     */
-    public function removeMember(Request $request, Workspace $workspace, User $user)
-    {
-        $this->authorize('manageMembers', $workspace);
-
-        // Ne peut pas retirer le owner
-        if ($workspace->owner_id === $user->id) {
-            return response()->json([
-                'message' => 'Impossible de retirer le propriétaire du workspace'
-            ], 422);
-        }
-
-        if (!$workspace->members()->where('user_id', $user->id)->exists()) {
-            return response()->json([
-                'message' => 'Cet utilisateur n\'est pas membre du workspace'
-            ], 404);
-        }
-
-        // Vérifier s'il a des responsabilités
-        $preview = $this->removalService->getRemovalPreview($workspace, $user);
-
-        if ($preview['requires_transfer']) {
-            return response()->json([
-                'message' => 'Ce membre a des responsabilités. Utilisez l\'endpoint de transfert.',
-                'impact' => $preview,
-            ], 422);
-        }
-
-        try {
-            // Pas de responsabilités → retrait simple avec transfert automatique au owner
-            $stats = $this->removalService->removeFromWorkspace($workspace, $user);
-
-            return response()->json([
-                'message' => 'Membre retiré avec succès',
-                'data' => ['stats' => $stats],
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Erreur lors du retrait du membre',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+    // Vérifier que l'utilisateur est membre
+    if (!$workspace->members()->where('user_id', $user->id)->exists()) {
+      return response()->json([
+        'message' => 'Cet utilisateur n\'est pas membre du workspace'
+      ], 404);
     }
 
- 
+    $request->validate([
+      'new_responsable_id' => 'nullable|exists:users,id',
+    ]);
+
+    try {
+      $newResponsable = null;
+
+      if ($request->new_responsable_id) {
+        $newResponsable = User::findOrFail($request->new_responsable_id);
+
+        // Vérifier que le nouveau responsable est membre du workspace
+        if (!$workspace->members()->where('user_id', $newResponsable->id)->exists()) {
+          return response()->json([
+            'message' => 'Le nouveau responsable doit être membre du workspace'
+          ], 422);
+        }
+      }
+
+      $stats = $this->removalService->removeFromWorkspace($workspace, $user, $newResponsable);
+
+      return response()->json([
+        'message' => 'Membre retiré avec succès du workspace',
+        'data' => [
+          'removed_user' => [
+            'id' => $user->id,
+            'nom' => $user->nom,
+            'email' => $user->email,
+          ],
+          'new_responsable' => $newResponsable ? [
+            'id' => $newResponsable->id,
+            'nom' => $newResponsable->nom,
+          ] : [
+            'id' => $workspace->owner->id,
+            'nom' => $workspace->owner->nom,
+            'is_default' => true,
+          ],
+          'stats' => $stats,
+          'summary' => [
+            'projets_impactes' => $stats['projets_transferred'] + $stats['projets_membership_removed'],
+            'activites_impactees' => $stats['activites_transferred'] + $stats['activites_membership_removed'],
+            'taches_transferees' => $stats['taches_reassigned'],
+            'taches_desassignees' => $stats['taches_unassigned'],
+          ],
+        ],
+      ]);
+
+    } catch (\Exception $e) {
+      return response()->json([
+        'message' => 'Erreur lors du retrait du membre',
+        'error' => $e->getMessage(),
+      ], 500);
+    }
+  }
+
+  /**
+   * ✅ BONUS : Retrait simple sans transfert (si aucune responsabilité)
+   * 
+   * DELETE /workspaces/{workspace}/members/{user}
+   */
+  public function removeMember(Request $request, Workspace $workspace, User $user)
+  {
+    $this->authorize('manageMembers', $workspace);
+
+    // Ne peut pas retirer le owner
+    if ($workspace->owner_id === $user->id) {
+      return response()->json([
+        'message' => 'Impossible de retirer le propriétaire du workspace'
+      ], 422);
+    }
+
+    if (!$workspace->members()->where('user_id', $user->id)->exists()) {
+      return response()->json([
+        'message' => 'Cet utilisateur n\'est pas membre du workspace'
+      ], 404);
+    }
+
+    // Vérifier s'il a des responsabilités
+    $preview = $this->removalService->getRemovalPreview($workspace, $user);
+
+    if ($preview['requires_transfer']) {
+      return response()->json([
+        'message' => 'Ce membre a des responsabilités. Utilisez l\'endpoint de transfert.',
+        'impact' => $preview,
+      ], 422);
+    }
+
+    try {
+      // Pas de responsabilités → retrait simple avec transfert automatique au owner
+      $stats = $this->removalService->removeFromWorkspace($workspace, $user);
+
+      return response()->json([
+        'message' => 'Membre retiré avec succès',
+        'data' => ['stats' => $stats],
+      ]);
+
+    } catch (\Exception $e) {
+      return response()->json([
+        'message' => 'Erreur lors du retrait du membre',
+        'error' => $e->getMessage(),
+      ], 500);
+    }
+  }
+
+
 
 
   /**
@@ -1235,27 +1391,27 @@ class WorkspaceController extends Controller
         Log::info('Logo supprimé', ['workspace_id' => $workspace->id]);
       }
       // 2. Ensuite vérifier si on upload un nouveau logo
-     elseif ($request->hasFile('logo')) {
+      elseif ($request->hasFile('logo')) {
         try {
-            // Supprimer l'ancien logo si existe
-            if ($workspace->logo && file_exists(public_path('uploads/' . $workspace->logo))) {
-                unlink(public_path('uploads/' . $workspace->logo));
-            }
+          // Supprimer l'ancien logo si existe
+          if ($workspace->logo && file_exists(public_path('uploads/' . $workspace->logo))) {
+            unlink(public_path('uploads/' . $workspace->logo));
+          }
 
-            // Enregistrer le nouveau logo directement dans public/uploads
-            $logoPath = $request->file('logo')->store(
-                'workspaces/logos',
-                'uploads' // Utiliser le disk custom
-            );
-            $dataToUpdate['logo'] = $logoPath;
+          // Enregistrer le nouveau logo directement dans public/uploads
+          $logoPath = $request->file('logo')->store(
+            'workspaces/logos',
+            'uploads' // Utiliser le disk custom
+          );
+          $dataToUpdate['logo'] = $logoPath;
 
-            Log::info('Logo mis à jour avec succès', [
-                'workspace_id' => $workspace->id,
-                'logo_path' => $logoPath
-            ]);
+          Log::info('Logo mis à jour avec succès', [
+            'workspace_id' => $workspace->id,
+            'logo_path' => $logoPath
+          ]);
         } catch (\Exception $e) {
-            Log::error('Erreur upload logo workspace: ' . $e->getMessage());
-            throw $e; // Propager l'erreur pour rollback
+          Log::error('Erreur upload logo workspace: ' . $e->getMessage());
+          throw $e; // Propager l'erreur pour rollback
         }
       }
 
@@ -1339,7 +1495,7 @@ class WorkspaceController extends Controller
     try {
       // Delete logo if exists
       if ($workspace->logo && file_exists(public_path('uploads/' . $workspace->logo))) {
-          unlink(public_path('uploads/' . $workspace->logo));
+        unlink(public_path('uploads/' . $workspace->logo));
       }
 
       // Detach all members
@@ -1580,109 +1736,109 @@ class WorkspaceController extends Controller
   }
 
 
-      /**
-     * ✅ Obtenir un aperçu de l'impact du retrait d'un membre
-     * 
-     * GET /workspaces/{workspace}/members/{user}/removal-preview
-     */
-    public function getRemovalPreview(Request $request, Workspace $workspace, User $user)
-    {
-        $this->authorize('manageMembers', $workspace);
+  /**
+   * ✅ Obtenir un aperçu de l'impact du retrait d'un membre
+   * 
+   * GET /workspaces/{workspace}/members/{user}/removal-preview
+   */
+  public function getRemovalPreview(Request $request, Workspace $workspace, User $user)
+  {
+    $this->authorize('manageMembers', $workspace);
 
-        // Vérifier que l'utilisateur est membre
-        if (!$workspace->members()->where('user_id', $user->id)->exists()) {
-            return response()->json([
-                'message' => 'Cet utilisateur n\'est pas membre du workspace'
-            ], 404);
-        }
-
-        // Ne peut pas retirer le owner
-        if ($workspace->owner_id === $user->id) {
-            return response()->json([
-                'message' => 'Impossible de retirer le propriétaire du workspace'
-            ], 422);
-        }
-
-        try {
-            $preview = $this->removalService->getRemovalPreview($workspace, $user);
-
-            return response()->json([
-                'data' => [
-                    'user' => [
-                        'id' => $user->id,
-                        'nom' => $user->nom,
-                        'email' => $user->email,
-                        'avatar' => $user->avatar,
-                    ],
-                    'impact' => $preview,
-                    'default_responsable' => [
-                        'id' => $workspace->owner->id,
-                        'nom' => $workspace->owner->nom,
-                    ],
-                ],
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Erreur lors de l\'analyse',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+    // Vérifier que l'utilisateur est membre
+    if (!$workspace->members()->where('user_id', $user->id)->exists()) {
+      return response()->json([
+        'message' => 'Cet utilisateur n\'est pas membre du workspace'
+      ], 404);
     }
 
-    /**
-     * ✅ Obtenir les projets où l'utilisateur est responsable
-     * 
-     * GET /workspaces/{workspace}/members/{user}/projects
-     */
-    public function getUserProjects(Request $request, Workspace $workspace, User $user)
-    {
-        $this->authorize('manageMembers', $workspace);
-
-        $projects = $this->removalService->getUserProjectsAsResponsable($user, $workspace);
-
-        return response()->json([
-            'data' => $projects->map(function ($projet) {
-                return [
-                    'id' => $projet->id,
-                    'nom' => $projet->nom,
-                    'code' => $projet->code,
-                    'couleur' => $projet->couleur,
-                    'activites_count' => $projet->activites_count,
-                    'members_count' => $projet->members_count,
-                ];
-            }),
-            'count' => $projects->count(),
-        ]);
+    // Ne peut pas retirer le owner
+    if ($workspace->owner_id === $user->id) {
+      return response()->json([
+        'message' => 'Impossible de retirer le propriétaire du workspace'
+      ], 422);
     }
 
-   
-    /**
-     * ✅ Obtenir les candidats pour le transfert
-     * 
-     * GET /workspaces/{workspace}/transfer-candidates
-     */
-    public function getTransferCandidates(Request $request, Workspace $workspace)
-    {
-        $this->authorize('manageMembers', $workspace);
+    try {
+      $preview = $this->removalService->getRemovalPreview($workspace, $user);
 
-        $request->validate([
-            'exclude_user_id' => 'required|exists:users,id',
-        ]);
-
-        $excludeUser = User::findOrFail($request->exclude_user_id);
-        $candidates = $this->removalService->getTransferCandidates($workspace, $excludeUser);
-
-        return response()->json([
-            'data' => $candidates,
-            'default_candidate' => [
-                'id' => $workspace->owner->id,
-                'nom' => $workspace->owner->nom,
-                'email' => $workspace->owner->email,
-                'avatar' => $workspace->owner->avatar,
-                'is_owner' => true,
-            ],
-        ]);
+      return response()->json([
+        'data' => [
+          'user' => [
+            'id' => $user->id,
+            'nom' => $user->nom,
+            'email' => $user->email,
+            'avatar' => $user->avatar,
+          ],
+          'impact' => $preview,
+          'default_responsable' => [
+            'id' => $workspace->owner->id,
+            'nom' => $workspace->owner->nom,
+          ],
+        ],
+      ]);
+    } catch (\Exception $e) {
+      return response()->json([
+        'message' => 'Erreur lors de l\'analyse',
+        'error' => $e->getMessage(),
+      ], 500);
     }
+  }
 
-  
+  /**
+   * ✅ Obtenir les projets où l'utilisateur est responsable
+   * 
+   * GET /workspaces/{workspace}/members/{user}/projects
+   */
+  public function getUserProjects(Request $request, Workspace $workspace, User $user)
+  {
+    $this->authorize('manageMembers', $workspace);
+
+    $projects = $this->removalService->getUserProjectsAsResponsable($user, $workspace);
+
+    return response()->json([
+      'data' => $projects->map(function ($projet) {
+        return [
+          'id' => $projet->id,
+          'nom' => $projet->nom,
+          'code' => $projet->code,
+          'couleur' => $projet->couleur,
+          'activites_count' => $projet->activites_count,
+          'members_count' => $projet->members_count,
+        ];
+      }),
+      'count' => $projects->count(),
+    ]);
+  }
+
+
+  /**
+   * ✅ Obtenir les candidats pour le transfert
+   * 
+   * GET /workspaces/{workspace}/transfer-candidates
+   */
+  public function getTransferCandidates(Request $request, Workspace $workspace)
+  {
+    $this->authorize('manageMembers', $workspace);
+
+    $request->validate([
+      'exclude_user_id' => 'required|exists:users,id',
+    ]);
+
+    $excludeUser = User::findOrFail($request->exclude_user_id);
+    $candidates = $this->removalService->getTransferCandidates($workspace, $excludeUser);
+
+    return response()->json([
+      'data' => $candidates,
+      'default_candidate' => [
+        'id' => $workspace->owner->id,
+        'nom' => $workspace->owner->nom,
+        'email' => $workspace->owner->email,
+        'avatar' => $workspace->owner->avatar,
+        'is_owner' => true,
+      ],
+    ]);
+  }
+
+
 }
