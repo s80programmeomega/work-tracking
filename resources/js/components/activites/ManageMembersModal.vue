@@ -34,33 +34,35 @@
               <!-- Body -->
               <div class="p-6 max-h-[70vh] overflow-y-auto">
                 <!-- En-tête des permissions -->
-                <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div
+                  class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                   <div class="flex items-center justify-between">
                     <div>
                       <h3 class="font-medium text-gray-900 dark:text-white mb-1">Légende des permissions</h3>
                       <div class="flex flex-wrap gap-2">
-                        <div v-for="permission in availablePermissions" :key="permission.key" 
-                             class="flex items-center space-x-1">
+                        <div v-for="permission in availablePermissions" :key="permission.key"
+                          class="flex items-center space-x-1">
                           <span class="w-3 h-3 rounded" :class="permission.color"></span>
                           <span class="text-xs text-gray-600 dark:text-gray-400">{{ permission.label }}</span>
                         </div>
                       </div>
                     </div>
                     <div v-if="isSuperAdminOrResponsable" class="text-sm">
-                      <button @click="showAllPermissions = !showAllPermissions" 
-                              class="text-blue-600 dark:text-blue-400 hover:underline">
+                      <button @click="showAllPermissions = !showAllPermissions"
+                        class="text-blue-600 dark:text-blue-400 hover:underline">
                         {{ showAllPermissions ? 'Masquer détails' : 'Afficher détails' }}
                       </button>
                     </div>
                   </div>
-                  
+
                   <!-- Détails des permissions (optionnel) -->
                   <div v-if="showAllPermissions" class="mt-4 text-sm text-gray-600 dark:text-gray-400">
                     <p><strong>Responsable :</strong> Accès complet, peut gérer tous les membres et permissions</p>
                     <p><strong>Créer tâches :</strong> Peut créer de nouvelles tâches</p>
                     <p><strong>Modifier tâches :</strong> Peut modifier les tâches existantes</p>
                     <p><strong>Valider N1 :</strong> Peut valider les résultats de niveau 1</p>
-                    <p><strong>Assigner membres :</strong> Peut ajouter/retirer des membres (nécessite aussi "Supprimer des membres" pour retirer)</p>
+                    <p><strong>Assigner membres :</strong> Peut ajouter/retirer des membres (nécessite aussi "Supprimer
+                      des membres" pour retirer)</p>
                     <p><strong>Supprimer des membres :</strong> Peut retirer des membres de l'activité</p>
                   </div>
                 </div>
@@ -70,11 +72,12 @@
                   <div v-for="member in sortedMembers" :key="member.id"
                     class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
                     :class="getMemberCardClasses(member)">
-                    
+
                     <!-- Avatar et info -->
                     <div class="flex items-center space-x-3 flex-1 min-w-0">
                       <div class="relative">
-                        <div class="w-12 h-12 rounded-full flex items-center justify-center text-white text-sm font-bold"
+                        <div
+                          class="w-12 h-12 rounded-full flex items-center justify-center text-white text-sm font-bold"
                           :class="getAvatarClasses(member)">
                           {{ getInitials(member.nom) }}
                         </div>
@@ -82,7 +85,8 @@
                         <span v-if="member.id === activite.responsable_id"
                           class="absolute -top-1 -right-1 inline-flex items-center justify-center w-6 h-6 rounded-full bg-orange-500 text-white text-xs">
                           <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            <path
+                              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                           </svg>
                         </span>
                       </div>
@@ -113,10 +117,11 @@
                               </span>
                             </template>
                           </div>
-                          
+
                           <!-- Résumé des permissions -->
                           <div v-if="showPermissionSummary" class="text-xs text-gray-500 dark:text-gray-400">
-                            <span v-if="member.id === activite.responsable_id" class="font-medium">Responsable complet</span>
+                            <span v-if="member.id === activite.responsable_id" class="font-medium">Responsable
+                              complet</span>
                             <span v-else>{{ countMemberPermissions(member) }} permission(s)</span>
                           </div>
                         </div>
@@ -126,10 +131,8 @@
                     <!-- Actions -->
                     <div class="flex items-center space-x-2 ml-4 flex-shrink-0">
                       <!-- Éditer permissions -->
-                      <button v-if="canEditMemberPermissions(member)" 
-                        @click="editMember(member)"
-                        :disabled="isProcessing"
-                        :class="getActionButtonClasses('edit', member)"
+                      <button v-if="canEditMemberPermissions(member)" @click="editMember(member)"
+                        :disabled="isProcessing" :class="getActionButtonClasses('edit', member)"
                         :title="getEditButtonTooltip(member)">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -138,10 +141,8 @@
                       </button>
 
                       <!-- Changer responsable -->
-                      <button v-if="canChangeResponsable(member)" 
-                        @click="promoteToResponsable(member)"
-                        :disabled="isProcessing"
-                        :class="getActionButtonClasses('promote', member)"
+                      <button v-if="canChangeResponsable(member)" @click="promoteToResponsable(member)"
+                        :disabled="isProcessing" :class="getActionButtonClasses('promote', member)"
                         title="Définir comme responsable">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -150,9 +151,8 @@
                       </button>
 
                       <!-- Retirer membre -->
-                      <button v-if="canRemoveMember(member)" 
-                        @click="removeMember(member)" :disabled="isProcessing" :class="getActionButtonClasses('remove', member)"
-                        :title="getRemoveButtonTooltip(member)">
+                      <button v-if="canRemoveMember(member)" @click="removeMember(member)" :disabled="isProcessing"
+                        :class="getActionButtonClasses('remove', member)" :title="getRemoveButtonTooltip(member)">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -162,8 +162,9 @@
                       <!-- Indicateur de traitement -->
                       <span v-if="isProcessingMember(member.id)" class="text-blue-600 dark:text-blue-400">
                         <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                          <path class="opacity-75" fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                         </svg>
                       </span>
                     </div>
@@ -197,8 +198,7 @@
                     class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     Fermer
                   </button>
-                  <button v-if="currentUserPermissions?.can_assign_users" 
-                    @click="openAddMemberModal"
+                  <button v-if="currentUserPermissions?.can_assign_users" @click="openAddMemberModal"
                     :disabled="isProcessing"
                     class="px-4 py-2 bg-blue-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                     <span class="flex items-center">
@@ -243,44 +243,44 @@ const showPermissionSummary = ref(true)
 
 // Permissions disponibles avec métadonnées
 const availablePermissions = ref([
-  { 
-    key: 'can_create_tasks', 
-    label: 'Créer tâches', 
+  {
+    key: 'can_create_tasks',
+    label: 'Créer tâches',
     shortLabel: 'Créer',
     color: 'bg-green-500',
     badge: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
   },
-  { 
-    key: 'can_edit_tasks', 
-    label: 'Modifier tâches', 
+  {
+    key: 'can_edit_tasks',
+    label: 'Modifier tâches',
     shortLabel: 'Modifier',
     color: 'bg-blue-500',
     badge: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300'
   },
-  { 
-    key: 'can_delete_tasks', 
-    label: 'Supprimer tâches', 
+  {
+    key: 'can_delete_tasks',
+    label: 'Supprimer tâches',
     shortLabel: 'Supprimer tâches',
     color: 'bg-red-500',
     badge: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300'
   },
-  { 
-    key: 'can_validate_results', 
-    label: 'Valider N1', 
+  {
+    key: 'can_validate_results',
+    label: 'Valider N1',
     shortLabel: 'Valider',
     color: 'bg-purple-500',
     badge: 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300'
   },
-  { 
-    key: 'can_assign_users', 
-    label: 'Assigner membres', 
+  {
+    key: 'can_assign_users',
+    label: 'Assigner membres',
     shortLabel: 'Assigner',
     color: 'bg-yellow-500',
     badge: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300'
   },
-  { 
-    key: 'can_delete_member', 
-    label: 'Supprimer des membres', 
+  {
+    key: 'can_delete_member',
+    label: 'Supprimer des membres',
     shortLabel: 'Retirer membres',
     color: 'bg-orange-500',
     badge: 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300'
@@ -308,8 +308,8 @@ const getPermissionBadgeClasses = (permission, member) => {
 
 const getActionButtonClasses = (action, member) => {
   const base = "p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-  
-  switch(action) {
+
+  switch (action) {
     case 'edit':
       return base + " text-blue-600 dark:text-blue-400"
     case 'promote':
@@ -350,6 +350,19 @@ const projetResponsableId = ref(null)
 const currentUserPermissions = computed(() => {
   if (!currentUserId.value || members.value.length === 0) return null
 
+  // ✅ PRIORITÉ 1: Le responsable d'activité a TOUS les droits
+  if (currentUserId.value === props.activite.responsable_id) {
+    return {
+      can_create_tasks: true,
+      can_edit_tasks: true,
+      can_delete_tasks: true,
+      can_validate_results: true,
+      can_assign_users: true,
+      can_delete_member: true
+    }
+  }
+
+  // ✅ PRIORITÉ 2: Vérifier les permissions du membre
   const currentMember = members.value.find(m => m.id === currentUserId.value)
   if (!currentMember) return null
 
@@ -362,6 +375,14 @@ const currentUserPermissions = computed(() => {
     can_delete_member: !!currentMember.can_delete_member
   }
 })
+
+// ✅ CORRECTION: isSuperAdminOrResponsable
+const isSuperAdminOrResponsable = computed(() => {
+  const isSuperAdmin = authStore.user?.is_super_admin || false
+  const isResponsable = currentUserId.value === props.activite.responsable_id
+  return isSuperAdmin || isResponsable
+})
+
 
 // Permissions d'un membre
 const getMemberPermissions = (member) => {
@@ -386,10 +407,10 @@ const sortedMembers = computed(() => {
   return [...members.value].sort((a, b) => {
     if (a.id === props.activite.responsable_id) return -1
     if (b.id === props.activite.responsable_id) return 1
-    
+
     if (a.id === currentUserId.value) return -1
     if (b.id === currentUserId.value) return 1
-    
+
     const aPerms = countMemberPermissions(a)
     const bPerms = countMemberPermissions(b)
     return bPerms - aPerms
@@ -400,11 +421,7 @@ const activeMembersCount = computed(() => {
   return members.value.filter(m => countMemberPermissions(m) > 0).length
 })
 
-const isSuperAdminOrResponsable = computed(() => {
-  const isSuperAdmin = authStore.user?.is_super_admin || false
-  const isResponsable = currentUserId.value === props.activite.responsable_id
-  return isSuperAdmin || isResponsable
-})
+
 
 // Méthodes utilitaires
 const getInitials = (name) => {
@@ -419,14 +436,14 @@ const countMemberPermissions = (member) => {
 
 const getUserPermissionSummary = (permissions) => {
   if (!permissions) return 'Aucun droit'
-  
+
   const activePerms = availablePermissions.value
     .filter(p => permissions[p.key])
     .map(p => p.label.toLowerCase())
-  
+
   if (activePerms.length === 0) return 'Lecture seule'
   if (activePerms.length <= 2) return activePerms.join(' et ')
-  
+
   return `${activePerms.slice(0, 2).join(', ')}...`
 }
 
@@ -435,15 +452,15 @@ const canEditMemberPermissions = (member) => {
   if (member.id === currentUserId.value || member.id === props.activite.responsable_id) {
     return false
   }
-  
+
   return currentUserPermissions.value?.can_assign_users === true
 }
 
 const canChangeResponsable = (member) => {
   if (!isSuperAdminOrResponsable.value) return false
-  
+
   if (member.id === props.activite.responsable_id) return false
-  
+
   return members.value.some(m => m.id === member.id)
 }
 
@@ -458,21 +475,21 @@ const canRemoveMember = (member) => {
   if (member.id === currentUserId.value) {
     return false
   }
-  
+
   // Ne pas pouvoir retirer le responsable de l'activité
   if (member.id === props.activite.responsable_id) {
     return false
   }
-  
+
   // NE PAS POUVOIR RETIRER LE RESPONSABLE DU PROJET <-- AJOUT
   if (isProjetResponsable(member)) {
     return false
   }
-  
+
   // Vérifier les permissions nécessaires
   const hasDeletePermission = currentUserPermissions.value?.can_delete_member === true
   const hasAssignPermission = currentUserPermissions.value?.can_assign_users === true
-  
+
   // Besoin des deux permissions pour retirer un membre
   return hasDeletePermission && hasAssignPermission
 }
@@ -516,13 +533,13 @@ const promoteToResponsable = async (member) => {
     const response = await api.put(`/activites/${props.activite.id}/change-responsable`, {
       new_responsable_id: member.id
     })
-    
+
     Object.assign(props.activite, response.data.data)
     await loadMembers()
-    
+
     emit('updated', response.data.data)
     emit('change-responsable', member)
-    
+
   } catch (error) {
     console.error('Erreur lors du changement de responsable:', error)
     alert(error.response?.data?.message || 'Erreur lors du changement de responsable')
@@ -567,6 +584,10 @@ const loadMembers = async () => {
   try {
     const response = await api.get(`/activites/${props.activite.id}/members`)
     members.value = response.data.data || []
+    
+    // ✅ Charger aussi l'ID du responsable du projet
+    const activityResponse = await api.get(`/activites/${props.activite.id}`)
+    projetResponsableId.value = activityResponse.data.data?.projet?.responsable_id
     
     console.log('Membres chargés:', members.value.map(m => ({
       nom: m.nom,
