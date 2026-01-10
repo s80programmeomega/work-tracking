@@ -89,9 +89,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Workspace Members
         Route::prefix('{workspace}/members')->group(function () {
             Route::get('/', [WorkspaceController::class, 'members']);
-            Route::post('/', [WorkspaceController::class, 'addMember']);
-            Route::put('/{user}', [WorkspaceController::class, 'updateMember']);
+            Route::post('/', [WorkspaceController::class, 'addMember']); 
+            Route::put('/{user}', [WorkspaceController::class, 'updateMember'])->name('workspace.members.update');
+            Route::get('/{user}', [WorkspaceController::class, 'showMember'])->name('workspace.members.show');
             Route::delete('/{user}', [WorkspaceController::class, 'removeMember']);
+
 
             // Invitations
             Route::post('/invite', [WorkspaceController::class, 'inviteMembers']);
