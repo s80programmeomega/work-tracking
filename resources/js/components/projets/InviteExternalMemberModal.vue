@@ -1,3 +1,4 @@
+<!-- resources\js\components\projets\InviteExternalMemberModal.vue -->
 <template>
   <Teleport to="body">
     <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
