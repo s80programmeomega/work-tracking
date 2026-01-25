@@ -237,7 +237,7 @@
           <div v-if="invitations.length === 0" class="text-center py-12 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
             <MailIcon class="mx-auto h-12 w-12 text-gray-400" />
             <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-              Aucune invitation en attente 
+              Aucune invitation en attente
             </p>
           </div>
 
@@ -321,15 +321,9 @@
       confirm-text="Retirer définitivement" confirm-class="bg-red-600 hover:bg-red-700" type="danger"
       @confirm="confirmRemoveMember" @cancel="showRemoveModal = false" />
 
-      <!-- ✅ NOUVEAU : Modal de retrait amélioré -->
-    <RemoveMemberModal
-      v-if="showRemoveModal"
-      :member="memberToRemove"
-      :workspace-id="workspaceId"
-      context="workspace"
-      @close="closeRemovalModal"
-      @removed="handleMemberRemoved"
-    />
+    <!-- ✅ NOUVEAU : Modal de retrait amélioré -->
+    <RemoveMemberModal v-if="showRemoveModal" :member="memberToRemove" :workspace-id="workspaceId" context="workspace"
+      @close="closeRemovalModal" @removed="handleMemberRemoved" />
 
   </div>
 </template>
@@ -341,7 +335,6 @@ import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 import RemoveMemberModal from './RemoveMemberModal.vue'
 import { useToast } from "vue-toastification"
 const toast = useToast()
-
 
 import {
   UsersIcon,
@@ -492,26 +485,79 @@ const confirmRemoveMember = async () => {
     memberToRemove.value = null
     await loadData()
     emit('member-updated')
+    toast.success('Membre retiré avec succès')
   } catch (error) {
     console.error('Error removing member:', error)
+    
+    // Messages d'erreur détaillés en français
+    let errorMessage = 'Erreur lors du retrait du membre'
+    
+    if (error.response) {
+      if (error.response.status === 403) {
+        errorMessage = 'Vous n\'avez pas la permission de retirer ce membre'
+      } else if (error.response.status === 422) {
+        errorMessage = error.response.data.message || 'Ce membre a des responsabilités, veuillez utiliser le transfert'
+      } else {
+        errorMessage = error.response.data?.message || `Erreur serveur (${error.response.status})`
+      }
+    }
+    
+    toast.error(errorMessage)
   }
 }
 
 const resendInvitation = async (invitation) => {
   try {
+    // CORRECTION : Utiliser la bonne route
     await resendInvitationService(props.workspaceId, invitation.id)
-    // Show success message
+    toast.success('Invitation renvoyée avec succès')
   } catch (error) {
     console.error('Error resending invitation:', error)
+    
+    let errorMessage = 'Erreur lors du renvoi de l\'invitation'
+    
+    if (error.response) {
+      if (error.response.status === 403) {
+        errorMessage = 'Vous n\'avez pas la permission de renvoyer des invitations'
+      } else if (error.response.status === 404) {
+        errorMessage = 'Invitation non trouvée ou expirée'
+      } else if (error.response.status === 400) {
+        errorMessage = 'Cette invitation n\'est plus valide'
+      } else {
+        errorMessage = error.response.data?.message || `Erreur serveur (${error.response.status})`
+      }
+    } else if (error.request) {
+      errorMessage = 'Impossible de contacter le serveur. Vérifiez votre connexion.'
+    }
+    
+    toast.error(errorMessage)
   }
 }
 
 const cancelInvitation = async (invitation) => {
   try {
+    // CORRECTION : Utiliser la bonne route
     await cancelInvitationService(props.workspaceId, invitation.id)
     await loadData()
+    toast.success('Invitation annulée avec succès')
   } catch (error) {
     console.error('Error canceling invitation:', error)
+    
+    let errorMessage = 'Erreur lors de l\'annulation de l\'invitation'
+    
+    if (error.response) {
+      if (error.response.status === 403) {
+        errorMessage = 'Vous n\'avez pas la permission d\'annuler des invitations'
+      } else if (error.response.status === 404) {
+        errorMessage = 'Invitation non trouvée'
+      } else {
+        errorMessage = error.response.data?.message || `Erreur serveur (${error.response.status})`
+      }
+    } else if (error.request) {
+      errorMessage = 'Impossible de contacter le serveur. Vérifiez votre connexion.'
+    }
+    
+    toast.error(errorMessage)
   }
 }
 
@@ -519,6 +565,7 @@ const handleMemberInvited = () => {
   showInviteModal.value = false
   loadData()
   emit('member-updated')
+  toast.success('Invitations envoyées avec succès')
 }
 
 const handleMemberUpdated = () => {
@@ -526,33 +573,33 @@ const handleMemberUpdated = () => {
   selectedMember.value = null
   loadData()
   emit('member-updated')
+  toast.success('Membre mis à jour avec succès')
 }
-
 
 /**
  * ✅ Gérer la confirmation du retrait
  */
 const handleMemberRemoved = async (result) => {
   closeRemovalModal()
-  
+
   // Afficher un message de succès détaillé
   const stats = result.stats
   const summary = result.summary
-  
+
   let message = `${result.removed_user.nom} a été retiré avec succès.`
-  
+
   if (summary.projets_impactes > 0) {
     message += ` ${summary.projets_impactes} projet(s) traité(s).`
   }
   if (summary.taches_transferees > 0) {
     message += ` ${summary.taches_transferees} tâche(s) transférée(s).`
   }
-  
+
   toast.success(message)
-  
+
   // Recharger les données
   await loadData()
-  
+
   // Émettre l'événement
   emit('member-updated')
 }
@@ -586,8 +633,26 @@ const loadData = async () => {
 
     // TODO: Charger les activités récentes depuis l'API
     recentActivities.value = [] // À implémenter avec notre endpoint d'activités
+    
+    toast.success('Données chargées avec succès')
   } catch (error) {
     console.error('Error loading data:', error)
+    
+    let errorMessage = 'Erreur lors du chargement des données'
+    
+    if (error.response) {
+      if (error.response.status === 403) {
+        errorMessage = 'Vous n\'avez pas accès à ce workspace'
+      } else if (error.response.status === 404) {
+        errorMessage = 'Workspace non trouvé'
+      } else {
+        errorMessage = error.response.data?.message || `Erreur serveur (${error.response.status})`
+      }
+    } else if (error.request) {
+      errorMessage = 'Impossible de contacter le serveur. Vérifiez votre connexion.'
+    }
+    
+    toast.error(errorMessage)
   }
 }
 
@@ -602,4 +667,66 @@ watch(() => props.workspaceId, () => {
     loadData()
   }
 })
+
+// Messages toast pour les actions utilisateur
+const showToast = (type, message) => {
+  const toastOptions = {
+    position: "top-right",
+    timeout: 3000,
+    closeOnClick: true,
+    pauseOnFocusLoss: true,
+    pauseOnHover: true,
+    draggable: true,
+    draggablePercent: 0.6,
+    showCloseButtonOnHover: false,
+    hideProgressBar: false,
+    closeButton: "button",
+    icon: true,
+    rtl: false
+  }
+
+  switch (type) {
+    case 'success':
+      toast.success(message, toastOptions)
+      break
+    case 'error':
+      toast.error(message, toastOptions)
+      break
+    case 'warning':
+      toast.warning(message, toastOptions)
+      break
+    case 'info':
+      toast.info(message, toastOptions)
+      break
+  }
+}
+
+// Fonction helper pour afficher les erreurs de validation
+const showValidationErrors = (errors) => {
+  if (Array.isArray(errors)) {
+    errors.forEach(error => {
+      toast.warning(error, {
+        position: "top-right",
+        timeout: 5000,
+        closeOnClick: true
+      })
+    })
+  } else if (typeof errors === 'object') {
+    Object.values(errors).forEach(errorArray => {
+      errorArray.forEach(error => {
+        toast.warning(error, {
+          position: "top-right",
+          timeout: 5000,
+          closeOnClick: true
+        })
+      })
+    })
+  } else if (typeof errors === 'string') {
+    toast.warning(errors, {
+      position: "top-right",
+      timeout: 5000,
+      closeOnClick: true
+    })
+  }
+}
 </script>
