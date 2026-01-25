@@ -244,8 +244,8 @@ class WorkspaceController extends Controller
                 'tasks_count' => $tasksCount,
               ],
               'suggestions' => [
-                'view_profile_url' => "/workspaces/{$workspace->id}/members/{$user->id}",
-                'update_role_url' => "/workspaces/{$workspace->id}/members/{$user->id}",
+                // 'view_profile_url' => "/workspaces/{$workspace->id}/members/{$user->id}",
+                // 'update_role_url' => "/workspaces/{$workspace->id}/members/{$user->id}",
               ]
             ];
             continue;
@@ -465,6 +465,133 @@ class WorkspaceController extends Controller
 
     return $labels[$role] ?? $role;
   }
+
+  /**
+ * Afficher les détails d'un membre spécifique
+ */
+public function showMember(Request $request, Workspace $workspace, User $user)
+{
+    $this->authorize('viewMembers', $workspace);
+
+    // Vérifier que l'utilisateur est bien membre du workspace
+    if (!$workspace->members()->where('user_id', $user->id)->exists()) {
+        return response()->json([
+            'message' => 'Cet utilisateur n\'est pas membre de ce workspace'
+        ], 404);
+    }
+
+    // Charger les informations du membre
+    $member = $workspace->members()
+        ->where('user_id', $user->id)
+        ->withPivot(['role', 'permissions', 'invited_at', 'invited_by'])
+        ->first();
+
+    // Charger les statistiques
+    $projectsCount = $user->projets()
+        ->whereHas('workspace', function ($query) use ($workspace) {
+            $query->where('id', $workspace->id);
+        })
+        ->count();
+
+    $tasksCount = $user->taches()
+        ->whereHas('activite.projet', function ($query) use ($workspace) {
+            $query->where('workspace_id', $workspace->id);
+        })
+        ->count();
+
+    // Charger les projets où l'utilisateur est responsable
+    $responsibleProjects = $workspace->projets()
+        ->where('responsable_id', $user->id)
+        ->select('id', 'nom', 'code', 'status', 'created_at')
+        ->get();
+
+    return response()->json([
+        'data' => [
+            'user' => [
+                'id' => $user->id,
+                'nom' => $user->nom,
+                'email' => $user->email,
+                'avatar' => $user->avatar,
+                'is_active' => $user->is_active,
+                'created_at' => $user->created_at,
+            ],
+            'workspace_membership' => [
+                'role' => $member->pivot->role,
+                'role_label' => $this->getRoleLabel($member->pivot->role),
+                'permissions' => $member->pivot->permissions,
+                'invited_at' => $member->pivot->invited_at,
+                'invited_by' => $member->pivot->invited_by,
+            ],
+            'statistics' => [
+                'projects_count' => $projectsCount,
+                'tasks_count' => $tasksCount,
+                'responsible_projects_count' => $responsibleProjects->count(),
+            ],
+            'responsible_projects' => $responsibleProjects,
+            'last_activity' => $user->last_activity_at,
+        ]
+    ]);
+}
+
+/**
+ * Mettre à jour le rôle d'un membre
+ */
+public function updateMemberRole(Request $request, Workspace $workspace, User $user)
+{
+    $this->authorize('manageMembers', $workspace);
+
+    $request->validate([
+        'role' => ['required', Rule::in(['owner', 'super_admin', 'admin', 'member', 'viewer'])],
+        'permissions' => 'nullable|array',
+        'permissions.can_create_projects' => 'boolean',
+        'permissions.can_invite_members' => 'boolean',
+        'permissions.can_manage_settings' => 'boolean',
+    ]);
+
+    // Ne pas permettre de modifier le rôle du propriétaire
+    if ($workspace->owner_id === $user->id) {
+        return response()->json([
+            'message' => 'Impossible de modifier le rôle du propriétaire du workspace'
+        ], 422);
+    }
+
+    // Vérifier que l'utilisateur est bien membre
+    if (!$workspace->members()->where('user_id', $user->id)->exists()) {
+        return response()->json([
+            'message' => 'Cet utilisateur n\'est pas membre de ce workspace'
+        ], 404);
+    }
+
+    // Mettre à jour le rôle et les permissions
+    $workspace->members()->updateExistingPivot($user->id, [
+        'role' => $request->role,
+        'permissions' => $request->permissions ?? [],
+    ]);
+
+    // Log d'activité
+    activity()
+        ->causedBy(auth()->user())
+        ->performedOn($workspace)
+        ->withProperties([
+            'member_id' => $user->id,
+            'member_name' => $user->nom,
+            'new_role' => $request->role,
+            'permissions' => $request->permissions,
+        ])
+        ->log('Membre mis à jour');
+
+    return response()->json([
+        'message' => 'Rôle du membre mis à jour avec succès',
+        'data' => [
+            'user' => [
+                'id' => $user->id,
+                'nom' => $user->nom,
+                'role' => $request->role,
+                'role_label' => $this->getRoleLabel($request->role),
+            ]
+        ]
+    ]);
+}
 
   /**
    * ✅ NOUVEAU : Accepter une invitation
