@@ -784,9 +784,9 @@
           </div>
         </div>
       </div>
-    </template> <!-- ✅ CORRECTION: Fermeture correcte de la balise template -->
+    </template>  
 
-    <!-- Modaux -->
+    <!-- Modaux - SECTION CORRIGÉE -->
     <ActiviteForm v-if="showCreateActivityModal" :activite="null" :projet-id="projetId"
       @close="showCreateActivityModal = false" @saved="handleActivityCreated" />
 
@@ -806,14 +806,24 @@
     <ProjetFormModal v-if="showFormModal" :projet="selectedProjet" :workspace-id="workspaceId" @close="closeFormModal"
       @saved="handleProjetSaved" />
 
-    <!-- Modal pour gérer les membres d'activité -->
-    <ManageMembersModal v-if="showActivityMembersModal" :activite="selectedActivityForMembers"
-      @close="showActivityMembersModal = false" @updated="handleActivityMembersUpdated" />
+    <!-- ✅ CORRECTION 1: Modal pour gérer les membres d'activité -->
+    <ManageMembersModal
+      v-if="showActivityMembersModal"
+      :activite="selectedActivityForMembers"
+      @close="showActivityMembersModal = false"
+      @updated="handleActivityMembersUpdated"
+      @add-member="openAddMemberModalForActivity"
+    />
 
-      <!-- Modal pour ajouter des membres à une activité -->
-    <AddMemberModal v-if="showAddMemberModal" :show="showAddMemberModal"
-      :activite-id="selectedActivityForMembers?.id" :projet-id="projetId"
-      @close="showAddMemberModal = false" @members-added="handleMembersAddedToActivity" />
+    <!-- ✅ CORRECTION 2: Modal pour ajouter des membres à une activité -->
+    <AddMemberModal
+      v-if="showAddMemberModal"
+      :show="showAddMemberModal"
+      :activite-id="selectedActivityForMembers?.id"
+      :projet-id="selectedActivityForMembers?.projet_id"
+      @close="showAddMemberModal = false"
+      @members-added="handleMembersAddedToActivity"
+    />
 
   </div>
 </template>
@@ -826,7 +836,6 @@ import { useActivites } from '@/composables/useActivites'
 import { useActivityPermissions } from '@/composables/useActivityPermissions'
 import { useAuthStore } from '@/stores/auth'
 import { useProjetInvitations } from '@/composables/useProjetInvitations'
- 
 
 import {
   ChevronLeftIcon,
@@ -851,7 +860,8 @@ import ProjetFormModal from './ProjetFormModal.vue'
 import InviteExternalMemberModal from '@/components/projets/InviteExternalMemberModal.vue'
 import RemoveMemberWithTransferModal from '@/components/projets/RemoveMemberWithTransferModal.vue'
 import ManageMembersModal from '@/components/activites/ManageMembersModal.vue'
-// import AddMemberModal from '@/components/activites/AddMemberModal'
+// ✅ CORRECTION 3: Import du composant AddMemberModal
+import AddMemberModal from '@/components/activites/AddMemberModal.vue'
 import { useToast } from "vue-toastification"
 
 const props = defineProps({
@@ -879,11 +889,12 @@ const activities = ref([])
 const members = ref([])
 const showAllActivities = ref(false)
 
-// États pour la gestion des activités
+// ✅ CORRECTION 4: États pour la gestion des activités
 const selectedActivity = ref(null)
 const showEditActivityModal = ref(false)
 const showCreateActivityModal = ref(false)
 const showActivityMembersModal = ref(false)
+const showAddMemberModal = ref(false) // ← AJOUTÉ
 const selectedActivityForMembers = ref(null)
 
 // États pour la gestion des membres
@@ -899,8 +910,7 @@ const selectedProjet = ref(null)
 
 const activeTab = ref('overview')
 
-//etats pour la gestion des invitations
-// Dans le setup(), ajoutez ces variables et fonctions :
+// États pour la gestion des invitations
 const { 
   fetchInvitations, 
   resendInvitation: resendInvitationService,
@@ -1220,6 +1230,21 @@ const deleteActivity = async (activity) => {
   }
 }
 
+const onMembersActivityUpdated = () => {
+  showActivityMembersModal.value = false
+  loadActivite()
+}
+
+const onAddActivityMember = () => {
+  showAddMemberModal.value = true
+}
+
+const onEditActivityMember = (member) => {
+  editingActivityMember.value = member
+  showEditMemberModal.value = true
+}
+
+// ✅ CORRECTION 5: Gestion du modal ManageMembersModal
 const openActivityMembersModal = (activity) => {
   selectedActivityForMembers.value = activity
   showActivityMembersModal.value = true
@@ -1230,6 +1255,28 @@ const handleActivityMembersUpdated = () => {
   loadProjet()
 }
 
+// ✅ CORRECTION 6: Nouvelle méthode pour ouvrir AddMemberModal depuis ManageMembersModal
+const openAddMemberModalForActivity = () => {
+  console.log('📝 Ouverture du modal AddMember pour:', selectedActivityForMembers.value)
+  showAddMemberModal.value = true
+}
+
+// ✅ CORRECTION 7: Nouvelle méthode pour gérer l'ajout de membres
+const handleMembersAddedToActivity = async () => {
+  console.log('✅ Membres ajoutés avec succès')
+  showAddMemberModal.value = false
+  
+  // Recharger le projet pour mettre à jour les données
+  await loadProjet()
+  
+  // Si le modal ManageMembersModal est encore ouvert, il se rechargera automatiquement
+  // car loadProjet() met à jour selectedActivityForMembers via la référence
+}
+
+const onMemberAdded = () => {
+  showAddMemberModal.value = false
+  loadActivite()
+}
 // ==================== MÉTHODES DE GESTION DES MEMBRES ====================
 
 const editMember = (member) => {
