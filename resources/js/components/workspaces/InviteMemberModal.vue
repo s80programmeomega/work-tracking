@@ -578,9 +578,9 @@ const form = ref({
 // Méthodes pour gérer les membres déjà présents
 const viewMemberProfile = (userId) => {
   // Utilisez l'URL fournie par l'API
-  const memberUrl = `/workspaces/${props.workspaceId}/members/${userId}`;
-  window.open(memberUrl, '_blank');
-  toast.info('Ouvrir le profil du membre...');
+  // const memberUrl = `/workspaces/${props.workspaceId}/members/${userId}`;
+  // window.open(memberUrl, '_blank');
+  // toast.info('Ouvrir le profil du membre...');
 };
 
 const updateMemberRole = (userId) => {
