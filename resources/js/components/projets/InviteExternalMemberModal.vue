@@ -7,7 +7,7 @@
         <!-- Header -->
         <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
-            Inviter des membres au projet
+            Ajouter des membres au projet
           </h2>
           <button @click="handleClose"
             class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
@@ -119,7 +119,7 @@
                             <span class="text-sm font-medium text-blue-800 dark:text-blue-300">
                               {{ warning.email }}
                               <span v-if="warning.user_name" class="text-xs font-normal">({{ warning.user_name
-                                }})</span>
+                              }})</span>
                             </span>
                             <span class="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 rounded text-xs">
                               En attente
@@ -194,6 +194,42 @@
                 </div>
               </div>
 
+              <div v-if="invitationResult && invitationResult.added_members?.length > 0"
+                class="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                <div class="flex items-start gap-3">
+                  <svg class="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div class="flex-1">
+                    <p class="text-sm font-medium text-green-900 dark:text-green-300 mb-2">
+                      ✓ {{ invitationResult.direct_add_count }} membre(s) ajouté(s) directement
+                    </p>
+                    <ul class="space-y-2">
+                      <li v-for="member in invitationResult.added_members" :key="member.user_id"
+                        class="flex items-start gap-2">
+                        <span class="w-1.5 h-1.5 bg-green-600 rounded-full mt-1.5"></span>
+                        <div class="text-xs text-green-800 dark:text-green-400">
+                          <div class="font-medium">{{ member.user_name }} ({{ member.email }})</div>
+                          <div class="flex gap-1 mt-0.5">
+                            <span class="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 rounded text-xs">
+                              {{ getRoleLabel(member.role) }}
+                            </span>
+                            <span class="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 rounded text-xs">
+                              Ajouté immédiatement
+                            </span>
+                          </div>
+                          <div class="mt-1 text-green-600">
+                            ✉️ Notification envoyée
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              
               <!-- Suggestions -->
               <div v-if="hasActionableItems"
                 class="p-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
@@ -423,7 +459,64 @@
                   </div>
                 </div>
               </div>
+              <div class="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                  Permissions sur les activités
+                </label>
 
+                <div class="space-y-3">
+                  <div class="flex items-start gap-3">
+                    <input v-model="form.can_create_activity" :disabled="form.role === 'viewer'" type="checkbox"
+                      id="inv_can_create_activity"
+                      class="mt-1 w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-brand-500" />
+                    <div>
+                      <label for="inv_can_create_activity" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Peut créer des activités
+                      </label>
+                      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Permet de créer de nouvelles activités dans le projet
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="flex items-start gap-3">
+                    <input v-model="form.can_edit_activity" :disabled="form.role === 'viewer'" type="checkbox"
+                      id="inv_can_edit_activity"
+                      class="mt-1 w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-brand-500" />
+                    <div>
+                      <label for="inv_can_edit_activity" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Peut modifier des activités
+                      </label>
+                      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Permet de modifier les informations des activités
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="flex items-start gap-3">
+                    <input v-model="form.can_delete_activity"
+                      :disabled="form.role === 'member' || form.role === 'viewer'" type="checkbox"
+                      id="inv_can_delete_activity"
+                      class="mt-1 w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-brand-500" />
+                    <div>
+                      <label for="inv_can_delete_activity" class="text-sm font-medium text-red-700 dark:text-red-300">
+                        Peut supprimer des activités
+                      </label>
+                      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Permet de supprimer des activités (réservé aux admins)
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Avertissement pour les membres -->
+                <div v-if="form.role === 'member'"
+                  class="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <p class="text-xs text-blue-800 dark:text-blue-300">
+                    ℹ️ Les membres peuvent créer et modifier des activités, mais seuls les admins peuvent les supprimer
+                  </p>
+                </div>
+              </div>
               <!-- Avertissement pour le rôle membre -->
               <div v-if="form.role === 'member'"
                 class="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
@@ -456,7 +549,7 @@
           <button @click="handleSubmit" :disabled="submitting || !canSubmit"
             class="px-6 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
             <span v-if="submitting" class="animate-spin">⏳</span>
-            Envoyer {{ totalInvitations }} invitation(s)
+            Ajouter {{ totalInvitations }} membre(s)
           </button>
         </div>
       </div>
@@ -502,6 +595,9 @@ const form = ref({
   can_delete: false,
   can_invite: false,
   can_delete_member: false,
+  can_create_activity: false,
+  can_edit_activity: false,
+  can_delete_activity: false,
   message: ''
 })
 
@@ -606,16 +702,25 @@ const handleRoleChange = () => {
     form.value.can_delete = true
     form.value.can_invite = true
     form.value.can_delete_member = true
+    form.value.can_create_activity = true
+    form.value.can_edit_activity = true
+    form.value.can_delete_activity = true
   } else if (role === 'member') {
     form.value.can_edit = true
     form.value.can_delete = false
     form.value.can_invite = false
     form.value.can_delete_member = false
+    form.value.can_create_activity = true
+    form.value.can_edit_activity = true
+    form.value.can_delete_activity = false
   } else if (role === 'viewer') {
     form.value.can_edit = false
     form.value.can_delete = false
     form.value.can_invite = false
     form.value.can_delete_member = false
+    form.value.can_create_activity = false
+    form.value.can_edit_activity = false
+    form.value.can_delete_activity = false
   }
 }
 
@@ -681,12 +786,20 @@ const handleSubmit = async () => {
       return
     }
 
-    if (form.value.role === 'member' && (form.value.can_delete || form.value.can_invite || form.value.can_delete_member)) {
+    // Validation des permissions selon le rôle
+    if (form.value.role === 'member' && (
+      form.value.can_delete ||
+      form.value.can_invite ||
+      form.value.can_delete_member ||
+      form.value.can_delete_activity
+    )) {
       error.value = 'Les membres ne peuvent pas avoir les permissions de suppression ou d\'invitation'
       return
     }
 
-    if (form.value.role === 'viewer' && (form.value.can_edit || form.value.can_delete || form.value.can_invite || form.value.can_delete_member)) {
+    if (form.value.role === 'viewer' && Object.keys(form.value).some(
+      key => key.startsWith('can_') && form.value[key]
+    )) {
       error.value = 'Les observateurs ne peuvent avoir aucune permission'
       return
     }
@@ -713,27 +826,38 @@ const handleSubmit = async () => {
       can_delete: form.value.can_delete,
       can_invite: form.value.can_invite,
       can_delete_member: form.value.can_delete_member,
+      can_create_activity: form.value.can_create_activity,  // NOUVEAU
+      can_edit_activity: form.value.can_edit_activity,      // NOUVEAU
+      can_delete_activity: form.value.can_delete_activity,  // NOUVEAU
       message: form.value.message,
       send_email: true
     })
 
     invitationResult.value = result.data
-    console.log('Invitation result:', result.data)
-    
-    // Afficher des notifications selon le résultat
-    const { success_count, warning_count, error_count, message } = result.data
 
-    if (success_count > 0 && warning_count === 0 && error_count === 0) {
-      // Succès total
-      toast.success(message || `${success_count} invitation(s) envoyée(s) avec succès`)
-    } else if (success_count > 0 && (warning_count > 0 || error_count > 0)) {
-      // Succès partiel
-      toast.info(message || 'Invitations envoyées avec quelques remarques')
-    } else if (success_count === 0 && warning_count > 0 && error_count === 0) {
-      // Uniquement des invitations déjà en attente
+    // Afficher les notifications
+    const {
+      success_count,
+      direct_add_count,
+      invitation_count,
+      warning_count,
+      error_count,
+      message
+    } = result.data
+
+    if (direct_add_count > 0) {
+      toast.success(`${direct_add_count} membre(s) ajouté(s) directement au projet`)
+    }
+
+    if (invitation_count > 0) {
+      toast.success(`${invitation_count} invitation(s) envoyée(s) par email`)
+    }
+
+    if (success_count > 0 && (warning_count > 0 || error_count > 0)) {
+      toast.info(message || 'Certaines actions ont échoué')
+    } else if (success_count === 0 && warning_count > 0) {
       toast.info(message || 'Ces invitations sont déjà en attente')
     } else if (error_count > 0 && success_count === 0) {
-      // Uniquement des erreurs
       toast.warning(message || 'Aucune invitation n\'a pu être envoyée')
     }
 
