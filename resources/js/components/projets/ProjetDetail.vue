@@ -1,4 +1,4 @@
-<!-- resources/js/components/projets/ProjetDetail.vue - VERSION AMÉLIORÉE --> 
+<!-- resources/js/components/projets/ProjetDetail.vue - --> 
 <template>
   <div class="space-y-6">
     <!-- Loading -->
@@ -168,8 +168,8 @@
                     {{ projet.member_count || 0 }}
                   </div>
                   <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    Membres
-                  </div>
+                    Membres du projet disponibles
+                  </div> 
                 </div>
               </div>
 
@@ -487,25 +487,66 @@
                         </td>
                         <td class="px-6 py-4">
                           <div class="flex flex-wrap gap-1">
-                            <!-- ✅ CORRECTION: Utiliser member.can_edit directement -->
-                            <span v-if="member.can_edit === true || member.can_edit === 1"
-                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                              Éditer un projet
+                            <!-- Permissions projet -->
+                            <span
+                              v-if="member.can_edit === true || member.can_edit === 1"
+                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                            >
+                              Éditer projet
                             </span>
-                            <span v-if="member.can_delete === true || member.can_delete === 1"
-                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
-                              Supprimer un projet
+                            <span
+                              v-if="member.can_delete === true || member.can_delete === 1"
+                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                            >
+                              Supprimer projet
                             </span>
-                            <span v-if="member.can_invite === true || member.can_invite === 1"
-                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
-                              Inviter des membres
+                            <span
+                              v-if="member.can_invite === true || member.can_invite === 1"
+                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
+                            >
+                              Inviter membres
                             </span>
-                            <span v-if="member.can_delete_member === true || member.can_delete_member === 1"
-                               class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
-                              Supprimer des membres
+                            <span
+                              v-if="member.can_delete_member === true || member.can_delete_member === 1"
+                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400"
+                            >
+                              Retirer membres
                             </span>
-                            <span v-if="!hasAnyPermission(member)"
-                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+
+                            <!-- ✅ Permissions activités -->
+                            <span
+                              v-if="member.can_create_activity === true || member.can_create_activity === 1"
+                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400"
+                            >
+                              <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                              </svg>
+                              Créer activités
+                            </span>
+                            <span
+                              v-if="member.can_edit_activity === true || member.can_edit_activity === 1"
+                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400"
+                            >
+                              <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                              Éditer activités
+                            </span>
+                            <span
+                              v-if="member.can_delete_activity === true || member.can_delete_activity === 1"
+                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                            >
+                              <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                              Supprimer activités
+                            </span>
+
+                            <!-- Aucune permission -->
+                            <span
+                              v-if="!hasAnyPermission(member)"
+                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+                            >
                               Lecture seule
                             </span>
                           </div>
@@ -1066,11 +1107,22 @@ const canCreateActivities = computed(() => {
   const user = authStore.user
   if (!user || !projet.value) return false
 
+  // Super admin peut tout
   if (user.is_super_admin) return true
+  
+  // Responsable du projet peut tout
   if (projet.value.responsable_id === user.id) return true
 
-  const userMember = projet.value.members?.find(m => m.id === user.id)
-  return userMember?.pivot?.can_edit || false
+  // Chercher l'utilisateur dans les membres
+  const userMember = members.value.find(m => m.id === user.id)
+  
+  if (!userMember) return false
+
+  // Admin du projet peut créer
+  if (userMember.role === 'admin') return true
+
+  // Vérifier la permission spécifique
+  return userMember.can_create_activity === true || userMember.can_create_activity === 1
 })
  
 
@@ -1419,7 +1471,10 @@ const getStatusIcon = (status) => {
 // ✅ Méthodes pour vérifier les permissions - VERSION CORRIGÉE
 const hasAnyPermission = (member) => {
   // ✅ CORRECTION: Utiliser member.can_edit directement, pas member.pivot.can_edit
-  return member.can_edit || member.can_delete || member.can_invite || member.can_delete_member
+  return member.can_edit || member.can_delete || member.can_invite || member.can_delete_member ||
+    member.can_create_activity ||
+    member.can_edit_activity ||
+    member.can_delete_activity
 }
 
 /**
