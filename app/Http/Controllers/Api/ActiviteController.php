@@ -289,6 +289,8 @@ class ActiviteController extends Controller
             return response()->json(['message' => 'Accès non autorisé'], 403);
         }
 
+        $workspaceOwnerId = $activite->projet->workspace->owner_id ?? null;
+
         // Statistiques
         $stats = [
             'taches_count' => $activite->taches()->count(),
@@ -300,6 +302,7 @@ class ActiviteController extends Controller
         return response()->json([
             'data' => new ActiviteResource($activite),
             'stats' => $stats,
+             'workspace_owner_id' => $workspaceOwnerId,
         ]);
     }
 
@@ -798,8 +801,12 @@ public function changeResponsable(Request $request, $id): JsonResponse
         $user = $request->user();
         $projet = $activite->projet;
 
+         // ✅ Vérifier si l'utilisateur est propriétaire du workspace
+    $isWorkspaceOwner = $projet->workspace && $projet->workspace->owner_id === $user->id;
+
         // ✅ Vérifier les permissions
         $canManage = $user->isSuperAdmin()
+            || $isWorkspaceOwner 
             || $projet->canUserEdit($user)
             || $activite->responsable_id === $user->id
             || $activite->membres()->where('user_id', $user->id)
@@ -891,8 +898,13 @@ public function changeResponsable(Request $request, $id): JsonResponse
         $activite = Activite::with('projet')->findOrFail($activiteId);
         $user = $request->user();
 
+         // Vérifier si l'utilisateur est propriétaire du workspace
+    $isWorkspaceOwner = $activite->projet->workspace 
+        && $activite->projet->workspace->owner_id === $user->id;
+
         // Vérifier les permissions
         $canManage = $user->isSuperAdmin()
+            || $isWorkspaceOwner
             || $activite->projet->canUserEdit($user)
             || $activite->responsable_id === $user->id
             || $activite->membres()->where('user_id', $user->id)

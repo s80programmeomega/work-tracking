@@ -38,7 +38,7 @@
                   class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                   <div class="flex items-center justify-between">
                     <div>
-                      <h3 class="font-medium text-gray-900 dark:text-white mb-1">Légende des permissions</h3>
+                      <h3 class="font-medium text-gray-900 dark:text-white mb-1">Légende des permissions </h3>
                       <div class="flex flex-wrap gap-2">
                         <div v-for="permission in availablePermissions" :key="permission.key"
                           class="flex items-center space-x-1">
@@ -159,6 +159,10 @@
                         </svg>
                       </button>
 
+                      <span v-if="member.id === workspaceOwnerId"
+                        class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400">
+                        Propriétaire du workspace
+                      </span>
                       <!-- Indicateur de traitement -->
                       <span v-if="isProcessingMember(member.id)" class="text-blue-600 dark:text-blue-400">
                         <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -198,14 +202,17 @@
                     class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     Fermer
                   </button>
-                  <button v-if="currentUserPermissions?.can_assign_users" @click="openAddMemberModal"
-                    :disabled="isProcessing"
+                  <button v-if="!loading && (isWorkspaceOwner || currentUserPermissions?.can_assign_users)"
+                    @click="openAddMemberModal" :disabled="isProcessing"
                     class="px-4 py-2 bg-blue-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                     <span class="flex items-center">
                       <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                       </svg>
                       Ajouter un membre
+                      <span v-if="isWorkspaceOwner" class="ml-2 text-xs bg-purple-500 text-white px-2 py-0.5 rounded">
+                        Owner
+                      </span>
                     </span>
                   </button>
                 </div>
@@ -225,10 +232,9 @@ import api from '@/api/axios'
 import { useAuthStore } from '@/stores/auth'
 
 const props = defineProps({
-  activite: {
-    type: Object,
-    required: true
-  }
+  activite: { type: Object, required: true },
+  workspaceOwnerId: { type: [Number, String], default: null },
+  projetResponsableId: { type: [Number, String], default: null },
 })
 
 const emit = defineEmits(['close', 'updated', 'edit-member', 'add-member', 'change-responsable'])
@@ -321,6 +327,10 @@ const getActionButtonClasses = (action, member) => {
   }
 }
 
+// const workspaceOwnerId = ref(null)
+const workspaceOwnerId = computed(() => props.workspaceOwnerId)
+
+
 const getMemberCardClasses = (member) => {
   const classes = []
 
@@ -342,29 +352,36 @@ const getMemberCardClasses = (member) => {
   return classes.join(" ")
 }
 
+// Computed pour vérifier si l'utilisateur est propriétaire du workspace
+const isWorkspaceOwner = computed(() => {
+  const userId = authStore.user?.id
+  const ownerId = props.workspaceOwnerId
+
+  if (!userId || !ownerId) return false
+  return Number(ownerId) === Number(userId)
+})
+
+
 // Données utilisateur courant
 const currentUserId = computed(() => authStore.user?.id || null)
-const projetResponsableId = ref(null)
+// const projetResponsableId = ref(null)
 
-// Permissions de l'utilisateur courant
+const projetResponsableId = computed(() => props.projetResponsableId)
+
 const currentUserPermissions = computed(() => {
-  if (!currentUserId.value || members.value.length === 0) return null
+  if (!currentUserId.value) return null
+  if (loading.value) return null // 👈 évite un calcul faux pendant le chargement
 
-  // ✅ PRIORITÉ 1: Le responsable d'activité a TOUS les droits
-  if (currentUserId.value === props.activite.responsable_id) {
-    return {
-      can_create_tasks: true,
-      can_edit_tasks: true,
-      can_delete_tasks: true,
-      can_validate_results: true,
-      can_assign_users: true,
-      can_delete_member: true
-    }
-  }
 
-  // ✅ PRIORITÉ 2: Vérifier les permissions du membre
+  if (authStore.user?.is_super_admin) return getFullPermissions()
+  if (isWorkspaceOwner.value) return getFullPermissions()
+  if (currentUserId.value === props.activite.responsable_id) return getFullPermissions()
+  if (projetResponsableId.value === currentUserId.value) return getFullPermissions()
+
+
   const currentMember = members.value.find(m => m.id === currentUserId.value)
-  if (!currentMember) return null
+  if (!currentMember) return getDefaultPermissions()
+
 
   return {
     can_create_tasks: !!currentMember.can_create_tasks,
@@ -376,12 +393,38 @@ const currentUserPermissions = computed(() => {
   }
 })
 
-// ✅ CORRECTION: isSuperAdminOrResponsable
+// Ajouter ces fonctions utilitaires
+const getFullPermissions = () => {
+  return {
+    can_create_tasks: true,
+    can_edit_tasks: true,
+    can_delete_tasks: true,
+    can_validate_results: true,
+    can_assign_users: true,
+    can_delete_member: true
+  };
+};
+
+const getDefaultPermissions = () => {
+  return {
+    can_create_tasks: false,
+    can_edit_tasks: false,
+    can_delete_tasks: false,
+    can_validate_results: false,
+    can_assign_users: false,
+    can_delete_member: false
+  };
+};
+
+
+
+
+// Mettre à jour isSuperAdminOrResponsable pour inclure le workspace owner
 const isSuperAdminOrResponsable = computed(() => {
-  const isSuperAdmin = authStore.user?.is_super_admin || false
-  const isResponsable = currentUserId.value === props.activite.responsable_id
-  return isSuperAdmin || isResponsable
-})
+  const isSuperAdmin = authStore.user?.is_super_admin || false;
+  const isResponsable = currentUserId.value === props.activite.responsable_id;
+  return isSuperAdmin || isResponsable || isWorkspaceOwner.value;
+});
 
 
 // Permissions d'un membre
@@ -449,49 +492,43 @@ const getUserPermissionSummary = (permissions) => {
 
 // Logique de permissions
 const canEditMemberPermissions = (member) => {
+
+  // ✅ workspace owner peut éditer tous les autres, y compris le responsable
+  if (isWorkspaceOwner.value) return true
+
   if (member.id === currentUserId.value || member.id === props.activite.responsable_id) {
-    return false
+    return false;
   }
-
-  return currentUserPermissions.value?.can_assign_users === true
-}
-
-const canChangeResponsable = (member) => {
-  if (!isSuperAdminOrResponsable.value) return false
-
+  // sinon règles classiques
   if (member.id === props.activite.responsable_id) return false
 
-  return members.value.some(m => m.id === member.id)
+  return currentUserPermissions.value?.can_assign_users === true;
+};
+
+const canChangeResponsable = (member) => {
+  // si c'est déjà responsable, tu n'affiches pas le bouton
+  if (member.id === props.activite.responsable_id) return false
+
+  // ✅ owner peut toujours promouvoir
+  if (isWorkspaceOwner.value) return true
+
+  return isSuperAdminOrResponsable.value
 }
 
-// Ajouter cette méthode pour vérifier si un membre est responsable du projet
-const isProjetResponsable = (member) => {
-  return projetResponsableId.value && member.id === projetResponsableId.value
-}
-
-// Modifier la méthode canRemoveMember
+ 
 const canRemoveMember = (member) => {
-  // Ne pas pouvoir se retirer soi-même
-  if (member.id === currentUserId.value) {
-    return false
-  }
+  // ne pas se retirer soi-même (conseillé)
+  if (member.id === currentUserId.value) return false
 
-  // Ne pas pouvoir retirer le responsable de l'activité
-  if (member.id === props.activite.responsable_id) {
-    return false
-  }
+  // ✅ workspace owner peut retirer tous les autres, y compris le responsable
+  if (isWorkspaceOwner.value) return true
 
-  // NE PAS POUVOIR RETIRER LE RESPONSABLE DU PROJET <-- AJOUT
-  if (isProjetResponsable(member)) {
-    return false
-  }
+  // règles classiques
+  if (member.id === props.activite.responsable_id) return false
 
-  // Vérifier les permissions nécessaires
-  const hasDeletePermission = currentUserPermissions.value?.can_delete_member === true
-  const hasAssignPermission = currentUserPermissions.value?.can_assign_users === true
-
-  // Besoin des deux permissions pour retirer un membre
-  return hasDeletePermission && hasAssignPermission
+  const hasDelete = currentUserPermissions.value?.can_delete_member === true
+  const hasAssign = currentUserPermissions.value?.can_assign_users === true
+  return hasDelete && hasAssign
 }
 
 
@@ -570,30 +607,50 @@ const removeMember = async (member) => {
   }
 }
 
+// Dans ManageMembersModal.vue
 const openAddMemberModal = () => {
-  if (!currentUserPermissions.value?.can_assign_users) {
-    alert('Vous n\'avez pas le droit d\'ajouter des membres')
-    return
+  console.log('🔍 Vérification permission pour ajouter membre:', {
+    currentUserPermissions: currentUserPermissions.value,
+    canAssignUsers: currentUserPermissions.value?.can_assign_users,
+    isWorkspaceOwner: isWorkspaceOwner.value
+  });
+
+  // ✅ Workspace owner peut toujours ajouter des membres
+  if (isWorkspaceOwner.value) {
+    console.log('✅ Workspace owner peut ajouter des membres');
+    emit('add-member');
+    return;
   }
-  emit('add-member')
-}
+
+  if (!currentUserPermissions.value?.can_assign_users) {
+    alert('Vous n\'avez pas le droit d\'ajouter des membres');
+    return;
+  }
+
+  emit('add-member');
+};
 
 const loadMembers = async () => {
   loading.value = true
 
   try {
     const response = await api.get(`/activites/${props.activite.id}/members`)
-    members.value = response.data.data || []
-    
+    members.value = response.data.data || [];
+
     // ✅ Charger aussi l'ID du responsable du projet
-    const activityResponse = await api.get(`/activites/${props.activite.id}`)
-    projetResponsableId.value = activityResponse.data.data?.projet?.responsable_id
-    
+    // const activityResponse = await api.get(`/activites/${props.activite.id}`)
+
+    // projetResponsableId.value = activityResponse.data.data?.projet?.responsable_id
+
+    // if (activityResponse.data.data?.projet?.workspace) {
+    //   workspaceOwnerId.value = activityResponse.data.data.projet.workspace.owner_id;
+    // }
+
     console.log('Membres chargés:', members.value.map(m => ({
       nom: m.nom,
       permissions: getMemberPermissions(m)
     })))
-    
+
   } catch (error) {
     console.error('Erreur lors du chargement des membres:', error)
     members.value = []

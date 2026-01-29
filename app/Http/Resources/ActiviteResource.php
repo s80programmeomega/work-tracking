@@ -13,6 +13,9 @@ class ActiviteResource extends JsonResource
             'id' => $this->id,
             'projet_id' => $this->projet_id,
             'projet' => new ProjetResource($this->whenLoaded('projet')),
+            'workspace_owner_id' => $this->whenLoaded('projet.workspace', function () {
+                return $this->projet->workspace->owner_id ?? null;
+            }),
             'nom' => $this->nom,
             'description' => $this->description,
             'code' => $this->code,
@@ -29,8 +32,8 @@ class ActiviteResource extends JsonResource
             'is_overdue' => $this->is_overdue,
             'days_remaining' => $this->days_remaining,
             'tache_count' => $this->tache_count,
-            
-            // ✅ NOUVEAU : Inclure les membres avec leurs permissions
+
+            // Membres avec permissions
             'membres' => $this->whenLoaded('membres', function () {
                 return $this->membres->map(function ($membre) {
                     return [
@@ -46,63 +49,41 @@ class ActiviteResource extends JsonResource
                             'can_delete_tasks' => (bool) $membre->pivot->can_delete_tasks,
                             'can_validate_results' => (bool) $membre->pivot->can_validate_results,
                             'can_assign_users' => (bool) $membre->pivot->can_assign_users,
+                            'can_delete_member' => (bool) $membre->pivot->can_delete_member,
                         ],
                         'joined_at' => $membre->pivot->created_at?->toDateTimeString(),
                     ];
                 });
             }),
-            
-            // ✅ NOUVEAU : Statistiques des membres
+
             'membres_count' => $this->whenLoaded('membres', function () {
                 return $this->membres->count();
             }),
-            
-            // ✅ NOUVEAU : Permissions de l'utilisateur courant sur cette activité
+
+            // Permissions de l'utilisateur courant
             'user_permissions' => $this->when($request->user(), function () use ($request) {
                 $user = $request->user();
-                
+
                 // Super admin a tous les droits
                 if ($user->isSuperAdmin()) {
-                    return [
-                        'can_edit_activity' => true,
-                        'can_delete_activity' => true,
-                        'can_manage_members' => true,
-                        'can_create_tasks' => true,
-                        'can_edit_tasks' => true,
-                        'can_delete_tasks' => true,
-                        'can_validate_results' => true,
-                        'can_assign_users' => true,
-                    ];
+                    return $this->getFullPermissions();
                 }
-                
+
+                // ✅ RESPONSABLE DU WORKSPACE a tous les droits
+                if ($this->projet->workspace && $this->projet->workspace->owner_id === $user->id) {
+                    return $this->getFullPermissions();
+                }
+
                 // Responsable de l'activité
                 if ($this->responsable_id === $user->id) {
-                    return [
-                        'can_edit_activity' => true,
-                        'can_delete_activity' => true,
-                        'can_manage_members' => true,
-                        'can_create_tasks' => true,
-                        'can_edit_tasks' => true,
-                        'can_delete_tasks' => true,
-                        'can_validate_results' => true,
-                        'can_assign_users' => true,
-                    ];
+                    return $this->getFullPermissions();
                 }
-                
-                // Admin du projet
+
+                // Responsable du projet
                 if ($this->projet && $this->projet->responsable_id === $user->id) {
-                    return [
-                        'can_edit_activity' => true,
-                        'can_delete_activity' => true,
-                        'can_manage_members' => true,
-                        'can_create_tasks' => true,
-                        'can_edit_tasks' => true,
-                        'can_delete_tasks' => true,
-                        'can_validate_results' => true,
-                        'can_assign_users' => true,
-                    ];
+                    return $this->getFullPermissions();
                 }
-                
+
                 // Membre de l'activité
                 $membre = $this->membres->firstWhere('id', $user->id);
                 if ($membre) {
@@ -115,24 +96,46 @@ class ActiviteResource extends JsonResource
                         'can_delete_tasks' => (bool) $membre->pivot->can_delete_tasks,
                         'can_validate_results' => (bool) $membre->pivot->can_validate_results,
                         'can_assign_users' => (bool) $membre->pivot->can_assign_users,
+                        'can_delete_member' => (bool) $membre->pivot->can_delete_member,
                     ];
                 }
-                
+
                 // Aucun accès
-                return [
-                    'can_edit_activity' => false,
-                    'can_delete_activity' => false,
-                    'can_manage_members' => false,
-                    'can_create_tasks' => false,
-                    'can_edit_tasks' => false,
-                    'can_delete_tasks' => false,
-                    'can_validate_results' => false,
-                    'can_assign_users' => false,
-                ];
+                return $this->getDefaultPermissions();
             }),
-            
+
             'created_at' => $this->created_at?->toDateTimeString(),
             'updated_at' => $this->updated_at?->toDateTimeString(),
+        ];
+    }
+
+    private function getFullPermissions(): array
+    {
+        return [
+            'can_edit_activity' => true,
+            'can_delete_activity' => true,
+            'can_manage_members' => true,
+            'can_create_tasks' => true,
+            'can_edit_tasks' => true,
+            'can_delete_tasks' => true,
+            'can_validate_results' => true,
+            'can_assign_users' => true,
+            'can_delete_member' => true,
+        ];
+    }
+
+    private function getDefaultPermissions(): array
+    {
+        return [
+            'can_edit_activity' => false,
+            'can_delete_activity' => false,
+            'can_manage_members' => false,
+            'can_create_tasks' => false,
+            'can_edit_tasks' => false,
+            'can_delete_tasks' => false,
+            'can_validate_results' => false,
+            'can_assign_users' => false,
+            'can_delete_member' => false,
         ];
     }
 }

@@ -50,6 +50,12 @@
                   <SettingsIcon class="w-4 h-4" />
                   Paramètres
                 </button>
+                 <span v-if="isWorkspaceOwner" class="ml-2 inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400">
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                    </svg>
+                    Propriétaire du workspace
+                  </span>
               </div>
             </div>
 
@@ -851,6 +857,8 @@
     <ManageMembersModal
       v-if="showActivityMembersModal"
       :activite="selectedActivityForMembers"
+      :workspace-owner-id="projet?.workspace?.owner_id"
+      :projet-responsable-id="projet?.responsable_id"
       @close="showActivityMembersModal = false"
       @updated="handleActivityMembersUpdated"
       @add-member="openAddMemberModalForActivity"
@@ -1161,6 +1169,10 @@ const getActivityPermissions = (activity) => {
     return getDefaultActivityPermissions()
   }
 
+   if (isWorkspaceOwner.value) { 
+    return getFullActivityPermissions()
+  }
+
   // ✅ PRIORITÉ: Utiliser user_permissions s'il existe (permissions calculées côté serveur)
   if (activity.user_permissions) {
     return {
@@ -1348,15 +1360,21 @@ const loadProjet = async () => {
     loading.value = true
     const response = await fetchProjet(props.projetId)
 
-    console.log('🔍 API Response structure:', response)
-    console.log('📊 Response data:', response?.data)
-    console.log('🎯 Projet activites:', response?.data?.activites)
+    console.log('🔍 Données du projet chargées:', {
+      workspace: response?.data?.workspace,
+      workspaceOwnerId: response?.data?.workspace?.owner_id,
+      currentUserId: authStore.user?.id,
+      isWorkspaceOwner: response?.data?.workspace?.owner_id === authStore.user?.id
+    })
 
     if (response && response.data) {
       projet.value = response.data
       projectStats.value = response.stats || {}
       activities.value = Array.isArray(response.data.activites) ? response.data.activites : []
       members.value = Array.isArray(response.data.members) ? response.data.members : []
+
+      console.log('📋 Activités chargées:', activities.value)
+      console.log('👥 Membres chargés:', members.value.length)
 
       // Réinitialiser le filtre à "mes activités" par défaut
       showAllActivities.value = false
@@ -1487,6 +1505,12 @@ const canEditProjet = computed(() => {
   // Super admin peut tout éditer
   if (user.is_super_admin) return true
   
+  // ✅ Workspace owner peut tout éditer
+  if (isWorkspaceOwner.value) {
+    console.log('✅ Workspace owner peut éditer le projet')
+    return true
+  }
+  
   // Responsable du projet peut tout éditer
   if (projet.value.responsable_id === user.id) return true
   
@@ -1497,9 +1521,26 @@ const canEditProjet = computed(() => {
   return currentUserMember?.can_edit === true || currentUserMember?.can_edit === 1
 })
 
+const isWorkspaceOwner = computed(() => {
+  const user = authStore.user;
+  if (!user || !projet.value?.workspace) return false;
+  
+  console.log('Vérification workspace owner:', {
+    userId: user.id,
+    workspaceOwnerId: projet.value.workspace.owner_id,
+    isOwner: Number(projet.value.workspace.owner_id) === Number(user.id)
+  });
+  
+  return Number(projet.value.workspace.owner_id) === Number(user.id);
+});
+
 const canEditMember = (member) => {
   const currentUser = authStore.user
   if (!currentUser) return false
+
+  
+   // Le propriétaire de l'espace de travail peut tout faire
+  if (isWorkspaceOwner.value) return true
   
   // Ne pas permettre de modifier soi-même (l'utilisateur modifie ses propres permissions via un autre écran)
   if (member.id === currentUser.id) return false
@@ -1510,6 +1551,7 @@ const canEditMember = (member) => {
     // Ne pas permettre de retirer le responsable du projet
   if (member.id === projet.value.responsable_id) return false
 
+
   return true
 }
 
@@ -1517,13 +1559,18 @@ const canRemoveMember = (member) => {
   const currentUser = authStore.user
   if (!currentUser) return false
   
+    // Le propriétaire de l'espace de travail peut tout faire
+  if (isWorkspaceOwner.value) return true
+  
   // Ne pas permettre de se retirer soi-même
   if (member.id === currentUser.id) return false
   
   // Ne pas permettre de retirer le responsable du projet
-  if (member.id === projet.value.responsable_id) return false 
+  if (member.id === projet.value.responsable_id) return false
+
+  if (isWorkspaceOwner.value) return true
   
-  // Vérifier si l'utilisateur courant a la permission de supprimer
+  // V??rifier si l'utilisateur courant a la permission de supprimer
   const currentUserMember = members.value.find(m => m.id === currentUser.id)
   const hasDeletePermission = currentUserMember?.can_delete_member === true || currentUserMember?.can_delete_member === 1
   
@@ -1531,24 +1578,28 @@ const canRemoveMember = (member) => {
   
   return true
 }
+ 
 
 // ✅ CORRECTION: Méthodes pour déterminer si l'utilisateur peut gérer les membres
 const canManageMembers = computed(() => {
-  const user = authStore.user
-  if (!user || !projet.value) return false
-  
-  // Super admin peut tout gérer
-  if (user.is_super_admin) return true
-  
-  // Responsable du projet peut tout gérer
-  if (projet.value.responsable_id === user.id) return true
-  
-  // Chercher l'utilisateur courant dans les membres
-  const currentUserMember = members.value.find(m => m.id === user.id)
-  
-  // Vérifier si l'utilisateur a la permission d'inviter
-  return currentUserMember?.can_invite === true || currentUserMember?.can_invite === 1
-})
+    const user = authStore.user;
+    if (!user || !projet.value) return false;
+    
+    // Super admin peut tout gérer
+    if (user.is_super_admin) return true;
+    
+    // Propriétaire du workspace peut tout gérer
+    if (isWorkspaceOwner.value) return true;
+    
+    // Responsable du projet peut tout gérer
+    if (projet.value.responsable_id === user.id) return true;
+    
+    // Chercher l'utilisateur courant dans les membres
+    const currentUserMember = members.value.find(m => m.id === user.id);
+    
+    // Vérifier si l'utilisateur a la permission d'inviter
+    return currentUserMember?.can_invite === true || currentUserMember?.can_invite === 1;
+});
 
 // ✅ CORRECTION: Méthodes de formatage des rôles
 const getRoleColor = (role) => {
