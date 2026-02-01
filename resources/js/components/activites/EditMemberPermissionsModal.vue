@@ -1,3 +1,4 @@
+<!-- resources\js\components\activites\EditMemberPermissionsModal.vue -->
 <template>
   <TransitionRoot :show="true" as="template">
     <Dialog as="div" class="relative z-[100]" @close="$emit('close')">
