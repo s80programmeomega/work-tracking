@@ -671,9 +671,10 @@
       />
 
       <!-- ✅ Modaux avec gestion correcte -->
-      <ManageMembersModal
+     <ManageMembersModal
         v-if="showMembersModal"
         :activite="activite"
+        :workspaceOwnerId="workspaceOwnerId"
         @close="showMembersModal = false"
         @updated="onMembersUpdated"
         @edit-member="onEditMember"
@@ -755,6 +756,8 @@ const showAddMemberModal = ref(false)
 const editingActivite = ref(null)
 const showEditForm = ref(false)
 const editingMember = ref(null)
+
+const workspaceOwnerId = ref(null)
 
 // AJOUT: Variables pour la gestion des tâches
 const showTaskForm = ref(false)
@@ -925,6 +928,7 @@ const loadActivite = async () => {
   try {
     const response = await api.get(`/activites/${route.params.id}`)
     activite.value = response.data.data
+    workspaceOwnerId.value = response.data.workspace_owner_id ?? null
 
     // Charger les tâches
     await loadTaches()
