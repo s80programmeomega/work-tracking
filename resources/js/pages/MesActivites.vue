@@ -102,6 +102,14 @@
               class="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700">
               Réinitialiser
             </button>
+
+             <button
+                v-if="canCreateActivity"
+                @click="showCreateForm = true"
+                class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors" >
+                + Nouvelle activité
+              </button>
+
           </div>
         </div>
       </div>
@@ -277,11 +285,13 @@
     </div>
 
     <!-- ✅ MODALS DE GESTION -->
-    <!-- <ActiviteForm
+   <ActiviteForm
       v-if="showCreateForm"
+      :projet-id="filters.projet_id ? Number(filters.projet_id) : null"
       @close="showCreateForm = false"
       @saved="onActiviteCreated"
-    /> -->
+    />
+
 
     <ActiviteForm v-if="showEditForm" :activite="editingActivite" @close="showEditForm = false; editingActivite = null"
       @saved="onActiviteUpdated" />
@@ -307,6 +317,10 @@ import { useRouter } from 'vue-router'
 import { useActivites } from '@/composables/useActivites'
 import { useProjets } from '@/composables/useProjets'
 import { useWorkspace } from '@/composables/useWorkspace'
+
+import { useAuthStore } from '@/stores/auth'
+const authStore = useAuthStore()
+
 
 // Components
 import AdminLayout from '@/components/layout/AdminLayout.vue'
@@ -565,6 +579,24 @@ const onMemberPermissionsUpdated = () => {
     }, 100)
   }
 }
+
+const canCreateActivity = computed(() => {
+  const user = authStore.user
+  if (!user) return false
+
+  // super admin: ok
+  if (user.is_super_admin) return true
+
+  // workspace owner: ok
+  if (currentWorkspace.value?.owner_id && Number(currentWorkspace.value.owner_id) === Number(user.id)) {
+    return true
+  }
+
+  // sinon: tu peux décider de la règle (ex: au moins un projet sélectionné)
+  // car créer une activité demande un projet.
+  return Boolean(filters.value.projet_id)
+})
+
 
 const onMemberAdded = () => {
   showAddMemberModal.value = false
