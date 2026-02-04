@@ -21,6 +21,7 @@ class Tache extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'responsable_id',
         'activite_id',
         'parent_tache_id',
         'titre',
@@ -87,8 +88,20 @@ class Tache extends Model
         'time_variance_percentage',
     ];
 
-    protected $with = ['activite', 'labels'];
+    protected $with = ['activite', 'labels', 'responsable'];
 
+    /**
+     * Responsable de la tâche
+     */
+    public function responsable(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'responsable_id');
+    }
+
+    public function isResponsable(User $user): bool
+    {
+        return $this->responsable_id === $user->id;
+    }
     // ==================== ACTIVITY LOG ====================
 
     public function getActivitylogOptions(): LogOptions
@@ -776,6 +789,11 @@ class Tache extends Model
             return true;
         }
 
+        // Responsable de la tâche
+        if ($this->responsable_id === $user->id) {
+            return true;
+        }
+
         // Responsable de l'activité
         if ($this->activite && $this->activite->responsable_id === $user->id) {
             return true;
@@ -816,10 +834,15 @@ class Tache extends Model
             return true;
         }
 
+        // Responsable de la tâche
+        if ($this->responsable_id === $user->id) {
+            return true;
+        }
         // Responsable de l'activité
         if ($this->activite && $this->activite->responsable_id === $user->id) {
             return true;
         }
+
 
         // Assigné avec permission d'édition
         $assignment = $this->assignees()->where('user_id', $user->id)->first();
@@ -1035,6 +1058,11 @@ class Tache extends Model
     {
         // Super admin peut tout faire
         if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        // Responsable de la tâche
+        if ($this->responsable_id === $user->id) {
             return true;
         }
 
@@ -1262,6 +1290,11 @@ class Tache extends Model
     {
         return $query->where('week_number', $weekNumber)
             ->where('year', $year);
+    }
+
+    public function scopeResponsableBy($query, int $userId)
+    {
+        return $query->where('responsable_id', $userId);
     }
 
     /**
