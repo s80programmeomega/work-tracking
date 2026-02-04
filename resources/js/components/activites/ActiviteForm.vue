@@ -93,17 +93,50 @@
             </h3>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
+              <div v-if="isProjetLocked">
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Projet
+                </label>
+
+                <div class="p-4 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900/40">
+                  <div class="flex items-start justify-between gap-3">
+                    <div>
+                      <div class="text-sm font-semibold text-gray-900 dark:text-white">
+                        {{ currentProjet?.nom || 'Projet sélectionné' }}
+                      </div>
+                      <div class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                        <template v-if="currentProjet?.workspace?.nom">
+                          Workspace : {{ currentProjet.workspace.nom }}
+                        </template>
+                        <template v-else>
+                          ID projet : {{ formData.projet_id }}
+                        </template>
+                      </div>
+                    </div>
+
+                    <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium
+                                bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                      Verrouillé
+                    </span>
+                  </div>
+
+                  <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                    ⓘ Le projet est fixé car ce formulaire a été ouvert depuis sa vue.
+                  </p>
+                </div>
+              </div>
+
+              <div v-else>
                 <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Projet <span class="text-red-500">*</span>
                 </label>
+
                 <select
                   v-model="formData.projet_id"
                   required
                   @change="onProjetChange"
-                  :disabled="!!activite || loadingProjets"
-                  class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
+                  :disabled="loadingProjets"
+                  class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed" >
                   <option value="">
                     {{ loadingProjets ? 'Chargement des projets...' : 'Sélectionner un projet' }}
                   </option>
@@ -112,8 +145,7 @@
                     <template v-if="projet.workspace"> - {{ projet.workspace.nom }}</template>
                   </option>
                 </select>
-                
-                <!-- Message si aucun projet disponible -->
+
                 <div v-if="!loadingProjets && accessibleProjets.length === 0" class="mt-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
                   <div class="flex items-start gap-2">
                     <svg class="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -124,16 +156,13 @@
                         Aucun projet disponible
                       </p>
                       <p class="text-xs text-amber-700 dark:text-amber-300 mt-1">
-                        Vous n'avez accès à aucun projet dans ce workspace. Créez d'abord un projet ou demandez à y être ajouté.
+                        Vous n'avez accès à aucun projet dans ce workspace.
                       </p>
                     </div>
                   </div>
                 </div>
-
-                <p v-if="activite" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Le projet ne peut pas être modifié après la création
-                </p>
               </div>
+
 
               <div>
                 <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
@@ -385,10 +414,15 @@ const props = defineProps({
   activite: {
     type: Object,
     default: null
+  },
+  projetId: {
+    type: [Number, String],
+    default: null
   }
 })
 
 const emit = defineEmits(['close', 'saved'])
+const isProjetLocked = computed(() => !!props.projetId || !!props.activite)
 
 const authStore = useAuthStore()
 const { createActivite, updateActivite } = useActivites()
@@ -479,7 +513,7 @@ const loadAvailableMembers = async (projetId) => {
 // ✅ Réagir au changement de projet
 const onProjetChange = () => {
   formData.value.responsable_id = '' // Réinitialiser le responsable
-  loadAvailableMembers(formData.value.projet_id)
+  // loadAvailableMembers(formData.value.projet_id)
 }
 
 const handleSubmit = async () => {
@@ -545,9 +579,9 @@ const handleSubmit = async () => {
 }
 
 onMounted(async () => {
-  await loadAccessibleProjets()
-
+  
   if (props.activite) {
+    await loadAccessibleProjets()
     formData.value = {
       nom: props.activite.nom || '',
       description: props.activite.description || '',
@@ -561,16 +595,32 @@ onMounted(async () => {
     }
     
     // Charger les membres du projet existant
-    if (props.activite.projet_id) {
-      await loadAvailableMembers(props.activite.projet_id)
+     if (formData.value.projet_id) {
+      await loadAvailableMembers(formData.value.projet_id)
     }
+    return
   }
+
+  // ✅ Cas création depuis ProjetDetail
+  if (props.projetId) {
+    formData.value.projet_id = Number(props.projetId)
+    // optionnel : pas besoin de charger tous les projets si on force le projet
+    await loadAvailableMembers(formData.value.projet_id)
+    return
+  }
+
+  // ✅ Cas création “générique” (depuis ailleurs) : charger la liste des projets
+  await loadAccessibleProjets()
+
 })
 
 // ✅ Watch projet_id pour charger automatiquement les membres
 watch(() => formData.value.projet_id, (newProjetId) => {
   if (newProjetId) {
     loadAvailableMembers(newProjetId)
+  } else {
+    availableMembers.value = []
+    currentProjet.value = null
   }
 })
 </script>
