@@ -440,6 +440,7 @@ class TacheController extends Controller
         // ✅ Validation stricte avec messages personnalisés
         $validated = $request->validate([
             'activite_id' => 'required|exists:activites,id',
+                'responsable_id' => 'nullable|exists:users,id',
             'titre' => 'required|string|max:255',
             'description' => 'nullable|string',
             'objectif' => 'nullable|string',
@@ -787,16 +788,7 @@ class TacheController extends Controller
         // ✅ Vérification des permissions
         $this->authorize('update', $tache);
 
-        // ✅ DEBUG: Vérifier ce que Laravel reçoit pour la mise à jour
-        Log::info('Request Update Files Debug', [
-            'tache_id' => $tache->id,
-            'has_uploaded_files' => $request->hasFile('uploaded_files'),
-            'has_cover_image' => $request->hasFile('cover_image'),
-            'uploaded_files_count' => $request->file('uploaded_files') ? count($request->file('uploaded_files')) : 0,
-            'all_files' => array_keys($request->allFiles()),
-            'method' => $request->method(),
-            'has__method' => $request->has('_method')
-        ]);
+        
 
         // ✅ Validation COMPLÈTE similaire à store
         $validated = $request->validate([
@@ -806,7 +798,7 @@ class TacheController extends Controller
             'indicateurs_resultats' => 'nullable|string',
             'statut' => 'sometimes|required|in:a_faire,en_cours,termine',
             'priorite' => 'sometimes|required|in:faible,moyenne,elevee,critique',
-
+'responsable_id' => 'nullable|exists:users,id',
             // Dates
             'echeance' => 'nullable|date_format:Y-m-d',
             'date_debut' => 'nullable|date_format:Y-m-d',
@@ -1051,6 +1043,137 @@ class TacheController extends Controller
             ], 422);
         }
     }
+
+    
+/**
+ * ✅ NOUVEAU : Assigner un responsable à la tâche
+ */
+public function assignResponsable(Request $request, Tache $tache): JsonResponse
+{
+    $this->authorize('update', $tache);
+
+    $validated = $request->validate([
+        'responsable_id' => 'required|exists:users,id',
+    ]);
+
+    try {
+        // Vérifier que le responsable a accès à l'activité
+        $user = User::findOrFail($validated['responsable_id']);
+        
+        if (!$tache->activite) {
+            return response()->json([
+                'message' => 'La tâche doit appartenir à une activité'
+            ], 422);
+        }
+
+        // Vérifier que l'utilisateur est membre de l'activité ou du projet
+        $isMember = $tache->activite->membres()->where('user_id', $user->id)->exists();
+        $isProjetMember = $tache->activite->projet && 
+            $tache->activite->projet->membres()->where('user_id', $user->id)->exists();
+        
+        if (!$isMember && !$isProjetMember && !$user->isSuperAdmin()) {
+            return response()->json([
+                'message' => 'L\'utilisateur doit être membre de l\'activité ou du projet'
+            ], 422);
+        }
+
+        $tache->update([
+            'responsable_id' => $validated['responsable_id']
+        ]);
+
+        activity()
+            ->causedBy($request->user())
+            ->performedOn($tache)
+            ->withProperties([
+                'responsable_id' => $validated['responsable_id'],
+                'responsable_nom' => $user->nom
+            ])
+            ->log('Responsable assigné');
+
+        return response()->json([
+            'message' => 'Responsable assigné avec succès',
+            'data' => new TacheResource($tache->fresh(['responsable', 'activite', 'assignees', 'labels'])),
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Erreur assignation responsable', [
+            'tache_id' => $tache->id,
+            'error' => $e->getMessage()
+        ]);
+
+        return response()->json([
+            'message' => 'Erreur lors de l\'assignation du responsable',
+            'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue'
+        ], 500);
+    }
+}
+
+/**
+ * ✅ NOUVEAU : Retirer le responsable d'une tâche
+ */
+public function removeResponsable(Request $request, Tache $tache): JsonResponse
+{
+    $this->authorize('update', $tache);
+
+    try {
+        $oldResponsable = $tache->responsable;
+        
+        $tache->update([
+            'responsable_id' => null
+        ]);
+
+        activity()
+            ->causedBy($request->user())
+            ->performedOn($tache)
+            ->withProperties([
+                'old_responsable_id' => $oldResponsable?->id,
+                'old_responsable_nom' => $oldResponsable?->nom
+            ])
+            ->log('Responsable retiré');
+
+        return response()->json([
+            'message' => 'Responsable retiré avec succès',
+            'data' => new TacheResource($tache->fresh(['activite', 'assignees', 'labels'])),
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Erreur retrait responsable', [
+            'tache_id' => $tache->id,
+            'error' => $e->getMessage()
+        ]);
+
+        return response()->json([
+            'message' => 'Erreur lors du retrait du responsable',
+            'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue'
+        ], 500);
+    }
+}
+
+/**
+ * ✅ NOUVEAU : Mes tâches en tant que responsable
+ */
+public function myTasksAsResponsable(Request $request): JsonResponse
+{
+    $user = $request->user();
+
+    $taches = Tache::with([
+        'activite.projet',
+        'assignees',
+        'labels',
+        'resultatsIndividuels',
+        'responsable'
+    ])
+        ->responsableBy($user->id)
+        ->active()
+        ->ordered()
+        ->get();
+
+    return response()->json([
+        'message' => 'Tâches dont vous êtes responsable',
+        'data' => TacheResource::collection($taches),
+        'count' => $taches->count(),
+    ]);
+}
 
 
     /**
