@@ -1,4 +1,4 @@
-<!-- resources/js/components/projets/ProjetDetail.vue - --> 
+<!-- resources/js/components/projets/ProjetDetail.vue - -->
 <template>
   <div class="space-y-6">
     <!-- Loading -->
@@ -37,9 +37,7 @@
               </div>
 
               <div class="flex items-center gap-2 ml-4">
-                  <button 
-                  v-if="canEditProjet"
-                  @click.stop="editProjet(projet)"
+                <button v-if="canEditProjet" @click.stop="editProjet(projet)"
                   class="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-t-lg">
                   <EditIcon class="w-4 h-4" />
                   Modifier
@@ -50,12 +48,14 @@
                   <SettingsIcon class="w-4 h-4" />
                   Paramètres
                 </button>
-                 <span v-if="isWorkspaceOwner" class="ml-2 inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400">
-                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                    </svg>
-                    Propriétaire du workspace
-                  </span>
+                <span v-if="isWorkspaceOwner"
+                  class="ml-2 inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400">
+                  <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                  </svg>
+                  Propriétaire du workspace
+                </span>
               </div>
             </div>
 
@@ -175,7 +175,7 @@
                   </div>
                   <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">
                     Membres du projet disponibles
-                  </div> 
+                  </div>
                 </div>
               </div>
 
@@ -428,7 +428,7 @@
                     Membres du projet ({{ members.length }})
                   </h3>
                   <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    Gestion des membres et de leurs permissions 
+                    Gestion des membres et de leurs permissions
                   </p>
                 </div>
 
@@ -494,65 +494,52 @@
                         <td class="px-6 py-4">
                           <div class="flex flex-wrap gap-1">
                             <!-- Permissions projet -->
-                            <span
-                              v-if="member.can_edit === true || member.can_edit === 1"
-                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                            >
+                            <span v-if="member.can_edit === true || member.can_edit === 1"
+                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
                               Éditer projet
                             </span>
-                            <span
-                              v-if="member.can_delete === true || member.can_delete === 1"
-                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
-                            >
+                            <span v-if="member.can_delete === true || member.can_delete === 1"
+                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
                               Supprimer projet
                             </span>
-                            <span
-                              v-if="member.can_invite === true || member.can_invite === 1"
-                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
-                            >
+                            <span v-if="member.can_invite === true || member.can_invite === 1"
+                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
                               Inviter membres
                             </span>
-                            <span
-                              v-if="member.can_delete_member === true || member.can_delete_member === 1"
-                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400"
-                            >
+                            <span v-if="member.can_delete_member === true || member.can_delete_member === 1"
+                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400">
                               Retirer membres
                             </span>
 
                             <!-- ✅ Permissions activités -->
-                            <span
-                              v-if="member.can_create_activity === true || member.can_create_activity === 1"
-                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400"
-                            >
+                            <span v-if="member.can_create_activity === true || member.can_create_activity === 1"
+                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400">
                               <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M12 4v16m8-8H4" />
                               </svg>
                               Créer activités
                             </span>
-                            <span
-                              v-if="member.can_edit_activity === true || member.can_edit_activity === 1"
-                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400"
-                            >
+                            <span v-if="member.can_edit_activity === true || member.can_edit_activity === 1"
+                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400">
                               <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                               </svg>
                               Éditer activités
                             </span>
-                            <span
-                              v-if="member.can_delete_activity === true || member.can_delete_activity === 1"
-                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
-                            >
+                            <span v-if="member.can_delete_activity === true || member.can_delete_activity === 1"
+                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
                               <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                               </svg>
                               Supprimer activités
                             </span>
 
                             <!-- Aucune permission -->
-                            <span
-                              v-if="!hasAnyPermission(member)"
-                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
-                            >
+                            <span v-if="!hasAnyPermission(member)"
+                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
                               Lecture seule
                             </span>
                           </div>
@@ -581,7 +568,7 @@
                 </div>
               </div>
             </div>
-           
+
             <!-- Invitations Tab -->
             <div v-if="activeTab === 'invitations'" class="space-y-4">
               <div class="flex items-center justify-between mb-4">
@@ -601,22 +588,11 @@
               </div>
 
               <!-- État vide -->
-              <div
-                v-else-if="pendingInvitations.length === 0"
-                class="text-center py-12 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg"
-              >
-                <svg
-                  class="mx-auto h-12 w-12 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                  />
+              <div v-else-if="pendingInvitations.length === 0"
+                class="text-center py-12 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
                 <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">
                   Aucune invitation en attente
@@ -643,15 +619,13 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <tr
-                        v-for="invitation in pendingInvitations"
-                        :key="invitation.id"
-                        class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700" >
+                      <tr v-for="invitation in pendingInvitations" :key="invitation.id"
+                        class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
                         <!-- Invité -->
                         <td class="px-6 py-4">
                           <div class="flex items-center gap-3">
                             <div
-                              class="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300 text-xs font-medium" >
+                              class="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300 text-xs font-medium">
                               {{ getInitials(invitation.email) }}
                             </div>
                             <div>
@@ -670,12 +644,10 @@
 
                         <!-- Rôle -->
                         <td class="px-6 py-4">
-                          <span
-                            :class="[
-                              'px-2 py-1 rounded-full text-xs font-medium',
-                              getRoleColor(invitation.role)
-                            ]"
-                          >
+                          <span :class="[
+                            'px-2 py-1 rounded-full text-xs font-medium',
+                            getRoleColor(invitation.role)
+                          ]">
                             {{ getRoleLabel(invitation.role) }}
                           </span>
                         </td>
@@ -683,34 +655,25 @@
                         <!-- Permissions -->
                         <td class="px-6 py-4">
                           <div class="flex flex-wrap gap-1">
-                            <span
-                              v-if="invitation.can_edit"
-                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                            >
+                            <span v-if="invitation.can_edit"
+                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
                               Éditer
                             </span>
-                            <span
-                              v-if="invitation.can_delete"
-                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
-                            >
+                            <span v-if="invitation.can_delete"
+                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
                               Supprimer
                             </span>
-                            <span
-                              v-if="invitation.can_invite"
-                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
-                            >
+                            <span v-if="invitation.can_invite"
+                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
                               Inviter
                             </span>
-                            <span
-                              v-if="invitation.can_delete_member"
-                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400"
-                            >
+                            <span v-if="invitation.can_delete_member"
+                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400">
                               Retirer membres
                             </span>
                             <span
                               v-if="!invitation.can_edit && !invitation.can_delete && !invitation.can_invite && !invitation.can_delete_member"
-                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
-                            >
+                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
                               Lecture seule
                             </span>
                           </div>
@@ -720,8 +683,7 @@
                         <td class="px-6 py-4">
                           <div class="flex items-center gap-2">
                             <div
-                              class="w-6 h-6 rounded-full bg-brand-500 flex items-center justify-center text-white text-xs font-medium"
-                            >
+                              class="w-6 h-6 rounded-full bg-brand-500 flex items-center justify-center text-white text-xs font-medium">
                               {{ getInitials(invitation.invited_by?.nom || 'U') }}
                             </div>
                             <span class="text-sm text-gray-700 dark:text-gray-300">
@@ -740,14 +702,12 @@
                         <!-- Expiration -->
                         <td class="px-6 py-4">
                           <div>
-                            <span
-                              :class="[
-                                'text-xs',
-                                isExpiringSoon(invitation.expires_at)
-                                  ? 'text-red-600 dark:text-red-400 font-medium'
-                                  : 'text-gray-500 dark:text-gray-400'
-                              ]"
-                            >
+                            <span :class="[
+                              'text-xs',
+                              isExpiringSoon(invitation.expires_at)
+                                ? 'text-red-600 dark:text-red-400 font-medium'
+                                : 'text-gray-500 dark:text-gray-400'
+                            ]">
                               {{ formatDateTime(invitation.expires_at) }}
                             </span>
                             <div v-if="isExpiringSoon(invitation.expires_at)" class="text-xs text-red-500 mt-1">
@@ -759,20 +719,10 @@
                         <!-- Statut -->
                         <td class="px-6 py-4">
                           <span
-                            class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
-                          >
-                            <svg
-                              class="w-3 h-3 mr-1"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                              />
+                            class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
+                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             En attente
                           </span>
@@ -781,41 +731,24 @@
                         <!-- Actions -->
                         <td v-if="canManageMembers" class="px-6 py-4 text-right">
                           <div class="flex items-center justify-end gap-2">
-                            <button
-                              @click="resendInvitation(invitation)"
+                            <button @click="resendInvitation(invitation)"
                               :disabled="resendingInvitation === invitation.id"
                               class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium disabled:opacity-50"
-                              title="Renvoyer l'invitation"
-                            >
-                              <svg
-                                v-if="resendingInvitation === invitation.id"
-                                class="animate-spin h-4 w-4"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                              >
-                                <circle
-                                  class="opacity-25"
-                                  cx="12"
-                                  cy="12"
-                                  r="10"
-                                  stroke="currentColor"
-                                  stroke-width="4"
-                                />
-                                <path
-                                  class="opacity-75"
-                                  fill="currentColor"
-                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                />
+                              title="Renvoyer l'invitation">
+                              <svg v-if="resendingInvitation === invitation.id" class="animate-spin h-4 w-4" fill="none"
+                                viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                  stroke-width="4" />
+                                <path class="opacity-75" fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                               </svg>
                               <span v-else>Renvoyer</span>
                             </button>
 
-                            <button
-                              @click="cancelInvitation(invitation)"
+                            <button @click="cancelInvitation(invitation)"
                               :disabled="cancelingInvitation === invitation.id"
                               class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium disabled:opacity-50"
-                              title="Annuler l'invitation"
-                            >
+                              title="Annuler l'invitation">
                               <span v-if="cancelingInvitation === invitation.id">Annulation...</span>
                               <span v-else>Annuler</span>
                             </button>
@@ -827,11 +760,10 @@
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </div>
-    </template>  
+    </template>
 
     <!-- Modaux - SECTION CORRIGÉE -->
     <ActiviteForm v-if="showCreateActivityModal" :activite="null" :projet-id="projetId"
@@ -843,8 +775,8 @@
     <InviteExternalMemberModal v-if="showInviteModal" :projet-id="projetId" @close="showInviteModal = false"
       @invited="handleInvited" />
 
-    <EditMemberModal v-if="showEditMemberModal" :membre="selectedMember" :projet-id="projetId"
-      @close="showEditMemberModal = false" @updated="handleMemberUpdated" />
+    <EditProjetMemberModal v-if="showEditProjetMemberModal" :membre="selectedMember" :projet-id="projetId"
+      @close="showEditProjetMemberModal = false" @updated="handleMemberUpdated" />
 
     <RemoveMemberWithTransferModal v-if="showRemoveMemberModal" :member="memberToRemove"
       :workspace-id="projet.workspace_id" :projet-id="projetId" context="projet" @close="showRemoveMemberModal = false"
@@ -854,25 +786,21 @@
       @saved="handleProjetSaved" />
 
     <!-- ✅ CORRECTION 1: Modal pour gérer les membres d'activité -->
-    <ManageMembersModal
-      v-if="showActivityMembersModal"
-      :activite="selectedActivityForMembers"
-      :workspace-owner-id="projet?.workspace?.owner_id"
-      :projet-responsable-id="projet?.responsable_id"
-      @close="showActivityMembersModal = false"
-      @updated="handleActivityMembersUpdated"
-      @add-member="openAddMemberModalForActivity"
-    />
+    <ManageMembersModal v-if="showActivityMembersModal" :activite="selectedActivityForMembers"
+      :workspace-owner-id="projet?.workspace?.owner_id" :projet-responsable-id="projet?.responsable_id"
+      @close="showActivityMembersModal = false" @updated="handleActivityMembersUpdated"
+      @add-member="openAddMemberModalForActivity" @edit-member="onEditActivityMember" />
 
     <!-- ✅ CORRECTION 2: Modal pour ajouter des membres à une activité -->
-    <AddMemberModal
-      v-if="showAddMemberModal"
-      :show="showAddMemberModal"
+    <AddMemberModal v-if="showAddMemberModal" :show="showAddMemberModal" :activite-id="selectedActivityForMembers?.id"
+      :projet-id="selectedActivityForMembers?.projet_id" @close="showAddMemberModal = false"
+      @members-added="handleMembersAddedToActivity" />
+    <!-- Modal d’édition permissions membre (activité) -->
+    <EditMemberPermissionsModal v-if="showEditActivityMemberModal" :member="editingActivityMember"
       :activite-id="selectedActivityForMembers?.id"
-      :projet-id="selectedActivityForMembers?.projet_id"
-      @close="showAddMemberModal = false"
-      @members-added="handleMembersAddedToActivity"
-    />
+      @close="showEditActivityMemberModal = false; editingActivityMember = null"
+      @updated="handleActivityMembersUpdated" />
+
 
   </div>
 </template>
@@ -885,26 +813,19 @@ import { useActivites } from '@/composables/useActivites'
 import { useActivityPermissions } from '@/composables/useActivityPermissions'
 import { useAuthStore } from '@/stores/auth'
 import { useProjetInvitations } from '@/composables/useProjetInvitations'
+import EditMemberPermissionsModal from '@/components/activites/EditMemberPermissionsModal.vue'
 
 import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  EditIcon,
-  SettingsIcon,
-  CalendarIcon,
-  UsersIcon,
-  StarIcon,
-  ListIcon,
-  PlusIcon,
-  CheckCircleIcon,
-  TrendingUpIcon,
-  ArchiveIcon,
-  ClockIcon,
-  MailIcon
+  ChevronLeftIcon, EditIcon,
+  SettingsIcon, CalendarIcon,
+  UsersIcon, StarIcon,
+  ListIcon, PlusIcon,
+  CheckCircleIcon, TrendingUpIcon,
+  ArchiveIcon, ClockIcon, MailIcon
 } from '@/icons'
 
 import ActiviteForm from '@/components/activites/ActiviteForm.vue'
-import EditMemberModal from './EditMemberModal.vue'
+import EditProjetMemberModal from './EditProjetMemberModal.vue'
 import ProjetFormModal from './ProjetFormModal.vue'
 import InviteExternalMemberModal from '@/components/projets/InviteExternalMemberModal.vue'
 import RemoveMemberWithTransferModal from '@/components/projets/RemoveMemberWithTransferModal.vue'
@@ -912,6 +833,7 @@ import ManageMembersModal from '@/components/activites/ManageMembersModal.vue'
 // ✅ CORRECTION 3: Import du composant AddMemberModal
 import AddMemberModal from '@/components/activites/AddMemberModal.vue'
 import { useToast } from "vue-toastification"
+
 
 const props = defineProps({
   projetId: {
@@ -947,11 +869,14 @@ const showAddMemberModal = ref(false) // ← AJOUTÉ
 const selectedActivityForMembers = ref(null)
 
 // États pour la gestion des membres
-const showEditMemberModal = ref(false)
+const showEditProjetMemberModal = ref(false)
 const showRemoveMemberModal = ref(false)
 const showInviteModal = ref(false)
 const selectedMember = ref(null)
 const memberToRemove = ref(null)
+
+const showEditActivityMemberModal = ref(false)
+const editingActivityMember = ref(null)
 
 // États pour la gestion du projet
 const showFormModal = ref(false)
@@ -960,10 +885,10 @@ const selectedProjet = ref(null)
 const activeTab = ref('overview')
 
 // États pour la gestion des invitations
-const { 
-  fetchInvitations, 
+const {
+  fetchInvitations,
   resendInvitation: resendInvitationService,
-  cancelInvitation: cancelInvitationService 
+  cancelInvitation: cancelInvitationService
 } = useProjetInvitations()
 
 const toast = useToast()
@@ -982,6 +907,8 @@ const loadInvitations = async () => {
   } catch (error) {
     console.error('Error loading invitations:', error)
     pendingInvitations.value = []
+        toast.error('Erreur lors du chargement des invitations')
+
   } finally {
     loadingInvitations.value = false
   }
@@ -996,13 +923,13 @@ const resendInvitation = async (invitation) => {
   try {
     resendingInvitation.value = invitation.id
     await resendInvitationService(props.projetId, invitation.id)
-    
+
     toast.success(
       `L'invitation a été renvoyée avec succès`,
       'Invitation renvoyée',
       [`Email envoyé à ${invitation.email}`]
     )
-    
+
     await loadInvitations()
   } catch (error) {
     console.error('Error resending invitation:', error)
@@ -1024,13 +951,13 @@ const cancelInvitation = async (invitation) => {
   try {
     cancelingInvitation.value = invitation.id
     await cancelInvitationService(props.projetId, invitation.id)
-    
+
     toast.warning(
       `L'invitation a été annulée`,
       'Invitation annulée',
       [`${invitation.email} ne pourra plus accepter cette invitation`]
     )
-    
+
     await loadInvitations()
   } catch (error) {
     console.error('Error canceling invitation:', error)
@@ -1052,8 +979,8 @@ const isExpiringSoon = (expiresAt) => {
   return hoursUntilExpiration < 24 && hoursUntilExpiration > 0
 }
 
- 
- 
+
+
 
 
 // ==================== COMPUTED PROPERTIES ====================
@@ -1080,6 +1007,7 @@ const accessibleActivities = computed(() => {
  * ✅ Activités affichées (selon le filtre)
  */
 const displayedActivities = computed(() => {
+  if (isWorkspaceOwner.value) return activities.value
   return showAllActivities.value ? activities.value : accessibleActivities.value
 })
 
@@ -1092,6 +1020,7 @@ const canViewAllActivities = computed(() => {
 
   // Super admin peut tout voir
   if (user.is_super_admin) return true
+  if (isWorkspaceOwner.value) return true
 
   // Responsable du projet peut tout voir
   if (projet.value.responsable_id === user.id) return true
@@ -1117,13 +1046,13 @@ const canCreateActivities = computed(() => {
 
   // Super admin peut tout
   if (user.is_super_admin) return true
-  
+
   // Responsable du projet peut tout
   if (projet.value.responsable_id === user.id) return true
 
   // Chercher l'utilisateur dans les membres
   const userMember = members.value.find(m => m.id === user.id)
-  
+
   if (!userMember) return false
 
   // Admin du projet peut créer
@@ -1132,7 +1061,7 @@ const canCreateActivities = computed(() => {
   // Vérifier la permission spécifique
   return userMember.can_create_activity === true || userMember.can_create_activity === 1
 })
- 
+
 
 // ==================== MÉTHODES D'ACCÈS ====================
 
@@ -1169,7 +1098,7 @@ const getActivityPermissions = (activity) => {
     return getDefaultActivityPermissions()
   }
 
-   if (isWorkspaceOwner.value) { 
+  if (isWorkspaceOwner.value) {
     return getFullActivityPermissions()
   }
 
@@ -1194,7 +1123,7 @@ const getActivityPermissions = (activity) => {
 
   // ✅ Fallback: Vérifier si l'utilisateur est dans les membres de l'activité
   const userMember = activity.membres?.find(m => m.id === user.id)
-  
+
   if (userMember) {
     return {
       canEdit: userMember.permissions?.can_edit_activity || false,
@@ -1288,9 +1217,11 @@ const deleteActivity = async (activity) => {
   try {
     await deleteActiviteService(activity.id)
     await loadProjet()
+    toast.success(`Activité "${activity.nom}" supprimée avec succès`)
+
   } catch (error) {
     console.error('Error deleting activity:', error)
-    alert('Erreur lors de la suppression')
+    toast.error('Erreur lors de la suppression de l\'activité')
   }
 }
 
@@ -1305,7 +1236,7 @@ const onAddActivityMember = () => {
 
 const onEditActivityMember = (member) => {
   editingActivityMember.value = member
-  showEditMemberModal.value = true
+  showEditActivityMemberModal.value = true
 }
 
 // ✅ CORRECTION 5: Gestion du modal ManageMembersModal
@@ -1317,6 +1248,8 @@ const openActivityMembersModal = (activity) => {
 const handleActivityMembersUpdated = () => {
   showActivityMembersModal.value = false
   loadProjet()
+  toast.success('Membres de l\'activité mis à jour')
+
 }
 
 // ✅ CORRECTION 6: Nouvelle méthode pour ouvrir AddMemberModal depuis ManageMembersModal
@@ -1329,10 +1262,11 @@ const openAddMemberModalForActivity = () => {
 const handleMembersAddedToActivity = async () => {
   console.log('✅ Membres ajoutés avec succès')
   showAddMemberModal.value = false
-  
+  toast.success('Membres ajoutés à l\'activité')
+
   // Recharger le projet pour mettre à jour les données
   await loadProjet()
-  
+
   // Si le modal ManageMembersModal est encore ouvert, il se rechargera automatiquement
   // car loadProjet() met à jour selectedActivityForMembers via la référence
 }
@@ -1341,11 +1275,12 @@ const onMemberAdded = () => {
   showAddMemberModal.value = false
   loadActivite()
 }
+
 // ==================== MÉTHODES DE GESTION DES MEMBRES ====================
 
 const editMember = (member) => {
   selectedMember.value = member
-  showEditMemberModal.value = true
+  showEditProjetMemberModal.value = true
 }
 
 const removeMember = (member) => {
@@ -1390,6 +1325,8 @@ const loadProjet = async () => {
     projet.value = null
     activities.value = []
     members.value = []
+    toast.error('Erreur lors du chargement du projet')
+
   } finally {
     loading.value = false
   }
@@ -1398,28 +1335,38 @@ const loadProjet = async () => {
 const handleActivityCreated = () => {
   showCreateActivityModal.value = false
   loadProjet()
+  toast.success('Activité créée avec succès')
 }
 
 const handleActivityUpdated = () => {
   showEditActivityModal.value = false
   selectedActivity.value = null
   loadProjet()
+  toast.success('Activité mise à jour avec succès')
+
 }
 
 const handleInvited = () => {
   showInviteModal.value = false
   loadProjet()
+  if (invitedCount > 0) {
+    toast.success(`${invitedCount} membre(s) invité(s) avec succès`)
+  }
 }
 
 const handleMemberUpdated = () => {
-  showEditMemberModal.value = false
+  showEditProjetMemberModal.value = false
   selectedMember.value = null
   loadProjet()
+  toast.success('Permissions du membre mises à jour')
+
 }
 
 const handleMemberRemoved = () => {
   showRemoveMemberModal.value = false
   loadProjet()
+  toast.success('Membre retiré du projet')
+
 }
 
 const editProjet = (projet) => {
@@ -1435,6 +1382,8 @@ const closeFormModal = () => {
 const handleProjetSaved = () => {
   fetchProjets()
   closeFormModal()
+  toast.success('Projet sauvegardé avec succès')
+
 }
 
 // ==================== MÉTHODES D'AFFICHAGE ====================
@@ -1501,22 +1450,22 @@ const hasAnyPermission = (member) => {
 const canEditProjet = computed(() => {
   const user = authStore.user
   if (!user || !projet.value) return false
-  
+
   // Super admin peut tout éditer
   if (user.is_super_admin) return true
-  
+
   // ✅ Workspace owner peut tout éditer
   if (isWorkspaceOwner.value) {
     console.log('✅ Workspace owner peut éditer le projet')
     return true
   }
-  
+
   // Responsable du projet peut tout éditer
   if (projet.value.responsable_id === user.id) return true
-  
+
   // Chercher l'utilisateur courant dans les membres
   const currentUserMember = members.value.find(m => m.id === user.id)
-  
+
   // Vérifier si l'utilisateur a la permission d'éditer
   return currentUserMember?.can_edit === true || currentUserMember?.can_edit === 1
 })
@@ -1524,13 +1473,13 @@ const canEditProjet = computed(() => {
 const isWorkspaceOwner = computed(() => {
   const user = authStore.user;
   if (!user || !projet.value?.workspace) return false;
-  
+
   console.log('Vérification workspace owner:', {
     userId: user.id,
     workspaceOwnerId: projet.value.workspace.owner_id,
     isOwner: Number(projet.value.workspace.owner_id) === Number(user.id)
   });
-  
+
   return Number(projet.value.workspace.owner_id) === Number(user.id);
 });
 
@@ -1538,17 +1487,17 @@ const canEditMember = (member) => {
   const currentUser = authStore.user
   if (!currentUser) return false
 
-  
-   // Le propriétaire de l'espace de travail peut tout faire
+
+  // Le propriétaire de l'espace de travail peut tout faire
   if (isWorkspaceOwner.value) return true
-  
+
   // Ne pas permettre de modifier soi-même (l'utilisateur modifie ses propres permissions via un autre écran)
   if (member.id === currentUser.id) return false
-  
+
   // Vérifier si l'utilisateur courant a la permission de gérer les membres
   if (!canManageMembers.value) return false
-  
-    // Ne pas permettre de retirer le responsable du projet
+
+  // Ne pas permettre de retirer le responsable du projet
   if (member.id === projet.value.responsable_id) return false
 
 
@@ -1558,47 +1507,47 @@ const canEditMember = (member) => {
 const canRemoveMember = (member) => {
   const currentUser = authStore.user
   if (!currentUser) return false
-  
-    // Le propriétaire de l'espace de travail peut tout faire
+
+  // Le propriétaire de l'espace de travail peut tout faire
   if (isWorkspaceOwner.value) return true
-  
+
   // Ne pas permettre de se retirer soi-même
   if (member.id === currentUser.id) return false
-  
+
   // Ne pas permettre de retirer le responsable du projet
   if (member.id === projet.value.responsable_id) return false
 
   if (isWorkspaceOwner.value) return true
-  
+
   // V??rifier si l'utilisateur courant a la permission de supprimer
   const currentUserMember = members.value.find(m => m.id === currentUser.id)
   const hasDeletePermission = currentUserMember?.can_delete_member === true || currentUserMember?.can_delete_member === 1
-  
+
   if (!hasDeletePermission) return false
-  
+
   return true
 }
- 
+
 
 // ✅ CORRECTION: Méthodes pour déterminer si l'utilisateur peut gérer les membres
 const canManageMembers = computed(() => {
-    const user = authStore.user;
-    if (!user || !projet.value) return false;
-    
-    // Super admin peut tout gérer
-    if (user.is_super_admin) return true;
-    
-    // Propriétaire du workspace peut tout gérer
-    if (isWorkspaceOwner.value) return true;
-    
-    // Responsable du projet peut tout gérer
-    if (projet.value.responsable_id === user.id) return true;
-    
-    // Chercher l'utilisateur courant dans les membres
-    const currentUserMember = members.value.find(m => m.id === user.id);
-    
-    // Vérifier si l'utilisateur a la permission d'inviter
-    return currentUserMember?.can_invite === true || currentUserMember?.can_invite === 1;
+  const user = authStore.user;
+  if (!user || !projet.value) return false;
+
+  // Super admin peut tout gérer
+  if (user.is_super_admin) return true;
+
+  // Propriétaire du workspace peut tout gérer
+  if (isWorkspaceOwner.value) return true;
+
+  // Responsable du projet peut tout gérer
+  if (projet.value.responsable_id === user.id) return true;
+
+  // Chercher l'utilisateur courant dans les membres
+  const currentUserMember = members.value.find(m => m.id === user.id);
+
+  // Vérifier si l'utilisateur a la permission d'inviter
+  return currentUserMember?.can_invite === true || currentUserMember?.can_invite === 1;
 });
 
 // ✅ CORRECTION: Méthodes de formatage des rôles
@@ -1663,6 +1612,14 @@ watch(() => props.projetId, () => {
     loadProjet()
   }
 })
+
+watch(activeTab, async (tab) => {
+  if (tab === 'invitations') {
+    await loadInvitations()
+  }
+})
+
+
 </script>
 
 <style scoped>
