@@ -3,13 +3,14 @@
   <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 sm:p-6 lg:p-20"
     @click.self="$emit('close')">
     <div
-      class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[95vh] overflow-hidden flex flex-col animate-fade-in"
-    >
+      class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[95vh] overflow-hidden flex flex-col animate-fade-in">
       <!-- Header -->
-      <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white">
+      <div
+        class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-4">
-            <div class="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg ring-2 ring-white/30">
+            <div
+              class="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg ring-2 ring-white/30">
               <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -34,7 +35,8 @@
       </div>
 
       <!-- Permission Check - Loading State -->
-      <div v-if="isCheckingPermissions" class="mx-8 mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border-l-4 border-blue-500">
+      <div v-if="isCheckingPermissions"
+        class="mx-8 mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border-l-4 border-blue-500">
         <div class="flex items-center gap-3">
           <svg class="animate-spin w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -90,19 +92,16 @@
       <div class="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
         <div class="px-8">
           <nav class="flex space-x-8" aria-label="Tabs">
-            <button
-              v-for="tab in tabs"
-              :key="tab.id"
-              @click="activeTab = tab.id"
+            <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
               class="py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200"
               :class="activeTab === tab.id
                 ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
-            >
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'">
               <div class="flex items-center gap-2">
                 <component :is="tab.icon" class="w-5 h-5" />
                 <span>{{ tab.name }}</span>
-                <span v-if="tab.badge" class="ml-2 py-0.5 px-2 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                <span v-if="tab.badge"
+                  class="ml-2 py-0.5 px-2 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                   {{ tab.badge }}
                 </span>
               </div>
@@ -114,7 +113,7 @@
       <!-- Form Body avec contenu des onglets -->
       <div class="flex-1 overflow-y-auto custom-scrollbar">
         <form @submit.prevent="handleSubmit" class="p-8">
-          
+
           <!-- Onglet 1: Informations de base -->
           <div v-if="activeTab === 'informations'" class="space-y-8">
             <!-- Section Informations Générales -->
@@ -139,7 +138,8 @@
                   </div>
                   <div class="text-right">
                     <p class="text-xs text-blue-600 dark:text-blue-400">Projet</p>
-                    <p class="text-sm font-medium text-blue-800 dark:text-blue-200">{{ activiteContext.projet?.nom }}</p>
+                    <p class="text-sm font-medium text-blue-800 dark:text-blue-200">{{ activiteContext.projet?.nom }}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -183,7 +183,8 @@
                     class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"></textarea>
                 </div>
                 <div>
-                  <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Indicateurs de résultats</label>
+                  <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Indicateurs de
+                    résultats</label>
                   <textarea v-model="formData.indicateurs_resultats" rows="3" placeholder="Comment mesurer le succès ?"
                     class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"></textarea>
                 </div>
@@ -229,7 +230,8 @@
                         : 'border-gray-300 dark:border-gray-600 hover:border-blue-300'">
                       <input type="radio" v-model="formData.priorite" :value="priorite.value" class="sr-only" />
                       <span class="text-xl">{{ priorite.icon }}</span>
-                      <span class="flex-1 text-sm font-semibold text-gray-900 dark:text-white">{{ priorite.label }}</span>
+                      <span class="flex-1 text-sm font-semibold text-gray-900 dark:text-white">{{ priorite.label
+                      }}</span>
                     </label>
                   </div>
                 </div>
@@ -248,16 +250,9 @@
                     <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                       Date de début
                     </label>
-                    <DatePicker
-                      v-model="formData.date_debut"
-                      :enable-time-picker="false"
-                      auto-apply
-                      :format="'dd-MM-yyyy'"
-                      :locale="'fr'"
-                      :dark="isDark"
-                      placeholder="Sélectionner une date"
-                      class="w-full date-input"
-                    >
+                    <DatePicker v-model="formData.date_debut" :enable-time-picker="false" auto-apply
+                      :format="'dd-MM-yyyy'" :locale="'fr'" :dark="isDark" placeholder="Sélectionner une date"
+                      class="w-full date-input">
                       <template #input-icon>
                         <CalendarIcon class="w-5 h-5 text-gray-400" />
                       </template>
@@ -269,17 +264,9 @@
                     <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                       Date d'échéance
                     </label>
-                    <DatePicker
-                      v-model="formData.echeance"
-                      :enable-time-picker="false"
-                      auto-apply
-                      :format="'dd-MM-yyyy'"
-                      :locale="'fr'"
-                      :dark="isDark"
-                      :min-date="formData.date_debut"
-                      placeholder="Sélectionner une date"
-                      class="w-full date-input"
-                    >
+                    <DatePicker v-model="formData.echeance" :enable-time-picker="false" auto-apply
+                      :format="'dd-MM-yyyy'" :locale="'fr'" :dark="isDark" :min-date="formData.date_debut"
+                      placeholder="Sélectionner une date" class="w-full date-input">
                       <template #input-icon>
                         <CalendarIcon class="w-5 h-5 text-gray-400" />
                       </template>
@@ -291,16 +278,9 @@
                     <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                       Date de fin réelle
                     </label>
-                    <DatePicker
-                      v-model="formData.date_fin_reelle"
-                      :enable-time-picker="false"
-                      auto-apply
-                      :format="'yyyy-MM-dd'"
-                      :locale="'fr'"
-                      :dark="isDark"
-                      placeholder="Sélectionner une date"
-                      class="w-full date-input"
-                    >
+                    <DatePicker v-model="formData.date_fin_reelle" :enable-time-picker="false" auto-apply
+                      :format="'yyyy-MM-dd'" :locale="'fr'" :dark="isDark" placeholder="Sélectionner une date"
+                      class="w-full date-input">
                       <template #input-icon>
                         <CalendarIcon class="w-5 h-5 text-gray-400" />
                       </template>
@@ -318,7 +298,8 @@
                   <div class="mt-3 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
                     <div class="h-2.5 rounded-full transition-all duration-500"
                       :class="getProgressColorClass(formData.taux_realisation)"
-                      :style="{ width: `${formData.taux_realisation}%` }"></div>
+                      :style="{ width: `${formData.taux_realisation}%` }">
+                    </div>
                   </div>
                 </div>
                 <div>
@@ -359,6 +340,67 @@
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white">Équipe & Organisation</h3>
               </div>
 
+
+              <!-- Responsable de la tâche -->
+              <div>
+                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                  <UserIcon class="w-4 h-4 text-purple-500" />
+                  Responsable de la tâche
+                </label>
+                
+                <div v-if="loadingMembers" class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                  <div class="flex items-center gap-3">
+                    <svg class="animate-spin w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                      </path>
+                    </svg>
+                    <p class="text-sm text-blue-700 dark:text-blue-300">Chargement des membres...</p>
+                  </div>
+                </div>
+
+                <select v-else v-model="formData.responsable_id"
+                  :disabled="availableUsers.length === 0"
+                  class="w-full px-4 py-3.5 border-2 rounded-xl transition-all"
+                  :class="availableUsers.length === 0
+                    ? 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 opacity-60 cursor-not-allowed'
+                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 hover:border-purple-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500'">
+                  <option :value="null">Aucun responsable</option>
+                  <option v-for="user in availableUsers" :key="user.id" :value="user.id">
+                    {{ user.nom }} ({{ user.email }})
+                  </option>
+                </select>
+
+                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                  <InformationCircleIcon class="w-4 h-4" />
+                  Le responsable aura tous les droits sur la tâche (édition, validation, etc.)
+                </p>
+
+                <!-- Affichage du responsable actuel si tâche existante -->
+                <div v-if="tache && tache.responsable && formData.responsable_id === tache.responsable.id"
+                  class="mt-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full overflow-hidden bg-purple-100 dark:bg-purple-900">
+                      <img v-if="tache.responsable.avatar" :src="tache.responsable.avatar" :alt="tache.responsable.nom" 
+                        class="w-full h-full object-cover" />
+                      <div v-else class="w-full h-full flex items-center justify-center text-purple-600 dark:text-purple-400 font-bold">
+                        {{ tache.responsable.nom.charAt(0).toUpperCase() }}
+                      </div>
+                    </div>
+                    <div class="flex-1">
+                      <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ tache.responsable.nom }}</p>
+                      <p class="text-xs text-gray-600 dark:text-gray-400">{{ tache.responsable.email }}</p>
+                    </div>
+                    <div class="px-3 py-1 bg-purple-100 dark:bg-purple-900 rounded-full">
+                      <span class="text-xs font-semibold text-purple-700 dark:text-purple-300">Responsable actuel</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+
               <!-- Assignation -->
               <div>
                 <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Assigner à</label>
@@ -379,8 +421,7 @@
                   class="w-full px-4 py-3 border-2 rounded-xl transition-all"
                   :class="!canAssignUsers || availableUsers.length === 0
                     ? 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 opacity-60 cursor-not-allowed'
-                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 hover:border-blue-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'" 
-                  size="5">
+                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 hover:border-blue-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'" size="5">
                   <option v-for="user in availableUsers" :key="user.id" :value="user.id">
                     {{ user.nom }} ({{ user.email }})
                   </option>
@@ -390,7 +431,7 @@
                   class="mt-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                   <p class="text-sm text-gray-600 dark:text-gray-400 text-center">Aucun membre disponible</p>
                 </div>
-                
+
                 <p class="mt-2 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
                   <InformationCircleIcon class="w-4 h-4" />
                   Maintenez Ctrl/Cmd pour sélectionner plusieurs utilisateurs
@@ -400,13 +441,8 @@
               <!-- Labels -->
               <div>
                 <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Labels</label>
-                <TaskLabelsSelector
-                  v-model="formData.label_ids"
-                  :projet-id="currentActivite?.projet_id"
-                  :show-create-button="true"
-                  :show-scope-filter="true"
-                  @create-label="showLabelModal = true"
-                />
+                <TaskLabelsSelector v-model="formData.label_ids" :projet-id="currentActivite?.projet_id"
+                  :show-create-button="true" :show-scope-filter="true" @create-label="showLabelModal = true" />
               </div>
             </div>
 
@@ -444,7 +480,8 @@
               </div>
 
               <!-- Validateurs assignés (si besoin) -->
-              <div v-if="formData.validation_n1_required || formData.validation_n2_required" class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+              <div v-if="formData.validation_n1_required || formData.validation_n2_required"
+                class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
                 <p class="text-sm text-blue-700 dark:text-blue-300">
                   <InformationCircleIcon class="w-4 h-4 inline mr-2" />
                   Les validateurs seront automatiquement assignés en fonction des rôles dans l'activité et le projet.
@@ -471,7 +508,8 @@
                   <span class="text-3xl">{{ visibility.icon }}</span>
                   <div>
                     <span class="block text-sm font-bold text-gray-900 dark:text-white">{{ visibility.label }}</span>
-                    <span class="block text-xs text-gray-600 dark:text-gray-400 mt-1">{{ visibility.description }}</span>
+                    <span class="block text-xs text-gray-600 dark:text-gray-400 mt-1">{{ visibility.description
+                    }}</span>
                   </div>
                 </label>
               </div>
@@ -494,17 +532,13 @@
                 <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">
                   Fichiers attachés
                 </label>
-                
+
                 <!-- Zone de dépôt de fichiers -->
-                <div 
-                  @drop.prevent="handleFileDrop"
-                  @dragover.prevent="isDragOver = true"
+                <div @drop.prevent="handleFileDrop" @dragover.prevent="isDragOver = true"
                   @dragleave="isDragOver = false"
-                  class="border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200"
-                  :class="isDragOver 
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
-                    : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'"
-                >
+                  class="border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200" :class="isDragOver
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                    : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'">
                   <PaperClipIcon class="w-12 h-12 mx-auto text-gray-400 mb-4" />
                   <p class="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-2">
                     Glissez-déposez vos fichiers ici
@@ -512,18 +546,9 @@
                   <p class="text-sm text-gray-500 dark:text-gray-500 mb-4">
                     ou
                   </p>
-                  <input
-                    type="file"
-                    ref="fileInput"
-                    multiple
-                    @change="handleFileUpload"
-                    class="hidden"
-                  />
-                  <button
-                    type="button"
-                    @click="$refs.fileInput.click()"
-                    class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                  >
+                  <input type="file" ref="fileInput" multiple @change="handleFileUpload" class="hidden" />
+                  <button type="button" @click="$refs.fileInput.click()"
+                    class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
                     Parcourir les fichiers
                   </button>
                   <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">
@@ -541,11 +566,8 @@
                   Fichiers sélectionnés ({{ uploadedFiles.length }})
                 </h4>
                 <div class="space-y-2">
-                  <div
-                    v-for="(file, index) in uploadedFiles"
-                    :key="index"
-                    class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
-                  >
+                  <div v-for="(file, index) in uploadedFiles" :key="index"
+                    class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                     <div class="flex items-center gap-3">
                       <DocumentIcon class="w-5 h-5 text-gray-400" />
                       <div>
@@ -555,11 +577,8 @@
                         </p>
                       </div>
                     </div>
-                    <button
-                      type="button"
-                      @click="removeFile(index)"
-                      class="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                    >
+                    <button type="button" @click="removeFile(index)"
+                      class="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
                       <TrashIcon class="w-4 h-4" />
                     </button>
                   </div>
@@ -571,51 +590,35 @@
                 <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300">
                   Liens externes
                 </h4>
-                
+
                 <!-- Ajout de lien -->
                 <div class="flex gap-3">
-                  <input
-                    v-model="newLink.url"
-                    type="url"
-                    placeholder="https://example.com"
-                    class="flex-1 px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                  />
-                  <input
-                    v-model="newLink.title"
-                    type="text"
-                    placeholder="Titre du lien"
-                    class="flex-1 px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                  />
-                  <button
-                    type="button"
-                    @click="addLink"
-                    class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
-                  >
+                  <input v-model="newLink.url" type="url" placeholder="https://example.com"
+                    class="flex-1 px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
+                  <input v-model="newLink.title" type="text" placeholder="Titre du lien"
+                    class="flex-1 px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
+                  <button type="button" @click="addLink"
+                    class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
                     Ajouter
                   </button>
                 </div>
 
                 <!-- Liste des liens -->
                 <div v-if="externalLinks.length > 0" class="space-y-2">
-                  <div
-                    v-for="(link, index) in externalLinks"
-                    :key="index"
-                    class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
-                  >
+                  <div v-for="(link, index) in externalLinks" :key="index"
+                    class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                     <div class="flex items-center gap-3">
                       <LinkIcon class="w-5 h-5 text-blue-500" />
                       <div>
-                        <a :href="link.url" target="_blank" class="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline">
+                        <a :href="link.url" target="_blank"
+                          class="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline">
                           {{ link.title || link.url }}
                         </a>
                         <p class="text-xs text-gray-500 dark:text-gray-400">{{ link.url }}</p>
                       </div>
                     </div>
-                    <button
-                      type="button"
-                      @click="removeLink(index)"
-                      class="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                    >
+                    <button type="button" @click="removeLink(index)"
+                      class="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
                       <TrashIcon class="w-4 h-4" />
                     </button>
                   </div>
@@ -623,7 +626,7 @@
               </div>
             </div>
 
-            <!-- Section Apparence --> 
+            <!-- Section Apparence -->
             <div class="space-y-5">
               <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
                 <div class="p-2 bg-gradient-to-br from-pink-500 to-rose-600 rounded-lg">
@@ -637,31 +640,19 @@
                 <div>
                   <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Couleur</label>
                   <div class="flex gap-3 items-center">
-                    <input
-                      v-model="formData.couleur"
-                      type="color"
-                      class="h-12 w-20 border-2 border-gray-300 dark:border-gray-700 rounded-lg cursor-pointer"
-                    />
-                    <input
-                      v-model="formData.couleur"
-                      type="text"
-                      placeholder="#3B82F6"
-                      pattern="^#[0-9A-Fa-f]{6}$"
-                      class="flex-1 px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                    />
+                    <input v-model="formData.couleur" type="color"
+                      class="h-12 w-20 border-2 border-gray-300 dark:border-gray-700 rounded-lg cursor-pointer" />
+                    <input v-model="formData.couleur" type="text" placeholder="#3B82F6" pattern="^#[0-9A-Fa-f]{6}$"
+                      class="flex-1 px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
                   </div>
                 </div>
 
                 <!-- Image de couverture - CORRIGÉE -->
                 <div>
-                  <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Image de couverture</label>
-                  <input
-                    ref="coverImageInput"
-                    type="file"
-                    accept="image/*"
-                    @change="handleCoverImageUpload"
-                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                  />
+                  <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Image de
+                    couverture</label>
+                  <input ref="coverImageInput" type="file" accept="image/*" @change="handleCoverImageUpload"
+                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
                   <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">PNG, JPG, GIF jusqu'à 2 Mo</p>
                 </div>
               </div>
@@ -677,20 +668,15 @@
       </div>
 
       <!-- Footer -->
-      <div class="px-8 py-5 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex items-center justify-between gap-4">
+      <div
+        class="px-8 py-5 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex items-center justify-between gap-4">
         <div class="flex items-center gap-4">
           <!-- Navigation entre les onglets -->
           <div class="flex gap-2">
-            <button
-              v-for="tab in tabs"
-              :key="tab.id"
-              @click="activeTab = tab.id"
-              class="p-2 rounded-lg transition-colors"
-              :class="activeTab === tab.id
+            <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
+              class="p-2 rounded-lg transition-colors" :class="activeTab === tab.id
                 ? 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400'
-                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
-              :title="tab.name"
-            >
+                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'" :title="tab.name">
               <component :is="tab.icon" class="w-4 h-4" />
             </button>
           </div>
@@ -746,12 +732,8 @@
     </div>
 
     <!-- Label Modal -->
-    <LabelModal
-      v-if="showLabelModal"
-      :projet-id="currentActivite?.projet_id"
-      @saved="handleLabelCreated"
-      @close="showLabelModal = false"
-    />
+    <LabelModal v-if="showLabelModal" :projet-id="currentActivite?.projet_id" @saved="handleLabelCreated"
+      @close="showLabelModal = false" />
 
   </div>
 </template>
@@ -764,8 +746,8 @@ import api from '@/api/axios'
 import { useActivityPermissions } from '@/composables/useActivityPermissions'
 import { useActivityMembers } from '@/composables/useActivityMembers'
 import DatePicker from '@vuepic/vue-datepicker'
-import '@vuepic/vue-datepicker/dist/main.css' 
-import { 
+import '@vuepic/vue-datepicker/dist/main.css'
+import {
   CalendarIcon,
   InformationCircleIcon,
   UserGroupIcon,
@@ -777,7 +759,7 @@ import {
   LinkIcon,
   TrashIcon,
   PaintBrushIcon,
-  FolderIcon
+  FolderIcon, UserIcon
 } from '@heroicons/vue/24/outline'
 
 import { TaskLabelsSelector, LabelModal } from '@/components/labels'
@@ -821,7 +803,7 @@ const newLink = ref({ url: '', title: '' })
 // Variables labels et apparence
 const showLabelModal = ref(false)
 const coverImagePreview = ref(null)
-const coverImageFile = ref(null) 
+const coverImageFile = ref(null)
 
 // Refs pour les inputs
 const fileInputRef = ref(null)
@@ -831,9 +813,9 @@ const coverImageInputRef = ref(null)
 const tabs = [
   { id: 'informations', name: 'Informations', icon: InformationCircleIcon },
   { id: 'equipe', name: 'Équipe & Validation', icon: UserGroupIcon },
-  { 
-    id: 'fichiers', 
-    name: 'Fichiers & Ressources', 
+  {
+    id: 'fichiers',
+    name: 'Fichiers & Ressources',
     icon: PaperClipIcon,
     badge: computed(() => {
       const total = uploadedFiles.value.length + externalLinks.value.length
@@ -868,6 +850,7 @@ const availableUsers = computed(() => {
 // ==================== FORMULAIRE ====================
 const formData = ref({
   activite_id: props.activiteContext?.id || props.activiteId || '',
+  responsable_id: null,
   titre: '',
   description: '',
   objectif: '',
@@ -947,43 +930,43 @@ const handleFiles = (files) => {
     'application/zip',
     'application/x-zip-compressed'
   ]
-  
+
   const validFiles = []
   const errors = []
-  
+
   files.forEach(file => {
     // Vérifier la taille (10 Mo max)
     if (file.size > 10 * 1024 * 1024) {
       errors.push(`Le fichier "${file.name}" dépasse la taille maximale de 10 Mo`)
       return
     }
-    
+
     // Vérifier le type MIME
     if (!allowedTypes.includes(file.type)) {
       errors.push(`Le format du fichier "${file.name}" (${file.type}) n'est pas supporté`)
       return
     }
-    
+
     // Vérifier que le fichier n'est pas déjà ajouté
-    const exists = uploadedFiles.value.some(f => 
+    const exists = uploadedFiles.value.some(f =>
       f.name === file.name && f.size === file.size
     )
-    
+
     if (exists) {
       errors.push(`Le fichier "${file.name}" est déjà ajouté`)
       return
     }
-    
+
     validFiles.push(file)
   })
-  
+
   if (errors.length > 0) {
     errorMessage.value = errors.join('\n')
     setTimeout(() => {
       errorMessage.value = ''
     }, 5000)
   }
-  
+
   if (validFiles.length > 0) {
     uploadedFiles.value.push(...validFiles)
     console.log('✅ Fichiers ajoutés:', validFiles.length, 'Total:', uploadedFiles.value.length, 'uploaded files', uploadedFiles.value, 'validFiles', validFiles)
@@ -1017,7 +1000,7 @@ const addLink = () => {
     setTimeout(() => { errorMessage.value = '' }, 3000)
     return
   }
-  
+
   // Validation URL
   try {
     const url = new URL(newLink.value.url)
@@ -1029,7 +1012,7 @@ const addLink = () => {
     setTimeout(() => { errorMessage.value = '' }, 3000)
     return
   }
-  
+
   // Vérifier doublon
   const exists = externalLinks.value.some(link => link.url === newLink.value.url)
   if (exists) {
@@ -1037,15 +1020,15 @@ const addLink = () => {
     setTimeout(() => { errorMessage.value = '' }, 3000)
     return
   }
-  
+
   externalLinks.value.push({
     url: newLink.value.url.trim(),
     title: newLink.value.title.trim() || newLink.value.url.trim()
   })
-  
+
   // Réinitialiser
   newLink.value = { url: '', title: '' }
-  
+
   console.log('✅ Lien ajouté. Total:', externalLinks.value.length)
 }
 
@@ -1061,21 +1044,21 @@ const removeLink = (index) => {
  */
 const handleCoverImageUpload = (event) => {
   const file = event.target.files?.[0]
-  
+
   if (!file) {
     return
   }
-  
+
   // Réinitialiser les erreurs
   errorMessage.value = ''
-  
+
   // Vérifier la taille (2 Mo max)
   if (file.size > 2 * 1024 * 1024) {
     errorMessage.value = 'L\'image ne doit pas dépasser 2 Mo'
     event.target.value = ''
     return
   }
-  
+
   // Vérifier le type MIME strictement
   const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif']
   if (!validImageTypes.includes(file.type)) {
@@ -1083,10 +1066,10 @@ const handleCoverImageUpload = (event) => {
     event.target.value = ''
     return
   }
-  
+
   // Stocker le fichier
   coverImageFile.value = file
-  
+
   // Générer preview
   const reader = new FileReader()
   reader.onload = (e) => {
@@ -1097,7 +1080,7 @@ const handleCoverImageUpload = (event) => {
     coverImageFile.value = null
   }
   reader.readAsDataURL(file)
-  
+
   console.log('✅ Image de couverture sélectionnée:', {
     name: file.name,
     type: file.type,
@@ -1119,12 +1102,12 @@ const getProgressColorClass = (progress) => {
  */
 const formatDateForApi = (date) => {
   if (!date) return null
-  
+
   // Si c'est déjà une string au bon format
   if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
     return date
   }
-  
+
   // Si c'est un objet Date
   let dateObj
   if (date instanceof Date) {
@@ -1132,15 +1115,15 @@ const formatDateForApi = (date) => {
   } else {
     dateObj = new Date(date)
   }
-  
+
   if (isNaN(dateObj.getTime())) {
     return null
   }
-  
+
   const year = dateObj.getFullYear()
   const month = String(dateObj.getMonth() + 1).padStart(2, '0')
   const day = String(dateObj.getDate()).padStart(2, '0')
-  
+
   return `${year}-${month}-${day}`
 }
 
@@ -1165,64 +1148,67 @@ const handleSubmit = async () => {
 
     // ✅ TOUJOURS utiliser FormData pour éviter les problèmes
     const formDataObj = new FormData()
-    
+
     console.log('=== FormData Debug ===')
-for (let [key, value] of formDataObj.entries()) {
-  if (value instanceof File) {
-    console.log(`${key}: [FILE] ${value.name} (${value.type})`)
-  } else {
-    console.log(`${key}:`, value)
-  }
-}
+    for (let [key, value] of formDataObj.entries()) {
+      if (value instanceof File) {
+        console.log(`${key}: [FILE] ${value.name} (${value.type})`)
+      } else {
+        console.log(`${key}:`, value)
+      }
+    }
 
     // ✅ Ajouter les champs simples
     formDataObj.append('activite_id', formData.value.activite_id)
+    if (formData.value.responsable_id) {
+      formDataObj.append('responsable_id', formData.value.responsable_id)
+    }
     formDataObj.append('titre', formData.value.titre || '')
     formDataObj.append('description', formData.value.description || '')
     formDataObj.append('objectif', formData.value.objectif || '')
     formDataObj.append('indicateurs_resultats', formData.value.indicateurs_resultats || '')
     formDataObj.append('statut', formData.value.statut)
     formDataObj.append('priorite', formData.value.priorite)
-    
+
     // ✅ Dates formatées
     const dateDebut = formatDateForApi(formData.value.date_debut)
     const echeance = formatDateForApi(formData.value.echeance)
     const dateFinReelle = formatDateForApi(formData.value.date_fin_reelle)
-    
+
     if (dateDebut) formDataObj.append('date_debut', dateDebut)
     if (echeance) formDataObj.append('echeance', echeance)
     if (dateFinReelle) formDataObj.append('date_fin_reelle', dateFinReelle)
-    
+
     formDataObj.append('taux_realisation', formData.value.taux_realisation || 0)
-    
+
     if (formData.value.estimated_hours) {
       formDataObj.append('estimated_hours', formData.value.estimated_hours)
     }
     if (formData.value.actual_hours) {
       formDataObj.append('actual_hours', formData.value.actual_hours)
     }
-    
+
     // ✅ Booléens en 0/1
     formDataObj.append('validation_n1_required', formData.value.validation_n1_required ? '1' : '0')
     formDataObj.append('validation_n2_required', formData.value.validation_n2_required ? '1' : '0')
-    
+
     formDataObj.append('couleur', formData.value.couleur || '#3B82F6')
     formDataObj.append('commentaire', formData.value.commentaire || '')
     formDataObj.append('visibility', formData.value.visibility || 'members_only')
-    
+
     // ✅ Tableaux d'IDs
     if (formData.value.assignee_ids && formData.value.assignee_ids.length > 0) {
       formData.value.assignee_ids.forEach(id => {
         formDataObj.append('assignee_ids[]', id)
       })
     }
-    
+
     if (formData.value.label_ids && formData.value.label_ids.length > 0) {
       formData.value.label_ids.forEach(id => {
         formDataObj.append('label_ids[]', id)
       })
     }
-    
+
     // ✅ FICHIERS : Ajouter chaque fichier individuellement
     if (uploadedFiles.value.length > 0) {
       uploadedFiles.value.forEach((file, index) => {
@@ -1230,19 +1216,19 @@ for (let [key, value] of formDataObj.entries()) {
       })
       console.log('✅ Fichiers ajoutés au FormData:', uploadedFiles.value.length)
     }
-    
+
     // ✅ LIENS EXTERNES : Sérialiser proprement en JSON
     if (externalLinks.value.length > 0) {
       formDataObj.append('external_links', JSON.stringify(externalLinks.value))
       console.log('✅ Liens externes:', externalLinks.value.length)
     }
-    
+
     // ✅ IMAGE DE COUVERTURE
     if (coverImageFile.value) {
       formDataObj.append('cover_image', coverImageFile.value, coverImageFile.value.name)
       console.log('✅ Image de couverture ajoutée:', coverImageFile.value.name)
     }
-    
+
     // ✅ Debug: Afficher le contenu du FormData
     console.log('=== FormData Content ===')
     for (let [key, value] of formDataObj.entries()) {
@@ -1256,7 +1242,7 @@ for (let [key, value] of formDataObj.entries()) {
         console.log(`${key}:`, value)
       }
     }
-    
+
     // ✅ Envoyer
     if (props.tache) {
       formDataObj.append('_method', 'PUT')
@@ -1264,9 +1250,9 @@ for (let [key, value] of formDataObj.entries()) {
     } else {
       await createTache(formDataObj)
     }
-    
+
     emit('saved')
-    
+
   } catch (error) {
     console.error('❌ Erreur soumission:', error)
     handleError(error)
@@ -1356,7 +1342,7 @@ const loadData = async () => {
       api.get('/activites/mes-activites')
     ])
     activites.value = activitesRes.data.data || []
-    
+
     if (currentActivite.value?.projet_id) {
       await fetchLabelsForProject(currentActivite.value.projet_id)
     } else {
@@ -1387,6 +1373,7 @@ onMounted(async () => {
       formData.value = {
         ...formData.value,
         activite_id: props.tache.activite_id || '',
+        responsable_id: props.tache.responsable_id || null,
         titre: props.tache.titre || '',
         description: props.tache.description || '',
         objectif: props.tache.objectif || '',
@@ -1460,6 +1447,7 @@ onMounted(async () => {
     opacity: 0;
     transform: scale(0.95) translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
@@ -1467,9 +1455,26 @@ onMounted(async () => {
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
-  20%, 40%, 60%, 80% { transform: translateX(4px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-4px);
+  }
+
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(4px);
+  }
 }
 
 /* Styles spécifiques au DatePicker */
