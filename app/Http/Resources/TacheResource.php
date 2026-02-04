@@ -61,7 +61,19 @@ class TacheResource extends JsonResource
                     'responsable_id' => $this->activite->responsable_id,
                 ];
             }),
+            // Responsable de la tâche
+            'responsable_id' => $this->responsable_id,
+            'responsable' => $this->when($this->responsable, function () {
+                return [
+                    'id' => $this->responsable->id,
+                    'nom' => $this->responsable->nom,
+                    'email' => $this->responsable->email,
+                    'avatar' => $this->responsable->avatar,
+                ];
+            }),
 
+            // Dans la section 'permissions', ajouter :
+            'is_responsable' => $user ? $this->isResponsable($user) : false,
             // Informations de base
             'titre' => $this->titre,
             'description' => $this->description,
