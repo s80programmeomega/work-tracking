@@ -254,6 +254,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/en-retard', [TacheController::class, 'overdue']);
         Route::post('/reorder', [TacheController::class, 'reorder']);
 
+            Route::get('/my-tasks-as-responsable', [TacheController::class, 'myTasksAsResponsable']);
+    Route::post('/{tache}/assign-responsable', [TacheController::class, 'assignResponsable']);
+    Route::delete('/{tache}/remove-responsable', [TacheController::class, 'removeResponsable']);
+
+    
         // ✅ NOUVEAU: Mon kanban personnel
         Route::get('/my-kanban', [TacheController::class, 'myKanban']);
 
