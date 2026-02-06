@@ -291,21 +291,21 @@
                     </div>
                 </div>
 
-                <!-- Colonne droite - Illustration avec branding Uptiimun -->
+                <!-- Colonne droite - Illustration avec branding Uptiimum -->
                 <div class="relative items-center hidden w-full h-full lg:w-1/2 bg-brand-950 dark:bg-white/5 lg:grid">
                     <div class="flex items-center justify-center z-1">
                         <CommonGridShape />
                         <div class="flex flex-col items-center max-w-xs text-center">
-                            <!-- Logo Uptiimun -->
+                            <!-- Logo Uptiimum -->
                             <div class="block mb-6">
-                                <img width="200" height="180" :src="LogoDark" alt="Uptiimun Work Tracking"
+                                <img width="200" height="180" :src="LogoDark" alt="Uptiimum Work Tracking"
                                     class="mx-auto rounded-lg" />
                             </div>
 
 
                             <!-- Nom de l'application -->
                             <h2 class="mb-4 text-2xl font-bold text-white">
-                                Uptiimun Work Tracking
+                                Uptiimum Work Tracking
                             </h2>
 
                             <!-- Description -->

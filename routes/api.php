@@ -89,9 +89,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Workspace Members
         Route::prefix('{workspace}/members')->group(function () {
             Route::get('/', [WorkspaceController::class, 'members']);
-            Route::post('/', [WorkspaceController::class, 'addMember']);
-            Route::put('/{user}', [WorkspaceController::class, 'updateMember']);
+            Route::post('/', [WorkspaceController::class, 'addMember']); 
+            Route::put('/{user}', [WorkspaceController::class, 'updateMember'])->name('workspace.members.update');
+            Route::get('/{user}', [WorkspaceController::class, 'showMember'])->name('workspace.members.show');
             Route::delete('/{user}', [WorkspaceController::class, 'removeMember']);
+
 
             // Invitations
             Route::post('/invite', [WorkspaceController::class, 'inviteMembers']);
@@ -107,15 +109,27 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/{workspace}/statistics', [WorkspaceController::class, 'statistics']);
 
         // ========================================  MEMBRE REMOVAL WITH TRANSFER  ========================================
-        Route::prefix('{workspace}')->group(function () {
-            // Obtenir les projets où l'user est responsable (pour UI de transfert)
-            Route::get('/members/{user}/projects', [WorkspaceController::class, 'getUserProjects']);
+        Route::prefix('/{workspace}')->group(function () {
+
+            // Aperçu de l'impact du retrait d'un membre
+            Route::get('members/{user}/removal-preview', [WorkspaceController::class, 'getRemovalPreview'])
+                ->name('workspaces.members.removal-preview');
+
+            // Obtenir les projets où l'utilisateur est responsable
+            Route::get('members/{user}/projects', [WorkspaceController::class, 'getUserProjects'])
+                ->name('workspaces.members.projects');
 
             // Obtenir les candidats pour le transfert
-            Route::get('/transfer-candidates', [WorkspaceController::class, 'getTransferCandidates']);
+            Route::get('transfer-candidates', [WorkspaceController::class, 'getTransferCandidates'])
+                ->name('workspaces.transfer-candidates');
 
-            // Retirer membre avec transfert optionnel
-            Route::delete('/members/{user}/remove', [WorkspaceController::class, 'removeMemberWithTransfer']);
+            // Retirer un membre avec transfert de responsabilités
+            Route::delete('members/{user}/remove', [WorkspaceController::class, 'removeMemberWithTransfer'])
+                ->name('workspaces.members.remove-with-transfer');
+
+            // Retirer un membre (simple, vérifie les responsabilités)
+            Route::delete('members/{user}', [WorkspaceController::class, 'removeMember'])
+                ->name('workspaces.members.remove');
         });
     });
 
@@ -192,6 +206,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/{activite}', [ActiviteController::class, 'show']);
         Route::put('/{activite}', [ActiviteController::class, 'update']);
         Route::delete('/{activite}', [ActiviteController::class, 'destroy']);
+        Route::put('/{activite}/change-responsable', [ActiviteController::class, 'changeResponsable']);
 
         // Actions
         Route::post('/{activite}/archive', [ActiviteController::class, 'archive']);
@@ -202,7 +217,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         // Available members for projet
         Route::get('/available-members/{projetId}', [ActiviteController::class, 'availableMembers']);
-        //  Membres d'une activité spécifique
+
+        // Membres d'une activité spécifique
         Route::get('/{activite}/membres', [ActiviteController::class, 'membres']);
 
         // ✅ Gestion des membres d'activité
@@ -238,6 +254,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/en-retard', [TacheController::class, 'overdue']);
         Route::post('/reorder', [TacheController::class, 'reorder']);
 
+            Route::get('/my-tasks-as-responsable', [TacheController::class, 'myTasksAsResponsable']);
+    Route::post('/{tache}/assign-responsable', [TacheController::class, 'assignResponsable']);
+    Route::delete('/{tache}/remove-responsable', [TacheController::class, 'removeResponsable']);
+
+    
         // ✅ NOUVEAU: Mon kanban personnel
         Route::get('/my-kanban', [TacheController::class, 'myKanban']);
 
@@ -262,7 +283,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
         // CRUD basique
-        Route::get('/{tache}', [TacheController::class, 'show']);
+        Route::get('/{tache}', [TacheController::class, 'show'])->name('taches.show');
         Route::put('/{tache}', [TacheController::class, 'update']);
         Route::delete('/{tache}', [TacheController::class, 'destroy']);
 
@@ -325,7 +346,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // 📋 Récupérer un résultat spécifique
     Route::get('/tache-resultats/{resultat}', [TacheResultatController::class, 'show'])
-    ->name('tache-resultats.show');
+        ->name('tache-resultats.show');
 
     // ========================================  ÉVALUATIONS  ========================================
     Route::prefix('evaluations')->group(function () {

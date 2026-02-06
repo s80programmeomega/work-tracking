@@ -349,6 +349,8 @@ class AccessManagementService
                     'can_create_projects' => true,
                     'can_invite_members' => true,
                     'can_manage_settings' => true,
+                    'can_transfer_ownership' => false,
+                    'can_delete_members' => true
                 ]),
             ]);
 

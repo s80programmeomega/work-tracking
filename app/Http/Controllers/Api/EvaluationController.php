@@ -3,8 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\TacheResource;
 use App\Http\Resources\TacheResultatResource;
+use App\Models\Activite;
+use App\Models\Tache;
 use App\Models\TacheResultat;
+use App\Models\User;
+use App\Models\Workspace;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,7 +23,7 @@ use Illuminate\Support\Facades\Log;
  * - N1 : UNIQUEMENT le responsable de l'activité
  * - N2 : UNIQUEMENT le responsable du projet
  * - Consultation : Responsables N1 et N2 peuvent consulter tous les résultats
- */ 
+ */
 class EvaluationController extends Controller
 {
 
@@ -134,9 +139,9 @@ class EvaluationController extends Controller
                 'success' => true,
                 'message' => 'Résultat validé (Niveau 1) avec succès',
                 'data' => new TacheResultatResource($resultat->fresh([
-                    'user', 
-                    'validateurN1', 
-                    'validateurN2', 
+                    'user',
+                    'validateurN1',
+                    'validateurN2',
                     'documents',
                     'tache.activite.projet'
                 ]))
@@ -170,9 +175,11 @@ class EvaluationController extends Controller
         $user = $request->user();
 
         // ⚠️ VÉRIFICATION STRICTE : Uniquement responsable du projet
-        if (!$resultat->tache->activite->projet || 
-            $resultat->tache->activite->projet->responsable_id !== $user->id) {
-            
+        if (
+            !$resultat->tache->activite->projet ||
+            $resultat->tache->activite->projet->responsable_id !== $user->id
+        ) {
+
             Log::warning('Tentative de validation N2 non autorisée', [
                 'user_id' => $user->id,
                 'resultat_id' => $resultat->id,
@@ -218,9 +225,9 @@ class EvaluationController extends Controller
                 'success' => true,
                 'message' => 'Résultat validé (Niveau 2 - Final) avec succès',
                 'data' => new TacheResultatResource($resultat->fresh([
-                    'user', 
-                    'validateurN1', 
-                    'validateurN2', 
+                    'user',
+                    'validateurN1',
+                    'validateurN2',
                     'documents',
                     'tache.activite.projet'
                 ]))
@@ -264,8 +271,10 @@ class EvaluationController extends Controller
                 ], 403);
             }
         } else {
-            if (!$resultat->tache->activite->projet || 
-                $resultat->tache->activite->projet->responsable_id !== $user->id) {
+            if (
+                !$resultat->tache->activite->projet ||
+                $resultat->tache->activite->projet->responsable_id !== $user->id
+            ) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Seul le responsable du projet peut rejeter ce résultat (N2)'
@@ -393,8 +402,10 @@ class EvaluationController extends Controller
         }
 
         // Responsable du projet
-        if ($resultat->tache->activite->projet && 
-            $resultat->tache->activite->projet->responsable_id === $user->id) {
+        if (
+            $resultat->tache->activite->projet &&
+            $resultat->tache->activite->projet->responsable_id === $user->id
+        ) {
             return true;
         }
 
@@ -404,17 +415,17 @@ class EvaluationController extends Controller
     private function canValidateN1($user, TacheResultat $resultat): bool
     {
         return $resultat->soumis_le &&
-               !$resultat->valide_par_n1 &&
-               $resultat->user_id !== $user->id &&
-               $resultat->tache->activite->responsable_id === $user->id;
+            !$resultat->valide_par_n1 &&
+            $resultat->user_id !== $user->id &&
+            $resultat->tache->activite->responsable_id === $user->id;
     }
 
     private function canValidateN2($user, TacheResultat $resultat): bool
     {
         return $resultat->valide_par_n1 &&
-               !$resultat->valide_par_n2 &&
-               $resultat->tache->activite->projet &&
-               $resultat->tache->activite->projet->responsable_id === $user->id;
+            !$resultat->valide_par_n2 &&
+            $resultat->tache->activite->projet &&
+            $resultat->tache->activite->projet->responsable_id === $user->id;
     }
 
     private function canRejectN1($user, TacheResultat $resultat): bool
@@ -437,14 +448,16 @@ class EvaluationController extends Controller
             return 'responsable_activite';
         }
 
-        if ($resultat->tache->activite->projet && 
-            $resultat->tache->activite->projet->responsable_id === $user->id) {
+        if (
+            $resultat->tache->activite->projet &&
+            $resultat->tache->activite->projet->responsable_id === $user->id
+        ) {
             return 'responsable_projet';
         }
 
         return 'aucun';
     }
-    
+
     /**
      * ✅ Historique des validations
      */
@@ -458,7 +471,7 @@ class EvaluationController extends Controller
         ]);
 
         $user = $request->user();
-        
+
         $query = TacheResultat::query()
             ->with([
                 'tache.activite.projet',
@@ -480,12 +493,12 @@ class EvaluationController extends Controller
                                 ->where('can_validate_results', true);
                         });
                 })
-                // Ou résultats que l'utilisateur peut valider (N2)
-                ->orWhereHas('tache.activite.projet', function ($pq) use ($user) {
-                    $pq->where('responsable_id', $user->id);
-                })
-                // Ou ses propres résultats
-                ->orWhere('user_id', $user->id);
+                    // Ou résultats que l'utilisateur peut valider (N2)
+                    ->orWhereHas('tache.activite.projet', function ($pq) use ($user) {
+                        $pq->where('responsable_id', $user->id);
+                    })
+                    // Ou ses propres résultats
+                    ->orWhere('user_id', $user->id);
             });
         }
 
@@ -501,7 +514,7 @@ class EvaluationController extends Controller
                         }
                     } else {
                         $q->where('valide_par_n1', true)
-                          ->orWhere('valide_par_n2', true);
+                            ->orWhere('valide_par_n2', true);
                     }
                 });
             } else {
@@ -515,22 +528,22 @@ class EvaluationController extends Controller
                 case 'today':
                     $query->where(function ($q) {
                         $q->whereDate('valide_le_n1', Carbon::today())
-                          ->orWhereDate('valide_le_n2', Carbon::today())
-                          ->orWhereDate('rejete_le', Carbon::today());
+                            ->orWhereDate('valide_le_n2', Carbon::today())
+                            ->orWhereDate('rejete_le', Carbon::today());
                     });
                     break;
                 case 'week':
                     $query->where(function ($q) {
                         $q->whereBetween('valide_le_n1', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
-                          ->orWhereBetween('valide_le_n2', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
-                          ->orWhereBetween('rejete_le', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
+                            ->orWhereBetween('valide_le_n2', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
+                            ->orWhereBetween('rejete_le', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
                     });
                     break;
                 case 'month':
                     $query->where(function ($q) {
                         $q->whereBetween('valide_le_n1', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])
-                          ->orWhereBetween('valide_le_n2', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])
-                          ->orWhereBetween('rejete_le', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()]);
+                            ->orWhereBetween('valide_le_n2', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])
+                            ->orWhereBetween('rejete_le', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()]);
                     });
                     break;
             }
@@ -632,8 +645,8 @@ class EvaluationController extends Controller
             'valides_n2' => $resultats->where('valide_par_n2', true)->count(),
             'en_attente' => $resultats->where('valide_par_n1', false)->count(),
             'rejetes' => $resultats->whereNotNull('rejete_le')->count(),
-            'taux_validation' => $resultats->count() > 0 
-                ? round(($resultats->where('valide_par_n1', true)->count() / $resultats->count()) * 100) 
+            'taux_validation' => $resultats->count() > 0
+                ? round(($resultats->where('valide_par_n1', true)->count() / $resultats->count()) * 100)
                 : 0,
             'taux_realisation_moyen' => $resultats->avg('taux_realisation') ?? 0,
         ];
@@ -659,9 +672,9 @@ class EvaluationController extends Controller
                 $q->whereHas('tache.activite', function ($aq) use ($user) {
                     $aq->where('responsable_id', $user->id);
                 })
-                ->orWhereHas('tache.activite.projet', function ($pq) use ($user) {
-                    $pq->where('responsable_id', $user->id);
-                });
+                    ->orWhereHas('tache.activite.projet', function ($pq) use ($user) {
+                        $pq->where('responsable_id', $user->id);
+                    });
             });
         }
 
@@ -687,4 +700,816 @@ class EvaluationController extends Controller
             'data' => $stats
         ]);
     }
+
+
+    /**
+     * 📋 MON RAPPORT HEBDOMADAIRE AMÉLIORÉ 
+     * 
+     * Logique selon le scénario de Jean :
+     * - Affiche les tâches confiées pendant la semaine sélectionnée
+     * - Affiche les tâches des semaines précédentes non terminées OU terminées mais non validées
+     * - Masque les tâches complètement validées des semaines passées
+     */
+    public function myWeeklyReportImproved(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'week_number' => 'nullable|integer|min:1|max:53',
+            'year' => 'nullable|integer|min:1990',
+        ]);
+
+        $weekNumber = $validated['week_number'] ?? now()->weekOfYear;
+        $year = $validated['year'] ?? now()->year;
+        $user = $request->user();
+
+        // Dates de la semaine sélectionnée
+        $weekStart = $this->getWeekStartDate($year, $weekNumber);
+        $weekEnd = $this->getWeekEndDate($year, $weekNumber);
+
+        Log::info('📋 Chargement fiche évaluation améliorée', [
+            'user_id' => $user->id,
+            'week' => $weekNumber,
+            'year' => $year,
+            'week_start' => $weekStart,
+            'week_end' => $weekEnd,
+        ]);
+
+        // Récupérer TOUTES les tâches assignées à l'utilisateur (sans filtre de date)
+        $taches = Tache::with([
+            'activite.projet.workspace',
+            'assignees' => function ($query) use ($user) {
+                $query->where('user_id', $user->id)
+                    ->withPivot([
+                        'statut_individuel',
+                        'progression_individuelle',
+                        'started_at',
+                        'completed_at',
+                        'created_at' // 🔑 Date d'affectation cruciale
+                    ]);
+            },
+            'labels',
+            'resultatsIndividuels' => function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            }
+        ])
+            ->whereHas('assignees', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->active() // Exclut les archivées
+            ->ordered()
+            ->get();
+
+        // 🎯 LOGIQUE DE FILTRAGE SELON LE SCÉNARIO
+        $tasksToDisplay = $taches->filter(function ($tache) use ($weekStart, $weekEnd, $user) {
+            $assignee = $tache->assignees->first();
+            if (!$assignee)
+                return false;
+
+            // Date d'affectation de la tâche à l'utilisateur
+            $affectationDate = Carbon::parse($assignee->pivot->created_at);
+            $weekStartCarbon = Carbon::parse($weekStart);
+            $weekEndCarbon = Carbon::parse($weekEnd);
+
+            // ✅ CAS 1 : Tâche affectée PENDANT cette semaine → TOUJOURS afficher
+            if ($affectationDate->between($weekStartCarbon, $weekEndCarbon)) {
+                Log::debug('Tâche affectée cette semaine', [
+                    'tache_id' => $tache->id,
+                    'affectation' => $affectationDate->format('Y-m-d')
+                ]);
+                return true;
+            }
+
+            // ✅ CAS 2 : Tâche affectée AVANT cette semaine
+            if ($affectationDate->lt($weekStartCarbon)) {
+                $statutIndividuel = $assignee->pivot->statut_individuel;
+
+                // Si pas terminé → AFFICHER (tâche en cours)
+                if ($statutIndividuel !== 'termine') {
+                    Log::debug('Tâche non terminée d\'avant', [
+                        'tache_id' => $tache->id,
+                        'statut' => $statutIndividuel
+                    ]);
+                    return true;
+                }
+
+                // Si terminé → vérifier la validation
+                $monResultat = $tache->monResultat($user);
+
+                // Pas de résultat soumis → AFFICHER
+                if (!$monResultat || !$monResultat->soumis_le) {
+                    Log::debug('Tâche terminée mais résultat non soumis', [
+                        'tache_id' => $tache->id
+                    ]);
+                    return true;
+                }
+
+                // Vérifier si validation complète
+                $validationComplete = false;
+
+                if ($tache->validation_n2_required) {
+                    // N1 ET N2 requis → validé seulement si les 2 sont validés
+                    $validationComplete = $monResultat->valide_par_n1 && $monResultat->valide_par_n2;
+                } else {
+                    // Seulement N1 requis → validé si N1 validé
+                    $validationComplete = $monResultat->valide_par_n1;
+                }
+
+                // Si validation complète, vérifier QUAND elle a eu lieu
+                if ($validationComplete) {
+                    $validationDate = $tache->validation_n2_required
+                        ? Carbon::parse($monResultat->valide_le_n2)
+                        : Carbon::parse($monResultat->valide_le_n1);
+
+                    // 🔑 RÈGLE IMPORTANTE : Masquer si validé AVANT ou PENDANT la semaine sélectionnée
+                    // Jean voit la tâche 3 validée dans la semaine du 01-07/12
+                    // Mais NE LA VOIT PLUS dans la semaine du 08-14/12
+                    if ($validationDate->lte($weekEndCarbon)) {
+                        Log::debug('Tâche validée avant/pendant cette semaine → masquée', [
+                            'tache_id' => $tache->id,
+                            'validation_date' => $validationDate->format('Y-m-d'),
+                            'week_end' => $weekEndCarbon->format('Y-m-d')
+                        ]);
+                        return false; // ❌ NE PAS afficher
+                    }
+                }
+
+                // Pas complètement validée → AFFICHER
+                Log::debug('Tâche pas encore validée → affichée', [
+                    'tache_id' => $tache->id,
+                    'valide_n1' => $monResultat->valide_par_n1,
+                    'valide_n2' => $monResultat->valide_par_n2
+                ]);
+                return true;
+            }
+
+            // ❌ CAS 3 : Tâche affectée APRÈS cette semaine → NE PAS afficher
+            return false;
+        });
+
+        // Calculer les statistiques détaillées
+        $stats = $this->calculateDetailedStats($tasksToDisplay, $user, Carbon::parse($weekEnd));
+
+        // Grouper par activité
+        $byActivite = $tasksToDisplay->groupBy('activite_id')->map(function ($tasks, $activiteId) use ($user) {
+            $activite = $tasks->first()->activite;
+
+            return [
+                'activite' => [
+                    'id' => $activite->id,
+                    'nom' => $activite->nom,
+                    'code' => $activite->code,
+                    'projet_nom' => $activite->projet?->nom,
+                    'workspace_nom' => $activite->projet?->workspace?->nom,
+                ],
+                'taches' => TacheResource::collection($tasks),
+                'stats' => [
+                    'total' => $tasks->count(),
+                    'a_faire' => $tasks->filter(function ($t) use ($user) {
+                        $assignee = $t->assignees->first();
+                        return $assignee && $assignee->pivot->statut_individuel === 'a_faire';
+                    })->count(),
+                    'en_cours' => $tasks->filter(function ($t) use ($user) {
+                        $assignee = $t->assignees->first();
+                        return $assignee && $assignee->pivot->statut_individuel === 'en_cours';
+                    })->count(),
+                    'termine' => $tasks->filter(function ($t) use ($user) {
+                        $assignee = $t->assignees->first();
+                        return $assignee && $assignee->pivot->statut_individuel === 'termine';
+                    })->count(),
+                ]
+            ];
+        })->values();
+
+        Log::info('✅ Fiche évaluation chargée', [
+            'user_id' => $user->id,
+            'total_tasks' => $stats['total'],
+            'activites' => $byActivite->count()
+        ]);
+
+        return response()->json([
+            'week_info' => [
+                'week_number' => $weekNumber,
+                'year' => $year,
+                'start_date' => $weekStart,
+                'end_date' => $weekEnd,
+                'is_current_week' => $weekNumber === now()->weekOfYear && $year === now()->year,
+            ],
+            'all_tasks' => TacheResource::collection($tasksToDisplay),
+            'by_activite' => $byActivite,
+            'stats' => $stats,
+            'scenario_info' => [
+                'message' => 'Les tâches complètement validées disparaissent des semaines suivantes',
+                'logic' => [
+                    'show_if_assigned_this_week' => true,
+                    'show_if_not_completed' => true,
+                    'show_if_completed_but_not_validated' => true,
+                    'hide_if_fully_validated_before_week_end' => true,
+                ]
+            ]
+        ]);
+    }
+
+    /**
+     * 🛠️ Helper: Calculer les statistiques détaillées
+     */
+    private function calculateDetailedStats($tasks, $user, $weekEnd)
+    {
+        $total = $tasks->count();
+
+        $a_faire = $tasks->filter(function ($t) use ($user) {
+            $assignee = $t->assignees->first();
+            return $assignee && $assignee->pivot->statut_individuel === 'a_faire';
+        })->count();
+
+        $en_cours = $tasks->filter(function ($t) use ($user) {
+            $assignee = $t->assignees->first();
+            return $assignee && $assignee->pivot->statut_individuel === 'en_cours';
+        })->count();
+
+        $termine = $tasks->filter(function ($t) use ($user) {
+            $assignee = $t->assignees->first();
+            return $assignee && $assignee->pivot->statut_individuel === 'termine';
+        })->count();
+
+        $avec_resultat = $tasks->filter(function ($t) {
+            return $t->resultatsIndividuels->isNotEmpty() &&
+                $t->resultatsIndividuels->first()->soumis_le;
+        })->count();
+
+        $valide_n1 = $tasks->filter(function ($t) {
+            $r = $t->resultatsIndividuels->first();
+            return $r && $r->valide_par_n1;
+        })->count();
+
+        $valide_n2 = $tasks->filter(function ($t) {
+            $r = $t->resultatsIndividuels->first();
+            return $r && $r->valide_par_n2;
+        })->count();
+
+        // 🚨 EN RETARD : échéance passée ET pas terminé individuellement
+        $en_retard = $tasks->filter(function ($t) use ($user) {
+            $assignee = $t->assignees->first();
+            return $t->is_overdue &&
+                $assignee &&
+                $assignee->pivot->statut_individuel !== 'termine';
+        })->count();
+
+        $estimated_hours = $tasks->sum(fn($t) => (float) $t->estimated_hours);
+        $actual_hours = $tasks->sum(fn($t) => (float) $t->actual_hours);
+
+        return [
+            'total' => $total,
+            'a_faire' => $a_faire,
+            'en_cours' => $en_cours,
+            'termine' => $termine,
+            'avec_resultat' => $avec_resultat,
+            'valide_n1' => $valide_n1,
+            'valide_n2' => $valide_n2,
+            'en_retard' => $en_retard,
+            'completionRate' => $total > 0 ? round(($termine / $total) * 100) : 0,
+            'validationRate' => $avec_resultat > 0 ? round(($valide_n1 / $avec_resultat) * 100) : 0,
+            'estimated_hours' => number_format($estimated_hours, 1),
+            'actual_hours' => number_format($actual_hours, 1),
+        ];
+    }
+
+    /**
+     * 🛠️ Helper: Obtenir la date de début de semaine (Lundi)
+     */
+    private function getWeekStartDate(int $year, int $week): string
+    {
+        $dto = new \DateTime();
+        $dto->setISODate($year, $week);
+        return $dto->format('Y-m-d');
+    }
+
+    /**
+     * 🛠️ Helper: Obtenir la date de fin de semaine (Dimanche)
+     */
+    private function getWeekEndDate(int $year, int $week): string
+    {
+        $dto = new \DateTime();
+        $dto->setISODate($year, $week, 7);
+        return $dto->format('Y-m-d');
+    }
+
+    /**
+     * 📊 RAPPORT DE PERFORMANCE D'UN WORKSPACE
+     * À ajouter dans EvaluationController.php
+     * 
+     * Permet aux managers de voir les performances de tous les membres du workspace
+     */
+    public function workspacePerformanceReport(Request $request, int $workspaceId): JsonResponse
+    {
+        $validated = $request->validate([
+            'week_number' => 'nullable|integer|min:1|max:53',
+            'year' => 'nullable|integer|min:1990',
+            'user_id' => 'nullable|exists:users,id', // Filtrer par utilisateur spécifique
+        ]);
+
+        $workspace = Workspace::with(['membres'])->findOrFail($workspaceId);
+        $user = $request->user();
+
+        // Vérifier les permissions
+        if (!$this->canViewWorkspacePerformance($user, $workspace)) {
+            return response()->json([
+                'message' => 'Vous n\'avez pas la permission de consulter ce rapport'
+            ], 403);
+        }
+
+        $weekNumber = $validated['week_number'] ?? now()->weekOfYear;
+        $year = $validated['year'] ?? now()->year;
+        $weekStart = $this->getWeekStartDate($year, $weekNumber);
+        $weekEnd = $this->getWeekEndDate($year, $weekNumber);
+
+        // Liste des membres à analyser
+        $membresQuery = $workspace->membres();
+
+        if (isset($validated['user_id'])) {
+            $membresQuery->where('users.id', $validated['user_id']);
+        }
+
+        $membres = $membresQuery->get();
+
+        // Analyser chaque membre
+        $performanceData = $membres->map(function ($membre) use ($weekStart, $weekEnd, $weekNumber, $year, $workspace) {
+            return $this->generateUserPerformanceReport($membre, $weekStart, $weekEnd, $weekNumber, $year, $workspace);
+        })->sortByDesc('performance_score')->values();
+
+        // Statistiques globales du workspace
+        $globalStats = $this->calculateWorkspaceGlobalStats($performanceData);
+
+        return response()->json([
+            'workspace' => [
+                'id' => $workspace->id,
+                'nom' => $workspace->nom,
+                'total_membres' => $membres->count(),
+            ],
+            'week_info' => [
+                'week_number' => $weekNumber,
+                'year' => $year,
+                'start_date' => $weekStart,
+                'end_date' => $weekEnd,
+                'is_current_week' => $weekNumber === now()->weekOfYear && $year === now()->year,
+            ],
+            'membres_performance' => $performanceData,
+            'global_stats' => $globalStats,
+            'classement' => $this->generateRanking($performanceData),
+        ]);
+    }
+
+    /**
+     * 📈 DÉTAIL PERFORMANCE D'UN MEMBRE
+     */
+    public function memberDetailedPerformance(Request $request, int $userId): JsonResponse
+    {
+        $validated = $request->validate([
+            'week_number' => 'nullable|integer|min:1|max:53',
+            'year' => 'nullable|integer|min:1990',
+            'workspace_id' => 'nullable|exists:workspaces,id',
+        ]);
+
+        $membre = User::findOrFail($userId);
+        $currentUser = $request->user();
+
+        // Vérifier permissions
+        if (!$this->canViewUserPerformance($currentUser, $membre, $validated['workspace_id'] ?? null)) {
+            return response()->json([
+                'message' => 'Accès non autorisé'
+            ], 403);
+        }
+
+        $weekNumber = $validated['week_number'] ?? now()->weekOfYear;
+        $year = $validated['year'] ?? now()->year;
+        $weekStart = $this->getWeekStartDate($year, $weekNumber);
+        $weekEnd = $this->getWeekEndDate($year, $weekNumber);
+
+        $performance = $this->generateUserPerformanceReport($membre, $weekStart, $weekEnd, $weekNumber, $year);
+
+        // Historique des 4 dernières semaines
+        $historique = $this->generatePerformanceHistory($membre, $weekNumber, $year, 4);
+
+        return response()->json([
+            'user' => [
+                'id' => $membre->id,
+                'nom' => $membre->nom,
+                'email' => $membre->email,
+                'avatar' => $membre->avatar,
+            ],
+            'week_info' => [
+                'week_number' => $weekNumber,
+                'year' => $year,
+                'start_date' => $weekStart,
+                'end_date' => $weekEnd,
+            ],
+            'performance' => $performance,
+            'historique' => $historique,
+            'tendances' => $this->calculatePerformanceTrends($historique),
+        ]);
+    }
+
+    // ==================== MÉTHODES PRIVÉES ====================
+
+    /**
+     * Générer le rapport de performance d'un utilisateur
+     */
+    private function generateUserPerformanceReport($user, $weekStart, $weekEnd, $weekNumber, $year, $workspace = null)
+    {
+        // Récupérer les tâches selon la logique améliorée
+        $taches = Tache::with([
+            'activite.projet',
+            'assignees' => function ($query) use ($user) {
+                $query->where('user_id', $user->id)
+                    ->withPivot(['statut_individuel', 'progression_individuelle', 'created_at', 'completed_at']);
+            },
+            'resultatsIndividuels' => function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            }
+        ])
+            ->whereHas('assignees', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->active()
+            ->get()
+            ->filter(function ($tache) use ($user, $weekStart, $weekEnd) {
+                // Utiliser la même logique que myWeeklyReport
+                return $this->shouldDisplayTaskInWeek($tache, $user, $weekStart, $weekEnd);
+            });
+
+        // Si workspace spécifié, filtrer par workspace
+        if ($workspace) {
+            $taches = $taches->filter(function ($tache) use ($workspace) {
+                return $tache->activite->projet &&
+                    $tache->activite->projet->workspace_id === $workspace->id;
+            });
+        }
+
+        $stats = $this->calculateDetailedStats($taches, $user, Carbon::parse($weekEnd));
+
+        // Analyse des retards
+        $retards = $taches->filter(function ($t) use ($user) {
+            $assignee = $t->assignees->first();
+            return $t->is_overdue && $assignee && $assignee->pivot->statut_individuel !== 'termine';
+        });
+
+        // 🎯 Score de performance (0-100)
+        $performanceScore = $this->calculatePerformanceScore($stats, $retards->count());
+
+        // 📊 Analyse du temps
+        $timeAnalysis = $this->analyzeTime($stats);
+
+        return [
+            'user' => [
+                'id' => $user->id,
+                'nom' => $user->nom,
+                'email' => $user->email,
+                'avatar' => $user->avatar,
+            ],
+            'stats' => $stats,
+            'performance_score' => $performanceScore,
+            'performance_level' => $this->getPerformanceLevel($performanceScore),
+            'time_analysis' => $timeAnalysis,
+            'taches_en_retard' => TacheResource::collection($retards),
+            'retards_count' => $retards->count(),
+            'recommandations' => $this->generateRecommendations($stats, $retards->count()),
+        ];
+    }
+
+    /**
+     * Calculer le score de performance (0-100)
+     */
+    private function calculatePerformanceScore($stats, $retardsCount): int
+    {
+        $score = 50; // Base
+
+        // ✅ Points positifs
+        $score += ($stats['termine'] * 8); // Tâches terminées
+        $score += ($stats['valide_n1'] * 5); // Validations N1
+        $score += ($stats['valide_n2'] * 3); // Validations N2
+        $score += (min($stats['completionRate'], 100) * 0.3); // Taux de complétion
+
+        // ❌ Pénalités
+        $score -= ($stats['a_faire'] * 3); // Tâches à faire
+        $score -= ($retardsCount * 15); // GROS MALUS pour retards
+
+        // Pénalité si beaucoup d'heures sans terminer
+        if ($stats['actual_hours'] > $stats['estimated_hours'] && $stats['termine'] < $stats['total'] / 2) {
+            $score -= 10;
+        }
+
+        return max(0, min(100, round($score)));
+    }
+
+    /**
+     * Déterminer le niveau de performance
+     */
+    private function getPerformanceLevel($score): array
+    {
+        if ($score >= 90) {
+            return ['label' => 'Excellent', 'color' => 'green', 'emoji' => '🌟'];
+        } elseif ($score >= 75) {
+            return ['label' => 'Très bien', 'color' => 'blue', 'emoji' => '👍'];
+        } elseif ($score >= 60) {
+            return ['label' => 'Bien', 'color' => 'yellow', 'emoji' => '👌'];
+        } elseif ($score >= 40) {
+            return ['label' => 'À améliorer', 'color' => 'orange', 'emoji' => '⚠️'];
+        } else {
+            return ['label' => 'Critique', 'color' => 'red', 'emoji' => '🚨'];
+        }
+    }
+
+    /**
+     * Analyser le temps de travail
+     */
+    private function analyzeTime($stats): array
+    {
+        $estimated = (float) $stats['estimated_hours'];
+        $actual = (float) $stats['actual_hours'];
+
+        $efficiency = $estimated > 0 ? round(($estimated / $actual) * 100) : 100;
+        $overrun = $actual - $estimated;
+        $overrunPercent = $estimated > 0 ? round(($overrun / $estimated) * 100) : 0;
+
+        return [
+            'estimated_hours' => $estimated,
+            'actual_hours' => $actual,
+            'efficiency' => min(100, $efficiency),
+            'overrun_hours' => round($overrun, 1),
+            'overrun_percent' => $overrunPercent,
+            'status' => $overrun <= 0 ? 'on_track' : ($overrun < $estimated * 0.2 ? 'slight_overrun' : 'significant_overrun'),
+        ];
+    }
+
+    /**
+     * Générer des recommandations personnalisées
+     */
+    private function generateRecommandations($stats, $retardsCount): array
+    {
+        $recommendations = [];
+
+        // 🚨 PRIORITÉ 1 : Retards
+        if ($retardsCount > 0) {
+            $recommendations[] = [
+                'type' => 'urgent',
+                'priority' => 1,
+                'message' => "🚨 URGENT: Vous avez {$retardsCount} tâche(s) en retard. Priorisez-les immédiatement.",
+                'action' => 'Concentrez-vous sur les tâches en retard avant d\'en commencer de nouvelles.',
+            ];
+        }
+
+        // ⚠️ PRIORITÉ 2 : Trop de tâches à faire
+        if ($stats['a_faire'] > 3) {
+            $recommendations[] = [
+                'type' => 'warning',
+                'priority' => 2,
+                'message' => "⚠️ Vous avez {$stats['a_faire']} tâches à faire. Commencez-en quelques-unes pour éviter l'accumulation.",
+                'action' => 'Démarrez au moins 2-3 tâches cette semaine pour maintenir un bon rythme.',
+            ];
+        }
+
+        // 💡 PRIORITÉ 3 : Tâches terminées non soumises
+        $non_soumis = $stats['termine'] - $stats['avec_resultat'];
+        if ($non_soumis > 0) {
+            $recommendations[] = [
+                'type' => 'info',
+                'priority' => 3,
+                'message' => "💡 Vous avez {$non_soumis} tâche(s) terminée(s) dont les résultats n'ont pas été soumis.",
+                'action' => 'Soumettez vos résultats pour validation dès que possible.',
+            ];
+        }
+
+        // ✅ FÉLICITATIONS
+        if ($stats['valide_n1'] >= 3 && $retardsCount === 0) {
+            $recommendations[] = [
+                'type' => 'success',
+                'priority' => 4,
+                'message' => "✅ Excellent travail! {$stats['valide_n1']} résultats validés et aucun retard.",
+                'action' => 'Continuez sur cette lancée!',
+            ];
+        }
+
+        // Trier par priorité
+        usort($recommendations, fn($a, $b) => $a['priority'] - $b['priority']);
+
+        return $recommendations;
+    }
+
+    /**
+     * Calculer les statistiques globales du workspace
+     */
+    private function calculateWorkspaceGlobalStats($performanceData): array
+    {
+        $totalMembres = $performanceData->count();
+
+        if ($totalMembres === 0) {
+            return [
+                'total_membres' => 0,
+                'avg_performance_score' => 0,
+                'total_taches' => 0,
+                'total_terminees' => 0,
+                'total_en_retard' => 0,
+                'completion_rate' => 0,
+            ];
+        }
+
+        $totalTaches = $performanceData->sum('stats.total');
+        $totalTerminees = $performanceData->sum('stats.termine');
+        $totalEnRetard = $performanceData->sum('retards_count');
+        $avgScore = $performanceData->avg('performance_score');
+
+        return [
+            'total_membres' => $totalMembres,
+            'avg_performance_score' => round($avgScore, 1),
+            'total_taches' => $totalTaches,
+            'total_terminees' => $totalTerminees,
+            'total_en_retard' => $totalEnRetard,
+            'completion_rate' => $totalTaches > 0 ? round(($totalTerminees / $totalTaches) * 100) : 0,
+            'membres_excellent' => $performanceData->filter(fn($p) => $p['performance_score'] >= 90)->count(),
+            'membres_bien' => $performanceData->filter(fn($p) => $p['performance_score'] >= 60 && $p['performance_score'] < 90)->count(),
+            'membres_a_ameliorer' => $performanceData->filter(fn($p) => $p['performance_score'] < 60)->count(),
+        ];
+    }
+
+    /**
+     * Générer le classement
+     */
+    private function generateRanking($performanceData): array
+    {
+        return $performanceData->map(function ($perf, $index) {
+            return [
+                'rank' => $index + 1,
+                'user_id' => $perf['user']['id'],
+                'nom' => $perf['user']['nom'],
+                'score' => $perf['performance_score'],
+                'taches_terminees' => $perf['stats']['termine'],
+                'en_retard' => $perf['retards_count'],
+            ];
+        })->values()->all();
+    }
+
+    /**
+     * Générer l'historique de performance
+     */
+    private function generatePerformanceHistory($user, $currentWeek, $currentYear, $weeksCount): array
+    {
+        $history = [];
+
+        for ($i = 0; $i < $weeksCount; $i++) {
+            $week = $currentWeek - $i;
+            $year = $currentYear;
+
+            // Gérer le passage d'année
+            if ($week < 1) {
+                $week = 52 + $week;
+                $year--;
+            }
+
+            $weekStart = $this->getWeekStartDate($year, $week);
+            $weekEnd = $this->getWeekEndDate($year, $week);
+
+            $perf = $this->generateUserPerformanceReport($user, $weekStart, $weekEnd, $week, $year);
+
+            $history[] = [
+                'week_number' => $week,
+                'year' => $year,
+                'performance_score' => $perf['performance_score'],
+                'taches_total' => $perf['stats']['total'],
+                'taches_terminees' => $perf['stats']['termine'],
+                'en_retard' => $perf['retards_count'],
+            ];
+        }
+
+        return array_reverse($history);
+    }
+
+    /**
+     * Calculer les tendances
+     */
+    private function calculatePerformanceTrends($historique): array
+    {
+        if (count($historique) < 2) {
+            return ['trend' => 'stable', 'variation' => 0];
+        }
+
+        $scores = array_column($historique, 'performance_score');
+        $latest = end($scores);
+        $previous = $scores[count($scores) - 2];
+
+        $variation = $latest - $previous;
+
+        $trend = 'stable';
+        if ($variation > 5) {
+            $trend = 'improving';
+        } elseif ($variation < -5) {
+            $trend = 'declining';
+        }
+
+        return [
+            'trend' => $trend,
+            'variation' => round($variation, 1),
+            'emoji' => $trend === 'improving' ? '📈' : ($trend === 'declining' ? '📉' : '➡️'),
+        ];
+    }
+
+    /**
+     * Vérifier si l'utilisateur peut voir les performances du workspace
+     */
+    private function canViewWorkspacePerformance($user, $workspace): bool
+    {
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        // Owner ou admin du workspace
+        $membre = $workspace->membres()->where('user_id', $user->id)->first();
+        if ($membre && in_array($membre->pivot->role, ['owner', 'admin'])) {
+            return true;
+        }
+
+        // Responsable d'un projet du workspace
+        $isResponsableProjet = $workspace->projets()
+            ->where('responsable_id', $user->id)
+            ->exists();
+
+        return $isResponsableProjet;
+    }
+
+    /**
+     * Vérifier si l'utilisateur peut voir la performance d'un membre
+     */
+    private function canViewUserPerformance($currentUser, $targetUser, $workspaceId = null): bool
+    {
+        if ($currentUser->id === $targetUser->id) {
+            return true;
+        }
+
+        if ($currentUser->isSuperAdmin()) {
+            return true;
+        }
+
+        // Si workspace spécifié, vérifier les permissions workspace
+        if ($workspaceId) {
+            $workspace = Workspace::find($workspaceId);
+            if ($workspace && $this->canViewWorkspacePerformance($currentUser, $workspace)) {
+                return true;
+            }
+        }
+
+        // Vérifier si responsable d'activité avec le membre
+        $isResponsable = Activite::where('responsable_id', $currentUser->id)
+            ->whereHas('membres', function ($q) use ($targetUser) {
+                $q->where('user_id', $targetUser->id);
+            })
+            ->exists();
+
+        return $isResponsable;
+    }
+
+    /**
+     * Helper pour déterminer si une tâche doit être affichée (réutilisé)
+     */
+    private function shouldDisplayTaskInWeek($tache, $user, $weekStart, $weekEnd): bool
+    {
+        $assignee = $tache->assignees->first();
+        if (!$assignee)
+            return false;
+
+        $affectationDate = Carbon::parse($assignee->pivot->created_at);
+        $weekStartCarbon = Carbon::parse($weekStart);
+        $weekEndCarbon = Carbon::parse($weekEnd);
+
+        if ($affectationDate->between($weekStartCarbon, $weekEndCarbon)) {
+            return true;
+        }
+
+        if ($affectationDate->lt($weekStartCarbon)) {
+            $statutIndividuel = $assignee->pivot->statut_individuel;
+
+            if ($statutIndividuel !== 'termine') {
+                return true;
+            }
+
+            $monResultat = $tache->monResultat($user);
+
+            if (!$monResultat || !$monResultat->soumis_le) {
+                return true;
+            }
+
+            $validationComplete = $tache->validation_n2_required
+                ? ($monResultat->valide_par_n1 && $monResultat->valide_par_n2)
+                : $monResultat->valide_par_n1;
+
+            if ($validationComplete) {
+                $validationDate = $tache->validation_n2_required
+                    ? Carbon::parse($monResultat->valide_le_n2)
+                    : Carbon::parse($monResultat->valide_le_n1);
+
+                return $validationDate->gt($weekEndCarbon);
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
 }

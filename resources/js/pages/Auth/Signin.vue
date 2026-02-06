@@ -223,7 +223,7 @@
         width="200"
         height="180"
         :src="LogoDark"
-        alt="Uptiimun Work Tracking"
+        alt="Uptiimum Work Tracking"
         class="mx-auto rounded-lg"
     />
 </div>
@@ -231,7 +231,7 @@
 
                             <!-- Nom de l'application -->
                             <h2 class="mb-4 text-2xl font-bold text-white">
-                                Uptiimun Work Tracking
+                                Uptiimum Work Tracking
                             </h2>
 
                             <!-- Description -->

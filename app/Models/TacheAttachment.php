@@ -34,7 +34,7 @@ class TacheAttachment extends Model
 
     public function getFileUrlAttribute(): string
     {
-        return asset('storage/' . $this->file_path);
+        return asset('uploads/' . $this->file_path);
     }
 
     public function getFormattedFileSizeAttribute(): string

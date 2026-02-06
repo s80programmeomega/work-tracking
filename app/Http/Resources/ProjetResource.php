@@ -26,6 +26,7 @@ class ProjetResource extends JsonResource
                     'id' => $this->workspace->id,
                     'nom' => $this->workspace->nom,
                     'slug' => $this->workspace->slug,
+                    'owner_id' => $this->workspace->owner_id,
                 ];
             }),
             'nom' => $this->nom,

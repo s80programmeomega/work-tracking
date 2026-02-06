@@ -2,7 +2,9 @@
 import { ref, computed, watch } from 'vue';
 import api from '@/api/axios';
 import { useAuthStore } from '@/stores/auth';
+import { useToast } from "vue-toastification"
 
+const toast = useToast()
 const currentWorkspace = ref(null);
 const workspaces = ref([]);
 const loading = ref(false);
@@ -54,6 +56,8 @@ export function useWorkspace() {
       return currentWorkspace.value;
     } catch (err) {
       console.error('Erreur lors de l\'initialisation du workspace:', err);
+      toast.error('Erreur lors de l\'initialisation du workspace:');
+
       error.value = err.response?.data?.message || 'Erreur d\'initialisation';
       throw err;
     } finally {
@@ -78,17 +82,17 @@ export function useWorkspace() {
         workspaces.value = response.data.data || response.data;
       }
 
-      return workspaces.value;
+      // return workspaces.value;
       // // Si ce n'est pas paginé
       // workspaces.value = response.data.data || response.data;
 
-      // // Set first workspace as current if none selected
-      // if (!currentWorkspace.value && workspaces.value.length > 0) {
-      //   currentWorkspace.value = workspaces.value[0];
-      //   localStorage.setItem('current_workspace_id', workspaces.value[0].id);
-      // }
+      // Set first workspace as current if none selected
+      if (!currentWorkspace.value && workspaces.value.length > 0) {
+        currentWorkspace.value = workspaces.value[0];
+        localStorage.setItem('current_workspace_id', workspaces.value[0].id);
+      }
 
-      // return workspaces.value;
+      return workspaces.value;
     } catch (err) {
       error.value = err.response?.data?.message || 'Erreur lors du chargement des workspaces';
       console.error('Error fetching workspaces:', err);
@@ -138,6 +142,8 @@ export function useWorkspace() {
       await api.post(`/workspaces/switch/${newWorkspaceId}`);
     } catch (err) {
       console.warn('Erreur lors du switch workspace côté serveur:', err);
+      toast.warning('Erreur lors du switch workspace côté serveur');
+
     }
 
     // ✅ Notifier tous les listeners
@@ -158,6 +164,8 @@ export function useWorkspace() {
           listener(event);
         } catch (error) {
           console.error('Error in workspace change listener:', error);
+          toast.error('Error in workspace change listener:');
+
         }
       } else {
         // Marquer les listeners invalides pour suppression
@@ -278,6 +286,7 @@ export function useWorkspace() {
 
       return updatedWorkspace;
     } catch (err) {
+      toast.warning('Erreur lors de la mise à jour');
       console.error('Erreur lors de la mise à jour:', err);
       console.error('Response data:', err.response?.data);
       error.value = err.response?.data?.message || 'Erreur lors de la mise à jour du workspace';
@@ -323,83 +332,82 @@ export function useWorkspace() {
   /**
    * Fetch workspace members
    */
-const fetchMembers = async (workspaceId) => {
-  loading.value = true
-  error.value = null
+  const fetchMembers = async (workspaceId) => {
+    loading.value = true
+    error.value = null
 
-  try {
-    const response = await api.get(`/workspaces/${workspaceId}/members`)
-    
-    console.log('✅ Membres chargés:', response.data)
-    
-    // Les membres sont déjà formatés avec permissions et statistiques
-    const members = response.data.data || []
-    
-    // Validation des données
-    members.forEach(member => {
-      if (!member.pivot) {
-        console.warn('⚠️ Membre sans pivot:', member)
-        member.pivot = {
-          role: 'viewer',
-          permissions: {
+    try {
+      const response = await api.get(`/workspaces/${workspaceId}/members`)
+
+      console.log('✅ Membres chargés:', response.data)
+
+      // Les membres sont déjà formatés avec permissions et statistiques
+      const members = response.data.data || []
+
+      // Validation des données
+      members.forEach(member => {
+        if (!member.pivot) {
+          console.warn('⚠️ Membre sans pivot:', member)
+          member.pivot = {
+            role: 'viewer',
+            permissions: {
+              can_create_projects: false,
+              can_invite_members: false,
+              can_manage_settings: false,
+            }
+          }
+        }
+
+        if (!member.pivot.permissions) {
+          member.pivot.permissions = {
             can_create_projects: false,
             can_invite_members: false,
             can_manage_settings: false,
           }
         }
-      }
-      
-      if (!member.pivot.permissions) {
-        member.pivot.permissions = {
-          can_create_projects: false,
-          can_invite_members: false,
-          can_manage_settings: false,
-        }
-      }
-      
-      if (!member.statistics) {
-        member.statistics = {
-          projets_count: 0,
-          taches_count: 0,
-          taches_completees: 0,
-          taux_completion: 0,
-        }
-      }
-      
-      if (!member.projets) {
-        member.projets = []
-      }
-    })
-    
-    return members
-  } catch (err) {
-    console.error('❌ Erreur chargement membres:', err)
-    error.value = err.response?.data?.message || 'Erreur lors du chargement des membres'
-    throw err
-  } finally {
-    loading.value = false
-  }
-}
 
-const fetchInvitations = async (workspaceId) => {
-  loading.value = true
-  error.value = null
-  
-  try {
-    const response = await api.get(`/workspaces/${workspaceId}/invitations`)
-    
-    console.log('✅ Invitations chargées:', response.data)
-    
-    // La réponse contient déjà les données formatées du backend
-    return response.data.data || []
-  } catch (err) {
-    console.error('❌ Erreur chargement invitations:', err)
-    error.value = err.response?.data?.message || 'Erreur lors du chargement des invitations'
-    throw err
-  } finally {
-    loading.value = false
+        if (!member.statistics) {
+          member.statistics = {
+            projets_count: 0,
+            taches_count: 0,
+            taches_completees: 0,
+            taux_completion: 0,
+          }
+        }
+
+        if (!member.projets) {
+          member.projets = []
+        }
+      })
+
+      return members
+    } catch (err) {
+      console.error('❌ Erreur chargement membres:', err)
+      error.value = err.response?.data?.message || 'Erreur lors du chargement des membres'
+      throw err
+    } finally {
+      loading.value = false
+    }
   }
-}
+
+  const fetchInvitations = async (workspaceId) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      // ✅ Nouvelle route
+      const response = await api.get(`/workspaces/${workspaceId}/members/invitations`)
+
+      console.log('✅ Invitations chargées:', response.data)
+      return response.data.data || []
+    } catch (err) {
+      console.error('❌ Erreur chargement invitations:', err)
+      error.value = err.response?.data?.message || 'Erreur lors du chargement des invitations'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
 
   /**
  * Fetch all invitations across all workspaces (for admin/super_admin)
@@ -435,48 +443,48 @@ const fetchInvitations = async (workspaceId) => {
   /**
    * Invite members to workspace
    */
-const inviteMembers = async (workspaceId, inviteData) => {
-  loading.value = true
-  error.value = null
+  const inviteMembers = async (workspaceId, inviteData) => {
+    loading.value = true
+    error.value = null
 
-  try {
-    console.log('📧 Envoi invitations:', {
-      workspaceId,
-      emails: inviteData.emails,
-      role: inviteData.role,
-      send_email: inviteData.send_email
-    })
+    try {
+      console.log('📧 Envoi invitations:', {
+        workspaceId,
+        emails: inviteData.emails,
+        role: inviteData.role,
+        send_email: inviteData.send_email
+      })
 
-    const response = await api.post(`/workspaces/${workspaceId}/members/invite`, inviteData)
-    
-    console.log('✅ Réponse invitations:', response.data)
-    
-    // Afficher un résumé dans la console
-    if (response.data.data) {
-      const { success_count, error_count, invitations, errors } = response.data.data
-      
-      console.log(`✅ Invitations réussies: ${success_count}`)
-      if (error_count > 0) {
-        console.warn(`⚠️ Invitations échouées: ${error_count}`)
-        errors.forEach(err => {
-          console.warn(`  - ${err.email}: ${err.message}`)
+      const response = await api.post(`/workspaces/${workspaceId}/members/invite`, inviteData)
+
+      console.log('✅ Réponse invitations:', response.data)
+
+      // Afficher un résumé dans la console
+      if (response.data.data) {
+        const { success_count, error_count, invitations, errors } = response.data.data
+
+        console.log(`✅ Invitations réussies: ${success_count}`)
+        if (error_count > 0) {
+          console.warn(`⚠️ Invitations échouées: ${error_count}`)
+          errors.forEach(err => {
+            console.warn(`  - ${err.email}: ${err.message}`)
+          })
+        }
+
+        invitations.forEach(inv => {
+          console.log(`  ✓ ${inv.email} ${inv.user_exists ? '(utilisateur existant)' : '(nouvel utilisateur)'}`)
         })
       }
-      
-      invitations.forEach(inv => {
-        console.log(`  ✓ ${inv.email} ${inv.user_exists ? '(utilisateur existant)' : '(nouvel utilisateur)'}`)
-      })
+
+      return response.data
+    } catch (err) {
+      console.error('❌ Erreur invitations:', err)
+      error.value = err.response?.data?.message || 'Erreur lors de l\'envoi des invitations'
+      throw err
+    } finally {
+      loading.value = false
     }
-    
-    return response.data
-  } catch (err) {
-    console.error('❌ Erreur invitations:', err)
-    error.value = err.response?.data?.message || 'Erreur lors de l\'envoi des invitations'
-    throw err
-  } finally {
-    loading.value = false
   }
-}
 
   /**
    * Resend invitation
@@ -486,7 +494,7 @@ const inviteMembers = async (workspaceId, inviteData) => {
     error.value = null;
 
     try {
-      const response = await api.post(`/workspaces/${workspaceId}/invitations/${invitationId}/resend`);
+    const response = await api.post(`/workspaces/${workspaceId}/members/invitations/${invitationId}/resend`);
       return response.data;
     } catch (err) {
       error.value = err.response?.data?.message || 'Erreur lors du renvoi de l\'invitation';
@@ -504,7 +512,7 @@ const inviteMembers = async (workspaceId, inviteData) => {
     error.value = null;
 
     try {
-      const response = await api.delete(`/workspaces/${workspaceId}/invitations/${invitationId}`);
+    const response = await api.delete(`/workspaces/${workspaceId}/members/invitations/${invitationId}`);
       return response.data;
     } catch (err) {
       error.value = err.response?.data?.message || 'Erreur lors de l\'annulation de l\'invitation';
@@ -729,48 +737,48 @@ const inviteMembers = async (workspaceId, inviteData) => {
   /**
    * Get member permissions and role
    */
-const getMemberPermissions = (member) => {
-  // Validation de base
-  if (!member || !member.pivot) {
-    console.warn('⚠️ Member sans pivot:', member)
-    return {
-      can_create_projects: false,
-      can_invite_members: false,
-      can_manage_settings: false,
+  const getMemberPermissions = (member) => {
+    // Validation de base
+    if (!member || !member.pivot) {
+      console.warn('⚠️ Member sans pivot:', member)
+      return {
+        can_create_projects: false,
+        can_invite_members: false,
+        can_manage_settings: false,
+      }
     }
-  }
 
-  const pivot = member.pivot
-  let permissions = pivot.permissions || {}
+    const pivot = member.pivot
+    let permissions = pivot.permissions || {}
 
-  // Si c'est une string, essayer de parser
-  if (typeof permissions === 'string') {
-    try {
-      permissions = JSON.parse(permissions)
-    } catch (e) {
-      console.error('❌ Erreur parsing permissions:', permissions)
-      permissions = {}
+    // Si c'est une string, essayer de parser
+    if (typeof permissions === 'string') {
+      try {
+        permissions = JSON.parse(permissions)
+      } catch (e) {
+        console.error('❌ Erreur parsing permissions:', permissions)
+        permissions = {}
+      }
     }
-  }
 
-  // Si c'est le format "all"
-  if (permissions === 'all' || 
+    // Si c'est le format "all"
+    if (permissions === 'all' ||
       (Array.isArray(permissions) && permissions[0] === 'all') ||
       (typeof permissions === 'string' && permissions === '["all"]')) {
+      return {
+        can_create_projects: true,
+        can_invite_members: true,
+        can_manage_settings: true,
+      }
+    }
+
+    // Format normal
     return {
-      can_create_projects: true,
-      can_invite_members: true,
-      can_manage_settings: true,
+      can_create_projects: permissions.can_create_projects ?? false,
+      can_invite_members: permissions.can_invite_members ?? false,
+      can_manage_settings: permissions.can_manage_settings ?? false,
     }
   }
-
-  // Format normal
-  return {
-    can_create_projects: permissions.can_create_projects ?? false,
-    can_invite_members: permissions.can_invite_members ?? false,
-    can_manage_settings: permissions.can_manage_settings ?? false,
-  }
-}
 
   /**
   * Check if user can manage workspace members
@@ -783,8 +791,8 @@ const getMemberPermissions = (member) => {
       return true;
     }
 
-    console.log('canManageMembers',workspace);
-    
+    console.log('canManageMembers', workspace);
+
     // Vérifier les permissions via le pivot
     const member = workspace.members?.find(m => m.id === user.id);
     if (!member || !member.pivot) return false;

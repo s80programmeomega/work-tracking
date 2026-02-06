@@ -79,7 +79,7 @@ export function useInvitationPermissions(workspace) {
 
     // Empêcher d'accorder plus de permissions que ce qu'on a soi-même
     const userPermissions = useWorkspacePermissions(workspace)
-    
+
     // Logique de vérification basée sur les permissions de l'utilisateur
     switch (permissionKey) {
       case 'can_invite_members':
@@ -165,11 +165,91 @@ export function useInvitationPermissions(workspace) {
     }
   }
 
+
+  /**
+ * Parse member permissions from pivot data
+ * @param {Object} pivot - Member pivot data
+ * @returns {Object} Parsed permissions object
+ */
+const parseMemberPermissions = (pivot) => {
+  if (!pivot || !pivot.permissions) return {}
+
+  let permissions = pivot.permissions
+
+  // Handle various permission formats
+  if (typeof permissions === 'string') {
+    try {
+      // Try to parse as JSON
+      permissions = JSON.parse(permissions)
+    } catch {
+      // If parsing fails, check for 'all' format
+      if (permissions === 'all' || permissions === '["all"]') {
+        return {
+          can_create_projects: true,
+          can_view_all_projects: true,
+          can_invite_members: true,
+          can_delete_members: true,
+          can_manage_settings: true,
+          can_transfer_ownership: true
+        }
+      }
+      permissions = {}
+    }
+  }
+  // Handle array format
+  if (Array.isArray(permissions)) {
+    if (permissions.includes('all')) {
+      return {
+        can_create_projects: true,
+        can_view_all_projects: true,
+        can_invite_members: true,
+        can_delete_members: true,
+        can_manage_settings: true,
+        can_transfer_ownership: true
+      }
+    }
+
+    // Convert array to object
+    return permissions.reduce((acc, perm) => {
+      acc[perm] = true
+      return acc
+    }, {})
+  }
+
+  // Return object format
+  return {
+    can_create_projects: permissions.can_create_projects ?? false,
+    can_view_all_projects: permissions.can_view_all_projects ?? false,
+    can_invite_members: permissions.can_invite_members ?? false,
+    can_delete_members: permissions.can_delete_members ?? false,
+    can_manage_settings: permissions.can_manage_settings ?? false,
+    can_transfer_ownership: permissions.can_transfer_ownership ?? false
+  }
+}
+
+/**
+ * Format permissions for API submission
+ * @param {Object} permissions - Permissions object
+ * @returns {Object|string} Formatted permissions
+ */
+const formatPermissionsForApi = (permissions) => {
+  // If all permissions are true, return 'all'
+  const allTrue = Object.values(permissions).every(value => value === true)
+  if (allTrue) {
+    return 'all'
+  }
+
+  // Otherwise return the object
+  return permissions
+}
+
   return {
     getAvailablePermissionsForRole,
     getDefaultPermissionsForRole,
     canGrantPermission,
     isPermissionRecommended,
-    validatePermissions
+    validatePermissions,
+    parseMemberPermissions,
+    formatPermissionsForApi
   }
 }

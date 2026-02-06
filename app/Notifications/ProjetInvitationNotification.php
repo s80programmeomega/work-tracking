@@ -28,7 +28,7 @@ class ProjetInvitationNotification extends Notification implements ShouldQueue
     {
         $projet = $this->invitation->projet;
         $inviter = $this->invitation->invitedBy;
-        $acceptUrl = url("/invitations/projet/{$this->invitation->token}/accept");
+        $acceptUrl = url("/invitations/projet/{$this->invitation->token}");
 
         return (new MailMessage)
             ->subject("Invitation au projet : {$projet->nom}")

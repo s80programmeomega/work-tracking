@@ -42,6 +42,12 @@ return new class extends Migration {
                     ->after('started_at')
                     ->comment('Date de complétion de la tâche par cet utilisateur');
             }
+            if (!Schema::hasColumn('tache_user', 'assigned_at')) {
+                $table->timestamp('assigned_at')
+                    ->nullable()
+                    ->after('completed_at')
+                    ->comment('Date d\'assignation de la tâche par cet utilisateur');
+            }
 
             // Notes personnelles (optionnel)
             if (!Schema::hasColumn('tache_user', 'notes_personnelles')) {
@@ -49,6 +55,14 @@ return new class extends Migration {
                     ->nullable()
                     ->after('completed_at')
                     ->comment('Notes personnelles de l\'utilisateur sur cette tâche');
+            }
+             if (!Schema::hasColumn('tache_user', 'assigned_by')) {
+                $table->foreignId('assigned_by')
+                    ->nullable()
+                    ->after('user_id')
+                    ->constrained('users')
+                    ->onDelete('cascade')
+                    ->comment('Utilisateur qui a assigné la tache');
             }
         });
 

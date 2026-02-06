@@ -8,6 +8,13 @@ use App\Models\Tache;
 use App\Models\TacheAttachment;
 use App\Models\TacheExternalLink;
 use App\Models\User;
+use App\Notifications\Taches\TacheAssignedNotification;
+use App\Notifications\Taches\TacheFileAddedNotification;
+use App\Notifications\Taches\TacheFileRemovedNotification;
+use App\Notifications\Taches\TacheLinkAddedNotification;
+use App\Notifications\Taches\TacheLinkRemovedNotification;
+use App\Notifications\Taches\TacheUnassignedNotification;
+use App\Notifications\Taches\TacheUpdatedNotification;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -210,7 +217,12 @@ class TacheService
     public function handleFileUploads(Tache $tache, array $files, User $uploadedBy): void
     {
         foreach ($files as $file) {
-            $this->uploadFile($tache, $file, $uploadedBy);
+            $attachment = $this->uploadFile($tache, $file, $uploadedBy);
+
+            // Notifier tous les assignees
+            foreach ($tache->assignees as $assignee) {
+                $assignee->notify(new TacheFileAddedNotification($tache, $uploadedBy, $attachment));
+            }
         }
     }
 
@@ -221,7 +233,7 @@ class TacheService
     {
         $originalName = $file->getClientOriginalName();
         $fileName = time() . '_' . uniqid() . '_' . $originalName;
-        $filePath = $file->storeAs('tache-attachments', $fileName, 'public');
+        $filePath = $file->storeAs('tache-attachments', $fileName, 'uploads');
 
         if (!$filePath) {
             throw new \Exception('Erreur lors de l\'upload du fichier');
@@ -241,15 +253,25 @@ class TacheService
     /**
      * ✅ Supprimer un fichier attaché
      */
-    public function deleteAttachment(TacheAttachment $attachment): bool
+   public function deleteAttachment(TacheAttachment $attachment, User $deletedBy): bool
     {
+        $tache = $attachment->tache;
+
         // Supprimer le fichier physique
-        if (Storage::disk('public')->exists($attachment->file_path)) {
-            Storage::disk('public')->delete($attachment->file_path);
+        if (Storage::disk('uploads')->exists($attachment->file_path)) {
+            Storage::disk('uploads')->delete($attachment->file_path);
         }
 
-        // Supprimer l'enregistrement
-        return $attachment->delete();
+        $deleted = $attachment->delete();
+
+        // Notifier les assignees
+        if ($deleted) {
+            foreach ($tache->assignees as $assignee) {
+                $assignee->notify(new TacheFileRemovedNotification($tache, $deletedBy, $attachment));
+            }
+        }
+
+        return $deleted;
     }
 
     /**
@@ -258,21 +280,36 @@ class TacheService
     public function addExternalLinks(Tache $tache, array $links, User $createdBy): void
     {
         foreach ($links as $link) {
-            TacheExternalLink::create([
+            $linkModel = TacheExternalLink::create([
                 'tache_id' => $tache->id,
                 'title' => $link['title'] ?? $link['url'],
                 'url' => $link['url'],
                 'created_by' => $createdBy->id,
             ]);
+
+            // Notifier les assignees
+            foreach ($tache->assignees as $assignee) {
+                $assignee->notify(new TacheLinkAddedNotification($tache, $createdBy, $linkModel));
+            }
         }
     }
 
     /**
      * ✅ Supprimer un lien externe
      */
-    public function deleteExternalLink(TacheExternalLink $link): bool
+    public function deleteExternalLink(TacheExternalLink $link, User $deletedBy): bool
     {
-        return $link->delete();
+        $tache = $link->tache;
+        $deleted = $link->delete();
+
+        // Notifier les assignees
+        if ($deleted) {
+            foreach ($tache->assignees as $assignee) {
+                $assignee->notify(new TacheLinkRemovedNotification($tache, $deletedBy, $link));
+            }
+        }
+
+        return $deleted;
     }
 
 
@@ -332,7 +369,15 @@ class TacheService
                         'can_edit' => true,
                         'can_complete' => true,
                         'can_validate' => false,
+                        'assigned_at' => now()
                     ]);
+
+                    // Notifier assignés
+                    $user = User::find($userId);
+                    if ($user) {
+                        $user->notify(new TacheAssignedNotification($tache, $creator));
+                    }
+                    
                 }
             }
 
@@ -352,8 +397,6 @@ class TacheService
         });
     }
 
-
-
     /**
      * ✅ Mettre à jour une tâche avec gestion COMPLÈTE des fichiers
      */
@@ -362,14 +405,6 @@ class TacheService
         Gate::authorize('update', $tache);
 
         return DB::transaction(function () use ($tache, $data) {
-            // ✅ DEBUG: Log des données reçues
-            Log::info('Service updateTache - Données reçues', [
-                'tache_id' => $tache->id,
-                'data_keys' => array_keys($data),
-                'has_uploaded_files' => isset($data['uploaded_files']),
-                'uploaded_files_count' => isset($data['uploaded_files']) ? count($data['uploaded_files']) : 0,
-                'has_cover_image' => isset($data['cover_image'])
-            ]);
 
             // Extraire fichiers et liens
             $uploadedFiles = $data['uploaded_files'] ?? [];
@@ -394,51 +429,43 @@ class TacheService
             if ($coverImagePath) {
                 $data['cover_image'] = $coverImagePath;
             }
-
-            Log::info('Service updateTache - Données avant mise à jour', [
-                'tache_id' => $tache->id,
-                'data' => $data,
-                'uploaded_files_count' => count($uploadedFiles),
-                'assignee_ids' => $assigneeIds,
-                'label_ids' => $labelIds
-            ]);
+           
 
             // Mettre à jour tâche
             $tache->update($data);
 
             // Sync relations si fournies
+             // Assignees
             if ($assigneeIds !== null) {
-                Log::info('Mise à jour assignees', [
-                    'tache_id' => $tache->id,
-                    'assignee_ids' => $assigneeIds
-                ]);
+                $oldAssignees = $tache->assignees->pluck('id')->toArray();
                 $tache->assignees()->sync($assigneeIds);
+
+                // Notifier assignés
+                $added = array_diff($assigneeIds, $oldAssignees);
+                $removed = array_diff($oldAssignees, $assigneeIds);
+
+                foreach ($added as $userId) {
+                    $user = User::find($userId);
+                    if ($user) $user->notify(new TacheAssignedNotification($tache, auth()->user()));
+                }
+
+                foreach ($removed as $userId) {
+                    $user = User::find($userId);
+                    if ($user) $user->notify(new TacheUnassignedNotification($tache, auth()->user()));
+                }
             }
 
             if ($labelIds !== null) {
-                Log::info('Mise à jour labels', [
-                    'tache_id' => $tache->id,
-                    'label_ids' => $labelIds
-                ]);
                 $tache->labels()->sync($labelIds);
             }
 
             // ✅ Gérer les nouveaux fichiers
             if (!empty($uploadedFiles)) {
-                Log::info('Ajout nouveaux fichiers', [
-                    'tache_id' => $tache->id,
-                    'count' => count($uploadedFiles)
-                ]);
                 $this->handleFileUploads($tache, $uploadedFiles, auth()->user());
             }
 
             // ✅ Gérer les liens externes - remplacement complet
             if (array_key_exists('external_links', $data) || !empty($externalLinks)) {
-                Log::info('Mise à jour liens externes', [
-                    'tache_id' => $tache->id,
-                    'links_count' => count($externalLinks)
-                ]);
-
                 // Supprimer les anciens liens
                 $tache->externalLinks()->delete();
 
@@ -446,6 +473,11 @@ class TacheService
                 if (!empty($externalLinks)) {
                     $this->addExternalLinks($tache, $externalLinks, auth()->user());
                 }
+            }
+
+            // Notifier modification
+            foreach ($tache->assignees as $assignee) {
+                $assignee->notify(new TacheUpdatedNotification($tache, auth()->user()));
             }
 
             // ✅ Log modification

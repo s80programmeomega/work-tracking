@@ -1,7 +1,6 @@
 <!-- resources/js/components/resultats/ResultatCard.vue -->
 <template>
-  <div class="rounded-2xl border bg-white dark:bg-white/[0.03] overflow-hidden transition-all hover:shadow-lg"
-    :class="getCardBorderClass()">
+  <div class="rounded-2xl border bg-white dark:bg-white/[0.03] overflow-hidden transition-all hover:shadow-lg" :class="getCardBorderClass()">
 
     <!-- Header avec informations de validation -->
     <div class="p-6 bg-gradient-to-r" :class="getHeaderGradientClass()">
@@ -13,11 +12,9 @@
               :class="userRoleBadge.class">
               <svg v-if="userRole === 'responsable_activite'" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clip-rule="evenodd" />
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
               </svg>
-              <svg v-else-if="userRole === 'responsable_projet'" class="w-4 h-4" fill="currentColor"
-                viewBox="0 0 20 20">
+              <svg v-else-if="userRole === 'responsable_projet'" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd"
                   d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                   clip-rule="evenodd" />

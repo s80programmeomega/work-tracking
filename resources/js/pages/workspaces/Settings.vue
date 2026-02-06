@@ -512,7 +512,9 @@ import { useRoute, useRouter } from 'vue-router';
 import { useWorkspace } from '@/composables/useWorkspace';
 import AdminLayout from '@/components/layout/AdminLayout.vue';
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue';  
+import { useToast } from "vue-toastification"
 
+const toast = useToast()
 const route = useRoute();
 const router = useRouter();
 const { fetchWorkspace, updateWorkspace, deleteWorkspace } = useWorkspace();
@@ -573,6 +575,8 @@ const loadWorkspace = async () => {
         }
     } catch (error) {
         console.error('Error loading workspace:', error);
+        toast.warning('Erreur lors du chargement du workspace')
+
         router.push({ name: 'workspaces.index' });
     } finally {
         loading.value = false;
@@ -588,6 +592,8 @@ const saveSettings = async () => {
         });
         
         console.log('Paramètres enregistrés avec succès');
+        toast.success('Paramètres enregistrés avec succès')
+
         // TODO: Add success notification
     } catch (error) {
         console.error('Error saving settings:', error);
@@ -606,10 +612,13 @@ const handleDelete = async () => {
 
     try {
         await deleteWorkspace(workspaceId);
-        console.log('Workspace supprimé avec succès');
+        toast.success(' workspace supprimé avec success'); 
+
         router.push({ name: 'workspaces.index' });
     } catch (error) {
         console.error('Error deleting workspace:', error);
+        toast.error('Error deleting workspace');
+
         // TODO: Add error notification
     } finally {
         deleting.value = false;
@@ -624,6 +633,8 @@ const handleArchive = async () => {
         showArchiveModal.value = false;
     } catch (error) {
         console.error('Error archiving workspace:', error);
+        toast.error('Error archiving workspace')
+
     }
 };
 

@@ -147,9 +147,10 @@
 
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue'
-import EditProfileModal from './EditProfileModal.vue'
+// import EditProfileModal from './EditProfileModal.vue'
 import { useUsers } from '@/composables/useUsers'
-// import { useNotification } from '../../composables/useNotifications'
+import { useNotifications } from '@/composables/useNotifications'
+ 
 
 const props = defineProps({
   user: {
@@ -161,7 +162,7 @@ const props = defineProps({
 const emit = defineEmits(['refresh'])
 
 const { updateProfile } = useUsers()
-const { showSuccess, showError } = useNotification()
+const { showSuccess, showError } = useNotifications()
 
 const showEditModal = ref(false)
 const uploadingAvatar = ref(false)
@@ -176,7 +177,7 @@ const avatarUrl = computed(() => {
 })
 
 const formData = ref({
-  firstName: '',
+  nom: '',
   lastName: '',
   email: '',
   phone: '',
@@ -190,7 +191,7 @@ const formData = ref({
 watch(() => props.user, (newUser) => {
   if (newUser) {
     const names = newUser.nom?.split(' ') || []
-    formData.value.firstName = names[0] || ''
+    formData.value.nom = names[0] || ''
     formData.value.lastName = names.slice(1).join(' ') || ''
     formData.value.email = newUser.email || ''
     formData.value.phone = newUser.numero_telephone || ''

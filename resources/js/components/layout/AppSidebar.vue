@@ -485,8 +485,8 @@ const menuGroups = computed(() => [
                 name: 'Tâches',
                 subItems: [
                     { name: 'Toutes les tâches', path: '/taches', superAdminOnly: false },
-                    { name: 'Mes tâches', path: '/taches/mes-taches' },
-                    { name: 'Assignées à moi', path: '/taches/assignees' },
+                    { name: 'Mes tâchesSS', path: '/taches/mes-taches' },
+                    { name: 'Mes tâches', path: '/taches/assignees' },
                     { name: 'Tache attente de validation', path: '/taches/resultats/en-attente' },
                     // { name: 'En retard', path: '/taches/en-retard', count: 3 },
                     { name: 'En Attente de Collègues', path: '/taches/waiting-colleagues' },

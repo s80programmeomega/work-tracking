@@ -5,18 +5,18 @@
       <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <h4 class="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
-            Personal Information
+             Information Personnelle
           </h4>
 
           <div class="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
             <div>
-              <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">First Name</p>
-              <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ firstName || 'Non renseigné' }}</p>
+              <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Prénom</p>
+              <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ prenom || 'Non renseigné' }}</p>
             </div>
 
             <div>
-              <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Last Name</p>
-              <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ lastName || 'Non renseigné' }}</p>
+              <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Nom</p>
+              <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ nom || 'Non renseigné' }}</p>
             </div>
 
             <div>
@@ -88,10 +88,10 @@
           </button>
           <div class="px-2 pr-14">
             <h4 class="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
-              Edit Personal Information
+              Editer les Informations Personnelle
             </h4>
-            <p class="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
-              Update your details to keep your profile up-to-date.
+            <p class="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7"> 
+              Mettre à jour les details d'informations.
             </p>
           </div>
           <form class="flex flex-col">
@@ -157,7 +157,7 @@
               </div>
               <div class="mt-7">
                 <h5 class="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
-                  Personal Information
+                   Information Personnelle
                 </h5>
 
                 <div class="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
@@ -165,11 +165,11 @@
                     <label
                       class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
                     >
-                      First Name
+                      Prénom
                     </label>
                     <input
                       type="text"
-                      v-model="formData.firstName"
+                      v-model="formData.prenom"
                       class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                     />
                   </div>
@@ -178,11 +178,11 @@
                     <label
                       class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
                     >
-                      Last Name
+                      Nom
                     </label>
                     <input
                       type="text"
-                      v-model="formData.lastName"
+                      v-model="formData.nom"
                       class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                     />
                   </div>
@@ -254,6 +254,9 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import Modal from './Modal.vue'
+import { useToast } from "vue-toastification"
+const toast = useToast()
+
 
 const props = defineProps({
   user: {
@@ -262,25 +265,29 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['refresh'])
+const emit = defineEmits(['refresh']) 
 
 const isProfileInfoModal = ref(false)
 
-// Split name into first and last name
-const firstName = computed(() => {
+const uploadingAvatar = ref(false)
+const avatarPreview = ref(null)
+const avatarInput = ref(null)
+
+// Split name into first and Nom
+const prenom = computed(() => {
   const names = props.user?.nom?.split(' ') || []
   return names[0] || ''
 })
 
-const lastName = computed(() => {
+const nom = computed(() => {
   const names = props.user?.nom?.split(' ') || []
   return names.slice(1).join(' ') || ''
 })
 
 // Form data
 const formData = ref({
-  firstName: '',
-  lastName: '',
+  prenom: '',
+  nom: '',
   email: '',
   phone: '',
   bio: '',
@@ -294,16 +301,39 @@ const formData = ref({
 watch(() => props.user, (newUser) => {
   if (newUser) {
     const names = newUser.nom?.split(' ') || []
-    formData.value.firstName = names[0] || ''
-    formData.value.lastName = names.slice(1).join(' ') || ''
+    formData.value.prenom = names[0] || ''
+    formData.value.nom = names.slice(1).join(' ') || ''
     formData.value.email = newUser.email || ''
     formData.value.phone = newUser.numero_telephone || ''
     formData.value.bio = newUser.bio || ''
   }
 }, { immediate: true })
 
-const saveProfile = () => {
-  // Implement save profile logic here
+const saveProfile = async () => {
+ 
+   try {
+    
+    // formData.append('_method', 'PUT')
+
+    await updateProfile(formData)
+    toast.success('utilisateur mis à jour avec succès')
+    emit('refresh')
+    
+    // Reset preview after successful upload
+    // setTimeout(() => {
+    //   avatarPreview.value = null
+    // }, 2000)
+  } catch (error) {
+    console.error('Error uploading avatar:', error)
+    toast.error(error.response?.data?.message || 'Erreur lors du téléchargement de l\'avatar')
+    avatarPreview.value = null
+  } finally {
+    uploadingAvatar.value = false
+    if (avatarInput.value) {
+      avatarInput.value.value = ''
+    }
+  }
+
   console.log('Profile saved', formData.value)
   isProfileInfoModal.value = false
   emit('refresh')
