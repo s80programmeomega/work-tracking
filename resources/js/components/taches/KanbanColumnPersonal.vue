@@ -44,13 +44,14 @@
         class="cursor-move transition-all"
         :class="{ 'opacity-50': isDragging && draggedTask?.id === tache.id }"
       >
-        <TacheCardPersonal
-          :tache="tache"
-          @view="$emit('view-task', tache)"
-          @move="handleQuickMove"
-          @submit-result="$emit('submit-result', tache)"
-          @update-progression="handleUpdateProgression"
-        />
+       <TacheCardPersonal
+        :tache="tache"
+        @view="$emit('view-task', tache)"
+        @move="handleQuickMove"
+        @submit-result="$emit('submit-result', tache)"
+        @update-progression="handleUpdateProgression"
+        @edit="$emit('edit-task', tache)"   
+      />
       </div>
     </div>
 
@@ -97,7 +98,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['move-card', 'view-task', 'submit-result', 'update-progression'])
+const emit = defineEmits(['move-card', 'view-task', 'submit-result', 'update-progression', 'edit-task'])
 
 // State
 const isDragOver = ref(false)

@@ -1,4 +1,4 @@
-<!-- resources/js/components/taches/TacheCardPersonal.vue -->
+<!-- resources/js/components/taches/TacheCardPersonal.vue - VERSION AVEC RESPONSABLE -->
 <template>
   <div 
     class="relative group bg-white dark:bg-gray-800 rounded-lg border transition-all hover:shadow-lg"
@@ -9,14 +9,24 @@
     ]"
     @click="!compact && $emit('view', tache)"
   >
-    <!-- En-tête -->
+    <!-- En-tête avec badge responsable -->
     <div class="flex items-start justify-between gap-2 mb-2">
       <div class="flex-1 min-w-0">
-        <!-- Code + Priorité -->
+        <!-- Code + Priorité + BADGE RESPONSABLE -->
         <div class="flex items-center gap-2 mb-1 flex-wrap">
           <span v-if="tache.code" class="text-xs font-mono text-gray-500 dark:text-gray-400">
             {{ tache.code }}
           </span>
+          
+          <!-- ✅ NOUVEAU : Badge Responsable -->
+          <span 
+            v-if="isResponsable"
+            class="text-xs font-bold px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded flex items-center gap-1"
+            title="Vous êtes le responsable de cette tâche"
+          >
+            👑 Responsable
+          </span>
+          
           <span 
             class="text-xs font-medium px-2 py-0.5 rounded"
             :class="getPriorityClass(tache.priorite)"
@@ -55,7 +65,7 @@
       </div>
     </div>
 
-    <!-- Double Statut : Mon statut + Statut global -->
+    <!-- ✅ NOUVEAU : Double affichage si responsable -->
     <div class="space-y-2 mb-3">
       <!-- Mon statut individuel -->
       <div class="flex items-center justify-between">
@@ -84,8 +94,23 @@
         ></div>
       </div>
 
-      <!-- Statut global (si tâche collaborative) -->
-      <div v-if="isCollaborative" class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+      <!-- ✅ NOUVEAU : Statut global si responsable -->
+      <div v-if="isResponsable" class="flex items-center justify-between pt-2 border-t border-purple-200 dark:border-purple-800">
+        <div class="flex items-center gap-2">
+          <svg class="w-3 h-3 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+          </svg>
+          <span class="text-xs font-medium text-purple-700 dark:text-purple-300">
+            Statut global : {{ getStatusLabel(tache.statut) }}
+          </span>
+        </div>
+        <span class="text-xs font-bold text-purple-600 dark:text-purple-400">
+          {{ tache.taux_realisation || 0 }}%
+        </span>
+      </div>
+
+      <!-- Statut global (si tâche collaborative et non responsable) -->
+      <div v-else-if="isCollaborative" class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
         <div class="flex items-center gap-1">
           <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -121,7 +146,7 @@
             v-for="assignee in visibleAssignees"
             :key="assignee.id"
             :title="`${assignee.nom} - ${getStatusLabel(assignee.pivot.statut_individuel)}`"
-            class="w-6 h-6 rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center text-[10px] font-bold text-white"
+            class="w-6 h-6 rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center text-[10px] font-bold text-white relative"
             :style="{ 
               backgroundColor: stringToColor(assignee.nom),
               opacity: assignee.pivot.statut_individuel === 'termine' ? 1 : 0.6
@@ -166,35 +191,50 @@
       </div>
     </div>
 
-    <!-- Actions -->
+    <!-- ✅ NOUVEAU : Actions avec mode responsable -->
     <div v-if="!compact" class="flex items-center gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-      <!-- Boutons de déplacement rapide -->
-      <button
-        v-if="myStatus !== 'en_cours'"
-        @click.stop="quickMove('en_cours', 50)"
-        class="flex-1 px-3 py-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
-      >
-        ▶ Démarrer
-      </button>
-      
-      <button
-        v-if="myStatus !== 'termine'"
-        @click.stop="quickMove('termine', 100)"
-        class="flex-1 px-3 py-1.5 text-xs font-medium text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors"
-      >
-        ✓ Terminer
-      </button>
+      <!-- Actions personnelles (toujours disponibles) -->
+      <div class="flex-1 flex gap-2">
+        <button
+          v-if="myStatus !== 'en_cours'"
+          @click.stop="quickMove('en_cours', 50)"
+          class="flex-1 px-3 py-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+        >
+          ▶ Démarrer
+        </button>
+        
+        <button
+          v-if="myStatus !== 'termine'"
+          @click.stop="quickMove('termine', 100)"
+          class="flex-1 px-3 py-1.5 text-xs font-medium text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors"
+        >
+          ✓ Terminer
+        </button>
 
-      <!-- Bouton soumettre résultat -->
+        <!-- Bouton soumettre résultat -->
+        <button
+          v-if="canSubmitResult"
+          @click.stop="$emit('submit-result', tache)"
+          class="flex-1 px-3 py-1.5 text-xs font-medium text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-lg transition-colors flex items-center justify-center gap-1"
+        >
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          {{ hasMyResult ? 'Modifier' : 'Résultat' }}
+        </button>
+      </div>
+
+      <!-- ✅ NOUVEAU : Bouton "Éditer" si responsable -->
       <button
-        v-if="canSubmitResult"
-        @click.stop="$emit('submit-result', tache)"
-        class="flex-1 px-3 py-1.5 text-xs font-medium text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-lg transition-colors flex items-center justify-center gap-1"
+        v-if="isResponsable"
+        @click.stop="$emit('edit', tache)"
+        class="px-3 py-1.5 text-xs font-medium text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-lg transition-colors flex items-center gap-1"
+        title="Éditer la tâche (en tant que responsable)"
       >
         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
         </svg>
-        {{ hasMyResult ? 'Modifier' : 'Résultat' }}
+        Éditer
       </button>
     </div>
 
@@ -206,7 +246,7 @@
       <span>{{ formatDate(tache.echeance) }}</span>
     </div>
 
-    <!-- Menu contextuel -->
+    <!-- Menu contextuel amélioré -->
     <div
       v-if="showMenu"
       class="absolute right-2 top-12 z-50 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1"
@@ -218,6 +258,16 @@
       >
         👁️ Voir détails
       </button>
+      
+      <!-- ✅ NOUVEAU : Option éditer si responsable -->
+      <button
+        v-if="isResponsable"
+        @click="handleEdit"
+        class="w-full px-4 py-2 text-left text-sm text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors"
+      >
+        ✏️ Éditer (responsable)
+      </button>
+      
       <button
         v-if="myStatus !== 'a_faire'"
         @click="quickMove('a_faire', 0)"
@@ -247,22 +297,26 @@
 import { ref, computed } from 'vue'
 
 const props = defineProps({
-  tache: {
-    type: Object,
-    required: true
-  },
-  compact: {
-    type: Boolean,
-    default: false
-  }
+  tache: { type: Object, required: true },
+  compact: { type: Boolean, default: false }
 })
 
-const emit = defineEmits(['view', 'move', 'submit-result', 'update-progression'])
+const emit = defineEmits(['view', 'move', 'submit-result', 'update-progression', 'edit'])
 
 // State
 const showMenu = ref(false)
 
-// Computed
+// ✅ NOUVEAU : Computed pour détecter si responsable
+const currentUserId = computed(() => {
+  const userStr = localStorage.getItem('user')
+  return userStr ? JSON.parse(userStr).id : null
+})
+
+const isResponsable = computed(() => {
+  return props.tache.responsable_id === currentUserId.value
+})
+
+// Computed existants
 const myStatus = computed(() => props.tache.my_status?.statut || props.tache.statut)
 const myProgression = computed(() => props.tache.my_status?.progression || 0)
 const myResult = computed(() => props.tache.my_result)
@@ -271,7 +325,6 @@ const teamStats = computed(() => props.tache.team_stats)
 const isCollaborative = computed(() => teamStats.value && teamStats.value.total > 1)
 
 const canSubmitResult = computed(() => {
-  // ✅ CORRECTION: Permet soumission si en_cours OU termine
   return (myStatus.value === 'en_cours' || myStatus.value === 'termine')
 })
 
@@ -289,6 +342,10 @@ const cardBorderClass = computed(() => {
   }
   if (myStatus.value === 'en_cours') {
     return 'border-blue-300 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/10'
+  }
+  // ✅ NOUVEAU : Bordure violette si responsable
+  if (isResponsable.value) {
+    return 'border-purple-300 dark:border-purple-800 bg-purple-50/50 dark:bg-purple-900/10'
   }
   return 'border-gray-200 dark:border-gray-700'
 })
@@ -316,6 +373,11 @@ function toggleMenu() {
 function handleViewDetails() {
   showMenu.value = false
   emit('view', props.tache)
+}
+
+function handleEdit() {
+  showMenu.value = false
+  emit('edit', props.tache)
 }
 
 function handleSubmitResult() {

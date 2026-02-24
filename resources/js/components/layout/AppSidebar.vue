@@ -283,7 +283,7 @@ import {
     CheckIcon,
     PlusIcon,
     SettingsIcon,
-    XIcon,StarIcon 
+    XIcon, StarIcon
 } from '../../icons';
 
 import BoxCubeIcon from '@/icons/BoxCubeIcon.vue';
@@ -295,7 +295,7 @@ import { useSidebar } from '@/composables/useSidebar';
 import api from '@/api/axios'
 import { useAuthStore } from '@/stores/auth';
 import { useWorkspace } from '@/composables/useWorkspace';
- 
+
 
 const LogoDark = new URL('@/assets/images/logo/Logo-dark.jpg', import.meta.url).href
 const Logo = new URL('@/assets/images/logo/Logo.png', import.meta.url).href
@@ -480,17 +480,89 @@ const menuGroups = computed(() => [
                     // { name: 'En retard', path: '/activites/en-retard', count: 5 },
                 ],
             },
+            // ==================== MISE À JOUR DE AppSidebar.vue ====================
+
+            // {
+            //     icon: TaskIcon,
+            //     name: 'Tâches',
+            //     subItems: [
+            //         {
+            //             name: 'Toutes les tâches',
+            //             path: '/taches',
+            //             superAdminOnly: false
+            //         },
+            //         {
+            //             name: 'Mes tâches assignées',
+            //             path: '/taches/assignees',
+            //             description: 'Tâches où je suis intervenant',
+            //             icon: '👤'
+            //         },
+            //         // ✅ NOUVEAU : Tâches où je suis responsable
+            //         {
+            //             name: 'Mes tâches en responsabilité',
+            //             path: '/taches/responsable',
+            //             description: 'Tâches dont je suis le responsable',
+            //             icon: '👑',
+            //             badge: 'new', // Optionnel : badge "nouveau"
+            //             badgeColor: 'purple'
+            //         },
+            //         {
+            //             name: 'Tâches en attente de validation',
+            //             path: '/taches/resultats/en-attente',
+            //             icon: '⏳'
+            //         },
+            //         {
+            //             name: 'En Attente de Collègues',
+            //             path: '/taches/waiting-colleagues',
+            //             icon: '🤝'
+            //         },
+            //         {
+            //             name: 'Vue Coordination',
+            //             path: '/taches/coordination',
+            //             icon: '🎯'
+            //         },
+            //     ],
+            // },
+
+            // ==================== ALTERNATIVE : Groupement par rôle ====================
+
             {
                 icon: TaskIcon,
                 name: 'Tâches',
                 subItems: [
-                    { name: 'Toutes les tâches', path: '/taches', superAdminOnly: false },
-                    { name: 'Mes tâchesSS', path: '/taches/mes-taches' },
-                    { name: 'Mes tâches', path: '/taches/assignees' },
-                    { name: 'Tache attente de validation', path: '/taches/resultats/en-attente' },
-                    // { name: 'En retard', path: '/taches/en-retard', count: 3 },
-                    { name: 'En Attente de Collègues', path: '/taches/waiting-colleagues' },
-                    { name: 'Vue Coordination', path: '/taches/coordination' },
+                    {
+                        name: 'Toutes les tâches',
+                        path: '/taches',
+                        superAdminOnly: false
+                    }, 
+                    
+                    {
+                        name: 'En tant que responsable',
+                        path: '/taches/responsable',
+                        icon: '👑',
+                        badge: 'new'
+                    },
+                    {
+                        name: 'En tant qu\'intervenant',
+                        path: '/taches/assignees',
+                        icon: '👤'
+                    },
+ 
+                    {
+                        name: 'Tâches en attente de validation',
+                        path: '/taches/resultats/en-attente',
+                        icon: '⏳'
+                    },
+                    // {
+                    //     name: 'En attente de collègues',
+                    //     path: '/taches/waiting-colleagues',
+                    //     icon: '🤝'
+                    // },
+                    // {
+                    //     name: 'Vue coordination',
+                    //     path: '/taches/coordination',
+                    //     icon: '🎯'
+                    // },
                 ],
             },
         ],
@@ -520,20 +592,20 @@ const menuGroups = computed(() => [
             },
         ],
     },
-    {
-        title: 'Documentation & Ressources',
-        items: [
-            {
-                icon: XIcon ,
-                name: 'Documents',
-                subItems: [
-                    { name: 'Tous les Documents', path: '/documents' },
-                    // { name: 'Mes Documents', path: '/documents/me' }, // Optionnel
-                    // { name: 'Partagés avec moi', path: '/documents/shared' }, // Optionnel
-                ],
-            },
-        ],
-    },
+    // {
+    //     title: 'Documentation & Ressources',
+    //     items: [
+    //         {
+    //             icon: XIcon,
+    //             name: 'Documents',
+    //             subItems: [
+    //                 { name: 'Tous les Documents', path: '/documents' },
+    //                 { name: 'Mes Documents', path: '/documents/me' }, // Optionnel
+    //                 { name: 'Partagés avec moi', path: '/documents/shared' }, // Optionnel
+    //             ],
+    //         },
+    //     ],
+    // },
     {
         title: 'Collaboration',
         items: [
