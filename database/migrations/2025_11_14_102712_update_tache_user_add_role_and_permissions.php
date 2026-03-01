@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('tache_user', function (Blueprint $table) {
             // Ajouter les colonnes pour le rôle et permissions
-            $table->enum('role', ['assignee', 'validator', 'observer'])
+            $table->enum('role', ['assignee', 'validator', 'observer','responsable','collaborator'])
                 ->default('assignee')
                 ->after('user_id');
 

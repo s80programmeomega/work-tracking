@@ -17,6 +17,9 @@ return new class extends Migration
                 ->after('created_by')
                 ->constrained('users')
                 ->nullOnDelete();
+
+                  // ✅ Ajouter un index pour les requêtes
+            $table->index('responsable_id');
         });
     }
 
@@ -27,6 +30,7 @@ return new class extends Migration
     {
         Schema::table('taches', function (Blueprint $table) {
             $table->dropForeign(['responsable_id']);
+            $table->dropIndex(['responsable_id']);
             $table->dropColumn('responsable_id');
         });
     }

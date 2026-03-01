@@ -328,6 +328,16 @@ const router = createRouter({
         breadcrumb: 'Mes Tâches'
       }
     },
+    // ✅ AJOUT : Route pour les tâches en responsabilité
+    {
+      path: '/taches/responsable',
+      name: 'taches.responsable',
+      component: () => import('../pages/TachesResponsable.vue'),
+      meta: {
+        requiresAuth: true,
+        title: 'Mes Tâches en Responsabilité'
+      }
+    },
     {
       path: '/taches/assignees',
       name: 'taches.assignees',

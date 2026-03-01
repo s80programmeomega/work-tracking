@@ -329,125 +329,190 @@
             </div>
           </div>
 
-          <!-- Onglet 2: Équipe & Validation -->
-          <div v-if="activeTab === 'equipe'" class="space-y-8">
-            <!-- Section Équipe & Organisation -->
-            <div class="space-y-5">
-              <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
-                <div class="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg">
-                  <UserGroupIcon class="w-5 h-5 text-white" />
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Équipe & Organisation</h3>
+         <!-- Onglet 2: Équipe & Validation -->
+  <div v-if="activeTab === 'equipe'" class="space-y-8">
+    <!-- Section Équipe & Organisation -->
+    <div class="space-y-5">
+      <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
+        <div class="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg">
+          <UserGroupIcon class="w-5 h-5 text-white" />
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Équipe & Organisation</h3>
+      </div>
+
+      <!-- ✅ ORDRE MODIFIÉ : Responsable EN PREMIER -->
+      <!-- Responsable de la tâche -->
+      <div>
+        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+          <UserIcon class="w-4 h-4 text-purple-500" />
+          <span class="text-red-500">*</span>
+          Responsable de la tâche
+        </label>
+        
+        <div v-if="loadingMembers" class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+          <div class="flex items-center gap-3">
+            <svg class="animate-spin w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+              </path>
+            </svg>
+            <p class="text-sm text-blue-700 dark:text-blue-300">Chargement des membres...</p>
+          </div>
+        </div>
+
+        <select 
+          v-else 
+          v-model="formData.responsable_id"
+          required
+          :disabled="availableUsers.length === 0"
+          class="w-full px-4 py-3.5 border-2 rounded-xl transition-all"
+          :class="availableUsers.length === 0
+            ? 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 opacity-60 cursor-not-allowed'
+            : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 hover:border-purple-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500'"
+        >
+          <option :value="null">-- Sélectionner un responsable --</option>
+          <option v-for="user in availableUsers" :key="user.id" :value="user.id">
+            {{ user.nom }} ({{ user.email }})
+          </option>
+        </select>
+
+        <!-- ✅ Message informatif -->
+        <!-- <div class="mt-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+          <div class="flex items-start gap-2">
+            <InformationCircleIcon class="w-5 h-5 text-purple-600 dark:text-purple-400 flex-shrink-0 mt-0.5" />
+            <div class="text-sm text-purple-700 dark:text-purple-300">
+              <p class="font-semibold mb-1">À propos du responsable :</p>
+              <ul class="space-y-1 list-disc list-inside">
+                <li>Le responsable pilote l'exécution de la tâche</li>
+                <li>Il sera automatiquement ajouté aux intervenants</li>
+                <li>Il aura tous les droits sur la tâche</li>
+              </ul>
+            </div>
+          </div>
+        </div> -->
+
+        <!-- Affichage du responsable actuel si tâche existante -->
+        <div v-if="tache && tache.responsable && formData.responsable_id === tache.responsable.id"
+          class="mt-3 p-3 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-lg border-2 border-purple-200 dark:border-purple-800">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full overflow-hidden bg-purple-100 dark:bg-purple-900 ring-2 ring-purple-500">
+              <img v-if="tache.responsable.avatar" :src="tache.responsable.avatar" :alt="tache.responsable.nom" 
+                class="w-full h-full object-cover" />
+              <div v-else class="w-full h-full flex items-center justify-center text-purple-600 dark:text-purple-400 font-bold">
+                {{ tache.responsable.nom.charAt(0).toUpperCase() }}
               </div>
+            </div>
+            <div class="flex-1">
+              <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ tache.responsable.nom }}</p>
+              <p class="text-xs text-gray-600 dark:text-gray-400">{{ tache.responsable.email }}</p>
+            </div>
+            <div class="px-3 py-1 bg-purple-600 rounded-full">
+              <span class="text-xs font-semibold text-white flex items-center gap-1">
+                <CheckBadgeIcon class="w-3 h-3" />
+                Responsable
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
 
+      <!-- ✅ SÉPARATEUR VISUEL -->
+      <div class="relative">
+        <div class="absolute inset-0 flex items-center">
+          <div class="w-full border-t-2 border-gray-200 dark:border-gray-700"></div>
+        </div>
+        <div class="relative flex justify-center">
+          <span class="px-3 bg-white dark:bg-gray-800 text-sm font-semibold text-gray-500 dark:text-gray-400">
+            Intervenants additionnels
+          </span>
+        </div>
+      </div>
 
-              <!-- Responsable de la tâche -->
-              <div>
-                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                  <UserIcon class="w-4 h-4 text-purple-500" />
-                  Responsable de la tâche
-                </label>
-                
-                <div v-if="loadingMembers" class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
-                  <div class="flex items-center gap-3">
-                    <svg class="animate-spin w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                      </path>
-                    </svg>
-                    <p class="text-sm text-blue-700 dark:text-blue-300">Chargement des membres...</p>
+      <!-- Assignation (Intervenants) -->
+      <div>
+        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+          <UserGroupIcon class="w-4 h-4 text-blue-500" />
+          Autres intervenants
+        </label>
+        
+        <div v-if="loadingMembers" class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+          <div class="flex items-center gap-3">
+            <svg class="animate-spin w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+              </path>
+            </svg>
+            <p class="text-sm text-blue-700 dark:text-blue-300">Chargement des membres...</p>
+          </div>
+        </div>
+
+        <select 
+          v-else 
+          v-model="formData.assignee_ids" 
+          multiple
+          :disabled="!canAssignUsers || availableUsers.length === 0"
+          class="w-full px-4 py-3 border-2 rounded-xl transition-all"
+          :class="!canAssignUsers || availableUsers.length === 0
+            ? 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 opacity-60 cursor-not-allowed'
+            : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 hover:border-blue-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'" 
+          size="6"
+        >
+          <option 
+            v-for="user in availableUsers" 
+            :key="user.id" 
+            :value="user.id"
+            :disabled="user.id === formData.responsable_id"
+            :class="user.id === formData.responsable_id ? 'bg-purple-100 dark:bg-purple-900 font-bold' : ''"
+          >
+            {{ user.id === formData.responsable_id ? '👑 ' : '' }}{{ user.nom }} ({{ user.email }}){{ user.id === formData.responsable_id ? ' - Responsable' : '' }}
+          </option>
+        </select>
+
+        <div v-if="!loadingMembers && availableUsers.length === 0"
+          class="mt-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+          <p class="text-sm text-gray-600 dark:text-gray-400 text-center">Aucun membre disponible</p>
+        </div>
+
+                <div class="mt-3 space-y-2">
+                  <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                    <InformationCircleIcon class="w-4 h-4" />
+                    Maintenez Ctrl/Cmd pour sélectionner plusieurs utilisateurs
+                  </p>
+                  
+                  <!-- ✅ Affichage du responsable dans la liste -->
+                  <div v-if="formData.responsable_id" class="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                    <p class="text-xs text-purple-700 dark:text-purple-300 flex items-center gap-1">
+                      <CheckBadgeIcon class="w-4 h-4" />
+                      Le responsable est automatiquement inclus dans les intervenants
+                    </p>
+                  </div>
+
+                  <!-- ✅ Compteur d'intervenants -->
+                  <div v-if="formData.assignee_ids.length > 0" class="flex items-center gap-2 text-sm">
+                    <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full font-semibold">
+                      {{ formData.assignee_ids.length }} intervenant(s) sélectionné(s)
+                    </span>
+                    <span v-if="formData.responsable_id && formData.assignee_ids.includes(formData.responsable_id)" 
+                      class="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-full font-semibold flex items-center gap-1">
+                      <UserIcon class="w-3 h-3" />
+                      dont 1 responsable
+                    </span>
                   </div>
                 </div>
-
-                <select v-else v-model="formData.responsable_id"
-                  :disabled="availableUsers.length === 0"
-                  class="w-full px-4 py-3.5 border-2 rounded-xl transition-all"
-                  :class="availableUsers.length === 0
-                    ? 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 opacity-60 cursor-not-allowed'
-                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 hover:border-purple-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500'">
-                  <option :value="null">Aucun responsable</option>
-                  <option v-for="user in availableUsers" :key="user.id" :value="user.id">
-                    {{ user.nom }} ({{ user.email }})
-                  </option>
-                </select>
-
-                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                  <InformationCircleIcon class="w-4 h-4" />
-                  Le responsable aura tous les droits sur la tâche (édition, validation, etc.)
-                </p>
-
-                <!-- Affichage du responsable actuel si tâche existante -->
-                <div v-if="tache && tache.responsable && formData.responsable_id === tache.responsable.id"
-                  class="mt-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
-                  <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full overflow-hidden bg-purple-100 dark:bg-purple-900">
-                      <img v-if="tache.responsable.avatar" :src="tache.responsable.avatar" :alt="tache.responsable.nom" 
-                        class="w-full h-full object-cover" />
-                      <div v-else class="w-full h-full flex items-center justify-center text-purple-600 dark:text-purple-400 font-bold">
-                        {{ tache.responsable.nom.charAt(0).toUpperCase() }}
-                      </div>
-                    </div>
-                    <div class="flex-1">
-                      <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ tache.responsable.nom }}</p>
-                      <p class="text-xs text-gray-600 dark:text-gray-400">{{ tache.responsable.email }}</p>
-                    </div>
-                    <div class="px-3 py-1 bg-purple-100 dark:bg-purple-900 rounded-full">
-                      <span class="text-xs font-semibold text-purple-700 dark:text-purple-300">Responsable actuel</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-
-
-              <!-- Assignation -->
-              <div>
-                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Assigner à</label>
-                <div v-if="loadingMembers" class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
-                  <div class="flex items-center gap-3">
-                    <svg class="animate-spin w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                      </path>
-                    </svg>
-                    <p class="text-sm text-blue-700 dark:text-blue-300">Chargement des membres...</p>
-                  </div>
-                </div>
-
-                <select v-else v-model="formData.assignee_ids" multiple
-                  :disabled="!canAssignUsers || availableUsers.length === 0"
-                  class="w-full px-4 py-3 border-2 rounded-xl transition-all"
-                  :class="!canAssignUsers || availableUsers.length === 0
-                    ? 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 opacity-60 cursor-not-allowed'
-                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 hover:border-blue-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'" size="5">
-                  <option v-for="user in availableUsers" :key="user.id" :value="user.id">
-                    {{ user.nom }} ({{ user.email }})
-                  </option>
-                </select>
-
-                <div v-if="!loadingMembers && availableUsers.length === 0"
-                  class="mt-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                  <p class="text-sm text-gray-600 dark:text-gray-400 text-center">Aucun membre disponible</p>
-                </div>
-
-                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                  <InformationCircleIcon class="w-4 h-4" />
-                  Maintenez Ctrl/Cmd pour sélectionner plusieurs utilisateurs
-                </p>
               </div>
 
               <!-- Labels -->
-              <div>
+              <!-- <div>
                 <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Labels</label>
                 <TaskLabelsSelector v-model="formData.label_ids" :projet-id="currentActivite?.projet_id"
                   :show-create-button="true" :show-scope-filter="true" @create-label="showLabelModal = true" />
-              </div>
+              </div> -->
             </div>
 
             <!-- Section Validation -->
-            <div class="space-y-5">
+            <!-- <div class="space-y-5">
               <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
                 <div class="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg">
                   <CheckBadgeIcon class="w-5 h-5 text-white" />
@@ -478,8 +543,7 @@
                   </div>
                 </label>
               </div>
-
-              <!-- Validateurs assignés (si besoin) -->
+ 
               <div v-if="formData.validation_n1_required || formData.validation_n2_required"
                 class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
                 <p class="text-sm text-blue-700 dark:text-blue-300">
@@ -487,7 +551,7 @@
                   Les validateurs seront automatiquement assignés en fonction des rôles dans l'activité et le projet.
                 </p>
               </div>
-            </div>
+            </div> -->
 
             <!-- Section Visibilité -->
             <div class="space-y-5">
@@ -739,7 +803,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useTaches } from '@/composables/useTaches'
 import api from '@/api/axios'
@@ -759,13 +823,18 @@ import {
   LinkIcon,
   TrashIcon,
   PaintBrushIcon,
-  FolderIcon, UserIcon
+  FolderIcon,
+  UserIcon
 } from '@heroicons/vue/24/outline'
 
 import { TaskLabelsSelector, LabelModal } from '@/components/labels'
 import { useLabels } from '@/composables/useLabels'
+import { useToast } from 'vue-toastification'
 
 const isDark = computed(() => document.documentElement.classList.contains('dark'))
+
+// ✅ Toast pour notifications
+const toast = useToast()
 
 const props = defineProps({
   tache: { type: Object, default: null },
@@ -855,7 +924,7 @@ const formData = ref({
   description: '',
   objectif: '',
   indicateurs_resultats: '',
-  statut: props.initialStatut || 'a_faire',
+  statut: 'a_faire', // ✅ Par défaut à "a_faire"
   priorite: 'moyenne',
   echeance: null,
   date_debut: null,
@@ -863,8 +932,8 @@ const formData = ref({
   taux_realisation: 0,
   estimated_hours: null,
   actual_hours: null,
-  validation_n1_required: false,
-  validation_n2_required: false,
+  validation_n1_required: true, // ✅ Par défaut cochée
+  validation_n2_required: true, // ✅ Par défaut cochée
   couleur: '#3B82F6',
   commentaire: '',
   assignee_ids: [],
@@ -893,27 +962,18 @@ const visibilityOptions = [
 
 // ==================== MÉTHODES FICHIERS & LIENS ====================
 
-/**
- * ✅ CORRIGÉ : Gérer le drag & drop de fichiers
- */
 const handleFileDrop = (event) => {
   isDragOver.value = false
   const files = Array.from(event.dataTransfer.files)
   handleFiles(files)
 }
 
-/**
- * ✅ CORRIGÉ : Gérer l'upload de fichiers via input
- */
 const handleFileUpload = (event) => {
   const files = Array.from(event.target.files)
   handleFiles(files)
-  event.target.value = '' // Reset l'input
+  event.target.value = ''
 }
 
-/**
- * ✅ CORRIGÉ : Traiter les fichiers uploadés avec validation stricte
- */
 const handleFiles = (files) => {
   const allowedTypes = [
     'application/pdf',
@@ -935,19 +995,16 @@ const handleFiles = (files) => {
   const errors = []
 
   files.forEach(file => {
-    // Vérifier la taille (10 Mo max)
     if (file.size > 10 * 1024 * 1024) {
       errors.push(`Le fichier "${file.name}" dépasse la taille maximale de 10 Mo`)
       return
     }
 
-    // Vérifier le type MIME
     if (!allowedTypes.includes(file.type)) {
       errors.push(`Le format du fichier "${file.name}" (${file.type}) n'est pas supporté`)
       return
     }
 
-    // Vérifier que le fichier n'est pas déjà ajouté
     const exists = uploadedFiles.value.some(f =>
       f.name === file.name && f.size === file.size
     )
@@ -961,28 +1018,22 @@ const handleFiles = (files) => {
   })
 
   if (errors.length > 0) {
-    errorMessage.value = errors.join('\n')
-    setTimeout(() => {
-      errorMessage.value = ''
-    }, 5000)
+    // ✅ Toast pour les erreurs de fichiers
+    errors.forEach(error => toast.error(error, { timeout: 5000 }))
   }
 
   if (validFiles.length > 0) {
     uploadedFiles.value.push(...validFiles)
-    console.log('✅ Fichiers ajoutés:', validFiles.length, 'Total:', uploadedFiles.value.length, 'uploaded files', uploadedFiles.value, 'validFiles', validFiles)
+    toast.success(`${validFiles.length} fichier(s) ajouté(s)`, { timeout: 2000 })
   }
 }
 
-/**
- * Supprimer un fichier
- */
 const removeFile = (index) => {
+  const fileName = uploadedFiles.value[index].name
   uploadedFiles.value.splice(index, 1)
+  toast.info(`Fichier "${fileName}" retiré`, { timeout: 2000 })
 }
 
-/**
- * Formater la taille du fichier
- */
 const formatFileSize = (bytes) => {
   if (bytes === 0) return '0 Bytes'
   const k = 1024
@@ -991,33 +1042,25 @@ const formatFileSize = (bytes) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
-/**
- * ✅ CORRIGÉ : Ajouter un lien externe avec validation
- */
 const addLink = () => {
   if (!newLink.value.url || !newLink.value.url.trim()) {
-    errorMessage.value = 'Veuillez saisir une URL'
-    setTimeout(() => { errorMessage.value = '' }, 3000)
+    toast.error('Veuillez saisir une URL')
     return
   }
 
-  // Validation URL
   try {
     const url = new URL(newLink.value.url)
     if (!['http:', 'https:'].includes(url.protocol)) {
       throw new Error('Protocol invalide')
     }
   } catch {
-    errorMessage.value = 'Veuillez saisir une URL valide (doit commencer par http:// ou https://)'
-    setTimeout(() => { errorMessage.value = '' }, 3000)
+    toast.error('URL invalide (doit commencer par http:// ou https://)')
     return
   }
 
-  // Vérifier doublon
   const exists = externalLinks.value.some(link => link.url === newLink.value.url)
   if (exists) {
-    errorMessage.value = 'Ce lien a déjà été ajouté'
-    setTimeout(() => { errorMessage.value = '' }, 3000)
+    toast.warning('Ce lien a déjà été ajouté')
     return
   }
 
@@ -1026,89 +1069,61 @@ const addLink = () => {
     title: newLink.value.title.trim() || newLink.value.url.trim()
   })
 
-  // Réinitialiser
   newLink.value = { url: '', title: '' }
-
-  console.log('✅ Lien ajouté. Total:', externalLinks.value.length)
+  toast.success('Lien ajouté avec succès')
 }
 
-/**
- * Supprimer un lien
- */
 const removeLink = (index) => {
+  const linkTitle = externalLinks.value[index].title
   externalLinks.value.splice(index, 1)
+  toast.info(`Lien "${linkTitle}" retiré`)
 }
 
-/**
- * ✅ CORRIGÉ : Gérer l'upload d'image de couverture
- */
 const handleCoverImageUpload = (event) => {
   const file = event.target.files?.[0]
 
-  if (!file) {
-    return
-  }
+  if (!file) return
 
-  // Réinitialiser les erreurs
-  errorMessage.value = ''
-
-  // Vérifier la taille (2 Mo max)
   if (file.size > 2 * 1024 * 1024) {
-    errorMessage.value = 'L\'image ne doit pas dépasser 2 Mo'
+    toast.error('L\'image ne doit pas dépasser 2 Mo')
     event.target.value = ''
     return
   }
 
-  // Vérifier le type MIME strictement
   const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif']
   if (!validImageTypes.includes(file.type)) {
-    errorMessage.value = `Format d'image non supporté (${file.type}). Formats acceptés: JPEG, PNG, GIF`
+    toast.error(`Format non supporté (${file.type}). Formats acceptés: JPEG, PNG, GIF`)
     event.target.value = ''
     return
   }
 
-  // Stocker le fichier
   coverImageFile.value = file
 
-  // Générer preview
   const reader = new FileReader()
   reader.onload = (e) => {
     coverImagePreview.value = e.target.result
+    toast.success('Image de couverture ajoutée')
   }
   reader.onerror = () => {
-    errorMessage.value = 'Erreur lors de la lecture du fichier'
+    toast.error('Erreur lors de la lecture du fichier')
     coverImageFile.value = null
   }
   reader.readAsDataURL(file)
-
-  console.log('✅ Image de couverture sélectionnée:', {
-    name: file.name,
-    type: file.type,
-    size: formatFileSize(file.size)
-  })
 }
 
-/**
- * Obtenir la classe de couleur pour la progression
- */
 const getProgressColorClass = (progress) => {
   if (progress < 30) return 'bg-red-500'
   if (progress < 70) return 'bg-amber-500'
   return 'bg-green-500'
 }
 
-/**
- * ✅ CORRIGÉ : Formater une date pour l'API (YYYY-MM-DD)
- */
 const formatDateForApi = (date) => {
   if (!date) return null
 
-  // Si c'est déjà une string au bon format
   if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
     return date
   }
 
-  // Si c'est un objet Date
   let dateObj
   if (date instanceof Date) {
     dateObj = date
@@ -1128,41 +1143,55 @@ const formatDateForApi = (date) => {
 }
 
 /**
- * ✅ CORRIGÉ : Soumettre le formulaire avec gestion optimale des fichiers
+ * ✅ AMÉLIORATION : Validation avant soumission
+ */
+const validateForm = () => {
+  const errors = []
+
+  if (!formData.value.responsable_id) {
+    errors.push('Vous devez sélectionner un responsable pour la tâche')
+  }
+
+  if (!formData.value.titre || formData.value.titre.trim() === '') {
+    errors.push('Le titre de la tâche est obligatoire')
+  }
+
+  if (!formData.value.activite_id) {
+    errors.push('Vous devez sélectionner une activité')
+  }
+
+  return errors
+}
+
+/**
+ * ✅ AMÉLIORATION : Soumission avec notifications explicites
  */
 const handleSubmit = async () => {
+  // ✅ Validation des permissions
   if (!hasPermission.value) {
     const action = props.tache ? 'edit_tasks' : 'create_tasks'
-    errorMessage.value = getPermissionDeniedMessage(action)
+    toast.error(getPermissionDeniedMessage(action))
+    return
+  }
+
+  // ✅ Validation du formulaire
+  const errors = validateForm()
+  if (errors.length > 0) {
+    errors.forEach(error => toast.error(error, { timeout: 5000 }))
     return
   }
 
   loading.value = true
-  errorMessage.value = ''
-  validationErrors.value = []
 
   try {
     if (currentActivite.value) {
       formData.value.activite_id = currentActivite.value.id
     }
 
-    // ✅ TOUJOURS utiliser FormData pour éviter les problèmes
     const formDataObj = new FormData()
 
-    console.log('=== FormData Debug ===')
-    for (let [key, value] of formDataObj.entries()) {
-      if (value instanceof File) {
-        console.log(`${key}: [FILE] ${value.name} (${value.type})`)
-      } else {
-        console.log(`${key}:`, value)
-      }
-    }
-
-    // ✅ Ajouter les champs simples
     formDataObj.append('activite_id', formData.value.activite_id)
-    if (formData.value.responsable_id) {
-      formDataObj.append('responsable_id', formData.value.responsable_id)
-    }
+    formDataObj.append('responsable_id', formData.value.responsable_id)
     formDataObj.append('titre', formData.value.titre || '')
     formDataObj.append('description', formData.value.description || '')
     formDataObj.append('objectif', formData.value.objectif || '')
@@ -1170,7 +1199,6 @@ const handleSubmit = async () => {
     formDataObj.append('statut', formData.value.statut)
     formDataObj.append('priorite', formData.value.priorite)
 
-    // ✅ Dates formatées
     const dateDebut = formatDateForApi(formData.value.date_debut)
     const echeance = formatDateForApi(formData.value.echeance)
     const dateFinReelle = formatDateForApi(formData.value.date_fin_reelle)
@@ -1188,7 +1216,6 @@ const handleSubmit = async () => {
       formDataObj.append('actual_hours', formData.value.actual_hours)
     }
 
-    // ✅ Booléens en 0/1
     formDataObj.append('validation_n1_required', formData.value.validation_n1_required ? '1' : '0')
     formDataObj.append('validation_n2_required', formData.value.validation_n2_required ? '1' : '0')
 
@@ -1196,7 +1223,6 @@ const handleSubmit = async () => {
     formDataObj.append('commentaire', formData.value.commentaire || '')
     formDataObj.append('visibility', formData.value.visibility || 'members_only')
 
-    // ✅ Tableaux d'IDs
     if (formData.value.assignee_ids && formData.value.assignee_ids.length > 0) {
       formData.value.assignee_ids.forEach(id => {
         formDataObj.append('assignee_ids[]', id)
@@ -1209,46 +1235,32 @@ const handleSubmit = async () => {
       })
     }
 
-    // ✅ FICHIERS : Ajouter chaque fichier individuellement
     if (uploadedFiles.value.length > 0) {
       uploadedFiles.value.forEach((file, index) => {
         formDataObj.append(`uploaded_files[${index}]`, file, file.name)
       })
-      console.log('✅ Fichiers ajoutés au FormData:', uploadedFiles.value.length)
     }
 
-    // ✅ LIENS EXTERNES : Sérialiser proprement en JSON
     if (externalLinks.value.length > 0) {
       formDataObj.append('external_links', JSON.stringify(externalLinks.value))
-      console.log('✅ Liens externes:', externalLinks.value.length)
     }
 
-    // ✅ IMAGE DE COUVERTURE
     if (coverImageFile.value) {
       formDataObj.append('cover_image', coverImageFile.value, coverImageFile.value.name)
-      console.log('✅ Image de couverture ajoutée:', coverImageFile.value.name)
-    }
-
-    // ✅ Debug: Afficher le contenu du FormData
-    console.log('=== FormData Content ===')
-    for (let [key, value] of formDataObj.entries()) {
-      if (value instanceof File) {
-        console.log(`${key}:`, {
-          name: value.name,
-          type: value.type,
-          size: value.size
-        })
-      } else {
-        console.log(`${key}:`, value)
-      }
     }
 
     // ✅ Envoyer
     if (props.tache) {
       formDataObj.append('_method', 'PUT')
       await updateTache(props.tache.id, formDataObj)
+      toast.success('✅ Tâche mise à jour avec succès !', {
+        timeout: 4000
+      })
     } else {
       await createTache(formDataObj)
+      toast.success('✅ Tâche créée avec succès !', {
+        timeout: 4000
+      })
     }
 
     emit('saved')
@@ -1262,29 +1274,27 @@ const handleSubmit = async () => {
 }
 
 /**
- * Gérer les erreurs de soumission
+ * ✅ AMÉLIORATION : Gestion des erreurs avec toasts
  */
 const handleError = (error) => {
   if (error.response?.status === 422) {
     const errors = error.response.data.errors
     if (errors) {
-      validationErrors.value = Object.values(errors).flat()
-      errorMessage.value = 'Veuillez corriger les erreurs suivantes :'
+      Object.values(errors).flat().forEach(err => {
+        toast.error(err, { timeout: 6000 })
+      })
     } else {
-      errorMessage.value = error.response.data.message || 'Erreur de validation'
+      toast.error(error.response.data.message || 'Erreur de validation')
     }
   } else if (error.response?.data?.message) {
-    errorMessage.value = error.response.data.message
+    toast.error(error.response.data.message)
   } else if (error.message === 'Network Error') {
-    errorMessage.value = 'Erreur de connexion. Veuillez vérifier votre connexion internet.'
+    toast.error('Erreur de connexion. Vérifiez votre connexion internet.')
   } else {
-    errorMessage.value = 'Une erreur s\'est produite. Veuillez réessayer.'
+    toast.error('Une erreur s\'est produite. Veuillez réessayer.')
   }
 }
 
-/**
- * Vérifier les permissions pour une activité
- */
 const checkPermissions = async (activiteId) => {
   if (!activiteId) {
     permissionChecked.value = false
@@ -1303,7 +1313,6 @@ const checkPermissions = async (activiteId) => {
     formData.value.activite_id = activiteId
     permissionChecked.value = true
 
-    // Charger les membres
     await loadActivityMembers(activiteId).catch(err => {
       if (currentActivite.value?.projet_id) {
         return loadProjectMembers(currentActivite.value.projet_id)
@@ -1311,15 +1320,13 @@ const checkPermissions = async (activiteId) => {
     })
   } catch (error) {
     console.error('❌ Erreur vérification permissions:', error)
+    toast.error('Erreur lors de la vérification des permissions')
     permissionChecked.value = true
   } finally {
     isCheckingPermissions.value = false
   }
 }
 
-/**
- * Gérer la création d'un nouveau label
- */
 const handleLabelCreated = async () => {
   showLabelModal.value = false
   try {
@@ -1328,14 +1335,13 @@ const handleLabelCreated = async () => {
     } else {
       await fetchLabels()
     }
+    toast.success('Label créé avec succès')
   } catch (error) {
     console.error('❌ Erreur rechargement labels:', error)
+    toast.error('Erreur lors du rechargement des labels')
   }
 }
 
-/**
- * Charger toutes les données nécessaires
- */
 const loadData = async () => {
   try {
     const [activitesRes] = await Promise.all([
@@ -1350,8 +1356,53 @@ const loadData = async () => {
     }
   } catch (error) {
     console.error('❌ Erreur chargement données:', error)
+    toast.error('Erreur lors du chargement des données')
   }
 }
+
+// ==================== WATCHERS ====================
+
+/**
+ * ✅ Watcher pour auto-sélectionner le responsable dans les assignés
+ */
+watch(() => formData.value.responsable_id, (newResponsableId, oldResponsableId) => {
+  if (newResponsableId) {
+    if (!formData.value.assignee_ids.includes(newResponsableId)) {
+      formData.value.assignee_ids.push(newResponsableId)
+      console.log('✅ Responsable automatiquement ajouté aux assignés:', newResponsableId)
+    }
+  } else if (oldResponsableId) {
+    const index = formData.value.assignee_ids.indexOf(oldResponsableId)
+    if (index > -1) {
+      formData.value.assignee_ids.splice(index, 1)
+      console.log('⚠️ Ancien responsable retiré des assignés:', oldResponsableId)
+    }
+  }
+}, { immediate: false })
+
+/**
+ * ✅ CORRIGÉ : Empêcher de retirer le responsable avec nextTick pour éviter les réactions multiples
+ */
+watch(() => formData.value.assignee_ids, (newAssignees, oldAssignees) => {
+  const responsableId = formData.value.responsable_id
+  
+  // Vérifier si le responsable existe et n'est plus dans la liste
+  if (responsableId && !newAssignees.includes(responsableId)) {
+    // Vérifier si le responsable était dans l'ancienne liste
+    if (oldAssignees && oldAssignees.includes(responsableId)) {
+      // Le responsable a été ACTIVEMENT retiré par l'utilisateur
+      nextTick(() => {
+        if (!formData.value.assignee_ids.includes(responsableId)) {
+          formData.value.assignee_ids.push(responsableId)
+          
+          toast.warning('Le responsable ne peut pas être retiré des intervenants', {
+            timeout: 3000
+          })
+        }
+      })
+    }
+  }
+}, { deep: true })
 
 // ==================== LIFECYCLE ====================
 
@@ -1359,7 +1410,6 @@ onMounted(async () => {
   try {
     await loadData()
 
-    // Initialiser l'activité
     if (props.activiteContext) {
       currentActivite.value = props.activiteContext
       formData.value.activite_id = props.activiteContext.id
@@ -1368,7 +1418,6 @@ onMounted(async () => {
       await checkPermissions(props.activiteId)
     }
 
-    // Charger les données de la tâche existante
     if (props.tache) {
       formData.value = {
         ...formData.value,
@@ -1386,8 +1435,10 @@ onMounted(async () => {
         taux_realisation: props.tache.taux_realisation || 0,
         estimated_hours: props.tache.estimated_hours || null,
         actual_hours: props.tache.actual_hours || null,
-        validation_n1_required: props.tache.validation_n1_required || false,
-        validation_n2_required: props.tache.validation_n2_required || false,
+        // validation_n1_required: props.tache.validation?.n1_required ?? true,
+        // validation_n2_required: props.tache.validation?.n2_required ?? true,
+        validation_n1_required: true,
+        validation_n2_required:  true,
         couleur: props.tache.couleur || '#3B82F6',
         commentaire: props.tache.commentaire || '',
         assignee_ids: props.tache.assignees?.map(a => a.id) || [],
@@ -1409,6 +1460,7 @@ onMounted(async () => {
     }
   } catch (error) {
     console.error('❌ Erreur initialisation:', error)
+    toast.error('Erreur lors de l\'initialisation du formulaire')
   } finally {
     if (!permissionChecked.value) {
       isCheckingPermissions.value = false

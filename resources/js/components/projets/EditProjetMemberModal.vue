@@ -7,7 +7,7 @@
         <!-- Header -->
         <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
-            Modifier les permissions
+            Modifier les permissions de {{ membre.nom }}
           </h2>
           <button @click="$emit('close')"
             class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
