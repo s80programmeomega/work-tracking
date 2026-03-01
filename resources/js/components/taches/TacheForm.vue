@@ -378,7 +378,7 @@
         </select>
 
         <!-- ✅ Message informatif -->
-        <div class="mt-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+        <!-- <div class="mt-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
           <div class="flex items-start gap-2">
             <InformationCircleIcon class="w-5 h-5 text-purple-600 dark:text-purple-400 flex-shrink-0 mt-0.5" />
             <div class="text-sm text-purple-700 dark:text-purple-300">
@@ -390,7 +390,7 @@
               </ul>
             </div>
           </div>
-        </div>
+        </div> -->
 
         <!-- Affichage du responsable actuel si tâche existante -->
         <div v-if="tache && tache.responsable && formData.responsable_id === tache.responsable.id"
@@ -504,15 +504,15 @@
               </div>
 
               <!-- Labels -->
-              <div>
+              <!-- <div>
                 <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Labels</label>
                 <TaskLabelsSelector v-model="formData.label_ids" :projet-id="currentActivite?.projet_id"
                   :show-create-button="true" :show-scope-filter="true" @create-label="showLabelModal = true" />
-              </div>
+              </div> -->
             </div>
 
             <!-- Section Validation -->
-            <div class="space-y-5">
+            <!-- <div class="space-y-5">
               <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
                 <div class="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg">
                   <CheckBadgeIcon class="w-5 h-5 text-white" />
@@ -543,8 +543,7 @@
                   </div>
                 </label>
               </div>
-
-              <!-- Validateurs assignés (si besoin) -->
+ 
               <div v-if="formData.validation_n1_required || formData.validation_n2_required"
                 class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
                 <p class="text-sm text-blue-700 dark:text-blue-300">
@@ -552,7 +551,7 @@
                   Les validateurs seront automatiquement assignés en fonction des rôles dans l'activité et le projet.
                 </p>
               </div>
-            </div>
+            </div> -->
 
             <!-- Section Visibilité -->
             <div class="space-y-5">
@@ -1436,8 +1435,10 @@ onMounted(async () => {
         taux_realisation: props.tache.taux_realisation || 0,
         estimated_hours: props.tache.estimated_hours || null,
         actual_hours: props.tache.actual_hours || null,
-        validation_n1_required: props.tache.validation?.n1_required ?? true,
-        validation_n2_required: props.tache.validation?.n2_required ?? true,
+        // validation_n1_required: props.tache.validation?.n1_required ?? true,
+        // validation_n2_required: props.tache.validation?.n2_required ?? true,
+        validation_n1_required: true,
+        validation_n2_required:  true,
         couleur: props.tache.couleur || '#3B82F6',
         commentaire: props.tache.commentaire || '',
         assignee_ids: props.tache.assignees?.map(a => a.id) || [],
