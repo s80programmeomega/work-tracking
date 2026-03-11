@@ -1346,12 +1346,11 @@ const handleActivityUpdated = () => {
 
 }
 
-const handleInvited = () => {
+const handleInvited = async () => {
   showInviteModal.value = false
-  loadProjet()
-  if (invitedCount > 0) {
-    toast.success(`${invitedCount} membre(s) invité(s) avec succès`)
-  }
+  await loadProjet()
+  await loadInvitations()
+  toast.success('Invitation(s) traitée(s) avec succès')
 }
 
 const handleMemberUpdated = () => {
@@ -1362,11 +1361,11 @@ const handleMemberUpdated = () => {
 
 }
 
-const handleMemberRemoved = () => {
+const handleMemberRemoved = async () => {
   showRemoveMemberModal.value = false
-  loadProjet()
+  memberToRemove.value = null
+  await loadProjet()
   toast.success('Membre retiré du projet')
-
 }
 
 const editProjet = (projet) => {
@@ -1506,26 +1505,17 @@ const canEditMember = (member) => {
 
 const canRemoveMember = (member) => {
   const currentUser = authStore.user
-  if (!currentUser) return false
+  if (!currentUser || !projet.value) return false
 
-  // Le propriétaire de l'espace de travail peut tout faire
-  if (isWorkspaceOwner.value) return true
-
-  // Ne pas permettre de se retirer soi-même
   if (member.id === currentUser.id) return false
 
-  // Ne pas permettre de retirer le responsable du projet
-  if (member.id === projet.value.responsable_id) return false
-
+  if (currentUser.is_super_admin) return true
   if (isWorkspaceOwner.value) return true
+  if (projet.value.responsable_id === currentUser.id) return true
 
-  // V??rifier si l'utilisateur courant a la permission de supprimer
   const currentUserMember = members.value.find(m => m.id === currentUser.id)
-  const hasDeletePermission = currentUserMember?.can_delete_member === true || currentUserMember?.can_delete_member === 1
 
-  if (!hasDeletePermission) return false
-
-  return true
+  return currentUserMember?.can_delete_member === true || currentUserMember?.can_delete_member === 1
 }
 
 

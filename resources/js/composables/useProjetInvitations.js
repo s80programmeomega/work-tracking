@@ -1,4 +1,3 @@
-// resources/js/composables/useProjetInvitations.js
 import { ref } from 'vue'
 import api from '@/api/axios'
 
@@ -8,7 +7,7 @@ export function useProjetInvitations() {
   const error = ref(null)
 
   /**
-   * ✅ Inviter des membres au projet
+   * Inviter des membres au projet
    */
   const inviteMembers = async (projetId, data) => {
     loading.value = true
@@ -18,7 +17,7 @@ export function useProjetInvitations() {
       const response = await api.post(`/projets/${projetId}/invitations`, data)
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Erreur lors de l\'invitation'
+      error.value = err.response?.data?.message || 'Erreur lors de l’invitation'
       throw err
     } finally {
       loading.value = false
@@ -26,7 +25,7 @@ export function useProjetInvitations() {
   }
 
   /**
-   * ✅ Récupérer les invitations d'un projet
+   * Récupérer les invitations d'un projet
    */
   const fetchInvitations = async (projetId) => {
     loading.value = true
@@ -45,7 +44,7 @@ export function useProjetInvitations() {
   }
 
   /**
-   * ✅ Vérifier une invitation
+   * Vérifier une invitation
    */
   const checkInvitation = async (token) => {
     loading.value = true
@@ -63,7 +62,7 @@ export function useProjetInvitations() {
   }
 
   /**
-   * ✅ Accepter une invitation
+   * Accepter une invitation
    */
   const acceptInvitation = async (token, userData = null) => {
     loading.value = true
@@ -73,7 +72,7 @@ export function useProjetInvitations() {
       const response = await api.post(`/invitations/projet/${token}/accept`, userData)
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Erreur lors de l\'acceptation'
+      error.value = err.response?.data?.message || 'Erreur lors de l’acceptation'
       throw err
     } finally {
       loading.value = false
@@ -81,7 +80,7 @@ export function useProjetInvitations() {
   }
 
   /**
-   * ✅ Renvoyer une invitation
+   * Renvoyer une invitation
    */
   const resendInvitation = async (projetId, invitationId) => {
     loading.value = true
@@ -99,7 +98,7 @@ export function useProjetInvitations() {
   }
 
   /**
-   * ✅ Annuler une invitation
+   * Annuler une invitation
    */
   const cancelInvitation = async (projetId, invitationId) => {
     loading.value = true
@@ -107,13 +106,12 @@ export function useProjetInvitations() {
 
     try {
       const response = await api.delete(`/projets/${projetId}/invitations/${invitationId}`)
-      
-      // Retirer de la liste locale
+
       invitations.value = invitations.value.filter(inv => inv.id !== invitationId)
-      
+
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Erreur lors de l\'annulation'
+      error.value = err.response?.data?.message || 'Erreur lors de l’annulation'
       throw err
     } finally {
       loading.value = false
@@ -121,57 +119,39 @@ export function useProjetInvitations() {
   }
 
   /**
-   * ✅ Retirer un membre avec transfert
+   * Charger l'impact du retrait d'un membre dans un projet
    */
-  const removeMemberWithTransfer = async (projetId, userId, newResponsableId = null) => {
+  const getProjectMemberRemovalImpact = async (projetId, userId) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response = await api.get(`/projets/${projetId}/members/${userId}/removal-impact`)
+      return response.data.data
+    } catch (err) {
+      error.value = err.response?.data?.message || 'Erreur lors du chargement de l’impact du retrait'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  /**
+   * Retirer un membre d’un projet avec transfert optionnel
+   */
+  const removeMemberWithTransfer = async (projetId, userId, transferToUserId = null) => {
     loading.value = true
     error.value = null
 
     try {
       const response = await api.delete(`/projets/${projetId}/members/${userId}/remove`, {
-        data: { new_responsable_id: newResponsableId }
+        data: {
+          transfer_to_user_id: transferToUserId
+        }
       })
       return response.data
     } catch (err) {
       error.value = err.response?.data?.message || 'Erreur lors du retrait'
-      throw err
-    } finally {
-      loading.value = false
-    }
-  }
-
-  /**
-   * ✅ Obtenir les projets où l'user est responsable
-   */
-  const getUserProjects = async (workspaceId, userId) => {
-    loading.value = true
-    error.value = null
-
-    try {
-      const response = await api.get(`/workspaces/${workspaceId}/members/${userId}/projects`)
-      return response.data.data
-    } catch (err) {
-      error.value = err.response?.data?.message || 'Erreur lors du chargement'
-      throw err
-    } finally {
-      loading.value = false
-    }
-  }
-
-  /**
-   * ✅ Obtenir les candidats pour le transfert
-   */
-  const getTransferCandidates = async (workspaceId, excludeUserId) => {
-    loading.value = true
-    error.value = null
-
-    try {
-      const response = await api.get(`/workspaces/${workspaceId}/transfer-candidates`, {
-        params: { exclude_user_id: excludeUserId }
-      })
-      return response.data.data
-    } catch (err) {
-      error.value = err.response?.data?.message || 'Erreur lors du chargement'
       throw err
     } finally {
       loading.value = false
@@ -188,8 +168,7 @@ export function useProjetInvitations() {
     acceptInvitation,
     resendInvitation,
     cancelInvitation,
-    removeMemberWithTransfer,
-    getUserProjects,
-    getTransferCandidates
+    getProjectMemberRemovalImpact,
+    removeMemberWithTransfer
   }
 }
