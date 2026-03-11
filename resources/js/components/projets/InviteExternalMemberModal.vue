@@ -119,7 +119,7 @@
                             <span class="text-sm font-medium text-blue-800 dark:text-blue-300">
                               {{ warning.email }}
                               <span v-if="warning.user_name" class="text-xs font-normal">({{ warning.user_name
-                              }})</span>
+                                }})</span>
                             </span>
                             <span class="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 rounded text-xs">
                               En attente
@@ -143,8 +143,9 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M6 18L18 6M6 6l12 12" />
                               </svg>
-                              Annuler
+                              Annuler 
                             </button>
+                        
                           </div>
 
                           <!-- Date d'expiration -->
@@ -229,7 +230,7 @@
                   </div>
                 </div>
               </div>
-              
+
               <!-- Suggestions -->
               <div v-if="hasActionableItems"
                 class="p-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
@@ -542,10 +543,11 @@
         <!-- Footer -->
         <div
           class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-          <button type="button" @click="$emit('close')"
+          <button type="button" @click="handleClose"
             class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-            Annuler
+            Annuler  
           </button>
+               
           <button @click="handleSubmit" :disabled="submitting || !canSubmit"
             class="px-6 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
             <span v-if="submitting" class="animate-spin">⏳</span>
@@ -731,16 +733,14 @@ const handleClose = () => {
   emit('close')
 }
 
-const resetAndRetry = () => {
-  invitationResult.value = null
-  error.value = null
-
-  // Réinitialiser les sélections
-  if (activeTab.value === 'workspace') {
-    selectedMembers.value = []
-  } else {
-    emailsInput.value = ''
+const getRoleLabel = (role) => {
+  const labels = {
+    owner: 'Propriétaire',
+    admin: 'Administrateur',
+    member: 'Membre',
+    viewer: 'Observateur'
   }
+  return labels[role] || role
 }
 
 const resendInvitation = async (invitationId, email) => {
@@ -864,7 +864,12 @@ const handleSubmit = async () => {
   } catch (err) {
     error.value = err.response?.data?.message || 'Une erreur est survenue'
     toast.error(error.value)
-    console.error('Error inviting members:', err)
+
+    console.error('Error inviting members:', {
+      status: err.response?.status,
+      data: err.response?.data,
+      errors: err.response?.data?.errors
+    })
   } finally {
     submitting.value = false
   }

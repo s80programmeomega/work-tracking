@@ -185,9 +185,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Project Statistics & Reports
         Route::get('/{projet}/statistics', [ProjetController::class, 'getStatistics']);
         Route::get('/{projet}/performance-report', [ProjetController::class, 'performanceReport']);
-        Route::get('/{projet}/accessible-tasks', [ProjetController::class, 'accessibleTasks']);
-        Route::delete('/{projet}/members/{user}/remove', [ProjetController::class, 'removeMemberWithTransfer']);
+        Route::get('/{projet}/accessible-tasks', [ProjetController::class, 'accessibleTasks']); 
 
+        Route::get('/{projet}/members/{user}/removal-impact', [ProjetController::class, 'getMemberRemovalImpact']);
+        Route::delete('/{projet}/members/{user}/remove', [ProjetController::class, 'removeMemberWithTransfer']);
 
     });
 

@@ -15,6 +15,8 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\FacadesLog;
+use App\Models\Activite;
+use App\Models\Tache;
 
 class ProjetController extends Controller
 {
@@ -192,7 +194,11 @@ class ProjetController extends Controller
                     'can_edit',
                     'can_delete',
                     'can_invite',
-                    'created_at'
+                    'can_delete_member',
+                    'can_create_activity',
+                    'can_edit_activity',
+                    'can_delete_activity',
+                    'created_at',
                 ]);
             },
             'tags',
@@ -427,7 +433,16 @@ class ProjetController extends Controller
         $this->authorize('view', $projet);
 
         $members = $projet->members()
-            ->withPivot(['role', 'can_edit', 'can_delete', 'can_invite'])
+            ->withPivot([
+                'role',
+                'can_edit',
+                'can_delete',
+                'can_invite',
+                'can_delete_member',
+                'can_create_activity',
+                'can_edit_activity',
+                'can_delete_activity',
+            ])
             ->get();
 
         return response()->json([
@@ -496,6 +511,9 @@ class ProjetController extends Controller
             'can_delete' => 'nullable|boolean',
             'can_invite' => 'nullable|boolean',
             'can_delete_member' => 'nullable|boolean',
+            'can_create_activity' => 'nullable|boolean',
+            'can_edit_activity' => 'nullable|boolean',
+            'can_delete_activity' => 'nullable|boolean',
         ]);
 
         // Vérifier si membre
@@ -509,7 +527,16 @@ class ProjetController extends Controller
             $this->projetService->updateMember(
                 $projet,
                 $user->id,
-                $request->only(['role', 'can_edit', 'can_delete', 'can_invite', 'can_delete_member'])
+                $request->only([
+                    'role',
+                    'can_edit',
+                    'can_delete',
+                    'can_invite',
+                    'can_delete_member',
+                    'can_create_activity',
+                    'can_edit_activity',
+                    'can_delete_activity',
+                ])
             );
 
             return response()->json([
@@ -545,6 +572,214 @@ class ProjetController extends Controller
                 'message' => 'Membre retiré avec succès. Tous ses accès ont été révoqués.',
             ]);
         } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erreur lors du retrait du membre.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function getMemberRemovalImpact(Projet $projet, User $user): JsonResponse
+    {
+        $this->authorize('manageMembers', $projet);
+
+        if (
+            (int) $projet->responsable_id !== (int) $user->id &&
+            !$projet->members()->where('users.id', $user->id)->exists()
+        ) {
+            return response()->json([
+                'message' => 'Cet utilisateur n\'est pas rattaché à ce projet.',
+            ], 404);
+        }
+
+        $activities = $projet->activites()
+            ->where('responsable_id', $user->id)
+            ->select('id', 'nom', 'code', 'responsable_id')
+            ->orderBy('nom')
+            ->get();
+
+        $responsableTasks = Tache::query()
+            ->whereHas('activite', function ($q) use ($projet) {
+                $q->where('projet_id', $projet->id);
+            })
+            ->where('responsable_id', $user->id)
+            ->select('id', 'titre', 'code', 'activite_id', 'responsable_id')
+            ->orderBy('titre')
+            ->get();
+
+        $assignedTasksCount = DB::table('tache_user')
+            ->join('taches', 'taches.id', '=', 'tache_user.tache_id')
+            ->join('activites', 'activites.id', '=', 'taches.activite_id')
+            ->where('activites.projet_id', $projet->id)
+            ->where('tache_user.user_id', $user->id)
+            ->count();
+
+        $candidateIds = $projet->members()
+            ->where('users.id', '!=', $user->id)
+            ->pluck('users.id')
+            ->toArray();
+
+        if (
+            $projet->responsable_id &&
+            (int) $projet->responsable_id !== (int) $user->id &&
+            !in_array((int) $projet->responsable_id, $candidateIds, true)
+        ) {
+            $candidateIds[] = (int) $projet->responsable_id;
+        }
+
+        if (
+            $projet->workspace &&
+            $projet->workspace->owner_id &&
+            (int) $projet->workspace->owner_id !== (int) $user->id &&
+            !in_array((int) $projet->workspace->owner_id, $candidateIds, true)
+        ) {
+            $candidateIds[] = (int) $projet->workspace->owner_id;
+        }
+
+        $candidates = User::query()
+            ->whereIn('id', $candidateIds)
+            ->select('id', 'nom', 'email', 'avatar')
+            ->orderBy('nom')
+            ->get();
+
+        return response()->json([
+            'data' => [
+                'is_project_responsable' => (int) $projet->responsable_id === (int) $user->id,
+                'activities_count' => $activities->count(),
+                'activities' => $activities,
+                'responsable_tasks_count' => $responsableTasks->count(),
+                'responsable_tasks' => $responsableTasks,
+                'assigned_tasks_count' => $assignedTasksCount,
+                'requires_transfer' => (
+                    (int) $projet->responsable_id === (int) $user->id ||
+                    $activities->count() > 0 ||
+                    $responsableTasks->count() > 0
+                ),
+                'candidates' => $candidates,
+            ],
+        ]);
+    }
+
+    public function removeMemberWithTransfer(Request $request, Projet $projet, User $user): JsonResponse
+    {
+        $this->authorize('manageMembers', $projet);
+
+        $request->validate([
+            'transfer_to_user_id' => ['nullable', 'integer', 'exists:users,id'],
+        ]);
+
+        $isProjectResponsable = (int) $projet->responsable_id === (int) $user->id;
+        $isProjectMember = $projet->members()->where('users.id', $user->id)->exists();
+
+        if (!$isProjectResponsable && !$isProjectMember) {
+            return response()->json([
+                'message' => 'Cet utilisateur n\'est pas rattaché à ce projet.',
+            ], 404);
+        }
+
+        $activitiesCount = $projet->activites()
+            ->where('responsable_id', $user->id)
+            ->count();
+
+        $responsableTasksCount = Tache::query()
+            ->whereHas('activite', function ($q) use ($projet) {
+                $q->where('projet_id', $projet->id);
+            })
+            ->where('responsable_id', $user->id)
+            ->count();
+
+        $requiresTransfer = $isProjectResponsable || $activitiesCount > 0 || $responsableTasksCount > 0;
+
+        $transferToUserId = $request->input('transfer_to_user_id');
+
+        if ($requiresTransfer && !$transferToUserId) {
+            return response()->json([
+                'message' => 'Le transfert des responsabilités est obligatoire avant le retrait de ce membre.',
+            ], 422);
+        }
+
+        if ($transferToUserId) {
+            if ((int) $transferToUserId === (int) $user->id) {
+                return response()->json([
+                    'message' => 'Le remplaçant doit être différent du membre retiré.',
+                ], 422);
+            }
+
+            $isValidReplacement =
+                $projet->members()->where('users.id', $transferToUserId)->exists()
+                || (int) optional($projet->responsable)->id === (int) $transferToUserId
+                || (int) optional($projet->workspace)->owner_id === (int) $transferToUserId;
+
+            if (!$isValidReplacement) {
+                return response()->json([
+                    'message' => 'Le remplaçant doit être membre du projet, responsable du projet ou propriétaire du workspace.',
+                ], 422);
+            }
+        }
+
+        try {
+            DB::transaction(function () use ($projet, $user, $transferToUserId, $isProjectResponsable) {
+                // 1. Transférer le responsable du projet
+                if ($isProjectResponsable && $transferToUserId) {
+                    $projet->update([
+                        'responsable_id' => $transferToUserId,
+                    ]);
+                }
+
+                // 2. Transférer les activités dont il est responsable
+                $projet->activites()
+                    ->where('responsable_id', $user->id)
+                    ->update([
+                        'responsable_id' => $transferToUserId,
+                    ]);
+
+                // 3. Transférer les tâches du projet dont il est responsable
+                Tache::query()
+                    ->whereHas('activite', function ($q) use ($projet) {
+                        $q->where('projet_id', $projet->id);
+                    })
+                    ->where('responsable_id', $user->id)
+                    ->update([
+                        'responsable_id' => $transferToUserId,
+                    ]);
+
+                // 4. Retirer l'utilisateur des assignations de tâches du projet
+                DB::table('tache_user')
+                    ->join('taches', 'taches.id', '=', 'tache_user.tache_id')
+                    ->join('activites', 'activites.id', '=', 'taches.activite_id')
+                    ->where('activites.projet_id', $projet->id)
+                    ->where('tache_user.user_id', $user->id)
+                    ->delete();
+
+                // 5. Retirer l'utilisateur des membres d'activités du projet si la table existe
+                if (\Schema::hasTable('activite_user')) {
+                    DB::table('activite_user')
+                        ->join('activites', 'activites.id', '=', 'activite_user.activite_id')
+                        ->where('activites.projet_id', $projet->id)
+                        ->where('activite_user.user_id', $user->id)
+                        ->delete();
+                }
+
+                // 6. Retirer du projet (pivot projet_user)
+                $projet->members()->detach($user->id);
+            });
+
+            return response()->json([
+                'message' => 'Membre retiré du projet avec succès.',
+                'data' => [
+                    'projet_id' => $projet->id,
+                    'user_id' => $user->id,
+                    'transferred_to_user_id' => $transferToUserId,
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Erreur retrait membre projet avec transfert', [
+                'projet_id' => $projet->id,
+                'user_id' => $user->id,
+                'transfer_to_user_id' => $transferToUserId,
+                'error' => $e->getMessage(),
+            ]);
+
             return response()->json([
                 'message' => 'Erreur lors du retrait du membre.',
                 'error' => $e->getMessage(),

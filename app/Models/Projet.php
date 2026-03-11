@@ -101,12 +101,21 @@ class Projet extends Model
         return $this->belongsTo(User::class, 'responsable_id');
     }
 
-    public function members(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'projet_user')
-            ->withPivot(['role', 'can_edit', 'can_delete', 'can_invite', 'can_delete_member'])
-            ->withTimestamps();
-    }
+public function members(): BelongsToMany
+{
+    return $this->belongsToMany(User::class, 'projet_user')
+        ->withPivot([
+            'role',
+            'can_edit',
+            'can_delete',
+            'can_invite',
+            'can_delete_member',
+            'can_create_activity',
+            'can_edit_activity',
+            'can_delete_activity',
+        ])
+        ->withTimestamps();
+}
 
     public function creator(): BelongsTo
     {
