@@ -772,8 +772,12 @@
     <ActiviteForm v-if="showEditActivityModal" :activite="selectedActivity" :projet-id="projetId"
       @close="showEditActivityModal = false" @saved="handleActivityUpdated" />
 
-    <InviteExternalMemberModal v-if="showInviteModal" :projet-id="projetId" @close="showInviteModal = false"
-      @invited="handleInvited" />
+    <InviteExternalMemberModal
+  v-if="showInviteModal"
+  :projet-id="projetId"
+  @close="handleInviteModalClosed"
+  @invited="handleInvited"
+/>
 
     <EditProjetMemberModal v-if="showEditProjetMemberModal" :membre="selectedMember" :projet-id="projetId"
       @close="showEditProjetMemberModal = false" @updated="handleMemberUpdated" />
@@ -1346,11 +1350,24 @@ const handleActivityUpdated = () => {
 
 }
 
+const invitationJustSucceeded = ref(false)
+
 const handleInvited = async () => {
+  invitationJustSucceeded.value = true
   showInviteModal.value = false
   await loadProjet()
   await loadInvitations()
   toast.success('Invitation(s) traitée(s) avec succès')
+}
+
+const handleInviteModalClosed = async () => {
+  showInviteModal.value = false
+
+  if (invitationJustSucceeded.value) {
+    invitationJustSucceeded.value = false
+    await loadProjet()
+    await loadInvitations()
+  }
 }
 
 const handleMemberUpdated = () => {
