@@ -31,6 +31,7 @@ class RolePermissionSeeder extends Seeder
             'can_delete_members',
             'can_invite_members',
             'can_manage_settings',
+            'can_view_all_projects',
 
             // Activités
             'activites.view',

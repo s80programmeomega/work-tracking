@@ -18,8 +18,12 @@ yarn-error.log
 /.idea
 /.vscode
 
-# Documentation files
-*.md
+# AI tools
+.mcp.json
+boost.json
+.sixth/
+.kiro/
+
 public/uploads/tache-attachments/1765472376_693af87875740_Continuez votre apprentissage 6.pdf
 public/uploads/tache-attachments/1765472376_693af87885201_cerd.png
 public/uploads/tache-attachments/1765472951_693afab771aca_domais.png
