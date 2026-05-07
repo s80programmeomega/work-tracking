@@ -1,5 +1,34 @@
 # Project Onboarding Guide
 
+> **For the AI agent reading this:** This document is your full briefing. Read it entirely before doing anything. It covers the project architecture, working conventions, and git workflow agreed with the developer (Jonas). Follow these conventions without needing to be re-explained.
+
+---
+
+## Working Conventions (AI ↔ Jonas)
+
+- **Branch strategy:** All work is on branch `jonas`. Features go on `jonas/feature/<name>`, fixes on `jonas/fix/<name>`. Always branch from `jonas`, PR back into `jonas`.
+- **Never push to `main`** without explicit instruction.
+- **Commit style:** `fix:`, `feat:`, `chore:` prefixes. Short, descriptive messages.
+- **Before any feature:** read the relevant existing code first (Service + Controller + Composable + Page) to match patterns.
+- **Minimal code:** write only what's needed, no over-engineering.
+- **Language:** Jonas communicates in English. Code and commits in English.
+- **This file is the memory:** update it at the end of each significant session with what was done and what's next.
+
+---
+
+## Current Status
+
+- App installed and running locally
+- All migrations applied and passing
+- Branch `jonas` pushed to origin
+- Fixes applied: duplicate migration, missing `can_view_all_projects` permission, `Documents.vue` route case
+
+## Next Steps
+
+- _(update this section each session)_
+
+---
+
 ## Project Overview: Work Tracking
 
 This is a **SPA (Single Page Application)** — Laravel serves as a pure JSON API backend, Vue.js handles everything in the browser.
