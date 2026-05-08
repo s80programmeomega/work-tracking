@@ -61,24 +61,29 @@ collaborateur/stagiaire submits result
 
 ---
 
-### Task 3: Fix broken policy methods
-**Branch:** `fix/policy-bugs`
+### Task 3: Build PermissionService
+**Branch:** `feature/permission-service`
 
 **Changes:**
-- `TachePolicy::create()`: remove `return true;`
-- `ActivitePolicy::create()`: fix undefined variable
-- Add `declare(strict_types=1);` to all policies
+- Create `app/Services/PermissionService.php` with methods for all 4 hierarchy levels:
+  - Workspace: `canManageWorkspace`, `canCreateProject`
+  - Project: `canEditProject`, `canDeleteProject`
+  - Activity: `canCreateTask`, `canEditActivity`
+  - Task: `canEditTask`, `canValidateN1` (cadre), `canValidateN2` (manager), `canCreateSubtask` (is_responsable)
+- Delete `app/Policies/` folder
+- Unregister policies from `AuthServiceProvider`
 
-**Tests:** Unit tests for policy methods
+**Tests:** Unit tests for each permission method
 
 ---
 
 ### Task 4: Update validation workflow to use new roles
-**Branch:** `feature/validation-workflow-update`
+**Branch:** `feature/permission-service` (same branch)
 
 **Changes:**
-- Update `TachePolicy`: validateN1/N2 use contextual roles
-- Update `TacheResultatController`, `EvaluationController`
+- Update `TacheResultatController`, `EvaluationController` to use `PermissionService`
+- N1 validation → cadre role check
+- N2 validation → manager role check
 
 **Tests:** Feature tests for N1/N2 validation
 
@@ -95,12 +100,13 @@ collaborateur/stagiaire submits result
 
 ---
 
-### Task 6: Audit controllers for missing authorization
-**Branch:** `fix/authorization-audit`
+### Task 6: Replace policy calls with PermissionService in all controllers
+**Branch:** `feature/permission-service` (same branch)
 
 **Changes:**
-- Grep all controllers, add missing `$this->authorize()`
-- Document in `docs/AUTHORIZATION_AUDIT.md`
+- Remove all `$this->authorize()` calls from controllers
+- Inject `PermissionService` into controllers that need it
+- Return 403 responses using `PermissionService` checks
 
 **Tests:** Feature tests for protected endpoints
 
