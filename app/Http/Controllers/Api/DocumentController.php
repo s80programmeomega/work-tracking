@@ -2,29 +2,29 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Document;
-use App\Services\DocumentService;
-use App\Http\Resources\DocumentResource;
-use App\Models\Workspace;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\DocumentResource;
 use App\Models\Activite;
+use App\Models\Document;
 use App\Models\Projet;
 use App\Models\Tache;
 use App\Models\User;
+use App\Models\Workspace;
+use App\Services\DocumentAccessResolver;
+use App\Services\DocumentService;
+use App\Services\PermissionService;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DocumentController extends Controller
 {
-    protected DocumentService $documentService;
-
-    public function __construct(DocumentService $documentService)
-    {
-        $this->documentService = $documentService;
-    }
+    public function __construct(
+        protected DocumentService $documentService,
+        protected PermissionService $permissionService,
+    ) {}
 
     /**
      * Récupère les documents d'une entité (Projet, Activité, Tâche, etc.)
@@ -131,7 +131,7 @@ class DocumentController extends Controller
             'documentable_type' => 'required|string',
             'documentable_id' => 'required|integer',
             'files' => 'required|array',
-            'files.*' => 'required|file|max:' . config('documents.max_file_size', 10240),
+            'files.*' => 'required|file|max:'.config('documents.max_file_size', 10240),
             'description' => 'sometimes|string|max:1000',
             'visibility' => 'sometimes|in:private,team,public',
             'disk' => 'sometimes|string',
@@ -143,12 +143,11 @@ class DocumentController extends Controller
             $user = $request->user();
             $files = $request->file('files');
 
-            // Vérifier la permission d'upload via Gate
-            Gate::authorize('create', [
-                Document::class,
-                $request->documentable_type,
-                $request->documentable_id
-            ]);
+            // Upload permission checked via DocumentAccessResolver
+            abort_unless(
+                app(DocumentAccessResolver::class)->canUpload($user, $request->documentable_type, $request->documentable_id),
+                403
+            );
 
             $options = [
                 'description' => $request->description,
@@ -186,11 +185,11 @@ class DocumentController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => count($documents) . ' documents uploadés avec succès',
+                'message' => count($documents).' documents uploadés avec succès',
                 'data' => DocumentResource::collection($documents),
             ], 201);
 
-        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+        } catch (AuthorizationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => "Vous n'avez pas la permission d'uploader des documents ici",
@@ -209,7 +208,7 @@ class DocumentController extends Controller
     public function show(Request $request, Document $document): JsonResponse
     {
         try {
-            Gate::authorize('view', $document);
+            abort_unless($this->permissionService->canViewDocument(auth()->user(), $document), 403);
 
             $document->load([
                 'user:id,nom,email,avatar',
@@ -222,7 +221,7 @@ class DocumentController extends Controller
                 'success' => true,
                 'data' => new DocumentResource($document),
             ]);
-        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+        } catch (AuthorizationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Vous n\'avez pas la permission de voir ce document',
@@ -242,7 +241,7 @@ class DocumentController extends Controller
         ]);
 
         try {
-            Gate::authorize('update', $document);
+            abort_unless($this->permissionService->canEditDocument(auth()->user(), $document), 403);
 
             $document->update($request->only(['nom', 'description', 'visibility']));
 
@@ -256,7 +255,7 @@ class DocumentController extends Controller
                 'message' => 'Document mis à jour avec succès',
                 'data' => new DocumentResource($document->fresh()),
             ]);
-        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+        } catch (AuthorizationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Vous n\'avez pas la permission de modifier ce document',
@@ -270,7 +269,7 @@ class DocumentController extends Controller
     public function destroy(Request $request, Document $document): JsonResponse
     {
         try {
-            Gate::authorize('delete', $document);
+            abort_unless($this->permissionService->canDeleteDocument(auth()->user(), $document), 403);
 
             $this->documentService->delete($document);
 
@@ -278,7 +277,7 @@ class DocumentController extends Controller
                 'success' => true,
                 'message' => 'Document supprimé avec succès',
             ]);
-        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+        } catch (AuthorizationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Vous n\'avez pas la permission de supprimer ce document',
@@ -297,7 +296,7 @@ class DocumentController extends Controller
     public function download(Request $request, Document $document): StreamedResponse|JsonResponse
     {
         try {
-            Gate::authorize('download', $document);
+            abort_unless($this->permissionService->canViewDocument(auth()->user(), $document), 403);
 
             // Enregistrer le téléchargement
             $this->documentService->recordDownload($document, $request->user());
@@ -310,7 +309,7 @@ class DocumentController extends Controller
                 $document->chemin,
                 $document->nom
             );
-        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+        } catch (AuthorizationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Vous n\'avez pas la permission de télécharger ce document',
@@ -318,7 +317,7 @@ class DocumentController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors du téléchargement : ' . $e->getMessage(),
+                'message' => 'Erreur lors du téléchargement : '.$e->getMessage(),
             ], 500);
         }
     }
@@ -329,11 +328,11 @@ class DocumentController extends Controller
     public function createVersion(Request $request, Document $document): JsonResponse
     {
         $request->validate([
-            'file' => 'required|file|max:' . config('documents.max_file_size', 10240),
+            'file' => 'required|file|max:'.config('documents.max_file_size', 10240),
         ]);
 
         try {
-            Gate::authorize('update', $document);
+            abort_unless($this->permissionService->canEditDocument(auth()->user(), $document), 403);
 
             $newVersion = $this->documentService->createVersion(
                 $document,
@@ -346,7 +345,7 @@ class DocumentController extends Controller
                 'message' => 'Nouvelle version créée avec succès',
                 'data' => new DocumentResource($newVersion),
             ], 201);
-        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+        } catch (AuthorizationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Vous n\'avez pas la permission de créer une nouvelle version',
@@ -358,7 +357,6 @@ class DocumentController extends Controller
             ], 400);
         }
     }
-
 
     /**
      * Liste les versions d'un document
@@ -385,12 +383,12 @@ class DocumentController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $versions
+                'data' => $versions,
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
@@ -401,7 +399,7 @@ class DocumentController extends Controller
     public function _versions(Request $request, Document $document): JsonResponse
     {
         try {
-            Gate::authorize('view', $document);
+            abort_unless($this->permissionService->canViewDocument(auth()->user(), $document), 403);
 
             $versions = $document->versions()->with('user:id,nom,email')->get();
 
@@ -413,7 +411,7 @@ class DocumentController extends Controller
                     'total_versions' => $versions->count() + 1,
                 ],
             ]);
-        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+        } catch (AuthorizationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Vous n\'avez pas la permission de voir les versions',
@@ -427,7 +425,7 @@ class DocumentController extends Controller
     public function stats(Request $request, Document $document): JsonResponse
     {
         try {
-            Gate::authorize('view', $document);
+            abort_unless($this->permissionService->canViewDocument(auth()->user(), $document), 403);
 
             $stats = $this->documentService->getDownloadStats($document);
 
@@ -435,7 +433,7 @@ class DocumentController extends Controller
                 'success' => true,
                 'data' => $stats,
             ]);
-        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+        } catch (AuthorizationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Vous n\'avez pas la permission de voir les statistiques',
@@ -496,13 +494,13 @@ class DocumentController extends Controller
                     'activities' => $activitiesCount,
                     'tasks' => $tasksCount,
                     'documents' => $documentsCount,
-                    'totalSize' => $totalSize
-                ]
+                    'totalSize' => $totalSize,
+                ],
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
@@ -523,12 +521,12 @@ class DocumentController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $documents
+                'data' => $documents,
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
@@ -555,7 +553,7 @@ class DocumentController extends Controller
                     'permissions' => function ($q) use ($user) {
                         $q->where('permissionable_type', User::class)
                             ->where('permissionable_id', $user->id);
-                    }
+                    },
                 ])
                 ->latest('created_at')
                 ->get();
@@ -567,12 +565,12 @@ class DocumentController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $documents
+                'data' => $documents,
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
@@ -593,15 +591,16 @@ class DocumentController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $documents
+                'data' => $documents,
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
+
     /**
      * Récupère la hiérarchie d'une entité
      */
@@ -614,7 +613,7 @@ class DocumentController extends Controller
             $hierarchy = [];
             $entity = $this->documentService->getEntity($entityType, $entityId);
 
-            if (!$entity) {
+            if (! $entity) {
                 return response()->json(['success' => false, 'message' => 'Entité non trouvée'], 404);
             }
 
@@ -626,14 +625,18 @@ class DocumentController extends Controller
                     $projet = $activite?->projet;
                     $workspace = $projet?->workspace;
 
-                    if ($workspace)
+                    if ($workspace) {
                         $hierarchy[] = ['type' => 'Workspace', 'label' => $workspace->nom];
-                    if ($projet)
+                    }
+                    if ($projet) {
                         $hierarchy[] = ['type' => 'Projet', 'label' => $projet->nom];
-                    if ($activite)
+                    }
+                    if ($activite) {
                         $hierarchy[] = ['type' => 'Activité', 'label' => $activite->nom];
-                    if ($tache)
+                    }
+                    if ($tache) {
                         $hierarchy[] = ['type' => 'Tâche', 'label' => $tache->titre];
+                    }
                     $hierarchy[] = ['type' => 'Résultat', 'label' => 'Résultat'];
                     break;
 
@@ -642,12 +645,15 @@ class DocumentController extends Controller
                     $projet = $activite?->projet;
                     $workspace = $projet?->workspace;
 
-                    if ($workspace)
+                    if ($workspace) {
                         $hierarchy[] = ['type' => 'Workspace', 'label' => $workspace->nom];
-                    if ($projet)
+                    }
+                    if ($projet) {
                         $hierarchy[] = ['type' => 'Projet', 'label' => $projet->nom];
-                    if ($activite)
+                    }
+                    if ($activite) {
                         $hierarchy[] = ['type' => 'Activité', 'label' => $activite->nom];
+                    }
                     $hierarchy[] = ['type' => 'Tâche', 'label' => $entity->titre];
                     break;
 
@@ -655,18 +661,21 @@ class DocumentController extends Controller
                     $projet = $entity->projet;
                     $workspace = $projet?->workspace;
 
-                    if ($workspace)
+                    if ($workspace) {
                         $hierarchy[] = ['type' => 'Workspace', 'label' => $workspace->nom];
-                    if ($projet)
+                    }
+                    if ($projet) {
                         $hierarchy[] = ['type' => 'Projet', 'label' => $projet->nom];
+                    }
                     $hierarchy[] = ['type' => 'Activité', 'label' => $entity->nom];
                     break;
 
                 case 'App\\Models\\Projet':
                     $workspace = $entity->workspace;
 
-                    if ($workspace)
+                    if ($workspace) {
                         $hierarchy[] = ['type' => 'Workspace', 'label' => $workspace->nom];
+                    }
                     $hierarchy[] = ['type' => 'Projet', 'label' => $entity->nom];
                     break;
 
@@ -677,12 +686,12 @@ class DocumentController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $hierarchy
+                'data' => $hierarchy,
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
@@ -703,9 +712,9 @@ class DocumentController extends Controller
         ]);
 
         try {
-            Gate::authorize('managePermissions', $document);
+            abort_unless($this->permissionService->canEditDocument(auth()->user(), $document), 403);
 
-            $targetUser = \App\Models\User::findOrFail($request->user_id);
+            $targetUser = User::findOrFail($request->user_id);
 
             $permission = $this->documentService->grantPermission(
                 $document,
@@ -719,7 +728,7 @@ class DocumentController extends Controller
                 'message' => 'Permission accordée avec succès',
                 'data' => $permission,
             ]);
-        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+        } catch (AuthorizationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Seul le propriétaire peut accorder des permissions',
@@ -737,9 +746,9 @@ class DocumentController extends Controller
         ]);
 
         try {
-            Gate::authorize('managePermissions', $document);
+            abort_unless($this->permissionService->canEditDocument(auth()->user(), $document), 403);
 
-            $targetUser = \App\Models\User::findOrFail($request->user_id);
+            $targetUser = User::findOrFail($request->user_id);
 
             $this->documentService->revokePermission($document, $targetUser);
 
@@ -747,7 +756,7 @@ class DocumentController extends Controller
                 'success' => true,
                 'message' => 'Permission révoquée avec succès',
             ]);
-        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+        } catch (AuthorizationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Vous n\'avez pas la permission de gérer les permissions',
@@ -773,7 +782,7 @@ class DocumentController extends Controller
         ]);
 
         try {
-            Gate::authorize('share', $document);
+            abort_unless($this->permissionService->canEditDocument(auth()->user(), $document), 403);
 
             $this->documentService->shareWithUsers(
                 $document,
@@ -784,9 +793,9 @@ class DocumentController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Document partagé avec ' . count($request->user_ids) . ' utilisateur(s)',
+                'message' => 'Document partagé avec '.count($request->user_ids).' utilisateur(s)',
             ]);
-        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+        } catch (AuthorizationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Vous n\'avez pas la permission de partager ce document',
@@ -800,7 +809,7 @@ class DocumentController extends Controller
     public function listPermissions(Request $request, Document $document): JsonResponse
     {
         try {
-            Gate::authorize('managePermissions', $document);
+            abort_unless($this->permissionService->canEditDocument(auth()->user(), $document), 403);
 
             $permissions = $document->permissions()
                 ->with('permissionable')
@@ -811,7 +820,7 @@ class DocumentController extends Controller
                 'success' => true,
                 'data' => $permissions,
             ]);
-        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+        } catch (AuthorizationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Vous n\'avez pas la permission de voir les permissions',

@@ -9,7 +9,7 @@ class UpdateUserRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('user.edit');
+        return true; // Authorization handled in controller via PermissionService
     }
 
     public function rules(): array

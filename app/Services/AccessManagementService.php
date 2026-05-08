@@ -2,13 +2,19 @@
 
 namespace App\Services;
 
-use App\Models\{User, Workspace, Projet, Activite, Tache};
-use Illuminate\Support\Facades\{DB, Log};
+use App\Models\Activite;
+use App\Models\Projet;
+use App\Models\Tache;
+use App\Models\User;
+use App\Models\Workspace;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Service de gestion centralisée des accès et permissions
- * 
+ *
  * Ce service gère:
  * - Transfert de responsabilités lors du départ d'un membre
  * - Accès temporaires pour consultants
@@ -20,9 +26,7 @@ class AccessManagementService
     /**
      * Retire un membre du workspace et transfère ses responsabilités
      *
-     * @param Workspace $workspace
-     * @param User $userToRemove
-     * @param User|null $newResponsable Nouveau responsable (owner du workspace par défaut)
+     * @param  User|null  $newResponsable  Nouveau responsable (owner du workspace par défaut)
      * @return array Statistiques du transfert
      */
     public function removeMemberWithTransfer(
@@ -56,7 +60,7 @@ class AccessManagementService
                 ]);
 
                 // Ajouter le nouveau responsable comme admin du projet s'il n'est pas déjà membre
-                if (!$projet->members()->where('user_id', $newResponsable->id)->exists()) {
+                if (! $projet->members()->where('user_id', $newResponsable->id)->exists()) {
                     $projet->members()->attach($newResponsable->id, [
                         'role' => 'admin',
                         'can_edit' => true,
@@ -73,11 +77,11 @@ class AccessManagementService
                 foreach ($projet->activites as $activite) {
                     if ($activite->responsable_id === $userToRemove->id) {
                         $activite->update([
-                            'responsable_id' => $newResponsable->id
+                            'responsable_id' => $newResponsable->id,
                         ]);
-                        
+
                         // Ajouter le nouveau responsable comme membre de l'activité
-                        if (!$activite->members()->where('user_id', $newResponsable->id)->exists()) {
+                        if (! $activite->members()->where('user_id', $newResponsable->id)->exists()) {
                             $activite->members()->attach($newResponsable->id, [
                                 'role' => 'responsable',
                                 'can_create_tasks' => true,
@@ -160,7 +164,7 @@ class AccessManagementService
                 ])
                 ->log('member_removed_with_transfer');
 
-            Log::info("Member removed from workspace with transfer", [
+            Log::info('Member removed from workspace with transfer', [
                 'workspace_id' => $workspace->id,
                 'user_removed' => $userToRemove->id,
                 'new_responsable' => $newResponsable->id,
@@ -174,13 +178,12 @@ class AccessManagementService
     /**
      * Accorde un accès temporaire à une ressource
      *
-     * @param User $user Utilisateur recevant l'accès
-     * @param mixed $accessible Projet, Activite ou Tache
-     * @param string $role Rôle accordé
-     * @param Carbon $expiresAt Date d'expiration
-     * @param string|null $reason Justification
-     * @param array $permissions Permissions spécifiques
-     * @return void
+     * @param  User  $user  Utilisateur recevant l'accès
+     * @param  mixed  $accessible  Projet, Activite ou Tache
+     * @param  string  $role  Rôle accordé
+     * @param  Carbon  $expiresAt  Date d'expiration
+     * @param  string|null  $reason  Justification
+     * @param  array  $permissions  Permissions spécifiques
      */
     public function grantTemporaryAccess(
         User $user,
@@ -194,7 +197,7 @@ class AccessManagementService
         $validTypes = [Projet::class, Activite::class, Tache::class];
         $accessibleType = get_class($accessible);
 
-        if (!in_array($accessibleType, $validTypes)) {
+        if (! in_array($accessibleType, $validTypes)) {
             throw new \InvalidArgumentException("Type d'accès non supporté: {$accessibleType}");
         }
 
@@ -231,15 +234,12 @@ class AccessManagementService
 
     /**
      * Révoque un accès temporaire
-     *
-     * @param int $temporaryAccessId
-     * @return bool
      */
     public function revokeTemporaryAccess(int $temporaryAccessId): bool
     {
         $access = DB::table('temporary_access')->find($temporaryAccessId);
 
-        if (!$access) {
+        if (! $access) {
             return false;
         }
 
@@ -285,7 +285,7 @@ class AccessManagementService
             ->where('expires_at', '<', now())
             ->delete();
 
-        Log::info("Cleaned expired temporary access", ['count' => $count]);
+        Log::info('Cleaned expired temporary access', ['count' => $count]);
 
         return $count;
     }
@@ -293,8 +293,7 @@ class AccessManagementService
     /**
      * Liste les accès temporaires actifs pour un utilisateur
      *
-     * @param User $user
-     * @return \Illuminate\Support\Collection
+     * @return Collection
      */
     public function getUserTemporaryAccess(User $user)
     {
@@ -310,8 +309,8 @@ class AccessManagementService
     /**
      * Liste les accès temporaires pour une ressource
      *
-     * @param mixed $accessible
-     * @return \Illuminate\Support\Collection
+     * @param  mixed  $accessible
+     * @return Collection
      */
     public function getResourceTemporaryAccess($accessible)
     {
@@ -327,10 +326,6 @@ class AccessManagementService
 
     /**
      * Transfère la propriété d'un workspace
-     *
-     * @param Workspace $workspace
-     * @param User $newOwner
-     * @return void
      */
     public function transferWorkspaceOwnership(Workspace $workspace, User $newOwner): void
     {
@@ -350,12 +345,12 @@ class AccessManagementService
                     'can_invite_members' => true,
                     'can_manage_settings' => true,
                     'can_transfer_ownership' => false,
-                    'can_delete_members' => true
+                    'can_delete_members' => true,
                 ]),
             ]);
 
             // Nouveau owner
-            if (!$workspace->members()->where('user_id', $newOwner->id)->exists()) {
+            if (! $workspace->members()->where('user_id', $newOwner->id)->exists()) {
                 $workspace->members()->attach($newOwner->id, [
                     'role' => 'owner',
                     'permissions' => json_encode([
@@ -397,19 +392,10 @@ class AccessManagementService
     /**
      * Vérifie si un utilisateur peut effectuer une action sur une ressource
      *
-     * @param User $user
-     * @param mixed $resource
-     * @param string $action
-     * @return bool
+     * @param  mixed  $resource
      */
     public function can(User $user, $resource, string $action): bool
     {
-        // Super admin peut tout
-        if ($user->isSuperAdmin()) {
-            return true;
-        }
-
-        // Déléguer aux policies Laravel
-        return $user->can($action, $resource);
+        return $user->isSuperAdmin();
     }
 }

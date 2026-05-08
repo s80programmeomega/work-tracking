@@ -1,35 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
-// use Illuminate\Support\Facades\Gate;
-
-use App\Models\Workspace;
-use App\Policies\DocumentPolicy;
-use App\Policies\WorkspacePolicy;
-use Dom\Document;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
 {
-    /**
-     * The model to policy mappings for the application.
-     *
-     * @var array<class-string, class-string>
-     */
-    protected $policies = [
-        \App\Models\User::class => \App\Policies\UserPolicy::class,
-        Workspace::class => WorkspacePolicy::class,
-        \App\Models\Projet::class => \App\Policies\ProjetPolicy::class,
-        \App\Models\Activite::class => \App\Policies\ActivitePolicy::class,
-        \App\Models\Tache::class => \App\Policies\TachePolicy::class,
-        Document::class => DocumentPolicy::class,
+    protected $policies = [];
 
-    ];
-
-    /**
-     * Register any authentication / authorization services.
-     */
     public function boot(): void
     {
         $this->registerPolicies();

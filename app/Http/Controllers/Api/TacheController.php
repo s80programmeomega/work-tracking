@@ -2,32 +2,38 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
 use App\Enums\TacheStatut;
+use App\Http\Controllers\Controller;
 use App\Http\Resources\TacheAttachmentResource;
-use App\Models\Tache;
-use App\Services\TacheService;
 use App\Http\Resources\TacheResource;
 use App\Http\Resources\TacheResultatResource;
 use App\Models\Activite;
 use App\Models\Document;
+use App\Models\Tache;
 use App\Models\TacheAttachment;
 use App\Models\TacheExternalLink;
 use App\Models\TacheResultat;
 use App\Models\User;
 use App\Notifications\ResultatIndividuelSoumisNotification;
+use App\Services\PermissionService;
+use App\Services\TacheService;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
 
 class TacheController extends Controller
 {
-    public function __construct(protected TacheService $tacheService)
-    {
+    public function __construct(
+        protected TacheService $tacheService,
+        protected PermissionService $permissionService,
+    ) {
         $this->middleware('auth:sanctum');
     }
 
@@ -36,7 +42,7 @@ class TacheController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $this->authorize('viewAny', Tache::class);
+        // All authenticated users can list tasks (filtered by access);
 
         $filters = $request->only([
             'activite_id',
@@ -57,7 +63,7 @@ class TacheController extends Controller
             'meta' => [
                 'total' => $taches->count(),
                 'filtered' => count($filters) > 0,
-            ]
+            ],
         ]);
     }
 
@@ -73,21 +79,22 @@ class TacheController extends Controller
             Log::info('Chargement Kanban', [
                 'activite_id' => $activiteId,
                 'user_id' => $user->id,
-                'is_super_admin' => $user->isSuperAdmin()
+                'is_super_admin' => $user->isSuperAdmin(),
             ]);
 
             // ✅ Vérification d'accès simplifiée
-            if (!$user->isSuperAdmin() && !$this->canUserAccessActivite($user, $activite)) {
+            if (! $user->isSuperAdmin() && ! $this->canUserAccessActivite($user, $activite)) {
                 Log::warning('Accès refusé au kanban', [
                     'user_id' => $user->id,
-                    'activite_id' => $activiteId
+                    'activite_id' => $activiteId,
                 ]);
+
                 return response()->json([
                     'message' => 'Accès non autorisé',
                     'a_faire' => [],
                     'en_cours' => [],
                     'termine' => [],
-                    'stats' => ['total' => 0, 'a_faire' => 0, 'en_cours' => 0, 'termine' => 0]
+                    'stats' => ['total' => 0, 'a_faire' => 0, 'en_cours' => 0, 'termine' => 0],
                 ], 403);
             }
 
@@ -111,46 +118,46 @@ class TacheController extends Controller
 
             Log::info('Kanban chargé avec succès', [
                 'activite_id' => $activiteId,
-                'stats' => $stats
+                'stats' => $stats,
             ]);
 
             return response()->json([
                 'a_faire' => TacheResource::collection($kanbanData['a_faire']),
                 'en_cours' => TacheResource::collection($kanbanData['en_cours']),
                 'termine' => TacheResource::collection($kanbanData['termine']),
-                'stats' => $stats
+                'stats' => $stats,
             ]);
 
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             Log::error('Activité non trouvée', ['activite_id' => $activiteId]);
+
             return response()->json([
                 'message' => 'Activité non trouvée',
                 'a_faire' => [],
                 'en_cours' => [],
                 'termine' => [],
-                'stats' => ['total' => 0, 'a_faire' => 0, 'en_cours' => 0, 'termine' => 0]
+                'stats' => ['total' => 0, 'a_faire' => 0, 'en_cours' => 0, 'termine' => 0],
             ], 404);
         } catch (\Exception $e) {
             Log::error('Erreur chargement Kanban', [
                 'activite_id' => $activiteId,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
+
             return response()->json([
                 'message' => 'Erreur lors du chargement du kanban',
                 'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue',
                 'a_faire' => [],
                 'en_cours' => [],
                 'termine' => [],
-                'stats' => ['total' => 0, 'a_faire' => 0, 'en_cours' => 0, 'termine' => 0]
+                'stats' => ['total' => 0, 'a_faire' => 0, 'en_cours' => 0, 'termine' => 0],
             ], 500);
         }
     }
 
     /**
      * ✅ Endpoint pour récupérer MES tâches en tant que RESPONSABLE
-     * 
-     * @return JsonResponse
      */
     public function myTasksAsResponsable(Request $request): JsonResponse
     {
@@ -172,7 +179,7 @@ class TacheController extends Controller
 
             Log::info('✅ Tâches en responsabilité récupérées', [
                 'user_id' => $user->id,
-                'total' => $taches->count()
+                'total' => $taches->count(),
             ]);
 
             return response()->json([
@@ -183,18 +190,18 @@ class TacheController extends Controller
                     'a_faire' => $taches->where('statut', 'a_faire')->count(),
                     'en_cours' => $taches->where('statut', 'en_cours')->count(),
                     'termine' => $taches->where('statut', 'termine')->count(),
-                ]
+                ],
             ]);
 
         } catch (\Exception $e) {
             Log::error('❌ Erreur récupération tâches responsable', [
                 'user_id' => $user->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return response()->json([
                 'message' => 'Erreur lors de la récupération des tâches',
-                'error' => config('app.debug') ? $e->getMessage() : null
+                'error' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
     }
@@ -229,7 +236,7 @@ class TacheController extends Controller
             'labels',
             'sousTaches',
             'attachments',
-            'externalLinks'
+            'externalLinks',
         ])
             ->assignedTo($user->id)
             ->active()
@@ -238,7 +245,7 @@ class TacheController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => TacheResource::collection($taches)
+            'data' => TacheResource::collection($taches),
         ]);
     }
 
@@ -263,10 +270,10 @@ class TacheController extends Controller
                 'assignees',
                 'labels',
                 'validatedN1By',
-                'validatedN2By'
+                'validatedN2By',
             ])
             ->get()
-            ->filter(function ($tache) use ($user) {
+            ->filter(function ($tache) {
                 // Double vérification avec Policy
                 return Gate::allows('validateN1', $tache);
             });
@@ -281,10 +288,10 @@ class TacheController extends Controller
                 'assignees',
                 'labels',
                 'validatedN1By',
-                'validatedN2By'
+                'validatedN2By',
             ])
             ->get()
-            ->filter(function ($tache) use ($user) {
+            ->filter(function ($tache) {
                 return Gate::allows('validateN2', $tache);
             });
 
@@ -295,7 +302,7 @@ class TacheController extends Controller
                 'n1' => $pendingN1->count(),
                 'n2' => $pendingN2->count(),
                 'total' => $pendingN1->count() + $pendingN2->count(),
-            ]
+            ],
         ]);
     }
 
@@ -362,10 +369,10 @@ class TacheController extends Controller
      */
     public function addAttachments(Request $request, Tache $tache)
     {
-        $this->authorize('update', $tache);
+        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
 
         $request->validate([
-            'files.*' => 'required|file|max:10240|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,zip,txt'
+            'files.*' => 'required|file|max:10240|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,zip,txt',
         ]);
 
         try {
@@ -380,18 +387,18 @@ class TacheController extends Controller
 
             return response()->json([
                 'message' => 'Fichiers ajoutés avec succès',
-                'data' => $uploadedFiles
+                'data' => $uploadedFiles,
             ], 201);
 
         } catch (\Exception $e) {
             Log::error('Erreur ajout fichiers', [
                 'tache_id' => $tache->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return response()->json([
                 'message' => 'Erreur lors de l\'ajout des fichiers',
-                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue'
+                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue',
             ], 500);
         }
     }
@@ -401,28 +408,27 @@ class TacheController extends Controller
      */
     public function getAttachments(Tache $tache)
     {
-        $this->authorize('view', $tache);
+        abort_unless($this->permissionService->canViewTask(auth()->user(), $tache), 403);
 
         $attachments = $tache->attachments()->with('uploadedBy')->get();
 
         return response()->json([
-            'data' => TacheAttachmentResource::collection($attachments)
+            'data' => TacheAttachmentResource::collection($attachments),
         ]);
     }
-
 
     /**
      * ✅ Télécharger un fichier attaché
      */
     public function downloadAttachment(Tache $tache, TacheAttachment $attachment): Response
     {
-        $this->authorize('view', $tache);
+        abort_unless($this->permissionService->canViewTask(auth()->user(), $tache), 403);
 
         if ($attachment->tache_id !== $tache->id) {
             abort(404, 'Fichier non trouvé pour cette tâche');
         }
 
-        if (!Storage::disk('uploads')->exists($attachment->file_path)) {
+        if (! Storage::disk('uploads')->exists($attachment->file_path)) {
             abort(404, 'Fichier non trouvé sur le serveur');
         }
 
@@ -432,13 +438,12 @@ class TacheController extends Controller
         );
     }
 
-
     /**
      * ✅ Ajouter un lien externe
      */
     public function addExternalLink(Request $request, Tache $tache): JsonResponse
     {
-        $this->authorize('update', $tache);
+        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -455,12 +460,12 @@ class TacheController extends Controller
 
             return response()->json([
                 'message' => 'Lien ajouté avec succès',
-                'data' => $link
+                'data' => $link,
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Erreur lors de l\'ajout du lien',
-                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue'
+                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue',
             ], 500);
         }
     }
@@ -473,17 +478,17 @@ class TacheController extends Controller
         // Si un responsable est défini
         if (isset($validated['responsable_id']) && $validated['responsable_id']) {
             // S'assurer que assignee_ids existe et est un tableau
-            if (!isset($validated['assignee_ids']) || !is_array($validated['assignee_ids'])) {
+            if (! isset($validated['assignee_ids']) || ! is_array($validated['assignee_ids'])) {
                 $validated['assignee_ids'] = [];
             }
 
             // Ajouter automatiquement le responsable aux assignés s'il n'y est pas
-            if (!in_array($validated['responsable_id'], $validated['assignee_ids'])) {
+            if (! in_array($validated['responsable_id'], $validated['assignee_ids'])) {
                 $validated['assignee_ids'][] = $validated['responsable_id'];
 
                 Log::info('✅ Responsable automatiquement ajouté aux assignés', [
                     'responsable_id' => $validated['responsable_id'],
-                    'assignee_ids' => $validated['assignee_ids']
+                    'assignee_ids' => $validated['assignee_ids'],
                 ]);
             }
         }
@@ -544,7 +549,7 @@ class TacheController extends Controller
             'uploaded_files.*' => [
                 'file',
                 'max:10240', // 10MB
-                'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,zip'
+                'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,zip',
             ],
 
             // ✅ CORRECTION 2: Validation de l'image de couverture
@@ -553,7 +558,7 @@ class TacheController extends Controller
                 'file',
                 'image',
                 'mimes:jpeg,jpg,png,gif',
-                'max:2048' // 2MB
+                'max:2048', // 2MB
             ],
 
             // ✅ CORRECTION 3: Links en JSON ou array
@@ -591,7 +596,7 @@ class TacheController extends Controller
                     ->exists();
 
             // Vérifier permissions workspace
-            if (!$canCreate && $activite->projet && $activite->projet->workspace) {
+            if (! $canCreate && $activite->projet && $activite->projet->workspace) {
                 $workspace = $activite->projet->workspace;
                 $workspaceMember = $workspace->membres()->where('user_id', $user->id)->first();
                 if ($workspaceMember && in_array($workspaceMember->pivot->role, ['owner', 'admin'])) {
@@ -599,7 +604,7 @@ class TacheController extends Controller
                 }
             }
 
-            if (!$canCreate) {
+            if (! $canCreate) {
                 return response()->json([
                     'message' => 'Vous n\'avez pas la permission de créer des tâches pour cette activité.',
                 ], 403);
@@ -624,7 +629,7 @@ class TacheController extends Controller
                 $files = $request->file('uploaded_files');
 
                 // S'assurer que c'est un tableau
-                if (!is_array($files)) {
+                if (! is_array($files)) {
                     $files = [$files];
                 }
 
@@ -652,23 +657,22 @@ class TacheController extends Controller
             // ✅ Créer la tâche via service
             $tache = $this->tacheService->createTache($data, $user);
 
-
             return response()->json([
                 'message' => 'Tâche créée avec succès.',
                 'data' => new TacheResource($tache),
             ], 201);
 
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
 
             return response()->json([
                 'message' => 'Erreur de validation',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
 
             return response()->json([
                 'message' => 'Erreur lors de la création de la tâche',
-                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue'
+                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue',
             ], 500);
         }
     }
@@ -723,14 +727,14 @@ class TacheController extends Controller
         } catch (\Exception $e) {
             Log::error('Erreur vérification permissions', [
                 'activite_id' => $activiteId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
+
             return response()->json([
-                'message' => 'Erreur lors de la vérification des permissions'
+                'message' => 'Erreur lors de la vérification des permissions',
             ], 500);
         }
     }
-
 
     /**
      * Afficher les détails d'une tâche
@@ -738,7 +742,7 @@ class TacheController extends Controller
     public function show(Tache $tache)
     {
         try {
-            $this->authorize('view', $tache);
+            abort_unless($this->permissionService->canViewTask(auth()->user(), $tache), 403);
 
             // Charger toutes les relations nécessaires
             $tache->load([
@@ -815,7 +819,7 @@ class TacheController extends Controller
                 'additional_info' => $additionalInfo,
             ]);
 
-        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+        } catch (AuthorizationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Vous n\'avez pas la permission de voir cette tâche.',
@@ -824,7 +828,7 @@ class TacheController extends Controller
             Log::error('Erreur lors de la récupération de la tâche', [
                 'tache_id' => $tache->id,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
@@ -834,16 +838,13 @@ class TacheController extends Controller
         }
     }
 
-
     /**
      * Mettre à jour une tâche - VERSION COMPLÈTEMENT CORRIGÉE
      */
     public function update(Request $request, Tache $tache): JsonResponse
     {
         // ✅ Vérification des permissions
-        $this->authorize('update', $tache);
-
-
+        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
 
         // ✅ Validation COMPLÈTE similaire à store
         $validated = $request->validate([
@@ -874,7 +875,7 @@ class TacheController extends Controller
             'uploaded_files.*' => [
                 'file',
                 'max:10240',
-                'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,zip'
+                'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,zip',
             ],
 
             // ✅ CORRECTION: Même validation de l'image
@@ -883,7 +884,7 @@ class TacheController extends Controller
                 'file',
                 'image',
                 'mimes:jpeg,jpg,png,gif',
-                'max:2048'
+                'max:2048',
             ],
 
             // Links
@@ -911,7 +912,7 @@ class TacheController extends Controller
                 'user_id' => $request->user()->id,
                 'has_files' => $request->hasFile('uploaded_files'),
                 'files_count' => $request->hasFile('uploaded_files') ? count($request->file('uploaded_files')) : 0,
-                'has_cover' => $request->hasFile('cover_image')
+                'has_cover' => $request->hasFile('cover_image'),
             ]);
 
             // ✅ Valider et synchroniser responsable avec assignés
@@ -933,7 +934,7 @@ class TacheController extends Controller
                 $files = $request->file('uploaded_files');
 
                 // S'assurer que c'est un tableau
-                if (!is_array($files)) {
+                if (! is_array($files)) {
                     $files = [$files];
                 }
 
@@ -943,7 +944,7 @@ class TacheController extends Controller
                         Log::info('Fichier valide détecté pour mise à jour', [
                             'name' => $file->getClientOriginalName(),
                             'mime' => $file->getMimeType(),
-                            'size' => $file->getSize()
+                            'size' => $file->getSize(),
                         ]);
                     }
                 }
@@ -959,14 +960,14 @@ class TacheController extends Controller
                     if ($tache->cover_image && Storage::disk('uploads')->exists($tache->cover_image)) {
                         Storage::disk('uploads')->delete($tache->cover_image);
                         Log::info('Ancienne image de couverture supprimée', [
-                            'old_path' => $tache->cover_image
+                            'old_path' => $tache->cover_image,
                         ]);
                     }
 
                     $coverImagePath = $coverImage->store('task-covers', 'uploads');
                     $data['cover_image'] = $coverImagePath;
                     Log::info('Nouvelle image de couverture uploadée', [
-                        'path' => $coverImagePath
+                        'path' => $coverImagePath,
                     ]);
                 }
             }
@@ -974,7 +975,7 @@ class TacheController extends Controller
             Log::info('Avant mise à jour tâche via service', [
                 'tache_id' => $tache->id,
                 'files_count' => count($uploadedFiles),
-                'has_cover' => isset($data['cover_image'])
+                'has_cover' => isset($data['cover_image']),
             ]);
 
             // ✅ Mettre à jour via service
@@ -982,7 +983,7 @@ class TacheController extends Controller
 
             Log::info('Tâche mise à jour avec succès', [
                 'tache_id' => $tache->id,
-                'files_processed' => count($uploadedFiles)
+                'files_processed' => count($uploadedFiles),
             ]);
 
             return response()->json([
@@ -990,36 +991,36 @@ class TacheController extends Controller
                 'data' => new TacheResource($tache),
             ]);
 
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             Log::warning('Erreur validation mise à jour tâche', [
                 'tache_id' => $tache->id,
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ]);
+
             return response()->json([
                 'message' => 'Erreur de validation',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             Log::error('Erreur mise à jour tâche', [
                 'tache_id' => $tache->id,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
                 'message' => 'Erreur lors de la mise à jour de la tâche',
-                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue'
+                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue',
             ], 500);
         }
     }
-
 
     /**
      * ✅ NOUVEAU : Endpoint pour changer le responsable avec auto-sync
      */
     public function changeResponsable(Request $request, Tache $tache): JsonResponse
     {
-        $this->authorize('update', $tache);
+        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
 
         $validated = $request->validate([
             'responsable_id' => 'required|exists:users,id',
@@ -1030,9 +1031,9 @@ class TacheController extends Controller
             $user = User::findOrFail($newResponsableId);
 
             // Vérifier que l'utilisateur a accès à l'activité
-            if (!$tache->activite) {
+            if (! $tache->activite) {
                 return response()->json([
-                    'message' => 'La tâche doit appartenir à une activité'
+                    'message' => 'La tâche doit appartenir à une activité',
                 ], 422);
             }
 
@@ -1040,19 +1041,19 @@ class TacheController extends Controller
             $isProjetMember = $tache->activite->projet &&
                 $tache->activite->projet->membres()->where('user_id', $user->id)->exists();
 
-            if (!$isMember && !$isProjetMember && !$user->isSuperAdmin()) {
+            if (! $isMember && ! $isProjetMember && ! $user->isSuperAdmin()) {
                 return response()->json([
-                    'message' => 'L\'utilisateur doit être membre de l\'activité ou du projet'
+                    'message' => 'L\'utilisateur doit être membre de l\'activité ou du projet',
                 ], 422);
             }
 
             // ✅ Mettre à jour le responsable
             $tache->update([
-                'responsable_id' => $newResponsableId
+                'responsable_id' => $newResponsableId,
             ]);
 
             // ✅ S'assurer que le nouveau responsable est assigné
-            if (!$tache->isAssignedTo($user)) {
+            if (! $tache->isAssignedTo($user)) {
                 $tache->assignees()->attach($newResponsableId, [
                     'role' => 'responsable',
                     'can_edit' => true,
@@ -1062,7 +1063,7 @@ class TacheController extends Controller
 
                 Log::info('✅ Nouveau responsable ajouté aux assignés', [
                     'tache_id' => $tache->id,
-                    'responsable_id' => $newResponsableId
+                    'responsable_id' => $newResponsableId,
                 ]);
             }
 
@@ -1071,7 +1072,7 @@ class TacheController extends Controller
                 ->performedOn($tache)
                 ->withProperties([
                     'responsable_id' => $newResponsableId,
-                    'responsable_nom' => $user->nom
+                    'responsable_nom' => $user->nom,
                 ])
                 ->log('Responsable modifié');
 
@@ -1083,12 +1084,12 @@ class TacheController extends Controller
         } catch (\Exception $e) {
             Log::error('Erreur changement responsable', [
                 'tache_id' => $tache->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return response()->json([
                 'message' => 'Erreur lors du changement de responsable',
-                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue'
+                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue',
             ], 500);
         }
     }
@@ -1098,11 +1099,11 @@ class TacheController extends Controller
      */
     public function deleteAttachment(Tache $tache, TacheAttachment $attachment): JsonResponse
     {
-        $this->authorize('update', $tache);
+        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
 
         if ($attachment->tache_id !== $tache->id) {
             return response()->json([
-                'message' => 'Fichier non trouvé pour cette tâche'
+                'message' => 'Fichier non trouvé pour cette tâche',
             ], 404);
         }
 
@@ -1110,12 +1111,12 @@ class TacheController extends Controller
             $this->tacheService->deleteAttachment($attachment, auth()->user());
 
             return response()->json([
-                'message' => 'Fichier supprimé avec succès'
+                'message' => 'Fichier supprimé avec succès',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Erreur lors de la suppression du fichier',
-                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue'
+                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue',
             ], 500);
         }
     }
@@ -1125,11 +1126,11 @@ class TacheController extends Controller
      */
     public function deleteExternalLink(Tache $tache, TacheExternalLink $link): JsonResponse
     {
-        $this->authorize('update', $tache);
+        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
 
         if ($link->tache_id !== $tache->id) {
             return response()->json([
-                'message' => 'Lien non trouvé pour cette tâche'
+                'message' => 'Lien non trouvé pour cette tâche',
             ], 404);
         }
 
@@ -1137,12 +1138,12 @@ class TacheController extends Controller
             $this->tacheService->deleteExternalLink($link);
 
             return response()->json([
-                'message' => 'Lien supprimé avec succès'
+                'message' => 'Lien supprimé avec succès',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Erreur lors de la suppression du lien',
-                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue'
+                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue',
             ], 500);
         }
     }
@@ -1152,7 +1153,7 @@ class TacheController extends Controller
      */
     public function destroy(Tache $tache): JsonResponse
     {
-        $this->authorize('delete', $tache);
+        abort_unless($this->permissionService->canDeleteTask(auth()->user(), $tache), 403);
 
         $this->tacheService->deleteTache($tache);
 
@@ -1166,7 +1167,7 @@ class TacheController extends Controller
      */
     public function complete(Request $request, Tache $tache): JsonResponse
     {
-        $this->authorize('complete', $tache);
+        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
 
         try {
             $tache->markAsCompleted($request->user());
@@ -1177,18 +1178,17 @@ class TacheController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 422);
         }
     }
-
 
     /**
      * ✅ NOUVEAU : Assigner un responsable à la tâche
      */
     public function assignResponsable(Request $request, Tache $tache): JsonResponse
     {
-        $this->authorize('update', $tache);
+        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
 
         $validated = $request->validate([
             'responsable_id' => 'required|exists:users,id',
@@ -1198,9 +1198,9 @@ class TacheController extends Controller
             // Vérifier que le responsable a accès à l'activité
             $user = User::findOrFail($validated['responsable_id']);
 
-            if (!$tache->activite) {
+            if (! $tache->activite) {
                 return response()->json([
-                    'message' => 'La tâche doit appartenir à une activité'
+                    'message' => 'La tâche doit appartenir à une activité',
                 ], 422);
             }
 
@@ -1209,14 +1209,14 @@ class TacheController extends Controller
             $isProjetMember = $tache->activite->projet &&
                 $tache->activite->projet->membres()->where('user_id', $user->id)->exists();
 
-            if (!$isMember && !$isProjetMember && !$user->isSuperAdmin()) {
+            if (! $isMember && ! $isProjetMember && ! $user->isSuperAdmin()) {
                 return response()->json([
-                    'message' => 'L\'utilisateur doit être membre de l\'activité ou du projet'
+                    'message' => 'L\'utilisateur doit être membre de l\'activité ou du projet',
                 ], 422);
             }
 
             $tache->update([
-                'responsable_id' => $validated['responsable_id']
+                'responsable_id' => $validated['responsable_id'],
             ]);
 
             activity()
@@ -1224,7 +1224,7 @@ class TacheController extends Controller
                 ->performedOn($tache)
                 ->withProperties([
                     'responsable_id' => $validated['responsable_id'],
-                    'responsable_nom' => $user->nom
+                    'responsable_nom' => $user->nom,
                 ])
                 ->log('Responsable assigné');
 
@@ -1236,12 +1236,12 @@ class TacheController extends Controller
         } catch (\Exception $e) {
             Log::error('Erreur assignation responsable', [
                 'tache_id' => $tache->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return response()->json([
                 'message' => 'Erreur lors de l\'assignation du responsable',
-                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue'
+                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue',
             ], 500);
         }
     }
@@ -1251,13 +1251,13 @@ class TacheController extends Controller
      */
     public function removeResponsable(Request $request, Tache $tache): JsonResponse
     {
-        $this->authorize('update', $tache);
+        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
 
         try {
             $oldResponsable = $tache->responsable;
 
             $tache->update([
-                'responsable_id' => null
+                'responsable_id' => null,
             ]);
 
             activity()
@@ -1265,7 +1265,7 @@ class TacheController extends Controller
                 ->performedOn($tache)
                 ->withProperties([
                     'old_responsable_id' => $oldResponsable?->id,
-                    'old_responsable_nom' => $oldResponsable?->nom
+                    'old_responsable_nom' => $oldResponsable?->nom,
                 ])
                 ->log('Responsable retiré');
 
@@ -1277,12 +1277,12 @@ class TacheController extends Controller
         } catch (\Exception $e) {
             Log::error('Erreur retrait responsable', [
                 'tache_id' => $tache->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return response()->json([
                 'message' => 'Erreur lors du retrait du responsable',
-                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue'
+                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue',
             ], 500);
         }
     }
@@ -1313,13 +1313,12 @@ class TacheController extends Controller
     //     ]);
     // }
 
-
     /**
      * ✅ Valider N1 (Responsable activité)
      */
     public function validateN1(Request $request, Tache $tache): JsonResponse
     {
-        $this->authorize('validateN1', $tache);
+        abort_unless($this->permissionService->canValidateN1(auth()->user(), $tache), 403);
 
         $validated = $request->validate([
             'commentaire' => 'nullable|string|max:1000',
@@ -1334,7 +1333,7 @@ class TacheController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 422);
         }
     }
@@ -1344,7 +1343,7 @@ class TacheController extends Controller
      */
     public function validateN2(Request $request, Tache $tache): JsonResponse
     {
-        $this->authorize('validateN2', $tache);
+        abort_unless($this->permissionService->canValidateN2(auth()->user(), $tache), 403);
 
         $validated = $request->validate([
             'commentaire' => 'nullable|string|max:1000',
@@ -1359,7 +1358,7 @@ class TacheController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 422);
         }
     }
@@ -1372,7 +1371,7 @@ class TacheController extends Controller
      */
     public function move(Request $request, Tache $tache): JsonResponse
     {
-        $this->authorize('update', $tache);
+        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
 
         $validated = $request->validate([
             'statut' => 'required|in:a_faire,en_cours,termine',
@@ -1396,7 +1395,7 @@ class TacheController extends Controller
      */
     public function archive(Tache $tache): JsonResponse
     {
-        $this->authorize('archive', $tache);
+        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
 
         $tache->archive();
 
@@ -1411,7 +1410,7 @@ class TacheController extends Controller
      */
     public function unarchive(Tache $tache): JsonResponse
     {
-        $this->authorize('archive', $tache);
+        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
 
         $tache->unarchive();
 
@@ -1426,7 +1425,7 @@ class TacheController extends Controller
      */
     public function assignUser(Request $request, Tache $tache): JsonResponse
     {
-        $this->authorize('assignUsers', $tache);
+        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
 
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
@@ -1449,7 +1448,7 @@ class TacheController extends Controller
      */
     public function unassignUser(Tache $tache, int $userId): JsonResponse
     {
-        $this->authorize('assignUsers', $tache);
+        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
 
         $tache = $this->tacheService->unassignUser($tache, $userId);
 
@@ -1500,7 +1499,7 @@ class TacheController extends Controller
 
     /**
      * ✅ NOUVELLE VERSION CORRIGÉE : Rapport hebdomadaire avec statuts individuels
-     * 
+     *
      * Affiche les tâches où l'utilisateur :
      * - Est assigné
      * - N'a PAS terminé OU a terminé mais résultat pas complètement validé
@@ -1540,7 +1539,7 @@ class TacheController extends Controller
                         'progression_individuelle',
                         'started_at',
                         'completed_at',
-                        'notes_personnelles'
+                        'notes_personnelles',
                     ]);
             },
             'labels',
@@ -1548,7 +1547,7 @@ class TacheController extends Controller
             'validatedN2By',
             'resultatsIndividuels' => function ($query) use ($user) {
                 $query->where('user_id', $user->id);
-            }
+            },
         ])
             ->whereHas('assignees', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
@@ -1562,14 +1561,14 @@ class TacheController extends Controller
             ->ordered()
             ->get();
 
-        // ✅ FILTRAGE SELON LE PROCESSUS : 
+        // ✅ FILTRAGE SELON LE PROCESSUS :
         // Afficher seulement si :
         // 1. Statut individuel != terminé
         // 2. OU statut individuel = terminé MAIS résultat pas complètement validé
         $tasksToDisplay = $taches->filter(function ($tache) use ($user) {
             $assignee = $tache->assignees->first();
 
-            if (!$assignee) {
+            if (! $assignee) {
                 return false;
             }
 
@@ -1584,7 +1583,7 @@ class TacheController extends Controller
             $monResultat = $tache->monResultat($user);
 
             // Pas de résultat soumis → afficher
-            if (!$monResultat || !$monResultat->soumis_le) {
+            if (! $monResultat || ! $monResultat->soumis_le) {
                 return true;
             }
 
@@ -1600,22 +1599,25 @@ class TacheController extends Controller
             }
 
             // ✅ Afficher si validation PAS complète
-            return !$validationComplete;
+            return ! $validationComplete;
         });
 
         // ✅ Calculer les statistiques avec STATUTS INDIVIDUELS
         $stats = [
             'total' => $tasksToDisplay->count(),
-            'a_faire' => $tasksToDisplay->filter(function ($t) use ($user) {
+            'a_faire' => $tasksToDisplay->filter(function ($t) {
                 $assignee = $t->assignees->first();
+
                 return $assignee && $assignee->pivot->statut_individuel === 'a_faire';
             })->count(),
-            'en_cours' => $tasksToDisplay->filter(function ($t) use ($user) {
+            'en_cours' => $tasksToDisplay->filter(function ($t) {
                 $assignee = $t->assignees->first();
+
                 return $assignee && $assignee->pivot->statut_individuel === 'en_cours';
             })->count(),
-            'termine' => $tasksToDisplay->filter(function ($t) use ($user) {
+            'termine' => $tasksToDisplay->filter(function ($t) {
                 $assignee = $t->assignees->first();
+
                 return $assignee && $assignee->pivot->statut_individuel === 'termine';
             })->count(),
             'avec_resultat' => $tasksToDisplay->filter(function ($t) {
@@ -1623,24 +1625,27 @@ class TacheController extends Controller
             })->count(),
             'valide_n1' => $tasksToDisplay->filter(function ($t) {
                 $r = $t->resultatsIndividuels->first();
+
                 return $r && $r->valide_par_n1;
             })->count(),
             'valide_n2' => $tasksToDisplay->filter(function ($t) {
                 $r = $t->resultatsIndividuels->first();
+
                 return $r && $r->valide_par_n2;
             })->count(),
-            'en_retard' => $tasksToDisplay->filter(function ($t) use ($user) {
+            'en_retard' => $tasksToDisplay->filter(function ($t) {
                 $assignee = $t->assignees->first();
+
                 return $t->is_overdue &&
                     $assignee &&
                     $assignee->pivot->statut_individuel !== 'termine';
             })->count(),
-            'estimated_hours' => $tasksToDisplay->sum(fn($t) => (float) $t->estimated_hours),
-            'actual_hours' => $tasksToDisplay->sum(fn($t) => (float) $t->actual_hours),
+            'estimated_hours' => $tasksToDisplay->sum(fn ($t) => (float) $t->estimated_hours),
+            'actual_hours' => $tasksToDisplay->sum(fn ($t) => (float) $t->actual_hours),
         ];
 
         // ✅ Grouper par activité
-        $byActivite = $tasksToDisplay->groupBy('activite_id')->map(function ($tasks, $activiteId) use ($user) {
+        $byActivite = $tasksToDisplay->groupBy('activite_id')->map(function ($tasks, $activiteId) {
             $activite = $tasks->first()->activite;
 
             return [
@@ -1653,26 +1658,29 @@ class TacheController extends Controller
                 'taches' => TacheResource::collection($tasks),
                 'stats' => [
                     'total' => $tasks->count(),
-                    'a_faire' => $tasks->filter(function ($t) use ($user) {
+                    'a_faire' => $tasks->filter(function ($t) {
                         $assignee = $t->assignees->first();
+
                         return $assignee && $assignee->pivot->statut_individuel === 'a_faire';
                     })->count(),
-                    'en_cours' => $tasks->filter(function ($t) use ($user) {
+                    'en_cours' => $tasks->filter(function ($t) {
                         $assignee = $t->assignees->first();
+
                         return $assignee && $assignee->pivot->statut_individuel === 'en_cours';
                     })->count(),
-                    'termine' => $tasks->filter(function ($t) use ($user) {
+                    'termine' => $tasks->filter(function ($t) {
                         $assignee = $t->assignees->first();
+
                         return $assignee && $assignee->pivot->statut_individuel === 'termine';
                     })->count(),
-                ]
+                ],
             ];
         })->values();
 
         Log::info('✅ Fiche évaluation chargée', [
             'user_id' => $user->id,
             'total_tasks' => $stats['total'],
-            'activites' => $byActivite->count()
+            'activites' => $byActivite->count(),
         ]);
 
         return response()->json([
@@ -1693,8 +1701,9 @@ class TacheController extends Controller
      */
     private function getWeekStartDate(int $year, int $week): string
     {
-        $dto = new \DateTime();
+        $dto = new \DateTime;
         $dto->setISODate($year, $week);
+
         return $dto->format('Y-m-d');
     }
 
@@ -1703,11 +1712,11 @@ class TacheController extends Controller
      */
     private function getWeekEndDate(int $year, int $week): string
     {
-        $dto = new \DateTime();
+        $dto = new \DateTime;
         $dto->setISODate($year, $week, 7);
+
         return $dto->format('Y-m-d');
     }
-
 
     /**
      * ✅ Rapport hebdomadaire d'un utilisateur (managers)
@@ -1717,16 +1726,16 @@ class TacheController extends Controller
         $user = User::findOrFail($userId);
 
         // Vérifier permissions: doit être manager de l'utilisateur
-        if (!$request->user()->isSuperAdmin()) {
+        if (! $request->user()->isSuperAdmin()) {
             $hasAccess = Activite::where('responsable_id', $request->user()->id)
                 ->whereHas('membres', function ($q) use ($userId) {
                     $q->where('user_id', $userId);
                 })
                 ->exists();
 
-            if (!$hasAccess) {
+            if (! $hasAccess) {
                 return response()->json([
-                    'message' => 'Vous n\'avez pas accès aux rapports de cet utilisateur'
+                    'message' => 'Vous n\'avez pas accès aux rapports de cet utilisateur',
                 ], 403);
             }
         }
@@ -1754,9 +1763,9 @@ class TacheController extends Controller
 
         try {
             // Vérifier assignation
-            if (!$tache->isAssignedTo($user)) {
+            if (! $tache->isAssignedTo($user)) {
                 return response()->json([
-                    'message' => 'Vous n\'êtes pas assigné à cette tâche'
+                    'message' => 'Vous n\'êtes pas assigné à cette tâche',
                 ], 403);
             }
 
@@ -1770,7 +1779,7 @@ class TacheController extends Controller
             // Mettre à jour les notes si fournies
             if (isset($validated['notes_personnelles'])) {
                 $tache->assignees()->updateExistingPivot($user->id, [
-                    'notes_personnelles' => $validated['notes_personnelles']
+                    'notes_personnelles' => $validated['notes_personnelles'],
                 ]);
             }
 
@@ -1778,7 +1787,7 @@ class TacheController extends Controller
                 'tache_id' => $tache->id,
                 'user_id' => $user->id,
                 'nouveau_statut' => $validated['statut'],
-                'statut_global' => $tache->fresh()->statut->value
+                'statut_global' => $tache->fresh()->statut->value,
             ]);
 
             return response()->json([
@@ -1787,7 +1796,7 @@ class TacheController extends Controller
                     'activite',
                     'assignees',
                     'labels',
-                    'resultatsIndividuels'
+                    'resultatsIndividuels',
                 ])),
             ]);
 
@@ -1795,16 +1804,14 @@ class TacheController extends Controller
             Log::error('Erreur mise à jour statut individuel', [
                 'tache_id' => $tache->id,
                 'user_id' => $user->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return response()->json([
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 422);
         }
     }
-
-
 
     /**
      * ✅ NOUVEAU : Mes tâches en attente de collègues
@@ -1826,7 +1833,6 @@ class TacheController extends Controller
         ]);
     }
 
-
     /**
      * ✅ NOUVEAU : Vue Tâches Assignées par utilisateur (pour coordination)
      */
@@ -1837,12 +1843,12 @@ class TacheController extends Controller
 
         // Vérifier permissions (responsable activité/projet ou super admin)
         if (
-            !$user->isSuperAdmin() &&
+            ! $user->isSuperAdmin() &&
             $activite->responsable_id !== $user->id &&
-            (!$activite->projet || $activite->projet->responsable_id !== $user->id)
+            (! $activite->projet || $activite->projet->responsable_id !== $user->id)
         ) {
             return response()->json([
-                'message' => 'Accès non autorisé'
+                'message' => 'Accès non autorisé',
             ], 403);
         }
 
@@ -1857,7 +1863,7 @@ class TacheController extends Controller
 
         foreach ($taches as $tache) {
             foreach ($tache->assignees as $assignee) {
-                if (!isset($byUser[$assignee->id])) {
+                if (! isset($byUser[$assignee->id])) {
                     $byUser[$assignee->id] = [
                         'user' => [
                             'id' => $assignee->id,
@@ -1873,7 +1879,7 @@ class TacheController extends Controller
                             'termine' => 0,
                             'en_retard' => 0,
                             'progression_moyenne' => 0,
-                        ]
+                        ],
                     ];
                 }
 
@@ -1923,7 +1929,6 @@ class TacheController extends Controller
         ]);
     }
 
-
     /**
      * ✅ MODIFIÉ : Valider un résultat individuel (N1)
      */
@@ -1938,9 +1943,9 @@ class TacheController extends Controller
         try {
             $tache = $resultat->tache;
 
-            if (!$resultat->canBeValidatedByN1($user)) {
+            if (! $resultat->canBeValidatedByN1($user)) {
                 return response()->json([
-                    'message' => 'Vous n\'avez pas la permission de valider ce résultat'
+                    'message' => 'Vous n\'avez pas la permission de valider ce résultat',
                 ], 403);
             }
 
@@ -1956,7 +1961,7 @@ class TacheController extends Controller
 
         } catch (\Exception $e) {
             return response()->json([
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 422);
         }
     }
@@ -1975,9 +1980,9 @@ class TacheController extends Controller
         try {
             $tache = $resultat->tache;
 
-            if (!$resultat->canBeValidatedByN2($user)) {
+            if (! $resultat->canBeValidatedByN2($user)) {
                 return response()->json([
-                    'message' => 'Vous n\'avez pas la permission de valider ce résultat'
+                    'message' => 'Vous n\'avez pas la permission de valider ce résultat',
                 ], 403);
             }
 
@@ -1993,7 +1998,7 @@ class TacheController extends Controller
 
         } catch (\Exception $e) {
             return response()->json([
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 422);
         }
     }
@@ -2031,7 +2036,7 @@ class TacheController extends Controller
                 'soumis' => $resultats->whereNotNull('soumis_le')->count(),
                 'valides_n1' => $resultats->where('valide_par_n1', true)->count(),
                 'valides_n2' => $resultats->where('valide_par_n2', true)->count(),
-            ]
+            ],
         ]);
     }
 
@@ -2042,7 +2047,7 @@ class TacheController extends Controller
     {
         $originalName = $file->getClientOriginalName();
         $extension = $file->getClientOriginalExtension();
-        $filename = Str::uuid() . '.' . $extension;
+        $filename = Str::uuid().'.'.$extension;
         $path = $file->storeAs('resultats', $filename, 'public');
 
         return $resultat->documents()->create([
@@ -2075,8 +2080,8 @@ class TacheController extends Controller
 
         // Notifier (sans doublon)
         $responsables->unique('id')
-            ->reject(fn($r) => $r->id === $assignee->id)
-            ->each(fn($r) => $r->notify(new ResultatIndividuelSoumisNotification($tache, $assignee, $resultat)));
+            ->reject(fn ($r) => $r->id === $assignee->id)
+            ->each(fn ($r) => $r->notify(new ResultatIndividuelSoumisNotification($tache, $assignee, $resultat)));
     }
 
     /**
@@ -2088,11 +2093,11 @@ class TacheController extends Controller
 
         // Vérifier permissions
         if (
-            !$activite->canUserEdit($request->user()) &&
+            ! $activite->canUserEdit($request->user()) &&
             $activite->responsable_id !== $request->user()->id
         ) {
             return response()->json([
-                'message' => 'Accès non autorisé'
+                'message' => 'Accès non autorisé',
             ], 403);
         }
 
@@ -2167,14 +2172,14 @@ class TacheController extends Controller
         $user = User::findOrFail($userId);
 
         // Vérifier permissions
-        if ($userId !== $request->user()->id && !$request->user()->isSuperAdmin()) {
+        if ($userId !== $request->user()->id && ! $request->user()->isSuperAdmin()) {
             $hasAccess = Activite::where('responsable_id', $request->user()->id)
                 ->whereHas('membres', function ($q) use ($userId) {
                     $q->where('user_id', $userId);
                 })
                 ->exists();
 
-            if (!$hasAccess) {
+            if (! $hasAccess) {
                 abort(403, 'Accès non autorisé');
             }
         }
@@ -2192,5 +2197,4 @@ class TacheController extends Controller
 
         return $pdf->download("rapport-hebdomadaire-{$user->nom}-S{$weekNumber}-{$year}.pdf");
     }
-
 }

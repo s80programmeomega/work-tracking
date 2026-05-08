@@ -9,7 +9,7 @@ class StoreUserRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('user.create');
+        return true; // Authorization handled in controller via PermissionService
     }
 
     public function rules(): array
