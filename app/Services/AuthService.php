@@ -2,26 +2,23 @@
 
 namespace App\Services;
 
-use App\Models\User;
-use App\Models\Workspace;
 use App\Enums\Role;
-use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class AuthService
 {
     /**
-     * Enregistre un nouvel utilisateur et crée son workspace par défaut
+     * Register a new user without creating a workspace.
+     * The user is assigned the default 'utilisateur' role.
      */
     public function register(array $data): User
     {
         return DB::transaction(function () use ($data) {
-            // 🔹 Construire le nom complet à partir de firstname et lastname
-            $nom = trim(
-                ($data['prenom'] ?? '') . ' ' . ($data['nom'] ?? '')
-            );
-            // 1. Création de l'utilisateur
+            $nom = trim(($data['prenom'] ?? '').' '.($data['nom'] ?? ''));
+
             $user = User::create([
                 'nom_complet' => $nom,
                 'nom' => $data['nom'],
@@ -31,35 +28,12 @@ class AuthService
                 'is_active' => true,
             ]);
 
-            // ✅ 2. Rôle par défaut
-            // $defaultRole = $data['role'] ?? Role::ADMIN->value;
-            // $user->assignRole($defaultRole);
+            $user->assignRole(Role::UTILISATEUR->value);
 
-            // ✅ 3. Création automatique du workspace personnel
-            $workspace = Workspace::create([
-                'nom' => "{$user->nom} Workspace",
-                'description' => 'Espace de travail personnel de ' . $user->nom,
-                'owner_id' => $user->id,
-                'is_active' => true,
-            ]);
-
-            // ✅ 4. Ajout dans la table pivot (membre propriétaire)
-            $workspace->members()->attach($user->id, [
-                'role' => 'owner',
-                'permissions' => json_encode(['all']),
-                'invited_at' => now(),
-                'invited_by' => $user->id,
-            ]);
-
-            // ✅ 5. Définir ce workspace comme courant
-            $user->update(['current_workspace_id' => $workspace->id]);
-
-            // ✅ 6. Log d'activité
             activity()
                 ->performedOn($user)
                 ->causedBy($user)
-                ->withProperties(['workspace_id' => $workspace->id])
-                ->log('User registered and workspace created');
+                ->log('User registered');
 
             return $user;
         });
@@ -70,49 +44,22 @@ class AuthService
      */
     public function login(array $credentials, bool $remember = false): array
     {
-        if (!Auth::attempt($credentials, $remember)) {
+        if (! Auth::attempt($credentials, $remember)) {
             throw new \Exception('Invalid credentials');
         }
 
         $user = Auth::user();
 
-        if (!$user->is_active) {
+        if (! $user->is_active) {
             Auth::logout();
             throw new \Exception('Account is inactive');
         }
 
-        // ✅ Mettre à jour les infos de connexion
+        // Update last login info
         $user->update([
             'last_login_at' => now(),
             'last_login_ip' => request()->ip(),
         ]);
-
-        // ✅ Vérifier si un workspace courant existe
-        if (!$user->current_workspace_id) {
-            // Si l'utilisateur est déjà membre d'un workspace
-            $workspace = $user->workspaces()->first();
-
-            if (!$workspace) {
-                // Sinon, créer un workspace personnel
-                $workspace = Workspace::create([
-                    'nom' => "{$user->name} Workspace",
-                    'description' => 'Espace de travail personnel de ' . $user->name,
-                    'owner_id' => $user->id,
-                    'is_active' => true,
-                ]);
-
-                // Lier comme membre propriétaire
-                $workspace->members()->attach($user->id, [
-                    'role' => 'owner',
-                    'permissions' => json_encode(['all']),
-                    'invited_at' => now(),
-                    'invited_by' => $user->id,
-                ]);
-            }
-
-            // Mettre à jour le workspace courant
-            $user->update(['current_workspace_id' => $workspace->id]);
-        }
 
         // ✅ Générer le token Sanctum
         // $token = $user->createToken('auth_token', ['*'], now()->addDays(7))->plainTextToken;

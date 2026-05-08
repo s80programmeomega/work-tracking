@@ -6,8 +6,12 @@
 
 ## Working Conventions (AI ↔ Jonas)
 
-- **Branch strategy:** All work is on branch `jonas`. Features go on `jonas/feature/<name>`, fixes on `jonas/fix/<name>`. Always branch from `jonas`, PR back into `jonas`.
-- **Never push to `main`** without explicit instruction.
+- **Main branch:** `jonas` — never push to `main`
+- **Branch strategy:**
+  - `feature/<name>` — new features
+  - `fix/<name>` — bug fixes
+  - `adjustment/<name>` — tweaks/refactors
+  - Always branch from `jonas`, PR back into `jonas`
 - **Commit style:** `fix:`, `feat:`, `chore:` prefixes. Short, descriptive messages.
 - **Before any feature:** read the relevant existing code first (Service + Controller + Composable + Page) to match patterns.
 - **Minimal code:** write only what's needed, no over-engineering.

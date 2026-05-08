@@ -1,62 +1,45 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Enums;
 
 enum Role: string
 {
     case SUPER_ADMIN = 'super_admin';
-    case ADMIN = 'admin';
-    case MANAGER = 'manager';
-    case MEMBER = 'member';
-    case VIEWER = 'viewer';
-    case CADRE = 'cadre';
-    case STAGIAIRE = 'stagiaire';
+    case DIRECTEUR = 'directeur';
+    case UTILISATEUR = 'utilisateur';
 
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::SUPER_ADMIN => 'Super Administrateur',
-            self::ADMIN => 'Administrateur',
-            self::MANAGER => 'Manager',
-            self::MEMBER => 'Member',
-            self::VIEWER => 'viewer',
-            self::CADRE => 'Cadre',
-            self::STAGIAIRE => 'Stagiaire',
+            self::DIRECTEUR => 'Directeur',
+            self::UTILISATEUR => 'Utilisateur',
         };
     }
 
     public function permissions(): array
     {
-        return match($this) {
-            self::SUPER_ADMIN => ['*'], // All permissions
-            self::ADMIN => [
-                'projets.create', 'projets.update', 'projets.delete',
-                'activites.create', 'activites.update', 'activites.delete',
-                'taches.create', 'taches.update', 'taches.delete',
-                'users.view', 'users.assign', 'reports.view','can_view_all_projects',
-                'can_invite_members', "can_create_projects", "can_manage_settings", "can_delete_members"
+        return match ($this) {
+            self::SUPER_ADMIN => ['*'],
+            self::DIRECTEUR => [
+                'workspaces.create',
+                'workspaces.update',
+                'workspaces.delete',
+                'workspaces.manage_members',
+                'projets.view',
+                'projets.create',
+                'projets.update',
+                'projets.delete',
+                'can_view_all_projects',
+                'can_create_projects',
+                'can_invite_members',
+                'can_manage_settings',
+                'can_delete_members',
             ],
-            self::MANAGER => [
-                'projets.create', 'projets.update',
-                'activites.create', 'activites.update',
-                'taches.create', 'taches.update', 'taches.delete',
-                'users.view', 'users.assign', 'reports.view', 'can_view_all_projects',
-                'can_invite_members', "can_create_projects", "can_manage_settings", "can_delete_members"
-
-            ],
-            self::MEMBER => [
-                'activites.view', 'activites.update',
-                'taches.create', 'taches.update', 'taches.delete',
-                'taches.validate'
-            ],
-            self::VIEWER => [
-                'taches.view','activites.view','taches.comment'
-            ],
-            self::CADRE => [
-                'taches.view', 'taches.update', 'taches.comment'
-            ],
-            self::STAGIAIRE => [
-                'taches.view', 'taches.comment'
+            self::UTILISATEUR => [
+                'workspaces.create',
             ],
         };
     }

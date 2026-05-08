@@ -2,13 +2,13 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 use App\Enums\Role as RoleEnum;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class RolePermissionSeeder extends Seeder
 {
@@ -17,11 +17,16 @@ class RolePermissionSeeder extends Seeder
      */
     public function run(): void
     {
-        // Reset cached roles and permissions
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Create permissions
         $permissions = [
+            // Workspaces
+            'workspaces.create',
+            'workspaces.update',
+            'workspaces.delete',
+            'workspaces.manage_members',
+
             // Projets
             'projets.view',
             'projets.create',
@@ -63,24 +68,23 @@ class RolePermissionSeeder extends Seeder
             Permission::create(['name' => $permission, 'guard_name' => 'web']);
         }
 
-        // Create roles and assign permissions
+        // Create global roles
         foreach (RoleEnum::cases() as $roleEnum) {
             $role = Role::create([
                 'name' => $roleEnum->value,
-                'guard_name' => 'web'
+                'guard_name' => 'web',
             ]);
 
             $rolePermissions = $roleEnum->permissions();
 
             if (in_array('*', $rolePermissions)) {
-                // Super admin gets all permissions
                 $role->givePermissionTo(Permission::all());
             } else {
                 $role->givePermissionTo($rolePermissions);
             }
         }
 
-        // Create a super admin user
+        // Create super admin user
         $superAdmin = User::create([
             'nom' => 'Super',
             'prenom' => 'Admin',
@@ -89,29 +93,38 @@ class RolePermissionSeeder extends Seeder
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
             'is_active' => true,
-            'role' => RoleEnum::SUPER_ADMIN->value,
         ]);
         $superAdmin->assignRole(RoleEnum::SUPER_ADMIN->value);
 
-        // Create a manager user
-        $manager = User::create([
-            'nom' => 'Manager',
-            'prenom' => 'Admin',
-            'nom_complet' => 'Admin Manager',
-            'email' => 'admin@worktracking.com',
+        // Create directeur user
+        $directeur = User::create([
+            'nom' => 'Directeur',
+            'prenom' => 'Test',
+            'nom_complet' => 'Test Directeur',
+            'email' => 'directeur@worktracking.com',
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
             'is_active' => true,
-            'role' => RoleEnum::ADMIN->value,
         ]);
-        $manager->assignRole(RoleEnum::ADMIN->value);
+        $directeur->assignRole(RoleEnum::DIRECTEUR->value);
 
-        
+        // Create utilisateur user
+        $utilisateur = User::create([
+            'nom' => 'Utilisateur',
+            'prenom' => 'Test',
+            'nom_complet' => 'Test Utilisateur',
+            'email' => 'utilisateur@worktracking.com',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
+            'is_active' => true,
+        ]);
+        $utilisateur->assignRole(RoleEnum::UTILISATEUR->value);
 
         $this->command->info('Roles and permissions seeded successfully!');
         $this->command->info('');
         $this->command->info('Default users created:');
-        $this->command->info('- admin@worktracking.com (password: password)');
-        $this->command->info('- manager@worktracking.com (password: password)'); 
+        $this->command->info('- superadmin@worktracking.com (password: password)');
+        $this->command->info('- directeur@worktracking.com (password: password)');
+        $this->command->info('- utilisateur@worktracking.com (password: password)');
     }
 }
