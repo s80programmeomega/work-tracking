@@ -452,6 +452,7 @@ const handleSubmit = async () => {
       toast.success('✅ Projet créé avec succès !', { position: 'top-right', timeout: 4000 })
     }
     emit('saved')
+    emit('close') // Always close the modal after a successful save
 
   } catch (err) {
     if (err.response?.status === 422) {
