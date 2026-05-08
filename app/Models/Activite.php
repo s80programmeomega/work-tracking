@@ -124,8 +124,6 @@ class Activite extends Model
                 'can_delete_tasks',
                 'can_validate_results',
                 'can_assign_users',
-                'can_delete_member',
-
             ])
             ->withTimestamps();
     }
