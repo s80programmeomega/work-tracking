@@ -804,7 +804,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore } from '@/stores/authStore'
 import { useTaches } from '@/composables/useTaches'
 import api from '@/api/axios'
 import { useActivityPermissions } from '@/composables/useActivityPermissions'

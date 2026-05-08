@@ -27,8 +27,8 @@
             </router-link>
         </div>
 
-        <!-- Workspace Selector avec Filtre Dashboard -->
-        <div v-if="isExpanded || isHovered || isMobileOpen" class="mb-4 px-2">
+        <!-- Workspace Selector — only shown when user has at least one workspace -->
+        <div v-if="(isExpanded || isHovered || isMobileOpen) && workspaces.length > 0" class="mb-4 px-2">
             <button @click="showWorkspaceSelector = !showWorkspaceSelector"
                 class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                 <div
@@ -293,7 +293,7 @@ import ClipboardCheckIcon from '@/icons/ClipboardCheckIcon.vue';
 import UsersIcon from '@/icons/UsersIcon.vue';
 import { useSidebar } from '@/composables/useSidebar';
 import api from '@/api/axios'
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore } from '@/stores/authStore';
 import { useWorkspace } from '@/composables/useWorkspace';
 
 

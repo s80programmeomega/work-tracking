@@ -236,7 +236,17 @@
                                         </p>
                                     </div>
 
-                                    <!-- Message d'erreur -->
+                                    <!-- Success message -->
+                                    <div v-if="successMessage" class="rounded-lg bg-success-50 p-4 dark:bg-success-500/10">
+                                        <div class="flex items-center">
+                                            <svg class="w-5 h-5 mr-2 text-success-500" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                            </svg>
+                                            <p class="text-sm text-success-700 dark:text-success-400">{{ successMessage }}</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Error message -->
                                     <div v-if="authError" class="rounded-lg bg-error-50 p-4 dark:bg-error-500/10">
                                         <div class="flex items-center">
                                             <svg class="w-5 h-5 mr-2 text-error-500" fill="currentColor"
@@ -367,6 +377,7 @@ const authStore = useAuthStore();
 // États réactifs
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
+const successMessage = ref('');
 const validationErrors = ref<Record<string, string[]>>({});
 
 // Données du formulaire
@@ -487,10 +498,13 @@ const handleSubmit = async () => {
             terms: form.agreeToTerms
         };
 
-        // Appeler l'action d'inscription du store
+        // Call register action
         await authStore.register(userData);
 
-        // Redirection gérée par le store après inscription réussie
+        // Show success feedback before redirect to signin
+        authStore.error = null;
+        // Use a temporary success state to show the message
+        successMessage.value = t('auth.registration_success') || 'Account created successfully! Please sign in.';
 
     } catch (error: any) {
         console.error('Registration error:', error);

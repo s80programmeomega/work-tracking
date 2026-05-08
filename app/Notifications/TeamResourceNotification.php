@@ -14,6 +14,7 @@ class TeamResourceNotification extends Notification implements ShouldQueue
     use Queueable;
 
     protected Team $team;
+
     protected TeamResource $resource;
 
     /**
@@ -49,7 +50,7 @@ class TeamResourceNotification extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $typeLabel = match($this->resource->type) {
+        $typeLabel = match ($this->resource->type) {
             'file' => '📎 Fichier',
             'link' => '🔗 Lien',
             'document' => '📄 Document',
@@ -60,14 +61,14 @@ class TeamResourceNotification extends Notification implements ShouldQueue
         $mail = (new MailMessage)
             ->subject("Nouvelle ressource dans {$this->team->name}")
             ->greeting("Bonjour {$notifiable->nom}!")
-            ->line("{$typeLabel}: **{$this->resource->title ?? $this->resource->name}**");
+            ->line($typeLabel.': **'.($this->resource->title ?? $this->resource->name).'**');
 
         if ($this->resource->description) {
             $mail->line($this->resource->description);
         }
 
         return $mail
-            ->action("Voir la ressource", url("/teams/{$this->team->uuid}"))
+            ->action('Voir la ressource', url("/teams/{$this->team->uuid}"))
             ->line('Merci d\'utiliser notre application!');
     }
 

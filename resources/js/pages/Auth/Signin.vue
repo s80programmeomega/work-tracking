@@ -156,6 +156,18 @@
                                             </router-link>
                                         </div>
 
+                                        <!-- Registration success message -->
+                                        <div v-if="registrationSuccess" class="rounded-lg bg-success-50 p-4 dark:bg-success-500/10">
+                                            <div class="flex items-center">
+                                                <svg class="w-5 h-5 mr-2 text-success-500" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                                </svg>
+                                                <p class="text-sm text-success-700 dark:text-success-400">
+                                                    Account created successfully! Please sign in.
+                                                </p>
+                                            </div>
+                                        </div>
+
                                         <!-- Message d'erreur -->
                                         <div v-if="authError" class="rounded-lg bg-error-50 p-4 dark:bg-error-500/10">
                                             <div class="flex items-center">
@@ -277,7 +289,7 @@
 <script setup lang="ts"> 
 import { ref, reactive, computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import CommonGridShape from "@/components/common/CommonGridShape.vue";
 import FullScreenLayout from "@/components/layout/FullScreenLayout.vue";
 import LanguageSwitcher from "@/components/common/LanguageSwitcher.vue";
@@ -289,6 +301,10 @@ import { useAuthStore } from "@/stores/authStore";
 const LogoDark = new URL('@/assets/images/logo/Logo-dark.jpg', import.meta.url).href
 const { t, locale } = useI18n();
 const router = useRouter();
+const route = useRoute();
+
+// Show success message when redirected from signup
+const registrationSuccess = computed(() => route.query.registered === '1');
 const authStore = useAuthStore();
 
 // États réactifs

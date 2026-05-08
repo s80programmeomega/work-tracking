@@ -52,27 +52,6 @@
               </div>
 
               <div class="flex items-center gap-2">
-                <!-- Bouton Modifier avec vérification de permission -->
-                <button v-if="canEditWorkspace"
-                  @click="navigateToEdit"
-                  class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  :title="canEditWorkspace ? 'Modifier le workspace' : 'Seul le propriétaire peut modifier'"
-                  :disabled="!canEditWorkspace">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                  </svg>
-                  Modifier
-                </button>
-
-                <button v-else
-                  @click="showPermissionDenied('edit')"
-                  class="flex items-center gap-2 px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg cursor-not-allowed"
-                  title="Seul le propriétaire peut modifier">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                  </svg>
-                  Modifier
-                </button>
 
                 <!-- Bouton Paramètres avec vérification de permission -->
                 <button v-if="canManageSettings"

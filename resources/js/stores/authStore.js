@@ -27,13 +27,17 @@ export const useAuthStore = defineStore('auth', {
         tokenExpiry: null,
         refreshInterval: null,
 
-        // ⭐ NOUVEAU: Gestion du timeout d'inactivité
-        inactivityTimeout: 60 * 60 * 1000, // 60 minutes par défaut
+        // Workspace state lives here so it is automatically cleared on logout
+        // alongside the user session — preventing stale data leaking between users
+        workspaces: [],
+        currentWorkspace: null,
+
+        // Inactivity timeout management
+        inactivityTimeout: 60 * 60 * 1000, // 60 minutes by default
         inactivityTimer: null,
         lastActivity: Date.now(),
-        warningTime: 5 * 60 * 1000, // 5 minutes avant déconnexion
+        warningTime: 5 * 60 * 1000, // warn 5 minutes before logout
         warningShown: false,
-
     }),
 
     getters: {
@@ -89,26 +93,17 @@ export const useAuthStore = defineStore('auth', {
         },
 
         /**
-         * ✅ Workspace actuel
+         * Current workspace — sourced from Pinia state (not user object)
+         * so it updates reactively when useWorkspace sets it
          */
-        currentWorkspace: (state) => {
-            if (!state.user) return null;
-            return state.user.current_workspace;
-        },
+        currentWorkspace: (state) => state.currentWorkspace,
 
-        currentWorkspaceId: (state) => {
-            if (!state.user) return null;
-            return state.user.current_workspace_id;
-        },
+        currentWorkspaceId: (state) => state.currentWorkspace?.id || state.user?.current_workspace_id || null,
 
         /**
-         * ✅ Liste des workspaces accessibles
+         * All workspaces the user has access to — sourced from Pinia state
          */
-        userWorkspaces: (state) => {
-            if (!state.user) return [];
-            if (!Array.isArray(state.user.workspaces)) return [];
-            return state.user.workspaces;
-        },
+        userWorkspaces: (state) => state.workspaces,
 
         /**
          * ✅ Informations utilisateur
@@ -622,7 +617,8 @@ export const useAuthStore = defineStore('auth', {
             this.error = null;
             try {
                 const response = await authAPI.register(data);
-                router.push('/signin');
+                // Pass success flag via query so Signin page can display a confirmation message
+                router.push({ path: '/signin', query: { registered: '1' } });
                 return response.data;
             } catch (error) {
                 this.error = error.response?.data?.message || 'Registration failed';
@@ -638,6 +634,13 @@ export const useAuthStore = defineStore('auth', {
         async login(credentials) {
             this.loading = true;
             this.error = null;
+
+            // Clear any stale user data from a previous session immediately,
+            // so the UI never shows another user's data while the API call is in flight
+            this.user = null;
+            this.isAuthenticated = false;
+            localStorage.removeItem('user');
+
             try {
                 await axios.get('/sanctum/csrf-cookie').catch(() => {});
 
@@ -709,22 +712,32 @@ export const useAuthStore = defineStore('auth', {
         },
 
        clearAuth() {
-            // ⭐ Nettoyer les timers
+            // Stop all timers
             if (this.inactivityTimer) {
                 clearTimeout(this.inactivityTimer);
                 this.inactivityTimer = null;
             }
-            
+
             this.hideTimeoutWarning();
             this.warningShown = false;
-            
+
+            // Clear user session state
             this.user = null;
             this.token = null;
             this.isAuthenticated = false;
             this.tokenExpiry = null;
+
+            // Clear workspace state — this is the key fix that prevents
+            // stale workspace data from leaking into the next user's session
+            this.workspaces = [];
+            this.currentWorkspace = null;
+
             this.stopTokenAutoRefresh();
+
             localStorage.removeItem('user');
             localStorage.removeItem('auth_token');
+            localStorage.removeItem('current_workspace_id');
+
             this.setAxiosToken(null);
         },
 

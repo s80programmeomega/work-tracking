@@ -95,7 +95,7 @@
 <script>
 import { ref, reactive, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useAuthStore } from '../../stores/auth'
+import { useAuthStore } from '@/stores/authStore'
 
 export default {
   name: 'ResetPassword',

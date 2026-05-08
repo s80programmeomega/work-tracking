@@ -215,7 +215,7 @@
 
 <script>
 import UserModal from './UserModal.vue'
-import { useAuthStore } from '../../stores/auth'
+import { useAuthStore } from '@/stores/authStore'
 
 export default {
   name: 'UserManagement',

@@ -133,7 +133,7 @@
 <script>
 import TeamModal from './TeamModal.vue'
 import TeamDetailModal from './TeamDetailModal.vue'
-import { useAuthStore } from '../../stores/auth'
+import { useAuthStore } from '@/stores/authStore'
 
 export default {
   name: 'TeamList',
