@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreWorkspaceRequest;
 use App\Http\Requests\UpdateWorkspaceRequest;
@@ -107,13 +108,22 @@ class WorkspaceController extends Controller
                 }
             }
 
-            // Ajouter le créateur comme membre owner
+            // Add creator as owner member
             $workspace->members()->attach($request->user()->id, [
                 'role' => 'owner',
-                'permissions' => json_encode(['all']), // ✅ Convertir en JSON
+                'permissions' => json_encode(['all']),
                 'invited_at' => now(),
                 'invited_by' => $request->user()->id,
             ]);
+
+            // Assign directeur global role if not already super_admin
+            $user = $request->user();
+            if (! $user->isSuperAdmin() && ! $user->hasRole(Role::DIRECTEUR->value)) {
+                $user->syncRoles([Role::DIRECTEUR->value]);
+            }
+
+            // Set as current workspace
+            $user->update(['current_workspace_id' => $workspace->id]);
 
             DB::commit();
 
