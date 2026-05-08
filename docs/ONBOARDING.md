@@ -25,11 +25,14 @@
 - App installed and running locally
 - All migrations applied and passing
 - Branch `jonas` pushed to origin
-- Fixes applied: duplicate migration, missing `can_view_all_projects` permission, `Documents.vue` route case
+- Roles & permissions refactor complete (see `docs/ROLES_AND_PERMISSIONS.md`)
+- 6 branches pushed, pending PR into `jonas`
 
 ## Next Steps
 
-- _(update this section each session)_
+- Open PRs for all 6 branches into `jonas`
+- Write PHPUnit feature tests for PermissionService and auth flows
+- Update remaining components to use `useProjetPermissions` and `useActivitePermissions`
 
 ---
 

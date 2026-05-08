@@ -7,14 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Storage;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Workspace extends Model
 {
-    use HasFactory, SoftDeletes, LogsActivity;
+    use HasFactory, LogsActivity, SoftDeletes;
 
     protected $fillable = [
         'nom',
@@ -43,8 +43,6 @@ class Workspace extends Model
     protected $attributes = [
         'is_active' => true,
     ];
-
-
 
     /**
      * Boot method pour générer le code et initialiser les settings
@@ -108,7 +106,7 @@ class Workspace extends Model
         do {
             $latest = static::withTrashed()->latest('id')->first();
             $nextId = $latest ? $latest->id + 1 : 1;
-            $code = 'WS-' . str_pad($nextId, 4, '0', STR_PAD_LEFT);
+            $code = 'WS-'.str_pad($nextId, 4, '0', STR_PAD_LEFT);
         } while (static::where('code', $code)->exists());
 
         return $code;
@@ -130,23 +128,26 @@ class Workspace extends Model
         return $this->belongsToMany(User::class, 'workspace_members')
             ->withPivot(['role', 'permissions', 'invited_at', 'invited_by'])
             ->withTimestamps()
-            ->using(new class extends \Illuminate\Database\Eloquent\Relations\Pivot {
-            protected $casts = [
-                'permissions' => 'array', // ✅ Auto-decode JSON
-                'invited_at' => 'datetime',
-            ];
+            ->using(new class extends Pivot
+            {
+                protected $casts = [
+                    'permissions' => 'array', // ✅ Auto-decode JSON
+                    'invited_at' => 'datetime',
+                ];
             });
     }
+
     public function membres(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'workspace_members')
             ->withPivot(['role', 'permissions', 'invited_at', 'invited_by'])
             ->withTimestamps()
-            ->using(new class extends \Illuminate\Database\Eloquent\Relations\Pivot {
-            protected $casts = [
-                'permissions' => 'array', // ✅ Auto-decode JSON
-                'invited_at' => 'datetime',
-            ];
+            ->using(new class extends Pivot
+            {
+                protected $casts = [
+                    'permissions' => 'array', // ✅ Auto-decode JSON
+                    'invited_at' => 'datetime',
+                ];
             });
     }
 
@@ -273,9 +274,10 @@ class Workspace extends Model
     public function getLogoUrlAttribute(): ?string
     {
         if ($this->logo) {
-            return $this->logo ? asset('uploads/' . $this->logo) : null;
+            return $this->logo ? asset('uploads/'.$this->logo) : null;
 
         }
+
         return null;
     }
 
@@ -308,7 +310,6 @@ class Workspace extends Model
             || $this->members()->where('user_id', $user->id)->exists();
     }
 
-
     /**
      * Get member role.
      */
@@ -319,6 +320,7 @@ class Workspace extends Model
         }
 
         $member = $this->members()->where('user_id', $user->id)->first();
+
         return $member?->pivot->role;
     }
 
@@ -332,6 +334,7 @@ class Workspace extends Model
         }
 
         $role = $this->getMemberRole($user);
+
         return in_array($role, ['owner', 'admin']);
     }
 
@@ -348,14 +351,14 @@ class Workspace extends Model
             return true;
         }
 
-        if (!$this->getSetting('members_can_create_projects', true)) {
+        if (! $this->getSetting('members_can_create_projects', true)) {
             return false;
         }
 
         $role = $this->getMemberRole($user);
+
         return in_array($role, ['owner', 'admin', 'member']);
     }
-
 
     /**
      * Check if user can manage settings.
@@ -372,7 +375,7 @@ class Workspace extends Model
 
         $member = $this->members()->where('user_id', $user->id)->first();
 
-        if (!$member) {
+        if (! $member) {
             return false;
         }
 
@@ -390,8 +393,8 @@ class Workspace extends Model
             return true;
         }
 
-
         $role = $this->getMemberRole($user);
+
         return in_array($role, ['owner', 'admin']);
     }
 
@@ -406,11 +409,12 @@ class Workspace extends Model
         }
 
         $member = $this->members()->where('user_id', $user->id)->first();
-        if (!$member) {
+        if (! $member) {
             return false;
         }
 
         $permissions = $member->pivot->permissions ?? [];
+
         return in_array('manage_projects', $permissions) ||
             in_array('all', $permissions) ||
             in_array($member->pivot->role, ['owner', 'admin']);
@@ -418,20 +422,15 @@ class Workspace extends Model
 
     /**
      * Add a member to workspace
-     * 
-     * @param User $user
-     * @param string $role
-     * @param array $permissions
-     * @return void
      */
     public function addMember(User $user, string $role = 'member', array $permissions = []): void
     {
         // Seul super admin, owner ou admin peut ajouter
-        if (!($user->isSuperAdmin() || $this->isOwner($user) || $this->getMemberRole($user) === 'admin')) {
-            throw new \Exception("Permission refusée : vous ne pouvez pas ajouter de membres.");
+        if (! ($user->isSuperAdmin() || $this->isOwner($user) || $this->getMemberRole($user) === 'admin')) {
+            throw new \Exception('Permission refusée : vous ne pouvez pas ajouter de membres.');
         }
 
-        if (!$this->isMember($user)) {
+        if (! $this->isMember($user)) {
             $this->members()->attach($user->id, [
                 'role' => $role,
                 'permissions' => json_encode($permissions), // ✅ Convertir en JSON
@@ -444,16 +443,16 @@ class Workspace extends Model
     public function removeMember(User $user, User $targetUser): void
     {
         // Super admin, owner ou admin peuvent supprimer
-        if (!($user->isSuperAdmin() || $this->isOwner($user) || $this->getMemberRole($user) === 'admin')) {
-            throw new \Exception("Permission refusée : vous ne pouvez pas supprimer ce membre.");
+        if (! ($user->isSuperAdmin() || $this->isOwner($user) || $this->getMemberRole($user) === 'admin')) {
+            throw new \Exception('Permission refusée : vous ne pouvez pas supprimer ce membre.');
         }
 
         // Personne ne peut supprimer l'owner
         if ($this->isOwner($targetUser)) {
-            throw new \Exception("Impossible de supprimer le propriétaire du workspace.");
+            throw new \Exception('Impossible de supprimer le propriétaire du workspace.');
         }
 
-        if (!$this->isOwner($user)) {
+        if (! $this->isOwner($user)) {
             $this->members()->detach($user->id);
         }
     }
@@ -473,12 +472,12 @@ class Workspace extends Model
             return true;
         }
 
-        // Rôle Admin dans workspace_members
+        // Manager role in workspace_members (replaces old 'admin' role)
         $member = $this->members()
             ->where('workspace_members.user_id', $user->id)
             ->first();
 
-        if ($member && in_array($member->pivot->role, ['owner', 'admin'])) {
+        if ($member && in_array($member->pivot->role, ['owner', 'manager'])) {
             return true;
         }
 
@@ -487,25 +486,20 @@ class Workspace extends Model
 
     /**
      * Update member role
-     * 
-     * @param User $user
-     * @param string $role
-     * @param array $permissions
-     * @return void
      */
     public function updateMemberRole(User $user, string $role, array $permissions = []): void
     {
         // Super admin, owner ou admin peuvent modifier
-        if (!($user->isSuperAdmin() || $this->isOwner($user) || $this->getMemberRole($user) === 'admin')) {
-            throw new \Exception("Permission refusée : vous ne pouvez pas modifier ce membre.");
+        if (! ($user->isSuperAdmin() || $this->isOwner($user) || $this->getMemberRole($user) === 'admin')) {
+            throw new \Exception('Permission refusée : vous ne pouvez pas modifier ce membre.');
         }
 
         // Ne jamais modifier l’owner
         if ($this->isOwner($targetUser)) {
-            throw new \Exception("Impossible de modifier le propriétaire du workspace.");
+            throw new \Exception('Impossible de modifier le propriétaire du workspace.');
         }
 
-        if ($this->isMember($user) && !$this->isOwner($user)) {
+        if ($this->isMember($user) && ! $this->isOwner($user)) {
             $this->members()->updateExistingPivot($user->id, [
                 'role' => $role,
                 'permissions' => json_encode($permissions), // ✅ Convertir en JSON
@@ -527,6 +521,7 @@ class Workspace extends Model
     public function allTaches()
     {
         $activiteIds = $this->allActivites()->pluck('id');
+
         return Tache::whereIn('activite_id', $activiteIds);
     }
 
@@ -548,7 +543,7 @@ class Workspace extends Model
             'total_taches' => $taches->count(),
             'taches_terminees' => $taches->where('statut', 'termine')->count(),
             'taches_en_cours' => $taches->where('statut', 'en_cours')->count(),
-            'taches_en_retard' => $taches->filter(fn($t) => $t->isOverdue())->count(),
+            'taches_en_retard' => $taches->filter(fn ($t) => $t->isOverdue())->count(),
             'taux_completion' => $taches->count() > 0
                 ? round(($taches->where('statut', 'termine')->count() / $taches->count()) * 100, 2) : 0,
             'progression_moyenne' => $projets->count() > 0
@@ -582,6 +577,7 @@ class Workspace extends Model
 
         // Admin du workspace
         $member = $this->members()->where('user_id', $user->id)->first();
+
         return $member && $member->pivot->role === 'admin';
     }
 
@@ -646,5 +642,4 @@ class Workspace extends Model
         // Si le décodage échoue ou ne retourne pas un array, retourner un array vide
         return is_array($decoded) ? $decoded : [];
     }
-
 }

@@ -395,14 +395,14 @@ class PermissionService
 
     private function projectMemberHasRole(User $user, Projet $projet, array $roles): bool
     {
-        $member = $projet->membres()->where('user_id', $user->id)->first();
+        $member = $projet->members()->where('user_id', $user->id)->first();
 
         return $member && in_array($member->pivot->role, $roles);
     }
 
     private function activityMemberHasRole(User $user, Activite $activite, string $role): bool
     {
-        $member = $activite->membres()->where('user_id', $user->id)->first();
+        $member = $activite->members()->where('user_id', $user->id)->first();
 
         return $member && $member->pivot->role === $role;
     }
@@ -413,7 +413,7 @@ class PermissionService
             return false;
         }
 
-        $member = $activite->membres()->where('user_id', $user->id)->first();
+        $member = $activite->members()->where('user_id', $user->id)->first();
 
         return $member && ($member->pivot->{$permission} ?? false);
     }
