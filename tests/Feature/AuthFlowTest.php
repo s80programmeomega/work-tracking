@@ -40,9 +40,9 @@ class AuthFlowTest extends TestCase
 
         $user = User::where('email', 'test@example.com')->first();
         $this->assertNotNull($user);
-        // Clear Spatie's static permission cache before checking roles
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
-        $this->assertTrue($user->hasRole(Role::UTILISATEUR->value, 'web'));
+        $user->unsetRelation('roles');
+        $this->assertTrue($user->getRoleNames()->contains(Role::UTILISATEUR->value));
     }
 
     /** @test */
@@ -80,7 +80,8 @@ class AuthFlowTest extends TestCase
 
         $user->refresh();
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
-        $this->assertTrue($user->hasRole(Role::DIRECTEUR->value));
+        $user->unsetRelation('roles');
+        $this->assertTrue($user->getRoleNames()->contains(Role::DIRECTEUR->value));
         $this->assertNotNull($user->current_workspace_id);
     }
 
