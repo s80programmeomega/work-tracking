@@ -9,13 +9,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Spatie\Permission\Traits\HasRoles;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles, LogsActivity, SoftDeletes;
+    use HasApiTokens, HasFactory, HasRoles, LogsActivity, Notifiable, SoftDeletes;
+
+    // Force Spatie to always use 'web' guard for role/permission lookups
+    // regardless of which guard (sanctum, web) authenticated the request
+    protected string $guard_name = 'web';
 
     /**
      * The attributes that are mass assignable.
@@ -63,7 +67,6 @@ class User extends Authenticatable
      *
      * @var array<string, string>
      */
-
     protected $casts = [
         'email_verified_at' => 'datetime',
         'two_factor_confirmed_at' => 'datetime',
@@ -79,7 +82,6 @@ class User extends Authenticatable
         'full_name',
         'avatar_url',
     ];
-
 
     /**
      * Activity logging configuration
@@ -171,11 +173,9 @@ class User extends Authenticatable
     public function projets(): BelongsToMany
     {
         return $this->belongsToMany(Projet::class, 'projet_user')
-            ->withPivot(['role', 'can_edit', 'can_delete', 'can_invite','can_delete_member'])
+            ->withPivot(['role', 'can_edit', 'can_delete', 'can_invite', 'can_delete_member'])
             ->withTimestamps();
     }
-
-
 
     public function activites()
     {
@@ -191,13 +191,12 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
-
     public function taches()
     {
         return $this->belongsToMany(Tache::class, 'tache_user')
             ->withPivot('role', 'can_edit', 'can_complete', 'can_validate', 'statut_individuel', 'progression_individuelle', 'started_at', 'completed_at')
             ->withTimestamps()
-             ->withCasts([
+            ->withCasts([
                 'started_at' => 'datetime',
                 'completed_at' => 'datetime',
                 'progression_individuelle' => 'integer',
@@ -242,7 +241,7 @@ class User extends Authenticatable
     {
         $preferences = $this->notificationPreference;
 
-        if (!$preferences) {
+        if (! $preferences) {
             return true; // Default to sending if no preferences set
         }
 
@@ -362,7 +361,6 @@ class User extends Authenticatable
         return $query->where('role', 'super_admin');
     }
 
-
     public function updateLoginInfo(): void
     {
         $this->update([
@@ -382,5 +380,4 @@ class User extends Authenticatable
             ->withPivot(['role', 'permissions', 'invited_at', 'invited_by'])
             ->withTimestamps();
     }
-
 }
