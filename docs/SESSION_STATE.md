@@ -16,9 +16,9 @@
 
 ## Current Session
 
-**Date:** 2026-05-11
-**Session goal:** Planning and documentation setup
-**Status:** Complete — ready to start implementation
+**Date:** 2026-05-12
+**Session goal:** Merge pending branches, complete Task 0 (Policies refactor), finalize docs
+**Status:** Complete — Task 0 done, PR open, ready to merge and start Task 1 tomorrow
 
 ---
 
@@ -29,9 +29,11 @@
 **Status:** Not started
 
 **What to do next:**
-1. Merge PR for `feature/v2-task-0-policies-refactor` into `jonas`
-2. Create branch `feature/v2-task-1-queue-reverb` from `jonas`
-3. Follow Task 1 in `IMPLEMENTATION_PLAN.md`
+1. Merge PR `feature/v2-task-0-policies-refactor` into `jonas`
+2. Run `php artisan migrate:fresh --seed` to apply seeder changes
+3. Manually test using `docs/testing/TASK_0_TESTING.md`
+4. Create branch `feature/v2-task-1-queue-reverb` from `jonas`
+5. Follow Task 1 in `IMPLEMENTATION_PLAN.md`
 
 ---
 
