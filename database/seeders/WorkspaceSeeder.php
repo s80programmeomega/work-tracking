@@ -1,85 +1,167 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
+use App\Enums\Role;
+use App\Models\Activite;
+use App\Models\Projet;
 use App\Models\User;
 use App\Models\Workspace;
-use Illuminate\Support\Arr;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class WorkspaceSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $users = User::all();
+        // Reuse directeur created by RolePermissionSeeder
+        $directeur = User::where('email', 'directeur@worktracking.com')->firstOrFail();
 
-        foreach ($users as $user) {
-            // Créer un workspace par défaut pour chaque utilisateur
-            $workspace = Workspace::create([
-                'nom' => $user->nom . ' Workspace',
-                'description' => 'Workspace par défaut pour ' . $user->nom,
-                'code' => 'WS-' . strtoupper(substr($user->nom, 0, 3)) . '-' . $user->id,
-                'owner_id' => $user->id,
-                'settings' => [
-                    "language" => $user->language ?? "fr",
-                    "timezone" => $user->timezone ?? "Africa/Douala",
-                    "visibility" => "private",
-                    "weekly_digest" => false,
-                    "members_can_invite" => true,
-                    "notify_on_new_member" => true,
-                    "notify_on_new_project" => true,
-                    "require_task_validation" => true,
-                    "default_project_visibility" => "team",
-                    "members_can_create_projects" => true,
-                    "members_can_delete_projects" => false,
-                    "require_approval_for_time_off" => true,
-                    "notify_on_deadline_approaching" => true
-                ],
-                'is_active' => true,
-                'logo' => null,
-            ]);
+        $manager = User::create([
+            'nom' => 'Manager',
+            'prenom' => 'Test',
+            'nom_complet' => 'Test Manager',
+            'email' => 'manager@worktracking.com',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
+            'is_active' => true,
+        ]);
+        $manager->assignRole(Role::UTILISATEUR->value);
 
-            // Assigner le workspace à l'utilisateur
-            $user->current_workspace_id = $workspace->id;
-            $user->save();
+        $cadre = User::create([
+            'nom' => 'Cadre',
+            'prenom' => 'Test',
+            'nom_complet' => 'Test Cadre',
+            'email' => 'cadre@worktracking.com',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
+            'is_active' => true,
+        ]);
+        $cadre->assignRole(Role::UTILISATEUR->value);
 
-            // Ajouter l'utilisateur comme membre du workspace (role: owner)
-            $workspace->members()->attach($user->id, [
-                'role' => 'owner',
-                'permissions' => json_encode([
-                    "projets.view" => true,
-                    "projets.create" => true,
-                    "projets.update" => true,
-                    "projets.delete" => true,
-                    "can_create_projects" => true,
-                    "can_invite_members" => true,
-                    "can_manage_settings" => true,
-                    "activites.view" => true,
-                    "activites.create" => true,
-                    "activites.update" => true,
-                    "activites.delete" => true,
-                    "taches.view" => true,
-                    "taches.create" => true,
-                    "taches.update" => true,
-                    "taches.delete" => true,
-                    "taches.validate" => true,
-                    "taches.comment" => true,
-                    "users.view" => true,
-                    "users.create" => true,
-                    "users.update" => true,
-                    "users.delete" => true,
-                    "users.assign" => true,
-                    "reports.view" => true,
-                    "reports.create" => true
-                ]),
+        $collaborateur = User::create([
+            'nom' => 'Collaborateur',
+            'prenom' => 'Test',
+            'nom_complet' => 'Test Collaborateur',
+            'email' => 'collaborateur@worktracking.com',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
+            'is_active' => true,
+        ]);
+        $collaborateur->assignRole(Role::UTILISATEUR->value);
+
+        $stagiaire = User::create([
+            'nom' => 'Stagiaire',
+            'prenom' => 'Test',
+            'nom_complet' => 'Test Stagiaire',
+            'email' => 'stagiaire@worktracking.com',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
+            'is_active' => true,
+        ]);
+        $stagiaire->assignRole(Role::UTILISATEUR->value);
+
+        $observateur = User::create([
+            'nom' => 'Observateur',
+            'prenom' => 'Test',
+            'nom_complet' => 'Test Observateur',
+            'email' => 'observateur@worktracking.com',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
+            'is_active' => true,
+        ]);
+        $observateur->assignRole(Role::UTILISATEUR->value);
+
+        // Create test workspace owned by directeur
+        $workspace = Workspace::create([
+            'nom' => 'Workspace de Test',
+            'description' => 'Workspace de démonstration avec tous les rôles',
+            'code' => 'TEST-WS-001',
+            'owner_id' => $directeur->id,
+            'is_active' => true,
+            'settings' => [
+                'default_project_visibility' => 'team',
+                'members_can_create_projects' => true,
+                'members_can_invite' => false,
+                'require_task_validation' => true,
+            ],
+        ]);
+
+        $directeur->update(['current_workspace_id' => $workspace->id]);
+
+        // Attach members with contextual roles
+        $workspace->members()->attach($directeur->id, [
+            'role' => 'owner',
+            'permissions' => json_encode(['all']),
+            'invited_at' => now(),
+            'invited_by' => $directeur->id,
+        ]);
+
+        foreach ([
+            ['user' => $manager,       'role' => 'manager'],
+            ['user' => $cadre,         'role' => 'cadre'],
+            ['user' => $collaborateur, 'role' => 'collaborateur'],
+            ['user' => $stagiaire,     'role' => 'stagiaire'],
+            ['user' => $observateur,   'role' => 'observateur'],
+        ] as $entry) {
+            $workspace->members()->attach($entry['user']->id, [
+                'role' => $entry['role'],
                 'invited_at' => now(),
-                'invited_by' => $user->id
+                'invited_by' => $directeur->id,
             ]);
+            $entry['user']->update(['current_workspace_id' => $workspace->id]);
         }
 
-        $this->command->info('Default workspaces created and assigned to all users with owner role!');
+        // Create a test project
+        $projet = Projet::create([
+            'workspace_id' => $workspace->id,
+            'nom' => 'Projet de Test',
+            'description' => 'Projet de démonstration',
+            'responsable_id' => $manager->id,
+            'date_debut' => now(),
+            'date_fin' => now()->addMonths(3),
+            'visibility' => 'team',
+        ]);
+
+        $projet->members()->attach($manager->id, ['role' => 'owner']);
+        $projet->members()->attach($cadre->id, ['role' => 'cadre']);
+        $projet->members()->attach($collaborateur->id, ['role' => 'collaborateur']);
+
+        // Create a test activity
+        $activite = Activite::create([
+            'projet_id' => $projet->id,
+            'nom' => 'Activité de Test',
+            'description' => 'Activité de démonstration',
+            'responsable_id' => $cadre->id,
+            'date_debut' => now(),
+            'date_fin' => now()->addMonths(2),
+        ]);
+
+        $activite->members()->attach($cadre->id, [
+            'role' => 'cadre',
+            'can_create_tasks' => true,
+            'can_edit_tasks' => true,
+            'can_delete_tasks' => true,
+            'can_validate_results' => true,
+            'can_assign_users' => true,
+        ]);
+
+        $activite->members()->attach($collaborateur->id, [
+            'role' => 'collaborateur',
+            'can_create_tasks' => false,
+            'can_edit_tasks' => true,
+        ]);
+
+        $this->command->info('Workspace seeded successfully!');
+        $this->command->info('');
+        $this->command->info('Test users (password: password):');
+        $this->command->info('- directeur@worktracking.com    → directeur (workspace owner)');
+        $this->command->info('- manager@worktracking.com      → manager (N2 validator)');
+        $this->command->info('- cadre@worktracking.com        → cadre (N1 validator)');
+        $this->command->info('- collaborateur@worktracking.com → collaborateur');
+        $this->command->info('- stagiaire@worktracking.com    → stagiaire');
+        $this->command->info('- observateur@worktracking.com  → observateur (read-only)');
     }
 }
