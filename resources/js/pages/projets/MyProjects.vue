@@ -465,7 +465,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProjets } from '@/composables/useProjets'
 import { useWorkspace } from '@/composables/useWorkspace'
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore } from '@/stores/authStore'
 import AdminLayout from "@/components/layout/AdminLayout.vue"
 import ProjetFormModal from '@/components/projets/ProjetFormModal.vue'
 import ConfirmModal from '@/components/common/ConfirmModal.vue'

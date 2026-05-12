@@ -213,7 +213,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/api/axios';
 import { useNotifications } from '@/composables/useNotifications';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore } from '@/stores/authStore';
 
 const props = defineProps({
   tache: {

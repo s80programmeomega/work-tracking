@@ -1,7 +1,7 @@
 // resources/js/composables/useProjets.js
 import { ref, computed } from 'vue'
 import { useToast } from '@/composables/useToast'
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore } from '@/stores/authStore'
 import api from '@/api/axios'
 
 export function useProjets() {

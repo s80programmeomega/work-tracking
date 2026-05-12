@@ -1,6 +1,6 @@
 // resources/js/composables/useActivityPermissions.js - VERSION OPTIMISÉE
 import { computed } from 'vue'
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore } from '@/stores/authStore'
 
 /**
  * Composable pour gérer les permissions des activités

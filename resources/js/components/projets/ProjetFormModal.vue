@@ -275,7 +275,7 @@
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useProjets } from '@/composables/useProjets'
 import { useWorkspace } from '@/composables/useWorkspace'
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore } from '@/stores/authStore'
 import { XIcon, CalendarIcon } from '@/icons'
 import DatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
@@ -452,6 +452,7 @@ const handleSubmit = async () => {
       toast.success('✅ Projet créé avec succès !', { position: 'top-right', timeout: 4000 })
     }
     emit('saved')
+    emit('close') // Always close the modal after a successful save
 
   } catch (err) {
     if (err.response?.status === 422) {

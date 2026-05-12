@@ -311,7 +311,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore } from '@/stores/authStore'
 import FullScreenLayout from '@/components/layout/FullScreenLayout.vue'
 import axios from 'axios'
 

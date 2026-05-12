@@ -27,13 +27,17 @@ export const useAuthStore = defineStore('auth', {
         tokenExpiry: null,
         refreshInterval: null,
 
-        // ⭐ NOUVEAU: Gestion du timeout d'inactivité
-        inactivityTimeout: 60 * 60 * 1000, // 60 minutes par défaut
+        // Workspace state lives here so it is automatically cleared on logout
+        // alongside the user session — preventing stale data leaking between users
+        workspaces: [],
+        currentWorkspace: null,
+
+        // Inactivity timeout management
+        inactivityTimeout: 60 * 60 * 1000, // 60 minutes by default
         inactivityTimer: null,
         lastActivity: Date.now(),
-        warningTime: 5 * 60 * 1000, // 5 minutes avant déconnexion
+        warningTime: 5 * 60 * 1000, // warn 5 minutes before logout
         warningShown: false,
-
     }),
 
     getters: {
@@ -89,26 +93,17 @@ export const useAuthStore = defineStore('auth', {
         },
 
         /**
-         * ✅ Workspace actuel
+         * Current workspace — sourced from Pinia state (not user object)
+         * so it updates reactively when useWorkspace sets it
          */
-        currentWorkspace: (state) => {
-            if (!state.user) return null;
-            return state.user.current_workspace;
-        },
+        currentWorkspace: (state) => state.currentWorkspace,
 
-        currentWorkspaceId: (state) => {
-            if (!state.user) return null;
-            return state.user.current_workspace_id;
-        },
+        currentWorkspaceId: (state) => state.currentWorkspace?.id || state.user?.current_workspace_id || null,
 
         /**
-         * ✅ Liste des workspaces accessibles
+         * All workspaces the user has access to — sourced from Pinia state
          */
-        userWorkspaces: (state) => {
-            if (!state.user) return [];
-            if (!Array.isArray(state.user.workspaces)) return [];
-            return state.user.workspaces;
-        },
+        userWorkspaces: (state) => state.workspaces,
 
         /**
          * ✅ Informations utilisateur
@@ -622,7 +617,8 @@ export const useAuthStore = defineStore('auth', {
             this.error = null;
             try {
                 const response = await authAPI.register(data);
-                router.push('/signin');
+                // Pass success flag via query so Signin page can display a confirmation message
+                router.push({ path: '/signin', query: { registered: '1' } });
                 return response.data;
             } catch (error) {
                 this.error = error.response?.data?.message || 'Registration failed';
@@ -638,14 +634,31 @@ export const useAuthStore = defineStore('auth', {
         async login(credentials) {
             this.loading = true;
             this.error = null;
+
+            // Clear any stale user data from a previous session immediately,
+            // so the UI never shows another user's data while the API call is in flight
+            this.user = null;
+            this.isAuthenticated = false;
+            localStorage.removeItem('user');
+
             try {
+                await axios.get('/sanctum/csrf-cookie').catch(() => {});
+
                 const response = await authAPI.login(credentials);
-                const { user, token, expires_at } = response.data.data;
+                const data = response.data?.data ?? response.data;
+
+                // Flexible response parsing
+                const token = data.token || data.access_token;
+                const user = data.user;
+
+                if (!token || !user) {
+                    throw new Error('Invalid auth response from API');
+                }
 
                 this.user = user;
                 this.token = token;
                 this.isAuthenticated = true;
-                this.tokenExpiry = expires_at ? new Date(expires_at).getTime() : null;
+                this.tokenExpiry = data.expires_at ? new Date(data.expires_at).getTime() : null;
 
                 localStorage.setItem('user', JSON.stringify(user));
                 localStorage.setItem('auth_token', token);
@@ -653,23 +666,10 @@ export const useAuthStore = defineStore('auth', {
 
                 this.setAxiosToken(token);
 
-                // Mise à jour de la langue
                 if (user.language) this.setLanguage(user.language);
 
-                // Auto refresh token
-                if (expires_at) {
-                    this.startTokenAutoRefresh();
-                }
+                if (this.tokenExpiry) this.startTokenAutoRefresh();
 
-                console.log('✅ Connexion réussie:', {
-                    user: user.nom || user.email,
-                    role: user.role,
-                    roleLevel: this.roleLevel,
-                    isSuperAdmin: this.isSuperAdmin,
-                    workspaces: user.workspaces?.length || 0
-                });
-
-                // Redirection après login
                 const invitationToken = router.currentRoute.value.query.invitation;
                 if (invitationToken) {
                     router.push(`/accept-invitation/${invitationToken}`);
@@ -679,8 +679,7 @@ export const useAuthStore = defineStore('auth', {
 
                 return response.data;
             } catch (error) {
-                console.error('❌ Erreur login:', error);
-                this.error = error.response?.data?.message || 'Login failed';
+                this.error = error.response?.data?.message || error.message || 'Login failed';
                 setTimeout(() => (this.error = null), 5000);
                 throw error;
             } finally {
@@ -713,22 +712,32 @@ export const useAuthStore = defineStore('auth', {
         },
 
        clearAuth() {
-            // ⭐ Nettoyer les timers
+            // Stop all timers
             if (this.inactivityTimer) {
                 clearTimeout(this.inactivityTimer);
                 this.inactivityTimer = null;
             }
-            
+
             this.hideTimeoutWarning();
             this.warningShown = false;
-            
+
+            // Clear user session state
             this.user = null;
             this.token = null;
             this.isAuthenticated = false;
             this.tokenExpiry = null;
+
+            // Clear workspace state — this is the key fix that prevents
+            // stale workspace data from leaking into the next user's session
+            this.workspaces = [];
+            this.currentWorkspace = null;
+
             this.stopTokenAutoRefresh();
+
             localStorage.removeItem('user');
             localStorage.removeItem('auth_token');
+            localStorage.removeItem('current_workspace_id');
+
             this.setAxiosToken(null);
         },
 
@@ -736,37 +745,34 @@ export const useAuthStore = defineStore('auth', {
         // RÉCUPÉRATION USER
         // ==========================================
         async fetchUser() {
-            if (!this.token) {
-                console.warn('⚠️ Pas de token, impossible de charger l\'utilisateur');
-                return;
-            }
+            if (!this.token) return;
 
             this.loading = true;
             try {
                 const response = await authAPI.getUser();
-                this.user = response.data.data || response.data;
+                // Handle both { data: user } and { data: { data: user } } response shapes
+                this.user = response.data?.data ?? response.data;
+                this.isAuthenticated = true;
                 localStorage.setItem('user', JSON.stringify(this.user));
 
-                if (this.user.language) {
-                    this.setLanguage(this.user.language);
-                }
+                if (this.user.language) this.setLanguage(this.user.language);
 
-                console.log('✅ Utilisateur chargé:', {
-                    user: this.user.nom || this.user.email,
-                    role: this.user.role,
-                    roleLevel: this.roleLevel,
-                    isSuperAdmin: this.isSuperAdmin,
-                    workspaces: this.user.workspaces?.length || 0
-                });
+                return this.user;
             } catch (error) {
-                console.error('❌ Erreur fetchUser:', error);
-
-                // Si 401, déconnecter
-                if (error.response?.status === 401) {
-                    await this.logout();
+                // On failure, attempt one token refresh then retry the fetch
+                // This handles expired tokens without forcing the user to re-login
+                try {
+                    await this.refreshToken();
+                    const response2 = await authAPI.getUser();
+                    this.user = response2.data?.data ?? response2.data;
+                    this.isAuthenticated = true;
+                    localStorage.setItem('user', JSON.stringify(this.user));
+                    return this.user;
+                } catch {
+                    // If refresh also fails, logout on 401
+                    if (error.response?.status === 401) await this.logout();
+                    throw error;
                 }
-
-                throw error;
             } finally {
                 this.loading = false;
             }
@@ -778,14 +784,19 @@ export const useAuthStore = defineStore('auth', {
         async refreshToken() {
             try {
                 const response = await authAPI.refreshToken();
-                const { token, expires_at } = response.data.data;
+                const data = response.data?.data ?? response.data;
+                // Accept both token shapes from the API
+                const token = data.token || data.access_token;
+                const expires_at = data.expires_at;
+
                 this.token = token;
                 this.tokenExpiry = expires_at ? new Date(expires_at).getTime() : null;
                 localStorage.setItem('auth_token', token);
                 this.setAxiosToken(token);
-                console.log('✅ Token rafraîchi');
+
+                // Reschedule next refresh based on new expiry
+                this.startTokenAutoRefresh();
             } catch (error) {
-                console.error('❌ Erreur refresh token:', error);
                 await this.logout();
                 throw error;
             }
@@ -794,31 +805,24 @@ export const useAuthStore = defineStore('auth', {
         startTokenAutoRefresh() {
             this.stopTokenAutoRefresh();
 
-            if (!this.tokenExpiry) {
-                console.warn('⚠️ Pas de tokenExpiry, auto-refresh désactivé');
-                return;
-            }
+            if (!this.tokenExpiry) return;
 
-            const refreshBefore = 60 * 1000; // 1 min avant expiration
+            // Use setTimeout instead of setInterval to avoid drift:
+            // schedule exactly 1 minute before the token expires
+            const refreshBeforeMs = 60 * 1000;
+            const delay = Math.max(1000, this.tokenExpiry - Date.now() - refreshBeforeMs);
 
-            this.refreshInterval = setInterval(() => {
-                if (!this.tokenExpiry) return;
-
-                const now = Date.now();
-                const timeUntilExpiry = this.tokenExpiry - now;
-
-                if (timeUntilExpiry <= refreshBefore) {
-                    console.log('🔄 Rafraîchissement automatique du token...');
-                    this.refreshToken();
-                }
-            }, 30 * 1000); // vérifie toutes les 30 sec
-
-            console.log('✅ Auto-refresh token activé');
+            this.refreshInterval = setTimeout(() => {
+                this.refreshToken().catch(() => {
+                    // refreshToken already calls logout on failure
+                });
+            }, delay);
         },
 
         stopTokenAutoRefresh() {
             if (this.refreshInterval) {
-                clearInterval(this.refreshInterval);
+                // Works for both setTimeout and setInterval
+                clearTimeout(this.refreshInterval);
                 this.refreshInterval = null;
             }
         },

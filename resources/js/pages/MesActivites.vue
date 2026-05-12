@@ -318,7 +318,7 @@ import { useActivites } from '@/composables/useActivites'
 import { useProjets } from '@/composables/useProjets'
 import { useWorkspace } from '@/composables/useWorkspace'
 
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore } from '@/stores/authStore'
 const authStore = useAuthStore()
 
 

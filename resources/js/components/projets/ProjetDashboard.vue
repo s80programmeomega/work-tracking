@@ -513,6 +513,12 @@ const closeFormModal = () => {
   showFormModal.value = false
   selectedProjet.value = null
 }
+
+// Refresh project list after a project is created or updated
+const handleProjetSaved = () => {
+  closeFormModal()
+  refreshData()
+}
 const refreshData = async () => {
   await Promise.all([
     fetchDashboardStats(),

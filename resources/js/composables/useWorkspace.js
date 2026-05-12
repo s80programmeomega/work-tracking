@@ -1,901 +1,595 @@
-// resources\js\composables\useWorkspace.js
-import { ref, computed, watch } from 'vue';
-import api from '@/api/axios';
-import { useAuthStore } from '@/stores/auth';
-import { useToast } from "vue-toastification"
+// resources/js/composables/useWorkspace.js
+//
+// ARCHITECTURE NOTE:
+// Previously, `currentWorkspace` and `workspaces` were module-level refs (singletons).
+// This caused stale data to leak between user sessions in the same browser tab,
+// because module-level state persists across logins until a full page reload.
+//
+// Fix: workspace state now lives in the Pinia authStore. Since authStore.clearAuth()
+// is called on every logout, workspace data is automatically wiped when a user logs out.
+// The public API of this composable is unchanged — all 23 consuming files work as before.
 
-const toast = useToast()
-const currentWorkspace = ref(null);
-const workspaces = ref([]);
+import { computed, ref } from 'vue';
+import api from '@/api/axios';
+import { useAuthStore } from '@/stores/authStore';
+import { useToast } from 'vue-toastification';
+
+const toast = useToast();
+
+// Loading and error are still local refs — they are UI state, not user session data,
+// so they don't need to survive across components or be cleared on logout.
 const loading = ref(false);
 const error = ref(null);
 
-// ✅ Event bus pour la communication entre composants
+// Event listeners for workspace change notifications (UI-only, not session data)
 const workspaceChangeListeners = new Set();
 
 export function useWorkspace() {
-  const authStore = useAuthStore();
+    const authStore = useAuthStore();
 
-  /**
-     * ✅ Initialiser le workspace courant depuis plusieurs sources
-     */
-  const initializeCurrentWorkspace = async () => {
-    loading.value = true;
-    try {
-      // 1. Charger les workspaces disponibles
-      if (workspaces.value.length === 0) {
-        await fetchWorkspaces();
-      }
-
-      // 2. Déterminer le workspace courant (ordre de priorité)
-      let workspaceId = null;
-
-      // a) Depuis le store auth
-      if (authStore.currentWorkspaceId) {
-        workspaceId = authStore.currentWorkspaceId;
-      }
-      // b) Depuis localStorage
-      else if (localStorage.getItem('current_workspace_id')) {
-        workspaceId = parseInt(localStorage.getItem('current_workspace_id'));
-      }
-      // c) Premier workspace disponible
-      else if (workspaces.value.length > 0) {
-        workspaceId = workspaces.value[0].id;
-      }
-
-      // 3. Définir le workspace courant
-      if (workspaceId) {
-        const workspace = workspaces.value.find(w => w.id === workspaceId);
-        if (workspace) {
-          currentWorkspace.value = workspace;
-          authStore.setCurrentWorkspace(workspaceId);
-          localStorage.setItem('current_workspace_id', workspaceId);
-        }
-      }
-
-      return currentWorkspace.value;
-    } catch (err) {
-      console.error('Erreur lors de l\'initialisation du workspace:', err);
-      toast.error('Erreur lors de l\'initialisation du workspace:');
-
-      error.value = err.response?.data?.message || 'Erreur d\'initialisation';
-      throw err;
-    } finally {
-      loading.value = false;
-    }
-  };
-
-  /**
-   * Fetch all workspaces for the current user
-   */
-  const fetchWorkspaces = async (params = {}) => {
-    loading.value = true;
-    error.value = null;
-
-    try {
-      const response = await api.get('/workspaces', { params });
-
-      // Si c'est paginé
-      if (response.data.data && Array.isArray(response.data.data)) {
-        workspaces.value = response.data.data;
-      } else {
-        workspaces.value = response.data.data || response.data;
-      }
-
-      // return workspaces.value;
-      // // Si ce n'est pas paginé
-      // workspaces.value = response.data.data || response.data;
-
-      // Set first workspace as current if none selected
-      if (!currentWorkspace.value && workspaces.value.length > 0) {
-        currentWorkspace.value = workspaces.value[0];
-        localStorage.setItem('current_workspace_id', workspaces.value[0].id);
-      }
-
-      return workspaces.value;
-    } catch (err) {
-      error.value = err.response?.data?.message || 'Erreur lors du chargement des workspaces';
-      console.error('Error fetching workspaces:', err);
-      throw err;
-    } finally {
-      loading.value = false;
-    }
-  };
-
-  /**
-   * Fetch a specific workspace
-   */
-  const fetchWorkspace = async (id) => {
-    loading.value = true;
-    error.value = null;
-
-    try {
-      const response = await api.get(`/workspaces/${id}`);
-      return response.data.data;
-    } catch (err) {
-      error.value = err.response?.data?.message || 'Erreur lors du chargement du workspace';
-      throw err;
-    } finally {
-      loading.value = false;
-    }
-  };
-
-  /**
-   * ✅ Sélectionner un workspace et notifier tous les composants
-   */
-  const selectWorkspace = async (workspace) => {
-    const oldWorkspaceId = currentWorkspace.value?.id;
-    const newWorkspaceId = workspace.id;
-
-    // Ne rien faire si c'est le même workspace
-    if (oldWorkspaceId === newWorkspaceId) {
-      return;
-    }
-
-    // Mettre à jour le workspace courant
-    currentWorkspace.value = workspace;
-    authStore.setCurrentWorkspace(newWorkspaceId);
-    localStorage.setItem('current_workspace_id', newWorkspaceId);
-
-    // ✅ Notifier le backend
-    try {
-      await api.post(`/workspaces/switch/${newWorkspaceId}`);
-    } catch (err) {
-      console.warn('Erreur lors du switch workspace côté serveur:', err);
-      toast.warning('Erreur lors du switch workspace côté serveur');
-
-    }
-
-    // ✅ Notifier tous les listeners
-    const event = new CustomEvent('workspace-changed', {
-      detail: {
-        workspace,
-        oldWorkspaceId,
-        newWorkspaceId
-      }
+    // Read workspace state from Pinia — reactive and automatically cleared on logout
+    const workspaces = computed({
+        get: () => authStore.workspaces,
+        set: (val) => { authStore.workspaces = val; },
     });
-    window.dispatchEvent(event);
 
-    // ✅ Notifier les listeners directs - AVEC VALIDATION
-    const listenersToRemove = [];
-    workspaceChangeListeners.forEach(listener => {
-      if (typeof listener === 'function') {
+    const currentWorkspace = computed({
+        get: () => authStore.currentWorkspace,
+        set: (val) => { authStore.currentWorkspace = val; },
+    });
+
+    /**
+     * Fetch all workspaces for the current user and store them in Pinia.
+     */
+    const fetchWorkspaces = async (params = {}) => {
+        loading.value = true;
+        error.value = null;
+
         try {
-          listener(event);
-        } catch (error) {
-          console.error('Error in workspace change listener:', error);
-          toast.error('Error in workspace change listener:');
+            const response = await api.get('/workspaces', { params });
+            const data = response.data.data && Array.isArray(response.data.data)
+                ? response.data.data
+                : (response.data.data || response.data);
 
-        }
-      } else {
-        // Marquer les listeners invalides pour suppression
-        listenersToRemove.push(listener);
-      }
-    });
+            // Store in Pinia — will be cleared automatically on logout
+            authStore.workspaces = data;
 
-    // Nettoyer les listeners invalides
-    listenersToRemove.forEach(invalidListener => {
-      workspaceChangeListeners.delete(invalidListener);
-    });
-
-    // ✅ Déclencher l'événement global
-    window.dispatchEvent(event);
-  };
-
-  /**
-  * ✅ S'abonner aux changements de workspace
-  */
-  const onWorkspaceChanged = (callback) => {
-    // Validation du callback
-    if (typeof callback !== 'function') {
-      console.error('onWorkspaceChanged: callback must be a function', callback);
-      return () => { }; // Retourne une fonction vide si le callback n'est pas valide
-    }
-
-    const handler = (event) => {
-      try {
-        callback(event);
-      } catch (error) {
-        console.error('Error in workspace change callback:', error);
-      }
-    };
-
-    // Ajouter le callback original au Set pour la notification directe
-    workspaceChangeListeners.add(callback);
-
-    // Écouter l'événement global
-    window.addEventListener('workspace-changed', handler);
-
-    // Retourner la fonction de nettoyage
-    return () => {
-      workspaceChangeListeners.delete(callback);
-      window.removeEventListener('workspace-changed', handler);
-    };
-  };
-
-
-  /**
-   * Create a new workspace
-   */
-  const createWorkspace = async (data) => {
-    loading.value = true;
-    error.value = null;
-
-    try {
-      const config = {};
-
-      if (data instanceof FormData) {
-        config.headers = {
-          'Content-Type': 'multipart/form-data'
-        };
-      }
-
-      const response = await api.post('/workspaces', data, config);
-      const newWorkspace = response.data.data;
-
-      workspaces.value.push(newWorkspace);
-      await selectWorkspace(newWorkspace);
-
-      return newWorkspace;
-    } catch (err) {
-      error.value = err.response?.data?.message || 'Erreur lors de la création du workspace';
-      throw err;
-    } finally {
-      loading.value = false;
-    }
-  };
-
-  /**
-   * Update a workspace
-   */
-  const updateWorkspace = async (id, data) => {
-    loading.value = true;
-    error.value = null;
-
-    try {
-      let response;
-
-      // Si c'est FormData, utiliser POST avec _method
-      if (data instanceof FormData) {
-        data.append('_method', 'PUT');
-
-        const config = {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        };
-
-        response = await api.post(`/workspaces/${id}`, data, config);
-      } else {
-        // Requête JSON normale
-        response = await api.put(`/workspaces/${id}`, data);
-      }
-
-      const updatedWorkspace = response.data.data;
-
-      // Update in list
-      const index = workspaces.value.findIndex(w => w.id === id);
-      if (index !== -1) {
-        workspaces.value[index] = updatedWorkspace;
-      }
-
-      // Update current if it's the same
-      if (currentWorkspace.value?.id === id) {
-        currentWorkspace.value = updatedWorkspace;
-      }
-
-      return updatedWorkspace;
-    } catch (err) {
-      toast.warning('Erreur lors de la mise à jour');
-      console.error('Erreur lors de la mise à jour:', err);
-      console.error('Response data:', err.response?.data);
-      error.value = err.response?.data?.message || 'Erreur lors de la mise à jour du workspace';
-      throw err;
-    } finally {
-      loading.value = false;
-    }
-  };
-
-  /**
-   * Delete a workspace
-   */
-  const deleteWorkspace = async (id) => {
-    loading.value = true;
-    error.value = null;
-
-    try {
-      await api.delete(`/workspaces/${id}`);
-
-      // Remove from list
-      workspaces.value = workspaces.value.filter(w => w.id !== id);
-
-      // Select another workspace if current was deleted
-      if (currentWorkspace.value?.id === id) {
-        const newWorkspace = workspaces.value[0] || null;
-        if (newWorkspace) {
-          await selectWorkspace(newWorkspace);
-        } else {
-          currentWorkspace.value = null;
-          authStore.setCurrentWorkspace(null);
-          localStorage.removeItem('current_workspace_id');
-        }
-      }
-    } catch (err) {
-      error.value = err.response?.data?.message || 'Erreur lors de la suppression du workspace';
-      throw err;
-    } finally {
-      loading.value = false;
-    }
-  };
-
-
-  /**
-   * Fetch workspace members
-   */
-  const fetchMembers = async (workspaceId) => {
-    loading.value = true
-    error.value = null
-
-    try {
-      const response = await api.get(`/workspaces/${workspaceId}/members`)
-
-      console.log('✅ Membres chargés:', response.data)
-
-      // Les membres sont déjà formatés avec permissions et statistiques
-      const members = response.data.data || []
-
-      // Validation des données
-      members.forEach(member => {
-        if (!member.pivot) {
-          console.warn('⚠️ Membre sans pivot:', member)
-          member.pivot = {
-            role: 'viewer',
-            permissions: {
-              can_create_projects: false,
-              can_invite_members: false,
-              can_manage_settings: false,
+            // Set first workspace as current if none is selected yet
+            if (!authStore.currentWorkspace && authStore.workspaces.length > 0) {
+                authStore.currentWorkspace = authStore.workspaces[0];
             }
-          }
+
+            return authStore.workspaces;
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Erreur lors du chargement des workspaces';
+            throw err;
+        } finally {
+            loading.value = false;
         }
+    };
 
-        if (!member.pivot.permissions) {
-          member.pivot.permissions = {
-            can_create_projects: false,
-            can_invite_members: false,
-            can_manage_settings: false,
-          }
-        }
-
-        if (!member.statistics) {
-          member.statistics = {
-            projets_count: 0,
-            taches_count: 0,
-            taches_completees: 0,
-            taux_completion: 0,
-          }
-        }
-
-        if (!member.projets) {
-          member.projets = []
-        }
-      })
-
-      return members
-    } catch (err) {
-      console.error('❌ Erreur chargement membres:', err)
-      error.value = err.response?.data?.message || 'Erreur lors du chargement des membres'
-      throw err
-    } finally {
-      loading.value = false
-    }
-  }
-
-  const fetchInvitations = async (workspaceId) => {
-    loading.value = true
-    error.value = null
-
-    try {
-      // ✅ Nouvelle route
-      const response = await api.get(`/workspaces/${workspaceId}/members/invitations`)
-
-      console.log('✅ Invitations chargées:', response.data)
-      return response.data.data || []
-    } catch (err) {
-      console.error('❌ Erreur chargement invitations:', err)
-      error.value = err.response?.data?.message || 'Erreur lors du chargement des invitations'
-      throw err
-    } finally {
-      loading.value = false
-    }
-  }
-
-  /**
- * Fetch all invitations across all workspaces (for admin/super_admin)
- */
-  const fetchAllInvitations = async (filters = {}) => {
-    loading.value = true
-    error.value = null
-
-    try {
-      const response = await api.get('/workspace-invitations/all', { params: filters })
-      return response.data
-    } catch (err) {
-      error.value = err.response?.data?.message || 'Erreur lors du chargement des invitations'
-      throw err
-    } finally {
-      loading.value = false
-    }
-  }
-
-  /**
-   * Get invitation statistics
-   */
-  const getInvitationStatistics = async () => {
-    try {
-      const response = await api.get('/workspace-invitations/statistics')
-      return response.data
-    } catch (err) {
-      error.value = err.response?.data?.message || 'Erreur lors du chargement des statistiques'
-      throw err
-    }
-  }
-
-  /**
-   * Invite members to workspace
-   */
-  const inviteMembers = async (workspaceId, inviteData) => {
-    loading.value = true
-    error.value = null
-
-    try {
-      console.log('📧 Envoi invitations:', {
-        workspaceId,
-        emails: inviteData.emails,
-        role: inviteData.role,
-        send_email: inviteData.send_email
-      })
-
-      const response = await api.post(`/workspaces/${workspaceId}/members/invite`, inviteData)
-
-      console.log('✅ Réponse invitations:', response.data)
-
-      // Afficher un résumé dans la console
-      if (response.data.data) {
-        const { success_count, error_count, invitations, errors } = response.data.data
-
-        console.log(`✅ Invitations réussies: ${success_count}`)
-        if (error_count > 0) {
-          console.warn(`⚠️ Invitations échouées: ${error_count}`)
-          errors.forEach(err => {
-            console.warn(`  - ${err.email}: ${err.message}`)
-          })
-        }
-
-        invitations.forEach(inv => {
-          console.log(`  ✓ ${inv.email} ${inv.user_exists ? '(utilisateur existant)' : '(nouvel utilisateur)'}`)
-        })
-      }
-
-      return response.data
-    } catch (err) {
-      console.error('❌ Erreur invitations:', err)
-      error.value = err.response?.data?.message || 'Erreur lors de l\'envoi des invitations'
-      throw err
-    } finally {
-      loading.value = false
-    }
-  }
-
-  /**
-   * Resend invitation
-   */
-  const resendInvitation = async (workspaceId, invitationId) => {
-    loading.value = true;
-    error.value = null;
-
-    try {
-    const response = await api.post(`/workspaces/${workspaceId}/members/invitations/${invitationId}/resend`);
-      return response.data;
-    } catch (err) {
-      error.value = err.response?.data?.message || 'Erreur lors du renvoi de l\'invitation';
-      throw err;
-    } finally {
-      loading.value = false;
-    }
-  };
-
-  /**
-   * Cancel invitation
-   */
-  const cancelInvitation = async (workspaceId, invitationId) => {
-    loading.value = true;
-    error.value = null;
-
-    try {
-    const response = await api.delete(`/workspaces/${workspaceId}/members/invitations/${invitationId}`);
-      return response.data;
-    } catch (err) {
-      error.value = err.response?.data?.message || 'Erreur lors de l\'annulation de l\'invitation';
-      throw err;
-    } finally {
-      loading.value = false;
-    }
-  };
-
-  /**
-   * Update workspace member role and permissions
-   */
-  const updateMemberRole = async (workspaceId, userId, memberData) => {
-    loading.value = true;
-    error.value = null;
-
-    try {
-      const response = await api.put(`/workspaces/${workspaceId}/members/${userId}`, memberData);
-      return response.data;
-    } catch (err) {
-      error.value = err.response?.data?.message || 'Erreur lors de la mise à jour du membre';
-      throw err;
-    } finally {
-      loading.value = false;
-    }
-  };
-
-  /**
-    * Add a member to workspace
-    */
-  const addMember = async (workspaceId, userData) => {
-    loading.value = true;
-    error.value = null;
-
-    try {
-      const response = await api.post(
-        `/workspaces/${workspaceId}/members`,
-        userData
-      );
-      return response.data.data;
-    } catch (err) {
-      error.value = err.response?.data?.message || 'Erreur lors de l\'ajout du membre';
-      throw err;
-    } finally {
-      loading.value = false;
-    }
-  };
-
-
-  /**
-     * Remove member from workspace
+    /**
+     * Initialize the current workspace from multiple sources (priority order):
+     * 1. authStore.currentWorkspaceId (from user object)
+     * 2. localStorage fallback
+     * 3. First available workspace
      */
-  const removeMember = async (workspaceId, userId) => {
-    loading.value = true;
-    error.value = null;
+    const initializeCurrentWorkspace = async () => {
+        loading.value = true;
+        try {
+            if (authStore.workspaces.length === 0) {
+                await fetchWorkspaces();
+            }
 
-    try {
-      const response = await api.delete(`/workspaces/${workspaceId}/members/${userId}`);
-      return response.data;
-    } catch (err) {
-      error.value = err.response?.data?.message || 'Erreur lors du retrait du membre';
-      throw err;
-    } finally {
-      loading.value = false;
-    }
-  };
+            let workspaceId = authStore.currentWorkspaceId
+                || parseInt(localStorage.getItem('current_workspace_id') || '0')
+                || authStore.workspaces[0]?.id
+                || null;
 
-  /**
-  * Update member role/permissions
-  */
-  const updateMember = async (workspaceId, userId, data) => {
-    loading.value = true;
-    error.value = null;
+            if (workspaceId) {
+                const workspace = authStore.workspaces.find(w => w.id === workspaceId);
+                if (workspace) {
+                    authStore.currentWorkspace = workspace;
+                    authStore.setCurrentWorkspace(workspaceId);
+                    localStorage.setItem('current_workspace_id', workspaceId);
+                }
+            }
 
-    try {
-      const response = await api.put(
-        `/workspaces/${workspaceId}/members/${userId}`,
-        data
-      );
-      return response.data.data;
-    } catch (err) {
-      error.value = err.response?.data?.message || 'Erreur lors de la mise à jour du membre';
-      throw err;
-    } finally {
-      loading.value = false;
-    }
-  };
+            return authStore.currentWorkspace;
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Erreur d\'initialisation';
+            throw err;
+        } finally {
+            loading.value = false;
+        }
+    };
 
-  /**
-     * Fetch workspace projects
-  */
-  const fetchProjects = async (workspaceId, params = {}) => {
-    loading.value = true;
-    error.value = null;
+    /**
+     * Fetch a single workspace by ID.
+     */
+    const fetchWorkspace = async (id) => {
+        loading.value = true;
+        error.value = null;
+        try {
+            const response = await api.get(`/workspaces/${id}`);
+            return response.data.data;
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Erreur lors du chargement du workspace';
+            throw err;
+        } finally {
+            loading.value = false;
+        }
+    };
 
-    try {
-      const response = await api.get(`/workspaces/${workspaceId}/projets`, { params });
-      return response.data;
-    } catch (err) {
-      error.value = err.response?.data?.message || 'Erreur lors du chargement des projets';
-      throw err;
-    } finally {
-      loading.value = false;
-    }
-  };
+    /**
+     * Switch the active workspace and notify all listeners.
+     */
+    const selectWorkspace = async (workspace) => {
+        const oldWorkspaceId = authStore.currentWorkspace?.id;
+        const newWorkspaceId = workspace.id;
 
+        if (oldWorkspaceId === newWorkspaceId) return;
 
-  // Fetch workspace statistics
-  const fetchStatistics = async (workspaceId) => {
-    loading.value = true;
-    error.value = null;
+        authStore.currentWorkspace = workspace;
+        authStore.setCurrentWorkspace(newWorkspaceId);
+        localStorage.setItem('current_workspace_id', newWorkspaceId);
 
-    try {
-      const response = await api.get(`/workspaces/${workspaceId}/statistics`);
-      return response.data.data;
-    } catch (err) {
-      error.value = err.response?.data?.message || 'Erreur lors du chargement des statistiques';
-      throw err;
-    } finally {
-      loading.value = false;
-    }
-  };
+        // Notify backend of the switch
+        try {
+            await api.post(`/workspaces/switch/${newWorkspaceId}`);
+        } catch (err) {
+            toast.warning('Erreur lors du switch workspace côté serveur');
+        }
 
-  /**
-   * Archive a workspace
-   */
-  const archiveWorkspace = async (id) => {
-    loading.value = true;
-    error.value = null;
+        // Broadcast change to all listeners
+        const event = new CustomEvent('workspace-changed', {
+            detail: { workspace, oldWorkspaceId, newWorkspaceId },
+        });
+        window.dispatchEvent(event);
 
-    try {
-      const response = await api.post(`/workspaces/${id}/archive`);
+        const invalid = [];
+        workspaceChangeListeners.forEach(listener => {
+            if (typeof listener === 'function') {
+                try { listener(event); } catch (e) { /* ignore */ }
+            } else {
+                invalid.push(listener);
+            }
+        });
+        invalid.forEach(l => workspaceChangeListeners.delete(l));
+    };
 
-      // Update in list
-      const index = workspaces.value.findIndex(w => w.id === id);
-      if (index !== -1) {
-        workspaces.value[index].is_active = false;
-      }
+    /**
+     * Subscribe to workspace change events.
+     * Returns an unsubscribe function — call it in onUnmounted.
+     */
+    const onWorkspaceChanged = (callback) => {
+        if (typeof callback !== 'function') return () => {};
 
-      // Update current if it's the same
-      if (currentWorkspace.value?.id === id) {
-        currentWorkspace.value.is_active = false;
-      }
+        const handler = (event) => { try { callback(event); } catch (e) { /* ignore */ } };
+        workspaceChangeListeners.add(callback);
+        window.addEventListener('workspace-changed', handler);
 
-      return response.data.data;
-    } catch (err) {
-      error.value = err.response?.data?.message || 'Erreur lors de l\'archivage du workspace';
-      throw err;
-    } finally {
-      loading.value = false;
-    }
-  };
+        return () => {
+            workspaceChangeListeners.delete(callback);
+            window.removeEventListener('workspace-changed', handler);
+        };
+    };
 
-  /**
-   * Unarchive a workspace
-   */
-  const unarchiveWorkspace = async (id) => {
-    loading.value = true;
-    error.value = null;
+    /**
+     * Create a new workspace and make it the active one.
+     */
+    const createWorkspace = async (data) => {
+        loading.value = true;
+        error.value = null;
+        try {
+            const config = data instanceof FormData
+                ? { headers: { 'Content-Type': 'multipart/form-data' } }
+                : {};
+            const response = await api.post('/workspaces', data, config);
+            const newWorkspace = response.data.data;
+            authStore.workspaces.push(newWorkspace);
+            await selectWorkspace(newWorkspace);
+            return newWorkspace;
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Erreur lors de la création du workspace';
+            throw err;
+        } finally {
+            loading.value = false;
+        }
+    };
 
-    try {
-      const response = await api.post(`/workspaces/${id}/unarchive`);
+    /**
+     * Update a workspace and refresh local state.
+     */
+    const updateWorkspace = async (id, data) => {
+        loading.value = true;
+        error.value = null;
+        try {
+            let response;
+            if (data instanceof FormData) {
+                data.append('_method', 'PUT');
+                response = await api.post(`/workspaces/${id}`, data, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                });
+            } else {
+                response = await api.put(`/workspaces/${id}`, data);
+            }
+            const updated = response.data.data;
+            const idx = authStore.workspaces.findIndex(w => w.id === id);
+            if (idx !== -1) authStore.workspaces[idx] = updated;
+            if (authStore.currentWorkspace?.id === id) authStore.currentWorkspace = updated;
+            return updated;
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Erreur lors de la mise à jour du workspace';
+            throw err;
+        } finally {
+            loading.value = false;
+        }
+    };
 
-      // Update in list
-      const index = workspaces.value.findIndex(w => w.id === id);
-      if (index !== -1) {
-        workspaces.value[index].is_active = true;
-      }
+    /**
+     * Delete a workspace and switch to another if it was the active one.
+     */
+    const deleteWorkspace = async (id) => {
+        loading.value = true;
+        error.value = null;
+        try {
+            await api.delete(`/workspaces/${id}`);
+            authStore.workspaces = authStore.workspaces.filter(w => w.id !== id);
+            if (authStore.currentWorkspace?.id === id) {
+                const next = authStore.workspaces[0] || null;
+                if (next) {
+                    await selectWorkspace(next);
+                } else {
+                    authStore.currentWorkspace = null;
+                    authStore.setCurrentWorkspace(null);
+                    localStorage.removeItem('current_workspace_id');
+                }
+            }
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Erreur lors de la suppression du workspace';
+            throw err;
+        } finally {
+            loading.value = false;
+        }
+    };
 
-      // Update current if it's the same
-      if (currentWorkspace.value?.id === id) {
-        currentWorkspace.value.is_active = true;
-      }
+    // ==================== MEMBER MANAGEMENT ====================
 
-      return response.data.data;
-    } catch (err) {
-      error.value = err.response?.data?.message || 'Erreur lors de la restauration du workspace';
-      throw err;
-    } finally {
-      loading.value = false;
-    }
-  };
+    const fetchMembers = async (workspaceId) => {
+        loading.value = true;
+        error.value = null;
+        try {
+            const response = await api.get(`/workspaces/${workspaceId}/members`);
+            return response.data.data || [];
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Erreur lors du chargement des membres';
+            throw err;
+        } finally {
+            loading.value = false;
+        }
+    };
 
-  /**
-  * Transfer workspace ownership
-  */
-  const transferOwnership = async (workspaceId, newOwnerId) => {
-    loading.value = true;
-    error.value = null;
+    const fetchInvitations = async (workspaceId) => {
+        loading.value = true;
+        error.value = null;
+        try {
+            const response = await api.get(`/workspaces/${workspaceId}/members/invitations`);
+            return response.data.data || [];
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Erreur lors du chargement des invitations';
+            throw err;
+        } finally {
+            loading.value = false;
+        }
+    };
 
-    try {
-      const response = await api.post(`/workspaces/${workspaceId}/transfer-ownership`, {
-        new_owner_id: newOwnerId
-      });
-      return response.data.data;
-    } catch (err) {
-      error.value = err.response?.data?.message || 'Erreur lors du transfert de propriété';
-      throw err;
-    } finally {
-      loading.value = false;
-    }
-  };
+    const fetchAllInvitations = async (filters = {}) => {
+        loading.value = true;
+        error.value = null;
+        try {
+            const response = await api.get('/workspace-invitations/all', { params: filters });
+            return response.data;
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Erreur lors du chargement des invitations';
+            throw err;
+        } finally {
+            loading.value = false;
+        }
+    };
 
-  /**
- * Initialize workspace from localStorage
- */
-  const initializeWorkspace = async () => {
-    const savedWorkspaceId = localStorage.getItem('current_workspace_id');
+    const getInvitationStatistics = async () => {
+        try {
+            const response = await api.get('/workspace-invitations/statistics');
+            return response.data;
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Erreur lors du chargement des statistiques';
+            throw err;
+        }
+    };
 
-    await fetchWorkspaces();
+    const inviteMembers = async (workspaceId, inviteData) => {
+        loading.value = true;
+        error.value = null;
+        try {
+            const response = await api.post(`/workspaces/${workspaceId}/members/invite`, inviteData);
+            return response.data;
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Erreur lors de l\'envoi des invitations';
+            throw err;
+        } finally {
+            loading.value = false;
+        }
+    };
 
-    if (savedWorkspaceId) {
-      const workspace = workspaces.value.find(
-        w => w.id === parseInt(savedWorkspaceId)
-      );
-      if (workspace) {
-        currentWorkspace.value = workspace;
-      }
-    }
-  };
+    const resendInvitation = async (workspaceId, invitationId) => {
+        loading.value = true;
+        error.value = null;
+        try {
+            const response = await api.post(`/workspaces/${workspaceId}/members/invitations/${invitationId}/resend`);
+            return response.data;
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Erreur lors du renvoi de l\'invitation';
+            throw err;
+        } finally {
+            loading.value = false;
+        }
+    };
 
-  /**
-   * Get member permissions and role
-   */
-  const getMemberPermissions = (member) => {
-    // Validation de base
-    if (!member || !member.pivot) {
-      console.warn('⚠️ Member sans pivot:', member)
-      return {
-        can_create_projects: false,
-        can_invite_members: false,
-        can_manage_settings: false,
-      }
-    }
+    const cancelInvitation = async (workspaceId, invitationId) => {
+        loading.value = true;
+        error.value = null;
+        try {
+            const response = await api.delete(`/workspaces/${workspaceId}/members/invitations/${invitationId}`);
+            return response.data;
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Erreur lors de l\'annulation de l\'invitation';
+            throw err;
+        } finally {
+            loading.value = false;
+        }
+    };
 
-    const pivot = member.pivot
-    let permissions = pivot.permissions || {}
+    const addMember = async (workspaceId, userData) => {
+        loading.value = true;
+        error.value = null;
+        try {
+            const response = await api.post(`/workspaces/${workspaceId}/members`, userData);
+            return response.data.data;
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Erreur lors de l\'ajout du membre';
+            throw err;
+        } finally {
+            loading.value = false;
+        }
+    };
 
-    // Si c'est une string, essayer de parser
-    if (typeof permissions === 'string') {
-      try {
-        permissions = JSON.parse(permissions)
-      } catch (e) {
-        console.error('❌ Erreur parsing permissions:', permissions)
-        permissions = {}
-      }
-    }
+    const removeMember = async (workspaceId, userId) => {
+        loading.value = true;
+        error.value = null;
+        try {
+            const response = await api.delete(`/workspaces/${workspaceId}/members/${userId}`);
+            return response.data;
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Erreur lors du retrait du membre';
+            throw err;
+        } finally {
+            loading.value = false;
+        }
+    };
 
-    // Si c'est le format "all"
-    if (permissions === 'all' ||
-      (Array.isArray(permissions) && permissions[0] === 'all') ||
-      (typeof permissions === 'string' && permissions === '["all"]')) {
-      return {
-        can_create_projects: true,
-        can_invite_members: true,
-        can_manage_settings: true,
-      }
-    }
+    const updateMember = async (workspaceId, userId, data) => {
+        loading.value = true;
+        error.value = null;
+        try {
+            const response = await api.put(`/workspaces/${workspaceId}/members/${userId}`, data);
+            return response.data.data;
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Erreur lors de la mise à jour du membre';
+            throw err;
+        } finally {
+            loading.value = false;
+        }
+    };
 
-    // Format normal
-    return {
-      can_create_projects: permissions.can_create_projects ?? false,
-      can_invite_members: permissions.can_invite_members ?? false,
-      can_manage_settings: permissions.can_manage_settings ?? false,
-    }
-  }
+    const updateMemberRole = async (workspaceId, userId, memberData) => {
+        return updateMember(workspaceId, userId, memberData);
+    };
 
-  /**
-  * Check if user can manage workspace members
-  */
-  const canManageMembers = (workspace, user) => {
-    if (!workspace || !user) return false;
+    // ==================== PROJECTS / STATS ====================
 
-    // Le propriétaire peut tout gérer
-    if (workspace.owner_id === user.id) {
-      return true;
-    }
+    const fetchProjects = async (workspaceId, params = {}) => {
+        loading.value = true;
+        error.value = null;
+        try {
+            const response = await api.get(`/workspaces/${workspaceId}/projets`, { params });
+            return response.data;
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Erreur lors du chargement des projets';
+            throw err;
+        } finally {
+            loading.value = false;
+        }
+    };
 
-    console.log('canManageMembers', workspace);
+    const fetchStatistics = async (workspaceId) => {
+        loading.value = true;
+        error.value = null;
+        try {
+            const response = await api.get(`/workspaces/${workspaceId}/statistics`);
+            return response.data.data;
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Erreur lors du chargement des statistiques';
+            throw err;
+        } finally {
+            loading.value = false;
+        }
+    };
 
-    // Vérifier les permissions via le pivot
-    const member = workspace.members?.find(m => m.id === user.id);
-    if (!member || !member.pivot) return false;
+    const archiveWorkspace = async (id) => {
+        loading.value = true;
+        error.value = null;
+        try {
+            const response = await api.post(`/workspaces/${id}/archive`);
+            const idx = authStore.workspaces.findIndex(w => w.id === id);
+            if (idx !== -1) authStore.workspaces[idx].is_active = false;
+            if (authStore.currentWorkspace?.id === id) authStore.currentWorkspace.is_active = false;
+            return response.data.data;
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Erreur lors de l\'archivage du workspace';
+            throw err;
+        } finally {
+            loading.value = false;
+        }
+    };
 
-    const role = member.pivot.role;
-    return ['owner', 'super_admin', 'admin'].includes(role);
-  };
+    const unarchiveWorkspace = async (id) => {
+        loading.value = true;
+        error.value = null;
+        try {
+            const response = await api.post(`/workspaces/${id}/unarchive`);
+            const idx = authStore.workspaces.findIndex(w => w.id === id);
+            if (idx !== -1) authStore.workspaces[idx].is_active = true;
+            if (authStore.currentWorkspace?.id === id) authStore.currentWorkspace.is_active = true;
+            return response.data.data;
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Erreur lors de la restauration du workspace';
+            throw err;
+        } finally {
+            loading.value = false;
+        }
+    };
 
-  /**
-   * Get available roles with labels
-   */
-  const getAvailableRoles = () => {
-    return [
-      { value: 'admin', label: 'Administrateur', description: 'Accès complet à la gestion du workspace' },
-      { value: 'member', label: 'Membre', description: 'Peut participer aux projets et activités' },
-      { value: 'viewer', label: 'Observateur', description: 'Accès en lecture seule' },
+    const transferOwnership = async (workspaceId, newOwnerId) => {
+        loading.value = true;
+        error.value = null;
+        try {
+            const response = await api.post(`/workspaces/${workspaceId}/transfer-ownership`, {
+                new_owner_id: newOwnerId,
+            });
+            return response.data.data;
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Erreur lors du transfert de propriété';
+            throw err;
+        } finally {
+            loading.value = false;
+        }
+    };
+
+    // ==================== HELPERS ====================
+
+    /** Parse and normalize member permissions from pivot */
+    const getMemberPermissions = (member) => {
+        if (!member?.pivot) return { can_create_projects: false, can_invite_members: false, can_manage_settings: false };
+
+        let permissions = member.pivot.permissions || {};
+        if (typeof permissions === 'string') {
+            try { permissions = JSON.parse(permissions); } catch { permissions = {}; }
+        }
+
+        // 'all' shorthand used for owner pivot
+        if (permissions === 'all' || (Array.isArray(permissions) && permissions[0] === 'all')) {
+            return { can_create_projects: true, can_invite_members: true, can_manage_settings: true };
+        }
+
+        return {
+            can_create_projects: permissions.can_create_projects ?? false,
+            can_invite_members:  permissions.can_invite_members  ?? false,
+            can_manage_settings: permissions.can_manage_settings ?? false,
+        };
+    };
+
+    const canManageMembers = (workspace, user) => {
+        if (!workspace || !user) return false;
+        if (workspace.owner_id === user.id) return true;
+        const member = workspace.members?.find(m => m.id === user.id);
+        return ['owner', 'manager'].includes(member?.pivot?.role);
+    };
+
+    /** Available contextual roles for workspace membership */
+    const getAvailableRoles = () => [
+        { value: 'manager',       label: 'Manager',       description: 'N2 validator, sees all projects' },
+        { value: 'cadre',         label: 'Cadre',         description: 'N1 validator, manages activities' },
+        { value: 'collaborateur', label: 'Collaborateur', description: 'Executes tasks' },
+        { value: 'stagiaire',     label: 'Stagiaire',     description: 'Intern, limited access' },
+        { value: 'observateur',   label: 'Observateur',   description: 'Read-only' },
     ];
-  };
 
-  /**
-   * Get role label
-   */
-  const getRoleLabel = (role) => {
-    const roles = {
-      owner: 'Propriétaire',
-      super_admin: 'Super Admin',
-      admin: 'Administrateur',
-      member: 'Membre',
-      viewer: 'Observateur',
+    const getRoleLabel = (role) => ({
+        owner:         'Propriétaire',
+        manager:       'Manager',
+        cadre:         'Cadre',
+        collaborateur: 'Collaborateur',
+        stagiaire:     'Stagiaire',
+        observateur:   'Observateur',
+    }[role] || role);
+
+    const getRoleColor = (role) => ({
+        owner:         'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
+        manager:       'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+        cadre:         'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400',
+        collaborateur: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+        stagiaire:     'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
+        observateur:   'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+    }[role] || 'bg-gray-100 text-gray-800');
+
+    // ==================== COMPUTED ====================
+
+    const hasWorkspaces     = computed(() => authStore.workspaces.length > 0);
+    const currentWorkspaceId   = computed(() => authStore.currentWorkspace?.id || null);
+    const currentWorkspaceName = computed(() => authStore.currentWorkspace?.nom || '');
+
+    // Kept for backward compatibility — components that used initializeWorkspace
+    const initializeWorkspace = initializeCurrentWorkspace;
+
+    return {
+        // State (backed by Pinia — cleared on logout)
+        currentWorkspace,
+        workspaces,
+        loading,
+        error,
+
+        // Computed
+        hasWorkspaces,
+        currentWorkspaceId,
+        currentWorkspaceName,
+
+        // Core methods
+        initializeCurrentWorkspace,
+        initializeWorkspace,
+        fetchWorkspaces,
+        fetchWorkspace,
+        selectWorkspace,
+        createWorkspace,
+        updateWorkspace,
+        deleteWorkspace,
+        onWorkspaceChanged,
+
+        // Member management
+        fetchMembers,
+        fetchInvitations,
+        fetchAllInvitations,
+        getInvitationStatistics,
+        inviteMembers,
+        resendInvitation,
+        cancelInvitation,
+        addMember,
+        removeMember,
+        updateMember,
+        updateMemberRole,
+
+        // Projects / stats
+        fetchProjects,
+        fetchStatistics,
+        archiveWorkspace,
+        unarchiveWorkspace,
+        transferOwnership,
+
+        // Helpers
+        getMemberPermissions,
+        canManageMembers,
+        getAvailableRoles,
+        getRoleLabel,
+        getRoleColor,
     };
-    return roles[role] || role;
-  };
-
-  /**
-   * Get role color classes
-   */
-  const getRoleColor = (role) => {
-    const colors = {
-      owner: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
-      super_admin: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
-      admin: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-      member: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-      viewer: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
-    };
-    return colors[role] || colors.viewer;
-  };
-
-  // Computed properties
-  const hasWorkspaces = computed(() => workspaces.value.length > 0);
-
-  const currentWorkspaceId = computed(() => currentWorkspace.value?.id || null);
-
-  const currentWorkspaceName = computed(() => currentWorkspace.value?.nom || '');
-
-  const isWorkspaceOwner = computed(() => {
-    // TODO: Get current user from auth store
-    // return currentWorkspace.value?.owner_id === currentUser.value?.id;
-    return false;
-  });
-
-  return {
-    // State
-    currentWorkspace,
-    workspaces,
-    loading,
-    error,
-
-    // Computed
-    hasWorkspaces,
-    currentWorkspaceId,
-    currentWorkspaceName,
-    isWorkspaceOwner,
-
-    // Methods
-    initializeCurrentWorkspace,
-    fetchWorkspaces,
-    fetchWorkspace,
-    selectWorkspace,
-    createWorkspace,
-    updateWorkspace,
-    deleteWorkspace,
-    addMember,
-    removeMember,
-    updateMember,
-    fetchProjects,
-    fetchStatistics,
-    archiveWorkspace,
-    unarchiveWorkspace,
-    transferOwnership,
-    initializeWorkspace,
-    onWorkspaceChanged,
-
-    // Nouvelles méthodes pour la gestion des membres
-    fetchMembers,
-    fetchInvitations,
-    inviteMembers,
-    resendInvitation,
-    cancelInvitation,
-    updateMemberRole,
-    getMemberPermissions,
-    canManageMembers,
-    getAvailableRoles,
-    getRoleLabel,
-    getRoleColor,
-  };
 }

@@ -643,58 +643,52 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
 
-  // Début du chargement
   isLoading.value = true
-
-  // Set document title
   document.title = `${to.meta.title || 'Dashboard'} | Work Tracking`
 
-  // Vérifier si l'utilisateur est connecté
   const isLoggedIn = authStore.isAuthenticated
 
   try {
-    // Routes protégées
     if (to.meta.requiresAuth) {
       if (!isLoggedIn) {
         isLoading.value = false
-        return next({
-          name: 'Signin',
-          query: { redirect: to.fullPath }
-        })
+        return next({ name: 'Signin', query: { redirect: to.fullPath } })
       }
 
-      // Charger l'utilisateur si nécessaire
-      if (isLoggedIn && !authStore.user) {
+      // Load user if not yet loaded
+      if (!authStore.user) {
         try {
           await authStore.fetchUser()
         } catch (error) {
-          console.error('Erreur chargement utilisateur:', error)
           isLoading.value = false
           return next({ name: 'Signin' })
         }
       }
+
+      // Redirect utilisateur (no workspace yet) to workspace creation,
+      // unless they're already heading there
+      const noWorkspace = !authStore.user?.current_workspace_id
+      const isHeadingToWorkspaceCreate = to.name === 'workspaces.create'
+      if (noWorkspace && !isHeadingToWorkspaceCreate && !authStore.user?.is_super_admin) {
+        isLoading.value = false
+        return next({ name: 'workspaces.create' })
+      }
     }
 
-    // Routes pour invités seulement
+    // Guest-only routes (signin, signup) redirect authenticated users to dashboard
     if (to.meta.guest && isLoggedIn) {
       isLoading.value = false
       return next({ name: 'Dashboard' })
     }
 
-    // Vérifier les rôles (décommenter si nécessaire)
-    // if (to.meta.roles && !authStore.hasAnyRole(to.meta.roles)) {
-    //   return next({ name: 'Unauthorized' })
-    // }
-
     next()
   } catch (error) {
-    console.error('Erreur navigation:', error)
     isLoading.value = false
     next({ name: 'Signin' })
   }
 })
 
-// Après chaque navigation
+// After each navigation
 router.afterEach(() => {
   loading.value = false
 })
@@ -702,33 +696,3 @@ router.afterEach(() => {
 export { loading }
 
 export default router
-
-// Global navigation guards
-router.beforeEach(async (to, from, next) => {
-  const authStore = useAuthStore()
-
-  // Set document title
-  document.title = `${to.meta.title || 'Dashboard'} | Work Tracking`
-
-  // Check if route requires authentication
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    return next({ name: 'Signin', query: { redirect: to.fullPath } })
-  }
-
-  // Check if route is for guests only (signin, signup)
-  if (to.meta.guest && authStore.isAuthenticated) {
-    return next({ name: 'dashboard' })
-  }
-
-  // Check role requirements
-  // if (to.meta.roles && !authStore.hasAnyRole(to.meta.roles)) {
-  //   return next({ name: 'Unauthorized' })
-  // }
-
-  // Check permission requirements
-  // if (to.meta.permissions && !authStore.hasAnyPermission(to.meta.permissions)) {
-  //   return next({ name: 'Unauthorized' })
-  // }
-
-  next()
-})

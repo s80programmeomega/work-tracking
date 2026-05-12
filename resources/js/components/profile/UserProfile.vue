@@ -206,7 +206,7 @@
 <script>
 import EditProfileModal from './EditProfileModal.vue'
 import ChangePasswordModal from './ChangePasswordModal.vue'
-import { useAuthStore } from '../../stores/auth'
+import { useAuthStore } from '@/stores/authStore'
 import SessionSettings from '@/components/settings/SessionSettings.vue'
 
 export default {

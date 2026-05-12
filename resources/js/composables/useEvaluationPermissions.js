@@ -1,7 +1,7 @@
 // resources/js/composables/useEvaluationPermissions.js
 
 import { computed } from 'vue'
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore } from '@/stores/authStore'
 
 /**
  * 🎯 Composable pour gérer les permissions d'évaluation

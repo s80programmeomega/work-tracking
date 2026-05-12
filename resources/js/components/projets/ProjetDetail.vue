@@ -815,7 +815,7 @@ import { useRouter } from 'vue-router'
 import { useProjets } from '@/composables/useProjets'
 import { useActivites } from '@/composables/useActivites'
 import { useActivityPermissions } from '@/composables/useActivityPermissions'
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore } from '@/stores/authStore'
 import { useProjetInvitations } from '@/composables/useProjetInvitations'
 import EditMemberPermissionsModal from '@/components/activites/EditMemberPermissionsModal.vue'
 
