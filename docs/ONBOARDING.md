@@ -1,5 +1,21 @@
 # Project Onboarding Guide
 
+---
+
+## 🔄 Session Resume
+
+> **Starting a new session?** Read these files in order, then say "I've read the docs, resuming from Task N":
+>
+> 1. [`docs/SESSION_STATE.md`](./SESSION_STATE.md) — **start here** — current task, what's next, open questions
+> 2. [`docs/WORKING_GUIDELINES.md`](./WORKING_GUIDELINES.md) — all conventions, rules, and tool usage
+> 3. [`docs/IMPLEMENTATION_PLAN.md`](./IMPLEMENTATION_PLAN.md) — full v2.0 task breakdown with commits
+> 4. [`docs/PROGRESSION.md`](./PROGRESSION.md) — task status and deliverables checklists
+> 5. [`docs/PERMISSIONS_MATRIX.md`](./PERMISSIONS_MATRIX.md) — live permissions reference per role (update after every task that adds permissions)
+>
+> **Always commit, push to origin, and update `SESSION_STATE.md` at the end of every session** — the project lives on a USB drive.
+
+---
+
 > **For the AI agent reading this:** This document is your full briefing. Read it entirely before doing anything. It covers the project architecture, working conventions, and git workflow agreed with the developer (Jonas). Follow these conventions without needing to be re-explained.
 
 ---
