@@ -8,25 +8,27 @@ use App\Models\ProjetInvitation;
 use App\Models\User;
 use App\Notifications\ProjetInvitationNotification;
 use App\Notifications\ProjetMemberAddedNotification;
+use App\Services\PermissionService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 
 class ProjetInvitationController extends Controller
 {
+    public function __construct(protected PermissionService $permissionService) {}
 
-        /**
+    /**
      * ✅ AMÉLIORATION : Gestion intelligente des invitations
      * - Membres workspace : Ajout direct + notification
      * - Externes : Invitation par email
      */
     public function invite(Projet $projet, Request $request)
     {
-        $this->authorize('manageMembers', $projet);
+        abort_unless($this->permissionService->canManageProjectMembers(auth()->user(), $projet), 403);
 
         $request->validate([
             'emails' => 'required|array|min:1',
@@ -94,8 +96,9 @@ class ProjetInvitationController extends Controller
                             'message' => 'Cet utilisateur est déjà membre de ce projet',
                             'type' => 'already_member',
                             'user_id' => $user->id,
-                            'user_name' => $user->nom
+                            'user_name' => $user->nom,
                         ];
+
                         continue;
                     }
 
@@ -106,7 +109,7 @@ class ProjetInvitationController extends Controller
 
                     if ($isWorkspaceMember) {
                         // ✅ MEMBRE DU WORKSPACE : Ajout direct sans invitation
-                        DB::transaction(function () use ($projet, $user, $permissions, $sendEmail, &$addedMembers, $request) {
+                        DB::transaction(function () use ($projet, $user, $permissions, $sendEmail, &$addedMembers) {
                             // Ajouter au projet
                             $projet->members()->attach($user->id, $permissions);
 
@@ -143,13 +146,14 @@ class ProjetInvitationController extends Controller
                     if ($existingInvitation && $existingInvitation->expires_at > now()) {
                         $warnings[] = [
                             'email' => $email,
-                            'message' => 'Une invitation est déjà en attente. Elle expire ' . 
+                            'message' => 'Une invitation est déjà en attente. Elle expire '.
                                        $existingInvitation->expires_at->diffForHumans(),
                             'type' => 'pending_invitation',
                             'expires_at' => $existingInvitation->expires_at->toISOString(),
                             'invitation_id' => $existingInvitation->id,
-                            'user_name' => $user->nom
+                            'user_name' => $user->nom,
                         ];
+
                         continue;
                     }
 
@@ -187,12 +191,13 @@ class ProjetInvitationController extends Controller
                     if ($existingInvitation && $existingInvitation->expires_at > now()) {
                         $warnings[] = [
                             'email' => $email,
-                            'message' => 'Une invitation est déjà en attente. Elle expire ' . 
+                            'message' => 'Une invitation est déjà en attente. Elle expire '.
                                        $existingInvitation->expires_at->diffForHumans(),
                             'type' => 'pending_invitation',
                             'expires_at' => $existingInvitation->expires_at->toISOString(),
-                            'invitation_id' => $existingInvitation->id
+                            'invitation_id' => $existingInvitation->id,
                         ];
+
                         continue;
                     }
 
@@ -220,13 +225,13 @@ class ProjetInvitationController extends Controller
                 Log::error('Error processing projet invitation', [
                     'email' => $email,
                     'projet_id' => $projet->id,
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ]);
 
                 $errors[] = [
                     'email' => $email,
-                    'message' => 'Erreur: ' . $e->getMessage(),
-                    'type' => 'server_error'
+                    'message' => 'Erreur: '.$e->getMessage(),
+                    'type' => 'server_error',
                 ];
             }
         }
@@ -256,9 +261,9 @@ class ProjetInvitationController extends Controller
             $messageParts[] = "{$errorCount} erreur(s)";
         }
 
-        $message = $successCount > 0 
+        $message = $successCount > 0
             ? implode(', ', $messageParts)
-            : "Aucune action effectuée";
+            : 'Aucune action effectuée';
 
         $statusCode = $successCount > 0 ? 200 : 422;
 
@@ -278,7 +283,7 @@ class ProjetInvitationController extends Controller
         ], $statusCode);
     }
 
-     /**
+    /**
      * Helper pour créer une invitation
      */
     private function createInvitation(Projet $projet, string $email, array $permissions, ?string $message): ProjetInvitation
@@ -317,7 +322,7 @@ class ProjetInvitationController extends Controller
 
             $projet = $invitation->projet;
 
-            if (!$projet->workspace->is_active) {
+            if (! $projet->workspace->is_active) {
                 throw new \Exception('Ce projet n\'est plus actif');
             }
 
@@ -335,8 +340,8 @@ class ProjetInvitationController extends Controller
                     'data' => [
                         'projet' => $projet,
                         'role' => $invitation->role,
-                        'redirect_to' => "/projets/{$projet->id}"
-                    ]
+                        'redirect_to' => "/projets/{$projet->id}",
+                    ],
                 ]);
             } else {
                 // ✅ Nouvel utilisateur - Doit s'enregistrer d'abord
@@ -376,24 +381,24 @@ class ProjetInvitationController extends Controller
                         'token' => $token,
                         'token_type' => 'Bearer',
                         'projet' => $projet,
-                        'redirect_to' => "/projets/{$projet->id}"
-                    ]
+                        'redirect_to' => "/projets/{$projet->id}",
+                    ],
                 ], 201);
             }
 
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             return response()->json([
-                'message' => 'Invitation invalide ou expirée'
+                'message' => 'Invitation invalide ou expirée',
             ], 404);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error accepting projet invitation', [
                 'token' => $token,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return response()->json([
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 400);
         }
     }
@@ -427,16 +432,16 @@ class ProjetInvitationController extends Controller
                         'inviter' => [
                             'nom' => $invitation->invitedBy->nom,
                             'email' => $invitation->invitedBy->email,
-                        ]
+                        ],
                     ],
                     'user_exists' => $userExists,
-                    'requires_registration' => !$userExists,
-                ]
+                    'requires_registration' => ! $userExists,
+                ],
             ]);
 
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             return response()->json([
-                'message' => 'Invitation invalide ou expirée'
+                'message' => 'Invitation invalide ou expirée',
             ], 404);
         }
     }
@@ -446,7 +451,7 @@ class ProjetInvitationController extends Controller
      */
     public function index(Projet $projet)
     {
-        $this->authorize('manageMembers', $projet);
+        abort_unless($this->permissionService->canManageProjectMembers(auth()->user(), $projet), 403);
 
         $invitations = ProjetInvitation::where('projet_id', $projet->id)
             ->where('status', 'pending')
@@ -465,7 +470,7 @@ class ProjetInvitationController extends Controller
      */
     public function resend(Projet $projet, ProjetInvitation $invitation)
     {
-        $this->authorize('manageMembers', $projet);
+        abort_unless($this->permissionService->canManageProjectMembers(auth()->user(), $projet), 403);
 
         if ($invitation->projet_id !== $projet->id) {
             abort(403, 'Cette invitation n\'appartient pas à ce projet');
@@ -499,7 +504,7 @@ class ProjetInvitationController extends Controller
      */
     public function cancel(Projet $projet, ProjetInvitation $invitation)
     {
-        $this->authorize('manageMembers', $projet);
+        abort_unless($this->permissionService->canManageProjectMembers(auth()->user(), $projet), 403);
 
         if ($invitation->projet_id !== $projet->id) {
             abort(403, 'Cette invitation n\'appartient pas à ce projet');

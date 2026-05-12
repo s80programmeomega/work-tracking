@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateProfileRequest;
+use App\Http\Requests\UpdateUserRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\UserService;
-use App\Http\Requests\StoreUserRequest;
-use App\Http\Requests\UpdateUserRequest;
-use App\Http\Requests\UpdateProfileRequest;
-use App\Http\Resources\UserResource;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
@@ -24,7 +24,7 @@ class UserController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $this->authorize('viewAny', User::class);
+        abort_unless(auth()->user()->isSuperAdmin() || auth()->user()->hasRole('directeur'), 403);
 
         $filters = $request->only([
             'search',
@@ -55,7 +55,7 @@ class UserController extends Controller
      */
     public function show(User $user): JsonResponse
     {
-        $this->authorize('view', $user);
+        abort_unless(auth()->user()->isSuperAdmin() || auth()->id() === $user->id, 403);
 
         $user->load(['roles', 'permissions']);
         $stats = $this->userService->getUserStats($user);
@@ -145,7 +145,7 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user): JsonResponse
     {
-        $this->authorize('update', $user);
+        abort_unless(auth()->user()->isSuperAdmin() || auth()->id() === $user->id, 403);
 
         $user = $this->userService->updateUser($user, $request->validated());
 
@@ -161,7 +161,7 @@ class UserController extends Controller
      */
     public function destroy(User $user): JsonResponse
     {
-        $this->authorize('delete', $user);
+        abort_unless(auth()->user()->isSuperAdmin(), 403);
 
         $this->userService->deleteUser($user);
 
@@ -176,7 +176,7 @@ class UserController extends Controller
      */
     public function toggleActive(User $user): JsonResponse
     {
-        $this->authorize('update', $user);
+        abort_unless(auth()->user()->isSuperAdmin() || auth()->id() === $user->id, 403);
 
         $user = $this->userService->toggleActiveStatus($user);
 
@@ -192,7 +192,7 @@ class UserController extends Controller
      */
     public function activity(User $user): JsonResponse
     {
-        $this->authorize('view', $user);
+        abort_unless(auth()->user()->isSuperAdmin() || auth()->id() === $user->id, 403);
 
         $activities = $this->userService->getUserActivity($user);
 
@@ -222,6 +222,4 @@ class UserController extends Controller
             'data' => UserResource::collection($users),
         ]);
     }
-
-    
 }

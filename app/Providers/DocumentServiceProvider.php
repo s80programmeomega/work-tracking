@@ -2,11 +2,14 @@
 
 namespace App\Providers;
 
+use App\Models\Activite;
 use App\Models\Document;
-use App\Policies\DocumentPolicy;
+use App\Models\Projet;
+use App\Models\Tache;
+use App\Models\TacheResultat;
+use App\Models\Workspace;
 use App\Services\DocumentAccessResolver;
 use App\Services\DocumentService;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -19,7 +22,7 @@ class DocumentServiceProvider extends ServiceProvider
     {
         // Enregistrer le DocumentAccessResolver comme singleton
         $this->app->singleton(DocumentAccessResolver::class, function ($app) {
-            return new DocumentAccessResolver();
+            return new DocumentAccessResolver;
         });
 
         // Enregistrer le DocumentService comme singleton
@@ -33,9 +36,6 @@ class DocumentServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Enregistrer la Policy pour Document
-        Gate::policy(Document::class, DocumentPolicy::class);
-
         // Enregistrer des gates personnalisés si nécessaire
         $this->registerGates();
 
@@ -51,14 +51,15 @@ class DocumentServiceProvider extends ServiceProvider
         // Gate pour vérifier si un user peut uploader sur une entité
         Gate::define('upload-to-entity', function ($user, $entityType, $entityId) {
             $resolver = app(DocumentAccessResolver::class);
+
             return $resolver->canUpload($user, $entityType, $entityId);
         });
 
         // Gate pour vérifier l'accès à un workspace
         Gate::define('access-workspace-documents', function ($user, $workspaceId) {
-            $workspace = \App\Models\Workspace::find($workspaceId);
+            $workspace = Workspace::find($workspaceId);
 
-            if (!$workspace) {
+            if (! $workspace) {
                 return false;
             }
 
@@ -78,46 +79,46 @@ class DocumentServiceProvider extends ServiceProvider
      * Enregistrer des macros pour les modèles
      */
     protected function registerMacros(): void
-{
-    // Liste des modèles qui peuvent avoir des documents
-    $documentableModels = [
-        \App\Models\Workspace::class,
-        \App\Models\Projet::class,
-        \App\Models\Activite::class,
-        \App\Models\Tache::class,
-        \App\Models\TacheResultat::class, 
-    ];
-    
-    foreach ($documentableModels as $modelClass) {
-        if (class_exists($modelClass)) {
-            // Utilisez la classe spécifique plutôt que Model
-            $modelClass::macro('getDocuments', function () {
-                return Document::where('documentable_type', get_class($this))
-                    ->where('documentable_id', $this->getKey())
-                    ->when(method_exists(Document::class, 'accessibleBy'), function ($query) {
-                        return $query->accessibleBy(auth()->user());
-                    })
-                    ->get();
-            });
-            
-            $modelClass::macro('uploadDocument', function ($file, $user = null, $options = []) {
-                $user = $user ?? auth()->user();
-                
-                if (!$user) {
-                    throw new \Exception('Aucun utilisateur authentifié');
-                }
-                
-                $service = app(DocumentService::class);
-                
-                return $service->upload(
-                    $file,
-                    get_class($this),
-                    $this->getKey(),
-                    $user,
-                    $options
-                );
-            });
+    {
+        // Liste des modèles qui peuvent avoir des documents
+        $documentableModels = [
+            Workspace::class,
+            Projet::class,
+            Activite::class,
+            Tache::class,
+            TacheResultat::class,
+        ];
+
+        foreach ($documentableModels as $modelClass) {
+            if (class_exists($modelClass)) {
+                // Utilisez la classe spécifique plutôt que Model
+                $modelClass::macro('getDocuments', function () {
+                    return Document::where('documentable_type', get_class($this))
+                        ->where('documentable_id', $this->getKey())
+                        ->when(method_exists(Document::class, 'accessibleBy'), function ($query) {
+                            return $query->accessibleBy(auth()->user());
+                        })
+                        ->get();
+                });
+
+                $modelClass::macro('uploadDocument', function ($file, $user = null, $options = []) {
+                    $user = $user ?? auth()->user();
+
+                    if (! $user) {
+                        throw new \Exception('Aucun utilisateur authentifié');
+                    }
+
+                    $service = app(DocumentService::class);
+
+                    return $service->upload(
+                        $file,
+                        get_class($this),
+                        $this->getKey(),
+                        $user,
+                        $options
+                    );
+                });
+            }
         }
     }
-}
 }

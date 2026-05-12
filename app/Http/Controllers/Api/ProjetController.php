@@ -7,24 +7,23 @@ use App\Http\Requests\Projet\StoreProjetRequest;
 use App\Http\Requests\Projet\UpdateProjetRequest;
 use App\Http\Resources\ProjetResource;
 use App\Models\Projet;
+use App\Models\Tache;
 use App\Models\User;
+use App\Models\Workspace;
+use App\Services\PermissionService;
 use App\Services\ProjetService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\FacadesLog;
-use App\Models\Activite;
-use App\Models\Tache;
 
 class ProjetController extends Controller
 {
-
     public function __construct(
-        protected ProjetService $projetService
-    ) {
-    }
+        protected ProjetService $projetService,
+        protected PermissionService $permissionService,
+    ) {}
 
     /**
      * Display a listing of ALL projects (SUPER ADMIN ONLY).
@@ -76,7 +75,7 @@ class ProjetController extends Controller
         // ✅ Filtre par workspace actuel
         $workspaceId = $request->input('workspace_id') ?? $request->user()->current_workspace_id;
 
-        if (!$workspaceId) {
+        if (! $workspaceId) {
             return ProjetResource::collection([]);
         }
 
@@ -95,7 +94,7 @@ class ProjetController extends Controller
         // ✅ Utilise le workspace fourni ou le workspace actuel
         $workspaceId = $request->input('workspace_id') ?? $request->user()->current_workspace_id;
 
-        if (!$workspaceId) {
+        if (! $workspaceId) {
             return ProjetResource::collection([]);
         }
 
@@ -105,7 +104,7 @@ class ProjetController extends Controller
             ->latest();
 
         // ✅ Si super_admin sans workspace_id spécifié, voir tous les projets archivés
-        if ($request->user()->isSuperAdmin() && !$request->has('workspace_id')) {
+        if ($request->user()->isSuperAdmin() && ! $request->has('workspace_id')) {
             $query = Projet::archived()
                 ->with(['responsable', 'members', 'tags', 'workspace'])
                 ->latest();
@@ -121,36 +120,36 @@ class ProjetController extends Controller
      */
     public function store(StoreProjetRequest $request): JsonResponse
     {
-        $this->authorize('create', Projet::class);
+        // Authorization checked in store method via workspace permissions;
 
         $data = $request->validated();
 
         // ✅ Utilise le workspace fourni ou le workspace actuel
         $workspaceId = $data['workspace_id'] ?? $request->user()->current_workspace_id;
 
-        if (!$workspaceId) {
+        if (! $workspaceId) {
             return response()->json([
                 'message' => 'Vous devez sélectionner un workspace actif.',
             ], 422);
         }
 
         // Vérifier que l'utilisateur a accès au workspace
-        $workspace = \App\Models\Workspace::find($workspaceId);
-        if (!$workspace) {
+        $workspace = Workspace::find($workspaceId);
+        if (! $workspace) {
             return response()->json([
                 'message' => 'Le workspace sélectionné n\'existe pas.',
             ], 404);
         }
 
         // ✅ Super admin peut créer dans n'importe quel workspace
-        if (!$request->user()->isSuperAdmin() && !$workspace->hasAccess($request->user())) {
+        if (! $request->user()->isSuperAdmin() && ! $workspace->hasAccess($request->user())) {
             return response()->json([
                 'message' => 'Vous n\'avez pas accès à ce workspace.',
             ], 403);
         }
 
         // Vérifier que l'utilisateur peut créer des projets dans ce workspace
-        if (!$request->user()->isSuperAdmin() && !$workspace->canCreateProjects($request->user())) {
+        if (! $request->user()->isSuperAdmin() && ! $workspace->canCreateProjects($request->user())) {
             return response()->json([
                 'message' => 'Vous n\'avez pas la permission de créer des projets dans ce workspace.',
             ], 403);
@@ -179,7 +178,7 @@ class ProjetController extends Controller
      */
     public function show(Projet $projet): JsonResponse
     {
-        $this->authorize('view', $projet);
+        abort_unless($this->permissionService->canViewProject(auth()->user(), $projet), 403);
 
         $userId = auth()->id();
         $user = auth()->user();
@@ -206,14 +205,14 @@ class ProjetController extends Controller
             'activites' => function ($query) use ($userId, $user, $projet) {
                 // ✅ FILTRE : Uniquement les activités où l'utilisateur est impliqué
                 // SAUF si super admin OU responsable du projet
-                if (!$user->isSuperAdmin() && $projet->responsable_id !== $userId) {
+                if (! $user->isSuperAdmin() && $projet->responsable_id !== $userId) {
                     $query->where(function ($q) use ($userId) {
                         // Responsable de l'activité
                         $q->where('responsable_id', $userId)
                             // OU membre de l'activité
                             ->orWhereHas('membres', function ($mq) use ($userId) {
-                            $mq->where('user_id', $userId);
-                        });
+                                $mq->where('user_id', $userId);
+                            });
                     });
                 }
 
@@ -221,24 +220,24 @@ class ProjetController extends Controller
                 $query->with([
                     'responsable:id,nom,prenom,email,avatar',
                     'membres' => function ($mq) {
-                    $mq->select('users.id', 'users.nom', 'users.prenom', 'users.email', 'users.avatar')
-                        ->withPivot([
-                            'role',
-                            'can_create_tasks',
-                            'can_edit_tasks',
-                            'can_delete_tasks',
-                            'can_validate_results',
-                            'can_assign_users',
-                            'created_at'
-                        ]);
-                },
+                        $mq->select('users.id', 'users.nom', 'users.prenom', 'users.email', 'users.avatar')
+                            ->withPivot([
+                                'role',
+                                'can_create_tasks',
+                                'can_edit_tasks',
+                                'can_delete_tasks',
+                                'can_validate_results',
+                                'can_assign_users',
+                                'created_at',
+                            ]);
+                    },
                     'taches' => function ($tq) {
-                    $tq->select('id', 'activite_id', 'titre', 'statut', 'priorite', 'echeance');
-                }
+                        $tq->select('id', 'activite_id', 'titre', 'statut', 'priorite', 'echeance');
+                    },
                 ])
                     ->withCount('taches')
                     ->orderBy('ordre');
-            }
+            },
         ]);
 
         // ✅ Calculer les statistiques basées sur les activités FILTRÉES
@@ -264,7 +263,7 @@ class ProjetController extends Controller
      */
     public function update(UpdateProjetRequest $request, Projet $projet): JsonResponse
     {
-        $this->authorize('update', $projet);
+        abort_unless($this->permissionService->canEditProject(auth()->user(), $projet), 403);
 
         try {
             $projet = $this->projetService->updateProjet($projet, $request->validated());
@@ -286,7 +285,7 @@ class ProjetController extends Controller
      */
     public function destroy(Projet $projet): JsonResponse
     {
-        $this->authorize('delete', $projet);
+        abort_unless($this->permissionService->canDeleteProject(auth()->user(), $projet), 403);
 
         try {
             $this->projetService->deleteProjet($projet);
@@ -307,7 +306,7 @@ class ProjetController extends Controller
      */
     public function archive(Projet $projet): JsonResponse
     {
-        $this->authorize('update', $projet);
+        abort_unless($this->permissionService->canEditProject(auth()->user(), $projet), 403);
 
         try {
             $projet = $this->projetService->archiveProjet($projet);
@@ -329,7 +328,7 @@ class ProjetController extends Controller
      */
     public function unarchive(Projet $projet): JsonResponse
     {
-        $this->authorize('update', $projet);
+        abort_unless($this->permissionService->canEditProject(auth()->user(), $projet), 403);
 
         try {
             $projet = $this->projetService->unarchiveProjet($projet);
@@ -351,7 +350,7 @@ class ProjetController extends Controller
      */
     public function complete(Projet $projet): JsonResponse
     {
-        $this->authorize('update', $projet);
+        abort_unless($this->permissionService->canEditProject(auth()->user(), $projet), 403);
 
         try {
             $projet = $this->projetService->completeProjet($projet);
@@ -373,7 +372,7 @@ class ProjetController extends Controller
      */
     public function clone(Request $request, Projet $projet): JsonResponse
     {
-        $this->authorize('view', $projet);
+        abort_unless($this->permissionService->canViewProject(auth()->user(), $projet), 403);
 
         $request->validate([
             'nom' => 'nullable|string|max:255',
@@ -408,7 +407,7 @@ class ProjetController extends Controller
      */
     public function toggleFavorite(Projet $projet): JsonResponse
     {
-        $this->authorize('view', $projet);
+        abort_unless($this->permissionService->canViewProject(auth()->user(), $projet), 403);
 
         try {
             $projet = $this->projetService->toggleFavorite($projet);
@@ -430,7 +429,7 @@ class ProjetController extends Controller
      */
     public function getMembers(Projet $projet): JsonResponse
     {
-        $this->authorize('view', $projet);
+        abort_unless($this->permissionService->canViewProject(auth()->user(), $projet), 403);
 
         $members = $projet->members()
             ->withPivot([
@@ -455,7 +454,7 @@ class ProjetController extends Controller
      */
     public function addMember(Request $request, Projet $projet): JsonResponse
     {
-        $this->authorize('manageMembers', $projet);
+        abort_unless($this->permissionService->canManageProjectMembers(auth()->user(), $projet), 403);
 
         $request->validate([
             'user_id' => 'required|exists:users,id',
@@ -467,7 +466,7 @@ class ProjetController extends Controller
 
         // Vérifier que l'utilisateur fait partie du workspace
         $workspace = $projet->workspace;
-        if (!$workspace->hasMember($request->user_id)) {
+        if (! $workspace->hasMember($request->user_id)) {
             return response()->json([
                 'message' => 'L\'utilisateur doit d\'abord être membre du workspace.',
             ], 422);
@@ -503,7 +502,7 @@ class ProjetController extends Controller
      */
     public function updateMember(Request $request, Projet $projet, User $user): JsonResponse
     {
-        $this->authorize('manageMembers', $projet);
+        abort_unless($this->permissionService->canManageProjectMembers(auth()->user(), $projet), 403);
 
         $request->validate([
             'role' => 'sometimes|in:admin,member,viewer',
@@ -517,7 +516,7 @@ class ProjetController extends Controller
         ]);
 
         // Vérifier si membre
-        if (!$projet->members()->where('user_id', $user->id)->exists()) {
+        if (! $projet->members()->where('user_id', $user->id)->exists()) {
             return response()->json([
                 'message' => 'Cet utilisateur n\'est pas membre du projet.',
             ], 404);
@@ -555,10 +554,10 @@ class ProjetController extends Controller
      */
     public function removeMember(Projet $projet, User $user): JsonResponse
     {
-        $this->authorize('manageMembers', $projet);
+        abort_unless($this->permissionService->canManageProjectMembers(auth()->user(), $projet), 403);
 
         // Vérifier si membre
-        if (!$projet->members()->where('user_id', $user->id)->exists()) {
+        if (! $projet->members()->where('user_id', $user->id)->exists()) {
             return response()->json([
                 'message' => 'Cet utilisateur n\'est pas membre du projet.',
             ], 404);
@@ -581,11 +580,11 @@ class ProjetController extends Controller
 
     public function getMemberRemovalImpact(Projet $projet, User $user): JsonResponse
     {
-        $this->authorize('manageMembers', $projet);
+        abort_unless($this->permissionService->canManageProjectMembers(auth()->user(), $projet), 403);
 
         if (
             (int) $projet->responsable_id !== (int) $user->id &&
-            !$projet->members()->where('users.id', $user->id)->exists()
+            ! $projet->members()->where('users.id', $user->id)->exists()
         ) {
             return response()->json([
                 'message' => 'Cet utilisateur n\'est pas rattaché à ce projet.',
@@ -622,7 +621,7 @@ class ProjetController extends Controller
         if (
             $projet->responsable_id &&
             (int) $projet->responsable_id !== (int) $user->id &&
-            !in_array((int) $projet->responsable_id, $candidateIds, true)
+            ! in_array((int) $projet->responsable_id, $candidateIds, true)
         ) {
             $candidateIds[] = (int) $projet->responsable_id;
         }
@@ -631,7 +630,7 @@ class ProjetController extends Controller
             $projet->workspace &&
             $projet->workspace->owner_id &&
             (int) $projet->workspace->owner_id !== (int) $user->id &&
-            !in_array((int) $projet->workspace->owner_id, $candidateIds, true)
+            ! in_array((int) $projet->workspace->owner_id, $candidateIds, true)
         ) {
             $candidateIds[] = (int) $projet->workspace->owner_id;
         }
@@ -662,7 +661,7 @@ class ProjetController extends Controller
 
     public function removeMemberWithTransfer(Request $request, Projet $projet, User $user): JsonResponse
     {
-        $this->authorize('manageMembers', $projet);
+        abort_unless($this->permissionService->canManageProjectMembers(auth()->user(), $projet), 403);
 
         $request->validate([
             'transfer_to_user_id' => ['nullable', 'integer', 'exists:users,id'],
@@ -671,7 +670,7 @@ class ProjetController extends Controller
         $isProjectResponsable = (int) $projet->responsable_id === (int) $user->id;
         $isProjectMember = $projet->members()->where('users.id', $user->id)->exists();
 
-        if (!$isProjectResponsable && !$isProjectMember) {
+        if (! $isProjectResponsable && ! $isProjectMember) {
             return response()->json([
                 'message' => 'Cet utilisateur n\'est pas rattaché à ce projet.',
             ], 404);
@@ -692,7 +691,7 @@ class ProjetController extends Controller
 
         $transferToUserId = $request->input('transfer_to_user_id');
 
-        if ($requiresTransfer && !$transferToUserId) {
+        if ($requiresTransfer && ! $transferToUserId) {
             return response()->json([
                 'message' => 'Le transfert des responsabilités est obligatoire avant le retrait de ce membre.',
             ], 422);
@@ -710,7 +709,7 @@ class ProjetController extends Controller
                 || (int) optional($projet->responsable)->id === (int) $transferToUserId
                 || (int) optional($projet->workspace)->owner_id === (int) $transferToUserId;
 
-            if (!$isValidReplacement) {
+            if (! $isValidReplacement) {
                 return response()->json([
                     'message' => 'Le remplaçant doit être membre du projet, responsable du projet ou propriétaire du workspace.',
                 ], 422);
@@ -792,7 +791,7 @@ class ProjetController extends Controller
      */
     public function getActivites(Projet $projet): JsonResponse
     {
-        $this->authorize('view', $projet);
+        abort_unless($this->permissionService->canViewProject(auth()->user(), $projet), 403);
 
         $activites = $projet->activites()
             ->with(['responsable', 'taches'])
@@ -809,7 +808,7 @@ class ProjetController extends Controller
      */
     public function getTaches(Projet $projet): JsonResponse
     {
-        $this->authorize('view', $projet);
+        abort_unless($this->permissionService->canViewProject(auth()->user(), $projet), 403);
 
         $taches = $projet->taches()
             ->with(['activite', 'assignees', 'soustaches'])
@@ -825,7 +824,7 @@ class ProjetController extends Controller
      */
     public function getStatistics(Projet $projet): JsonResponse
     {
-        $this->authorize('view', $projet);
+        abort_unless($this->permissionService->canViewProject(auth()->user(), $projet), 403);
 
         try {
             $stats = $this->projetService->getProjetStats($projet);
@@ -851,9 +850,10 @@ class ProjetController extends Controller
         $workspaceId = $request->input('workspace_id') ?? $request->user()->current_workspace_id;
 
         // ✅ Si super_admin sans workspace spécifié, stats globales
-        if ($request->user()->isSuperAdmin() && !$workspaceId) {
+        if ($request->user()->isSuperAdmin() && ! $workspaceId) {
             try {
                 $stats = $this->projetService->getGlobalDashboardStats();
+
                 return response()->json([
                     'data' => $stats,
                 ]);
@@ -866,7 +866,7 @@ class ProjetController extends Controller
             }
         }
 
-        if (!$workspaceId) {
+        if (! $workspaceId) {
             return response()->json([
                 'data' => $this->getEmptyStats(),
             ]);
@@ -912,7 +912,7 @@ class ProjetController extends Controller
      */
     public function performanceReport(Request $request, Projet $projet): JsonResponse
     {
-        $this->authorize('view', $projet);
+        abort_unless($this->permissionService->canViewProject(auth()->user(), $projet), 403);
 
         $request->validate([
             'start_date' => 'nullable|date',
@@ -941,7 +941,7 @@ class ProjetController extends Controller
      */
     public function accessibleTasks(Request $request, Projet $projet): JsonResponse
     {
-        $this->authorize('view', $projet);
+        abort_unless($this->permissionService->canViewProject(auth()->user(), $projet), 403);
 
         try {
             $user = $request->user();
@@ -960,7 +960,6 @@ class ProjetController extends Controller
         }
     }
 
-
     public function accessible()
     {
         $user = auth()->user();
@@ -968,14 +967,10 @@ class ProjetController extends Controller
         $projets = Projet::with('workspace')
             ->whereHas('workspace', function ($q) use ($user) {
                 $q->where('owner_id', $user->id)
-                    ->orWhereHas('members', fn($m) => $m->where('user_id', $user->id));
+                    ->orWhereHas('members', fn ($m) => $m->where('user_id', $user->id));
             })
             ->get();
 
         return response()->json($projets);
     }
-
-
-
-
 }

@@ -4,39 +4,33 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\TacheResource;
-use App\Models\Tache;
-use App\Models\TacheResultat;
 use App\Http\Resources\TacheResultatResource;
 use App\Models\Document;
 use App\Models\DocumentDownload;
 use App\Models\DocumentPermission;
+use App\Models\Tache;
+use App\Models\TacheResultat;
+use App\Models\User;
+use App\Notifications\ResultatIndividuelSoumisNotification;
 use App\Notifications\ResultatRejeteNotification;
+use App\Services\PermissionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-/**
- * 📊 TacheResultatController - Version Améliorée
- * 
- * Gestion complète des résultats avec:
- * - Documents attachés (polymorphic via table documents)
- * - Validation N1/N2 avec gestion du statut individuel
- * - Visualisation des documents existants
- * - Suppression/mise à jour de documents
- * - Notifications appropriées
- */
 class TacheResultatController extends Controller
 {
+    public function __construct(protected PermissionService $permissionService) {}
+
     /**
      * 📋 Liste des résultats d'une tâche
      */
     public function index(Tache $tache)
     {
-        Gate::authorize('view', $tache);
+        abort_unless($this->permissionService->canViewTask(auth()->user(), $tache), 403);
 
         $resultats = $tache->resultats()
             ->with(['user', 'validateurN1', 'validateurN2', 'documents'])
@@ -45,7 +39,7 @@ class TacheResultatController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => TacheResultatResource::collection($resultats)
+            'data' => TacheResultatResource::collection($resultats),
         ]);
     }
 
@@ -54,7 +48,7 @@ class TacheResultatController extends Controller
      */
     public function store(Request $request, Tache $tache)
     {
-        Gate::authorize('update', $tache);
+        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
 
         $validated = $request->validate([
             'resultats_attendus' => 'required|string',
@@ -94,7 +88,7 @@ class TacheResultatController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Résultat enregistré avec succès',
-                'data' => new TacheResultatResource($resultat->load(['user', 'documents']))
+                'data' => new TacheResultatResource($resultat->load(['user', 'documents'])),
             ], 201);
         });
     }
@@ -104,7 +98,7 @@ class TacheResultatController extends Controller
      */
     public function show_(Tache $tache, TacheResultat $resultat)
     {
-        Gate::authorize('view', $tache);
+        abort_unless($this->permissionService->canViewTask(auth()->user(), $tache), 403);
 
         if ($resultat->tache_id !== $tache->id) {
             abort(404, 'Résultat non trouvé');
@@ -114,7 +108,7 @@ class TacheResultatController extends Controller
             'success' => true,
             'data' => new TacheResultatResource(
                 $resultat->load(['user', 'validateurN1', 'validateurN2', 'documents'])
-            )
+            ),
         ]);
     }
 
@@ -126,10 +120,10 @@ class TacheResultatController extends Controller
         $user = $request->user();
 
         // Vérifier les permissions
-        if (!$resultat->canBeViewedBy($user)) {
+        if (! $resultat->canBeViewedBy($user)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Vous n\'avez pas la permission de voir ce résultat'
+                'message' => 'Vous n\'avez pas la permission de voir ce résultat',
             ], 403);
         }
 
@@ -139,12 +133,12 @@ class TacheResultatController extends Controller
             'tache.activite.projet',
             'validateurN1',
             'validateurN2',
-            'documents'
+            'documents',
         ]);
 
         return response()->json([
             'success' => true,
-            'data' => new TacheResultatResource($resultat)
+            'data' => new TacheResultatResource($resultat),
         ]);
     }
 
@@ -153,17 +147,17 @@ class TacheResultatController extends Controller
      */
     public function update(Request $request, Tache $tache, TacheResultat $resultat)
     {
-        Gate::authorize('update', $tache);
+        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
 
         if ($resultat->tache_id !== $tache->id) {
             abort(404);
         }
 
         // Ne pas modifier un résultat validé
-        if ($resultat->is_fully_validated && !auth()->user()->isSuperAdmin()) {
+        if ($resultat->is_fully_validated && ! auth()->user()->isSuperAdmin()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Impossible de modifier un résultat entièrement validé'
+                'message' => 'Impossible de modifier un résultat entièrement validé',
             ], 403);
         }
 
@@ -196,7 +190,7 @@ class TacheResultatController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Résultat mis à jour',
-                'data' => new TacheResultatResource($resultat->fresh(['user', 'documents']))
+                'data' => new TacheResultatResource($resultat->fresh(['user', 'documents'])),
             ]);
         });
     }
@@ -206,16 +200,16 @@ class TacheResultatController extends Controller
      */
     public function destroy(Tache $tache, TacheResultat $resultat)
     {
-        Gate::authorize('update', $tache);
+        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
 
         if ($resultat->tache_id !== $tache->id) {
             abort(404);
         }
 
-        if ($resultat->is_fully_validated && !auth()->user()->isSuperAdmin()) {
+        if ($resultat->is_fully_validated && ! auth()->user()->isSuperAdmin()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Impossible de supprimer un résultat validé'
+                'message' => 'Impossible de supprimer un résultat validé',
             ], 403);
         }
 
@@ -231,7 +225,7 @@ class TacheResultatController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Résultat supprimé'
+            'message' => 'Résultat supprimé',
         ]);
     }
 
@@ -240,7 +234,7 @@ class TacheResultatController extends Controller
      */
     public function submit(Request $request, Tache $tache, TacheResultat $resultat)
     {
-        Gate::authorize('update', $tache);
+        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
 
         if ($resultat->tache_id !== $tache->id) {
             abort(404);
@@ -249,7 +243,7 @@ class TacheResultatController extends Controller
         if ($resultat->soumis_le) {
             return response()->json([
                 'success' => false,
-                'message' => 'Ce résultat a déjà été soumis'
+                'message' => 'Ce résultat a déjà été soumis',
             ], 400);
         }
 
@@ -258,7 +252,7 @@ class TacheResultatController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Résultat soumis pour validation',
-            'data' => new TacheResultatResource($resultat->fresh())
+            'data' => new TacheResultatResource($resultat->fresh()),
         ]);
     }
 
@@ -320,7 +314,7 @@ class TacheResultatController extends Controller
                 Log::info('Résultat mis à jour', [
                     'resultat_id' => $resultat->id,
                     'tache_id' => $tache->id,
-                    'user_id' => $user->id
+                    'user_id' => $user->id,
                 ]);
             } else {
                 // Création
@@ -339,12 +333,12 @@ class TacheResultatController extends Controller
                 Log::info('Nouveau résultat créé', [
                     'resultat_id' => $resultat->id,
                     'tache_id' => $tache->id,
-                    'user_id' => $user->id
+                    'user_id' => $user->id,
                 ]);
             }
 
             // Supprimer les documents demandés
-            if (!empty($validated['documents_to_delete'])) {
+            if (! empty($validated['documents_to_delete'])) {
                 $documentsToDelete = Document::whereIn('id', $validated['documents_to_delete'])
                     ->where('documentable_type', TacheResultat::class)
                     ->where('documentable_id', $resultat->id)
@@ -366,7 +360,7 @@ class TacheResultatController extends Controller
 
                     Log::info('Document supprimé', [
                         'document_id' => $doc->id,
-                        'resultat_id' => $resultat->id
+                        'resultat_id' => $resultat->id,
                     ]);
                 }
             }
@@ -395,12 +389,12 @@ class TacheResultatController extends Controller
                 'tache_id' => $tache->id,
                 'user_id' => $user->id,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
                 'message' => 'Erreur lors de la soumission du résultat',
-                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue'
+                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue',
             ], 500);
         }
     }
@@ -410,7 +404,7 @@ class TacheResultatController extends Controller
      */
     public function downloadDocument(Tache $tache, TacheResultat $resultat, Document $document)
     {
-        Gate::authorize('view', $tache);
+        abort_unless($this->permissionService->canViewTask(auth()->user(), $tache), 403);
 
         // Vérifier que le document appartient au résultat
         if (
@@ -421,12 +415,12 @@ class TacheResultatController extends Controller
         }
 
         // Vérifier les permissions de téléchargement
-        if (!$document->canBeDownloadedBy(auth()->user())) {
+        if (! $document->canBeDownloadedBy(auth()->user())) {
             abort(403, 'Vous n\'avez pas la permission de télécharger ce document');
         }
 
         // Vérifier l'existence du fichier
-        if (!Storage::disk($document->disk)->exists($document->chemin)) {
+        if (! Storage::disk($document->disk)->exists($document->chemin)) {
             abort(404, 'Fichier non trouvé');
         }
 
@@ -447,13 +441,13 @@ class TacheResultatController extends Controller
             // Retourner le fichier
             return Storage::disk($document->disk)->download(
                 $document->chemin,
-                $document->nom . '.' . $document->extension
+                $document->nom.'.'.$document->extension
             );
 
         } catch (\Exception $e) {
             Log::error('Erreur téléchargement document', [
                 'document_id' => $document->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             abort(500, 'Erreur lors du téléchargement');
@@ -465,7 +459,7 @@ class TacheResultatController extends Controller
      */
     public function viewDocument(Tache $tache, TacheResultat $resultat, Document $document)
     {
-        Gate::authorize('view', $tache);
+        abort_unless($this->permissionService->canViewTask(auth()->user(), $tache), 403);
 
         // Vérifier que le document appartient au résultat
         if (
@@ -476,12 +470,12 @@ class TacheResultatController extends Controller
         }
 
         // Vérifier les permissions de visualisation
-        if (!$document->canBeViewedBy(auth()->user())) {
+        if (! $document->canBeViewedBy(auth()->user())) {
             abort(403, 'Vous n\'avez pas la permission de voir ce document');
         }
 
         // Vérifier l'existence du fichier
-        if (!Storage::disk($document->disk)->exists($document->chemin)) {
+        if (! Storage::disk($document->disk)->exists($document->chemin)) {
             abort(404, 'Fichier non trouvé');
         }
 
@@ -495,7 +489,7 @@ class TacheResultatController extends Controller
         // Pour les autres types, forcer le téléchargement
         return Storage::disk($document->disk)->download(
             $document->chemin,
-            $document->nom . '.' . $document->extension
+            $document->nom.'.'.$document->extension
         );
     }
 
@@ -504,14 +498,14 @@ class TacheResultatController extends Controller
      */
     public function documentStats(Tache $tache, TacheResultat $resultat)
     {
-        Gate::authorize('view', $tache);
+        abort_unless($this->permissionService->canViewTask(auth()->user(), $tache), 403);
 
         $documents = $resultat->documents()
             ->withCount('downloads')
             ->with([
                 'downloads' => function ($query) {
                     $query->recent(30)->with('user');
-                }
+                },
             ])
             ->get();
 
@@ -540,7 +534,7 @@ class TacheResultatController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $stats
+            'data' => $stats,
         ]);
     }
 
@@ -549,10 +543,10 @@ class TacheResultatController extends Controller
      */
     public function validateN1(Request $request, Tache $tache, TacheResultat $resultat)
     {
-        if (!$resultat->canBeValidatedByN1(auth()->user())) {
+        if (! $resultat->canBeValidatedByN1(auth()->user())) {
             return response()->json([
                 'success' => false,
-                'message' => 'Vous n\'avez pas la permission de valider ce résultat (N1)'
+                'message' => 'Vous n\'avez pas la permission de valider ce résultat (N1)',
             ], 403);
         }
 
@@ -571,7 +565,7 @@ class TacheResultatController extends Controller
 
             Log::info('Résultat validé N1', [
                 'resultat_id' => $resultat->id,
-                'validateur_id' => auth()->id()
+                'validateur_id' => auth()->id(),
             ]);
 
             DB::commit();
@@ -579,19 +573,19 @@ class TacheResultatController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Résultat validé (Niveau 1)',
-                'data' => new TacheResultatResource($resultat->fresh())
+                'data' => new TacheResultatResource($resultat->fresh()),
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
 
             Log::error('Erreur validation N1', [
                 'resultat_id' => $resultat->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 422);
         }
     }
@@ -601,10 +595,10 @@ class TacheResultatController extends Controller
      */
     public function validateN2(Request $request, Tache $tache, TacheResultat $resultat)
     {
-        if (!$resultat->canBeValidatedByN2(auth()->user())) {
+        if (! $resultat->canBeValidatedByN2(auth()->user())) {
             return response()->json([
                 'success' => false,
-                'message' => 'Vous n\'avez pas la permission de valider ce résultat (N2)'
+                'message' => 'Vous n\'avez pas la permission de valider ce résultat (N2)',
             ], 403);
         }
 
@@ -623,7 +617,7 @@ class TacheResultatController extends Controller
 
             Log::info('Résultat validé N2', [
                 'resultat_id' => $resultat->id,
-                'validateur_id' => auth()->id()
+                'validateur_id' => auth()->id(),
             ]);
 
             DB::commit();
@@ -631,19 +625,19 @@ class TacheResultatController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Résultat validé (Niveau 2 - Final)',
-                'data' => new TacheResultatResource($resultat->fresh())
+                'data' => new TacheResultatResource($resultat->fresh()),
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
 
             Log::error('Erreur validation N2', [
                 'resultat_id' => $resultat->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 422);
         }
     }
@@ -658,17 +652,17 @@ class TacheResultatController extends Controller
             'level' => 'required|in:n1,n2',
         ]);
 
-        if ($validated['level'] === 'n1' && !$resultat->canBeValidatedByN1(auth()->user())) {
+        if ($validated['level'] === 'n1' && ! $resultat->canBeValidatedByN1(auth()->user())) {
             return response()->json([
                 'success' => false,
-                'message' => 'Permission refusée'
+                'message' => 'Permission refusée',
             ], 403);
         }
 
-        if ($validated['level'] === 'n2' && !$resultat->canBeValidatedByN2(auth()->user())) {
+        if ($validated['level'] === 'n2' && ! $resultat->canBeValidatedByN2(auth()->user())) {
             return response()->json([
                 'success' => false,
-                'message' => 'Permission refusée'
+                'message' => 'Permission refusée',
             ], 403);
         }
 
@@ -689,7 +683,7 @@ class TacheResultatController extends Controller
                 'resultat_id' => $resultat->id,
                 'level' => $validated['level'],
                 'user_id' => $resultat->user_id,
-                'nouveau_statut' => 'a_faire'
+                'nouveau_statut' => 'a_faire',
             ]);
 
             // Notifier l'utilisateur
@@ -702,19 +696,19 @@ class TacheResultatController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Résultat rejeté. L\'utilisateur devra le soumettre à nouveau.',
-                'data' => new TacheResultatResource($resultat->fresh())
+                'data' => new TacheResultatResource($resultat->fresh()),
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
 
             Log::error('Erreur rejet résultat', [
                 'resultat_id' => $resultat->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 422);
         }
     }
@@ -724,7 +718,7 @@ class TacheResultatController extends Controller
      */
     public function history(Tache $tache, TacheResultat $resultat)
     {
-        Gate::authorize('view', $tache);
+        abort_unless($this->permissionService->canViewTask(auth()->user(), $tache), 403);
 
         if ($resultat->tache_id !== $tache->id) {
             abort(404);
@@ -736,7 +730,7 @@ class TacheResultatController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $activities
+            'data' => $activities,
         ]);
     }
 
@@ -765,8 +759,8 @@ class TacheResultatController extends Controller
                     'n1' => $pendingN1->count(),
                     'n2' => $pendingN2->count(),
                     'total' => $resultats->count(),
-                ]
-            ]
+                ],
+            ],
         ]);
     }
 
@@ -775,7 +769,7 @@ class TacheResultatController extends Controller
      */
     public function getDocuments(Tache $tache, TacheResultat $resultat)
     {
-        Gate::authorize('view', $tache);
+        abort_unless($this->permissionService->canViewTask(auth()->user(), $tache), 403);
 
         if ($resultat->tache_id !== $tache->id) {
             abort(404, 'Résultat non trouvé');
@@ -804,7 +798,7 @@ class TacheResultatController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $documents
+            'data' => $documents,
         ]);
     }
 
@@ -813,7 +807,7 @@ class TacheResultatController extends Controller
      */
     public function deleteDocument(Tache $tache, TacheResultat $resultat, Document $document)
     {
-        Gate::authorize('update', $tache);
+        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
 
         if ($resultat->tache_id !== $tache->id) {
             abort(404);
@@ -826,15 +820,15 @@ class TacheResultatController extends Controller
         ) {
             return response()->json([
                 'success' => false,
-                'message' => 'Document non trouvé pour ce résultat'
+                'message' => 'Document non trouvé pour ce résultat',
             ], 404);
         }
 
         // Ne pas supprimer si le résultat est validé (sauf admin)
-        if ($resultat->is_fully_validated && !auth()->user()->isSuperAdmin()) {
+        if ($resultat->is_fully_validated && ! auth()->user()->isSuperAdmin()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Impossible de supprimer un document d\'un résultat validé'
+                'message' => 'Impossible de supprimer un document d\'un résultat validé',
             ], 403);
         }
 
@@ -853,7 +847,7 @@ class TacheResultatController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Document supprimé avec succès'
+            'message' => 'Document supprimé avec succès',
         ]);
     }
 
@@ -866,7 +860,7 @@ class TacheResultatController extends Controller
     {
         $originalName = $file->getClientOriginalName();
         $extension = $file->getClientOriginalExtension();
-        $filename = Str::uuid() . '.' . $extension;
+        $filename = Str::uuid().'.'.$extension;
         $path = $file->storeAs('resultats/taches', $filename, 'public');
 
         $document = $resultat->documents()->create([
@@ -911,12 +905,11 @@ class TacheResultatController extends Controller
 
         // Notifier (sans doublon)
         $responsables->unique('id')
-            ->reject(fn($r) => $r->id === $user->id)
-            ->each(fn($r) => $r->notify(
-                new \App\Notifications\ResultatIndividuelSoumisNotification($tache, $user, $resultat)
+            ->reject(fn ($r) => $r->id === $user->id)
+            ->each(fn ($r) => $r->notify(
+                new ResultatIndividuelSoumisNotification($tache, $user, $resultat)
             ));
     }
-
 
     /**
      * Upload d'un document avec système de permissions
@@ -925,7 +918,7 @@ class TacheResultatController extends Controller
     {
         $originalName = $file->getClientOriginalName();
         $extension = $file->getClientOriginalExtension();
-        $filename = Str::uuid() . '.' . $extension;
+        $filename = Str::uuid().'.'.$extension;
 
         // Stockage dans le dossier private
         $path = $file->storeAs('resultats/taches', $filename, 'private');
@@ -971,7 +964,7 @@ class TacheResultatController extends Controller
         // 1. Permission pour l'utilisateur uploader (plein accès)
         $permissions->push([
             'document_id' => $document->id,
-            'permissionable_type' => \App\Models\User::class,
+            'permissionable_type' => User::class,
             'permissionable_id' => $currentUserId,
             'can_view' => true,
             'can_download' => true,
@@ -984,7 +977,7 @@ class TacheResultatController extends Controller
         if ($tache->activite->responsable && $tache->activite->responsable->id !== $currentUserId) {
             $permissions->push([
                 'document_id' => $document->id,
-                'permissionable_type' => \App\Models\User::class,
+                'permissionable_type' => User::class,
                 'permissionable_id' => $tache->activite->responsable->id,
                 'can_view' => true,
                 'can_download' => true,
@@ -1002,7 +995,7 @@ class TacheResultatController extends Controller
         ) {
             $permissions->push([
                 'document_id' => $document->id,
-                'permissionable_type' => \App\Models\User::class,
+                'permissionable_type' => User::class,
                 'permissionable_id' => $tache->activite->projet->responsable->id,
                 'can_view' => true,
                 'can_download' => true,
@@ -1025,7 +1018,7 @@ class TacheResultatController extends Controller
         foreach ($validateurs->unique() as $validateurId) {
             $permissions->push([
                 'document_id' => $document->id,
-                'permissionable_type' => \App\Models\User::class,
+                'permissionable_type' => User::class,
                 'permissionable_id' => $validateurId,
                 'can_view' => true,
                 'can_download' => true,
@@ -1037,7 +1030,7 @@ class TacheResultatController extends Controller
 
         // ❌ Éviter les doublons
         $permissions = $permissions->unique(function ($item) {
-            return $item['document_id'] . '-' . $item['permissionable_type'] . '-' . $item['permissionable_id'];
+            return $item['document_id'].'-'.$item['permissionable_type'].'-'.$item['permissionable_id'];
         })->values();
 
         if ($permissions->isNotEmpty()) {
@@ -1047,12 +1040,9 @@ class TacheResultatController extends Controller
             Log::info('Permissions créées pour le document', [
                 'document_id' => $document->id,
                 'permissions_count' => $permissions->count(),
-                'users' => $permissions->pluck('permissionable_id')->toArray()
+                'users' => $permissions->pluck('permissionable_id')->toArray(),
             ]);
         }
 
     }
-
-
-
 }
