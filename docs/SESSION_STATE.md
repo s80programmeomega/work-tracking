@@ -29,14 +29,21 @@
 **Status:** Not started
 
 **What to do next:**
-1. Create branch `feature/v2-task-1-queue-reverb` from `jonas`
-2. Follow Task 1 in `IMPLEMENTATION_PLAN.md`
+1. Merge PR for `feature/v2-task-0-policies-refactor` into `jonas`
+2. Create branch `feature/v2-task-1-queue-reverb` from `jonas`
+3. Follow Task 1 in `IMPLEMENTATION_PLAN.md`
 
 ---
 
 ## Last Completed Task
 
-None — planning phase complete, implementation not yet started.
+**Task 0** — Permission Architecture Refactor (Policies)
+- 5 Policy classes created (`ProjetPolicy`, `ActivitePolicy`, `TachePolicy`, `DocumentPolicy`, `WorkspacePolicy`)
+- `AuthServiceProvider` updated with `Gate::before()` super_admin bypass + policy registration
+- `RolePermissionSeeder` updated with contextual roles
+- All 76 `abort_unless` replaced with `$this->authorize()` across 6 controllers
+- All 22 tests passing
+- Branch pushed — PR pending into `jonas`
 
 ---
 
@@ -44,7 +51,7 @@ None — planning phase complete, implementation not yet started.
 
 | Branch | Task | Status |
 |---|---|---|
-| — | — | — |
+| `feature/v2-task-0-policies-refactor` | Task 0 | Pending review |
 
 ---
 
@@ -73,3 +80,4 @@ None — planning phase complete, implementation not yet started.
 | Date | Tasks worked on | Outcome |
 |---|---|---|
 | 2026-05-11 | Planning | Created IMPLEMENTATION_PLAN.md, WORKING_GUIDELINES.md, PROGRESSION.md, SESSION_STATE.md. Updated ONBOARDING.md. Ready to start Task 1. |
+| 2026-05-12 | Planning + Task 0 | Merged 6 branches into jonas. Completed Task 0: Policies refactor, Gate::before bypass, contextual roles seeded, 76 abort_unless replaced. All tests passing. PR open. |

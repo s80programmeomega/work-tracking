@@ -19,7 +19,7 @@
 
 | # | Task | Branch | Status | Started | Completed | Notes |
 |---|---|---|---|---|---|---|
-| 0 | Permission Architecture Refactor (Policies) | `feature/v2-task-0-policies-refactor` | ⬜ | — | — | — |
+| 0 | Permission Architecture Refactor (Policies) | `feature/v2-task-0-policies-refactor` | ✅ | 2026-05-12 | 2026-05-12 | — |
 | 1 | Queue (database) + Laravel Reverb | `feature/v2-task-1-queue-reverb` | ⬜ | — | — | — |
 | 2 | Subtask Data Model | `feature/v2-task-2-subtask-model` | ⬜ | — | — | — |
 | 3 | Subtask CRUD API + Auto Progress | `feature/v2-task-3-subtask-api` | ⬜ | — | — | — |
