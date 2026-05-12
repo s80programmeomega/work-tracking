@@ -26,31 +26,40 @@ class RolePermissionSeeder extends Seeder
             'workspaces.update',
             'workspaces.delete',
             'workspaces.manage_members',
+            'workspaces.manage_settings',
+            'workspaces.invite_members',
+            'workspaces.remove_members',
+            'workspaces.view_all_projects',
 
             // Projets
             'projets.view',
             'projets.create',
             'projets.update',
             'projets.delete',
-            'can_create_projects',
-            'can_delete_members',
-            'can_invite_members',
-            'can_manage_settings',
-            'can_view_all_projects',
+            'projets.manage_members',
 
             // Activités
             'activites.view',
             'activites.create',
             'activites.update',
             'activites.delete',
+            'activites.manage_members',
 
             // Tâches
             'taches.view',
             'taches.create',
             'taches.update',
             'taches.delete',
-            'taches.validate',
+            'taches.validate_n1',
+            'taches.validate_n2',
+            'taches.submit_result',
             'taches.comment',
+
+            // Documents
+            'documents.view',
+            'documents.upload',
+            'documents.delete',
+            'documents.share',
 
             // Users
             'users.view',
@@ -62,15 +71,22 @@ class RolePermissionSeeder extends Seeder
             // Reports
             'reports.view',
             'reports.create',
+
+            // Legacy — kept for backward compat during transition
+            'can_create_projects',
+            'can_delete_members',
+            'can_invite_members',
+            'can_manage_settings',
+            'can_view_all_projects',
         ];
 
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission, 'guard_name' => 'web']);
+            Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
         }
 
-        // Create global roles
+        // Global roles (Spatie — assigned to user account)
         foreach (RoleEnum::cases() as $roleEnum) {
-            $role = Role::create([
+            $role = Role::firstOrCreate([
                 'name' => $roleEnum->value,
                 'guard_name' => 'web',
             ]);
@@ -81,6 +97,52 @@ class RolePermissionSeeder extends Seeder
                 $role->givePermissionTo(Permission::all());
             } else {
                 $role->givePermissionTo($rolePermissions);
+            }
+        }
+
+        // Contextual roles (stored in pivot tables — scoped per workspace/project/activity)
+        $contextualRoles = [
+            'owner' => Permission::all(),
+            'manager' => [
+                'projets.view', 'projets.update', 'projets.manage_members',
+                'activites.view', 'activites.create', 'activites.update', 'activites.delete', 'activites.manage_members',
+                'taches.view', 'taches.create', 'taches.update', 'taches.delete', 'taches.validate_n2', 'taches.comment',
+                'documents.view', 'documents.upload', 'documents.delete', 'documents.share',
+                'reports.view', 'reports.create',
+            ],
+            'cadre' => [
+                'projets.view',
+                'activites.view', 'activites.update',
+                'taches.view', 'taches.create', 'taches.update', 'taches.validate_n1', 'taches.comment',
+                'documents.view', 'documents.upload',
+                'reports.view',
+            ],
+            'collaborateur' => [
+                'projets.view',
+                'activites.view',
+                'taches.view', 'taches.submit_result', 'taches.comment',
+                'documents.view', 'documents.upload',
+            ],
+            'stagiaire' => [
+                'projets.view',
+                'activites.view',
+                'taches.view', 'taches.submit_result', 'taches.comment',
+                'documents.view',
+            ],
+            'observateur' => [
+                'projets.view',
+                'activites.view',
+                'taches.view',
+                'documents.view',
+            ],
+        ];
+
+        foreach ($contextualRoles as $roleName => $rolePermissions) {
+            $role = Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
+            if ($rolePermissions instanceof \Illuminate\Database\Eloquent\Collection) {
+                $role->syncPermissions($rolePermissions);
+            } else {
+                $role->syncPermissions(Permission::whereIn('name', $rolePermissions)->get());
             }
         }
 

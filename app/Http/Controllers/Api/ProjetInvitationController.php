@@ -28,7 +28,7 @@ class ProjetInvitationController extends Controller
      */
     public function invite(Projet $projet, Request $request)
     {
-        abort_unless($this->permissionService->canManageProjectMembers(auth()->user(), $projet), 403);
+        $this->authorize('manageMembers', $projet);
 
         $request->validate([
             'emails' => 'required|array|min:1',
@@ -451,7 +451,7 @@ class ProjetInvitationController extends Controller
      */
     public function index(Projet $projet)
     {
-        abort_unless($this->permissionService->canManageProjectMembers(auth()->user(), $projet), 403);
+        $this->authorize('manageMembers', $projet);
 
         $invitations = ProjetInvitation::where('projet_id', $projet->id)
             ->where('status', 'pending')
@@ -470,7 +470,7 @@ class ProjetInvitationController extends Controller
      */
     public function resend(Projet $projet, ProjetInvitation $invitation)
     {
-        abort_unless($this->permissionService->canManageProjectMembers(auth()->user(), $projet), 403);
+        $this->authorize('manageMembers', $projet);
 
         if ($invitation->projet_id !== $projet->id) {
             abort(403, 'Cette invitation n\'appartient pas à ce projet');
@@ -504,7 +504,7 @@ class ProjetInvitationController extends Controller
      */
     public function cancel(Projet $projet, ProjetInvitation $invitation)
     {
-        abort_unless($this->permissionService->canManageProjectMembers(auth()->user(), $projet), 403);
+        $this->authorize('manageMembers', $projet);
 
         if ($invitation->projet_id !== $projet->id) {
             abort(403, 'Cette invitation n\'appartient pas à ce projet');
