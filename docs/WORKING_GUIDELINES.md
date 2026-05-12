@@ -83,6 +83,8 @@ At the end of each task, produce a short list:
 - Translation keys added
 - Commits made
 
+Then **tick off every completed item in the `docs/PROGRESSION.md` deliverables checklist** for that task. Leave unchecked any item that was intentionally deferred to a later task.
+
 This doubles as the `ONBOARDING.md` update content.
 
 ---
