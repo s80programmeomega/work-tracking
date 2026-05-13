@@ -306,7 +306,8 @@ class Workspace extends Model
 
     public function hasAccess(User $user): bool
     {
-        return $this->owner_id === $user->id
+        return $user->isSuperAdmin()
+            || $this->owner_id === $user->id
             || $this->members()->where('user_id', $user->id)->exists();
     }
 

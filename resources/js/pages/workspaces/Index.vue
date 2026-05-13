@@ -156,7 +156,8 @@
       <!-- Grid View (Asana-style) -->
       <div v-else-if="viewMode === 'grid'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <div v-for="workspace in filteredWorkspaces" :key="workspace.id"
-          class="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-lg transition-all duration-300 overflow-hidden">
+          class="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-lg transition-all duration-300 overflow-hidden cursor-pointer"
+          @click="navigateToWorkspace(workspace.id)">
           
           <!-- Visual Identifier -->
           <div class="absolute top-0 left-0 w-full h-2" 
@@ -165,7 +166,7 @@
           <!-- Hover Effect -->
           <div class="absolute inset-0 bg-gradient-to-br from-blue-50/0 to-blue-100/0 group-hover:from-blue-50/10 group-hover:to-blue-100/10 dark:from-blue-900/0 dark:to-blue-800/0 dark:group-hover:from-blue-900/10 dark:group-hover:to-blue-800/10 transition-all duration-300"></div>
           
-          <div class="relative p-6" @click="navigateToWorkspace(workspace.id)">
+          <div class="relative p-6">
             <!-- Logo and Title -->
             <div class="flex items-start space-x-4 mb-5">
               <div class="flex-shrink-0">
@@ -263,14 +264,15 @@
       <!-- List View (Asana-style) -->
       <div v-else class="space-y-3">
         <div v-for="workspace in filteredWorkspaces" :key="workspace.id"
-          class="group bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition-all duration-200">
+          class="group bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition-all duration-200 cursor-pointer"
+          @click="navigateToWorkspace(workspace.id)">
           
           <!-- Active Indicator -->
           <div class="flex items-center">
             <div class="w-1 h-16 rounded-l-lg" 
               :class="workspace.is_active ? 'bg-blue-600' : 'bg-gray-400'"></div>
             
-            <div class="flex-1 p-4" @click="navigateToWorkspace(workspace.id)">
+            <div class="flex-1 p-4">
               <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4 flex-1 min-w-0">
                   <!-- Logo -->

@@ -80,7 +80,7 @@
                     <div class="max-h-60 overflow-y-auto">
                         <!-- CORRECTION : Utiliser filteredWorkspaces et vérifier null -->
                         <button v-for="workspace in filteredWorkspaces" :key="workspace?.id || 'null'"
-                            @click="selectWorkspace(workspace)"
+                            @click="handleSelectWorkspace(workspace)"
                             class="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors group">
                             <div
                                 class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white font-semibold text-sm">
@@ -338,8 +338,7 @@ const filteredWorkspaces = computed(() => {
         .map(workspace => ({
             id: workspace.id,
             nom: workspace.nom || 'Workspace sans nom',
-            projets_count: workspace.projets_count || 0,
-            // autres propriétés avec fallback
+            projets_count: workspace.projets_count ?? workspace.projet_count ?? 0,
         }))
 })
 
@@ -370,7 +369,7 @@ const currentWorkspaceInitials = computed(() => {
 });
 
 const workspaceProjectCount = computed(() => {
-    return currentWorkspace.value?.projets_count || 0;
+    return currentWorkspace.value?.projets_count ?? currentWorkspace.value?.projet_count ?? 0;
 });
 
 const getWorkspaceInitials = (name) => {

@@ -93,11 +93,8 @@ export const useAuthStore = defineStore('auth', {
         },
 
         /**
-         * Current workspace — sourced from Pinia state (not user object)
-         * so it updates reactively when useWorkspace sets it
+         * Current workspace ID — derived from state or user object
          */
-        currentWorkspace: (state) => state.currentWorkspace,
-
         currentWorkspaceId: (state) => state.currentWorkspace?.id || state.user?.current_workspace_id || null,
 
         /**
