@@ -364,7 +364,7 @@ import { useWorkspace } from '@/composables/useWorkspace';
 import AdminLayout from '@/components/layout/AdminLayout.vue';
 
 const router = useRouter();
-const { workspaces, loading, fetchWorkspaces } = useWorkspace();
+const { workspaces, loading, fetchWorkspaces, selectWorkspace } = useWorkspace();
 
 const searchQuery = ref('');
 const filterActive = ref('all');
@@ -420,7 +420,9 @@ const formatDate = (dateString: string): string => {
   });
 };
 
-const navigateToWorkspace = (id: number) => {
+const navigateToWorkspace = async (id: number) => {
+  const workspace = workspaces.value.find(w => w.id === id);
+  if (workspace) await selectWorkspace(workspace);
   router.push({ name: 'workspaces.show', params: { id } });
 };
 

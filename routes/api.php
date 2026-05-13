@@ -90,16 +90,17 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::prefix('{workspace}/members')->group(function () {
             Route::get('/', [WorkspaceController::class, 'members']);
             Route::post('/', [WorkspaceController::class, 'addMember']);
-            Route::put('/{user}', [WorkspaceController::class, 'updateMember'])->name('workspace.members.update');
-            Route::get('/{user}', [WorkspaceController::class, 'showMember'])->name('workspace.members.show');
-            Route::delete('/{user}', [WorkspaceController::class, 'removeMember']);
 
-
-            // Invitations
+            // Static routes MUST come before /{user} to avoid being swallowed by the wildcard
             Route::post('/invite', [WorkspaceController::class, 'inviteMembers']);
             Route::get('/invitations', [WorkspaceController::class, 'invitations']);
             Route::post('/invitations/{invitation}/resend', [WorkspaceController::class, 'resendInvitation']);
             Route::delete('/invitations/{invitation}', [WorkspaceController::class, 'cancelInvitation']);
+
+            // Dynamic /{user} routes after static ones
+            Route::put('/{user}', [WorkspaceController::class, 'updateMember'])->name('workspace.members.update');
+            Route::get('/{user}', [WorkspaceController::class, 'showMember'])->name('workspace.members.show');
+            Route::delete('/{user}', [WorkspaceController::class, 'removeMember']);
         });
 
         // Workspace Projects

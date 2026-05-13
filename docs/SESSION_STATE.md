@@ -16,9 +16,9 @@
 
 ## Current Session
 
-**Date:** 2026-05-12
-**Session goal:** Merge pending branches, complete Task 0 (Policies refactor), finalize docs
-**Status:** Complete — Task 0 done, PR open, ready to merge and start Task 1 tomorrow
+**Date:** 2026-05-13
+**Session goal:** Fix pre-merge bugs, factories/seeder, refactor, prepare for Task 1
+**Status:** Complete — all bugs fixed, tests passing, ready to merge PR and start Task 1
 
 ---
 
@@ -82,4 +82,4 @@
 | Date | Tasks worked on | Outcome |
 |---|---|---|
 | 2026-05-11 | Planning | Created IMPLEMENTATION_PLAN.md, WORKING_GUIDELINES.md, PROGRESSION.md, SESSION_STATE.md. Updated ONBOARDING.md. Ready to start Task 1. |
-| 2026-05-12 | Planning + Task 0 | Merged 6 branches into jonas. Completed Task 0: Policies refactor, Gate::before bypass, contextual roles seeded, 76 abort_unless replaced. All tests passing. PR open. |
+| 2026-05-13 | Task 0 bug fixes | Fixed Pinia readonly conflict, UserResource missing current_workspace_id, hasAccess super_admin bypass, sidebar projet_count fallback, workspace/project card cursor, navigateToWorkspace now calls selectWorkspace. Added 6 factories, expanded seeder to 2 workspaces + 45 tasks. Refactored ProjetService to use scopeInWorkspace. All tests passing. |

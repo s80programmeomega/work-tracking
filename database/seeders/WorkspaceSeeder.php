@@ -183,6 +183,38 @@ class WorkspaceSeeder extends Seeder
             }
         }
 
+        // ── Second workspace (owned by manager, directeur is a member) ──────
+        $workspace2 = Workspace::create([
+            'nom'         => 'Workspace Secondaire',
+            'description' => 'Second workspace pour tester le switch',
+            'code'        => 'TEST-WS-002',
+            'owner_id'    => $manager->id,
+            'is_active'   => true,
+            'settings'    => ['default_project_visibility' => 'team'],
+        ]);
+
+        foreach ([$superAdmin, $directeur, $manager, $cadre] as $user) {
+            $user->update(['current_workspace_id' => $workspace->id]); // keep primary
+        }
+
+        $workspace2->members()->attach($manager->id, [
+            'role' => 'owner', 'invited_at' => now(), 'invited_by' => $manager->id,
+        ]);
+        $workspace2->members()->attach($directeur->id, [
+            'role' => 'manager', 'invited_at' => now(), 'invited_by' => $manager->id,
+        ]);
+
+        Projet::create([
+            'workspace_id'   => $workspace2->id,
+            'nom'            => 'Projet Workspace 2',
+            'description'    => 'Projet de test dans le second workspace',
+            'responsable_id' => $manager->id,
+            'date_debut'     => now(),
+            'date_fin'       => now()->addMonths(2),
+            'visibility'     => 'team',
+            'status'         => 'active',
+        ]);
+
         $this->command->info('Workspace seeded successfully!');
         $this->command->info('3 projects × 3 activities × 5 tasks = 45 tasks total');
         $this->command->info('');

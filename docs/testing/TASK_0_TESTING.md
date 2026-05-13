@@ -59,7 +59,13 @@
 3. Try to edit anything → ❌ should return 403 on all write actions
 4. View project/task details → ✅ should succeed
 
-**TC-07 — Unauthenticated request is rejected**
+**TC-07 — Workspace switch works**
+1. Log in as `directeur@worktracking.com`
+2. Open the sidebar workspace dropdown
+3. Click "Workspace Secondaire" (owned by manager, directeur is a member)
+- ✅ Expected: sidebar label updates to "Workspace Secondaire", page data refreshes
+
+**TC-08 — Unauthenticated request is rejected**
 1. Log out completely
 2. Call any API endpoint directly (e.g. `GET /api/projets/1`)
 - ❌ Expected: 401 Unauthorized
