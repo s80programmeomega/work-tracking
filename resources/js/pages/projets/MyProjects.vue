@@ -250,7 +250,8 @@
           <!-- Projects Grid - Trello Style Cards -->
           <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <div v-for="projet in filteredProjets" :key="projet.id"
-              class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow overflow-hidden">
+              class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow overflow-hidden cursor-pointer"
+              @click="viewProjet(projet.id)">
               <!-- Card Header with Color Band -->
               <div class="h-2" :style="{ backgroundColor: projet.couleur || '#3B82F6' }"></div>
 
@@ -268,8 +269,7 @@
                         Propriétaire
                       </span>
                     </div>
-                    <h3 @click="viewProjet(projet.id)"
-                      class="text-lg font-bold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer line-clamp-1">
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors line-clamp-1">
                       {{ projet.nom }}
                     </h3>
                   </div>
