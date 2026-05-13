@@ -51,7 +51,7 @@ class ProjetService
                 return new LengthAwarePaginator([], 0, $filters['per_page'] ?? 15);
             }
 
-            $query->where('workspace_id', $workspace->id);
+            $query->inWorkspace($workspace->id);
 
             if (!($workspace->owner_id === $user->id || $this->isWorkspaceAdmin($user, $workspace))) {
                 $query->where(function ($q) use ($user) {
@@ -111,15 +111,15 @@ class ProjetService
      */
     public function getWorkspaceDashboardStats(int $workspaceId): array
     {
-        $totalProjets = Projet::where('workspace_id', $workspaceId)->count();
+        $totalProjets = Projet::inWorkspace($workspaceId)->count();
 
         return [
             'total_projets' => $totalProjets,
-            'projets_actifs' => Projet::where('workspace_id', $workspaceId)->active()->count(),
-            'projets_termines' => Projet::where('workspace_id', $workspaceId)->completed()->count(),
-            'projets_archives' => Projet::where('workspace_id', $workspaceId)->archived()->count(),
-            'projets_en_retard' => Projet::where('workspace_id', $workspaceId)->overdue()->count(),
-            'projets_favoris' => Projet::where('workspace_id', $workspaceId)->favorite()->count(),
+            'projets_actifs' => Projet::inWorkspace($workspaceId)->active()->count(),
+            'projets_termines' => Projet::inWorkspace($workspaceId)->completed()->count(),
+            'projets_archives' => Projet::inWorkspace($workspaceId)->archived()->count(),
+            'projets_en_retard' => Projet::inWorkspace($workspaceId)->overdue()->count(),
+            'projets_favoris' => Projet::inWorkspace($workspaceId)->favorite()->count(),
             'total_activites' => DB::table('activites')
                 ->join('projets', 'activites.projet_id', '=', 'projets.id')
                 ->where('projets.workspace_id', $workspaceId)
@@ -219,7 +219,7 @@ class ProjetService
     protected function applyFilters(Builder $query, array $filters): void
     {
         if (!empty($filters['workspace_id'])) {
-            $query->where('workspace_id', $filters['workspace_id']);
+            $query->inWorkspace($filters['workspace_id']);
         }
 
         if (!empty($filters['search'])) {
