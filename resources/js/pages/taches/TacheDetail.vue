@@ -124,6 +124,25 @@
             <TacheDetailsTab :tache="tache" />
           </div>
 
+          <!-- Tab: Sous-tâches -->
+          <div v-show="activeTab === 'sous-taches'">
+            <SousTacheList
+              v-if="sousTachesComposable"
+              :tache-id="tache.id"
+              :sous-taches="sousTachesComposable.sousTaches.value"
+              :loading="sousTachesComposable.loading.value"
+              :error="sousTachesComposable.error.value"
+              :total-poids="sousTachesComposable.totalPoids.value"
+              :parent-echeance="tache.echeance"
+              :can-create="permissions.can_create_subtask ?? false"
+              :can-edit="permissions.can_update ?? false"
+              :can-delete="permissions.can_delete ?? false"
+              @create="handleSousTacheCreate"
+              @update="handleSousTacheUpdate"
+              @delete="handleSousTacheDelete"
+            />
+          </div>
+
           <!-- Tab: Assignés -->
           <div v-show="activeTab === 'assignees'">
             <TacheAssigneesTab :tache="tache" :permissions="permissions" @refresh="fetchTache" />
@@ -174,6 +193,8 @@ import TacheLinksTab from '@/components/taches/tacheDetail/TacheLinksTab.vue';
 import TacheResultsTab from '@/components/taches/tacheDetail/TacheResultsTab.vue';
 import TacheCommentsTab from '@/components/taches/tacheDetail/TacheCommentsTab.vue';
 import TacheActivityTab from '@/components/taches/tacheDetail/TacheActivityTab.vue';
+import SousTacheList from '@/components/taches/SousTacheList.vue';
+import { useSousTaches } from '@/composables/useSousTaches';
 
 const route = useRoute();
 const tache = ref(null);
@@ -184,8 +205,11 @@ const stats = ref({});
 const permissions = ref({});
 const breadcrumb = ref({});
 
+const sousTachesComposable = ref(null);
+
 const tabs = computed(() => [
   { id: 'details', label: 'Détails', icon: 'fa-info-circle' },
+  { id: 'sous-taches', label: 'Sous-tâches', icon: 'fa-list-check', count: sousTachesComposable.value?.sousTaches.value.length },
   { id: 'assignees', label: 'Assignés', icon: 'fa-users', count: stats.value.assignees_count },
   { id: 'attachments', label: 'Fichiers', icon: 'fa-paperclip', count: stats.value.attachments_count },
   { id: 'links', label: 'Liens', icon: 'fa-link', count: stats.value.links_count },
@@ -204,12 +228,34 @@ const fetchTache = async () => {
     stats.value = response.data.additional_info.stats;
     permissions.value = response.data.additional_info.permissions;
     breadcrumb.value = response.data.additional_info.breadcrumb;
+
+    if (!sousTachesComposable.value) {
+      sousTachesComposable.value = useSousTaches(tache.value.id);
+    }
+    await sousTachesComposable.value.fetchSousTaches();
   } catch (err) {
     error.value = err.response?.data?.message || 'Erreur lors du chargement de la tâche';
     console.error('Erreur:', err);
   } finally {
     loading.value = false;
   }
+};
+
+const handleSousTacheCreate = async (payload) => {
+  if (!sousTachesComposable.value) return;
+  await sousTachesComposable.value.createSousTache(payload);
+};
+
+const handleSousTacheUpdate = async (id, payload) => {
+  if (!sousTachesComposable.value) return;
+  await sousTachesComposable.value.updateSousTache(id, payload);
+  await fetchTache();
+};
+
+const handleSousTacheDelete = async (id) => {
+  if (!sousTachesComposable.value) return;
+  await sousTachesComposable.value.deleteSousTache(id);
+  await fetchTache();
 };
 
 const getStatutClass = (statut) => {
