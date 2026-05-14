@@ -796,6 +796,7 @@ class TacheController extends Controller
                     'can_add_attachments' => auth()->user()->can('addAttachments', $tache),
                     'can_add_links' => auth()->user()->can('addLinks', $tache),
                     'can_comment' => auth()->user()->can('comment', $tache),
+                    'can_create_subtask' => auth()->user()->can('createSubtask', $tache),
                 ],
 
                 // Informations de navigation
