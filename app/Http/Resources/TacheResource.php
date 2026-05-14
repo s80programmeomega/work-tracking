@@ -140,7 +140,7 @@ class TacheResource extends JsonResource
                     'can_edit' => (bool) ($pivot->pivot->can_edit ?? false),
                     'can_complete' => (bool) ($pivot->pivot->can_complete ?? true),
                     'can_validate' => (bool) ($pivot->pivot->can_validate ?? false),
-                    'role' => $pivot->pivot->role ?? 'collaborator',
+                    'role' => $pivot->pivot->role ?? 'collaborateur',
                     'can_move' => true,
                     'can_submit_result' => ($pivot->pivot->statut_individuel ?? $this->statut->value) === 'termine',
                 ];
@@ -195,7 +195,7 @@ class TacheResource extends JsonResource
                         'email' => $assignedUser->email,
                         'avatar' => $assignedUser->avatar,
                         'pivot' => [
-                            'role' => $assignedUser->pivot->role ?? 'collaborator',
+                            'role' => $assignedUser->pivot->role ?? 'collaborateur',
                             'can_edit' => (bool) ($assignedUser->pivot->can_edit ?? false),
                             'can_complete' => (bool) ($assignedUser->pivot->can_complete ?? true),
                             'can_validate' => (bool) ($assignedUser->pivot->can_validate ?? false),

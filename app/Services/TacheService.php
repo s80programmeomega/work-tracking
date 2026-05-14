@@ -8,17 +8,13 @@ use App\Models\Tache;
 use App\Models\TacheAttachment;
 use App\Models\TacheExternalLink;
 use App\Models\User;
-use App\Notifications\Taches\TacheAssignedNotification;
 use App\Notifications\Taches\TacheFileAddedNotification;
 use App\Notifications\Taches\TacheFileRemovedNotification;
 use App\Notifications\Taches\TacheLinkAddedNotification;
 use App\Notifications\Taches\TacheLinkRemovedNotification;
-use App\Notifications\Taches\TacheUnassignedNotification;
-use App\Notifications\Taches\TacheUpdatedNotification;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
@@ -26,7 +22,7 @@ class TacheService
 {
     /**
      * ✅ Obtenir le numéro de semaine standardisé (ISO 8601)
-     * 
+     *
      * ISO 8601: La semaine commence le lundi, la première semaine de l'année
      * contient le 4 janvier.
      */
@@ -42,7 +38,6 @@ class TacheService
         ];
     }
 
-
     /**
      * ✅ Obtenir toutes les tâches avec filtres et permissions
      */
@@ -51,7 +46,7 @@ class TacheService
         $query = Tache::query()->with(['activite.projet', 'assignees', 'labels']);
 
         // ✅ Appliquer les permissions via Policy
-        if (!$user->isSuperAdmin()) {
+        if (! $user->isSuperAdmin()) {
             $query->where(function ($q) use ($user) {
                 // Tâches assignées
                 $q->whereHas('assignees', function ($aq) use ($user) {
@@ -155,7 +150,7 @@ class TacheService
                     'labels:id,nom,couleur',
                     'validatedN1By:id,nom',
                     'validatedN2By:id,nom',
-                    'createdBy:id,nom'
+                    'createdBy:id,nom',
                 ])
                 ->orderBy('position')
                 ->orderBy('created_at', 'desc')
@@ -163,7 +158,7 @@ class TacheService
 
             Log::info('Tâches récupérées', [
                 'activite_id' => $activiteId,
-                'total' => $taches->count()
+                'total' => $taches->count(),
             ]);
 
             // ✅ Grouper par statut avec garantie de structure
@@ -177,7 +172,7 @@ class TacheService
                 'activite_id' => $activiteId,
                 'a_faire' => count($kanban['a_faire']),
                 'en_cours' => count($kanban['en_cours']),
-                'termine' => count($kanban['termine'])
+                'termine' => count($kanban['termine']),
             ]);
 
             return $kanban;
@@ -186,7 +181,7 @@ class TacheService
             Log::error('Erreur Service getKanbanForActivite', [
                 'activite_id' => $activiteId,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             // ✅ Retourner structure vide en cas d'erreur
@@ -197,7 +192,6 @@ class TacheService
             ];
         }
     }
-
 
     /**
      * ✅ Mes tâches (toutes mes tâches accessibles)
@@ -232,10 +226,10 @@ class TacheService
     public function uploadFile(Tache $tache, $file, User $uploadedBy): TacheAttachment
     {
         $originalName = $file->getClientOriginalName();
-        $fileName = time() . '_' . uniqid() . '_' . $originalName;
+        $fileName = time().'_'.uniqid().'_'.$originalName;
         $filePath = $file->storeAs('tache-attachments', $fileName, 'uploads');
 
-        if (!$filePath) {
+        if (! $filePath) {
             throw new \Exception('Erreur lors de l\'upload du fichier');
         }
 
@@ -250,55 +244,53 @@ class TacheService
         ]);
     }
 
-    
-/**
- * ✅ NOUVEAU : Gérer les liens externes
- */
-protected function handleExternalLinks(Tache $tache, $links, User $user): void
-{
-    // Si c'est une string JSON, la décoder
-    if (is_string($links)) {
-        $links = json_decode($links, true);
-    }
+    /**
+     * ✅ NOUVEAU : Gérer les liens externes
+     */
+    protected function handleExternalLinks(Tache $tache, $links, User $user): void
+    {
+        // Si c'est une string JSON, la décoder
+        if (is_string($links)) {
+            $links = json_decode($links, true);
+        }
 
-    if (!is_array($links)) {
-        return;
-    }
+        if (! is_array($links)) {
+            return;
+        }
 
-    foreach ($links as $link) {
-        try {
-            // Validation
-            if (!isset($link['url']) || !filter_var($link['url'], FILTER_VALIDATE_URL)) {
-                continue;
+        foreach ($links as $link) {
+            try {
+                // Validation
+                if (! isset($link['url']) || ! filter_var($link['url'], FILTER_VALIDATE_URL)) {
+                    continue;
+                }
+
+                TacheExternalLink::create([
+                    'tache_id' => $tache->id,
+                    'url' => $link['url'],
+                    'title' => $link['title'] ?? $link['url'],
+                    'created_by' => $user->id,
+                ]);
+
+                Log::info('✅ Lien externe ajouté', [
+                    'tache_id' => $tache->id,
+                    'url' => $link['url'],
+                ]);
+            } catch (\Exception $e) {
+                Log::error('❌ Erreur ajout lien externe', [
+                    'tache_id' => $tache->id,
+                    'link' => $link,
+                    'error' => $e->getMessage(),
+                ]);
+                // Continuer avec les autres liens
             }
-
-            TacheExternalLink::create([
-                'tache_id' => $tache->id,
-                'url' => $link['url'],
-                'title' => $link['title'] ?? $link['url'],
-                'created_by' => $user->id,
-            ]);
-
-            Log::info('✅ Lien externe ajouté', [
-                'tache_id' => $tache->id,
-                'url' => $link['url']
-            ]);
-        } catch (\Exception $e) {
-            Log::error('❌ Erreur ajout lien externe', [
-                'tache_id' => $tache->id,
-                'link' => $link,
-                'error' => $e->getMessage()
-            ]);
-            // Continuer avec les autres liens
         }
     }
-}
-
 
     /**
      * ✅ Supprimer un fichier attaché
      */
-   public function deleteAttachment(TacheAttachment $attachment, User $deletedBy): bool
+    public function deleteAttachment(TacheAttachment $attachment, User $deletedBy): bool
     {
         $tache = $attachment->tache;
 
@@ -357,22 +349,21 @@ protected function handleExternalLinks(Tache $tache, $links, User $user): void
         return $deleted;
     }
 
-
     /**
      * ✅ Créer une tâche avec gestion automatique des semaines
      */
     public function createTache(array $data, User $user): Tache
     {
         DB::beginTransaction();
-        
+
         try {
             // ✅ S'assurer que le responsable est dans les assignés
             if (isset($data['responsable_id'])) {
-                if (!isset($data['assignee_ids']) || !is_array($data['assignee_ids'])) {
+                if (! isset($data['assignee_ids']) || ! is_array($data['assignee_ids'])) {
                     $data['assignee_ids'] = [];
                 }
-                
-                if (!in_array($data['responsable_id'], $data['assignee_ids'])) {
+
+                if (! in_array($data['responsable_id'], $data['assignee_ids'])) {
                     $data['assignee_ids'][] = $data['responsable_id'];
                 }
             }
@@ -382,7 +373,7 @@ protected function handleExternalLinks(Tache $tache, $links, User $user): void
             $labelIds = $data['label_ids'] ?? [];
             $uploadedFiles = $data['uploaded_files'] ?? [];
             $externalLinks = $data['external_links'] ?? [];
-            
+
             unset(
                 $data['assignee_ids'],
                 $data['label_ids'],
@@ -397,13 +388,14 @@ protected function handleExternalLinks(Tache $tache, $links, User $user): void
             $tache = Tache::create($data);
 
             // ✅ Assigner les utilisateurs avec rôle spécial pour le responsable
-            if (!empty($assigneeIds)) {
+            if (! empty($assigneeIds)) {
                 $assignData = [];
                 foreach ($assigneeIds as $userId) {
                     $isResponsable = ($userId == $data['responsable_id']);
-                    
+
                     $assignData[$userId] = [
-                        'role' => $isResponsable ? 'responsable' : 'collaborator',
+                        'role' => 'collaborateur',
+                        'is_responsable' => $isResponsable,
                         'can_edit' => $isResponsable ? true : false,
                         'can_complete' => true,
                         'can_validate' => $isResponsable ? true : false,
@@ -411,28 +403,28 @@ protected function handleExternalLinks(Tache $tache, $links, User $user): void
                         'progression_individuelle' => 0,
                     ];
                 }
-                
+
                 $tache->assignees()->attach($assignData);
-                
+
                 Log::info('✅ Assignés attachés avec responsable', [
                     'tache_id' => $tache->id,
                     'responsable_id' => $data['responsable_id'],
-                    'total_assignes' => count($assigneeIds)
+                    'total_assignes' => count($assigneeIds),
                 ]);
             }
 
             // Attacher les labels
-            if (!empty($labelIds)) {
+            if (! empty($labelIds)) {
                 $tache->labels()->attach($labelIds);
             }
 
             // Gérer les fichiers uploadés
-            if (!empty($uploadedFiles)) {
+            if (! empty($uploadedFiles)) {
                 $this->handleFileUploads($tache, $uploadedFiles, $user);
             }
 
             // Gérer les liens externes
-            if (!empty($externalLinks)) {
+            if (! empty($externalLinks)) {
                 $this->handleExternalLinks($tache, $externalLinks, $user);
             }
 
@@ -444,14 +436,14 @@ protected function handleExternalLinks(Tache $tache, $links, User $user): void
                 'labels',
                 'attachments',
                 'externalLinks',
-                'responsable'
+                'responsable',
             ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('❌ Erreur création tâche', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
             throw $e;
         }
@@ -460,116 +452,117 @@ protected function handleExternalLinks(Tache $tache, $links, User $user): void
     /**
      * ✅ Mettre à jour une tâche avec gestion COMPLÈTE des fichiers
      */
-public function updateTache(Tache $tache, array $data): Tache
-{
-    DB::beginTransaction();
-    
-    try {
-        // ✅ S'assurer que le responsable est dans les assignés
-        if (isset($data['responsable_id'])) {
-            if (!isset($data['assignee_ids']) || !is_array($data['assignee_ids'])) {
-                $data['assignee_ids'] = $tache->assignees->pluck('id')->toArray();
-            }
-            
-            if (!in_array($data['responsable_id'], $data['assignee_ids'])) {
-                $data['assignee_ids'][] = $data['responsable_id'];
-            }
-        }
+    public function updateTache(Tache $tache, array $data): Tache
+    {
+        DB::beginTransaction();
 
-        // Extraire les relations
-        $assigneeIds = $data['assignee_ids'] ?? null;
-        $labelIds = $data['label_ids'] ?? null;
-        $uploadedFiles = $data['uploaded_files'] ?? [];
-        $externalLinks = $data['external_links'] ?? [];
-        
-        unset(
-            $data['assignee_ids'],
-            $data['label_ids'],
-            $data['uploaded_files'],
-            $data['external_links']
-        );
+        try {
+            // ✅ S'assurer que le responsable est dans les assignés
+            if (isset($data['responsable_id'])) {
+                if (! isset($data['assignee_ids']) || ! is_array($data['assignee_ids'])) {
+                    $data['assignee_ids'] = $tache->assignees->pluck('id')->toArray();
+                }
 
-        // Mettre à jour les champs de base
-        $tache->update($data);
-
-        // ✅ Mettre à jour les assignés si fournis
-        if ($assigneeIds !== null) {
-            $assignData = [];
-            foreach ($assigneeIds as $userId) {
-                $isResponsable = isset($data['responsable_id']) && ($userId == $data['responsable_id']);
-                
-                // Garder les données existantes si l'utilisateur était déjà assigné
-                $existing = $tache->assignees()->where('user_id', $userId)->first();
-                
-                $assignData[$userId] = [
-                    'role' => $isResponsable ? 'responsable' : ($existing?->pivot->role ?? 'collaborator'),
-                    'can_edit' => $isResponsable ? true : ($existing?->pivot->can_edit ?? false),
-                    'can_complete' => $existing?->pivot->can_complete ?? true,
-                    'can_validate' => $isResponsable ? true : ($existing?->pivot->can_validate ?? false),
-                    'statut_individuel' => $existing?->pivot->statut_individuel ?? 'a_faire',
-                    'progression_individuelle' => $existing?->pivot->progression_individuelle ?? 0,
-                ];
+                if (! in_array($data['responsable_id'], $data['assignee_ids'])) {
+                    $data['assignee_ids'][] = $data['responsable_id'];
+                }
             }
-            
-            $tache->assignees()->sync($assignData);
-            
-            Log::info('✅ Assignés synchronisés avec responsable', [
-                'tache_id' => $tache->id,
-                'responsable_id' => $data['responsable_id'] ?? null,
-                'total_assignes' => count($assigneeIds)
-            ]);
-        } elseif (isset($data['responsable_id'])) {
-            // Si seul le responsable a changé mais pas la liste des assignés
-            $currentResponsableId = $data['responsable_id'];
-            
-            if (!$tache->isAssignedTo(User::find($currentResponsableId))) {
-                $tache->assignees()->attach($currentResponsableId, [
-                    'role' => 'responsable',
-                    'can_edit' => true,
-                    'can_complete' => true,
-                    'can_validate' => true,
-                    'statut_individuel' => 'a_faire',
-                    'progression_individuelle' => 0,
+
+            // Extraire les relations
+            $assigneeIds = $data['assignee_ids'] ?? null;
+            $labelIds = $data['label_ids'] ?? null;
+            $uploadedFiles = $data['uploaded_files'] ?? [];
+            $externalLinks = $data['external_links'] ?? [];
+
+            unset(
+                $data['assignee_ids'],
+                $data['label_ids'],
+                $data['uploaded_files'],
+                $data['external_links']
+            );
+
+            // Mettre à jour les champs de base
+            $tache->update($data);
+
+            // ✅ Mettre à jour les assignés si fournis
+            if ($assigneeIds !== null) {
+                $assignData = [];
+                foreach ($assigneeIds as $userId) {
+                    $isResponsable = isset($data['responsable_id']) && ($userId == $data['responsable_id']);
+
+                    // Garder les données existantes si l'utilisateur était déjà assigné
+                    $existing = $tache->assignees()->where('user_id', $userId)->first();
+
+                    $assignData[$userId] = [
+                        'role' => $existing?->pivot->role ?? 'collaborateur',
+                        'is_responsable' => $isResponsable,
+                        'can_edit' => $isResponsable ? true : ($existing?->pivot->can_edit ?? false),
+                        'can_complete' => $existing?->pivot->can_complete ?? true,
+                        'can_validate' => $isResponsable ? true : ($existing?->pivot->can_validate ?? false),
+                        'statut_individuel' => $existing?->pivot->statut_individuel ?? 'a_faire',
+                        'progression_individuelle' => $existing?->pivot->progression_individuelle ?? 0,
+                    ];
+                }
+
+                $tache->assignees()->sync($assignData);
+
+                Log::info('✅ Assignés synchronisés avec responsable', [
+                    'tache_id' => $tache->id,
+                    'responsable_id' => $data['responsable_id'] ?? null,
+                    'total_assignes' => count($assigneeIds),
                 ]);
+            } elseif (isset($data['responsable_id'])) {
+                // Si seul le responsable a changé mais pas la liste des assignés
+                $currentResponsableId = $data['responsable_id'];
+
+                if (! $tache->isAssignedTo(User::find($currentResponsableId))) {
+                    $tache->assignees()->attach($currentResponsableId, [
+                        'role' => 'collaborateur',
+                        'is_responsable' => true,
+                        'can_edit' => true,
+                        'can_complete' => true,
+                        'can_validate' => true,
+                        'statut_individuel' => 'a_faire',
+                        'progression_individuelle' => 0,
+                    ]);
+                }
             }
+
+            // Mettre à jour les labels si fournis
+            if ($labelIds !== null) {
+                $tache->labels()->sync($labelIds);
+            }
+
+            // Gérer les nouveaux fichiers uploadés
+            if (! empty($uploadedFiles)) {
+                $this->handleFileUploads($tache, $uploadedFiles, auth()->user());
+            }
+
+            // Gérer les nouveaux liens externes
+            if (! empty($externalLinks)) {
+                $this->handleExternalLinks($tache, $externalLinks, auth()->user());
+            }
+
+            DB::commit();
+
+            return $tache->fresh([
+                'activite',
+                'assignees',
+                'labels',
+                'attachments',
+                'externalLinks',
+                'responsable',
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('❌ Erreur mise à jour tâche', [
+                'tache_id' => $tache->id,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
         }
-
-        // Mettre à jour les labels si fournis
-        if ($labelIds !== null) {
-            $tache->labels()->sync($labelIds);
-        }
-
-        // Gérer les nouveaux fichiers uploadés
-        if (!empty($uploadedFiles)) {
-            $this->handleFileUploads($tache, $uploadedFiles, auth()->user());
-        }
-
-        // Gérer les nouveaux liens externes
-        if (!empty($externalLinks)) {
-            $this->handleExternalLinks($tache, $externalLinks, auth()->user());
-        }
-
-        DB::commit();
-
-        return $tache->fresh([
-            'activite',
-            'assignees',
-            'labels',
-            'attachments',
-            'externalLinks',
-            'responsable'
-        ]);
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error('❌ Erreur mise à jour tâche', [
-            'tache_id' => $tache->id,
-            'error' => $e->getMessage()
-        ]);
-        throw $e;
     }
-}
-
 
     /**
      * ✅ Déterminer les informations de semaine à partir des dates
@@ -667,7 +660,7 @@ public function updateTache(Tache $tache, array $data): Tache
                 'validated_n2_at',
             ]);
 
-            $newTache->titre = $tache->titre . ' (Copie)';
+            $newTache->titre = $tache->titre.' (Copie)';
             $newTache->taux_realisation = 0;
             $newTache->statut = TacheStatut::A_FAIRE;
 
@@ -696,6 +689,7 @@ public function updateTache(Tache $tache, array $data): Tache
     public function archiveTache(Tache $tache): Tache
     {
         $tache->archive();
+
         return $tache->load(['activite', 'assignees', 'labels']);
     }
 
@@ -705,6 +699,7 @@ public function updateTache(Tache $tache, array $data): Tache
     public function unarchiveTache(Tache $tache): Tache
     {
         $tache->unarchive();
+
         return $tache->load(['activite', 'assignees', 'labels']);
     }
 
@@ -715,9 +710,9 @@ public function updateTache(Tache $tache, array $data): Tache
     {
         $userId = $data['user_id'];
 
-        if (!$tache->assignees->contains($userId)) {
+        if (! $tache->assignees->contains($userId)) {
             $tache->assignees()->attach($userId, [
-                'role' => $data['role'] ?? 'collaborator',
+                'role' => $data['role'] ?? 'collaborateur',
                 'can_edit' => $data['can_edit'] ?? false,
                 'can_complete' => $data['can_complete'] ?? true,
                 'can_validate' => $data['can_validate'] ?? false,
@@ -733,6 +728,7 @@ public function updateTache(Tache $tache, array $data): Tache
     public function unassignUser(Tache $tache, int $userId): Tache
     {
         $tache->assignees()->detach($userId);
+
         return $tache->fresh(['activite', 'assignees']);
     }
 
@@ -759,7 +755,7 @@ public function updateTache(Tache $tache, array $data): Tache
             'overdue' => $taches->filter->is_overdue->count(),
             'validated_n1' => $taches->whereNotNull('validated_n1_at')->count(),
             'validated_n2' => $taches->whereNotNull('validated_n2_at')->count(),
-            'with_results' => $taches->filter(fn($t) => $t->resultats->count() > 0)->count(),
+            'with_results' => $taches->filter(fn ($t) => $t->resultats->count() > 0)->count(),
             'estimated_hours' => $taches->sum('estimated_hours'),
             'actual_hours' => $taches->sum('actual_hours'),
         ];
@@ -775,6 +771,7 @@ public function updateTache(Tache $tache, array $data): Tache
         // Grouper par activité
         $tachesByActivite = $taches->groupBy('activite_id')->map(function ($groupedTaches) {
             $activite = $groupedTaches->first()->activite;
+
             return [
                 'activite' => [
                     'id' => $activite->id,
@@ -821,7 +818,7 @@ public function updateTache(Tache $tache, array $data): Tache
         $userStats = [];
         foreach ($taches as $tache) {
             foreach ($tache->assignees as $user) {
-                if (!isset($userStats[$user->id])) {
+                if (! isset($userStats[$user->id])) {
                     $userStats[$user->id] = [
                         'user' => $user->only(['id', 'nom', 'email', 'avatar']),
                         'total' => 0,
@@ -885,9 +882,7 @@ public function updateTache(Tache $tache, array $data): Tache
                     : 0,
                 'estimated_hours' => $taches->sum('estimated_hours'),
                 'actual_hours' => $taches->sum('actual_hours'),
-            ]
+            ],
         ];
     }
-
-
 }

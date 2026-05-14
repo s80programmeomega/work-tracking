@@ -592,7 +592,7 @@ class TacheController extends Controller
                 $activite->membres()
                     ->where('user_id', $user->id)
                     ->where(function ($query) {
-                        $query->where('role', 'responsable')
+                        $query->where('role', 'cadre')
                             ->orWhere('can_create_tasks', true);
                     })
                     ->exists();
@@ -702,7 +702,7 @@ class TacheController extends Controller
                 'can_create_tasks' => $user->isSuperAdmin() ||
                     $activite->responsable_id === $user->id ||
                     ($activite->projet && $activite->projet->responsable_id === $user->id) ||
-                    ($membre && ($membre->pivot->role === 'responsable' || $membre->pivot->can_create_tasks)) ||
+                    ($membre && ($membre->pivot->role === 'cadre' || $membre->pivot->can_create_tasks)) ||
                     in_array($workspaceRole, ['owner', 'admin']),
                 'can_edit_tasks' => $user->isSuperAdmin() ||
                     $activite->responsable_id === $user->id ||
@@ -1059,7 +1059,8 @@ class TacheController extends Controller
             // ✅ S'assurer que le nouveau responsable est assigné
             if (! $tache->isAssignedTo($user)) {
                 $tache->assignees()->attach($newResponsableId, [
-                    'role' => 'responsable',
+                    'role' => 'collaborateur',
+                    'is_responsable' => true,
                     'can_edit' => true,
                     'can_complete' => true,
                     'can_validate' => true,

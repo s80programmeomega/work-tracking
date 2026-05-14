@@ -83,7 +83,7 @@ class AccessManagementService
                         // Ajouter le nouveau responsable comme membre de l'activité
                         if (! $activite->members()->where('user_id', $newResponsable->id)->exists()) {
                             $activite->members()->attach($newResponsable->id, [
-                                'role' => 'responsable',
+                                'role' => 'cadre',
                                 'can_create_tasks' => true,
                                 'can_edit_tasks' => true,
                                 'can_delete_tasks' => true,
