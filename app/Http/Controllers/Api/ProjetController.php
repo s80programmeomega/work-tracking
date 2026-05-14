@@ -811,7 +811,7 @@ class ProjetController extends Controller
         $this->authorize('view', $projet);
 
         $taches = $projet->taches()
-            ->with(['activite', 'assignees', 'soustaches'])
+            ->with(['activite', 'assignees', 'sousTaches'])
             ->get();
 
         return response()->json([
@@ -946,7 +946,7 @@ class ProjetController extends Controller
         try {
             $user = $request->user();
             $tasks = $projet->accessibleTachesFor($user)
-                ->with(['assignees', 'activite', 'soustaches'])
+                ->with(['assignees', 'activite', 'sousTaches'])
                 ->get();
 
             return response()->json([

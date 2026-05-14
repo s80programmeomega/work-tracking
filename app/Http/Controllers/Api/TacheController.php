@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\TacheStatut;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\SousTacheResource;
 use App\Http\Resources\TacheAttachmentResource;
 use App\Http\Resources\TacheResource;
 use App\Http\Resources\TacheResultatResource;
 use App\Models\Activite;
 use App\Models\Document;
+use App\Models\SousTache;
 use App\Models\Tache;
 use App\Models\TacheAttachment;
 use App\Models\TacheExternalLink;
@@ -1458,42 +1460,54 @@ class TacheController extends Controller
         ]);
     }
 
-    /**
-     * ✅ Sous-tâches
-     */
     public function subTasks(Tache $tache): JsonResponse
     {
+        $this->authorize('view', $tache);
+
         $sousTaches = $tache->sousTaches()
-            ->with(['assignees', 'labels'])
+            ->with(['responsable'])
             ->ordered()
             ->get();
 
         return response()->json([
-            'data' => TacheResource::collection($sousTaches),
+            'data' => SousTacheResource::collection($sousTaches),
         ]);
     }
 
-    /**
-     * ✅ Créer sous-tâche
-     */
     public function createSubTask(Request $request, Tache $tache): JsonResponse
     {
+        $this->authorize('createSubtask', $tache);
+
         $validated = $request->validate([
             'titre' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'priorite' => 'required|in:faible,moyenne,elevee,critique',
-            'echeance' => 'nullable|date',
-            'assignee_ids' => 'nullable|array',
+            'responsable_id' => 'nullable|exists:users,id',
+            'date_echeance' => 'nullable|date|before_or_equal:'.optional($tache->echeance)->format('Y-m-d'),
+            'poids' => 'nullable|integer|min:0|max:100',
+            'ordre' => 'nullable|integer|min:0',
+            'validation_n0_required' => 'boolean',
+            'validation_n1_required' => 'boolean',
+            'validation_n2_required' => 'boolean',
         ]);
 
-        $validated['activite_id'] = $tache->activite_id;
-        $validated['parent_tache_id'] = $tache->id;
+        $poids = $validated['poids'] ?? 0;
 
-        $sousTache = $this->tacheService->createTache($validated, $request->user());
+        // R1: SousTache cannot be created on a task that is itself a SousTache
+        // (enforced at data layer — Tache has no parent concept anymore)
+
+        // R2: weight validation
+        SousTache::enforceWeights($tache->id, $poids, $request->user()->id);
+
+        $sousTache = SousTache::create(array_merge($validated, [
+            'tache_id' => $tache->id,
+            'poids' => $poids,
+        ]));
+
+        $sousTache->load('responsable');
 
         return response()->json([
-            'message' => 'Sous-tâche créée avec succès.',
-            'data' => new TacheResource($sousTache),
+            'message' => __('sous_taches.success.created'),
+            'data' => new SousTacheResource($sousTache),
         ], 201);
     }
 
