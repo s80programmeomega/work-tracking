@@ -208,7 +208,7 @@ class DocumentController extends Controller
     public function show(Request $request, Document $document): JsonResponse
     {
         try {
-            abort_unless($this->permissionService->canViewDocument(auth()->user(), $document), 403);
+            $this->authorize('view', $document);
 
             $document->load([
                 'user:id,nom,email,avatar',
@@ -241,7 +241,7 @@ class DocumentController extends Controller
         ]);
 
         try {
-            abort_unless($this->permissionService->canEditDocument(auth()->user(), $document), 403);
+            $this->authorize('update', $document);
 
             $document->update($request->only(['nom', 'description', 'visibility']));
 
@@ -269,7 +269,7 @@ class DocumentController extends Controller
     public function destroy(Request $request, Document $document): JsonResponse
     {
         try {
-            abort_unless($this->permissionService->canDeleteDocument(auth()->user(), $document), 403);
+            $this->authorize('delete', $document);
 
             $this->documentService->delete($document);
 
@@ -296,7 +296,7 @@ class DocumentController extends Controller
     public function download(Request $request, Document $document): StreamedResponse|JsonResponse
     {
         try {
-            abort_unless($this->permissionService->canViewDocument(auth()->user(), $document), 403);
+            $this->authorize('view', $document);
 
             // Enregistrer le téléchargement
             $this->documentService->recordDownload($document, $request->user());
@@ -332,7 +332,7 @@ class DocumentController extends Controller
         ]);
 
         try {
-            abort_unless($this->permissionService->canEditDocument(auth()->user(), $document), 403);
+            $this->authorize('update', $document);
 
             $newVersion = $this->documentService->createVersion(
                 $document,
@@ -399,7 +399,7 @@ class DocumentController extends Controller
     public function _versions(Request $request, Document $document): JsonResponse
     {
         try {
-            abort_unless($this->permissionService->canViewDocument(auth()->user(), $document), 403);
+            $this->authorize('view', $document);
 
             $versions = $document->versions()->with('user:id,nom,email')->get();
 
@@ -425,7 +425,7 @@ class DocumentController extends Controller
     public function stats(Request $request, Document $document): JsonResponse
     {
         try {
-            abort_unless($this->permissionService->canViewDocument(auth()->user(), $document), 403);
+            $this->authorize('view', $document);
 
             $stats = $this->documentService->getDownloadStats($document);
 
@@ -712,7 +712,7 @@ class DocumentController extends Controller
         ]);
 
         try {
-            abort_unless($this->permissionService->canEditDocument(auth()->user(), $document), 403);
+            $this->authorize('update', $document);
 
             $targetUser = User::findOrFail($request->user_id);
 
@@ -746,7 +746,7 @@ class DocumentController extends Controller
         ]);
 
         try {
-            abort_unless($this->permissionService->canEditDocument(auth()->user(), $document), 403);
+            $this->authorize('update', $document);
 
             $targetUser = User::findOrFail($request->user_id);
 
@@ -782,7 +782,7 @@ class DocumentController extends Controller
         ]);
 
         try {
-            abort_unless($this->permissionService->canEditDocument(auth()->user(), $document), 403);
+            $this->authorize('update', $document);
 
             $this->documentService->shareWithUsers(
                 $document,
@@ -809,7 +809,7 @@ class DocumentController extends Controller
     public function listPermissions(Request $request, Document $document): JsonResponse
     {
         try {
-            abort_unless($this->permissionService->canEditDocument(auth()->user(), $document), 403);
+            $this->authorize('update', $document);
 
             $permissions = $document->permissions()
                 ->with('permissionable')

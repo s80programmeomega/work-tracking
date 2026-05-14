@@ -369,7 +369,7 @@ class TacheController extends Controller
      */
     public function addAttachments(Request $request, Tache $tache)
     {
-        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
+        $this->authorize('update', $tache);
 
         $request->validate([
             'files.*' => 'required|file|max:10240|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,zip,txt',
@@ -408,7 +408,7 @@ class TacheController extends Controller
      */
     public function getAttachments(Tache $tache)
     {
-        abort_unless($this->permissionService->canViewTask(auth()->user(), $tache), 403);
+        $this->authorize('view', $tache);
 
         $attachments = $tache->attachments()->with('uploadedBy')->get();
 
@@ -422,7 +422,7 @@ class TacheController extends Controller
      */
     public function downloadAttachment(Tache $tache, TacheAttachment $attachment): Response
     {
-        abort_unless($this->permissionService->canViewTask(auth()->user(), $tache), 403);
+        $this->authorize('view', $tache);
 
         if ($attachment->tache_id !== $tache->id) {
             abort(404, 'Fichier non trouvé pour cette tâche');
@@ -443,7 +443,7 @@ class TacheController extends Controller
      */
     public function addExternalLink(Request $request, Tache $tache): JsonResponse
     {
-        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
+        $this->authorize('update', $tache);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -742,7 +742,7 @@ class TacheController extends Controller
     public function show(Tache $tache)
     {
         try {
-            abort_unless($this->permissionService->canViewTask(auth()->user(), $tache), 403);
+            $this->authorize('view', $tache);
 
             // Charger toutes les relations nécessaires
             $tache->load([
@@ -844,7 +844,7 @@ class TacheController extends Controller
     public function update(Request $request, Tache $tache): JsonResponse
     {
         // ✅ Vérification des permissions
-        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
+        $this->authorize('update', $tache);
 
         // ✅ Validation COMPLÈTE similaire à store
         $validated = $request->validate([
@@ -1020,7 +1020,7 @@ class TacheController extends Controller
      */
     public function changeResponsable(Request $request, Tache $tache): JsonResponse
     {
-        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
+        $this->authorize('update', $tache);
 
         $validated = $request->validate([
             'responsable_id' => 'required|exists:users,id',
@@ -1099,7 +1099,7 @@ class TacheController extends Controller
      */
     public function deleteAttachment(Tache $tache, TacheAttachment $attachment): JsonResponse
     {
-        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
+        $this->authorize('update', $tache);
 
         if ($attachment->tache_id !== $tache->id) {
             return response()->json([
@@ -1126,7 +1126,7 @@ class TacheController extends Controller
      */
     public function deleteExternalLink(Tache $tache, TacheExternalLink $link): JsonResponse
     {
-        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
+        $this->authorize('update', $tache);
 
         if ($link->tache_id !== $tache->id) {
             return response()->json([
@@ -1153,7 +1153,7 @@ class TacheController extends Controller
      */
     public function destroy(Tache $tache): JsonResponse
     {
-        abort_unless($this->permissionService->canDeleteTask(auth()->user(), $tache), 403);
+        $this->authorize('delete', $tache);
 
         $this->tacheService->deleteTache($tache);
 
@@ -1167,7 +1167,7 @@ class TacheController extends Controller
      */
     public function complete(Request $request, Tache $tache): JsonResponse
     {
-        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
+        $this->authorize('update', $tache);
 
         try {
             $tache->markAsCompleted($request->user());
@@ -1188,7 +1188,7 @@ class TacheController extends Controller
      */
     public function assignResponsable(Request $request, Tache $tache): JsonResponse
     {
-        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
+        $this->authorize('update', $tache);
 
         $validated = $request->validate([
             'responsable_id' => 'required|exists:users,id',
@@ -1251,7 +1251,7 @@ class TacheController extends Controller
      */
     public function removeResponsable(Request $request, Tache $tache): JsonResponse
     {
-        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
+        $this->authorize('update', $tache);
 
         try {
             $oldResponsable = $tache->responsable;
@@ -1318,7 +1318,7 @@ class TacheController extends Controller
      */
     public function validateN1(Request $request, Tache $tache): JsonResponse
     {
-        abort_unless($this->permissionService->canValidateN1(auth()->user(), $tache), 403);
+        $this->authorize('validateN1', $tache);
 
         $validated = $request->validate([
             'commentaire' => 'nullable|string|max:1000',
@@ -1343,7 +1343,7 @@ class TacheController extends Controller
      */
     public function validateN2(Request $request, Tache $tache): JsonResponse
     {
-        abort_unless($this->permissionService->canValidateN2(auth()->user(), $tache), 403);
+        $this->authorize('validateN2', $tache);
 
         $validated = $request->validate([
             'commentaire' => 'nullable|string|max:1000',
@@ -1371,7 +1371,7 @@ class TacheController extends Controller
      */
     public function move(Request $request, Tache $tache): JsonResponse
     {
-        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
+        $this->authorize('update', $tache);
 
         $validated = $request->validate([
             'statut' => 'required|in:a_faire,en_cours,termine',
@@ -1395,7 +1395,7 @@ class TacheController extends Controller
      */
     public function archive(Tache $tache): JsonResponse
     {
-        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
+        $this->authorize('update', $tache);
 
         $tache->archive();
 
@@ -1410,7 +1410,7 @@ class TacheController extends Controller
      */
     public function unarchive(Tache $tache): JsonResponse
     {
-        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
+        $this->authorize('update', $tache);
 
         $tache->unarchive();
 
@@ -1425,7 +1425,7 @@ class TacheController extends Controller
      */
     public function assignUser(Request $request, Tache $tache): JsonResponse
     {
-        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
+        $this->authorize('update', $tache);
 
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
@@ -1448,7 +1448,7 @@ class TacheController extends Controller
      */
     public function unassignUser(Tache $tache, int $userId): JsonResponse
     {
-        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
+        $this->authorize('update', $tache);
 
         $tache = $this->tacheService->unassignUser($tache, $userId);
 

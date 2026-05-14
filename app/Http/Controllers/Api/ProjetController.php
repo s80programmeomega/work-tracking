@@ -178,7 +178,7 @@ class ProjetController extends Controller
      */
     public function show(Projet $projet): JsonResponse
     {
-        abort_unless($this->permissionService->canViewProject(auth()->user(), $projet), 403);
+        $this->authorize('view', $projet);
 
         $userId = auth()->id();
         $user = auth()->user();
@@ -263,7 +263,7 @@ class ProjetController extends Controller
      */
     public function update(UpdateProjetRequest $request, Projet $projet): JsonResponse
     {
-        abort_unless($this->permissionService->canEditProject(auth()->user(), $projet), 403);
+        $this->authorize('update', $projet);
 
         try {
             $projet = $this->projetService->updateProjet($projet, $request->validated());
@@ -285,7 +285,7 @@ class ProjetController extends Controller
      */
     public function destroy(Projet $projet): JsonResponse
     {
-        abort_unless($this->permissionService->canDeleteProject(auth()->user(), $projet), 403);
+        $this->authorize('delete', $projet);
 
         try {
             $this->projetService->deleteProjet($projet);
@@ -306,7 +306,7 @@ class ProjetController extends Controller
      */
     public function archive(Projet $projet): JsonResponse
     {
-        abort_unless($this->permissionService->canEditProject(auth()->user(), $projet), 403);
+        $this->authorize('update', $projet);
 
         try {
             $projet = $this->projetService->archiveProjet($projet);
@@ -328,7 +328,7 @@ class ProjetController extends Controller
      */
     public function unarchive(Projet $projet): JsonResponse
     {
-        abort_unless($this->permissionService->canEditProject(auth()->user(), $projet), 403);
+        $this->authorize('update', $projet);
 
         try {
             $projet = $this->projetService->unarchiveProjet($projet);
@@ -350,7 +350,7 @@ class ProjetController extends Controller
      */
     public function complete(Projet $projet): JsonResponse
     {
-        abort_unless($this->permissionService->canEditProject(auth()->user(), $projet), 403);
+        $this->authorize('update', $projet);
 
         try {
             $projet = $this->projetService->completeProjet($projet);
@@ -372,7 +372,7 @@ class ProjetController extends Controller
      */
     public function clone(Request $request, Projet $projet): JsonResponse
     {
-        abort_unless($this->permissionService->canViewProject(auth()->user(), $projet), 403);
+        $this->authorize('view', $projet);
 
         $request->validate([
             'nom' => 'nullable|string|max:255',
@@ -407,7 +407,7 @@ class ProjetController extends Controller
      */
     public function toggleFavorite(Projet $projet): JsonResponse
     {
-        abort_unless($this->permissionService->canViewProject(auth()->user(), $projet), 403);
+        $this->authorize('view', $projet);
 
         try {
             $projet = $this->projetService->toggleFavorite($projet);
@@ -429,7 +429,7 @@ class ProjetController extends Controller
      */
     public function getMembers(Projet $projet): JsonResponse
     {
-        abort_unless($this->permissionService->canViewProject(auth()->user(), $projet), 403);
+        $this->authorize('view', $projet);
 
         $members = $projet->members()
             ->withPivot([
@@ -454,7 +454,7 @@ class ProjetController extends Controller
      */
     public function addMember(Request $request, Projet $projet): JsonResponse
     {
-        abort_unless($this->permissionService->canManageProjectMembers(auth()->user(), $projet), 403);
+        $this->authorize('manageMembers', $projet);
 
         $request->validate([
             'user_id' => 'required|exists:users,id',
@@ -502,7 +502,7 @@ class ProjetController extends Controller
      */
     public function updateMember(Request $request, Projet $projet, User $user): JsonResponse
     {
-        abort_unless($this->permissionService->canManageProjectMembers(auth()->user(), $projet), 403);
+        $this->authorize('manageMembers', $projet);
 
         $request->validate([
             'role' => 'sometimes|in:admin,member,viewer',
@@ -554,7 +554,7 @@ class ProjetController extends Controller
      */
     public function removeMember(Projet $projet, User $user): JsonResponse
     {
-        abort_unless($this->permissionService->canManageProjectMembers(auth()->user(), $projet), 403);
+        $this->authorize('manageMembers', $projet);
 
         // Vérifier si membre
         if (! $projet->members()->where('user_id', $user->id)->exists()) {
@@ -580,7 +580,7 @@ class ProjetController extends Controller
 
     public function getMemberRemovalImpact(Projet $projet, User $user): JsonResponse
     {
-        abort_unless($this->permissionService->canManageProjectMembers(auth()->user(), $projet), 403);
+        $this->authorize('manageMembers', $projet);
 
         if (
             (int) $projet->responsable_id !== (int) $user->id &&
@@ -661,7 +661,7 @@ class ProjetController extends Controller
 
     public function removeMemberWithTransfer(Request $request, Projet $projet, User $user): JsonResponse
     {
-        abort_unless($this->permissionService->canManageProjectMembers(auth()->user(), $projet), 403);
+        $this->authorize('manageMembers', $projet);
 
         $request->validate([
             'transfer_to_user_id' => ['nullable', 'integer', 'exists:users,id'],
@@ -791,7 +791,7 @@ class ProjetController extends Controller
      */
     public function getActivites(Projet $projet): JsonResponse
     {
-        abort_unless($this->permissionService->canViewProject(auth()->user(), $projet), 403);
+        $this->authorize('view', $projet);
 
         $activites = $projet->activites()
             ->with(['responsable', 'taches'])
@@ -808,7 +808,7 @@ class ProjetController extends Controller
      */
     public function getTaches(Projet $projet): JsonResponse
     {
-        abort_unless($this->permissionService->canViewProject(auth()->user(), $projet), 403);
+        $this->authorize('view', $projet);
 
         $taches = $projet->taches()
             ->with(['activite', 'assignees', 'soustaches'])
@@ -824,7 +824,7 @@ class ProjetController extends Controller
      */
     public function getStatistics(Projet $projet): JsonResponse
     {
-        abort_unless($this->permissionService->canViewProject(auth()->user(), $projet), 403);
+        $this->authorize('view', $projet);
 
         try {
             $stats = $this->projetService->getProjetStats($projet);
@@ -912,7 +912,7 @@ class ProjetController extends Controller
      */
     public function performanceReport(Request $request, Projet $projet): JsonResponse
     {
-        abort_unless($this->permissionService->canViewProject(auth()->user(), $projet), 403);
+        $this->authorize('view', $projet);
 
         $request->validate([
             'start_date' => 'nullable|date',
@@ -941,7 +941,7 @@ class ProjetController extends Controller
      */
     public function accessibleTasks(Request $request, Projet $projet): JsonResponse
     {
-        abort_unless($this->permissionService->canViewProject(auth()->user(), $projet), 403);
+        $this->authorize('view', $projet);
 
         try {
             $user = $request->user();

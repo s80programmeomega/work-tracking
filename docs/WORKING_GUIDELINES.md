@@ -83,6 +83,8 @@ At the end of each task, produce a short list:
 - Translation keys added
 - Commits made
 
+Then **tick off every completed item in the `docs/PROGRESSION.md` deliverables checklist** for that task. Leave unchecked any item that was intentionally deferred to a later task.
+
 This doubles as the `ONBOARDING.md` update content.
 
 ---
@@ -199,3 +201,25 @@ public function via($notifiable): array
 ```
 
 **Never** send email synchronously. All notification classes must implement `ShouldQueue`.
+
+---
+
+## Guide 13 — Doc Updates and User Testing Guide After Each Task
+
+At the end of every task, after ticking the PROGRESSION.md checklist (Guide 7), do the following:
+
+**1. Update related docs**
+- `docs/PROGRESSION.md` — tick completed checklist items
+- `docs/SESSION_STATE.md` — update Current Task, Last Completed Task, Open PRs, Session Log
+- `docs/PERMISSIONS_MATRIX.md` — add any new permissions introduced in the task
+- `docs/IMPLEMENTATION_PLAN.md` — update the Current Task section at the bottom
+- `docs/ONBOARDING.md` — only if architecture or conventions changed
+
+**2. Create a user testing guide**
+Create `docs/testing/TASK_N_TESTING.md` for every completed task. This file is for Jonas to manually verify the feature works end-to-end in the browser before the PR is merged.
+
+Structure of every testing guide:
+- **Prerequisites** — what must be set up before testing (seeded data, env vars, running services)
+- **Test cases** — numbered, each with: action to perform, expected result, how to verify
+- **Negative cases** — what should be blocked (wrong role, missing data, etc.)
+- **Cleanup** — anything to reset after testing (optional)

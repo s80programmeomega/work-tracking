@@ -370,6 +370,7 @@ const {
   cancelInvitation: cancelInvitationService,
   getRoleLabel,
   getRoleColor,
+  currentWorkspace,
 } = useWorkspace()
 
 // Initialiser les permissions avec le workspace
@@ -612,11 +613,9 @@ const loadData = async () => {
 
     // Mettre à jour l'objet workspace avec les membres
     workspace.value = {
+      ...(currentWorkspace.value || {}),
       id: props.workspaceId,
       members: members.value,
-      // Ajoutez d'autres propriétés si nécessaire
-      // owner_id: ...,
-      // settings: ...,
     }
 
     // Load invitations

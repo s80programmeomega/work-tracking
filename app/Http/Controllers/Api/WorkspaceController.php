@@ -188,7 +188,7 @@ class WorkspaceController extends Controller
      */
     public function inviteMembers(Request $request, Workspace $workspace)
     {
-        abort_unless($this->permissionService->canManageWorkspace(auth()->user(), $workspace), 403);
+        $this->authorize('manage', $workspace);
 
         $request->validate([
             'emails' => 'required|array|min:1',
@@ -483,7 +483,7 @@ class WorkspaceController extends Controller
      */
     public function showMember(Request $request, Workspace $workspace, User $user)
     {
-        abort_unless($this->permissionService->canViewWorkspace(auth()->user(), $workspace), 403);
+        $this->authorize('view', $workspace);
 
         // Vérifier que l'utilisateur est bien membre du workspace
         if (! $workspace->members()->where('user_id', $user->id)->exists()) {
@@ -550,7 +550,7 @@ class WorkspaceController extends Controller
      */
     public function updateMemberRole(Request $request, Workspace $workspace, User $user)
     {
-        abort_unless($this->permissionService->canManageWorkspace(auth()->user(), $workspace), 403);
+        $this->authorize('manage', $workspace);
 
         $request->validate([
             'role' => ['required', Rule::in(['owner', 'super_admin', 'admin', 'member', 'viewer'])],
@@ -918,7 +918,7 @@ class WorkspaceController extends Controller
      */
     public function cancelInvitation(Workspace $workspace, WorkspaceInvitation $invitation)
     {
-        abort_unless($this->permissionService->canManageWorkspace(auth()->user(), $workspace), 403);
+        $this->authorize('manage', $workspace);
 
         if ($invitation->workspace_id !== $workspace->id) {
             abort(403, 'Cette invitation n\'appartient pas à ce workspace');
@@ -1020,7 +1020,7 @@ class WorkspaceController extends Controller
      */
     public function members(Request $request, Workspace $workspace)
     {
-        abort_unless($this->permissionService->canViewWorkspace(auth()->user(), $workspace), 403);
+        $this->authorize('view', $workspace);
 
         if (! $this->userHasAccess($request->user(), $workspace)) {
             return response()->json([
@@ -1136,7 +1136,7 @@ class WorkspaceController extends Controller
      */
     public function removeMemberWithTransfer(Request $request, Workspace $workspace, User $user)
     {
-        abort_unless($this->permissionService->canManageWorkspace(auth()->user(), $workspace), 403);
+        $this->authorize('manage', $workspace);
 
         // Ne peut pas retirer le owner
         if ($workspace->owner_id === $user->id) {
@@ -1213,7 +1213,7 @@ class WorkspaceController extends Controller
      */
     public function removeMember(Request $request, Workspace $workspace, User $user)
     {
-        abort_unless($this->permissionService->canManageWorkspace(auth()->user(), $workspace), 403);
+        $this->authorize('manage', $workspace);
 
         // Ne peut pas retirer le owner
         if ($workspace->owner_id === $user->id) {
@@ -1879,7 +1879,7 @@ class WorkspaceController extends Controller
      */
     public function getRemovalPreview(Request $request, Workspace $workspace, User $user)
     {
-        abort_unless($this->permissionService->canManageWorkspace(auth()->user(), $workspace), 403);
+        $this->authorize('manage', $workspace);
 
         // Vérifier que l'utilisateur est membre
         if (! $workspace->members()->where('user_id', $user->id)->exists()) {
@@ -1928,7 +1928,7 @@ class WorkspaceController extends Controller
      */
     public function getUserProjects(Request $request, Workspace $workspace, User $user)
     {
-        abort_unless($this->permissionService->canManageWorkspace(auth()->user(), $workspace), 403);
+        $this->authorize('manage', $workspace);
 
         $projects = $this->removalService->getUserProjectsAsResponsable($user, $workspace);
 
@@ -1954,7 +1954,7 @@ class WorkspaceController extends Controller
      */
     public function getTransferCandidates(Request $request, Workspace $workspace)
     {
-        abort_unless($this->permissionService->canManageWorkspace(auth()->user(), $workspace), 403);
+        $this->authorize('manage', $workspace);
 
         $request->validate([
             'exclude_user_id' => 'required|exists:users,id',

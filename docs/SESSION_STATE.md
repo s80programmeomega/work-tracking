@@ -16,9 +16,9 @@
 
 ## Current Session
 
-**Date:** 2026-05-11
-**Session goal:** Planning and documentation setup
-**Status:** Complete — ready to start implementation
+**Date:** 2026-05-13
+**Session goal:** Fix pre-merge bugs, factories/seeder, refactor, prepare for Task 1
+**Status:** Complete — all bugs fixed, tests passing, ready to merge PR and start Task 1
 
 ---
 
@@ -29,14 +29,23 @@
 **Status:** Not started
 
 **What to do next:**
-1. Create branch `feature/v2-task-1-queue-reverb` from `jonas`
-2. Follow Task 1 in `IMPLEMENTATION_PLAN.md`
+1. Merge PR `feature/v2-task-0-policies-refactor` into `jonas`
+2. Run `php artisan migrate:fresh --seed` to apply seeder changes
+3. Manually test using `docs/testing/TASK_0_TESTING.md`
+4. Create branch `feature/v2-task-1-queue-reverb` from `jonas`
+5. Follow Task 1 in `IMPLEMENTATION_PLAN.md`
 
 ---
 
 ## Last Completed Task
 
-None — planning phase complete, implementation not yet started.
+**Task 0** — Permission Architecture Refactor (Policies)
+- 5 Policy classes created (`ProjetPolicy`, `ActivitePolicy`, `TachePolicy`, `DocumentPolicy`, `WorkspacePolicy`)
+- `AuthServiceProvider` updated with `Gate::before()` super_admin bypass + policy registration
+- `RolePermissionSeeder` updated with contextual roles
+- All 76 `abort_unless` replaced with `$this->authorize()` across 6 controllers
+- All 22 tests passing
+- Branch pushed — PR pending into `jonas`
 
 ---
 
@@ -44,7 +53,7 @@ None — planning phase complete, implementation not yet started.
 
 | Branch | Task | Status |
 |---|---|---|
-| — | — | — |
+| `feature/v2-task-0-policies-refactor` | Task 0 | Pending review |
 
 ---
 
@@ -73,3 +82,4 @@ None — planning phase complete, implementation not yet started.
 | Date | Tasks worked on | Outcome |
 |---|---|---|
 | 2026-05-11 | Planning | Created IMPLEMENTATION_PLAN.md, WORKING_GUIDELINES.md, PROGRESSION.md, SESSION_STATE.md. Updated ONBOARDING.md. Ready to start Task 1. |
+| 2026-05-13 | Task 0 bug fixes | Fixed Pinia readonly conflict, UserResource missing current_workspace_id, hasAccess super_admin bypass, sidebar projet_count fallback, workspace/project card cursor, navigateToWorkspace now calls selectWorkspace. Added 6 factories, expanded seeder to 2 workspaces + 45 tasks. Refactored ProjetService to use scopeInWorkspace. All tests passing. |

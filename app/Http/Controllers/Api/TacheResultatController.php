@@ -30,7 +30,7 @@ class TacheResultatController extends Controller
      */
     public function index(Tache $tache)
     {
-        abort_unless($this->permissionService->canViewTask(auth()->user(), $tache), 403);
+        $this->authorize('view', $tache);
 
         $resultats = $tache->resultats()
             ->with(['user', 'validateurN1', 'validateurN2', 'documents'])
@@ -48,7 +48,7 @@ class TacheResultatController extends Controller
      */
     public function store(Request $request, Tache $tache)
     {
-        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
+        $this->authorize('update', $tache);
 
         $validated = $request->validate([
             'resultats_attendus' => 'required|string',
@@ -98,7 +98,7 @@ class TacheResultatController extends Controller
      */
     public function show_(Tache $tache, TacheResultat $resultat)
     {
-        abort_unless($this->permissionService->canViewTask(auth()->user(), $tache), 403);
+        $this->authorize('view', $tache);
 
         if ($resultat->tache_id !== $tache->id) {
             abort(404, 'Résultat non trouvé');
@@ -147,7 +147,7 @@ class TacheResultatController extends Controller
      */
     public function update(Request $request, Tache $tache, TacheResultat $resultat)
     {
-        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
+        $this->authorize('update', $tache);
 
         if ($resultat->tache_id !== $tache->id) {
             abort(404);
@@ -200,7 +200,7 @@ class TacheResultatController extends Controller
      */
     public function destroy(Tache $tache, TacheResultat $resultat)
     {
-        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
+        $this->authorize('update', $tache);
 
         if ($resultat->tache_id !== $tache->id) {
             abort(404);
@@ -234,7 +234,7 @@ class TacheResultatController extends Controller
      */
     public function submit(Request $request, Tache $tache, TacheResultat $resultat)
     {
-        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
+        $this->authorize('update', $tache);
 
         if ($resultat->tache_id !== $tache->id) {
             abort(404);
@@ -404,7 +404,7 @@ class TacheResultatController extends Controller
      */
     public function downloadDocument(Tache $tache, TacheResultat $resultat, Document $document)
     {
-        abort_unless($this->permissionService->canViewTask(auth()->user(), $tache), 403);
+        $this->authorize('view', $tache);
 
         // Vérifier que le document appartient au résultat
         if (
@@ -459,7 +459,7 @@ class TacheResultatController extends Controller
      */
     public function viewDocument(Tache $tache, TacheResultat $resultat, Document $document)
     {
-        abort_unless($this->permissionService->canViewTask(auth()->user(), $tache), 403);
+        $this->authorize('view', $tache);
 
         // Vérifier que le document appartient au résultat
         if (
@@ -498,7 +498,7 @@ class TacheResultatController extends Controller
      */
     public function documentStats(Tache $tache, TacheResultat $resultat)
     {
-        abort_unless($this->permissionService->canViewTask(auth()->user(), $tache), 403);
+        $this->authorize('view', $tache);
 
         $documents = $resultat->documents()
             ->withCount('downloads')
@@ -718,7 +718,7 @@ class TacheResultatController extends Controller
      */
     public function history(Tache $tache, TacheResultat $resultat)
     {
-        abort_unless($this->permissionService->canViewTask(auth()->user(), $tache), 403);
+        $this->authorize('view', $tache);
 
         if ($resultat->tache_id !== $tache->id) {
             abort(404);
@@ -769,7 +769,7 @@ class TacheResultatController extends Controller
      */
     public function getDocuments(Tache $tache, TacheResultat $resultat)
     {
-        abort_unless($this->permissionService->canViewTask(auth()->user(), $tache), 403);
+        $this->authorize('view', $tache);
 
         if ($resultat->tache_id !== $tache->id) {
             abort(404, 'Résultat non trouvé');
@@ -807,7 +807,7 @@ class TacheResultatController extends Controller
      */
     public function deleteDocument(Tache $tache, TacheResultat $resultat, Document $document)
     {
-        abort_unless($this->permissionService->canEditTask(auth()->user(), $tache), 403);
+        $this->authorize('update', $tache);
 
         if ($resultat->tache_id !== $tache->id) {
             abort(404);
