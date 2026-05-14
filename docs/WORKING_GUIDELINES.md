@@ -18,6 +18,14 @@ Always branch from `jonas`, PR back into `jonas`. Never push to `main`.
 
 ---
 
+## Guide 0 — Commit Messages
+
+- Use `fix:`, `feat:`, `chore:`, `refactor:`, `test:`, `docs:` prefixes.
+- Messages must be short and descriptive — describe the change, not the author.
+- **Never include AI authorship references** (e.g., no `Co-Authored-By: Claude`, no "Generated with AI") in any commit message.
+
+---
+
 ## Guide 2 — Read Before Write
 
 Before implementing any task, explicitly state which existing files were read (Service + Controller + Composable + Page) and which pattern is being followed. Never invent new patterns that conflict with existing code.

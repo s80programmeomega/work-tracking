@@ -20,7 +20,7 @@
 | # | Task | Branch | Status | Started | Completed | Notes |
 |---|---|---|---|---|---|---|
 | 0 | Permission Architecture Refactor (Policies) | `feature/v2-task-0-policies-refactor` | ✅ | 2026-05-12 | 2026-05-12 | — |
-| 1 | Queue (database) + Laravel Reverb | `feature/v2-task-1-queue-reverb` | ⬜ | — | — | — |
+| 1 | Queue (database) + Laravel Reverb | `feature/v2-task-1-queue-reverb` | ✅ | 2026-05-14 | 2026-05-14 | — |
 | 2 | Subtask Data Model | `feature/v2-task-2-subtask-model` | ⬜ | — | — | — |
 | 3 | Subtask CRUD API + Auto Progress | `feature/v2-task-3-subtask-api` | ⬜ | — | — | — |
 | 4 | Subtask UI | `feature/v2-task-4-subtask-ui` | ⬜ | — | — | — |
@@ -42,22 +42,22 @@
 ### Task 0
 - [x] Contextual roles seeded into Spatie `roles` table with default permissions
 - [x] `ProjetPolicy`, `ActivitePolicy`, `TachePolicy`, `DocumentPolicy`, `WorkspacePolicy` created
-- [x] `SousTachePolicy` stub created (populated in Task 2)
+- [ ] `SousTachePolicy` stub created (populated in Task 2)
 - [x] `Gate::before()` super_admin bypass registered in `AuthServiceProvider`
 - [x] All policies registered in `AuthServiceProvider::$policies`
 - [x] `PermissionService` refactored to relationship-helper only
 - [x] All controllers updated: `abort_unless` → `$this->authorize()`
 - [x] `RolePermissionSeeder` updated to seed contextual roles
 - [x] All existing tests still passing
-- [ ] PR opened into `jonas`
+- [x] PR merged into `jonas`
 
 ### Task 1
-- [ ] `QUEUE_CONNECTION=database` in `.env` and `.env.example`
-- [ ] Reverb installed and configured
-- [ ] `laravel-echo` + `pusher-js` installed
-- [ ] `useEcho.js` composable created
-- [ ] Tests passing
-- [ ] PR opened into `jonas`
+- [x] `QUEUE_CONNECTION=database` in `.env` and `.env.example`
+- [x] Reverb installed and configured
+- [x] `laravel-echo` + `pusher-js` installed
+- [x] `useEcho.js` composable created
+- [x] Tests passing
+- [ ] PR merged into `jonas`
 
 ### Task 2
 - [ ] Migration `create_sous_taches_table` applied
