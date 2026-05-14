@@ -1,18 +1,30 @@
 <?php
 
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\Api\ActiviteController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\EvaluationController;
-use App\Http\Controllers\Api\WorkspaceController;
 use App\Http\Controllers\Api\ProjetController;
 use App\Http\Controllers\Api\ProjetInvitationController;
+use App\Http\Controllers\Api\SousTacheController;
 use App\Http\Controllers\Api\TacheController;
 use App\Http\Controllers\Api\TacheResultatController;
+use App\Http\Controllers\Api\WorkspaceController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LabelController;
+use App\Http\Controllers\LabelTemplateController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\NotificationPreferenceController;
+use App\Http\Controllers\TacheLabelController;
+use App\Http\Controllers\TeamAnnouncementController;
+use App\Http\Controllers\TeamController;
+use App\Http\Controllers\TeamEventController;
+use App\Http\Controllers\TeamMemberController;
+use App\Http\Controllers\TeamMessageController;
+use App\Http\Controllers\TeamResourceController;
 use App\Http\Controllers\UserController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -134,8 +146,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         });
     });
 
-
-
     // ======================================== PROJETS ========================================
     Route::prefix('projets')->group(function () {
 
@@ -150,7 +160,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('/activites', [ActiviteController::class, 'index']); // Toutes les activités
         });
 
-        // CRUD de base 
+        // CRUD de base
         Route::post('/', [ProjetController::class, 'store']);
         Route::get('/{projet}', [ProjetController::class, 'show']);
         Route::put('/{projet}', [ProjetController::class, 'update']);
@@ -162,7 +172,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/{projet}/complete', [ProjetController::class, 'complete']);
         Route::post('/{projet}/clone', [ProjetController::class, 'clone']); // Changé de duplicate à clone
         Route::post('/{projet}/toggle-favorite', [ProjetController::class, 'toggleFavorite']);
-
 
         // Project Members Management
         Route::prefix('{projet}/members')->group(function () {
@@ -186,13 +195,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Project Statistics & Reports
         Route::get('/{projet}/statistics', [ProjetController::class, 'getStatistics']);
         Route::get('/{projet}/performance-report', [ProjetController::class, 'performanceReport']);
-        Route::get('/{projet}/accessible-tasks', [ProjetController::class, 'accessibleTasks']); 
+        Route::get('/{projet}/accessible-tasks', [ProjetController::class, 'accessibleTasks']);
 
         Route::get('/{projet}/members/{user}/removal-impact', [ProjetController::class, 'getMemberRemovalImpact']);
         Route::delete('/{projet}/members/{user}/remove', [ProjetController::class, 'removeMemberWithTransfer']);
 
     });
-
 
     // Activity Management Routes
     Route::prefix('activites')->group(function () {
@@ -260,7 +268,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/{tache}/assign-responsable', [TacheController::class, 'assignResponsable']);
         Route::delete('/{tache}/remove-responsable', [TacheController::class, 'removeResponsable']);
 
-
         // ✅ NOUVEAU: Mon kanban personnel
         Route::get('/my-kanban', [TacheController::class, 'myKanban']);
 
@@ -283,7 +290,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Route::post('/resultats-individuels/{resultat}/validate-n1', [TacheController::class, 'validateIndividualResultN1']);
         // Route::post('/resultats-individuels/{resultat}/validate-n2', [TacheController::class, 'validateIndividualResultN2']);
 
-
         // CRUD basique
         Route::get('/{tache}', [TacheController::class, 'show'])->name('taches.show');
         Route::put('/{tache}', [TacheController::class, 'update']);
@@ -303,8 +309,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('/{tache}/assignees/{user}', [TacheController::class, 'unassignUser']);
 
         // Sub-tasks
-        Route::get('/{tache}/sous-taches', [TacheController::class, 'subTasks']);
-        Route::post('/{tache}/sous-taches', [TacheController::class, 'createSubTask']);
+        Route::get('/{tache}/sous-taches', [SousTacheController::class, 'index']);
+        Route::post('/{tache}/sous-taches', [SousTacheController::class, 'store']);
 
         // Task Dependencies
         Route::get('/{tache}/dependencies', [TacheController::class, 'dependencies']);
@@ -325,6 +331,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('{tache}/external-links', [TacheController::class, 'addExternalLink']);
         Route::delete('{tache}/external-links/{link}', [TacheController::class, 'deleteExternalLink']);
 
+    });
+
+    // ======================================== SOUS-TÂCHES ========================================
+    Route::prefix('sous-taches')->group(function () {
+        Route::put('/{sousTache}', [SousTacheController::class, 'update']);
+        Route::delete('/{sousTache}', [SousTacheController::class, 'destroy']);
+        Route::post('/{sousTache}/intervenants', [SousTacheController::class, 'assignIntervenant']);
     });
 
     // ======================================== RÉSULTATS DE TÂCHES  ========================================
@@ -376,7 +389,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Export PDF du rapport de performance workspace
         Route::post('/workspace/{workspaceId}/export-pdf', [EvaluationController::class, 'exportWorkspacePerformancePdf']);
 
-
         // Dashboard général
         Route::get('/dashboard', [TacheController::class, 'evaluationDashboard']);
 
@@ -413,7 +425,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/activite/{activiteId}/performance', [TacheController::class, 'activityPerformanceReport']);
         Route::get('/activite/{activiteId}/user-tasks', [TacheController::class, 'userTasksReport']);
     });
-
 
     // Document Management Routes
     Route::prefix('documents')->group(function () {
@@ -507,7 +518,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
          */
         Route::get('/my-documents', [DocumentController::class, 'myDocuments'])->name('documents.my-documents');
 
-
         /**
          * POST /api/documents/{document}/versions
          * Crée une nouvelle version d'un document
@@ -555,56 +565,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/{document}/share', [DocumentController::class, 'shareWithUsers'])->name('documents.share');
     });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     // User Management Routes
     Route::prefix('users')->group(function () {
-
 
         // List and search
         Route::get('/', [UserController::class, 'index']);
@@ -626,10 +588,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/{user}/toggle-active', [UserController::class, 'toggleActive']);
         Route::get('/{user}/activity', [UserController::class, 'activity']);
     });
-
-
-
-
 
     // Task Management Routes
     // Route::prefix('taches')->group(function () {
@@ -670,147 +628,145 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Label Templates routes
     Route::prefix('label-templates')->group(function () {
-        Route::get('/', [\App\Http\Controllers\LabelTemplateController::class, 'index']);
-        Route::get('/default', [\App\Http\Controllers\LabelTemplateController::class, 'getDefault']);
-        Route::get('/predefined', [\App\Http\Controllers\LabelTemplateController::class, 'predefined']);
-        Route::post('/', [\App\Http\Controllers\LabelTemplateController::class, 'store']);
-        Route::get('/{labelTemplate}', [\App\Http\Controllers\LabelTemplateController::class, 'show']);
-        Route::put('/{labelTemplate}', [\App\Http\Controllers\LabelTemplateController::class, 'update']);
-        Route::delete('/{labelTemplate}', [\App\Http\Controllers\LabelTemplateController::class, 'destroy']);
-        Route::post('/{labelTemplate}/apply', [\App\Http\Controllers\LabelTemplateController::class, 'apply']);
-        Route::post('/{labelTemplate}/duplicate', [\App\Http\Controllers\LabelTemplateController::class, 'duplicate']);
-        Route::post('/{labelTemplate}/set-default', [\App\Http\Controllers\LabelTemplateController::class, 'setDefault']);
+        Route::get('/', [LabelTemplateController::class, 'index']);
+        Route::get('/default', [LabelTemplateController::class, 'getDefault']);
+        Route::get('/predefined', [LabelTemplateController::class, 'predefined']);
+        Route::post('/', [LabelTemplateController::class, 'store']);
+        Route::get('/{labelTemplate}', [LabelTemplateController::class, 'show']);
+        Route::put('/{labelTemplate}', [LabelTemplateController::class, 'update']);
+        Route::delete('/{labelTemplate}', [LabelTemplateController::class, 'destroy']);
+        Route::post('/{labelTemplate}/apply', [LabelTemplateController::class, 'apply']);
+        Route::post('/{labelTemplate}/duplicate', [LabelTemplateController::class, 'duplicate']);
+        Route::post('/{labelTemplate}/set-default', [LabelTemplateController::class, 'setDefault']);
     });
 
     // Task Labels routes (attach/detach labels to tasks)
     Route::prefix('taches/{tache}/labels')->group(function () {
-        Route::get('/', [\App\Http\Controllers\TacheLabelController::class, 'index']);
-        Route::post('/sync', [\App\Http\Controllers\TacheLabelController::class, 'sync']);
-        Route::post('/attach', [\App\Http\Controllers\TacheLabelController::class, 'attach']);
-        Route::post('/detach', [\App\Http\Controllers\TacheLabelController::class, 'detach']);
-        Route::delete('/detach-all', [\App\Http\Controllers\TacheLabelController::class, 'detachAll']);
+        Route::get('/', [TacheLabelController::class, 'index']);
+        Route::post('/sync', [TacheLabelController::class, 'sync']);
+        Route::post('/attach', [TacheLabelController::class, 'attach']);
+        Route::post('/detach', [TacheLabelController::class, 'detach']);
+        Route::delete('/detach-all', [TacheLabelController::class, 'detachAll']);
     });
 
     // Comment Management Routes
     Route::prefix('comments')->group(function () {
         // List comments for an entity
-        Route::get('/', [\App\Http\Controllers\CommentController::class, 'index']);
+        Route::get('/', [CommentController::class, 'index']);
 
         // CRUD operations
-        Route::post('/', [\App\Http\Controllers\CommentController::class, 'store']);
-        Route::get('/{comment}', [\App\Http\Controllers\CommentController::class, 'show']);
-        Route::put('/{comment}', [\App\Http\Controllers\CommentController::class, 'update']);
-        Route::delete('/{comment}', [\App\Http\Controllers\CommentController::class, 'destroy']);
+        Route::post('/', [CommentController::class, 'store']);
+        Route::get('/{comment}', [CommentController::class, 'show']);
+        Route::put('/{comment}', [CommentController::class, 'update']);
+        Route::delete('/{comment}', [CommentController::class, 'destroy']);
 
         // Reactions
-        Route::post('/{comment}/reactions', [\App\Http\Controllers\CommentController::class, 'toggleReaction']);
+        Route::post('/{comment}/reactions', [CommentController::class, 'toggleReaction']);
 
         // Attachments
-        Route::post('/{comment}/attachments', [\App\Http\Controllers\CommentController::class, 'addAttachment']);
-        Route::delete('/{comment}/attachments/{attachment}', [\App\Http\Controllers\CommentController::class, 'deleteAttachment']);
+        Route::post('/{comment}/attachments', [CommentController::class, 'addAttachment']);
+        Route::delete('/{comment}/attachments/{attachment}', [CommentController::class, 'deleteAttachment']);
 
         // Mentions
-        Route::get('/mentions/unread', [\App\Http\Controllers\CommentController::class, 'unreadMentions']);
-        Route::post('/mentions/mark-read', [\App\Http\Controllers\CommentController::class, 'markMentionsAsRead']);
+        Route::get('/mentions/unread', [CommentController::class, 'unreadMentions']);
+        Route::post('/mentions/mark-read', [CommentController::class, 'markMentionsAsRead']);
     });
 
     // Activity Log Routes
     Route::prefix('activities')->group(function () {
         // Get activity feed for dashboard
-        Route::get('/feed', [\App\Http\Controllers\ActivityController::class, 'feed']);
+        Route::get('/feed', [ActivityController::class, 'feed']);
 
         // Get recent activities
-        Route::get('/recent', [\App\Http\Controllers\ActivityController::class, 'recent']);
+        Route::get('/recent', [ActivityController::class, 'recent']);
 
         // Get activities for a specific subject
-        Route::get('/subject', [\App\Http\Controllers\ActivityController::class, 'forSubject']);
+        Route::get('/subject', [ActivityController::class, 'forSubject']);
 
         // Get activities by user
-        Route::get('/user', [\App\Http\Controllers\ActivityController::class, 'byUser']);
+        Route::get('/user', [ActivityController::class, 'byUser']);
 
         // Get activities by log name
-        Route::get('/log-name', [\App\Http\Controllers\ActivityController::class, 'byLogName']);
+        Route::get('/log-name', [ActivityController::class, 'byLogName']);
 
         // Get activities by date range
-        Route::get('/date-range', [\App\Http\Controllers\ActivityController::class, 'byDateRange']);
+        Route::get('/date-range', [ActivityController::class, 'byDateRange']);
 
         // Get activity statistics
-        Route::get('/stats', [\App\Http\Controllers\ActivityController::class, 'stats']);
+        Route::get('/stats', [ActivityController::class, 'stats']);
     });
-
-
 
     // Notification routes
     Route::prefix('notifications')->group(function () {
-        Route::get('/', [\App\Http\Controllers\NotificationController::class, 'index']);
-        Route::get('/all', [\App\Http\Controllers\NotificationController::class, 'all']);
-        Route::get('/grouped', [\App\Http\Controllers\NotificationController::class, 'grouped']);
-        Route::get('/statistics', [\App\Http\Controllers\NotificationController::class, 'statistics']);
-        Route::post('/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead']);
-        Route::post('/{id}/mark-read', [\App\Http\Controllers\NotificationController::class, 'markAsRead']);
-        Route::delete('/delete-all-read', [\App\Http\Controllers\NotificationController::class, 'deleteAllRead']);
-        Route::delete('/{id}', [\App\Http\Controllers\NotificationController::class, 'destroy']);
+        Route::get('/', [NotificationController::class, 'index']);
+        Route::get('/all', [NotificationController::class, 'all']);
+        Route::get('/grouped', [NotificationController::class, 'grouped']);
+        Route::get('/statistics', [NotificationController::class, 'statistics']);
+        Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead']);
+        Route::post('/{id}/mark-read', [NotificationController::class, 'markAsRead']);
+        Route::delete('/delete-all-read', [NotificationController::class, 'deleteAllRead']);
+        Route::delete('/{id}', [NotificationController::class, 'destroy']);
     });
 
     // Notification preferences
     Route::prefix('notification-preferences')->group(function () {
-        Route::get('/', [\App\Http\Controllers\NotificationPreferenceController::class, 'show']);
-        Route::put('/', [\App\Http\Controllers\NotificationPreferenceController::class, 'update']);
+        Route::get('/', [NotificationPreferenceController::class, 'show']);
+        Route::put('/', [NotificationPreferenceController::class, 'update']);
     });
 
     // Team Management Routes
     Route::prefix('teams')->group(function () {
         // List and my teams
-        Route::get('/', [\App\Http\Controllers\TeamController::class, 'index']);
-        Route::get('/my-teams', [\App\Http\Controllers\TeamController::class, 'myTeams']);
+        Route::get('/', [TeamController::class, 'index']);
+        Route::get('/my-teams', [TeamController::class, 'myTeams']);
 
         // CRUD
-        Route::post('/', [\App\Http\Controllers\TeamController::class, 'store']);
-        Route::get('/{uuid}', [\App\Http\Controllers\TeamController::class, 'show']);
-        Route::put('/{uuid}', [\App\Http\Controllers\TeamController::class, 'update']);
-        Route::delete('/{uuid}', [\App\Http\Controllers\TeamController::class, 'destroy']);
+        Route::post('/', [TeamController::class, 'store']);
+        Route::get('/{uuid}', [TeamController::class, 'show']);
+        Route::put('/{uuid}', [TeamController::class, 'update']);
+        Route::delete('/{uuid}', [TeamController::class, 'destroy']);
 
         // Actions
-        Route::post('/{uuid}/archive', [\App\Http\Controllers\TeamController::class, 'archive']);
-        Route::post('/{uuid}/restore', [\App\Http\Controllers\TeamController::class, 'restore']);
-        Route::post('/{uuid}/avatar', [\App\Http\Controllers\TeamController::class, 'uploadAvatar']);
+        Route::post('/{uuid}/archive', [TeamController::class, 'archive']);
+        Route::post('/{uuid}/restore', [TeamController::class, 'restore']);
+        Route::post('/{uuid}/avatar', [TeamController::class, 'uploadAvatar']);
 
         // Stats and activity
-        Route::get('/{uuid}/stats', [\App\Http\Controllers\TeamController::class, 'stats']);
-        Route::get('/{uuid}/activities', [\App\Http\Controllers\TeamController::class, 'activities']);
-        Route::get('/{uuid}/online-members', [\App\Http\Controllers\TeamController::class, 'onlineMembers']);
-        Route::post('/{uuid}/presence', [\App\Http\Controllers\TeamController::class, 'updatePresence']);
+        Route::get('/{uuid}/stats', [TeamController::class, 'stats']);
+        Route::get('/{uuid}/activities', [TeamController::class, 'activities']);
+        Route::get('/{uuid}/online-members', [TeamController::class, 'onlineMembers']);
+        Route::post('/{uuid}/presence', [TeamController::class, 'updatePresence']);
 
         // Members
-        Route::post('/{uuid}/members', [\App\Http\Controllers\TeamMemberController::class, 'store']);
-        Route::put('/{uuid}/members/{userId}/role', [\App\Http\Controllers\TeamMemberController::class, 'updateRole']);
-        Route::put('/{uuid}/members/{userId}/permissions', [\App\Http\Controllers\TeamMemberController::class, 'updatePermissions']);
-        Route::delete('/{uuid}/members/{userId}', [\App\Http\Controllers\TeamMemberController::class, 'destroy']);
-        Route::post('/{uuid}/transfer-ownership', [\App\Http\Controllers\TeamMemberController::class, 'transferOwnership']);
+        Route::post('/{uuid}/members', [TeamMemberController::class, 'store']);
+        Route::put('/{uuid}/members/{userId}/role', [TeamMemberController::class, 'updateRole']);
+        Route::put('/{uuid}/members/{userId}/permissions', [TeamMemberController::class, 'updatePermissions']);
+        Route::delete('/{uuid}/members/{userId}', [TeamMemberController::class, 'destroy']);
+        Route::post('/{uuid}/transfer-ownership', [TeamMemberController::class, 'transferOwnership']);
 
         // Messages
-        Route::get('/{uuid}/messages', [\App\Http\Controllers\TeamMessageController::class, 'index']);
-        Route::get('/{uuid}/messages/pinned', [\App\Http\Controllers\TeamMessageController::class, 'pinned']);
-        Route::post('/{uuid}/messages', [\App\Http\Controllers\TeamMessageController::class, 'store']);
-        Route::post('/messages/{uuid}/reactions', [\App\Http\Controllers\TeamMessageController::class, 'addReaction']);
+        Route::get('/{uuid}/messages', [TeamMessageController::class, 'index']);
+        Route::get('/{uuid}/messages/pinned', [TeamMessageController::class, 'pinned']);
+        Route::post('/{uuid}/messages', [TeamMessageController::class, 'store']);
+        Route::post('/messages/{uuid}/reactions', [TeamMessageController::class, 'addReaction']);
 
         // Announcements
-        Route::get('/{uuid}/announcements', [\App\Http\Controllers\TeamAnnouncementController::class, 'index']);
-        Route::post('/{uuid}/announcements', [\App\Http\Controllers\TeamAnnouncementController::class, 'store']);
-        Route::put('/{uuid}/announcements/{announcement}', [\App\Http\Controllers\TeamAnnouncementController::class, 'update']);
-        Route::delete('/{uuid}/announcements/{announcement}', [\App\Http\Controllers\TeamAnnouncementController::class, 'destroy']);
+        Route::get('/{uuid}/announcements', [TeamAnnouncementController::class, 'index']);
+        Route::post('/{uuid}/announcements', [TeamAnnouncementController::class, 'store']);
+        Route::put('/{uuid}/announcements/{announcement}', [TeamAnnouncementController::class, 'update']);
+        Route::delete('/{uuid}/announcements/{announcement}', [TeamAnnouncementController::class, 'destroy']);
 
         // Resources
-        Route::get('/{uuid}/resources', [\App\Http\Controllers\TeamResourceController::class, 'index']);
-        Route::post('/{uuid}/resources', [\App\Http\Controllers\TeamResourceController::class, 'store']);
-        Route::put('/{uuid}/resources/{resource}', [\App\Http\Controllers\TeamResourceController::class, 'update']);
-        Route::delete('/{uuid}/resources/{resource}', [\App\Http\Controllers\TeamResourceController::class, 'destroy']);
+        Route::get('/{uuid}/resources', [TeamResourceController::class, 'index']);
+        Route::post('/{uuid}/resources', [TeamResourceController::class, 'store']);
+        Route::put('/{uuid}/resources/{resource}', [TeamResourceController::class, 'update']);
+        Route::delete('/{uuid}/resources/{resource}', [TeamResourceController::class, 'destroy']);
 
         // Events
-        Route::get('/{uuid}/events', [\App\Http\Controllers\TeamEventController::class, 'index']);
-        Route::post('/{uuid}/events', [\App\Http\Controllers\TeamEventController::class, 'store']);
-        Route::get('/{uuid}/events/{event}', [\App\Http\Controllers\TeamEventController::class, 'show']);
-        Route::put('/{uuid}/events/{event}', [\App\Http\Controllers\TeamEventController::class, 'update']);
-        Route::delete('/{uuid}/events/{event}', [\App\Http\Controllers\TeamEventController::class, 'destroy']);
+        Route::get('/{uuid}/events', [TeamEventController::class, 'index']);
+        Route::post('/{uuid}/events', [TeamEventController::class, 'store']);
+        Route::get('/{uuid}/events/{event}', [TeamEventController::class, 'show']);
+        Route::put('/{uuid}/events/{event}', [TeamEventController::class, 'update']);
+        Route::delete('/{uuid}/events/{event}', [TeamEventController::class, 'destroy']);
     });
 });

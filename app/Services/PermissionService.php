@@ -390,6 +390,30 @@ class PermissionService
         return $this->canEditSousTache($user, $sousTache);
     }
 
+    public function canAssignSousTacheIntervenant(User $user, SousTache $sousTache): bool
+    {
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        $tache = $sousTache->tache;
+        $activite = $tache?->activite;
+        $workspace = $activite?->projet?->workspace;
+
+        if ($workspace && $workspace->isOwnerOrAdmin($user)) {
+            return true;
+        }
+
+        if ($activite?->isResponsable($user)) {
+            return true;
+        }
+
+        // Subtask responsable (is_responsable flag on tache_user)
+        $assignment = $tache?->assignees()->where('user_id', $user->id)->first();
+
+        return $assignment && ($assignment->pivot->is_responsable ?? false);
+    }
+
     // =========================================================================
     // DOCUMENT LEVEL
     // =========================================================================
