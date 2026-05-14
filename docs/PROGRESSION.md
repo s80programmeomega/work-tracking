@@ -23,7 +23,7 @@
 | 1 | Queue (database) + Laravel Reverb | `feature/v2-task-1-queue-reverb` | ✅ | 2026-05-14 | 2026-05-14 | — |
 | 2 | Subtask Data Model | `feature/v2-task-2-subtask-model` | ✅ | 2026-05-14 | 2026-05-14 | — |
 | 3 | Subtask CRUD API + Auto Progress | `feature/v2-task-3-subtask-api` | ✅ | 2026-05-14 | 2026-05-14 | — |
-| 4 | Subtask UI | `feature/v2-task-4-subtask-ui` | ⬜ | — | — | — |
+| 4 | Subtask UI | `feature/v2-task-4-subtask-ui` | ✅ | 2026-05-14 | 2026-05-14 | — |
 | 5 | Validation N0 + 48h Timer | `feature/v2-task-5-validation-n0` | ⬜ | — | — | — |
 | 6 | Anti-Sabotage Bypass | `feature/v2-task-6-bypass` | ⬜ | — | — | — |
 | 7 | N1 Scores + Pending Validations | `feature/v2-task-7-scores-dashboard` | ⬜ | — | — | — |
@@ -90,14 +90,14 @@
 - [ ] PR merged into `jonas`
 
 ### Task 4
-- [ ] `useSousTaches.js` composable created
-- [ ] `SousTacheList.vue` created
-- [ ] `SousTacheForm.vue` created
-- [ ] Kanban card indicator added
-- [ ] Submit result button disabled when blocking subtasks
-- [ ] Permissions added to `useActivitePermissions.js`
-- [ ] Translation keys added
-- [ ] Tests passing
+- [x] `useSousTaches.js` composable created
+- [x] `SousTacheList.vue` created
+- [x] `SousTacheForm.vue` created
+- [x] Kanban card indicator added (count badge + mini progress bar on TacheCard)
+- [ ] Submit result button disabled when blocking subtasks — deferred to Task 5 (results tab)
+- [x] Permissions added to `useActivitePermissions.js` (`canCreateSousTache`, `canAssignSousTacheIntervenant`)
+- [x] Translation keys added (`ui.*` section in fr/en sous_taches.php)
+- [x] Tests passing (41 total)
 - [ ] PR opened into `jonas`
 
 ### Task 5

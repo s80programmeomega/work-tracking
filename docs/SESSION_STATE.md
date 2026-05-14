@@ -24,19 +24,34 @@
 
 ## Current Task
 
-**Task:** 4 — Subtask UI
-**Branch:** `feature/v2-task-4-subtask-ui` _(not created yet)_
+**Task:** 5 — Validation N0 + 48h Timer
+**Branch:** `feature/v2-task-5-validation-n0` _(not created yet)_
 **Status:** Not started
 
 **What to do next:**
-1. Merge PR `feature/v2-task-3-subtask-api` into `jonas`
-2. Manually test Task 3 using `docs/testing/TASK_3_TESTING.md`
-3. Create branch `feature/v2-task-4-subtask-ui` from `jonas`
-4. Follow Task 4 in `IMPLEMENTATION_PLAN.md`
+1. Manually test Task 4 using `docs/testing/TASK_4_TESTING.md`
+2. Open PR `feature/v2-task-4-subtask-ui` into `jonas`
+3. Create branch `feature/v2-task-5-validation-n0` from `jonas`
+4. Follow Task 5 in `IMPLEMENTATION_PLAN.md`
 
 ---
 
 ## Last Completed Task
+
+**Task 4** — Subtask UI
+- `useSousTaches.js` composable: fetch, create, update, delete, assignIntervenant, hasBlockingSubtasks, totalPoids
+- `SousTacheForm.vue`: quick-create form with poids remaining indicator, date max constraint, validation flags
+- `SousTacheList.vue`: ordered list, inline statut/progression edit, quick-complete toggle, weighted progress bar, overdue/blocking badges, context menu
+- `TacheDetail.vue`: Sous-tâches tab added (second tab), wired to all CRUD handlers
+- `TacheCard.vue`: "N ST" count badge + mini progress bar when sous_taches_count > 0
+- `useActivitePermissions.js`: `canCreateSousTache` and `canAssignSousTacheIntervenant` added
+- Translation keys: `ui.*` section added to both fr/en sous_taches.php
+- Submit result button disable (blocking subtasks) deferred to Task 5
+- 41 tests passing, 0 new tests (frontend-only task)
+
+---
+
+## Previously Completed
 
 **Task 3** — Subtask CRUD API + Automatic Progress
 - `SousTacheService`, `SousTacheController` (5 endpoints), `SousTacheObserver`
@@ -44,13 +59,7 @@
 - Parent statut auto-change: all done → termine, any en_retard → en_retard
 - Manual statut block when sous-taches exist (422)
 - `canAssignSousTacheIntervenant` permission added
-- 3 notifications (SousTacheAssignee, SousTacheOverdue, TacheStatutAutoChange)
-- MySQL ENUM extended for taches.statut
-- 10 new tests, 41 total, all passing
-
----
-
-## Previously Completed
+- 3 notifications, MySQL ENUM extended, 10 new tests, 41 total
 
 **Task 2** — Subtask Data Model
 - 3 migrations: `create_sous_taches_table`, `create_sous_tache_user_table`, `drop_parent_tache_id_from_taches` (with data migration from self-referential pattern)
@@ -75,6 +84,7 @@
 | `feature/v2-task-1-queue-reverb` | Task 1 | Merged ✅ |
 | `feature/v2-task-2-subtask-model` | Task 2 | Merged ✅ |
 | `feature/v2-task-3-subtask-api` | Task 3 | Pending review |
+| `feature/v2-task-4-subtask-ui` | Task 4 | Pending review |
 
 ---
 
