@@ -15,19 +15,17 @@
 **Action:** Open a terminal and run:
 ```bash
 php artisan tinker
->>> dispatch(new class implements \Illuminate\Contracts\Queue\ShouldQueue {
-...     use \Illuminate\Foundation\Bus\Dispatchable, \Illuminate\Queue\InteractsWithQueue, \Illuminate\Queue\Queueable, \Illuminate\Queue\SerializesModels;
-...     public function handle(): void {}
-... });
+```
+Then inside Tinker:
+```php
+DB::table('jobs')->truncate();
+Queue::push('test-job');
+DB::table('jobs')->count(); // should return 1
 ```
 
-**Expected result:** The job is added to the `jobs` table.
+**Expected result:** `count()` returns `1` — the job row is in the `jobs` table.
 
-**How to verify:**
-```bash
-php artisan tinker
->>> DB::table('jobs')->count(); // should return 1
-```
+**How to verify:** The count is non-zero and the row is visible in the `jobs` table.
 
 ---
 
