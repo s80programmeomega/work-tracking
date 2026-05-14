@@ -7,6 +7,7 @@ namespace Database\Seeders;
 use App\Enums\Role;
 use App\Models\Activite;
 use App\Models\Projet;
+use App\Models\SousTache;
 use App\Models\Tache;
 use App\Models\User;
 use App\Models\Workspace;
@@ -17,8 +18,8 @@ class WorkspaceSeeder extends Seeder
 {
     public function run(): void
     {
-        $superAdmin  = User::where('email', 'superadmin@worktracking.com')->firstOrFail();
-        $directeur   = User::where('email', 'directeur@worktracking.com')->firstOrFail();
+        $superAdmin = User::where('email', 'superadmin@worktracking.com')->firstOrFail();
+        $directeur = User::where('email', 'directeur@worktracking.com')->firstOrFail();
 
         foreach ([
             ['nom' => 'Manager',       'prenom' => 'Test', 'email' => 'manager@worktracking.com'],
@@ -28,34 +29,34 @@ class WorkspaceSeeder extends Seeder
             ['nom' => 'Observateur',   'prenom' => 'Test', 'email' => 'observateur@worktracking.com'],
         ] as $data) {
             User::create([
-                'nom'               => $data['nom'],
-                'prenom'            => $data['prenom'],
-                'nom_complet'       => $data['prenom'] . ' ' . $data['nom'],
-                'email'             => $data['email'],
-                'password'          => Hash::make('password'),
+                'nom' => $data['nom'],
+                'prenom' => $data['prenom'],
+                'nom_complet' => $data['prenom'].' '.$data['nom'],
+                'email' => $data['email'],
+                'password' => Hash::make('password'),
                 'email_verified_at' => now(),
-                'is_active'         => true,
+                'is_active' => true,
             ])->assignRole(Role::UTILISATEUR->value);
         }
 
-        $manager       = User::where('email', 'manager@worktracking.com')->firstOrFail();
-        $cadre         = User::where('email', 'cadre@worktracking.com')->firstOrFail();
+        $manager = User::where('email', 'manager@worktracking.com')->firstOrFail();
+        $cadre = User::where('email', 'cadre@worktracking.com')->firstOrFail();
         $collaborateur = User::where('email', 'collaborateur@worktracking.com')->firstOrFail();
-        $stagiaire     = User::where('email', 'stagiaire@worktracking.com')->firstOrFail();
-        $observateur   = User::where('email', 'observateur@worktracking.com')->firstOrFail();
+        $stagiaire = User::where('email', 'stagiaire@worktracking.com')->firstOrFail();
+        $observateur = User::where('email', 'observateur@worktracking.com')->firstOrFail();
 
         // ── Workspace ────────────────────────────────────────────────────────
         $workspace = Workspace::create([
-            'nom'         => 'Workspace de Test',
+            'nom' => 'Workspace de Test',
             'description' => 'Workspace de démonstration avec tous les rôles',
-            'code'        => 'TEST-WS-001',
-            'owner_id'    => $directeur->id,
-            'is_active'   => true,
-            'settings'    => [
+            'code' => 'TEST-WS-001',
+            'owner_id' => $directeur->id,
+            'is_active' => true,
+            'settings' => [
                 'default_project_visibility' => 'team',
                 'members_can_create_projects' => true,
-                'members_can_invite'          => false,
-                'require_task_validation'     => true,
+                'members_can_invite' => false,
+                'require_task_validation' => true,
             ],
         ]);
 
@@ -66,10 +67,10 @@ class WorkspaceSeeder extends Seeder
 
         // Attach workspace members
         $workspace->members()->attach($directeur->id, [
-            'role'        => 'owner',
+            'role' => 'owner',
             'permissions' => json_encode(['all']),
-            'invited_at'  => now(),
-            'invited_by'  => $directeur->id,
+            'invited_at' => now(),
+            'invited_by' => $directeur->id,
         ]);
         foreach ([
             [$manager,       'manager'],
@@ -79,7 +80,7 @@ class WorkspaceSeeder extends Seeder
             [$observateur,   'observateur'],
         ] as [$user, $role]) {
             $workspace->members()->attach($user->id, [
-                'role'       => $role,
+                'role' => $role,
                 'invited_at' => now(),
                 'invited_by' => $directeur->id,
             ]);
@@ -94,21 +95,21 @@ class WorkspaceSeeder extends Seeder
 
         foreach ($projectsData as $pd) {
             $projet = Projet::create([
-                'workspace_id'   => $workspace->id,
-                'nom'            => $pd['nom'],
-                'description'    => 'Projet de démonstration : ' . $pd['nom'],
+                'workspace_id' => $workspace->id,
+                'nom' => $pd['nom'],
+                'description' => 'Projet de démonstration : '.$pd['nom'],
                 'responsable_id' => $pd['responsable']->id,
-                'date_debut'     => now(),
-                'date_fin'       => now()->addMonths(3),
-                'visibility'     => 'team',
-                'status'         => 'active',
+                'date_debut' => now(),
+                'date_fin' => now()->addMonths(3),
+                'visibility' => 'team',
+                'status' => 'active',
             ]);
 
-            $projet->members()->attach($manager->id,       ['role' => 'manager']);
-            $projet->members()->attach($cadre->id,         ['role' => 'cadre']);
+            $projet->members()->attach($manager->id, ['role' => 'manager']);
+            $projet->members()->attach($cadre->id, ['role' => 'cadre']);
             $projet->members()->attach($collaborateur->id, ['role' => 'collaborateur']);
-            $projet->members()->attach($stagiaire->id,     ['role' => 'stagiaire']);
-            $projet->members()->attach($observateur->id,   ['role' => 'observateur']);
+            $projet->members()->attach($stagiaire->id, ['role' => 'stagiaire']);
+            $projet->members()->attach($observateur->id, ['role' => 'observateur']);
 
             // ── Activities (3 per project) ────────────────────────────────────
             $activitiesData = [
@@ -119,31 +120,31 @@ class WorkspaceSeeder extends Seeder
 
             foreach ($activitiesData as $ad) {
                 $activite = Activite::create([
-                    'projet_id'      => $projet->id,
-                    'nom'            => $ad['nom'],
-                    'description'    => 'Activité : ' . $ad['nom'],
+                    'projet_id' => $projet->id,
+                    'nom' => $ad['nom'],
+                    'description' => 'Activité : '.$ad['nom'],
                     'responsable_id' => $ad['responsable']->id,
-                    'date_debut'     => now(),
-                    'date_fin'       => now()->addMonths(2),
+                    'date_debut' => now(),
+                    'date_fin' => now()->addMonths(2),
                 ]);
 
                 $activite->members()->attach($cadre->id, [
-                    'role'                => 'cadre',
-                    'can_create_tasks'    => true,
-                    'can_edit_tasks'      => true,
-                    'can_delete_tasks'    => true,
-                    'can_validate_results'=> true,
-                    'can_assign_users'    => true,
+                    'role' => 'cadre',
+                    'can_create_tasks' => true,
+                    'can_edit_tasks' => true,
+                    'can_delete_tasks' => true,
+                    'can_validate_results' => true,
+                    'can_assign_users' => true,
                 ]);
                 $activite->members()->attach($collaborateur->id, [
-                    'role'             => 'collaborateur',
+                    'role' => 'collaborateur',
                     'can_create_tasks' => false,
-                    'can_edit_tasks'   => false,
+                    'can_edit_tasks' => false,
                 ]);
                 $activite->members()->attach($stagiaire->id, [
-                    'role'             => 'stagiaire',
+                    'role' => 'stagiaire',
                     'can_create_tasks' => false,
-                    'can_edit_tasks'   => false,
+                    'can_edit_tasks' => false,
                 ]);
 
                 // ── Tasks (5 per activity) ────────────────────────────────────
@@ -151,46 +152,82 @@ class WorkspaceSeeder extends Seeder
                     ['titre' => 'Recueil des besoins',          'statut' => 'termine',  'taux' => 100, 'priorite' => 'elevee'],
                     ['titre' => 'Rédaction des spécifications',  'statut' => 'en_cours', 'taux' => 60,  'priorite' => 'elevee'],
                     ['titre' => 'Conception technique',          'statut' => 'en_cours', 'taux' => 40,  'priorite' => 'moyenne'],
-                    ['titre' => 'Développement module principal','statut' => 'a_faire',  'taux' => 0,   'priorite' => 'critique'],
+                    ['titre' => 'Développement module principal', 'statut' => 'a_faire',  'taux' => 0,   'priorite' => 'critique'],
                     ['titre' => 'Revue de code',                 'statut' => 'a_faire',  'taux' => 0,   'priorite' => 'faible'],
                 ];
 
+                $firstTask = true;
                 foreach ($tasksData as $td) {
                     $tache = Tache::create([
-                        'activite_id'            => $activite->id,
-                        'responsable_id'         => $cadre->id,
-                        'titre'                  => $td['titre'],
-                        'description'            => 'Description de : ' . $td['titre'],
-                        'statut'                 => $td['statut'],
-                        'priorite'               => $td['priorite'],
-                        'echeance'               => now()->addDays(rand(7, 30)),
-                        'taux_realisation'       => $td['taux'],
+                        'activite_id' => $activite->id,
+                        'responsable_id' => $cadre->id,
+                        'titre' => $td['titre'],
+                        'description' => 'Description de : '.$td['titre'],
+                        'statut' => $td['statut'],
+                        'priorite' => $td['priorite'],
+                        'echeance' => now()->addDays(rand(7, 30)),
+                        'taux_realisation' => $td['taux'],
                         'validation_n1_required' => true,
                         'validation_n2_required' => true,
                     ]);
 
                     $tache->assignees()->attach($collaborateur->id, [
-                        'role'           => 'collaborateur',
-                        'is_responsable' => false,
-                        'can_edit'       => false,
+                        'role' => 'collaborateur',
+                        'is_responsable' => true,
+                        'can_edit' => false,
                     ]);
                     $tache->assignees()->attach($stagiaire->id, [
-                        'role'           => 'stagiaire',
+                        'role' => 'stagiaire',
                         'is_responsable' => false,
-                        'can_edit'       => false,
+                        'can_edit' => false,
                     ]);
+
+                    // Add 3 weighted sous-tâches on the first task of each activity
+                    if ($firstTask) {
+                        SousTache::create([
+                            'tache_id' => $tache->id,
+                            'responsable_id' => $collaborateur->id,
+                            'titre' => 'Préparation',
+                            'statut' => 'termine',
+                            'progression' => 100,
+                            'poids' => 40,
+                            'ordre' => 1,
+                            'date_echeance' => now()->addDays(5),
+                        ]);
+                        SousTache::create([
+                            'tache_id' => $tache->id,
+                            'responsable_id' => $collaborateur->id,
+                            'titre' => 'Exécution',
+                            'statut' => 'en_cours',
+                            'progression' => 50,
+                            'poids' => 35,
+                            'ordre' => 2,
+                            'date_echeance' => now()->addDays(10),
+                        ]);
+                        SousTache::create([
+                            'tache_id' => $tache->id,
+                            'responsable_id' => $stagiaire->id,
+                            'titre' => 'Livraison',
+                            'statut' => 'a_faire',
+                            'progression' => 0,
+                            'poids' => 25,
+                            'ordre' => 3,
+                            'date_echeance' => now()->addDays(15),
+                        ]);
+                        $firstTask = false;
+                    }
                 }
             }
         }
 
         // ── Second workspace (owned by manager, directeur is a member) ──────
         $workspace2 = Workspace::create([
-            'nom'         => 'Workspace Secondaire',
+            'nom' => 'Workspace Secondaire',
             'description' => 'Second workspace pour tester le switch',
-            'code'        => 'TEST-WS-002',
-            'owner_id'    => $manager->id,
-            'is_active'   => true,
-            'settings'    => ['default_project_visibility' => 'team'],
+            'code' => 'TEST-WS-002',
+            'owner_id' => $manager->id,
+            'is_active' => true,
+            'settings' => ['default_project_visibility' => 'team'],
         ]);
 
         foreach ([$superAdmin, $directeur, $manager, $cadre] as $user) {
@@ -205,18 +242,19 @@ class WorkspaceSeeder extends Seeder
         ]);
 
         Projet::create([
-            'workspace_id'   => $workspace2->id,
-            'nom'            => 'Projet Workspace 2',
-            'description'    => 'Projet de test dans le second workspace',
+            'workspace_id' => $workspace2->id,
+            'nom' => 'Projet Workspace 2',
+            'description' => 'Projet de test dans le second workspace',
             'responsable_id' => $manager->id,
-            'date_debut'     => now(),
-            'date_fin'       => now()->addMonths(2),
-            'visibility'     => 'team',
-            'status'         => 'active',
+            'date_debut' => now(),
+            'date_fin' => now()->addMonths(2),
+            'visibility' => 'team',
+            'status' => 'active',
         ]);
 
         $this->command->info('Workspace seeded successfully!');
         $this->command->info('3 projects × 3 activities × 5 tasks = 45 tasks total');
+        $this->command->info('First task of each activity has 3 sous-tâches (poids: 40/35/25)');
         $this->command->info('');
         $this->command->info('Test users (password: password):');
         $this->command->info('- superadmin@worktracking.com    → super_admin (sees everything)');

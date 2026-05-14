@@ -42,14 +42,14 @@
 ### Task 0
 - [x] Contextual roles seeded into Spatie `roles` table with default permissions
 - [x] `ProjetPolicy`, `ActivitePolicy`, `TachePolicy`, `DocumentPolicy`, `WorkspacePolicy` created
-- [ ] `SousTachePolicy` stub created (populated in Task 2)
+- [x] `SousTachePolicy` stub created (populated in Task 2)
 - [x] `Gate::before()` super_admin bypass registered in `AuthServiceProvider`
 - [x] All policies registered in `AuthServiceProvider::$policies`
 - [x] `PermissionService` refactored to relationship-helper only
 - [x] All controllers updated: `abort_unless` → `$this->authorize()`
 - [x] `RolePermissionSeeder` updated to seed contextual roles
 - [x] All existing tests still passing
-- [x] PR merged into `jonas`
+- [ ] PR opened into `jonas`
 
 ### Task 1
 - [x] `QUEUE_CONNECTION=database` in `.env` and `.env.example`
@@ -57,7 +57,7 @@
 - [x] `laravel-echo` + `pusher-js` installed
 - [x] `useEcho.js` composable created
 - [x] Tests passing
-- [ ] PR merged into `jonas`
+- [x] PR merged into `jonas`
 
 ### Task 2
 - [x] Migration `create_sous_taches_table` applied
@@ -70,11 +70,11 @@
 - [x] `SousTachePolicy` created and registered in `AuthServiceProvider`
 - [x] Permissions added (PermissionService + RolePermissionSeeder)
 - [x] Translation files `lang/fr/sous_taches.php` and `lang/en/sous_taches.php` created
-- [x] Bug fix: `soustaches` → `sousTaches` in ProjetController
+- [x] Bug fix: `soustaches` → `sousTaches` in ProjetController (2 occurrences)
 - [x] `is_responsable` added to `assignees()` withPivot in Tache model
-- [x] Tests passing (6 new tests, 28 total)
+- [x] Tests passing (6 new tests)
 - [ ] Frontend composable (`useTachePermissions.js`) — deferred to Task 4
-- [ ] PR merged into `jonas`
+- [x] PR merged into `jonas`
 
 ### Task 3
 - [ ] `SousTacheService` created

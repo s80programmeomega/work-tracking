@@ -6,6 +6,7 @@ use App\Enums\TachePriorite;
 use App\Enums\TacheStatut;
 use App\Notifications\AssigneCompletedTaskNotification;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,7 +24,6 @@ class Tache extends Model
     protected $fillable = [
         'responsable_id',
         'activite_id',
-        'parent_tache_id',
         'titre',
         'code',
         'description',
@@ -80,7 +80,6 @@ class Tache extends Model
         'year' => 'integer',
     ];
 
-
     protected $appends = [
         'is_overdue',
         'validation_status',
@@ -112,7 +111,6 @@ class Tache extends Model
             ->dontSubmitEmptyLogs();
     }
 
-
     /**
      * Boot the model
      */
@@ -121,12 +119,12 @@ class Tache extends Model
         parent::boot();
 
         static::creating(function ($tache) {
-            if (!$tache->code) {
+            if (! $tache->code) {
                 $tache->code = static::generateUniqueCode();
             }
 
             // ✅ Auto-définir semaine et année
-            if (!$tache->week_number && $tache->date_debut) {
+            if (! $tache->week_number && $tache->date_debut) {
                 $tache->week_number = $tache->date_debut->weekOfYear;
                 $tache->year = $tache->date_debut->year;
             }
@@ -141,7 +139,7 @@ class Tache extends Model
         do {
             $latest = static::withTrashed()->latest('id')->first();
             $nextId = $latest ? $latest->id + 1 : 1;
-            $code = 'TASK-' . str_pad($nextId, 4, '0', STR_PAD_LEFT);
+            $code = 'TASK-'.str_pad($nextId, 4, '0', STR_PAD_LEFT);
         } while (static::withTrashed()->where('code', $code)->exists());
 
         return $code;
@@ -158,7 +156,7 @@ class Tache extends Model
     public function isOverdue(): bool
     {
         // Si pas de date d'échéance ou tâche terminée, pas en retard
-        if (!$this->echeance || $this->statut === TacheStatut::TERMINE) {
+        if (! $this->echeance || $this->statut === TacheStatut::TERMINE) {
             return false;
         }
 
@@ -189,6 +187,7 @@ class Tache extends Model
             ->where('statut', '!=', TacheStatut::TERMINE->value)
             ->whereIn('priorite', [TachePriorite::ELEVEE, TachePriorite::MOYENNE]);
     }
+
     /**
      * Fichiers attachés
      */
@@ -216,6 +215,7 @@ class Tache extends Model
         return $this->belongsToMany(User::class, 'tache_user')
             ->withPivot([
                 'role',
+                'is_responsable',
                 'can_edit',
                 'can_complete',
                 'can_validate',
@@ -223,7 +223,7 @@ class Tache extends Model
                 'progression_individuelle',
                 'started_at',
                 'completed_at',
-                'notes_personnelles'
+                'notes_personnelles',
             ])
             ->withTimestamps()
             ->withCasts([
@@ -270,7 +270,6 @@ class Tache extends Model
             ->get();
     }
 
-
     public function resultatsIndividuels(): HasMany
     {
         return $this->hasMany(TacheResultat::class)
@@ -293,11 +292,11 @@ class Tache extends Model
      */
     public function monResultat(?User $user = null): ?TacheResultat
     {
-        if (!$user) {
+        if (! $user) {
             $user = auth()->user();
         }
 
-        if (!$user) {
+        if (! $user) {
             return null;
         }
 
@@ -333,7 +332,7 @@ class Tache extends Model
             ->where('user_id', $user->id)
             ->first();
 
-        if (!$pivot) {
+        if (! $pivot) {
             return null;
         }
 
@@ -345,7 +344,6 @@ class Tache extends Model
             'notes_personnelles' => $pivot->pivot->notes_personnelles,
         ];
     }
-
 
     /**
      * ✅ NOUVEAU : Obtenir la progression individuelle
@@ -361,7 +359,7 @@ class Tache extends Model
 
     public function updateStatutForUser(User $user, string $newStatut, ?int $progression = null): void
     {
-        if (!$this->isAssignedTo($user)) {
+        if (! $this->isAssignedTo($user)) {
             throw new \Exception('Cet utilisateur n\'est pas assigné à cette tâche');
         }
 
@@ -377,7 +375,7 @@ class Tache extends Model
         // ✅ AUTO-GÉRER les timestamps selon le statut
         if ($newStatut === 'en_cours') {
             $pivot = $this->assignees()->where('user_id', $user->id)->first();
-            if (!$pivot->pivot->started_at) {
+            if (! $pivot->pivot->started_at) {
                 $updateData['started_at'] = now();
             }
         } elseif ($newStatut === 'termine') {
@@ -471,12 +469,11 @@ class Tache extends Model
                         'progression_individuelle',
                         'started_at',
                         'completed_at',
-                        'notes_personnelles'
+                        'notes_personnelles',
                     ]);
-            }
+            },
         ]);
     }
-
 
     /**
      * ✅ NOUVEAU: Obtenir les tâches d'un utilisateur par statut individuel
@@ -527,7 +524,7 @@ class Tache extends Model
                 'statut_individuel',
                 'progression_individuelle',
                 'started_at',
-                'completed_at'
+                'completed_at',
             ])
             ->get();
 
@@ -566,7 +563,7 @@ class Tache extends Model
             return false;
         }
 
-        return $assignees->every(fn($u) => $u->pivot->statut_individuel === 'termine');
+        return $assignees->every(fn ($u) => $u->pivot->statut_individuel === 'termine');
     }
 
     /**
@@ -577,7 +574,7 @@ class Tache extends Model
         return $this->assignees()
             ->withPivot('statut_individuel')
             ->get()
-            ->filter(fn($u) => $u->pivot->statut_individuel !== 'termine');
+            ->filter(fn ($u) => $u->pivot->statut_individuel !== 'termine');
     }
 
     /**
@@ -593,13 +590,12 @@ class Tache extends Model
         });
     }
 
-
     /**
      * ✅ NOUVEAU : Soumettre un résultat individuel
      */
     public function soumettreResultatIndividuel(User $user, array $data): TacheResultat
     {
-        if (!$this->isAssignedTo($user)) {
+        if (! $this->isAssignedTo($user)) {
             throw new \Exception('Vous n\'êtes pas assigné à cette tâche');
         }
 
@@ -653,8 +649,8 @@ class Tache extends Model
                 // Si N2 requis, doit être validé aussi
                 $q->where('valide_par_n2', true)
                     ->orWhereHas('tache', function ($tq) {
-                    $tq->where('validation_n2_required', false);
-                });
+                        $tq->where('validation_n2_required', false);
+                    });
             })
             ->count();
 
@@ -703,14 +699,9 @@ class Tache extends Model
             ->withTimestamps();
     }
 
-    public function parent(): BelongsTo
-    {
-        return $this->belongsTo(Tache::class, 'parent_tache_id');
-    }
-
     public function sousTaches(): HasMany
     {
-        return $this->hasMany(Tache::class, 'parent_tache_id');
+        return $this->hasMany(SousTache::class);
     }
 
     public function dependencies(): BelongsToMany
@@ -757,9 +748,6 @@ class Tache extends Model
             ->performedOn($this)
             ->log('Tâche marquée comme terminée');
     }
-
-
-
 
     /**
      * ✅ Archiver/Désarchiver
@@ -843,7 +831,6 @@ class Tache extends Model
             return true;
         }
 
-
         // Assigné avec permission d'édition
         $assignment = $this->assignees()->where('user_id', $user->id)->first();
         if ($assignment && ($assignment->pivot->can_edit ?? false)) {
@@ -853,18 +840,17 @@ class Tache extends Model
         return false;
     }
 
-
     /**
      * ✅ Vérifier si l'utilisateur peut valider N2
      */
     public function canBeValidatedN2By(User $user): bool
     {
-        if (!$this->validation_n2_required) {
+        if (! $this->validation_n2_required) {
             return false;
         }
 
         // N1 doit être validé d'abord
-        if (!$this->validated_n1_at) {
+        if (! $this->validated_n1_at) {
             return false;
         }
 
@@ -895,12 +881,11 @@ class Tache extends Model
         return false;
     }
 
-
     // ==================== ACCESSORS ====================
 
     public function getIsOverdueAttribute(): bool
     {
-        if (!$this->echeance || $this->statut === TacheStatut::TERMINE) {
+        if (! $this->echeance || $this->statut === TacheStatut::TERMINE) {
             return false;
         }
 
@@ -924,24 +909,21 @@ class Tache extends Model
         return 'not_validated';
     }
 
-
     public function getCanBeCompletedAttribute(): bool
     {
-        // Vérifier si toutes les sous-tâches sont terminées
-        return $this->sousTaches()->where('statut', '!=', TacheStatut::TERMINE->value)->count() === 0;
+        return $this->sousTaches()->where('statut', '!=', 'termine')->count() === 0;
     }
 
     public function getTimeVariancePercentageAttribute(): ?float
     {
-        if (!$this->estimated_hours || $this->estimated_hours == 0 || !$this->actual_hours) {
+        if (! $this->estimated_hours || $this->estimated_hours == 0 || ! $this->actual_hours) {
             return null;
         }
 
         return round((($this->actual_hours - $this->estimated_hours) / $this->estimated_hours) * 100, 2);
     }
 
-
-    public function canBeStarted(User $user = null): bool
+    public function canBeStarted(?User $user = null): bool
     {
         // État de base
         if ($this->statut === TacheStatut::TERMINE) {
@@ -953,7 +935,7 @@ class Tache extends Model
         }
 
         // Vérifier les permissions utilisateur si fourni
-        if ($user && !$this->canBeEditedBy($user)) {
+        if ($user && ! $this->canBeEditedBy($user)) {
             return false;
         }
 
@@ -999,9 +981,7 @@ class Tache extends Model
         return true; // Temporairement toujours vrai
     }
 
-
     // ==================== SCOPES ====================
-
 
     public function scopeForActivite($query, int $activiteId)
     {
@@ -1078,6 +1058,7 @@ class Tache extends Model
 
         // Assigné avec permission can_complete
         $assignment = $this->assignees()->where('user_id', $user->id)->first();
+
         return $assignment && ($assignment->pivot->can_complete ?? true);
     }
 
@@ -1087,7 +1068,7 @@ class Tache extends Model
     public function canBeValidatedN1By(User $user): bool
     {
         // Tâche doit être en attente de validation N1
-        if (!$this->validation_n1_required || $this->validated_n1_at) {
+        if (! $this->validation_n1_required || $this->validated_n1_at) {
             return false;
         }
 
@@ -1112,15 +1093,12 @@ class Tache extends Model
         return false;
     }
 
-
-
-
     /**
      * ✅ NOUVEAU : Valider la tâche (N1)
      */
     public function validateN1(User $user, ?string $commentaire = null): void
     {
-        if (!$this->canBeValidatedN1By($user)) {
+        if (! $this->canBeValidatedN1By($user)) {
             throw new \Exception('Vous n\'avez pas la permission de valider cette tâche (N1)');
         }
 
@@ -1151,11 +1129,11 @@ class Tache extends Model
      */
     public function validateN2(User $user, ?string $commentaire = null): void
     {
-        if (!$this->canBeValidatedN2By($user)) {
+        if (! $this->canBeValidatedN2By($user)) {
             throw new \Exception('Vous n\'avez pas la permission de valider cette tâche (N2)');
         }
 
-        if (!$this->validated_n1_at) {
+        if (! $this->validated_n1_at) {
             throw new \Exception('La validation N1 doit être effectuée avant la validation N2');
         }
 
@@ -1183,11 +1161,11 @@ class Tache extends Model
      */
     public function isFullyValidated(): bool
     {
-        if ($this->validation_n1_required && !$this->validated_n1_at) {
+        if ($this->validation_n1_required && ! $this->validated_n1_at) {
             return false;
         }
 
-        if ($this->validation_n2_required && !$this->validated_n2_at) {
+        if ($this->validation_n2_required && ! $this->validated_n2_at) {
             return false;
         }
 
@@ -1196,9 +1174,6 @@ class Tache extends Model
 
     /**
      * ✅ Vérifie si la tâche doit être affichée sur la fiche d'évaluation
-     * 
-     * @param User $user
-     * @return bool
      */
     public function shouldShowOnEvaluation(User $user): bool
     {
@@ -1214,12 +1189,12 @@ class Tache extends Model
             $monResultat = $this->monResultat($user);
 
             // Pas de résultat → afficher
-            if (!$monResultat || !$monResultat->soumis_le) {
+            if (! $monResultat || ! $monResultat->soumis_le) {
                 return true;
             }
 
             // Vérifier si validation complète
-            return !$this->isValidationCompleteForUser($user);
+            return ! $this->isValidationCompleteForUser($user);
         }
 
         return false;
@@ -1227,15 +1202,12 @@ class Tache extends Model
 
     /**
      * ✅ Vérifie si la validation est complète pour un utilisateur
-     * 
-     * @param User $user
-     * @return bool
      */
     public function isValidationCompleteForUser(User $user): bool
     {
         $monResultat = $this->monResultat($user);
 
-        if (!$monResultat) {
+        if (! $monResultat) {
             return false;
         }
 
@@ -1250,41 +1222,38 @@ class Tache extends Model
 
     /**
      * ✅ Récupère le statut de validation pour l'affichage
-     * 
-     * @param User $user
-     * @return string
      */
     public function getValidationStatusForUser(User $user): string
     {
         $monResultat = $this->monResultat($user);
 
-        if (!$monResultat || !$monResultat->soumis_le) {
+        if (! $monResultat || ! $monResultat->soumis_le) {
             return 'not_submitted'; // Pas encore soumis
         }
 
         if ($this->validation_n2_required) {
-            if (!$monResultat->valide_par_n1) {
+            if (! $monResultat->valide_par_n1) {
                 return 'pending_n1'; // En attente N1
             }
-            if (!$monResultat->valide_par_n2) {
+            if (! $monResultat->valide_par_n2) {
                 return 'pending_n2'; // En attente N2
             }
+
             return 'fully_validated'; // Complètement validé
         } else {
-            if (!$monResultat->valide_par_n1) {
+            if (! $monResultat->valide_par_n1) {
                 return 'pending_n1'; // En attente N1
             }
+
             return 'fully_validated'; // Complètement validé
         }
     }
 
     /**
      * ✅ Scope pour les tâches d'une semaine spécifique
-     * 
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param int $weekNumber
-     * @param int $year
-     * @return \Illuminate\Database\Eloquent\Builder
+     *
+     * @param  Builder  $query
+     * @return Builder
      */
     public function scopeForWeek($query, int $weekNumber, int $year)
     {
@@ -1300,10 +1269,9 @@ class Tache extends Model
     /**
      * ✅ Scope pour les tâches à afficher sur la fiche d'évaluation
      * Filtre côté DB pour optimisation
-     * 
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param User $user
-     * @return \Illuminate\Database\Eloquent\Builder
+     *
+     * @param  Builder  $query
+     * @return Builder
      */
     public function scopeForEvaluation($query, User $user)
     {
@@ -1315,29 +1283,26 @@ class Tache extends Model
                 $q->whereIn('statut', ['en_cours', 'a_faire'])
                     // Ou les tâches terminées mais pas complètement validées
                     ->orWhere(function ($subQ) use ($user) {
-                    $subQ->where('statut', 'termine')
-                        ->where(function ($validQ) use ($user) {
-                            // Sans résultat
-                            $validQ->whereDoesntHave('resultatsIndividuels', function ($resQ) use ($user) {
-                                $resQ->where('user_id', $user->id)
-                                    ->whereNotNull('soumis_le');
-                            })
-                                // Ou avec résultat non validé
-                                ->orWhereHas('resultatsIndividuels', function ($resQ) use ($user) {
-                                $resQ->where('user_id', $user->id)
-                                    ->where(function ($valQ) {
-                                        $valQ->where('valide_par_n1', false)
-                                            ->orWhere(function ($n2Q) {
-                                                $n2Q->whereColumn('taches.validation_n2_required', true)
-                                                    ->where('valide_par_n2', false);
+                        $subQ->where('statut', 'termine')
+                            ->where(function ($validQ) use ($user) {
+                                // Sans résultat
+                                $validQ->whereDoesntHave('resultatsIndividuels', function ($resQ) use ($user) {
+                                    $resQ->where('user_id', $user->id)
+                                        ->whereNotNull('soumis_le');
+                                })
+                                    // Ou avec résultat non validé
+                                    ->orWhereHas('resultatsIndividuels', function ($resQ) use ($user) {
+                                        $resQ->where('user_id', $user->id)
+                                            ->where(function ($valQ) {
+                                                $valQ->where('valide_par_n1', false)
+                                                    ->orWhere(function ($n2Q) {
+                                                        $n2Q->whereColumn('taches.validation_n2_required', true)
+                                                            ->where('valide_par_n2', false);
+                                                    });
                                             });
                                     });
                             });
-                        });
-                });
+                    });
             });
     }
-
-
-
 }

@@ -14,36 +14,47 @@ class TacheResource extends JsonResource
 
         // ✅ Helper pour formater les dates en toute sécurité
         $formatDate = function ($date) {
-            if (!$date)
+            if (! $date) {
                 return null;
-            if (is_string($date))
+            }
+            if (is_string($date)) {
                 return $date;
-            if (method_exists($date, 'format'))
+            }
+            if (method_exists($date, 'format')) {
                 return $date->format('Y-m-d H:i:s');
+            }
+
             return null;
         };
 
         $formatDateOnly = function ($date) {
-            if (!$date)
+            if (! $date) {
                 return null;
-            if (is_string($date))
+            }
+            if (is_string($date)) {
                 return $date;
-            if (method_exists($date, 'format'))
+            }
+            if (method_exists($date, 'format')) {
                 return $date->format('Y-m-d');
+            }
+
             return null;
         };
 
         // ✅ Helper pour formater les dates du pivot
         $formatPivotDate = function ($date) {
-            if (!$date)
+            if (! $date) {
                 return null;
-            if (is_string($date))
+            }
+            if (is_string($date)) {
                 return $date;
-            if (method_exists($date, 'format'))
+            }
+            if (method_exists($date, 'format')) {
                 return $date->format('Y-m-d H:i:s');
+            }
+
             return null;
         };
-
 
         return [
             'id' => $this->id,
@@ -97,7 +108,7 @@ class TacheResource extends JsonResource
 
             // ✅ MON statut individuel avec helper de formatage
             'my_status' => $this->when($user, function () use ($user, $formatPivotDate) {
-                if (!$this->isAssignedTo($user)) {
+                if (! $this->isAssignedTo($user)) {
                     return null;
                 }
 
@@ -112,11 +123,11 @@ class TacheResource extends JsonResource
                         'role',
                         'can_edit',
                         'can_complete',
-                        'can_validate'
+                        'can_validate',
                     ])
                     ->first();
 
-                if (!$pivot) {
+                if (! $pivot) {
                     return null;
                 }
 
@@ -289,9 +300,7 @@ class TacheResource extends JsonResource
             'labels' => LabelResource::collection($this->whenLoaded('labels')),
 
             // Sous-tâches
-            'parent_tache_id' => $this->parent_tache_id,
-            'is_subtask' => (bool) $this->parent_tache_id,
-            'sous_taches_count' => $this->whenLoaded('sousTaches', fn() => $this->sousTaches->count()),
+            'sous_taches_count' => $this->whenLoaded('sousTaches', fn () => $this->sousTaches->count()),
 
             // Apparence
             'position' => $this->position,
@@ -325,7 +334,7 @@ class TacheResource extends JsonResource
                     'can_move_my_card' => $this->isAssignedTo($user),
                     'can_submit_result' => $this->isAssignedTo($user) &&
                         $this->getStatutForUser($user) === 'termine' &&
-                        !$this->monResultat($user),
+                        ! $this->monResultat($user),
                 ];
             }),
             // ✅ NOUVEAUX CHAMPS pour la fiche d'évaluation
@@ -345,11 +354,11 @@ class TacheResource extends JsonResource
 
                     // Peut soumettre un résultat
                     'can_submit_result' => $this->getStatutForUser($user) === 'termine'
-                        && !$this->monResultat($user)?->soumis_le,
+                        && ! $this->monResultat($user)?->soumis_le,
 
                     // Peut éditer le résultat (non validé N1)
                     'can_edit_result' => $this->monResultat($user)
-                        && !$this->monResultat($user)->valide_par_n1,
+                        && ! $this->monResultat($user)->valide_par_n1,
                 ];
             }),
         ];
@@ -370,6 +379,6 @@ class TacheResource extends JsonResource
 
     public function getFileUrlAttribute(): string
     {
-        return asset('uploads/' . $this->cover_image);
+        return asset('uploads/'.$this->cover_image);
     }
 }

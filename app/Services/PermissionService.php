@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Models\Activite;
 use App\Models\Document;
 use App\Models\Projet;
+use App\Models\SousTache;
 use App\Models\Tache;
 use App\Models\User;
 use App\Models\Workspace;
@@ -345,6 +346,48 @@ class PermissionService
         $assignment = $tache->assignees()->where('user_id', $user->id)->first();
 
         return $assignment && ($assignment->pivot->is_responsable ?? false);
+    }
+
+    // =========================================================================
+    // SOUS-TACHE LEVEL
+    // =========================================================================
+
+    public function canViewSousTache(User $user, SousTache $sousTache): bool
+    {
+        return $this->canViewTask($user, $sousTache->tache);
+    }
+
+    public function canCreateSousTache(User $user, Tache $tache): bool
+    {
+        return $this->canCreateSubtask($user, $tache);
+    }
+
+    public function canEditSousTache(User $user, SousTache $sousTache): bool
+    {
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        $tache = $sousTache->tache;
+        $activite = $tache?->activite;
+        $workspace = $activite?->projet?->workspace;
+
+        if ($workspace && $workspace->isOwnerOrAdmin($user)) {
+            return true;
+        }
+
+        if ($activite?->isResponsable($user) || $tache?->isResponsable($user)) {
+            return true;
+        }
+
+        $assignment = $tache?->assignees()->where('user_id', $user->id)->first();
+
+        return $assignment && ($assignment->pivot->is_responsable ?? false);
+    }
+
+    public function canDeleteSousTache(User $user, SousTache $sousTache): bool
+    {
+        return $this->canEditSousTache($user, $sousTache);
     }
 
     // =========================================================================

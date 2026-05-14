@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Enums\Role as RoleEnum;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Permission;
@@ -54,6 +55,12 @@ class RolePermissionSeeder extends Seeder
             'taches.validate_n2',
             'taches.submit_result',
             'taches.comment',
+
+            // Sous-tâches
+            'sous_taches.view',
+            'sous_taches.create',
+            'sous_taches.update',
+            'sous_taches.delete',
 
             // Documents
             'documents.view',
@@ -107,6 +114,7 @@ class RolePermissionSeeder extends Seeder
                 'projets.view', 'projets.update', 'projets.manage_members',
                 'activites.view', 'activites.create', 'activites.update', 'activites.delete', 'activites.manage_members',
                 'taches.view', 'taches.create', 'taches.update', 'taches.delete', 'taches.validate_n2', 'taches.comment',
+                'sous_taches.view', 'sous_taches.create', 'sous_taches.update', 'sous_taches.delete',
                 'documents.view', 'documents.upload', 'documents.delete', 'documents.share',
                 'reports.view', 'reports.create',
             ],
@@ -114,6 +122,7 @@ class RolePermissionSeeder extends Seeder
                 'projets.view',
                 'activites.view', 'activites.update',
                 'taches.view', 'taches.create', 'taches.update', 'taches.validate_n1', 'taches.comment',
+                'sous_taches.view', 'sous_taches.create', 'sous_taches.update',
                 'documents.view', 'documents.upload',
                 'reports.view',
             ],
@@ -121,25 +130,28 @@ class RolePermissionSeeder extends Seeder
                 'projets.view',
                 'activites.view',
                 'taches.view', 'taches.submit_result', 'taches.comment',
+                'sous_taches.view',
                 'documents.view', 'documents.upload',
             ],
             'stagiaire' => [
                 'projets.view',
                 'activites.view',
                 'taches.view', 'taches.submit_result', 'taches.comment',
+                'sous_taches.view',
                 'documents.view',
             ],
             'observateur' => [
                 'projets.view',
                 'activites.view',
                 'taches.view',
+                'sous_taches.view',
                 'documents.view',
             ],
         ];
 
         foreach ($contextualRoles as $roleName => $rolePermissions) {
             $role = Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
-            if ($rolePermissions instanceof \Illuminate\Database\Eloquent\Collection) {
+            if ($rolePermissions instanceof Collection) {
                 $role->syncPermissions($rolePermissions);
             } else {
                 $role->syncPermissions(Permission::whereIn('name', $rolePermissions)->get());
