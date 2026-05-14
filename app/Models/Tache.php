@@ -123,10 +123,24 @@ class Tache extends Model
                 $tache->code = static::generateUniqueCode();
             }
 
-            // ✅ Auto-définir semaine et année
             if (! $tache->week_number && $tache->date_debut) {
                 $tache->week_number = $tache->date_debut->weekOfYear;
                 $tache->year = $tache->date_debut->year;
+            }
+        });
+
+        // Block manual statut changes when sous-taches exist (except annule)
+        static::updating(function ($tache) {
+            if (
+                $tache->isDirty('statut')
+                && $tache->statut->value !== 'annule'
+                && $tache->sousTaches()->whereNull('deleted_at')->exists()
+            ) {
+                Log::warning('Manual statut update blocked: sous-taches exist', [
+                    'tache_id' => $tache->id,
+                    'reason' => 'subtasks_exist',
+                ]);
+                throw new \InvalidArgumentException(__('sous_taches.errors.status_blocked'));
             }
         });
     }

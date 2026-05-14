@@ -1003,6 +1003,8 @@ class TacheController extends Controller
                 'message' => 'Erreur de validation',
                 'errors' => $e->errors(),
             ], 422);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
         } catch (\Exception $e) {
             Log::error('Erreur mise à jour tâche', [
                 'tache_id' => $tache->id,

@@ -24,19 +24,33 @@
 
 ## Current Task
 
-**Task:** 3 — Subtask CRUD API + Automatic Progress
-**Branch:** `feature/v2-task-3-subtask-api` _(not created yet)_
+**Task:** 4 — Subtask UI
+**Branch:** `feature/v2-task-4-subtask-ui` _(not created yet)_
 **Status:** Not started
 
 **What to do next:**
-1. Merge PRs for Task 1 and Task 2 into `jonas`
-2. Manually test Task 2 using `docs/testing/TASK_2_TESTING.md`
-3. Create branch `feature/v2-task-3-subtask-api` from `jonas`
-4. Follow Task 3 in `IMPLEMENTATION_PLAN.md`
+1. Merge PR `feature/v2-task-3-subtask-api` into `jonas`
+2. Manually test Task 3 using `docs/testing/TASK_3_TESTING.md`
+3. Create branch `feature/v2-task-4-subtask-ui` from `jonas`
+4. Follow Task 4 in `IMPLEMENTATION_PLAN.md`
 
 ---
 
 ## Last Completed Task
+
+**Task 3** — Subtask CRUD API + Automatic Progress
+- `SousTacheService`, `SousTacheController` (5 endpoints), `SousTacheObserver`
+- Weighted progress auto-recalculation on parent task
+- Parent statut auto-change: all done → termine, any en_retard → en_retard
+- Manual statut block when sous-taches exist (422)
+- `canAssignSousTacheIntervenant` permission added
+- 3 notifications (SousTacheAssignee, SousTacheOverdue, TacheStatutAutoChange)
+- MySQL ENUM extended for taches.statut
+- 10 new tests, 41 total, all passing
+
+---
+
+## Previously Completed
 
 **Task 2** — Subtask Data Model
 - 3 migrations: `create_sous_taches_table`, `create_sous_tache_user_table`, `drop_parent_tache_id_from_taches` (with data migration from self-referential pattern)
@@ -60,6 +74,7 @@
 |---|---|---|
 | `feature/v2-task-1-queue-reverb` | Task 1 | Merged ✅ |
 | `feature/v2-task-2-subtask-model` | Task 2 | Merged ✅ |
+| `feature/v2-task-3-subtask-api` | Task 3 | Pending review |
 
 ---
 

@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\Document;
+use App\Models\SousTache;
+use App\Observers\SousTacheObserver;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -17,12 +21,13 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-   public function boot(): void
-    { 
-        
+    public function boot(): void
+    {
+        SousTache::observe(SousTacheObserver::class);
+
         // Enregistrer automatiquement la relation documents() sur tous les modèles
-        \Illuminate\Database\Eloquent\Model::resolveRelationUsing('documents', function ($model) {
-            return $model->morphMany(\App\Models\Document::class, 'documentable');
+        Model::resolveRelationUsing('documents', function ($model) {
+            return $model->morphMany(Document::class, 'documentable');
         });
     }
 }

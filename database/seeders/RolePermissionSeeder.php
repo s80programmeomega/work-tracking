@@ -61,6 +61,7 @@ class RolePermissionSeeder extends Seeder
             'sous_taches.create',
             'sous_taches.update',
             'sous_taches.delete',
+            'sous_taches.assign_intervenant',
 
             // Documents
             'documents.view',
@@ -114,7 +115,7 @@ class RolePermissionSeeder extends Seeder
                 'projets.view', 'projets.update', 'projets.manage_members',
                 'activites.view', 'activites.create', 'activites.update', 'activites.delete', 'activites.manage_members',
                 'taches.view', 'taches.create', 'taches.update', 'taches.delete', 'taches.validate_n2', 'taches.comment',
-                'sous_taches.view', 'sous_taches.create', 'sous_taches.update', 'sous_taches.delete',
+                'sous_taches.view', 'sous_taches.create', 'sous_taches.update', 'sous_taches.delete', 'sous_taches.assign_intervenant',
                 'documents.view', 'documents.upload', 'documents.delete', 'documents.share',
                 'reports.view', 'reports.create',
             ],
@@ -122,7 +123,7 @@ class RolePermissionSeeder extends Seeder
                 'projets.view',
                 'activites.view', 'activites.update',
                 'taches.view', 'taches.create', 'taches.update', 'taches.validate_n1', 'taches.comment',
-                'sous_taches.view', 'sous_taches.create', 'sous_taches.update',
+                'sous_taches.view', 'sous_taches.create', 'sous_taches.update', 'sous_taches.assign_intervenant',
                 'documents.view', 'documents.upload',
                 'reports.view',
             ],

@@ -232,3 +232,23 @@ Structure of every testing guide:
 - **Test cases** — numbered, each with: action to perform, expected result, how to verify
 - **Negative cases** — what should be blocked (wrong role, missing data, etc.)
 - **Cleanup** — anything to reset after testing (optional)
+
+---
+
+## Guide 14 — No Silent Deletions
+
+Before removing any code (column reference, method, class, route, field, relation, etc.):
+
+1. **Search the full codebase** for all usages of that code — PHP, JS/Vue, migrations, seeders, tests, translations.
+2. **Report the impact** to Jonas: what uses it, what breaks, what is safe to remove.
+3. **Wait for explicit approval** before deleting anything — even in auto-edit mode.
+
+This applies to:
+- Model `fillable`, `casts`, `withPivot`, relationships
+- Controller methods and routes
+- Service methods
+- Vue components, composables, and store properties
+- Translation keys
+- Migration columns
+
+**Why:** Removing code without a full impact check has caused broken endpoints and missing DB columns in this project. The cost of asking is always lower than the cost of reverting.
