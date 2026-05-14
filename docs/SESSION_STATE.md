@@ -77,6 +77,7 @@
 - DB: MySQL, database `work-tracking`
 - Queue: `database` ✅
 - Broadcasting: `reverb` ✅ — run `php artisan reverb:start` to start WebSocket server
+- Remotes: `origin` = your repo (`s80programmeomega`), `client` = client repo (frozen until paid)
 - Run backend: `php artisan serve`
 - Run frontend: `npm run dev`
 - Run tests: `php artisan test --compact`
