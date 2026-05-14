@@ -134,9 +134,9 @@
                 <SousTacheList
                   :tache-id="tache.id"
                   :parent-echeance="tache.echeance"
-                  :can-create="tache.permissions?.can_create_subtask ?? false"
-                  :can-edit="tache.permissions?.can_edit ?? tache.permissions?.can_update ?? false"
-                  :can-delete="tache.permissions?.can_delete ?? false"
+                  :can-create="true"
+                  :can-edit="true"
+                  :can-delete="true"
                 />
               </SectionCollapsible>
 
@@ -192,9 +192,9 @@
             <SousTacheList
               :tache-id="tache.id"
               :parent-echeance="tache.echeance"
-              :can-create="tache.permissions?.can_create_subtask ?? false"
-              :can-edit="tache.permissions?.can_edit ?? tache.permissions?.can_update ?? false"
-              :can-delete="tache.permissions?.can_delete ?? false"
+              :can-create="true"
+              :can-edit="true"
+              :can-delete="true"
             />
           </div>
 

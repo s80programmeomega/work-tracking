@@ -20,6 +20,7 @@ export function useSousTaches(tacheId) {
             const { data } = await api.get(`/taches/${tacheId}/sous-taches`)
             sousTaches.value = data.data ?? data
         } catch (err) {
+            console.error('[useSousTaches] error', err.response?.status, err.message)
             error.value = err.response?.data?.message ?? 'Erreur lors du chargement des sous-tâches.'
         } finally {
             loading.value = false
