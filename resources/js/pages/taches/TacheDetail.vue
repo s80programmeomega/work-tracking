@@ -128,17 +128,11 @@
           <div v-show="activeTab === 'sous-taches'">
             <SousTacheList
               :tache-id="tache.id"
-              :sous-taches="sousTaches"
-              :loading="sousTachesLoading"
-              :error="sousTachesError"
-              :total-poids="totalPoids"
               :parent-echeance="tache.echeance"
               :can-create="permissions.can_create_subtask ?? false"
               :can-edit="permissions.can_update ?? false"
               :can-delete="permissions.can_delete ?? false"
-              @create="handleSousTacheCreate"
-              @update="handleSousTacheUpdate"
-              @delete="handleSousTacheDelete"
+              @updated="fetchTache"
             />
           </div>
 
@@ -193,7 +187,6 @@ import TacheResultsTab from '@/components/taches/tacheDetail/TacheResultsTab.vue
 import TacheCommentsTab from '@/components/taches/tacheDetail/TacheCommentsTab.vue';
 import TacheActivityTab from '@/components/taches/tacheDetail/TacheActivityTab.vue';
 import SousTacheList from '@/components/taches/SousTacheList.vue';
-import { useSousTaches } from '@/composables/useSousTaches';
 
 const route = useRoute();
 const tache = ref(null);
@@ -204,21 +197,9 @@ const stats = ref({});
 const permissions = ref({});
 const breadcrumb = ref({});
 
-// Initialize composable at top level using the route param directly
-const {
-  sousTaches,
-  loading: sousTachesLoading,
-  error: sousTachesError,
-  totalPoids,
-  fetchSousTaches,
-  createSousTache,
-  updateSousTache,
-  deleteSousTache,
-} = useSousTaches(route.params.id);
-
 const tabs = computed(() => [
   { id: 'details', label: 'Détails', icon: 'fa-info-circle' },
-  { id: 'sous-taches', label: 'Sous-tâches', icon: 'fa-list-check', count: sousTaches.value.length },
+  { id: 'sous-taches', label: 'Sous-tâches', icon: 'fa-list-check' },
   { id: 'assignees', label: 'Assignés', icon: 'fa-users', count: stats.value.assignees_count },
   { id: 'attachments', label: 'Fichiers', icon: 'fa-paperclip', count: stats.value.attachments_count },
   { id: 'links', label: 'Liens', icon: 'fa-link', count: stats.value.links_count },
@@ -238,27 +219,12 @@ const fetchTache = async () => {
     permissions.value = response.data.additional_info.permissions;
     breadcrumb.value = response.data.additional_info.breadcrumb;
 
-    await fetchSousTaches();
   } catch (err) {
     error.value = err.response?.data?.message || 'Erreur lors du chargement de la tâche';
     console.error('Erreur:', err);
   } finally {
     loading.value = false;
   }
-};
-
-const handleSousTacheCreate = async (payload) => {
-  await createSousTache(payload);
-};
-
-const handleSousTacheUpdate = async (id, payload) => {
-  await updateSousTache(id, payload);
-  await fetchTache();
-};
-
-const handleSousTacheDelete = async (id) => {
-  await deleteSousTache(id);
-  await fetchTache();
 };
 
 const getStatutClass = (statut) => {

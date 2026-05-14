@@ -39,8 +39,20 @@
 
           <!-- Actions header -->
           <div class="flex items-center gap-2 ml-4">
+            <!-- Lien vers la page complète -->
+            <router-link
+              :to="`/taches/${tache.id}`"
+              class="p-2 text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
+              title="Ouvrir la page complète"
+              @click="$emit('close')"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </router-link>
+
             <!-- Bascule mode détaillé -->
-            <button 
+            <button
               v-if="!isDetailedView"
               @click="enableDetailedView('details')"
               class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
@@ -164,6 +176,17 @@
             <DetailedTaskView :tache="tache" @refresh="refreshTask" />
           </div>
 
+          <!-- Onglet Sous-tâches -->
+          <div v-show="activeTab === 'sous-taches'">
+            <SousTacheList
+              :tache-id="tache.id"
+              :parent-echeance="tache.echeance"
+              :can-create="tache.permissions?.can_create_subtask ?? false"
+              :can-edit="tache.permissions?.can_edit ?? tache.permissions?.can_update ?? false"
+              :can-delete="tache.permissions?.can_delete ?? false"
+            />
+          </div>
+
           <!-- Onglet Résultats -->
           <div v-show="activeTab === 'resultats'">
             <ResultatsSection
@@ -244,6 +267,7 @@ import DetailedTaskView from './DetailedTaskView.vue'
 import ResultatsSection from './ResultatsSection.vue'
 import CommentSection from '@/components/comments/CommentSection.vue'
 import DocumentSection from '@/components/common/DocumentSection.vue'
+import SousTacheList from '@/components/taches/SousTacheList.vue'
 
 const props = defineProps({
   tache: {
@@ -270,6 +294,7 @@ const modalSizeClass = computed(() =>
 
 const tabs = computed(() => [
   { id: 'details', label: 'Détails' },
+  { id: 'sous-taches', label: 'Sous-tâches' },
   // { id: 'resultats', label: 'Résultats', count: localTache.value.resultats_count || 0 },
   // { id: 'commentaires', label: 'Commentaires', count: localTache.value.comments_count || 0 },
   { id: 'documents', label: 'Documents de resultat', count: localTache.value.documents_count || 0 },

@@ -261,20 +261,30 @@
 <script setup>
 import { ref, computed } from 'vue'
 import SousTacheForm from './SousTacheForm.vue'
+import { useSousTaches } from '@/composables/useSousTaches'
 
 const props = defineProps({
     tacheId: { type: Number, required: true },
-    sousTaches: { type: Array, default: () => [] },
-    loading: { type: Boolean, default: false },
-    error: { type: String, default: null },
-    totalPoids: { type: Number, default: 0 },
     parentEcheance: { type: String, default: null },
     canCreate: { type: Boolean, default: false },
     canEdit: { type: Boolean, default: false },
     canDelete: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['create', 'update', 'delete'])
+const emit = defineEmits(['updated'])
+
+const {
+    sousTaches,
+    loading,
+    error,
+    totalPoids,
+    fetchSousTaches,
+    createSousTache,
+    updateSousTache,
+    deleteSousTache,
+} = useSousTaches(props.tacheId)
+
+fetchSousTaches()
 
 const showForm = ref(false)
 const creating = ref(false)
@@ -285,12 +295,12 @@ const formRef = ref(null)
 const editForm = ref({ statut: '', progression: 0 })
 
 const orderedSousTaches = computed(() =>
-    [...props.sousTaches].sort((a, b) => (a.ordre ?? 0) - (b.ordre ?? 0))
+    [...sousTaches.value].sort((a, b) => (a.ordre ?? 0) - (b.ordre ?? 0))
 )
 
 const weightedProgress = computed(() => {
-    if (props.totalPoids === 0) return 0
-    const sum = props.sousTaches.reduce((acc, st) => acc + (st.progression ?? 0) * (st.poids ?? 0) / 100, 0)
+    if (totalPoids.value === 0) return 0
+    const sum = sousTaches.value.reduce((acc, st) => acc + (st.progression ?? 0) * (st.poids ?? 0) / 100, 0)
     return Math.round(sum)
 })
 
@@ -315,8 +325,9 @@ const cancelEdit = () => {
 const saveEdit = async (st) => {
     saving.value = true
     try {
-        await emit('update', st.id, { ...editForm.value })
+        await updateSousTache(st.id, { ...editForm.value })
         editingId.value = null
+        emit('updated')
     } finally {
         saving.value = false
     }
@@ -325,15 +336,17 @@ const saveEdit = async (st) => {
 const toggleComplete = async (st) => {
     const newStatut = st.statut === 'termine' ? 'en_cours' : 'termine'
     const newProgression = newStatut === 'termine' ? 100 : st.progression
-    emit('update', st.id, { statut: newStatut, progression: newProgression })
+    await updateSousTache(st.id, { statut: newStatut, progression: newProgression })
+    emit('updated')
 }
 
 const handleCreate = async (payload) => {
     creating.value = true
     try {
-        await emit('create', payload)
+        await createSousTache(payload)
         showForm.value = false
         formRef.value?.reset()
+        emit('updated')
     } catch (err) {
         const data = err.response?.data
         if (data?.errors) {
@@ -349,7 +362,8 @@ const handleCreate = async (payload) => {
 const confirmDelete = async (st) => {
     openMenuId.value = null
     if (!confirm(`Supprimer la sous-tâche "${st.titre}" ?`)) return
-    emit('delete', st.id)
+    await deleteSousTache(st.id)
+    emit('updated')
 }
 
 const formatDate = (date) => {

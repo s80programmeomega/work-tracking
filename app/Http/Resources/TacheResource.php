@@ -328,13 +328,16 @@ class TacheResource extends JsonResource
                 return [
                     'can_view' => $this->isAccessibleBy($user),
                     'can_edit' => $this->canBeEditedBy($user),
+                    'can_update' => $this->canBeEditedBy($user),
                     'can_complete' => $this->canBeCompletedBy($user),
+                    'can_delete' => $user->can('delete', $this->resource),
                     'can_validate_n1' => $this->activite ? $this->canBeValidatedN1By($user) : false,
                     'can_validate_n2' => $this->activite ? $this->canBeValidatedN2By($user) : false,
                     'can_move_my_card' => $this->isAssignedTo($user),
                     'can_submit_result' => $this->isAssignedTo($user) &&
                         $this->getStatutForUser($user) === 'termine' &&
                         ! $this->monResultat($user),
+                    'can_create_subtask' => $user->can('createSubtask', $this->resource),
                 ];
             }),
             // ✅ NOUVEAUX CHAMPS pour la fiche d'évaluation
