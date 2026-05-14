@@ -15,6 +15,7 @@ feature/v2-task-N-<short-name>
 Examples: `feature/v2-task-2-subtask-model`, `feature/v2-task-5-validation-n0`
 
 Always branch from `jonas`, PR back into `jonas`. Never push to `main`.
+**Never push directly to `jonas`** — it only receives changes via PR merges.
 
 ---
 
