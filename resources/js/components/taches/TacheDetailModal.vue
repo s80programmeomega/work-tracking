@@ -129,6 +129,17 @@
                 <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">{{ tache.indicateurs_resultats || 'Aucun indicateur défini' }}</p>
               </SectionCollapsible>
 
+              <!-- Sous-tâches -->
+              <SectionCollapsible title="Sous-tâches" :default-open="true">
+                <SousTacheList
+                  :tache-id="tache.id"
+                  :parent-echeance="tache.echeance"
+                  :can-create="tache.permissions?.can_create_subtask ?? false"
+                  :can-edit="tache.permissions?.can_edit ?? tache.permissions?.can_update ?? false"
+                  :can-delete="tache.permissions?.can_delete ?? false"
+                />
+              </SectionCollapsible>
+
               <!-- Commentaire récent -->
               <SectionCollapsible v-if="latestComment" title="Dernier commentaire" :default-open="true">
                 <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
