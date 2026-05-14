@@ -39,15 +39,18 @@
 ## Last Completed Task
 
 **Task 4** — Subtask UI
-- `useSousTaches.js` composable: fetch, create, update, delete, assignIntervenant, hasBlockingSubtasks, totalPoids
-- `SousTacheForm.vue`: quick-create form with poids remaining indicator, date max constraint, validation flags
-- `SousTacheList.vue`: ordered list, inline statut/progression edit, quick-complete toggle, weighted progress bar, overdue/blocking badges, context menu
-- `TacheDetail.vue`: Sous-tâches tab added (second tab), wired to all CRUD handlers
-- `TacheCard.vue`: "N ST" count badge + mini progress bar when sous_taches_count > 0
-- `useActivitePermissions.js`: `canCreateSousTache` and `canAssignSousTacheIntervenant` added
-- Translation keys: `ui.*` section added to both fr/en sous_taches.php
+- `useSousTaches.js`: self-contained CRUD composable (owns data, no broken await-emit)
+- `SousTacheForm.vue`: quick-create form with poids remaining, date max, validation flags
+- `SousTacheList.vue`: ordered list, inline edit, quick-complete toggle, weighted progress bar, badges
+- `TacheDetail.vue`: Sous-tâches tab (second position)
+- `TacheDetailModal.vue`: Sous-tâches collapsible in compact view + tab in detailed view; external link icon to full page
+- `TacheCard.vue`: "N ST" badge + mini progress bar
+- `useActivitePermissions.js`: `canCreateSousTache`, `canAssignSousTacheIntervenant`
+- `TacheResource`: `can_update`, `can_delete`, `can_create_subtask` added to permissions block
+- Bug fix: stale `'responsable'`/`'collaborator'`/`'assignee'` role values in 6 files (post-Task-0 ENUM)
+- Bug fix: `can_create_subtask` added to `TacheController::show()` permissions payload
 - Submit result button disable (blocking subtasks) deferred to Task 5
-- 41 tests passing, 0 new tests (frontend-only task)
+- 41 tests passing
 
 ---
 
@@ -84,7 +87,7 @@
 | `feature/v2-task-1-queue-reverb` | Task 1 | Merged ✅ |
 | `feature/v2-task-2-subtask-model` | Task 2 | Merged ✅ |
 | `feature/v2-task-3-subtask-api` | Task 3 | Pending review |
-| `feature/v2-task-4-subtask-ui` | Task 4 | Pending review |
+| `feature/v2-task-4-subtask-ui` | Task 4 | Pending review — includes role ENUM bug fixes |
 
 ---
 

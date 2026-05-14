@@ -90,13 +90,19 @@
 - [ ] PR merged into `jonas`
 
 ### Task 4
-- [x] `useSousTaches.js` composable created
-- [x] `SousTacheList.vue` created
-- [x] `SousTacheForm.vue` created
+- [x] `useSousTaches.js` composable created (self-contained CRUD, owns its own data)
+- [x] `SousTacheList.vue` created (ordered list, inline edit, quick-complete toggle, weighted progress bar)
+- [x] `SousTacheForm.vue` created (quick-create with poids remaining, date max, validation flags)
 - [x] Kanban card indicator added (count badge + mini progress bar on TacheCard)
 - [ ] Submit result button disabled when blocking subtasks — deferred to Task 5 (results tab)
 - [x] Permissions added to `useActivitePermissions.js` (`canCreateSousTache`, `canAssignSousTacheIntervenant`)
 - [x] Translation keys added (`ui.*` section in fr/en sous_taches.php)
+- [x] `SousTacheList` integrated in `TacheDetail.vue` (Sous-tâches tab)
+- [x] `SousTacheList` integrated in `TacheDetailModal.vue` (compact view + detailed view tab)
+- [x] External link icon added to modal header → navigates to full TacheDetail page
+- [x] `TacheResource` extended with `can_update`, `can_delete`, `can_create_subtask` in permissions
+- [x] Bug fix: stale `'responsable'`/`'collaborator'` role values replaced across 6 files (post-Task-0 ENUM)
+- [x] Bug fix: `can_create_subtask` added to `TacheController::show()` permissions payload
 - [x] Tests passing (41 total)
 - [ ] PR opened into `jonas`
 
@@ -209,4 +215,4 @@
 
 | # | Description | File(s) | Severity | Status |
 |---|---|---|---|---|
-| — | — | — | — | — |
+| 1 | Stale `'responsable'`/`'collaborator'` role values inserted into `tache_user` and `activite_user` after Task 0 ENUM change — caused 500 on task creation | `TacheService`, `TacheController`, `ActiviteController`, `AccessManagementService`, `MemberRemovalService`, `TacheResource` | High | Fixed in Task 4 branch |

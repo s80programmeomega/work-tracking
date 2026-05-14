@@ -4,105 +4,128 @@
 
 - App running: `php artisan serve` + `npm run dev`
 - DB migrated and seeded: `php artisan migrate:fresh --seed`
-- Authenticated as `directeur@worktracking.com` (password: `password`)
-- Open a task that has sous-tâches seeded (check Tinker: `App\Models\Tache::has('sousTaches')->first()->id`)
+- Authenticated as `cadre@worktracking.com` (password: `password`) — has full sous-tâche permissions
+- Tasks with sous-tâches seeded: tache IDs 1, 2, 4, 10, 11 (each has 3 sous-tâches)
+
+---
+
+## How to access sous-tâches
+
+There are two entry points:
+
+**A — Via the kanban modal (primary):**
+1. Go to `/taches` → select an activité
+2. Click any task card → modal opens
+3. Scroll down in the modal to the **"Sous-tâches"** collapsible section (open by default)
+
+**B — Via the full detail page:**
+1. In the modal, click the **↗ icon** (top-right of modal header) → opens `/taches/{id}`
+2. Click the **"Sous-tâches"** tab (second tab, between Détails and Assignés)
 
 ---
 
 ## Test Cases
 
-### 1. Sous-tâches tab visible on task detail
+### 1. Sous-tâches visible in modal
 
-Navigate to `/taches/{id}`. Verify:
-- A "Sous-tâches" tab appears between "Détails" and "Assignés".
-- Clicking it shows the `SousTacheList` component.
-- Seeded sous-tâches appear with their titre, statut badge, poids, and deadline.
-
----
-
-### 2. Weighted progress bar
-
-On a task with multiple sous-tâches with poids > 0:
-- The "Progression pondérée" bar should appear above the list.
-- The percentage should match `Σ(poids_i × progression_i / 100)`.
-- "Poids total alloué: X% / 100%" should reflect the sum.
+Open tache 1 ("Rédiger le cahier des charges fonctionnel") from the kanban:
+- A "Sous-tâches" collapsible section appears in the modal body.
+- 3 sous-tâches listed: "Interviews parties prenantes", "Rédaction du document", "Validation et signature".
+- Each shows statut badge, poids, and deadline.
 
 ---
 
-### 3. Quick-complete toggle
+### 2. Sous-tâches tab on full detail page
 
-Click the circle button on a sous-tâche with `statut = 'a_faire'`:
-- Button turns green with a checkmark.
-- Statut badge changes to "Terminé".
-- Parent task `taux_realisation` updates (check Détails tab).
-
-Click again on a "Terminé" sous-tâche:
-- Statut reverts to "En cours".
+Click ↗ in the modal header to open `/taches/1`:
+- "Sous-tâches" tab is second in the tab bar.
+- Clicking it shows the same 3 sous-tâches.
 
 ---
 
-### 4. Inline edit (statut + progression)
+### 3. Weighted progress bar
 
-Click the `⋮` menu on any sous-tâche → "Modifier":
-- An inline edit form appears below that item.
-- Change statut to `en_cours` and progression to `75`.
-- Click "Enregistrer" → changes persist, parent task progress updates.
+On a task with poids > 0 on its sous-tâches:
+- "Progression pondérée" bar appears above the list.
+- Percentage = `Σ(poids_i × progression_i / 100)`.
+- "Poids total alloué: X% / 100%" shown below.
 
 ---
 
-### 5. Create a new sous-tâche
+### 4. Quick-complete toggle
 
-On the Sous-tâches tab, click "Ajouter":
+Click the circle button on a sous-tâche with `statut ≠ termine`:
+- Circle turns green with a checkmark.
+- Statut badge updates to "Terminé".
+
+Click it again:
+- Reverts to "En cours".
+
+---
+
+### 5. Inline edit (statut + progression)
+
+Click `⋮` → "Modifier" on any sous-tâche:
+- Inline form appears below that item.
+- Change statut to `en_cours`, progression to `50`.
+- Click "Enregistrer" → changes saved, weighted progress bar updates.
+
+---
+
+### 6. Create a new sous-tâche
+
+Click "Ajouter" button (top-right of the sous-tâches section):
 - `SousTacheForm` appears.
-- Fill: titre = "Test ST", poids = 20, date within parent echeance.
+- Fill: titre = "Test ST", poids = 5, date within parent echeance.
 - Submit → sous-tâche appears in list; form resets.
 
 ---
 
-### 6. R2 enforced on create: weights > 100% → 422
+### 7. R2: weights > 100% → 422
 
-On a task that already has 80% poids allocated, try creating a sous-tâche with poids = 30:
-- Expected: error message appears in the form (`sous_taches.errors.weights_sum_invalid`).
-
----
-
-### 7. Date exceeds parent echeance → 422
-
-Try creating a sous-tâche with `date_echeance` past the parent task's echeance:
-- Expected: error message (`sous_taches.errors.date_exceeds_parent`).
-- The date input should also enforce `max` attribute in the browser.
+On tache 1 (already has 40+35+25 = 100% poids), try creating with poids = 10:
+- Expected: error `sous_taches.errors.weights_sum_invalid` shown in form.
 
 ---
 
-### 8. Delete a sous-tâche
+### 8. Date exceeds parent echeance → 422
 
-Click `⋮` → "Supprimer" on any sous-tâche:
+Create a sous-tâche with `date_echeance` past the parent task echeance:
+- Expected: error `sous_taches.errors.date_exceeds_parent`.
+- Browser date picker also enforces the `max` attribute.
+
+---
+
+### 9. Delete a sous-tâche
+
+Click `⋮` → "Supprimer":
 - Confirmation dialog appears.
 - On confirm: item removed from list, parent progress recalculates.
 
 ---
 
-### 9. Kanban card indicator
+### 10. Kanban card indicator
 
-Navigate to the Kanban board for an activité whose tasks have sous-tâches:
-- Task cards with `sous_taches_count > 0` show a badge like "3 ST".
-- A mini progress bar reflects the task's `taux_realisation`.
+On the kanban board:
+- Task cards with sous-tâches show a badge like "3 ST".
+- A mini progress bar below the badge reflects `taux_realisation`.
 
 ---
 
-### 10. Observateur cannot create
+### 11. External link navigation
 
-Log in as a user with `observateur` role on the activité:
-- Navigate to a task in that activité.
-- "Ajouter" button should not appear on the Sous-tâches tab.
+In the modal, click the ↗ icon (top-right, beside the expand button):
+- Modal closes.
+- Browser navigates to `/taches/{id}` (full detail page).
 
 ---
 
 ## Negative Cases
 
-- Unauthenticated request to `POST /api/taches/{id}/sous-taches` → 401
-- User with no activité membership → 403 on any sous-tâche endpoint
-- Empty titre on form → client-side validation error (no request sent)
+- Unauthenticated `POST /api/taches/{id}/sous-taches` → 401
+- User with no activité membership → 403
+- Empty titre submitted → client-side error, no request sent
+- Login as `stagiaire@worktracking.com`: "Ajouter" button should not appear (stagiaire cannot create)
 
 ---
 
