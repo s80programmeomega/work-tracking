@@ -22,7 +22,7 @@
 | 0 | Permission Architecture Refactor (Policies) | `feature/v2-task-0-policies-refactor` | ✅ | 2026-05-12 | 2026-05-12 | — |
 | 1 | Queue (database) + Laravel Reverb | `feature/v2-task-1-queue-reverb` | ✅ | 2026-05-14 | 2026-05-14 | — |
 | 2 | Subtask Data Model | `feature/v2-task-2-subtask-model` | ✅ | 2026-05-14 | 2026-05-14 | — |
-| 3 | Subtask CRUD API + Auto Progress | `feature/v2-task-3-subtask-api` | ⬜ | — | — | — |
+| 3 | Subtask CRUD API + Auto Progress | `feature/v2-task-3-subtask-api` | ✅ | 2026-05-14 | 2026-05-14 | — |
 | 4 | Subtask UI | `feature/v2-task-4-subtask-ui` | ⬜ | — | — | — |
 | 5 | Validation N0 + 48h Timer | `feature/v2-task-5-validation-n0` | ⬜ | — | — | — |
 | 6 | Anti-Sabotage Bypass | `feature/v2-task-6-bypass` | ⬜ | — | — | — |
@@ -77,14 +77,17 @@
 - [x] PR merged into `jonas`
 
 ### Task 3
-- [ ] `SousTacheService` created
-- [ ] `SousTacheController` created (5 endpoints)
-- [ ] `SousTacheObserver` created and registered
-- [ ] Routes registered in `api.php`
-- [ ] `canAssignSousTacheIntervenant` permission added
-- [ ] Translation keys added
-- [ ] Tests passing
-- [ ] PR opened into `jonas`
+- [x] `SousTacheService` created (create, update, delete, assignIntervenant)
+- [x] `SousTacheController` created (5 endpoints: index, store, update, destroy, assignIntervenant)
+- [x] `SousTacheObserver` created and registered in `AppServiceProvider`
+- [x] Routes registered in `api.php`
+- [x] `canAssignSousTacheIntervenant` permission added to `PermissionService` and seeder
+- [x] Translation keys added (fr/en): date_exceeds_parent, status_blocked, unauthorized, intervenant_assigned, notifications.assigned
+- [x] 3 notifications created: `SousTacheAssigneeNotification`, `SousTacheOverdueNotification`, `TacheStatutAutoChangeNotification`
+- [x] Migration: extend `taches.statut` MySQL ENUM with `en_retard` and `a_refaire`
+- [x] Manual statut block on parent Tache when sous-taches exist (model `updating` hook)
+- [x] Tests passing (10 new tests, 41 total)
+- [ ] PR merged into `jonas`
 
 ### Task 4
 - [ ] `useSousTaches.js` composable created
