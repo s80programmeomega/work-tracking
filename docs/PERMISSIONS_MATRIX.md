@@ -83,7 +83,8 @@ Assigned in: `workspace_members`, `projet_user`, `activite_user`, `tache_user`
 | Delete task | ✅ | ✅ | ❌ | 🔑 | ❌ | ❌ | ❌ |
 | Submit result (TacheResultat) | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ |
 | Create subtask | ✅ | ✅ | ✅ | ✅ | 🔑 | ❌ | ❌ |
-| Approve/return N0 (result check) | ❌ | ❌ | ❌ | ❌ | 🔑 | ❌ | ❌ |
+| Approve result at N0 | ✅ | ✅ | ✅ | ✅ | 🔑 | ❌ | ❌ |
+| Return result at N0 with comment | ✅ | ✅ | ✅ | ✅ | 🔑 | ❌ | ❌ |
 | Activate bypass | ❌ | ❌ | ❌ | ❌ | ✅ (own result) | ✅ (own result) | ❌ |
 
 > 🔑 pivot flag: `can_edit` on `tache_user`, `can_delete_tasks` on `activite_user`, `is_responsable` on `tache_user` (for subtask creation and N0 approval)
@@ -146,3 +147,7 @@ Assigned in: `workspace_members`, `projet_user`, `activite_user`, `tache_user`
 | Date | Task | Change |
 |---|---|---|
 | 2026-05-12 | Planning | Initial matrix created from existing `PermissionService` |
+| 2026-05-14 | Task 2 | `sous_taches.view/create/update/delete/assign_intervenant` — `SousTachePolicy` + `PermissionService` |
+| 2026-05-14 | Task 3 | `canAssignSousTacheIntervenant` wired into `RolePermissionSeeder` |
+| 2026-05-14 | Task 4 | `canCreateSousTache`, `canAssignSousTacheIntervenant` in `useActivitePermissions.js`. `can_create_subtask` in `TacheResource` |
+| 2026-05-15 | Task 5 | `canApprouverN0`, `canRenvoyerN0` in `PermissionService`. `resultats.approuver_n0/renvoyer_n0` seeded. `useTachePermissions.js` created. `can_approuver_n0`, `can_renvoyer_n0` in `TacheResultatResource` |

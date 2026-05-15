@@ -24,19 +24,29 @@
 
 ## Current Task
 
-**Task:** 4 — Subtask UI
-**Branch:** `feature/v2-task-4-subtask-ui` _(not created yet)_
+**Task:** 6 — Anti-Sabotage Bypass
+**Branch:** `feature/v2-task-6-bypass` _(not created yet)_
 **Status:** Not started
 
 **What to do next:**
-1. Merge PR `feature/v2-task-3-subtask-api` into `jonas`
-2. Manually test Task 3 using `docs/testing/TASK_3_TESTING.md`
-3. Create branch `feature/v2-task-4-subtask-ui` from `jonas`
-4. Follow Task 4 in `IMPLEMENTATION_PLAN.md`
+1. Manually test Task 5 using `docs/testing/TASK_5_TESTING.md`
+2. Open PR `feature/v2-task-5-validation-n0` into `jonas`
+3. Create branch `feature/v2-task-6-bypass` from `jonas`
+4. Follow Task 6 in `IMPLEMENTATION_PLAN.md`
 
 ---
 
 ## Last Completed Task
+
+**Task 5** — N0 Validation Circuit + 48h Timer
+- `ValidationAuditLog` model (immutable, R6)
+- `TacheResultatService`: `soumettre`, `approuverN0`, `renvoyerN0`, `transmettreAuN1`
+- `TransmettreResultatAuN1Job`: dispatched on submit, workspace-configured delay (default 48h), skips if N0 already acted
+- 4 notifications: `ResultatSoumisN0`, `ResultatRenvoye` (Blade), `ResultatApprouveN0` (in-app), `ResultatTransmisAuto`
+- `POST approuver-n0`, `POST renvoyer-n0` endpoints with R4 (min 30 chars)
+- `useTachePermissions.js` created with `canApprouverN0`, `canRenvoyerN0`
+- `circuit_validation.*` translation files (fr + en)
+- 7 new tests, 48 total
 
 **Task 3** — Subtask CRUD API + Automatic Progress
 - `SousTacheService`, `SousTacheController` (5 endpoints), `SousTacheObserver`

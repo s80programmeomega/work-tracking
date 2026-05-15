@@ -24,7 +24,7 @@
 | 2 | Subtask Data Model | `feature/v2-task-2-subtask-model` | ✅ | 2026-05-14 | 2026-05-14 | — |
 | 3 | Subtask CRUD API + Auto Progress | `feature/v2-task-3-subtask-api` | ✅ | 2026-05-14 | 2026-05-14 | — |
 | 4 | Subtask UI | `feature/v2-task-4-subtask-ui` | ⬜ | — | — | — |
-| 5 | Validation N0 + 48h Timer | `feature/v2-task-5-validation-n0` | ⬜ | — | — | — |
+| 5 | Validation N0 + 48h Timer | `feature/v2-task-5-validation-n0` | ✅ | 2026-05-15 | 2026-05-15 | — |
 | 6 | Anti-Sabotage Bypass | `feature/v2-task-6-bypass` | ⬜ | — | — | — |
 | 7 | N1 Scores + Pending Validations | `feature/v2-task-7-scores-dashboard` | ⬜ | — | — | — |
 | 8 | Reverb + Web Push Notifications | `feature/v2-task-8-notifications` | ⬜ | — | — | — |
@@ -101,15 +101,20 @@
 - [ ] PR opened into `jonas`
 
 ### Task 5
-- [ ] N0 columns added to `tache_resultats`
-- [ ] `validation_audit_logs` table created
-- [ ] `approuverN0`, `renvoyerN0`, `transmettreAuN1` added to `TacheResultatService`
-- [ ] `TransmettreResultatAuN1Job` created
-- [ ] `ResultatSoumisN0Notification` and `ResultatTransmisAutoNotification` created
-- [ ] `validation_timeout_hours` workspace setting added
-- [ ] Permissions added (PermissionService + Seeder + `useTachePermissions.js`)
-- [ ] Translation files `lang/fr/validation.php` and `lang/en/validation.php` created
-- [ ] Tests passing
+- [x] N0 columns added to `tache_resultats` (statut, soumis_n0_le, action_n0, commentaire_n0, n0_actor_id, action_n0_le)
+- [x] `validation_audit_logs` table created (immutable — no updated_at, R6)
+- [x] `ValidationAuditLog` model created
+- [x] `TacheResultatService` created: `soumettre`, `approuverN0`, `renvoyerN0`, `transmettreAuN1`
+- [x] `TransmettreResultatAuN1Job` created (dispatched on submit, skips if N0 already acted)
+- [x] `ResultatSoumisN0Notification`, `ResultatRenvoyeNotification`, `ResultatApprouveN0Notification`, `ResultatTransmisAutoNotification` created
+- [x] Blade template: `resources/views/emails/resultat-renvoye/{fr,en}.blade.php`
+- [x] `validation_timeout_hours` added to `Workspace::getDefaultSettings()` (default 48h)
+- [x] `canApprouverN0`, `canRenvoyerN0` added to `PermissionService`
+- [x] `resultats.approuver_n0`, `resultats.renvoyer_n0` added to `RolePermissionSeeder`
+- [x] `useTachePermissions.js` created with `canApprouverN0`, `canRenvoyerN0`
+- [x] `TacheResultatResource`: `statut`, `validation_n0` block, `can_approuver_n0`, `can_renvoyer_n0`
+- [x] Translation files `lang/fr/circuit_validation.php` + `lang/en/circuit_validation.php` (separate from Laravel's validation.php)
+- [x] 7 new tests passing (48 total)
 - [ ] PR opened into `jonas`
 
 ### Task 6
