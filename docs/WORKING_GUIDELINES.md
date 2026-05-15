@@ -4,6 +4,18 @@
 
 ---
 
+## Guide 0 — Consult Before Acting
+
+Before executing any step of a task:
+
+1. **Read the relevant guides in this document** — identify every guide that applies to what you are about to do (branching, migrations, permissions, translations, emails, logging, etc.) and follow them exactly.
+2. **Before modifying anything that already exists** — search the full codebase for all usages of that code (PHP, Vue, JS, migrations, seeders, tests, translations) and analyse the impact before touching it.
+3. **Never assume** a change is isolated. A method rename, a column addition, a role value change, or a pivot field removal can break things far from the edit site. Always verify scope first.
+
+This guide takes precedence over everything else. Skipping it to save time has caused broken endpoints, wrong role values, and missing columns in this project.
+
+---
+
 ## Guide 1 — Branch Naming
 
 Each task maps to one branch:
