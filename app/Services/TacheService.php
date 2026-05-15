@@ -43,7 +43,7 @@ class TacheService
      */
     public function getAllTaches(User $user, array $filters = []): Collection
     {
-        $query = Tache::query()->with(['activite.projet', 'assignees', 'labels']);
+        $query = Tache::query()->with(['activite.projet', 'assignees', 'labels', 'sousTaches:id,tache_id']);
 
         // ✅ Appliquer les permissions via Policy
         if (! $user->isSuperAdmin()) {
@@ -151,6 +151,7 @@ class TacheService
                     'validatedN1By:id,nom',
                     'validatedN2By:id,nom',
                     'createdBy:id,nom',
+                    'sousTaches:id,tache_id',
                 ])
                 ->orderBy('position')
                 ->orderBy('created_at', 'desc')
@@ -199,7 +200,7 @@ class TacheService
     public function getMyTaches(User $user): Collection
     {
         return Tache::assignedTo($user->id)
-            ->with(['activite', 'assignees', 'labels'])
+            ->with(['activite', 'assignees', 'labels', 'sousTaches:id,tache_id'])
             ->active()
             ->ordered()
             ->get();

@@ -343,6 +343,17 @@ class PermissionService
             return true;
         }
 
+        // Cadre and collaborateur via activity membership role or can_create_tasks flag
+        if ($activite && $this->activityMemberHasPermission($user, $activite, 'can_create_tasks')) {
+            return true;
+        }
+
+        $member = $activite?->membres()->where('user_id', $user->id)->first();
+        if ($member && in_array($member->pivot->role, ['cadre', 'collaborateur'])) {
+            return true;
+        }
+
+        // Task responsable
         $assignment = $tache->assignees()->where('user_id', $user->id)->first();
 
         return $assignment && ($assignment->pivot->is_responsable ?? false);

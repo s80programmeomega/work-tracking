@@ -1033,7 +1033,11 @@ class ActiviteController extends Controller
      */
     public function getTaches(Request $request, $id): JsonResponse
     {
-        $activite = Activite::with('taches.assignees')->findOrFail($id);
+        $activite = Activite::with([
+            'taches.assignees:id,nom,email,avatar',
+            'taches.labels:id,nom,couleur',
+            'taches.sousTaches:id,tache_id',
+        ])->findOrFail($id);
         $user = $request->user();
 
         // Vérifier l'accès
@@ -1042,7 +1046,7 @@ class ActiviteController extends Controller
         }
 
         return response()->json([
-            'data' => $activite->taches,
+            'data' => TacheResource::collection($activite->taches),
         ]);
     }
 }

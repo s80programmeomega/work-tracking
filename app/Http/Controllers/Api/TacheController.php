@@ -174,6 +174,7 @@ class TacheController extends Controller
                     'assignees:id,nom,email,avatar',
                     'labels:id,nom,couleur',
                     'responsable:id,nom,email,avatar',
+                    'sousTaches:id,tache_id',
                 ])
                 ->active() // Seulement les tâches actives (non archivées)
                 ->orderBy('created_at', 'desc')
@@ -236,7 +237,7 @@ class TacheController extends Controller
             'assignees',
             'resultatsIndividuels.user',
             'labels',
-            'sousTaches',
+            'sousTaches:id,tache_id',
             'attachments',
             'externalLinks',
         ])
@@ -273,6 +274,7 @@ class TacheController extends Controller
                 'labels',
                 'validatedN1By',
                 'validatedN2By',
+                'sousTaches:id,tache_id',
             ])
             ->get()
             ->filter(function ($tache) {
@@ -291,6 +293,7 @@ class TacheController extends Controller
                 'labels',
                 'validatedN1By',
                 'validatedN2By',
+                'sousTaches:id,tache_id',
             ])
             ->get()
             ->filter(function ($tache) {
@@ -324,7 +327,7 @@ class TacheController extends Controller
                         $actq->where('responsable_id', $user->id);
                     });
             })
-            ->with(['activite.projet', 'labels', 'assignees'])
+            ->with(['activite.projet', 'labels', 'assignees', 'sousTaches:id,tache_id'])
             ->ordered()
             ->get();
 

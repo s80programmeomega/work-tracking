@@ -125,7 +125,7 @@ In the modal, click the ↗ icon (top-right, beside the expand button):
 - Unauthenticated `POST /api/taches/{id}/sous-taches` → 401
 - User with no activité membership → 403
 - Empty titre submitted → client-side error, no request sent
-- Login as `stagiaire@worktracking.com`: "Ajouter" button should not appear (stagiaire cannot create)
+- Login as `stagiaire@worktracking.com`: sous-tâches are visible but "Ajouter" button must not appear (stagiaire can view, cannot create)
 
 ---
 
