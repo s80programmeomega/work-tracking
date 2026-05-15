@@ -334,7 +334,13 @@ class User extends Authenticatable
      */
     public function isSuperAdmin(): bool
     {
-        return (bool) $this->is_super_admin;
+        // Column is the fast path; Spatie role is the authoritative fallback.
+        // Both must agree — if the column is set, trust it; otherwise check Spatie.
+        if ($this->is_super_admin) {
+            return true;
+        }
+
+        return $this->hasRole('super_admin');
     }
 
     /**

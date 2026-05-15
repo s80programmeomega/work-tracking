@@ -37,12 +37,16 @@ class WorkspaceController extends Controller
     {
         $user = $request->user();
 
-        $workspaces = Workspace::where(function ($query) use ($user) {
-            $query->where('owner_id', $user->id)
-                ->orWhereHas('members', function ($q) use ($user) {
-                    $q->where('user_id', $user->id);
-                });
-        })
+        $baseQuery = $user->isSuperAdmin()
+            ? Workspace::query()
+            : Workspace::where(function ($query) use ($user) {
+                $query->where('owner_id', $user->id)
+                    ->orWhereHas('members', function ($q) use ($user) {
+                        $q->where('user_id', $user->id);
+                    });
+            });
+
+        $workspaces = $baseQuery
             ->withCount('projets')
             ->with(['owner:id,nom,email,avatar'])
             ->when($request->search, function ($query, $search) {
@@ -173,9 +177,10 @@ class WorkspaceController extends Controller
     public function getUserWorkspaces(Request $request)
     {
         $user = $request->user();
-        $workspaces = Workspace::accessibleBy($user->id)
-            ->withCount('projets', 'members')
-            ->get();
+
+        $workspaces = $user->isSuperAdmin()
+            ? Workspace::withCount('projets', 'members')->get()
+            : Workspace::accessibleBy($user->id)->withCount('projets', 'members')->get();
 
         return response()->json(['data' => $workspaces]);
     }
@@ -869,7 +874,9 @@ class WorkspaceController extends Controller
      */
     public function invitations(Workspace $workspace)
     {
-        // $this->authorize('manageMembers', $workspace);
+        if (! $this->userCanManageMembers(request()->user(), $workspace)) {
+            return response()->json(['message' => 'Accès non autorisé'], 403);
+        }
 
         $invitations = WorkspaceInvitation::where('workspace_id', $workspace->id)
             ->where('status', 'pending')
@@ -888,7 +895,9 @@ class WorkspaceController extends Controller
      */
     public function resendInvitation(Workspace $workspace, WorkspaceInvitation $invitation)
     {
-        // $this->authorize('manageMembers', $workspace);
+        if (! $this->userCanManageMembers(request()->user(), $workspace)) {
+            return response()->json(['message' => 'Accès non autorisé'], 403);
+        }
 
         if ($invitation->workspace_id !== $workspace->id) {
             abort(403, 'Cette invitation n\'appartient pas à ce workspace');
@@ -1284,14 +1293,14 @@ class WorkspaceController extends Controller
                 });
             });
 
-        // 🔥 LOGIQUE DE PERMISSION
-        // Owner ou Admin du workspace → Voit TOUT
+        // super_admin, workspace owner ou admin → voit TOUS les projets
         if (
+            $user->isSuperAdmin() ||
             $workspace->owner_id === $user->id ||
             $this->isWorkspaceAdmin($user, $workspace)
         ) {
 
-            // ✅ Aucun filtre supplémentaire : voir tous les projets
+            // ✅ Aucun filtre supplémentaire
 
         } else {
             // ❌ Membre simple → Uniquement projets accessibles
@@ -1393,15 +1402,25 @@ class WorkspaceController extends Controller
      */
     private function userHasAccess(User $user, Workspace $workspace): bool
     {
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
         return $workspace->owner_id === $user->id ||
-          $workspace->members()->where('user_id', $user->id)->exists();
+            $workspace->members()->where('user_id', $user->id)->exists();
     }
 
     /**
-     * Helper: Check if user can manage members
+     * Helper: Check if user can manage workspace members.
+     * Grants access to: super_admin, workspace owner, and members with owner/manager role
+     * or with explicit can_invite_members pivot permission.
      */
     private function userCanManageMembers(User $user, Workspace $workspace): bool
     {
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
         if ($workspace->owner_id === $user->id) {
             return true;
         }
@@ -1410,7 +1429,21 @@ class WorkspaceController extends Controller
             ->where('user_id', $user->id)
             ->first();
 
-        return $member && in_array($member->pivot->role, ['owner', 'super_admin', 'admin']);
+        if (! $member) {
+            return false;
+        }
+
+        // Manager role has implicit invite rights
+        if (in_array($member->pivot->role, ['owner', 'manager'])) {
+            return true;
+        }
+
+        // Explicit pivot flag
+        $permissions = is_array($member->pivot->permissions)
+            ? $member->pivot->permissions
+            : json_decode($member->pivot->permissions ?? '{}', true);
+
+        return ! empty($permissions['can_invite_members']);
     }
 
     /**

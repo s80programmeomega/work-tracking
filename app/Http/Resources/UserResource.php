@@ -9,11 +9,13 @@ class UserResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $isSuperAdmin = $this->resource->isSuperAdmin();
+
         return [
             'id' => $this->id,
             'nom' => $this->nom,
             'email' => $this->email,
-            'role' => 'admin',
+            'prenom' => $this->prenom,
             'fonction' => $this->fonction,
             'avatar' => $this->avatar_url,
             'initials' => $this->initials,
@@ -23,6 +25,7 @@ class UserResource extends JsonResource
             'language' => $this->language ?? 'fr',
             'timezone' => $this->timezone,
             'is_active' => $this->is_active,
+            'is_super_admin' => $isSuperAdmin,
             'current_workspace_id' => $this->current_workspace_id,
             'last_login_at' => $this->last_login_at?->toISOString(),
             'email_verified_at' => $this->email_verified_at?->toISOString(),
@@ -37,18 +40,16 @@ class UserResource extends JsonResource
             // ]),
             'team' => null,
 
-            'roles' => $this->whenLoaded('roles', fn() =>
-                $this->roles->pluck('name')
+            'roles' => $this->whenLoaded('roles', fn () => $this->roles->pluck('name')
             ),
 
-            'permissions' => $this->whenLoaded('permissions', fn() =>
-                $this->permissions->pluck('name')
+            'permissions' => $this->whenLoaded('permissions', fn () => $this->permissions->pluck('name')
             ),
 
             // Stats (only when specifically loaded)
             'stats' => $this->when(
                 isset($this->stats),
-                fn() => $this->stats
+                fn () => $this->stats
             ),
         ];
     }

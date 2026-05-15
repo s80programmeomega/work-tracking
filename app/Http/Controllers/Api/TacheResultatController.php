@@ -749,11 +749,13 @@ class TacheResultatController extends Controller
     {
         $user = $request->user();
 
-        $resultats = TacheResultat::query()
-            ->with(['tache.activite.projet', 'user', 'documents'])
-            ->requiringValidationFrom($user)
-            ->latest('soumis_le')
-            ->get();
+        $query = TacheResultat::query()->with(['tache.activite.projet', 'user', 'documents']);
+
+        if (! $user->isSuperAdmin()) {
+            $query->requiringValidationFrom($user);
+        }
+
+        $resultats = $query->latest('soumis_le')->get();
 
         $pendingN1 = $resultats->where('valide_par_n1', false);
         $pendingN2 = $resultats->where('valide_par_n1', true)->where('valide_par_n2', false);
