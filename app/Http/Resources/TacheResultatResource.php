@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Services\PermissionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -12,7 +13,7 @@ class TacheResultatResource extends JsonResource
         return [
             'id' => $this->id,
             'tache_id' => $this->tache_id,
-            
+
             // Informations utilisateur
             'user' => $this->when($this->user, [
                 'id' => $this->user?->id,
@@ -20,7 +21,7 @@ class TacheResultatResource extends JsonResource
                 'email' => $this->user?->email,
                 'avatar' => $this->user?->avatar,
             ]),
-            
+
             // Résultats
             'resultats_attendus' => $this->resultats_attendus,
             'resultats_obtenus' => $this->resultats_obtenus,
@@ -28,12 +29,25 @@ class TacheResultatResource extends JsonResource
             'difficultes_rencontrees' => $this->difficultes_rencontrees,
             'solutions_envisagees' => $this->solutions_envisagees,
             'observations' => $this->observations,
-            
+
             // Statut
+            'statut' => $this->statut,
             'validation_status' => $this->validation_status,
             'is_fully_validated' => $this->is_fully_validated,
             'soumis_le' => $this->soumis_le?->format('Y-m-d H:i:s'),
-            
+
+            // N0 circuit
+            'validation_n0' => [
+                'soumis_n0_le' => $this->soumis_n0_le?->format('Y-m-d H:i:s'),
+                'action' => $this->action_n0,
+                'commentaire' => $this->commentaire_n0,
+                'action_le' => $this->action_n0_le?->format('Y-m-d H:i:s'),
+                'actor' => $this->when($this->n0Actor, [
+                    'id' => $this->n0Actor?->id,
+                    'nom' => $this->n0Actor?->nom,
+                ]),
+            ],
+
             // Validation N1
             'validation_n1' => [
                 'valide' => $this->valide_par_n1,
@@ -56,14 +70,14 @@ class TacheResultatResource extends JsonResource
                 'valide_le' => $this->valide_le_n2?->format('Y-m-d H:i:s'),
                 'commentaire' => $this->commentaire_n2,
             ],
-            
+
             // 🔥 IMPORTANT : Tâche avec TOUTES les relations
             'tache' => $this->when($this->relationLoaded('tache'), [
                 'id' => $this->tache?->id,
                 'titre' => $this->tache?->titre,
                 'code' => $this->tache?->code,
                 'echeance' => $this->tache?->echeance?->format('Y-m-d'),
-                
+
                 // 🔥 Activité (OBLIGATOIRE pour les permissions)
                 'activite' => $this->when($this->tache?->relationLoaded('activite'), [
                     'id' => $this->tache->activite?->id,
@@ -74,7 +88,7 @@ class TacheResultatResource extends JsonResource
                         'nom' => $this->tache->activite->responsable?->nom,
                         'avatar' => $this->tache->activite->responsable?->avatar,
                     ]),
-                    
+
                     // 🔥 Projet (OBLIGATOIRE pour validation N2)
                     'projet' => $this->when($this->tache->activite?->relationLoaded('projet'), [
                         'id' => $this->tache->activite->projet?->id,
@@ -88,10 +102,10 @@ class TacheResultatResource extends JsonResource
                     ]),
                 ]),
             ]),
-             
+
             // Documents
-            'documents' => $this->when($this->relationLoaded('documents'), function() use ($request) {
-                return $this->documents->map(function($doc) use ($request) {
+            'documents' => $this->when($this->relationLoaded('documents'), function () use ($request) {
+                return $this->documents->map(function ($doc) use ($request) {
                     return [
                         'id' => $doc->id,
                         'nom' => $doc->nom,
@@ -122,24 +136,27 @@ class TacheResultatResource extends JsonResource
                     ];
                 });
             }),
-            
+
             // Métadonnées
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
-            
+
             // Permissions
-            'permissions' => $this->when($request->user(), function() use ($request) {
+            'permissions' => $this->when($request->user(), function () use ($request) {
                 $user = $request->user();
-                
+
+                $permService = app(PermissionService::class);
+
                 return [
-                    'can_edit' => !$this->is_fully_validated && $this->user_id === $user->id,
-                    'can_delete' => !$this->is_fully_validated && $this->user_id === $user->id,
-                    'can_submit' => !$this->soumis_le && $this->user_id === $user->id,
+                    'can_edit' => ! $this->is_fully_validated && $this->user_id === $user->id,
+                    'can_delete' => ! $this->is_fully_validated && $this->user_id === $user->id,
+                    'can_submit' => ! $this->soumis_le && $this->user_id === $user->id,
                     'can_validate_n1' => $this->canBeValidatedByN1($user),
                     'can_validate_n2' => $this->canBeValidatedByN2($user),
+                    'can_approuver_n0' => $permService->canApprouverN0($user, $this->resource),
+                    'can_renvoyer_n0' => $permService->canRenvoyerN0($user, $this->resource),
                 ];
             }),
         ];
     }
-   
 }

@@ -9,6 +9,7 @@ use App\Models\Document;
 use App\Models\Projet;
 use App\Models\SousTache;
 use App\Models\Tache;
+use App\Models\TacheResultat;
 use App\Models\User;
 use App\Models\Workspace;
 
@@ -465,6 +466,33 @@ class PermissionService
         $member = $projet->members()->where('user_id', $user->id)->first();
 
         return $member && in_array($member->pivot->role, $roles);
+    }
+
+    // =========================================================================
+    // N0 VALIDATION LEVEL
+    // =========================================================================
+
+    /**
+     * Can approve a result at N0 (task is_responsable only).
+     */
+    public function canApprouverN0(User $user, TacheResultat $resultat): bool
+    {
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        $tache = $resultat->tache;
+        $assignment = $tache->assignees()->where('user_id', $user->id)->first();
+
+        return $assignment && ($assignment->pivot->is_responsable ?? false);
+    }
+
+    /**
+     * Can return a result at N0 with a comment (task is_responsable only).
+     */
+    public function canRenvoyerN0(User $user, TacheResultat $resultat): bool
+    {
+        return $this->canApprouverN0($user, $resultat);
     }
 
     private function activityMemberHasRole(User $user, Activite $activite, string $role): bool

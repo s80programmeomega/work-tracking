@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Notifications\ResultatIndividuelSoumisNotification;
 use App\Notifications\ResultatRejeteNotification;
 use App\Services\PermissionService;
+use App\Services\TacheResultatService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +24,10 @@ use Illuminate\Support\Str;
 
 class TacheResultatController extends Controller
 {
-    public function __construct(protected PermissionService $permissionService) {}
+    public function __construct(
+        protected PermissionService $permissionService,
+        protected TacheResultatService $resultatService,
+    ) {}
 
     /**
      * 📋 Liste des résultats d'une tâche
@@ -1036,13 +1040,81 @@ class TacheResultatController extends Controller
         if ($permissions->isNotEmpty()) {
             DocumentPermission::insert($permissions->all());
 
-            // Log pour debug
             Log::info('Permissions créées pour le document', [
                 'document_id' => $document->id,
                 'permissions_count' => $permissions->count(),
                 'users' => $permissions->pluck('permissionable_id')->toArray(),
             ]);
         }
+    }
 
+    /**
+     * N0 approves and forwards result to N1.
+     * POST /taches/{tache}/resultats/{resultat}/approuver-n0
+     */
+    public function approuverN0(Request $request, Tache $tache, TacheResultat $resultat): JsonResponse
+    {
+        $user = $request->user();
+
+        if (! $this->permissionService->canApprouverN0($user, $resultat)) {
+            Log::warning('Accès refusé approuverN0', [
+                'user_id' => $user->id,
+                'tache_resultat_id' => $resultat->id,
+                'action' => 'approuver_n0',
+                'reason' => 'unauthorized',
+            ]);
+
+            return response()->json(['message' => __('circuit_validation.errors.unauthorized')], 403);
+        }
+
+        if ($resultat->statut !== 'en_verification_n0') {
+            return response()->json(['message' => __('circuit_validation.errors.invalid_statut')], 422);
+        }
+
+        $this->resultatService->approuverN0($resultat, $user);
+
+        return response()->json([
+            'message' => __('circuit_validation.success.approuve_n0'),
+            'data' => new TacheResultatResource($resultat->fresh()),
+        ]);
+    }
+
+    /**
+     * N0 returns the result with a mandatory comment (min 30 chars, R4).
+     * POST /taches/{tache}/resultats/{resultat}/renvoyer-n0
+     */
+    public function renvoyerN0(Request $request, Tache $tache, TacheResultat $resultat): JsonResponse
+    {
+        $user = $request->user();
+
+        if (! $this->permissionService->canRenvoyerN0($user, $resultat)) {
+            Log::warning('Accès refusé renvoyerN0', [
+                'user_id' => $user->id,
+                'tache_resultat_id' => $resultat->id,
+                'action' => 'renvoyer_n0',
+                'reason' => 'unauthorized',
+            ]);
+
+            return response()->json(['message' => __('circuit_validation.errors.unauthorized')], 403);
+        }
+
+        if ($resultat->statut !== 'en_verification_n0') {
+            return response()->json(['message' => __('circuit_validation.errors.invalid_statut')], 422);
+        }
+
+        $validated = $request->validate([
+            'commentaire' => 'required|string',
+        ]);
+
+        try {
+            $this->resultatService->renvoyerN0($resultat, $user, $validated['commentaire']);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+
+        return response()->json([
+            'message' => __('circuit_validation.success.renvoye_n0'),
+            'data' => new TacheResultatResource($resultat->fresh()),
+        ]);
     }
 }

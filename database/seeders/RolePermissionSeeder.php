@@ -63,6 +63,10 @@ class RolePermissionSeeder extends Seeder
             'sous_taches.delete',
             'sous_taches.assign_intervenant',
 
+            // N0 validation circuit
+            'resultats.approuver_n0',
+            'resultats.renvoyer_n0',
+
             // Documents
             'documents.view',
             'documents.upload',
@@ -116,6 +120,7 @@ class RolePermissionSeeder extends Seeder
                 'activites.view', 'activites.create', 'activites.update', 'activites.delete', 'activites.manage_members',
                 'taches.view', 'taches.create', 'taches.update', 'taches.delete', 'taches.validate_n2', 'taches.comment',
                 'sous_taches.view', 'sous_taches.create', 'sous_taches.update', 'sous_taches.delete', 'sous_taches.assign_intervenant',
+                'resultats.approuver_n0', 'resultats.renvoyer_n0',
                 'documents.view', 'documents.upload', 'documents.delete', 'documents.share',
                 'reports.view', 'reports.create',
             ],
@@ -124,6 +129,7 @@ class RolePermissionSeeder extends Seeder
                 'activites.view', 'activites.update',
                 'taches.view', 'taches.create', 'taches.update', 'taches.validate_n1', 'taches.comment',
                 'sous_taches.view', 'sous_taches.create', 'sous_taches.update', 'sous_taches.assign_intervenant',
+                'resultats.approuver_n0', 'resultats.renvoyer_n0',
                 'documents.view', 'documents.upload',
                 'reports.view',
             ],
@@ -131,7 +137,8 @@ class RolePermissionSeeder extends Seeder
                 'projets.view',
                 'activites.view',
                 'taches.view', 'taches.submit_result', 'taches.comment',
-                'sous_taches.view',
+                'sous_taches.view', 'sous_taches.create', 'sous_taches.update',
+                'resultats.approuver_n0', 'resultats.renvoyer_n0',
                 'documents.view', 'documents.upload',
             ],
             'stagiaire' => [

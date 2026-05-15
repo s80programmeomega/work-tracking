@@ -84,6 +84,7 @@ class Workspace extends Model
             'require_task_validation' => true,
             'require_approval_for_time_off' => true,
             'default_project_visibility' => 'team',
+            'validation_timeout_hours' => 48, // R8: 24–168h, default 48h
         ];
     }
 
