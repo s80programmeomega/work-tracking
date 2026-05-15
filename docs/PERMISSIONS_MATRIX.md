@@ -82,11 +82,17 @@ Assigned in: `workspace_members`, `projet_user`, `activite_user`, `tache_user`
 | Edit task | ✅ | ✅ | ✅ | ✅ | 🔑 | ❌ | ❌ |
 | Delete task | ✅ | ✅ | ❌ | 🔑 | ❌ | ❌ | ❌ |
 | Submit result (TacheResultat) | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ |
-| Create subtask | ✅ | ✅ | ✅ | ✅ | 🔑 | ❌ | ❌ |
+| Create subtask | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
+| Edit subtask | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
+| Delete subtask | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
+| View subtask | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Assign intervenant to subtask | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
 | Approve/return N0 (result check) | ❌ | ❌ | ❌ | ❌ | 🔑 | ❌ | ❌ |
 | Activate bypass | ❌ | ❌ | ❌ | ❌ | ✅ (own result) | ✅ (own result) | ❌ |
 
-> 🔑 pivot flag: `can_edit` on `tache_user`, `can_delete_tasks` on `activite_user`, `is_responsable` on `tache_user` (for subtask creation and N0 approval)
+> 🔑 pivot flag: `can_edit` on `tache_user`, `can_delete_tasks` on `activite_user`, `is_responsable` on `tache_user` (for N0 approval)
+>
+> Subtask permissions (`sous_taches.*`) are enforced via `SousTachePolicy` → `PermissionService`. Seeded in `RolePermissionSeeder`. Frontend: `canCreateSousTache`, `canAssignSousTacheIntervenant` in `useActivitePermissions.js`.
 
 ---
 
@@ -146,3 +152,6 @@ Assigned in: `workspace_members`, `projet_user`, `activite_user`, `tache_user`
 | Date | Task | Change |
 |---|---|---|
 | 2026-05-12 | Planning | Initial matrix created from existing `PermissionService` |
+| 2026-05-14 | Task 2 | Added `sous_taches.view/create/update/delete/assign_intervenant` — `SousTachePolicy` + `PermissionService` |
+| 2026-05-14 | Task 3 | `canAssignSousTacheIntervenant` wired into `RolePermissionSeeder` for all roles |
+| 2026-05-14 | Task 4 | `canCreateSousTache` + `canAssignSousTacheIntervenant` added to `useActivitePermissions.js`. `can_create_subtask` exposed in `TacheResource` permissions block |
