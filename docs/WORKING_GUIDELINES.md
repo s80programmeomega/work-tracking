@@ -53,9 +53,10 @@ Every task touching permissions follows this exact order:
 2. Add permission string to `database/seeders/RolePermissionSeeder.php`
 3. Add to `Role::permissions()` in `app/Enums/Role.php` for relevant roles
 4. Add to the relevant frontend composable (`useWorkspacePermissions.js`, `useProjetPermissions.js`, `useActivitePermissions.js`, or `useTachePermissions.js`)
-5. **Update `docs/PERMISSIONS_MATRIX.md`** with the new permission row and which roles get it
+5. Expose in the relevant API Resource (`TacheResource`, `ActiviteResource`, etc.) if the frontend needs to read it from API responses
+6. **Update `docs/PERMISSIONS_MATRIX.md`** — see Guide 15. This is a hard gate.
 
-All 5 steps must be done before marking a task complete.
+All 6 steps must be done before marking a task complete.
 
 ---
 
@@ -252,3 +253,25 @@ This applies to:
 - Migration columns
 
 **Why:** Removing code without a full impact check has caused broken endpoints and missing DB columns in this project. The cost of asking is always lower than the cost of reverting.
+
+---
+
+## Guide 15 — Permissions Matrix is a Hard Gate
+
+`docs/PERMISSIONS_MATRIX.md` must be updated **in the same commit** as any permission change. A task is not complete if the matrix is out of date.
+
+**Triggers — update the matrix whenever you:**
+- Add a method to `PermissionService`
+- Add a permission string to `RolePermissionSeeder`
+- Add a permission to a frontend composable (`useWorkspacePermissions.js`, `useProjetPermissions.js`, `useActivitePermissions.js`, `useTachePermissions.js`)
+- Expose a permission key in an API Resource (`TacheResource`, `ActiviteResource`, etc.)
+- Register a new Policy in `AuthServiceProvider`
+
+**For each new permission, add a row to the matrix with:**
+- The permission name
+- Which roles get it (✅ / ❌ / 🔑)
+- Any pivot flag conditions (🔑)
+
+**Also append a row to the Changelog table** at the bottom of the matrix with: date, task number, and what changed.
+
+**Why:** The matrix was not updated for Tasks 2, 3, or 4 despite all permission steps being completed — the omission meant there was no single source of truth for role capabilities, making it impossible to audit what each role can do without reading multiple files.
