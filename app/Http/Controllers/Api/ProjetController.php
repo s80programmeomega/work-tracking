@@ -964,13 +964,15 @@ class ProjetController extends Controller
     {
         $user = auth()->user();
 
-        $projets = Projet::with('workspace')
-            ->whereHas('workspace', function ($q) use ($user) {
+        $query = Projet::with('workspace');
+
+        if (! $user->isSuperAdmin()) {
+            $query->whereHas('workspace', function ($q) use ($user) {
                 $q->where('owner_id', $user->id)
                     ->orWhereHas('members', fn ($m) => $m->where('user_id', $user->id));
-            })
-            ->get();
+            });
+        }
 
-        return response()->json($projets);
+        return response()->json($query->get());
     }
 }

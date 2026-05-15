@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Activite;
 use App\Models\Projet;
 use App\Models\Tache;
 use App\Models\User;
@@ -11,19 +10,17 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class ProjetService
 {
-
     /**
      * Get ALL projects (SUPER ADMIN ONLY)
-     * @param array $filters
+     *
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
     public function getAllProjets(array $filters = [])
     {
-         $query = Projet::with(['responsable', 'members', 'tags', 'workspace'])
+        $query = Projet::with(['responsable', 'members', 'tags', 'workspace'])
             ->withCount(['activites', 'taches']);
 
         $this->applyFilters($query, $filters);
@@ -33,42 +30,39 @@ class ProjetService
 
     /**
      * Get user's projects (where user is member or responsable)
-     * @param User $user
-     * @param array $filters
+     *
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
-
-
-
     public function getUserProjets(User $user, array $filters = []): LengthAwarePaginator
     {
-         $query = Projet::with(['responsable', 'workspace', 'members'])
+        $query = Projet::with(['responsable', 'workspace', 'members'])
             ->withCount(['activites', 'members']);
 
-        if (!empty($filters['workspace_id'])) {
+        if (! empty($filters['workspace_id'])) {
             $workspace = Workspace::find($filters['workspace_id']);
-            if (!$workspace) {
+            if (! $workspace) {
                 return new LengthAwarePaginator([], 0, $filters['per_page'] ?? 15);
             }
 
             $query->inWorkspace($workspace->id);
 
-            if (!($workspace->owner_id === $user->id || $this->isWorkspaceAdmin($user, $workspace))) {
+            if (! ($user->isSuperAdmin() || $workspace->owner_id === $user->id || $this->isWorkspaceAdmin($user, $workspace))) {
                 $query->where(function ($q) use ($user) {
                     $q->where('responsable_id', $user->id)
-                      ->orWhereHas('members', fn($m) => $m->where('user_id', $user->id));
+                        ->orWhereHas('members', fn ($m) => $m->where('user_id', $user->id));
                 });
             }
-        } else {
-            // Tous les workspaces accessibles
+        } elseif (! $user->isSuperAdmin()) {
+            // Non-super_admin: filter to accessible workspaces only
             $query->where(function ($q) use ($user) {
                 $q->where('responsable_id', $user->id)
-                  ->orWhereHas('members', fn($m) => $m->where('user_id', $user->id))
-                  ->orWhereHas('workspace', fn($w) => $w->where('owner_id', $user->id)
-                      ->orWhereHas('members', fn($m) => $m->where('user_id', $user->id)
-                          ->whereIn('role', ['super_admin', 'admin'])));
+                    ->orWhereHas('members', fn ($m) => $m->where('user_id', $user->id))
+                    ->orWhereHas('workspace', fn ($w) => $w->where('owner_id', $user->id)
+                        ->orWhereHas('members', fn ($m) => $m->where('user_id', $user->id)
+                            ->whereIn('role', ['super_admin', 'admin'])));
             });
         }
+        // super_admin with no workspace_id filter: see all projects
 
         $this->applyFilters($query, $filters);
 
@@ -81,9 +75,9 @@ class ProjetService
     private function isWorkspaceAdmin(User $user, Workspace $workspace): bool
     {
         $member = $workspace->members()->where('user_id', $user->id)->first();
+
         return $member && in_array($member->pivot->role, ['admin']);
     }
-
 
     /**
      * ✅ NOUVEAU : Get global dashboard stats (ALL workspaces - SUPER ADMIN)
@@ -140,7 +134,6 @@ class ProjetService
         ];
     }
 
-
     /**
      * ✅ Calculate global completion rate
      */
@@ -156,7 +149,6 @@ class ProjetService
 
         return (int) round(($completedTaches / $totalTaches) * 100);
     }
-
 
     /**
      * Calculate workspace completion rate
@@ -213,47 +205,47 @@ class ProjetService
             ->toArray();
     }
 
-   /**
+    /**
      * Apply filters to a query
      */
     protected function applyFilters(Builder $query, array $filters): void
     {
-        if (!empty($filters['workspace_id'])) {
+        if (! empty($filters['workspace_id'])) {
             $query->inWorkspace($filters['workspace_id']);
         }
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $search = $filters['search'];
-            $query->where(fn($q) => $q->where('nom', 'like', "%$search%")
+            $query->where(fn ($q) => $q->where('nom', 'like', "%$search%")
                 ->orWhere('code', 'like', "%$search%")
                 ->orWhere('description', 'like', "%$search%"));
         }
 
-        if (!empty($filters['status']) && $filters['status'] !== 'all') {
+        if (! empty($filters['status']) && $filters['status'] !== 'all') {
             $query->where('status', $filters['status']);
         }
 
-        if (!empty($filters['visibility']) && $filters['visibility'] !== 'all') {
+        if (! empty($filters['visibility']) && $filters['visibility'] !== 'all') {
             $query->where('visibility', $filters['visibility']);
         }
 
-        if (!empty($filters['responsable_id'])) {
+        if (! empty($filters['responsable_id'])) {
             $query->where('responsable_id', $filters['responsable_id']);
         }
 
-        if (!empty($filters['tags'])) {
-            $query->whereHas('tags', fn($q) => $q->whereIn('projet_tags.id', (array)$filters['tags']));
+        if (! empty($filters['tags'])) {
+            $query->whereHas('tags', fn ($q) => $q->whereIn('projet_tags.id', (array) $filters['tags']));
         }
 
-        if (!empty($filters['is_template'])) {
+        if (! empty($filters['is_template'])) {
             $query->where('is_template', filter_var($filters['is_template'], FILTER_VALIDATE_BOOLEAN));
         }
 
-        if (!empty($filters['is_favorite'])) {
+        if (! empty($filters['is_favorite'])) {
             $query->where('is_favorite', filter_var($filters['is_favorite'], FILTER_VALIDATE_BOOLEAN));
         }
 
-        if (!empty($filters['is_overdue'])) {
+        if (! empty($filters['is_overdue'])) {
             $query->where('date_fin', '<', now())
                 ->whereNotIn('status', ['completed', 'archived']);
         }
@@ -286,7 +278,7 @@ class ProjetService
             }
 
             // Attach additional members
-            if (!empty($members)) {
+            if (! empty($members)) {
                 foreach ($members as $member) {
                     if ($member['user_id'] != $projet->responsable_id) {
                         $projet->members()->attach($member['user_id'], [
@@ -301,7 +293,7 @@ class ProjetService
             }
 
             // Attach tags
-            if (!empty($tags)) {
+            if (! empty($tags)) {
                 $projet->tags()->attach($tags);
             }
 
@@ -316,7 +308,7 @@ class ProjetService
     {
         return DB::transaction(function () use ($projet, $data) {
             // ✅ Si le code n'est pas fourni ou est null, ne pas le modifier
-            if (!isset($data['code']) || $data['code'] === null || $data['code'] === '') {
+            if (! isset($data['code']) || $data['code'] === null || $data['code'] === '') {
                 unset($data['code']);
             }
 
@@ -333,7 +325,7 @@ class ProjetService
             }
 
             // Recalculate progression if needed
-            if (!isset($data['progression'])) {
+            if (! isset($data['progression'])) {
                 $projet->updateProgression();
             }
 
@@ -364,6 +356,7 @@ class ProjetService
     public function archiveProjet(Projet $projet): Projet
     {
         $projet->archive();
+
         return $projet->fresh(['responsable', 'members', 'tags']);
     }
 
@@ -373,6 +366,7 @@ class ProjetService
     public function unarchiveProjet(Projet $projet): Projet
     {
         $projet->unarchive();
+
         return $projet->fresh(['responsable', 'members', 'tags']);
     }
 
@@ -382,6 +376,7 @@ class ProjetService
     public function completeProjet(Projet $projet): Projet
     {
         $projet->complete();
+
         return $projet->fresh(['responsable', 'members', 'tags']);
     }
 
@@ -403,8 +398,8 @@ class ProjetService
             ]), $overrides);
 
             // Add suffix to name if not provided
-            if (!isset($overrides['nom'])) {
-                $newData['nom'] = $projet->nom . ' (Copie)';
+            if (! isset($overrides['nom'])) {
+                $newData['nom'] = $projet->nom.' (Copie)';
             }
 
             // Reset some fields
@@ -456,7 +451,7 @@ class ProjetService
             ->where('user_id', $userId)
             ->first()
             ?->pivot
-                ?->only(['role', 'can_edit', 'can_delete', 'can_invite','can_delete_member']) ?? [];
+            ?->only(['role', 'can_edit', 'can_delete', 'can_invite', 'can_delete_member']) ?? [];
 
         $newPermissions = array_merge($existingPermissions, $permissions);
 
@@ -476,7 +471,8 @@ class ProjetService
      */
     public function toggleFavorite(Projet $projet): Projet
     {
-        $projet->update(['is_favorite' => !$projet->is_favorite]);
+        $projet->update(['is_favorite' => ! $projet->is_favorite]);
+
         return $projet->fresh(['responsable', 'members', 'tags']);
     }
 
@@ -497,9 +493,6 @@ class ProjetService
             'days_remaining' => $projet->days_remaining,
         ];
     }
-
-
-
 
     /**
      * Generate performance report for weekly evaluation.

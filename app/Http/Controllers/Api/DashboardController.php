@@ -2,150 +2,148 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use App\Models\Workspace;
-use App\Models\Projet;
-use App\Models\Activite;
-use App\Models\Tache;
-use App\Enums\TacheStatut;
 use App\Enums\TachePriorite;
+use App\Enums\TacheStatut;
+use App\Http\Controllers\Controller;
+use App\Models\Activite;
+use App\Models\Projet;
+use App\Models\Tache;
 use App\Models\User;
+use App\Models\Workspace;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
-   
     /**
- * Get dashboard data with member filtering
- */
-public function index(Request $request)
-{
-    $user = $request->user();
+     * Get dashboard data with member filtering
+     */
+    public function index(Request $request)
+    {
+        $user = $request->user();
 
-    // Filtrage par membre
-    $memberId = $request->input('member_id');
-    $projectStatus = $request->input('project_status');
-    $priority = $request->input('priority');
+        // Filtrage par membre
+        $memberId = $request->input('member_id');
+        $projectStatus = $request->input('project_status');
+        $priority = $request->input('priority');
 
-    // Workspaces accessibles
-    $workspaceIds = Workspace::accessibleBy($user->id)->pluck('id');
-    
-    if ($request->has('workspace_id') && $request->workspace_id) {
-        $workspaceIds = collect([$request->workspace_id]);
-    }
+        // Workspaces accessibles (super_admin voit tous)
+        $workspaceIds = $user->isSuperAdmin()
+            ? Workspace::pluck('id')
+            : Workspace::accessibleBy($user->id)->pluck('id');
 
-    // Projets avec filtres
-    $projetsQuery = Projet::accessibleBy($user->id)
-        ->whereIn('workspace_id', $workspaceIds);
+        if ($request->has('workspace_id') && $request->workspace_id) {
+            $workspaceIds = collect([$request->workspace_id]);
+        }
 
-    // Filtre par statut de projet
-    if ($projectStatus) {
-        $projetsQuery->where('status', $projectStatus);
-    }
+        // Projets avec filtres
+        $projetsQuery = Projet::accessibleBy($user->id)
+            ->whereIn('workspace_id', $workspaceIds);
 
-    $projets = $projetsQuery->get();
-    $projetIds = $projets->pluck('id');
+        // Filtre par statut de projet
+        if ($projectStatus) {
+            $projetsQuery->where('status', $projectStatus);
+        }
 
-    // Tâches avec filtres
-    $activiteIds = Activite::whereIn('projet_id', $projetIds)->pluck('id');
-    $tachesQuery = Tache::whereIn('activite_id', $activiteIds);
+        $projets = $projetsQuery->get();
+        $projetIds = $projets->pluck('id');
 
-    // Filtre par membre assigné
-    if ($memberId) {
-        $tachesQuery->whereHas('assignees', function ($q) use ($memberId) {
-            $q->where('user_id', $memberId);
-        });
-    }
+        // Tâches avec filtres
+        $activiteIds = Activite::whereIn('projet_id', $projetIds)->pluck('id');
+        $tachesQuery = Tache::whereIn('activite_id', $activiteIds);
 
-    // Filtre par priorité
-    if ($priority) {
-        $priorityEnum = match($priority) {
-            'high' => TachePriorite::ELEVEE,
-            'medium' => TachePriorite::MOYENNE,
-            'low' => TachePriorite::FAIBLE,
-        };
-        $tachesQuery->where('priorite', $priorityEnum);
-    }
+        // Filtre par membre assigné
+        if ($memberId) {
+            $tachesQuery->whereHas('assignees', function ($q) use ($memberId) {
+                $q->where('user_id', $memberId);
+            });
+        }
 
-    $taches = $tachesQuery->get();
+        // Filtre par priorité
+        if ($priority) {
+            $priorityEnum = match ($priority) {
+                'high' => TachePriorite::ELEVEE,
+                'medium' => TachePriorite::MOYENNE,
+                'low' => TachePriorite::FAIBLE,
+            };
+            $tachesQuery->where('priorite', $priorityEnum);
+        }
 
-    // Mes tâches (assignées à l'utilisateur connecté)
-    $myTasks = Tache::whereIn('activite_id', $activiteIds)
-        ->assignedTo($user->id)
-        ->where('statut', '!=', TacheStatut::TERMINE)
-        ->orderBy('echeance')
-        ->get()
-        ->take(5)
-        ->map(function ($tache) {
-            return [
-                'id' => $tache->id,
-                'title' => $tache->titre,
-                'project' => $tache->activite->projet->nom,
-                'priority' => $tache->priorite->value,
-                'due_date' => $tache->echeance?->format('d M Y'),
-                'status' => $tache->statut->value,
-                'is_overdue' => $tache->isOverdue()
-            ];
-        });
+        $taches = $tachesQuery->get();
 
-    // Membres de l'équipe
-    $teamMembers = User::whereHas('workspaces', function ($q) use ($workspaceIds) {
+        // Mes tâches (assignées à l'utilisateur connecté)
+        $myTasks = Tache::whereIn('activite_id', $activiteIds)
+            ->assignedTo($user->id)
+            ->where('statut', '!=', TacheStatut::TERMINE)
+            ->orderBy('echeance')
+            ->get()
+            ->take(5)
+            ->map(function ($tache) {
+                return [
+                    'id' => $tache->id,
+                    'title' => $tache->titre,
+                    'project' => $tache->activite->projet->nom,
+                    'priority' => $tache->priorite->value,
+                    'due_date' => $tache->echeance?->format('d M Y'),
+                    'status' => $tache->statut->value,
+                    'is_overdue' => $tache->isOverdue(),
+                ];
+            });
+
+        // Membres de l'équipe
+        $teamMembers = User::whereHas('workspaces', function ($q) use ($workspaceIds) {
             $q->whereIn('workspaces.id', $workspaceIds);
         })
-        ->withCount(['taches' => function ($q) use ($activiteIds) {
-            $q->whereIn('activite_id', $activiteIds)
-              ->where('statut', '!=', TacheStatut::TERMINE);
-        }])
-        ->get()
-        ->map(function ($member) {
-            return [
-                'id' => $member->id,
-                'nom' => $member->nom,
-                'prenom' => $member->prenom,
-                'email' => $member->email,
-                'avatar' => $member->avatar,
-                'taches_count' => $member->taches_count,
-                'role' => $member->pivot->role ?? 'member'
-            ];
-        });
+            ->withCount(['taches' => function ($q) use ($activiteIds) {
+                $q->whereIn('activite_id', $activiteIds)
+                    ->where('statut', '!=', TacheStatut::TERMINE);
+            }])
+            ->get()
+            ->map(function ($member) {
+                return [
+                    'id' => $member->id,
+                    'nom' => $member->nom,
+                    'prenom' => $member->prenom,
+                    'email' => $member->email,
+                    'avatar' => $member->avatar,
+                    'taches_count' => $member->taches_count,
+                    'role' => $member->pivot->role ?? 'member',
+                ];
+            });
 
-    return response()->json([
-        'stats' => $this->calculateStats($projets, $taches, $myTasks),
-        'monthly_progress' => $this->getMonthlyProgress($user, $workspaceIds),
-        'recent_projects' => $this->getRecentProjects($projets),
-        'my_tasks' => $myTasks,
-        'team_members' => $teamMembers,
-        // ... autres données existantes
-    ]);
-}
+        return response()->json([
+            'stats' => $this->calculateStats($projets, $taches, $myTasks),
+            'monthly_progress' => $this->getMonthlyProgress($user, $workspaceIds),
+            'recent_projects' => $this->getRecentProjects($projets),
+            'my_tasks' => $myTasks,
+            'team_members' => $teamMembers,
+            // ... autres données existantes
+        ]);
+    }
 
-
-/**
- * Calculate statistics with member context
- */
-private function calculateStats($projets, $taches, $myTasks)
-{
-    return [
-        'projets_actifs' => [
-            'value' => $projets->where('status', 'active')->count(),
-            'change' => '+12%',
-            'trend' => 'up'
-        ],
-        'taux_completion' => [
-            'value' => $taches->count() > 0 ? 
-                round(($taches->where('statut', TacheStatut::TERMINE)->count() / $taches->count()) * 100) : 0,
-            'change' => '+5%',
-            'trend' => 'up'
-        ],
-        'taches_en_retard' => [
-            'value' => $taches->filter(fn($t) => $t->isOverdue())->count(),
-            'change' => '-2%',
-            'trend' => 'down'
-        ]
-    ];
-}
+    /**
+     * Calculate statistics with member context
+     */
+    private function calculateStats($projets, $taches, $myTasks)
+    {
+        return [
+            'projets_actifs' => [
+                'value' => $projets->where('status', 'active')->count(),
+                'change' => '+12%',
+                'trend' => 'up',
+            ],
+            'taux_completion' => [
+                'value' => $taches->count() > 0 ?
+                    round(($taches->where('statut', TacheStatut::TERMINE)->count() / $taches->count()) * 100) : 0,
+                'change' => '+5%',
+                'trend' => 'up',
+            ],
+            'taches_en_retard' => [
+                'value' => $taches->filter(fn ($t) => $t->isOverdue())->count(),
+                'change' => '-2%',
+                'trend' => 'down',
+            ],
+        ];
+    }
 
     /**
      * Calculate percentage change
@@ -159,7 +157,7 @@ private function calculateStats($projets, $taches, $myTasks)
         $change = (($current - $previous) / $previous) * 100;
         $sign = $change >= 0 ? '+' : '';
 
-        return $sign . round($change) . '%';
+        return $sign.round($change).'%';
     }
 
     /**
@@ -199,7 +197,7 @@ private function calculateStats($projets, $taches, $myTasks)
                 'month' => $date->locale('fr')->isoFormat('MMM'),
                 'projets' => $projets,
                 'taches' => $taches,
-                'completes' => $completes
+                'completes' => $completes,
             ];
         }
 
@@ -215,23 +213,23 @@ private function calculateStats($projets, $taches, $myTasks)
             [
                 'name' => 'Terminé',
                 'value' => $taches->where('statut', TacheStatut::TERMINE)->count(),
-                'color' => '#10b981'
+                'color' => '#10b981',
             ],
             [
                 'name' => 'En Cours',
                 'value' => $taches->where('statut', TacheStatut::EN_COURS)->count(),
-                'color' => '#3b82f6'
+                'color' => '#3b82f6',
             ],
             [
                 'name' => 'À Faire',
                 'value' => $taches->where('statut', TacheStatut::A_FAIRE)->count(),
-                'color' => '#f59e0b'
+                'color' => '#f59e0b',
             ],
             [
                 'name' => 'En Retard',
-                'value' => $taches->filter(fn($t) => $t->isOverdue())->count(),
-                'color' => '#ef4444'
-            ]
+                'value' => $taches->filter(fn ($t) => $t->isOverdue())->count(),
+                'color' => '#ef4444',
+            ],
         ];
     }
 
@@ -244,18 +242,18 @@ private function calculateStats($projets, $taches, $myTasks)
             [
                 'name' => 'Élevée',
                 'value' => $taches->where('priorite', TachePriorite::ELEVEE)->count(),
-                'color' => '#ef4444'
+                'color' => '#ef4444',
             ],
             [
                 'name' => 'Moyenne',
                 'value' => $taches->where('priorite', TachePriorite::MOYENNE)->count(),
-                'color' => '#f59e0b'
+                'color' => '#f59e0b',
             ],
             [
                 'name' => 'faible',
                 'value' => $taches->where('priorite', TachePriorite::FAIBLE)->count(),
-                'color' => '#3b82f6'
-            ]
+                'color' => '#3b82f6',
+            ],
         ];
     }
 
@@ -282,12 +280,12 @@ private function calculateStats($projets, $taches, $myTasks)
                     'team' => $projet->members()->count(),
                     'tasks' => [
                         'total' => $taches->count(),
-                        'completed' => $taches->where('statut', TacheStatut::TERMINE)->count()
+                        'completed' => $taches->where('statut', TacheStatut::TERMINE)->count(),
                     ],
                     'responsable' => [
                         'id' => $projet->responsable?->id,
-                        'name' => $projet->responsable?->name
-                    ]
+                        'name' => $projet->responsable?->name,
+                    ],
                 ];
             })
             ->values();
@@ -305,7 +303,7 @@ private function calculateStats($projets, $taches, $myTasks)
                     && $tache->echeance
                     && $tache->echeance->lte(now()->addDays(7))
                     && $tache->isOverdue(); // ✅ Utilisation de la méthode corrigée
-    
+
             })
             ->sortBy('echeance')
             ->take(5)
@@ -316,9 +314,9 @@ private function calculateStats($projets, $taches, $myTasks)
                     'code' => $tache->code,
                     'project' => $tache->activite->projet->nom,
                     'project_code' => $tache->activite->projet->code,
-                    'assignees' => $tache->assignees->map(fn($u) => [
+                    'assignees' => $tache->assignees->map(fn ($u) => [
                         'id' => $u->id,
-                        'name' => $u->name
+                        'name' => $u->name,
                     ]),
                     'priority' => match ($tache->priorite) {
                         TachePriorite::ELEVEE => 'Élevée',
@@ -332,7 +330,7 @@ private function calculateStats($projets, $taches, $myTasks)
                         TacheStatut::EN_ATTENTE => 'En attente',
                         TacheStatut::TERMINE => 'Terminé',
                     },
-                    'is_overdue' => $tache->isOverdue()
+                    'is_overdue' => $tache->isOverdue(),
                 ];
             })
             ->values();
@@ -355,7 +353,7 @@ private function calculateStats($projets, $taches, $myTasks)
                 'name' => $workspace->nom,
                 'code' => $workspace->code,
                 'stats' => $stats,
-                'is_owner' => $workspace->isOwner(auth()->user())
+                'is_owner' => $workspace->isOwner(auth()->user()),
             ];
         });
     }
@@ -378,13 +376,13 @@ private function calculateStats($projets, $taches, $myTasks)
             'workspace' => [
                 'id' => $workspace->id,
                 'name' => $workspace->nom,
-                'code' => $workspace->code
+                'code' => $workspace->code,
             ],
             'stats' => [
                 'total' => $taches->count(),
                 'en_cours' => $taches->where('statut', TacheStatut::EN_COURS)->count(),
                 'termine' => $taches->where('statut', TacheStatut::TERMINE)->count(),
-                'en_retard' => $taches->filter(fn($t) => $t->isOverdue())->count()
+                'en_retard' => $taches->filter(fn ($t) => $t->isOverdue())->count(),
             ],
             'tasks' => $taches->map(function ($tache) {
                 return [
@@ -394,9 +392,9 @@ private function calculateStats($projets, $taches, $myTasks)
                     'statut' => $tache->statut->value,
                     'priorite' => $tache->priorite->value,
                     'echeance' => $tache->echeance?->format('Y-m-d'),
-                    'taux_realisation' => $tache->taux_realisation
+                    'taux_realisation' => $tache->taux_realisation,
                 ];
-            })
+            }),
         ]);
     }
 
@@ -418,27 +416,27 @@ private function calculateStats($projets, $taches, $myTasks)
                 'total' => $myTasks->count(),
                 'en_cours' => $myTasks->where('statut', TacheStatut::EN_COURS)->count(),
                 'termine' => $myTasks->where('statut', TacheStatut::TERMINE)->count(),
-                'en_retard' => $myTasks->filter(fn($t) => $t->isOverdue())->count()
+                'en_retard' => $myTasks->filter(fn ($t) => $t->isOverdue())->count(),
             ],
             'my_projects' => [
                 'total' => $myProjects->count(),
                 'actifs' => $myProjects->where('status', 'active')->count(),
-                'completion_moyenne' => $myProjects->avg('progression')
+                'completion_moyenne' => $myProjects->avg('progression'),
             ],
             'recent_activity' => $this->getRecentActivity($user),
-            'upcoming_deadlines' => $this->getUpcomingDeadlines($user)
+            'upcoming_deadlines' => $this->getUpcomingDeadlines($user),
         ]);
     }
 
-     /**
+    /**
      * Get team members for workspace
      */
     public function getTeamMembers(Request $request, $workspaceId)
     {
         $user = $request->user();
-        
+
         $workspace = Workspace::accessibleBy($user->id)->findOrFail($workspaceId);
-        
+
         $teamMembers = $workspace->members()
             ->withCount(['taches' => function ($q) use ($workspace) {
                 $q->whereHas('activite.projet', function ($pq) use ($workspace) {
@@ -454,12 +452,12 @@ private function calculateStats($projets, $taches, $myTasks)
                     'email' => $member->email,
                     'avatar' => $member->avatar,
                     'taches_count' => $member->taches_count,
-                    'role' => $member->pivot->role ?? 'member'
+                    'role' => $member->pivot->role ?? 'member',
                 ];
             });
 
         return response()->json([
-            'data' => $teamMembers
+            'data' => $teamMembers,
         ]);
     }
 
@@ -479,8 +477,8 @@ private function calculateStats($projets, $taches, $myTasks)
                     'id' => $tache->id,
                     'type' => 'task_update',
                     'title' => $tache->titre,
-                    'description' => "Tâche mise à jour",
-                    'timestamp' => $tache->updated_at->diffForHumans()
+                    'description' => 'Tâche mise à jour',
+                    'timestamp' => $tache->updated_at->diffForHumans(),
                 ];
             });
     }
@@ -505,7 +503,7 @@ private function calculateStats($projets, $taches, $myTasks)
                     'due_date' => $tache->echeance->format('Y-m-d'),
                     'days_remaining' => now()->diffInDays($tache->echeance),
                     'priority' => $tache->priorite->value,
-                    'project' => $tache->activite->projet->nom
+                    'project' => $tache->activite->projet->nom,
                 ];
             });
     }
