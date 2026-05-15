@@ -468,6 +468,25 @@ class PermissionService
         return $member && in_array($member->pivot->role, $roles);
     }
 
+    /**
+     * Can submit a TacheResultat — only task assignees with role collaborateur or stagiaire.
+     * Per PERMISSIONS_MATRIX.md: cadre, manager, owner, observateur cannot submit.
+     */
+    public function canSubmitResult(User $user, Tache $tache): bool
+    {
+        if ($user->isSuperAdmin()) {
+            return false;
+        }
+
+        $assignment = $tache->assignees()->where('user_id', $user->id)->first();
+
+        if (! $assignment) {
+            return false;
+        }
+
+        return in_array($assignment->pivot->role, ['collaborateur', 'stagiaire']);
+    }
+
     // =========================================================================
     // N0 VALIDATION LEVEL
     // =========================================================================

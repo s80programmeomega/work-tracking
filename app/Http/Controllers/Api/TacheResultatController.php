@@ -52,7 +52,11 @@ class TacheResultatController extends Controller
      */
     public function store(Request $request, Tache $tache)
     {
-        $this->authorize('update', $tache);
+        $this->authorize('view', $tache);
+
+        if (! $this->permissionService->canSubmitResult($request->user(), $tache)) {
+            return response()->json(['message' => __('circuit_validation.errors.unauthorized')], 403);
+        }
 
         $validated = $request->validate([
             'resultats_attendus' => 'required|string',
@@ -244,14 +248,14 @@ class TacheResultatController extends Controller
             abort(404);
         }
 
-        if ($resultat->soumis_le) {
+        if ($resultat->statut === 'en_verification_n0' || $resultat->soumis_n0_le !== null) {
             return response()->json([
                 'success' => false,
                 'message' => 'Ce résultat a déjà été soumis',
             ], 400);
         }
 
-        $resultat->submit();
+        $this->resultatService->soumettre($resultat, $request->user());
 
         return response()->json([
             'success' => true,

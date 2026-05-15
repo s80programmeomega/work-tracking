@@ -39,17 +39,27 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('labels', function (Blueprint $table) {
-            // Drop indexes first
-            $table->dropIndex(['labels_projet_id_index']);
-            $table->dropIndex(['labels_is_global_index']);
-            $table->dropIndex(['labels_projet_id_is_global_index']);
+            $foreignKeys = collect(DB::select("SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_NAME = 'labels' AND CONSTRAINT_SCHEMA = DATABASE() AND REFERENCED_TABLE_NAME IS NOT NULL"))->pluck('CONSTRAINT_NAME');
 
-            // Drop foreign keys
-            $table->dropForeign(['projet_id']);
-            $table->dropForeign(['created_by']);
+            foreach (['labels_projet_id_foreign', 'labels_created_by_foreign'] as $fk) {
+                if ($foreignKeys->contains($fk)) {
+                    $table->dropForeign($fk);
+                }
+            }
 
-            // Drop columns
-            $table->dropColumn(['projet_id', 'is_global', 'usage_count', 'created_by']);
+            $indexes = collect(DB::select('SHOW INDEX FROM labels'))->pluck('Key_name');
+
+            foreach (['labels_projet_id_index', 'labels_is_global_index', 'labels_projet_id_is_global_index'] as $index) {
+                if ($indexes->contains($index)) {
+                    $table->dropIndex($index);
+                }
+            }
+
+            $columns = Schema::getColumnListing('labels');
+            $toDrop = array_filter(['projet_id', 'is_global', 'usage_count', 'created_by'], fn ($c) => in_array($c, $columns));
+            if ($toDrop) {
+                $table->dropColumn(array_values($toDrop));
+            }
         });
     }
 };

@@ -69,7 +69,7 @@
                                                 class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
                                                 {{ $t('auth.email') }}<span class="text-error-500">*</span>
                                             </label>
-                                            <input v-model="form.email" type="email" id="email" name="email"
+                                            <input dusk="email" v-model="form.email" type="email" id="email" name="email"
                                                 :placeholder="$t('auth.email_placeholder')" :class="validationErrors.email
                                                         ? 'border-error-500 focus:border-error-500 focus:ring-error-500/10'
                                                         : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
@@ -88,7 +88,7 @@
                                                 {{ $t('auth.password') }}<span class="text-error-500">*</span>
                                             </label>
                                             <div class="relative">
-                                                <input v-model="form.password" :type="showPassword
+                                                <input dusk="password" v-model="form.password" :type="showPassword
                                                         ? 'text'
                                                         : 'password'
                                                     " id="password" :placeholder="$t('auth.password_placeholder')"
@@ -185,7 +185,7 @@
 
                                         <!-- Bouton de soumission -->
                                         <div>
-                                            <button type="submit" :disabled="loading"
+                                            <button dusk="login-button" type="submit" :disabled="loading"
                                                 class="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-hidden focus:ring-2 focus:ring-brand-500 focus:ring-offset-2">
                                                 <!-- Indicateur de chargement -->
                                                 <svg v-if="loading" class="w-5 h-5 mr-3 -ml-1 text-white animate-spin"

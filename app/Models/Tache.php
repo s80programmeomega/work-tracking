@@ -743,6 +743,25 @@ class Tache extends Model
     }
 
     /**
+     * Only collaborateur/stagiaire role assignments can submit results.
+     * Mirrors PermissionService::canSubmitResult — available here for resource use.
+     */
+    public function canSubmitResultBy(User $user): bool
+    {
+        if ($user->isSuperAdmin()) {
+            return false;
+        }
+
+        $assignment = $this->assignees()->where('user_id', $user->id)->first();
+
+        if (! $assignment) {
+            return false;
+        }
+
+        return in_array($assignment->pivot->role, ['collaborateur', 'stagiaire']);
+    }
+
+    /**
      * ✅ Marquer la tâche comme terminée
      */
     public function markAsCompleted(User $user): void
