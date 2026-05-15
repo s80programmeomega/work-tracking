@@ -94,6 +94,8 @@ class ActiviteController extends Controller
      */
     public function myActivites(Request $request): AnonymousResourceCollection
     {
+        $user = $request->user();
+
         $filters = $request->only([
             'search',
             'projet_id',
@@ -103,12 +105,18 @@ class ActiviteController extends Controller
             'workspace_id',
         ]);
 
-        // ✅ Filtre par workspace actuel
-        $workspaceId = $request->input('workspace_id') ?? $request->user()->current_workspace_id;
+        // Filter by current workspace
+        $workspaceId = $request->input('workspace_id') ?? $user->current_workspace_id;
         if ($workspaceId) {
             $filters['workspace_id'] = $workspaceId;
         }
-        $activites = $this->activiteService->getUserActivites($request->user(), $filters);
+
+        // Super admin sees all activities in the workspace — delegate to index logic
+        if ($user->isSuperAdmin()) {
+            $activites = $this->activiteService->getAllActivites($filters);
+        } else {
+            $activites = $this->activiteService->getUserActivites($user, $filters);
+        }
 
         return ActiviteResource::collection($activites);
     }

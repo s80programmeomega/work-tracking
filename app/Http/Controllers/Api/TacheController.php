@@ -166,8 +166,8 @@ class TacheController extends Controller
         $user = $request->user();
 
         try {
-            // Récupérer toutes les tâches où je suis responsable
-            $taches = Tache::where('responsable_id', $user->id)
+            // Super admin sees all active tasks; others see only tasks they are responsable of
+            $query = Tache::query()
                 ->with([
                     'activite:id,nom,code,projet_id',
                     'activite.projet:id,nom',
@@ -175,9 +175,14 @@ class TacheController extends Controller
                     'labels:id,nom,couleur',
                     'responsable:id,nom,email,avatar',
                 ])
-                ->active() // Seulement les tâches actives (non archivées)
-                ->orderBy('created_at', 'desc')
-                ->get();
+                ->active()
+                ->orderBy('created_at', 'desc');
+
+            if (! $user->isSuperAdmin()) {
+                $query->where('responsable_id', $user->id);
+            }
+
+            $taches = $query->get();
 
             Log::info('✅ Tâches en responsabilité récupérées', [
                 'user_id' => $user->id,
@@ -231,7 +236,7 @@ class TacheController extends Controller
     {
         $user = $request->user();
 
-        $taches = Tache::with([
+        $query = Tache::with([
             'activite.projet',
             'assignees',
             'resultatsIndividuels.user',
@@ -239,11 +244,13 @@ class TacheController extends Controller
             'sousTaches',
             'attachments',
             'externalLinks',
-        ])
-            ->assignedTo($user->id)
-            ->active()
-            ->ordered()
-            ->get();
+        ])->active()->ordered();
+
+        if (! $user->isSuperAdmin()) {
+            $query->assignedTo($user->id);
+        }
+
+        $taches = $query->get();
 
         return response()->json([
             'success' => true,
