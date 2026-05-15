@@ -103,9 +103,11 @@
                 class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500">
                 <option value="all">Tous les rôles</option>
                 <option value="owner">Propriétaire</option>
-                <option value="admin">Administrateur</option>
-                <option value="member">Membre</option>
-                <option value="viewer">Observateur</option>
+                <option value="manager">Manager</option>
+                <option value="cadre">Cadre</option>
+                <option value="collaborateur">Collaborateur</option>
+                <option value="stagiaire">Stagiaire</option>
+                <option value="observateur">Observateur</option>
               </select>
             </div>
 
@@ -627,7 +629,7 @@ const loadData = async () => {
       total_members: members.value.length,
       active_members: members.value.filter(m => m.is_active).length,
       pending_invitations: invitations.value.length,
-      admin_count: members.value.filter(m => ['owner', 'admin', 'member', 'viewer'].includes(m.pivot?.role)).length
+      admin_count: members.value.filter(m => ['owner', 'manager'].includes(m.pivot?.role)).length
     }
 
     // TODO: Charger les activités récentes depuis l'API

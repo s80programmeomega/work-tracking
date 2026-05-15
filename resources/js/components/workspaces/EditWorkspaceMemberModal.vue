@@ -377,19 +377,31 @@ const successMessage = ref(null)
 // Available roles with detailed info
 const availableRoles = [
   {
-    value: 'admin',
-    label: 'Administrateur',
+    value: 'manager',
+    label: 'Manager',
     description: 'Gestion complète du workspace',
     permissions: ['Créer projets', 'Gérer membres', 'Modifier paramètres']
   },
   {
-    value: 'member',
-    label: 'Membre',
-    description: 'Participation aux projets',
+    value: 'cadre',
+    label: 'Cadre',
+    description: 'Participation active aux projets',
     permissions: ['Créer projets', 'Voir projets']
   },
   {
-    value: 'viewer',
+    value: 'collaborateur',
+    label: 'Collaborateur',
+    description: 'Participation aux tâches assignées',
+    permissions: ['Voir projets', 'Soumettre résultats']
+  },
+  {
+    value: 'stagiaire',
+    label: 'Stagiaire',
+    description: 'Participation aux tâches assignées',
+    permissions: ['Voir projets', 'Soumettre résultats']
+  },
+  {
+    value: 'observateur',
     label: 'Observateur',
     description: 'Accès en lecture seule',
     permissions: ['Voir projets']
@@ -417,7 +429,7 @@ const availablePermissions = computed(() => {
       shortLabel: 'Créer',
       description: 'Autoriser la création de nouveaux projets dans le workspace',
       recommended: true,
-      required: form.value.role === 'admin'
+      required: form.value.role === 'manager'
     },
     {
       key: 'can_view_all_projects',

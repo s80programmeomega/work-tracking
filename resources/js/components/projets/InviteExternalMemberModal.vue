@@ -393,9 +393,11 @@
               <select v-model="form.role" required @change="handleRoleChange"
                 class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent">
                 <option value="">Sélectionner un rôle</option>
-                <option value="admin">Administrateur - Tous les droits</option>
-                <option value="member">Membre - Peut voir et éditer le projet</option>
-                <option value="viewer">Observateur - Lecture seule</option>
+                <option value="manager">Manager - Gestion complète du projet</option>
+                <option value="cadre">Cadre - Peut créer et gérer les activités</option>
+                <option value="collaborateur">Collaborateur - Participation aux tâches</option>
+                <option value="stagiaire">Stagiaire - Participation aux tâches</option>
+                <option value="observateur">Observateur - Lecture seule</option>
               </select>
             </div>
 
@@ -699,7 +701,7 @@ const removeEmail = (index) => {
 const handleRoleChange = () => {
   const role = form.value.role
 
-  if (role === 'admin') {
+  if (role === 'manager') {
     form.value.can_edit = true
     form.value.can_delete = true
     form.value.can_invite = true
@@ -707,7 +709,7 @@ const handleRoleChange = () => {
     form.value.can_create_activity = true
     form.value.can_edit_activity = true
     form.value.can_delete_activity = true
-  } else if (role === 'member') {
+  } else if (role === 'cadre') {
     form.value.can_edit = true
     form.value.can_delete = false
     form.value.can_invite = false
@@ -715,7 +717,7 @@ const handleRoleChange = () => {
     form.value.can_create_activity = true
     form.value.can_edit_activity = true
     form.value.can_delete_activity = false
-  } else if (role === 'viewer') {
+  } else if (role === 'collaborateur' || role === 'stagiaire' || role === 'observateur') {
     form.value.can_edit = false
     form.value.can_delete = false
     form.value.can_invite = false
