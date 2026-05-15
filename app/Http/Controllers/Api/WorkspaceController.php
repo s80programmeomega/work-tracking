@@ -198,7 +198,7 @@ class WorkspaceController extends Controller
         $request->validate([
             'emails' => 'required|array|min:1',
             'emails.*' => 'required|email',
-            'role' => 'required|in:admin,manager,member,viewer',
+            'role' => 'required|in:owner,manager,cadre,collaborateur,stagiaire,observateur',
             'message' => 'nullable|string|max:500',
             'permissions' => 'nullable|array',
             'permissions.can_create_projects' => 'boolean',
@@ -474,10 +474,11 @@ class WorkspaceController extends Controller
     {
         $labels = [
             'owner' => 'Propriétaire',
-            'super_admin' => 'Super Administrateur',
-            'admin' => 'Administrateur',
-            'member' => 'Membre',
-            'viewer' => 'Observateur',
+            'manager' => 'Manager',
+            'cadre' => 'Cadre',
+            'collaborateur' => 'Collaborateur',
+            'stagiaire' => 'Stagiaire',
+            'observateur' => 'Observateur',
         ];
 
         return $labels[$role] ?? $role;
@@ -947,8 +948,7 @@ class WorkspaceController extends Controller
      */
     public function allInvitations(Request $request)
     {
-        // Vérifier les permissions admin
-        if (! $request->user()->hasRole(['super_admin', 'admin'])) {
+        if (! $request->user()->isSuperAdmin()) {
             abort(403, 'Accès non autorisé');
         }
 
@@ -1004,7 +1004,7 @@ class WorkspaceController extends Controller
      */
     public function invitationStatistics(Request $request)
     {
-        if (! $request->user()->hasRole(['super_admin', 'admin'])) {
+        if (! $request->user()->isSuperAdmin()) {
             abort(403, 'Accès non autorisé');
         }
 
@@ -1121,7 +1121,7 @@ class WorkspaceController extends Controller
         }
 
         $validated = $request->validate([
-            'role' => ['sometimes', Rule::in(['owner', 'admin', 'member', 'viewer'])],
+            'role' => ['sometimes', Rule::in(['owner', 'manager', 'cadre', 'collaborateur', 'stagiaire', 'observateur'])],
             'permissions' => 'nullable|array',
         ]);
 
@@ -1329,7 +1329,7 @@ class WorkspaceController extends Controller
             return false;
         }
 
-        return in_array($member->pivot->role, ['super_admin', 'admin']);
+        return $member->pivot->role === 'manager';
     }
 
     /**
@@ -1793,7 +1793,7 @@ class WorkspaceController extends Controller
             ]);
 
             $workspace->members()->updateExistingPivot($request->user()->id, [
-                'role' => 'admin',
+                'role' => 'manager',
             ]);
 
             DB::commit();
@@ -1894,6 +1894,10 @@ class WorkspaceController extends Controller
      */
     private function userCanManageWorkspace(User $user, Workspace $workspace): bool
     {
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
         if ($workspace->owner_id === $user->id) {
             return true;
         }
@@ -1902,7 +1906,7 @@ class WorkspaceController extends Controller
             ->where('user_id', $user->id)
             ->first();
 
-        return $member && in_array($member->pivot->role, ['owner', 'super_admin', 'admin']);
+        return $member && $member->pivot->role === 'owner';
     }
 
     /**

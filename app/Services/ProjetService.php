@@ -76,7 +76,7 @@ class ProjetService
     {
         $member = $workspace->members()->where('user_id', $user->id)->first();
 
-        return $member && in_array($member->pivot->role, ['admin']);
+        return $member && $member->pivot->role === 'manager';
     }
 
     /**

@@ -59,10 +59,9 @@ class AccessManagementService
                     // created_by reste inchangé pour la traçabilité ✅
                 ]);
 
-                // Ajouter le nouveau responsable comme admin du projet s'il n'est pas déjà membre
                 if (! $projet->members()->where('user_id', $newResponsable->id)->exists()) {
                     $projet->members()->attach($newResponsable->id, [
-                        'role' => 'admin',
+                        'role' => 'manager',
                         'can_edit' => true,
                         'can_delete' => true,
                         'can_invite' => true,
@@ -336,9 +335,9 @@ class AccessManagementService
             $workspace->update(['owner_id' => $newOwner->id]);
 
             // Mettre à jour les rôles dans workspace_members
-            // Ancien owner devient admin
+            // Ancien owner devient manager
             $workspace->members()->updateExistingPivot($oldOwner->id, [
-                'role' => 'admin',
+                'role' => 'manager',
                 'permissions' => json_encode([
                     'can_view_all_projects' => true,
                     'can_create_projects' => true,

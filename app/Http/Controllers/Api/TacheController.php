@@ -353,11 +353,11 @@ class TacheController extends Controller
             return true;
         }
 
-        // Membre du workspace (owner/admin)
+        // Workspace owner or manager can access all activities in the workspace
         if ($activite->projet && $activite->projet->workspace) {
             $workspace = $activite->projet->workspace;
             $member = $workspace->membres()->where('user_id', $user->id)->first();
-            if ($member && in_array($member->pivot->role, ['owner', 'admin'])) {
+            if ($member && in_array($member->pivot->role, ['owner', 'manager'])) {
                 return true;
             }
         }
@@ -600,7 +600,7 @@ class TacheController extends Controller
             if (! $canCreate && $activite->projet && $activite->projet->workspace) {
                 $workspace = $activite->projet->workspace;
                 $workspaceMember = $workspace->membres()->where('user_id', $user->id)->first();
-                if ($workspaceMember && in_array($workspaceMember->pivot->role, ['owner', 'admin'])) {
+                if ($workspaceMember && in_array($workspaceMember->pivot->role, ['owner', 'manager'])) {
                     $canCreate = true;
                 }
             }
@@ -702,7 +702,7 @@ class TacheController extends Controller
                     $activite->responsable_id === $user->id ||
                     ($activite->projet && $activite->projet->responsable_id === $user->id) ||
                     ($membre && ($membre->pivot->role === 'responsable' || $membre->pivot->can_create_tasks)) ||
-                    in_array($workspaceRole, ['owner', 'admin']),
+                    in_array($workspaceRole, ['owner', 'manager']),
                 'can_edit_tasks' => $user->isSuperAdmin() ||
                     $activite->responsable_id === $user->id ||
                     ($membre && $membre->pivot->can_edit_tasks),
