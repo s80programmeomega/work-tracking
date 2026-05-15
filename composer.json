@@ -18,9 +18,11 @@
         "spatie/laravel-permission": "^6.21"
     },
     "require-dev": {
+        "doctrine/dbal": "^3.10",
         "fakerphp/faker": "^1.9.1",
         "laramint/laravel-brain": "^2.0",
         "laravel/boost": "^1.8",
+        "laravel/dusk": "^8.6",
         "laravel/pint": "^1.0",
         "laravel/sail": "^1.18",
         "mockery/mockery": "^1.4.4",

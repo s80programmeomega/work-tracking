@@ -114,8 +114,19 @@
 - [x] `useTachePermissions.js` created with `canApprouverN0`, `canRenvoyerN0`
 - [x] `TacheResultatResource`: `statut`, `validation_n0` block, `can_approuver_n0`, `can_renvoyer_n0`
 - [x] Translation files `lang/fr/circuit_validation.php` + `lang/en/circuit_validation.php` (separate from Laravel's validation.php)
+- [x] `TacheResultatController::submit()` wired to `TacheResultatService::soumettre()` — job now dispatched on submit
 - [x] 7 new tests passing (48 total)
 - [ ] PR opened into `jonas`
+
+### Dusk (Browser Testing)
+- [x] `laravel/dusk` installed (`^8.6`)
+- [x] ChromeDriver installed and matched to Chrome 148
+- [x] `.env.dusk.local` created — points to `work-tracking-dusk` dedicated test database
+- [x] `tests/Browser/WorkTrackingTestCase.php` base class — `signInAs()` (token injection) + `signInViaUi()` helpers
+- [x] `tests/Browser/Auth/AuthenticationTest.php` — 3 tests passing (sign in, wrong password, redirect guard)
+- [x] `dusk="email"`, `dusk="password"`, `dusk="login-button"` attributes added to `Signin.vue`
+- [x] Fragile `down()` rollback migrations fixed (`2025_10_14_labels`, `2025_10_24_team_id`, `2025_11_25_tache_resultats`)
+- [x] Run: `php artisan serve` + `php artisan dusk`
 
 ### Task 6
 - [ ] Bypass columns added to `tache_resultats`

@@ -252,3 +252,87 @@ This applies to:
 - Migration columns
 
 **Why:** Removing code without a full impact check has caused broken endpoints and missing DB columns in this project. The cost of asking is always lower than the cost of reverting.
+
+---
+
+## Guide 16 — Laravel Dusk Browser Testing
+
+Laravel Dusk (`laravel/dusk`) is installed for end-to-end browser testing. Browser tests live in `tests/Browser/`, organised by feature area.
+
+### Running tests
+
+```bash
+# Terminal 1 — server must be running before dusk
+php artisan serve
+
+# Terminal 2
+php artisan dusk                                         # all browser tests
+php artisan dusk tests/Browser/Auth/AuthenticationTest.php  # specific file
+php artisan dusk:fails                                   # only previously-failed tests
+```
+
+> The server uses `.env.dusk.local` automatically, which points to the `work-tracking-dusk` database. Never run Dusk against the dev database.
+
+### Base class
+
+All Dusk tests must extend `Tests\Browser\WorkTrackingTestCase`, not `DuskTestCase` directly. It provides:
+
+| Helper | When to use |
+|---|---|
+| `$this->signInAs($browser, $user)` | Any test that is NOT testing authentication. Injects a Sanctum token into localStorage directly — fast, no UI. |
+| `$this->signInViaUi($browser, $email, $password)` | Tests that verify the login form itself. |
+
+### `dusk` attributes on Vue elements
+
+Add a `dusk="element-name"` attribute to any Vue element a test needs to target. Target it in tests with `@element-name`.
+
+```html
+<!-- Vue component -->
+<input dusk="email" v-model="form.email" />
+<button dusk="login-button" type="submit">Se connecter</button>
+```
+
+```php
+// Dusk test
+$browser->type('@email', 'test@example.com')
+        ->click('@login-button');
+```
+
+Never target elements by CSS class — classes change with UI updates. `dusk` attributes are stable test handles.
+
+### Test organisation
+
+```
+tests/Browser/
+├── WorkTrackingTestCase.php   ← base class, extend this
+├── Auth/                      ← login, logout, redirect guards
+├── Taches/                    ← task creation, result submission
+├── Validation/                ← N0 approve/return, bypass, N1/N2
+└── Workspace/                 ← workspace creation, settings
+```
+
+### Session state between tests
+
+Dusk keeps the browser session alive across tests in the same file. If a test leaves the user authenticated and the next test expects a guest, clear localStorage explicitly:
+
+```php
+$browser->tap(fn ($b) => $b->script([
+    "localStorage.removeItem('auth_token');",
+    "localStorage.removeItem('user');",
+]))->visit('/signin');
+```
+
+### Migration strategy
+
+Dusk tests use `DatabaseMigrations` (not `RefreshDatabase` — transactions don't work across HTTP requests). All migration `down()` methods must be safe to run on a fresh database — use `Schema::hasColumn()` and existence checks before dropping columns, indexes, or foreign keys.
+
+### What to test with Dusk vs PHPUnit
+
+| PHPUnit (Feature tests) | Dusk (Browser tests) |
+|---|---|
+| API responses, status codes | Page renders after an action |
+| Permission checks (403s) | Button shows/hides based on role |
+| Business rule enforcement | Form validation messages visible |
+| Job dispatching, notifications | Full user flow (submit → approve → badge updates) |
+
+Write at least one Dusk test for every user-facing flow introduced by a task.

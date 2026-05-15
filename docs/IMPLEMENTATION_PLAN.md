@@ -356,6 +356,9 @@ test: add feature tests for subtask UI permissions
 - Unit: job cancelled when N0 acts before timeout
 - Feature: return without comment → HTTP 422 with translated message
 - Feature: unauthorized user on N0 action → HTTP 403
+- Dusk: submit result → statut badge updates to `en_verification_n0`; N0 approves → badge updates to `en_validation_n1`
+
+**Bug fixed during testing:** `TacheResultatController::submit()` was calling `$resultat->submit()` (legacy model method) instead of `TacheResultatService::soumettre()` — job was never dispatched. Fixed and covered by existing feature tests.
 
 **Demo:** Submit result → responsable notified → can approve or return → if no action after 48h, result auto-forwarded to N1.
 
@@ -930,6 +933,10 @@ test: add feature tests for platform dashboard permissions and stats
 
 > **Update this section at the end of every session.**
 
-- Last completed task: _(none yet)_
-- Next task: **Task 1** — Configure Queue (database) + Laravel Reverb
-- Branch to create: `feature/v2-task-1-queue-reverb`
+- Last completed task: **Task 5** — N0 Validation Circuit + 48h Timer (`feature/v2-task-5-validation-n0`)
+- Next task: **Task 6** — Anti-Sabotage Bypass
+- Branch to create: `feature/v2-task-6-bypass` (from `jonas`)
+- PR pending: `feature/v2-task-5-validation-n0` → `jonas`
+
+### Dusk note (applies to all remaining tasks)
+Each task must include at least one Dusk browser test covering its main user flow. Place tests under `tests/Browser/<FeatureArea>/`. Follow Guide 16 in `WORKING_GUIDELINES.md`.
