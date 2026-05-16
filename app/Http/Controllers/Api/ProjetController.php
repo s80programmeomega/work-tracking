@@ -178,7 +178,7 @@ class ProjetController extends Controller
             // ✅ CORRECTION : Charger members avec withPivot, pas 'members.pivot'
             'members' => function ($query) {
                 $query->withPivot([
-                    'role',
+                    'role_id',
                     'can_edit',
                     'can_delete',
                     'can_invite',
@@ -211,7 +211,7 @@ class ProjetController extends Controller
                     'membres' => function ($mq) {
                         $mq->select('users.id', 'users.nom', 'users.prenom', 'users.email', 'users.avatar')
                             ->withPivot([
-                                'role',
+                                'role_id',
                                 'can_create_tasks',
                                 'can_edit_tasks',
                                 'can_delete_tasks',
@@ -422,7 +422,7 @@ class ProjetController extends Controller
 
         $members = $projet->members()
             ->withPivot([
-                'role',
+                'role_id',
                 'can_edit',
                 'can_delete',
                 'can_invite',

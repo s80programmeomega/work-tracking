@@ -107,7 +107,6 @@ class DashboardController extends Controller
                     'email' => $member->email,
                     'avatar' => $member->avatar,
                     'taches_count' => $member->taches_count,
-                    'role' => Role::find($member->pivot->role_id)?->name ?? 'collaborateur',
                 ];
             });
 
@@ -439,6 +438,7 @@ class DashboardController extends Controller
         $workspace = Workspace::accessibleBy($user->id)->findOrFail($workspaceId);
 
         $teamMembers = $workspace->members()
+            ->withPivot(['role_id'])
             ->withCount(['taches' => function ($q) use ($workspace) {
                 $q->whereHas('activite.projet', function ($pq) use ($workspace) {
                     $pq->where('workspace_id', $workspace->id);
