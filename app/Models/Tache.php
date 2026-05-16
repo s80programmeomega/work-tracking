@@ -228,7 +228,7 @@ class Tache extends Model
     {
         return $this->belongsToMany(User::class, 'tache_user')
             ->withPivot([
-                'role',
+                'role_id',
                 'is_responsable',
                 'can_edit',
                 'can_complete',

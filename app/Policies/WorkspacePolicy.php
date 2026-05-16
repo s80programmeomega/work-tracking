@@ -6,39 +6,46 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\Workspace;
-use App\Services\PermissionService;
+use App\Permissions\ContextualPermissionGate;
+use App\Permissions\Permission;
 
 class WorkspacePolicy
 {
-    public function __construct(protected PermissionService $permissionService) {}
+    public function __construct(protected ContextualPermissionGate $gate) {}
 
     public function view(User $user, Workspace $workspace): bool
     {
-        return $this->permissionService->canViewWorkspace($user, $workspace);
+        return $this->gate->userCan($user, Permission::WORKSPACES_VIEW, $workspace);
     }
 
     public function manage(User $user, Workspace $workspace): bool
     {
-        return $this->permissionService->canManageWorkspace($user, $workspace);
+        return $this->gate->userCan($user, Permission::WORKSPACES_MANAGE_SETTINGS, $workspace);
     }
 
     public function createProject(User $user, Workspace $workspace): bool
     {
-        return $this->permissionService->canCreateProject($user, $workspace);
+        return $this->gate->userCan($user, Permission::WORKSPACES_CREATE_PROJECT, $workspace);
     }
 
     public function inviteMember(User $user, Workspace $workspace): bool
     {
-        return $this->permissionService->canInviteWorkspaceMember($user, $workspace);
+        return $this->gate->userCan($user, Permission::WORKSPACES_INVITE_MEMBER, $workspace);
     }
 
     public function removeMember(User $user, Workspace $workspace): bool
     {
-        return $this->permissionService->canRemoveWorkspaceMember($user, $workspace);
+        return $this->gate->userCan($user, Permission::WORKSPACES_REMOVE_MEMBER, $workspace);
     }
 
     public function manageSettings(User $user, Workspace $workspace): bool
     {
-        return $this->permissionService->canManageWorkspaceSettings($user, $workspace);
+        return $this->gate->userCan($user, Permission::WORKSPACES_MANAGE_SETTINGS, $workspace);
+    }
+
+    public function manageMembers(User $user, Workspace $workspace): bool
+    {
+        return $this->gate->userCan($user, Permission::WORKSPACES_INVITE_MEMBER, $workspace)
+            || $this->gate->userCan($user, Permission::WORKSPACES_REMOVE_MEMBER, $workspace);
     }
 }

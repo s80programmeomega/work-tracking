@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Models\Workspace;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Tests\Traits\AttachesWithRoleId;
 
 /**
  * Permissions Matrix Test
@@ -27,7 +28,7 @@ use Tests\TestCase;
  */
 class PermissionsMatrixTest extends TestCase
 {
-    use RefreshDatabase;
+    use AttachesWithRoleId, RefreshDatabase;
 
     private Workspace $workspace;
 
@@ -46,6 +47,7 @@ class PermissionsMatrixTest extends TestCase
     {
         parent::setUp();
         $this->artisan('db:seed', ['--class' => 'RolePermissionSeeder']);
+        $this->refreshRoleIdCache();
         $this->buildWorld();
     }
 
@@ -66,108 +68,67 @@ class PermissionsMatrixTest extends TestCase
         $this->activite = Activite::factory()->create(['projet_id' => $this->projet->id]);
         $this->tache = Tache::factory()->create(['activite_id' => $this->activite->id]);
 
-        $this->workspace->members()->attach($owner->id, [
-            'role' => 'owner',
-            'permissions' => json_encode(['all' => true]),
-        ]);
-        $this->projet->members()->attach($owner->id, ['role' => 'owner']);
-        $this->activite->members()->attach($owner->id, [
-            'role' => 'cadre',
-            'can_edit_activity' => true,
-            'can_create_tasks' => true,
-            'can_delete_tasks' => true,
+        $this->attachWithRole($this->workspace->members(), $owner->id, 'owner');
+        $this->attachWithRole($this->projet->members(), $owner->id, 'owner');
+        $this->attachWithRole($this->activite->members(), $owner->id, 'cadre', [
+            'can_edit_activity' => true, 'can_create_tasks' => true, 'can_delete_tasks' => true,
         ]);
         $this->users['owner'] = $owner;
 
         // manager — project-level manager
         $manager = User::factory()->create();
-        $this->workspace->members()->attach($manager->id, ['role' => 'manager', 'permissions' => json_encode([])]);
-        $this->projet->members()->attach($manager->id, ['role' => 'manager']);
-        $this->activite->members()->attach($manager->id, [
-            'role' => 'cadre',
-            'can_edit_activity' => false,
-            'can_create_tasks' => true,
-            'can_delete_tasks' => false,
+        $this->attachWithRole($this->workspace->members(), $manager->id, 'manager');
+        $this->attachWithRole($this->projet->members(), $manager->id, 'manager');
+        $this->attachWithRole($this->activite->members(), $manager->id, 'cadre', [
+            'can_edit_activity' => false, 'can_create_tasks' => true, 'can_delete_tasks' => false,
         ]);
         $this->users['manager'] = $manager;
 
         // cadre — activity-level, is_responsable on the task
         $cadre = User::factory()->create();
-        $this->workspace->members()->attach($cadre->id, ['role' => 'cadre', 'permissions' => json_encode([])]);
-        $this->activite->members()->attach($cadre->id, [
-            'role' => 'cadre',
-            'can_edit_activity' => false,
-            'can_create_tasks' => true,
-            'can_delete_tasks' => false,
+        $this->attachWithRole($this->workspace->members(), $cadre->id, 'cadre');
+        $this->attachWithRole($this->activite->members(), $cadre->id, 'cadre', [
+            'can_edit_activity' => false, 'can_create_tasks' => true, 'can_delete_tasks' => false,
         ]);
-        $this->tache->assignees()->attach($cadre->id, [
-            'role' => 'collaborateur',
-            'is_responsable' => true,
-            'can_edit' => true,
-            'can_complete' => true,
-            'can_validate' => true,
-            'statut_individuel' => 'a_faire',
-            'progression_individuelle' => 0,
+        $this->attachWithRole($this->tache->assignees(), $cadre->id, 'collaborateur', [
+            'is_responsable' => true, 'can_edit' => true, 'can_complete' => true,
+            'can_validate' => true, 'statut_individuel' => 'a_faire', 'progression_individuelle' => 0,
         ]);
         $this->users['cadre'] = $cadre;
 
         // collaborateur — task assignee, NOT is_responsable, can submit results
         $collaborateur = User::factory()->create();
-        $this->workspace->members()->attach($collaborateur->id, ['role' => 'collaborateur', 'permissions' => json_encode([])]);
-        $this->activite->members()->attach($collaborateur->id, [
-            'role' => 'collaborateur',
-            'can_edit_activity' => false,
-            'can_create_tasks' => false,
-            'can_delete_tasks' => false,
+        $this->attachWithRole($this->workspace->members(), $collaborateur->id, 'collaborateur');
+        $this->attachWithRole($this->activite->members(), $collaborateur->id, 'collaborateur', [
+            'can_edit_activity' => false, 'can_create_tasks' => false, 'can_delete_tasks' => false,
         ]);
-        $this->tache->assignees()->attach($collaborateur->id, [
-            'role' => 'collaborateur',
-            'is_responsable' => false,
-            'can_edit' => false,
-            'can_complete' => true,
-            'can_validate' => false,
-            'statut_individuel' => 'a_faire',
-            'progression_individuelle' => 0,
+        $this->attachWithRole($this->tache->assignees(), $collaborateur->id, 'collaborateur', [
+            'is_responsable' => false, 'can_edit' => false, 'can_complete' => true,
+            'can_validate' => false, 'statut_individuel' => 'a_faire', 'progression_individuelle' => 0,
         ]);
         $this->users['collaborateur'] = $collaborateur;
 
         // stagiaire — task assignee with minimal access
         $stagiaire = User::factory()->create();
-        $this->workspace->members()->attach($stagiaire->id, ['role' => 'stagiaire', 'permissions' => json_encode([])]);
-        $this->activite->members()->attach($stagiaire->id, [
-            'role' => 'stagiaire',
-            'can_edit_activity' => false,
-            'can_create_tasks' => false,
-            'can_delete_tasks' => false,
+        $this->attachWithRole($this->workspace->members(), $stagiaire->id, 'stagiaire');
+        $this->attachWithRole($this->activite->members(), $stagiaire->id, 'stagiaire', [
+            'can_edit_activity' => false, 'can_create_tasks' => false, 'can_delete_tasks' => false,
         ]);
-        $this->tache->assignees()->attach($stagiaire->id, [
-            'role' => 'stagiaire',
-            'is_responsable' => false,
-            'can_edit' => false,
-            'can_complete' => true,
-            'can_validate' => false,
-            'statut_individuel' => 'a_faire',
-            'progression_individuelle' => 0,
+        $this->attachWithRole($this->tache->assignees(), $stagiaire->id, 'stagiaire', [
+            'is_responsable' => false, 'can_edit' => false, 'can_complete' => true,
+            'can_validate' => false, 'statut_individuel' => 'a_faire', 'progression_individuelle' => 0,
         ]);
         $this->users['stagiaire'] = $stagiaire;
 
         // observateur — view-only task assignee
         $observateur = User::factory()->create();
-        $this->workspace->members()->attach($observateur->id, ['role' => 'observateur', 'permissions' => json_encode([])]);
-        $this->activite->members()->attach($observateur->id, [
-            'role' => 'observateur',
-            'can_edit_activity' => false,
-            'can_create_tasks' => false,
-            'can_delete_tasks' => false,
+        $this->attachWithRole($this->workspace->members(), $observateur->id, 'observateur');
+        $this->attachWithRole($this->activite->members(), $observateur->id, 'observateur', [
+            'can_edit_activity' => false, 'can_create_tasks' => false, 'can_delete_tasks' => false,
         ]);
-        $this->tache->assignees()->attach($observateur->id, [
-            'role' => 'observateur',
-            'is_responsable' => false,
-            'can_edit' => false,
-            'can_complete' => false,
-            'can_validate' => false,
-            'statut_individuel' => 'a_faire',
-            'progression_individuelle' => 0,
+        $this->attachWithRole($this->tache->assignees(), $observateur->id, 'observateur', [
+            'is_responsable' => false, 'can_edit' => false, 'can_complete' => false,
+            'can_validate' => false, 'statut_individuel' => 'a_faire', 'progression_individuelle' => 0,
         ]);
 
         // owner and manager are NOT assigned to the tache directly —

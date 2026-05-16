@@ -10,6 +10,7 @@ use App\Models\Workspace;
 use Illuminate\Support\Facades\Artisan;
 use Laravel\Dusk\Browser;
 use Tests\Browser\WorkTrackingTestCase;
+use Tests\Traits\AttachesWithRoleId;
 
 /**
  * Role Visibility Test
@@ -23,6 +24,8 @@ use Tests\Browser\WorkTrackingTestCase;
  */
 class RoleVisibilityTest extends WorkTrackingTestCase
 {
+    use AttachesWithRoleId;
+
     private static bool $worldBuilt = false;
 
     private static int $cadreId;
@@ -74,60 +77,36 @@ class RoleVisibilityTest extends WorkTrackingTestCase
 
         // cadre — is_responsable, sees Edit button, NOT Submit
         $cadre = User::factory()->create(['current_workspace_id' => $workspace->id]);
-        $workspace->members()->attach($cadre->id, ['role' => 'cadre', 'permissions' => json_encode([])]);
-        $activite->members()->attach($cadre->id, [
-            'role' => 'cadre',
-            'can_edit_activity' => false,
-            'can_create_tasks' => true,
-            'can_delete_tasks' => false,
+        $this->attachWithRole($workspace->members(), $cadre->id, 'cadre');
+        $this->attachWithRole($activite->members(), $cadre->id, 'cadre', [
+            'can_edit_activity' => false, 'can_create_tasks' => true, 'can_delete_tasks' => false,
         ]);
-        $tache->assignees()->attach($cadre->id, [
-            'role' => 'collaborateur',
-            'is_responsable' => true,
-            'can_edit' => true,
-            'can_complete' => true,
-            'can_validate' => true,
-            'statut_individuel' => 'en_cours',
-            'progression_individuelle' => 50,
+        $this->attachWithRole($tache->assignees(), $cadre->id, 'collaborateur', [
+            'is_responsable' => true, 'can_edit' => true, 'can_complete' => true,
+            'can_validate' => true, 'statut_individuel' => 'en_cours', 'progression_individuelle' => 50,
         ]);
         $tache->update(['responsable_id' => $cadre->id]);
 
         // collaborateur — NOT is_responsable, sees Submit button
         $collaborateur = User::factory()->create(['current_workspace_id' => $workspace->id]);
-        $workspace->members()->attach($collaborateur->id, ['role' => 'collaborateur', 'permissions' => json_encode([])]);
-        $activite->members()->attach($collaborateur->id, [
-            'role' => 'collaborateur',
-            'can_edit_activity' => false,
-            'can_create_tasks' => false,
-            'can_delete_tasks' => false,
+        $this->attachWithRole($workspace->members(), $collaborateur->id, 'collaborateur');
+        $this->attachWithRole($activite->members(), $collaborateur->id, 'collaborateur', [
+            'can_edit_activity' => false, 'can_create_tasks' => false, 'can_delete_tasks' => false,
         ]);
-        $tache->assignees()->attach($collaborateur->id, [
-            'role' => 'collaborateur',
-            'is_responsable' => false,
-            'can_edit' => false,
-            'can_complete' => true,
-            'can_validate' => false,
-            'statut_individuel' => 'en_cours',
-            'progression_individuelle' => 30,
+        $this->attachWithRole($tache->assignees(), $collaborateur->id, 'collaborateur', [
+            'is_responsable' => false, 'can_edit' => false, 'can_complete' => true,
+            'can_validate' => false, 'statut_individuel' => 'en_cours', 'progression_individuelle' => 30,
         ]);
 
         // observateur — assigned but no action buttons
         $observateur = User::factory()->create(['current_workspace_id' => $workspace->id]);
-        $workspace->members()->attach($observateur->id, ['role' => 'observateur', 'permissions' => json_encode([])]);
-        $activite->members()->attach($observateur->id, [
-            'role' => 'observateur',
-            'can_edit_activity' => false,
-            'can_create_tasks' => false,
-            'can_delete_tasks' => false,
+        $this->attachWithRole($workspace->members(), $observateur->id, 'observateur');
+        $this->attachWithRole($activite->members(), $observateur->id, 'observateur', [
+            'can_edit_activity' => false, 'can_create_tasks' => false, 'can_delete_tasks' => false,
         ]);
-        $tache->assignees()->attach($observateur->id, [
-            'role' => 'observateur',
-            'is_responsable' => false,
-            'can_edit' => false,
-            'can_complete' => false,
-            'can_validate' => false,
-            'statut_individuel' => 'a_faire',
-            'progression_individuelle' => 0,
+        $this->attachWithRole($tache->assignees(), $observateur->id, 'observateur', [
+            'is_responsable' => false, 'can_edit' => false, 'can_complete' => false,
+            'can_validate' => false, 'statut_individuel' => 'a_faire', 'progression_individuelle' => 0,
         ]);
 
         self::$cadreId = $cadre->id;

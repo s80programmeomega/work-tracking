@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use App\Enums\Role as RoleEnum;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Collection;
+use App\Permissions\Permission as Perm;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Permission;
@@ -13,160 +13,66 @@ use Spatie\Permission\PermissionRegistrar;
 
 class RolePermissionSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // Create permissions
-        $permissions = [
-            // Workspaces
-            'workspaces.create',
-            'workspaces.update',
-            'workspaces.delete',
-            'workspaces.manage_members',
-            'workspaces.manage_settings',
-            'workspaces.invite_members',
-            'workspaces.remove_members',
-            'workspaces.view_all_projects',
-
-            // Projets
-            'projets.view',
-            'projets.create',
-            'projets.update',
-            'projets.delete',
-            'projets.manage_members',
-
-            // Activités
-            'activites.view',
-            'activites.create',
-            'activites.update',
-            'activites.delete',
-            'activites.manage_members',
-
-            // Tâches
-            'taches.view',
-            'taches.create',
-            'taches.update',
-            'taches.delete',
-            'taches.validate_n1',
-            'taches.validate_n2',
-            'taches.submit_result',
-            'taches.comment',
-
-            // Sous-tâches
-            'sous_taches.view',
-            'sous_taches.create',
-            'sous_taches.update',
-            'sous_taches.delete',
-            'sous_taches.assign_intervenant',
-
-            // N0 validation circuit
-            'resultats.approuver_n0',
-            'resultats.renvoyer_n0',
-
-            // Documents
-            'documents.view',
-            'documents.upload',
-            'documents.delete',
-            'documents.share',
-
-            // Users
-            'users.view',
-            'users.create',
-            'users.update',
-            'users.delete',
-            'users.assign',
-
-            // Reports
-            'reports.view',
-            'reports.create',
-
-            // Legacy — kept for backward compat during transition
-            'can_create_projects',
-            'can_delete_members',
-            'can_invite_members',
-            'can_manage_settings',
-            'can_view_all_projects',
-        ];
-
-        foreach ($permissions as $permission) {
-            Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
+        // ── 1. Create all permissions from the single source of truth ─────
+        foreach (Perm::all() as $permName) {
+            Permission::firstOrCreate(['name' => $permName, 'guard_name' => 'web']);
         }
 
-        // Global roles (Spatie — assigned to user account)
+        // ── 2. Global Spatie roles (assigned to user accounts) ────────────
         foreach (RoleEnum::cases() as $roleEnum) {
-            $role = Role::firstOrCreate([
-                'name' => $roleEnum->value,
-                'guard_name' => 'web',
-            ]);
+            $role = Role::firstOrCreate(['name' => $roleEnum->value, 'guard_name' => 'web']);
 
             $rolePermissions = $roleEnum->permissions();
 
             if (in_array('*', $rolePermissions)) {
-                $role->givePermissionTo(Permission::all());
+                $role->syncPermissions(Permission::where('guard_name', 'web')->get());
             } else {
-                $role->givePermissionTo($rolePermissions);
+                $role->syncPermissions(
+                    Permission::whereIn('name', $rolePermissions)->where('guard_name', 'web')->get()
+                );
             }
         }
 
-        // Contextual roles (stored in pivot tables — scoped per workspace/project/activity)
-        $contextualRoles = [
-            'owner' => Permission::all(),
-            'manager' => [
-                'projets.view', 'projets.update', 'projets.manage_members',
-                'activites.view', 'activites.create', 'activites.update', 'activites.delete', 'activites.manage_members',
-                'taches.view', 'taches.create', 'taches.update', 'taches.delete', 'taches.validate_n2', 'taches.comment',
-                'sous_taches.view', 'sous_taches.create', 'sous_taches.update', 'sous_taches.delete', 'sous_taches.assign_intervenant',
-                'resultats.approuver_n0', 'resultats.renvoyer_n0',
-                'documents.view', 'documents.upload', 'documents.delete', 'documents.share',
-                'reports.view', 'reports.create',
-            ],
-            'cadre' => [
-                'projets.view',
-                'activites.view', 'activites.update',
-                'taches.view', 'taches.create', 'taches.update', 'taches.validate_n1', 'taches.comment',
-                'sous_taches.view', 'sous_taches.create', 'sous_taches.update', 'sous_taches.assign_intervenant',
-                'resultats.approuver_n0', 'resultats.renvoyer_n0',
-                'documents.view', 'documents.upload',
-                'reports.view',
-            ],
-            'collaborateur' => [
-                'projets.view',
-                'activites.view',
-                'taches.view', 'taches.submit_result', 'taches.comment',
-                'sous_taches.view', 'sous_taches.create', 'sous_taches.update',
-                'resultats.approuver_n0', 'resultats.renvoyer_n0',
-                'documents.view', 'documents.upload',
-            ],
-            'stagiaire' => [
-                'projets.view',
-                'activites.view',
-                'taches.view', 'taches.submit_result', 'taches.comment',
-                'sous_taches.view',
-                'documents.view',
-            ],
-            'observateur' => [
-                'projets.view',
-                'activites.view',
-                'taches.view',
-                'sous_taches.view',
-                'documents.view',
-            ],
-        ];
+        // ── 3. Contextual roles (stored in pivot role_id — scoped per resource) ──
+        // These are Spatie roles but are NEVER assigned globally to users.
+        // They live in pivot tables: workspace_members.role_id, projet_user.role_id, etc.
+        $contextualRoles = ['owner', 'manager', 'cadre', 'collaborateur', 'stagiaire', 'observateur', 'task_responsable'];
 
-        foreach ($contextualRoles as $roleName => $rolePermissions) {
+        foreach ($contextualRoles as $roleName) {
             $role = Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
-            if ($rolePermissions instanceof Collection) {
-                $role->syncPermissions($rolePermissions);
-            } else {
-                $role->syncPermissions(Permission::whereIn('name', $rolePermissions)->get());
-            }
+            $permNames = Perm::forRole($roleName);
+
+            $role->syncPermissions(
+                Permission::whereIn('name', $permNames)->where('guard_name', 'web')->get()
+            );
         }
 
-        // Create super admin user
+        // ── 4. Test users ─────────────────────────────────────────────────
+        $this->createTestUsers();
+
+        $this->command->info('✅ Roles and permissions seeded successfully!');
+        $this->command->info('');
+        $this->command->info('Global roles seeded: super_admin, directeur, utilisateur');
+        $this->command->info('Contextual roles seeded: owner, manager, cadre, collaborateur, stagiaire, observateur, task_responsable');
+        $this->command->info('');
+        $this->command->info('Test users:');
+        $this->command->info('  superadmin@worktracking.com  (password)  — super_admin');
+        $this->command->info('  directeur@worktracking.com   (password)  — directeur');
+        $this->command->info('  manager@worktracking.com     (password)  — utilisateur + manager pivot');
+        $this->command->info('  cadre@worktracking.com       (password)  — utilisateur + cadre pivot');
+        $this->command->info('  collaborateur@worktracking.com (password)— utilisateur + collaborateur pivot');
+        $this->command->info('  stagiaire@worktracking.com   (password)  — utilisateur + stagiaire pivot');
+        $this->command->info('  observateur@worktracking.com (password)  — utilisateur + observateur pivot');
+        $this->command->info('  utilisateur@worktracking.com (password)  — utilisateur (no workspace)');
+    }
+
+    private function createTestUsers(): void
+    {
+        // Super admin — global role, is_super_admin flag
         $superAdmin = User::firstOrCreate(
             ['email' => 'superadmin@worktracking.com'],
             [
@@ -180,37 +86,48 @@ class RolePermissionSeeder extends Seeder
             ]
         );
         $superAdmin->update(['is_super_admin' => true]);
-        $superAdmin->assignRole(RoleEnum::SUPER_ADMIN->value);
+        $superAdmin->syncRoles([RoleEnum::SUPER_ADMIN->value]);
 
-        // Create directeur user
-        $directeur = User::create([
+        // Directeur — global Spatie role; also receives owner pivot row when workspace created
+        $this->createUserIfNotExists([
+            'email' => 'directeur@worktracking.com',
             'nom' => 'Directeur',
             'prenom' => 'Test',
             'nom_complet' => 'Test Directeur',
-            'email' => 'directeur@worktracking.com',
-            'password' => Hash::make('password'),
-            'email_verified_at' => now(),
-            'is_active' => true,
-        ]);
-        $directeur->assignRole(RoleEnum::DIRECTEUR->value);
+        ], RoleEnum::DIRECTEUR->value);
 
-        // Create utilisateur user
-        $utilisateur = User::create([
+        // Contextual-only users — global role is 'utilisateur'
+        // Their contextual roles (manager, cadre, etc.) are assigned via pivot rows in workspace/project/activity
+        foreach (['manager', 'cadre', 'collaborateur', 'stagiaire', 'observateur'] as $contextRole) {
+            $this->createUserIfNotExists([
+                'email' => "{$contextRole}@worktracking.com",
+                'nom' => ucfirst($contextRole),
+                'prenom' => 'Test',
+                'nom_complet' => 'Test '.ucfirst($contextRole),
+            ], RoleEnum::UTILISATEUR->value);
+        }
+
+        // Plain utilisateur — no workspace
+        $this->createUserIfNotExists([
+            'email' => 'utilisateur@worktracking.com',
             'nom' => 'Utilisateur',
             'prenom' => 'Test',
             'nom_complet' => 'Test Utilisateur',
-            'email' => 'utilisateur@worktracking.com',
-            'password' => Hash::make('password'),
-            'email_verified_at' => now(),
-            'is_active' => true,
-        ]);
-        $utilisateur->assignRole(RoleEnum::UTILISATEUR->value);
+        ], RoleEnum::UTILISATEUR->value);
+    }
 
-        $this->command->info('Roles and permissions seeded successfully!');
-        $this->command->info('');
-        $this->command->info('Default users created:');
-        $this->command->info('- superadmin@worktracking.com (password: password)');
-        $this->command->info('- directeur@worktracking.com (password: password)');
-        $this->command->info('- utilisateur@worktracking.com (password: password)');
+    private function createUserIfNotExists(array $attributes, string $globalRole): User
+    {
+        $user = User::firstOrCreate(
+            ['email' => $attributes['email']],
+            array_merge($attributes, [
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+                'is_active' => true,
+            ])
+        );
+        $user->syncRoles([$globalRole]);
+
+        return $user;
     }
 }

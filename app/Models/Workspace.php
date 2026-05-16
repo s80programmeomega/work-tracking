@@ -127,26 +127,18 @@ class Workspace extends Model
     public function members(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'workspace_members')
-            ->withPivot(['role', 'permissions', 'invited_at', 'invited_by'])
-            ->withTimestamps()
-            ->using(new class extends Pivot
-            {
-                protected $casts = [
-                    'permissions' => 'array', // ✅ Auto-decode JSON
-                    'invited_at' => 'datetime',
-                ];
-            });
+            ->withPivot(['role_id', 'invited_at', 'invited_by'])
+            ->withTimestamps();
     }
 
     public function membres(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'workspace_members')
-            ->withPivot(['role', 'permissions', 'invited_at', 'invited_by'])
+            ->withPivot(['role_id', 'invited_at', 'invited_by'])
             ->withTimestamps()
             ->using(new class extends Pivot
             {
                 protected $casts = [
-                    'permissions' => 'array', // ✅ Auto-decode JSON
                     'invited_at' => 'datetime',
                 ];
             });

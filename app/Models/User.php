@@ -173,7 +173,7 @@ class User extends Authenticatable
     public function projets(): BelongsToMany
     {
         return $this->belongsToMany(Projet::class, 'projet_user')
-            ->withPivot(['role', 'can_edit', 'can_delete', 'can_invite', 'can_delete_member'])
+            ->withPivot(['role_id', 'can_edit', 'can_delete', 'can_invite', 'can_delete_member'])
             ->withTimestamps();
     }
 
@@ -181,7 +181,7 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Activite::class, 'activite_user', 'user_id', 'activite_id')
             ->withPivot([
-                'role',
+                'role_id',
                 'can_create_tasks',
                 'can_edit_tasks',
                 'can_delete_tasks',
@@ -194,7 +194,7 @@ class User extends Authenticatable
     public function taches()
     {
         return $this->belongsToMany(Tache::class, 'tache_user')
-            ->withPivot('role', 'can_edit', 'can_complete', 'can_validate', 'statut_individuel', 'progression_individuelle', 'started_at', 'completed_at')
+            ->withPivot('role_id', 'is_responsable', 'can_edit', 'can_complete', 'can_validate', 'statut_individuel', 'progression_individuelle', 'started_at', 'completed_at')
             ->withTimestamps()
             ->withCasts([
                 'started_at' => 'datetime',
@@ -383,7 +383,7 @@ class User extends Authenticatable
     public function workspaces()
     {
         return $this->belongsToMany(Workspace::class, 'workspace_members')
-            ->withPivot(['role', 'permissions', 'invited_at', 'invited_by'])
+            ->withPivot(['role_id', 'invited_at', 'invited_by'])
             ->withTimestamps();
     }
 }
