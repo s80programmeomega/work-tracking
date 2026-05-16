@@ -291,10 +291,14 @@ class Projet extends Model
                     $workspaceQuery->where(function ($wq) use ($userId) {
                         // Owner du workspace
                         $wq->where('owner_id', $userId)
-                            // OU Admin/Super Admin du workspace
+                            // OU manager/owner du workspace via role_id FK
                             ->orWhereHas('members', function ($memberQuery) use ($userId) {
                                 $memberQuery->where('workspace_members.user_id', $userId)
-                                    ->whereIn('workspace_members.role', ['owner', 'admin']);
+                                    ->whereIn('workspace_members.role_id', function ($roleQuery) {
+                                        $roleQuery->select('id')
+                                            ->from('roles')
+                                            ->whereIn('name', ['owner', 'manager']);
+                                    });
                             });
                     });
                 });

@@ -60,7 +60,9 @@ class ProjetService
                     ->orWhereHas('members', fn ($m) => $m->where('user_id', $user->id))
                     ->orWhereHas('workspace', fn ($w) => $w->where('owner_id', $user->id)
                         ->orWhereHas('members', fn ($m) => $m->where('user_id', $user->id)
-                            ->whereIn('role', ['super_admin', 'admin'])));
+                            ->whereIn('role_id', function ($r) {
+                                $r->select('id')->from('roles')->whereIn('name', ['owner', 'manager']);
+                            })));
             });
         }
         // super_admin with no workspace_id filter: see all projects
