@@ -63,6 +63,19 @@ class WorkspaceController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate($request->per_page ?? 15);
 
+        $gate = app(ContextualPermissionGate::class);
+        $workspaces->getCollection()->transform(function ($workspace) use ($user, $gate) {
+            $workspace->user_permissions = [
+                'can_view_workspace' => $gate->userCan($user, Permission::WORKSPACES_VIEW, $workspace),
+                'can_create_project' => $gate->userCan($user, Permission::WORKSPACES_CREATE_PROJECT, $workspace),
+                'can_invite_members' => $gate->userCan($user, Permission::WORKSPACES_INVITE_MEMBER, $workspace),
+                'can_remove_members' => $gate->userCan($user, Permission::WORKSPACES_REMOVE_MEMBER, $workspace),
+                'can_manage_workspace_settings' => $gate->userCan($user, Permission::WORKSPACES_MANAGE_SETTINGS, $workspace),
+            ];
+
+            return $workspace;
+        });
+
         return response()->json($workspaces);
     }
 
@@ -669,15 +682,17 @@ class WorkspaceController extends Controller
     {
         $user = $request->user();
 
+        $gate = app(ContextualPermissionGate::class);
+
         $workspaces = Workspace::accessibleBy($user->id)
             ->withCount([
                 'projets' => function ($query) {
                     $query->where('status', 'active');
                 },
             ])
-            ->whereNotNull('id') // ← Filtrer les workspaces sans ID
+            ->whereNotNull('id')
             ->get()
-            ->map(function ($workspace) {
+            ->map(function ($workspace) use ($user, $gate) {
                 return [
                     'id' => $workspace->id,
                     'nom' => $workspace->nom,
@@ -686,9 +701,17 @@ class WorkspaceController extends Controller
                     'description' => $workspace->description,
                     'created_at' => $workspace->created_at,
                     'updated_at' => $workspace->updated_at,
+                    'owner_id' => $workspace->owner_id,
+                    'user_permissions' => [
+                        'can_view_workspace' => $gate->userCan($user, Permission::WORKSPACES_VIEW, $workspace),
+                        'can_create_project' => $gate->userCan($user, Permission::WORKSPACES_CREATE_PROJECT, $workspace),
+                        'can_invite_members' => $gate->userCan($user, Permission::WORKSPACES_INVITE_MEMBER, $workspace),
+                        'can_remove_members' => $gate->userCan($user, Permission::WORKSPACES_REMOVE_MEMBER, $workspace),
+                        'can_manage_workspace_settings' => $gate->userCan($user, Permission::WORKSPACES_MANAGE_SETTINGS, $workspace),
+                    ],
                 ];
             })
-            ->filter() // ← Filtrer les éventuels éléments null
+            ->filter()
             ->values();
 
         return response()->json($workspaces);
