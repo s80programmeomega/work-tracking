@@ -48,12 +48,12 @@ export function useWorkspacePermissions(workspace = null) {
     // Pre-computed permissions object from backend (ContextualPermissionGate)
     const perms = computed(() => workspace?.value?.user_permissions ?? {})
 
-    const canView            = computed(() => isSuperAdmin.value || perms.value.can_view_workspace ?? false)
-    const canManageSettings  = computed(() => isSuperAdmin.value || perms.value.can_manage_workspace_settings ?? false)
+    const canView            = computed(() => isSuperAdmin.value || (perms.value.can_view_workspace ?? false))
+    const canManageSettings  = computed(() => isSuperAdmin.value || (perms.value.can_manage_workspace_settings ?? false))
     const canDelete          = computed(() => isSuperAdmin.value || isDirecteur.value)
-    const canInviteMembers   = computed(() => isSuperAdmin.value || perms.value.can_invite_members ?? false)
-    const canDeleteMembers   = computed(() => isSuperAdmin.value || perms.value.can_remove_members ?? false)
-    const canCreateProjects  = computed(() => isSuperAdmin.value || perms.value.can_create_project ?? false)
+    const canInviteMembers   = computed(() => isSuperAdmin.value || (perms.value.can_invite_members ?? false))
+    const canDeleteMembers   = computed(() => isSuperAdmin.value || (perms.value.can_remove_members ?? false))
+    const canCreateProjects  = computed(() => isSuperAdmin.value || (perms.value.can_create_project ?? false))
     const canViewAllProjects = computed(() => isSuperAdmin.value || isDirecteur.value || isManager.value)
     const canTransferOwnership = computed(() => isSuperAdmin.value || isDirecteur.value)
 
