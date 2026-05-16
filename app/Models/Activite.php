@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Permission\Models\Role;
 
 class Activite extends Model
 {
@@ -143,7 +144,7 @@ class Activite extends Model
 
         $member = $this->members()->where('user_id', $user->id)->first();
 
-        return $member?->pivot->role;
+        return $member ? (Role::find($member->pivot->role_id)?->name) : null;
     }
 
     public function canUserValidateN1(User $user): bool

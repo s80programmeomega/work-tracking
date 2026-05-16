@@ -11,6 +11,7 @@ use App\Models\Tache;
 use App\Models\User;
 use App\Models\Workspace;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
 
 class DashboardController extends Controller
 {
@@ -106,7 +107,7 @@ class DashboardController extends Controller
                     'email' => $member->email,
                     'avatar' => $member->avatar,
                     'taches_count' => $member->taches_count,
-                    'role' => $member->pivot->role ?? 'member',
+                    'role' => Role::find($member->pivot->role_id)?->name ?? 'collaborateur',
                 ];
             });
 
@@ -452,7 +453,7 @@ class DashboardController extends Controller
                     'email' => $member->email,
                     'avatar' => $member->avatar,
                     'taches_count' => $member->taches_count,
-                    'role' => $member->pivot->role ?? 'member',
+                    'role' => Role::find($member->pivot->role_id)?->name ?? 'collaborateur',
                 ];
             });
 

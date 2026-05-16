@@ -5,19 +5,14 @@ import { useAuthStore } from '@/stores/authStore'
 /**
  * Activity-level permission composable.
  *
- * Contextual roles on activite_user pivot:
- *   cadre > collaborateur > stagiaire > observateur
- *
- * Granular boolean permissions also stored on the pivot:
- *   can_create_tasks, can_edit_tasks, can_delete_tasks,
- *   can_validate_results, can_assign_users
- *
- * N1 validation belongs to cadre (or anyone with can_validate_results).
+ * Reads pre-computed permissions from activite.user_permissions (set by the backend
+ * ContextualPermissionGate via ActiviteResource). Boolean pivot overrides
+ * (can_create_tasks, can_edit_tasks, etc.) are already merged server-side.
  *
  * Usage:
  *   const { canCreateTask, canValidateN1 } = useActivitePermissions(activiteRef)
  *
- * @param {Ref|null} activite - A Vue ref containing the activity object (with members array)
+ * @param {Ref|null} activite - Vue ref containing the activity object
  */
 export function useActivitePermissions(activite = null) {
     const authStore = useAuthStore()
@@ -32,14 +27,13 @@ export function useActivitePermissions(activite = null) {
         return activite.value.responsable_id === currentUser.value.id
     })
 
-    /** Pivot row for the current user in this activity */
-    const memberPivot = computed(() => {
-        if (!activite?.value?.members || !currentUser.value) return null
-        const member = activite.value.members.find(m => m.id === currentUser.value.id)
-        return member?.pivot ?? null
+    /** Role name of the current user in this activity (from API response) */
+    const memberRole = computed(() => {
+        if (!activite?.value?.membres || !currentUser.value) return null
+        const member = activite.value.membres.find(m => m.id === currentUser.value.id)
+        return member?.role ?? member?.pivot?.role ?? null
     })
 
-    const memberRole      = computed(() => memberPivot.value?.role ?? null)
     const isCadre         = computed(() => memberRole.value === 'cadre')
     const isCollaborateur = computed(() => memberRole.value === 'collaborateur')
     const isStagiaire     = computed(() => memberRole.value === 'stagiaire')
@@ -50,56 +44,23 @@ export function useActivitePermissions(activite = null) {
         return memberRole.value !== null
     })
 
-    // ==================== PERMISSIONS ====================
+    // Pre-computed permissions object from backend (ContextualPermissionGate)
+    const perms = computed(() => activite?.value?.user_permissions ?? {})
 
-    const canView = computed(() => isSuperAdmin.value || isResponsable.value || isMember.value)
-
-    const canEdit = computed(() => {
-        if (isSuperAdmin.value || isResponsable.value) return true
-        return memberPivot.value?.can_edit_activity ?? false
-    })
-
-    const canDelete = computed(() => isSuperAdmin.value || isResponsable.value)
-
-    /** Can create tasks inside this activity */
-    const canCreateTask = computed(() => {
-        if (isSuperAdmin.value || isResponsable.value) return true
-        return memberPivot.value?.can_create_tasks ?? false
-    })
-
-    /** Can edit tasks inside this activity */
-    const canEditTask = computed(() => {
-        if (isSuperAdmin.value || isResponsable.value) return true
-        return memberPivot.value?.can_edit_tasks ?? false
-    })
-
-    /** Can delete tasks inside this activity */
-    const canDeleteTask = computed(() => {
-        if (isSuperAdmin.value || isResponsable.value) return true
-        return memberPivot.value?.can_delete_tasks ?? false
-    })
-
-    /**
-     * N1 validation — cadre role or explicit can_validate_results permission.
-     * The cadre validates task results before they go to the manager (N2).
-     */
-    const canValidateN1 = computed(() => {
-        if (isSuperAdmin.value || isResponsable.value) return true
-        return isCadre.value || (memberPivot.value?.can_validate_results ?? false)
-    })
-
-    /** Can assign users to tasks in this activity */
-    const canAssignUsers = computed(() => {
-        if (isSuperAdmin.value || isResponsable.value) return true
-        return memberPivot.value?.can_assign_users ?? false
-    })
+    const canView         = computed(() => isSuperAdmin.value || isResponsable.value || isMember.value)
+    const canEdit         = computed(() => isSuperAdmin.value || perms.value.can_edit_activity ?? false)
+    const canDelete       = computed(() => isSuperAdmin.value || perms.value.can_delete_activity ?? false)
+    const canCreateTask   = computed(() => isSuperAdmin.value || perms.value.can_create_tasks ?? false)
+    const canEditTask     = computed(() => isSuperAdmin.value || perms.value.can_edit_tasks ?? false)
+    const canDeleteTask   = computed(() => isSuperAdmin.value || perms.value.can_delete_tasks ?? false)
+    const canValidateN1   = computed(() => isSuperAdmin.value || perms.value.can_validate_results ?? false)
+    const canAssignUsers  = computed(() => isSuperAdmin.value || perms.value.can_assign_users ?? false)
+    const canManageMembers = computed(() => isSuperAdmin.value || perms.value.can_manage_members ?? false)
 
     return {
         currentUser,
         memberRole,
-        memberPivot,
 
-        // Role flags
         isSuperAdmin,
         isResponsable,
         isCadre,
@@ -108,7 +69,6 @@ export function useActivitePermissions(activite = null) {
         isObservateur,
         isMember,
 
-        // Permissions
         canView,
         canEdit,
         canDelete,
@@ -117,5 +77,6 @@ export function useActivitePermissions(activite = null) {
         canDeleteTask,
         canValidateN1,
         canAssignUsers,
+        canManageMembers,
     }
 }

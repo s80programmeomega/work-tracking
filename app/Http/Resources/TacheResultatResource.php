@@ -2,7 +2,8 @@
 
 namespace App\Http\Resources;
 
-use App\Services\PermissionService;
+use App\Permissions\ContextualPermissionGate;
+use App\Permissions\Permission;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -144,8 +145,8 @@ class TacheResultatResource extends JsonResource
             // Permissions
             'permissions' => $this->when($request->user(), function () use ($request) {
                 $user = $request->user();
-
-                $permService = app(PermissionService::class);
+                $gate = app(ContextualPermissionGate::class);
+                $tache = $this->tache;
 
                 return [
                     'can_edit' => ! $this->is_fully_validated && $this->user_id === $user->id,
@@ -153,8 +154,8 @@ class TacheResultatResource extends JsonResource
                     'can_submit' => ! $this->soumis_le && $this->user_id === $user->id,
                     'can_validate_n1' => $this->canBeValidatedByN1($user),
                     'can_validate_n2' => $this->canBeValidatedByN2($user),
-                    'can_approuver_n0' => $permService->canApprouverN0($user, $this->resource),
-                    'can_renvoyer_n0' => $permService->canRenvoyerN0($user, $this->resource),
+                    'can_approuver_n0' => $tache && $gate->userCan($user, Permission::TACHES_APPROVE_N0, $tache),
+                    'can_renvoyer_n0' => $tache && $gate->userCan($user, Permission::RESULTATS_RENVOYER_N0, $tache),
                 ];
             }),
         ];

@@ -10,7 +10,8 @@ use App\Models\SousTache;
 use App\Models\Tache;
 use App\Models\User;
 use App\Models\Workspace;
-use App\Services\PermissionService;
+use App\Permissions\ContextualPermissionGate;
+use App\Permissions\Permission;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Tests\Traits\AttachesWithRoleId;
@@ -106,9 +107,9 @@ class SousTacheModelTest extends TestCase
             'is_responsable' => false, 'can_edit' => false, 'can_complete' => true, 'can_validate' => false,
         ]);
 
-        $permissionService = app(PermissionService::class);
+        $gate = app(ContextualPermissionGate::class);
 
-        $this->assertFalse($permissionService->canCreateSousTache($collaborateur, $tache));
+        $this->assertFalse($gate->userCan($collaborateur, Permission::TACHES_CREATE_SUBTASK, $tache));
     }
 
     /** @test */
@@ -122,8 +123,8 @@ class SousTacheModelTest extends TestCase
             'is_responsable' => true, 'can_edit' => false, 'can_complete' => true, 'can_validate' => false,
         ]);
 
-        $permissionService = app(PermissionService::class);
+        $gate = app(ContextualPermissionGate::class);
 
-        $this->assertTrue($permissionService->canCreateSousTache($collaborateur, $tache));
+        $this->assertTrue($gate->userCan($collaborateur, Permission::TACHES_CREATE_SUBTASK, $tache));
     }
 }

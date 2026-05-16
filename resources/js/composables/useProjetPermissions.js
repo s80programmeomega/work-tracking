@@ -5,13 +5,14 @@ import { useAuthStore } from '@/stores/authStore'
 /**
  * Project-level permission composable.
  *
- * Contextual roles on projet_user pivot:
- *   owner > manager > cadre > collaborateur > stagiaire > observateur
+ * Reads pre-computed permissions from projet.user_permissions (set by the backend
+ * ContextualPermissionGate via ProjetResource). Do not derive permissions from raw
+ * pivot data — the backend is the single source of truth.
  *
  * Usage:
- *   const { canEditProject, canManageMembers } = useProjetPermissions(projetRef)
+ *   const { canEdit, canManageMembers } = useProjetPermissions(projetRef)
  *
- * @param {Ref|null} projet - A Vue ref containing the project object (with members array)
+ * @param {Ref|null} projet - Vue ref containing the project object
  */
 export function useProjetPermissions(projet = null) {
     const authStore = useAuthStore()
@@ -20,17 +21,17 @@ export function useProjetPermissions(projet = null) {
 
     const isSuperAdmin = computed(() => currentUser.value?.is_super_admin === true)
 
-    /** Pivot role of the current user in this project */
-    const memberRole = computed(() => {
-        if (!projet?.value?.members || !currentUser.value) return null
-        const member = projet.value.members.find(m => m.id === currentUser.value.id)
-        return member?.pivot?.role ?? null
-    })
-
     /** True if user is the project responsable */
     const isResponsable = computed(() => {
         if (!projet?.value || !currentUser.value) return false
         return projet.value.responsable_id === currentUser.value.id
+    })
+
+    /** Role name of the current user in this project (from API response) */
+    const memberRole = computed(() => {
+        if (!projet?.value?.members || !currentUser.value) return null
+        const member = projet.value.members.find(m => m.id === currentUser.value.id)
+        return member?.pivot?.role ?? member?.role ?? null
     })
 
     const isOwner         = computed(() => memberRole.value === 'owner')
@@ -39,46 +40,24 @@ export function useProjetPermissions(projet = null) {
     const isCollaborateur = computed(() => memberRole.value === 'collaborateur')
     const isObservateur   = computed(() => memberRole.value === 'observateur')
 
-    /** True if user has any membership in this project */
     const isMember = computed(() => {
         if (isSuperAdmin.value || isResponsable.value) return true
         return memberRole.value !== null
     })
 
-    // ==================== PERMISSIONS ====================
+    // Pre-computed permissions object from backend (ContextualPermissionGate)
+    const perms = computed(() => projet?.value?.user_permissions ?? {})
 
-    const canView = computed(() => {
-        if (isSuperAdmin.value || isResponsable.value) return true
-        return isMember.value || projet?.value?.visibility === 'public'
-    })
-
-    const canEdit = computed(() => {
-        if (isSuperAdmin.value || isResponsable.value) return true
-        return isOwner.value || isManager.value
-    })
-
-    const canDelete = computed(() => {
-        if (isSuperAdmin.value || isResponsable.value) return true
-        return isOwner.value
-    })
-
-    /** Can invite/manage project members */
-    const canManageMembers = computed(() => {
-        if (isSuperAdmin.value || isResponsable.value) return true
-        return isOwner.value || isManager.value
-    })
-
-    /** Can create activities inside this project */
-    const canCreateActivity = computed(() => {
-        if (isSuperAdmin.value || isResponsable.value) return true
-        return isOwner.value || isManager.value || isCadre.value
-    })
+    const canView           = computed(() => isSuperAdmin.value || perms.value.can_view ?? false)
+    const canEdit           = computed(() => isSuperAdmin.value || perms.value.can_edit ?? false)
+    const canDelete         = computed(() => isSuperAdmin.value || perms.value.can_delete ?? false)
+    const canManageMembers  = computed(() => isSuperAdmin.value || perms.value.can_manage_members ?? false)
+    const canCreateActivity = computed(() => isSuperAdmin.value || perms.value.can_create_activity ?? false)
 
     return {
         currentUser,
         memberRole,
 
-        // Role flags
         isSuperAdmin,
         isResponsable,
         isOwner,
@@ -88,7 +67,6 @@ export function useProjetPermissions(projet = null) {
         isObservateur,
         isMember,
 
-        // Permissions
         canView,
         canEdit,
         canDelete,

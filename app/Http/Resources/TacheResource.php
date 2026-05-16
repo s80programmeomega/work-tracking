@@ -3,8 +3,11 @@
 namespace App\Http\Resources;
 
 use App\Models\User;
+use App\Permissions\ContextualPermissionGate;
+use App\Permissions\Permission;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Spatie\Permission\Models\Role;
 
 class TacheResource extends JsonResource
 {
@@ -115,12 +118,13 @@ class TacheResource extends JsonResource
                 $pivot = $this->assignees()
                     ->where('user_id', $user->id)
                     ->withPivot([
+                        'role_id',
+                        'is_responsable',
                         'statut_individuel',
                         'progression_individuelle',
                         'started_at',
                         'completed_at',
                         'notes_personnelles',
-                        'role',
                         'can_edit',
                         'can_complete',
                         'can_validate',
@@ -140,7 +144,7 @@ class TacheResource extends JsonResource
                     'can_edit' => (bool) ($pivot->pivot->can_edit ?? false),
                     'can_complete' => (bool) ($pivot->pivot->can_complete ?? true),
                     'can_validate' => (bool) ($pivot->pivot->can_validate ?? false),
-                    'role' => $pivot->pivot->role ?? 'collaborator',
+                    'role' => Role::find($pivot->pivot->role_id)?->name ?? 'collaborateur',
                     'can_move' => true,
                     'can_submit_result' => ($pivot->pivot->statut_individuel ?? $this->statut->value) === 'termine',
                 ];
@@ -195,7 +199,7 @@ class TacheResource extends JsonResource
                         'email' => $assignedUser->email,
                         'avatar' => $assignedUser->avatar,
                         'pivot' => [
-                            'role' => $assignedUser->pivot->role ?? 'collaborator',
+                            'role' => Role::find($assignedUser->pivot->role_id)?->name ?? 'collaborateur',
                             'can_edit' => (bool) ($assignedUser->pivot->can_edit ?? false),
                             'can_complete' => (bool) ($assignedUser->pivot->can_complete ?? true),
                             'can_validate' => (bool) ($assignedUser->pivot->can_validate ?? false),
@@ -323,16 +327,21 @@ class TacheResource extends JsonResource
             'created_at' => $formatDate($this->created_at),
             'updated_at' => $formatDate($this->updated_at),
 
-            // ✅ Permissions avec vérifications null-safe
+            // Permissions computed by ContextualPermissionGate (DB-driven, admin-editable)
             'permissions' => $this->when($user, function () use ($user) {
+                $gate = app(ContextualPermissionGate::class);
+                $tache = $this->resource;
+
                 return [
-                    'can_view' => $this->isAccessibleBy($user),
-                    'can_edit' => $this->canBeEditedBy($user),
-                    'can_complete' => $this->canBeCompletedBy($user),
-                    'can_validate_n1' => $this->activite ? $this->canBeValidatedN1By($user) : false,
-                    'can_validate_n2' => $this->activite ? $this->canBeValidatedN2By($user) : false,
+                    'can_view' => $gate->userCan($user, Permission::TACHES_VIEW, $tache),
+                    'can_edit' => $gate->userCan($user, Permission::TACHES_EDIT, $tache),
+                    'can_complete' => $gate->userCan($user, Permission::TACHES_EDIT, $tache),
+                    'can_validate_n1' => $gate->userCan($user, Permission::TACHES_VALIDATE_N1, $tache),
+                    'can_validate_n2' => $gate->userCan($user, Permission::TACHES_VALIDATE_N2, $tache),
                     'can_move_my_card' => $this->isAssignedTo($user),
-                    'can_submit_result' => $this->canSubmitResultBy($user),
+                    'can_submit_result' => $gate->userCan($user, Permission::TACHES_SUBMIT_RESULT, $tache),
+                    'can_approve_n0' => $gate->userCan($user, Permission::TACHES_APPROVE_N0, $tache),
+                    'can_create_subtask' => $gate->userCan($user, Permission::TACHES_CREATE_SUBTASK, $tache),
                 ];
             }),
             // ✅ NOUVEAUX CHAMPS pour la fiche d'évaluation

@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 
 class ProjetService
 {
@@ -74,9 +75,7 @@ class ProjetService
      */
     private function isWorkspaceAdmin(User $user, Workspace $workspace): bool
     {
-        $member = $workspace->members()->where('user_id', $user->id)->first();
-
-        return $member && $member->pivot->role === 'manager';
+        return $workspace->isOwnerOrAdmin($user);
     }
 
     /**
@@ -266,10 +265,11 @@ class ProjetService
             // Create project
             $projet = Projet::create($data);
 
-            // Attach responsable as member with admin role
+            // Attach responsable as member with owner role
             if ($projet->responsable_id) {
+                $ownerRoleId = Role::findByName('owner', 'web')->id;
                 $projet->members()->attach($projet->responsable_id, [
-                    'role' => 'owner',
+                    'role_id' => $ownerRoleId,
                     'can_edit' => true,
                     'can_delete' => true,
                     'can_invite' => true,
@@ -281,8 +281,10 @@ class ProjetService
             if (! empty($members)) {
                 foreach ($members as $member) {
                     if ($member['user_id'] != $projet->responsable_id) {
+                        $roleName = $member['role'] ?? 'collaborateur';
+                        $memberRoleId = Role::findByName($roleName, 'web')->id;
                         $projet->members()->attach($member['user_id'], [
-                            'role' => $member['role'] ?? 'member',
+                            'role_id' => $memberRoleId,
                             'can_edit' => $member['can_edit'] ?? false,
                             'can_delete' => $member['can_delete'] ?? false,
                             'can_invite' => $member['can_invite'] ?? false,
@@ -413,7 +415,7 @@ class ProjetService
             // Clone members
             foreach ($projet->members as $member) {
                 $newProjet->members()->attach($member->id, [
-                    'role' => $member->pivot->role,
+                    'role_id' => $member->pivot->role_id,
                     'can_edit' => $member->pivot->can_edit,
                     'can_delete' => $member->pivot->can_delete,
                     'can_invite' => $member->pivot->can_invite,
@@ -433,8 +435,11 @@ class ProjetService
      */
     public function addMember(Projet $projet, int $userId, array $permissions = []): void
     {
+        $roleName = $permissions['role'] ?? 'collaborateur';
+        $roleId = Role::findByName($roleName, 'web')->id;
+
         $projet->members()->attach($userId, [
-            'role' => $permissions['role'] ?? 'member',
+            'role_id' => $roleId,
             'can_edit' => $permissions['can_edit'] ?? false,
             'can_delete' => $permissions['can_delete'] ?? false,
             'can_invite' => $permissions['can_invite'] ?? false,
@@ -447,15 +452,19 @@ class ProjetService
      */
     public function updateMember(Projet $projet, int $userId, array $permissions): void
     {
-        $existingPermissions = $projet->members()
-            ->where('user_id', $userId)
-            ->first()
-            ?->pivot
-            ?->only(['role', 'can_edit', 'can_delete', 'can_invite', 'can_delete_member']) ?? [];
+        $pivotData = [];
 
-        $newPermissions = array_merge($existingPermissions, $permissions);
+        if (isset($permissions['role'])) {
+            $pivotData['role_id'] = Role::findByName($permissions['role'], 'web')->id;
+        }
 
-        $projet->members()->updateExistingPivot($userId, $newPermissions);
+        foreach (['can_edit', 'can_delete', 'can_invite', 'can_delete_member', 'can_create_activity', 'can_edit_activity', 'can_delete_activity'] as $col) {
+            if (isset($permissions[$col])) {
+                $pivotData[$col] = $permissions[$col];
+            }
+        }
+
+        $projet->members()->updateExistingPivot($userId, $pivotData);
     }
 
     /**

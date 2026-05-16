@@ -52,11 +52,7 @@ class TacheResultatController extends Controller
      */
     public function store(Request $request, Tache $tache)
     {
-        $this->authorize('view', $tache);
-
-        if (! $this->permissionService->canSubmitResult($request->user(), $tache)) {
-            return response()->json(['message' => __('circuit_validation.errors.unauthorized')], 403);
-        }
+        $this->authorize('submitResult', $tache);
 
         $validated = $request->validate([
             'resultats_attendus' => 'required|string',
@@ -1062,16 +1058,7 @@ class TacheResultatController extends Controller
     {
         $user = $request->user();
 
-        if (! $this->permissionService->canApprouverN0($user, $resultat)) {
-            Log::warning('Accès refusé approuverN0', [
-                'user_id' => $user->id,
-                'tache_resultat_id' => $resultat->id,
-                'action' => 'approuver_n0',
-                'reason' => 'unauthorized',
-            ]);
-
-            return response()->json(['message' => __('circuit_validation.errors.unauthorized')], 403);
-        }
+        $this->authorize('approveN0', $resultat->tache);
 
         if ($resultat->statut !== 'en_verification_n0') {
             return response()->json(['message' => __('circuit_validation.errors.invalid_statut')], 422);
@@ -1093,16 +1080,7 @@ class TacheResultatController extends Controller
     {
         $user = $request->user();
 
-        if (! $this->permissionService->canRenvoyerN0($user, $resultat)) {
-            Log::warning('Accès refusé renvoyerN0', [
-                'user_id' => $user->id,
-                'tache_resultat_id' => $resultat->id,
-                'action' => 'renvoyer_n0',
-                'reason' => 'unauthorized',
-            ]);
-
-            return response()->json(['message' => __('circuit_validation.errors.unauthorized')], 403);
-        }
+        $this->authorize('approveN0', $resultat->tache);
 
         if ($resultat->statut !== 'en_verification_n0') {
             return response()->json(['message' => __('circuit_validation.errors.invalid_statut')], 422);

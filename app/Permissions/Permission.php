@@ -164,7 +164,9 @@ final class Permission
     public static function forRole(string $role): array
     {
         return match ($role) {
-            'owner' => self::all(),
+            // owner gets everything except task-assignee-only actions (submit_result, approve_n0).
+            // Those are granted contextually when a user is assigned to a specific task.
+            'owner' => array_diff(self::all(), [self::TACHES_SUBMIT_RESULT, self::TACHES_APPROVE_N0]),
 
             'manager' => [
                 self::WORKSPACES_VIEW,
@@ -184,7 +186,6 @@ final class Permission
                 self::TACHES_VIEW,
                 self::TACHES_EDIT,
                 self::TACHES_DELETE,
-                self::TACHES_APPROVE_N0,
                 self::TACHES_CREATE_SUBTASK,
                 self::TACHES_VALIDATE_N2,
                 self::TACHES_COMMENT,
@@ -196,7 +197,6 @@ final class Permission
                 self::DOCUMENTS_UPLOAD,
                 self::DOCUMENTS_DELETE,
                 self::DOCUMENTS_SHARE,
-                self::RESULTATS_APPROUVER_N0,
                 self::RESULTATS_RENVOYER_N0,
                 self::REPORTS_VIEW,
                 self::REPORTS_CREATE,
@@ -211,7 +211,6 @@ final class Permission
                 self::ACTIVITES_VALIDATE_N1,
                 self::TACHES_VIEW,
                 self::TACHES_EDIT,
-                self::TACHES_APPROVE_N0,
                 self::TACHES_CREATE_SUBTASK,
                 self::TACHES_VALIDATE_N1,
                 self::TACHES_COMMENT,
@@ -221,7 +220,6 @@ final class Permission
                 self::SOUS_TACHES_ASSIGN,
                 self::DOCUMENTS_VIEW,
                 self::DOCUMENTS_UPLOAD,
-                self::RESULTATS_APPROUVER_N0,
                 self::RESULTATS_RENVOYER_N0,
                 self::REPORTS_VIEW,
             ],

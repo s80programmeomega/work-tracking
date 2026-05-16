@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 
 class Projet extends Model
 {
@@ -333,13 +334,7 @@ class Projet extends Model
             return true;
         }
 
-        // Admin du workspace
-        $member = $this->workspace->members()->where('user_id', $user->id)->first();
-        if ($member && in_array($member->pivot->role, ['owner', 'admin'])) {
-            return true;
-        }
-
-        return false;
+        return $this->workspace->isOwnerOrAdmin($user);
     }
 
     /**
@@ -413,7 +408,7 @@ class Projet extends Model
     {
         $member = $this->members()->where('user_id', $user->id)->first();
 
-        return $member?->pivot->role;
+        return $member ? (Role::find($member->pivot->role_id)?->name) : null;
     }
 
     public function canUserEdit(User $user): bool

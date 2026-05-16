@@ -17,6 +17,8 @@ use App\Models\TacheExternalLink;
 use App\Models\TacheResultat;
 use App\Models\User;
 use App\Notifications\ResultatIndividuelSoumisNotification;
+use App\Permissions\ContextualPermissionGate;
+use App\Permissions\Permission;
 use App\Services\PermissionService;
 use App\Services\TacheService;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -28,6 +30,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
 
 class TacheController extends Controller
@@ -353,11 +356,10 @@ class TacheController extends Controller
             return true;
         }
 
-        // Workspace owner or manager can access all activities in the workspace
+        // Workspace owner or manager — check via ContextualPermissionGate
         if ($activite->projet && $activite->projet->workspace) {
-            $workspace = $activite->projet->workspace;
-            $member = $workspace->membres()->where('user_id', $user->id)->first();
-            if ($member && in_array($member->pivot->role, ['owner', 'manager'])) {
+            $gate = app(ContextualPermissionGate::class);
+            if ($gate->userCan($user, Permission::ACTIVITES_VIEW, $activite)) {
                 return true;
             }
         }
@@ -596,13 +598,10 @@ class TacheController extends Controller
                     })
                     ->exists();
 
-            // Vérifier permissions workspace
-            if (! $canCreate && $activite->projet && $activite->projet->workspace) {
-                $workspace = $activite->projet->workspace;
-                $workspaceMember = $workspace->membres()->where('user_id', $user->id)->first();
-                if ($workspaceMember && in_array($workspaceMember->pivot->role, ['owner', 'manager'])) {
-                    $canCreate = true;
-                }
+            // Vérifier permissions via ContextualPermissionGate (inclut workspace owner/manager)
+            if (! $canCreate) {
+                $gate = app(ContextualPermissionGate::class);
+                $canCreate = $gate->userCan($user, Permission::ACTIVITES_CREATE_TASK, $activite);
             }
 
             if (! $canCreate) {
@@ -687,40 +686,19 @@ class TacheController extends Controller
             $activite = Activite::with(['projet.workspace', 'membres'])->findOrFail($activiteId);
             $user = $request->user();
 
-            $membre = $activite->membres()->where('user_id', $user->id)->first();
-
-            // Vérifier les permissions workspace
-            $workspaceRole = null;
-            if ($activite->projet && $activite->projet->workspace) {
-                $workspaceMember = $activite->projet->workspace->membres()->where('user_id', $user->id)->first();
-                $workspaceRole = $workspaceMember ? $workspaceMember->pivot->role : null;
-            }
+            $gate = app(ContextualPermissionGate::class);
 
             $permissions = [
-                'can_view' => $this->canUserAccessActivite($user, $activite),
-                'can_create_tasks' => $user->isSuperAdmin() ||
-                    $activite->responsable_id === $user->id ||
-                    ($activite->projet && $activite->projet->responsable_id === $user->id) ||
-                    ($membre && ($membre->pivot->role === 'responsable' || $membre->pivot->can_create_tasks)) ||
-                    in_array($workspaceRole, ['owner', 'manager']),
-                'can_edit_tasks' => $user->isSuperAdmin() ||
-                    $activite->responsable_id === $user->id ||
-                    ($membre && $membre->pivot->can_edit_tasks),
-                'can_delete_tasks' => $user->isSuperAdmin() ||
-                    $activite->responsable_id === $user->id ||
-                    ($membre && $membre->pivot->can_delete_tasks),
-                'can_validate_results' => $user->isSuperAdmin() ||
-                    $activite->responsable_id === $user->id ||
-                    ($membre && $membre->pivot->can_validate_results),
-                'can_manage_members' => $user->isSuperAdmin() ||
-                    $activite->responsable_id === $user->id ||
-                    ($activite->projet && $activite->projet->responsable_id === $user->id),
+                'can_view' => $gate->userCan($user, Permission::ACTIVITES_VIEW, $activite),
+                'can_create_tasks' => $gate->userCan($user, Permission::ACTIVITES_CREATE_TASK, $activite),
+                'can_edit_tasks' => $gate->userCan($user, Permission::TACHES_EDIT, $activite),
+                'can_delete_tasks' => $gate->userCan($user, Permission::TACHES_DELETE, $activite),
+                'can_validate_results' => $gate->userCan($user, Permission::ACTIVITES_VALIDATE_N1, $activite),
+                'can_manage_members' => $gate->userCan($user, Permission::SOUS_TACHES_ASSIGN, $activite),
             ];
 
             return response()->json([
                 'permissions' => $permissions,
-                'user_role' => $membre ? $membre->pivot->role : 'non-membre',
-                'workspace_role' => $workspaceRole,
                 'is_responsable' => $activite->responsable_id === $user->id,
                 'is_projet_responsable' => $activite->projet && $activite->projet->responsable_id === $user->id,
                 'is_super_admin' => $user->isSuperAdmin(),
@@ -1057,8 +1035,10 @@ class TacheController extends Controller
 
             // ✅ S'assurer que le nouveau responsable est assigné
             if (! $tache->isAssignedTo($user)) {
+                $collaborateurRoleId = Role::findByName('collaborateur', 'web')->id;
                 $tache->assignees()->attach($newResponsableId, [
-                    'role' => 'responsable',
+                    'role_id' => $collaborateurRoleId,
+                    'is_responsable' => true,
                     'can_edit' => true,
                     'can_complete' => true,
                     'can_validate' => true,
@@ -1432,7 +1412,7 @@ class TacheController extends Controller
 
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
-            'role' => 'nullable|in:assignee,validator,observer',
+            'role' => 'nullable|in:collaborateur,stagiaire,observateur',
             'can_edit' => 'boolean',
             'can_complete' => 'boolean',
             'can_validate' => 'boolean',

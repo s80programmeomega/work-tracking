@@ -16,15 +16,17 @@ use App\Services\TacheResultatService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
+use Tests\Traits\AttachesWithRoleId;
 
 class N0ValidationCircuitTest extends TestCase
 {
-    use RefreshDatabase;
+    use AttachesWithRoleId, RefreshDatabase;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->artisan('db:seed', ['--class' => 'RolePermissionSeeder']);
+        $this->refreshRoleIdCache();
     }
 
     private function makeContext(): array
@@ -38,8 +40,7 @@ class N0ValidationCircuitTest extends TestCase
         $intervenant = User::factory()->create();
 
         // Responsable: is_responsable = true on tache_user
-        $tache->assignees()->attach($responsable->id, [
-            'role' => 'collaborateur',
+        $this->attachWithRole($tache->assignees(), $responsable->id, 'collaborateur', [
             'is_responsable' => true,
             'can_edit' => true,
             'can_complete' => true,
@@ -49,8 +50,7 @@ class N0ValidationCircuitTest extends TestCase
         ]);
 
         // Intervenant: regular assignee
-        $tache->assignees()->attach($intervenant->id, [
-            'role' => 'collaborateur',
+        $this->attachWithRole($tache->assignees(), $intervenant->id, 'collaborateur', [
             'is_responsable' => false,
             'can_edit' => false,
             'can_complete' => true,

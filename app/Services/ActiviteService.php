@@ -19,15 +19,15 @@ class ActiviteService
             ->with(['projet.workspace', 'responsable', 'membres']); // ✅ Ajouter membres
 
         // Apply filters
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $query->search($filters['search']);
         }
 
-        if (!empty($filters['projet_id'])) {
+        if (! empty($filters['projet_id'])) {
             $query->forProjet($filters['projet_id']);
         }
 
-        if (!empty($filters['responsable_id'])) {
+        if (! empty($filters['responsable_id'])) {
             $query->forUser($filters['responsable_id']);
         }
 
@@ -35,12 +35,12 @@ class ActiviteService
             $query->where('status', $filters['status']);
         }
 
-        if (!empty($filters['is_overdue'])) {
+        if (! empty($filters['is_overdue'])) {
             $query->overdue();
         }
 
         // ✅ Filtre par workspace
-        if (!empty($filters['workspace_id'])) {
+        if (! empty($filters['workspace_id'])) {
             $query->whereHas('projet', function ($q) use ($filters) {
                 $q->where('workspace_id', $filters['workspace_id']);
             });
@@ -61,6 +61,7 @@ class ActiviteService
     public function getActivitiesForProjet(int $projetId, array $filters = []): LengthAwarePaginator
     {
         $filters['projet_id'] = $projetId;
+
         return $this->getAllActivites($filters);
     }
 
@@ -88,17 +89,17 @@ class ActiviteService
             $q->accessibleBy($user->id);
 
             // ✅ APPLIQUER LE FILTRE WORKSPACE_ID
-            if (!empty($filters['workspace_id'])) {
+            if (! empty($filters['workspace_id'])) {
                 $q->where('workspace_id', $filters['workspace_id']);
             }
         });
 
         // Apply filters
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $query->search($filters['search']);
         }
 
-        if (!empty($filters['projet_id'])) {
+        if (! empty($filters['projet_id'])) {
             $query->forProjet($filters['projet_id']);
         }
 
@@ -106,12 +107,12 @@ class ActiviteService
             $query->where('status', $filters['status']);
         }
 
-        if (!empty($filters['is_overdue'])) {
+        if (! empty($filters['is_overdue'])) {
             $query->overdue();
         }
 
         // ✅ Filtre par workspace
-        if (!empty($filters['workspace_id'])) {
+        if (! empty($filters['workspace_id'])) {
             $query->whereHas('projet', function ($q) use ($filters) {
                 $q->where('workspace_id', $filters['workspace_id']);
             });
@@ -139,21 +140,21 @@ class ActiviteService
             $q->accessibleBy($user->id);
 
             // Filtre workspace
-            if (!empty($filters['workspace_id'])) {
+            if (! empty($filters['workspace_id'])) {
                 $q->where('workspace_id', $filters['workspace_id']);
             }
         });
 
         // Apply other filters
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $query->search($filters['search']);
         }
 
-        if (!empty($filters['projet_id'])) {
+        if (! empty($filters['projet_id'])) {
             $query->forProjet($filters['projet_id']);
         }
 
-        if (!empty($filters['responsable_id'])) {
+        if (! empty($filters['responsable_id'])) {
             $query->forUser($filters['responsable_id']);
         }
 
@@ -161,7 +162,7 @@ class ActiviteService
             $query->where('status', $filters['status']);
         }
 
-        if (!empty($filters['is_overdue'])) {
+        if (! empty($filters['is_overdue'])) {
             $query->overdue();
         }
 
@@ -181,7 +182,7 @@ class ActiviteService
     public function createActivite(array $data): Activite
     {
         // Set default order to last position
-        if (!isset($data['ordre'])) {
+        if (! isset($data['ordre'])) {
             $maxOrder = Activite::where('projet_id', $data['projet_id'])->max('ordre') ?? -1;
             $data['ordre'] = $maxOrder + 1;
         }
@@ -197,7 +198,7 @@ class ActiviteService
             $activite = Activite::create($data);
 
             // ✅ Ajouter les membres si fournis
-            if (!empty($membres)) {
+            if (! empty($membres)) {
                 foreach ($membres as $membre) {
                     $activite->membres()->attach($membre['user_id'], [
                         'role' => $membre['role'],
@@ -250,6 +251,7 @@ class ActiviteService
     public function archiveActivite(Activite $activite): Activite
     {
         $activite->archive();
+
         return $activite->fresh();
     }
 
@@ -259,6 +261,7 @@ class ActiviteService
     public function unarchiveActivite(Activite $activite): Activite
     {
         $activite->unarchive();
+
         return $activite->fresh();
     }
 
@@ -277,8 +280,8 @@ class ActiviteService
         $data = array_merge($data, $overrides);
 
         // Append "(Copy)" to name
-        if (!isset($overrides['nom'])) {
-            $data['nom'] = $activite->nom . ' (Copie)';
+        if (! isset($overrides['nom'])) {
+            $data['nom'] = $activite->nom.' (Copie)';
         }
 
         // Set new order
@@ -293,7 +296,7 @@ class ActiviteService
             if ($overrides['copy_members'] ?? true) {
                 foreach ($activite->membres as $membre) {
                     $newActivite->membres()->attach($membre->id, [
-                        'role' => $membre->pivot->role,
+                        'role_id' => $membre->pivot->role_id,
                         'can_edit_activity' => $membre->pivot->can_edit_activity,
                         'can_delete_activity' => $membre->pivot->can_delete_activity,
                         'can_create_tasks' => $membre->pivot->can_create_tasks,
@@ -442,7 +445,7 @@ class ActiviteService
             'total' => $activites->count(),
             'active' => $activites->where('status', 'active')->count(),
             'archived' => $activites->where('status', 'archived')->count(),
-            'overdue' => $activites->filter(fn($a) => $a->is_overdue)->count(),
+            'overdue' => $activites->filter(fn ($a) => $a->is_overdue)->count(),
             'avg_progression' => $activites->avg('progression') ?? 0,
         ];
     }

@@ -10,6 +10,7 @@ use App\Models\Workspace;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Spatie\Permission\Models\Role;
 
 /**
  * Service de gestion du retrait de membres avec transfert de responsabilités
@@ -292,17 +293,17 @@ class MemberRemovalService
             // created_by reste inchangé pour la traçabilité
         ]);
 
+        $managerRoleId = Role::findByName('manager', 'web')->id;
+
         if (! $projet->members()->where('user_id', $newResponsable->id)->exists()) {
             $projet->members()->attach($newResponsable->id, [
-                'role' => 'manager',
+                'role_id' => $managerRoleId,
                 'can_edit' => true,
                 'can_delete' => true,
                 'can_invite' => true,
             ]);
         } else {
-            $projet->members()->updateExistingPivot($newResponsable->id, [
-                'role' => 'manager',
-            ]);
+            $projet->members()->updateExistingPivot($newResponsable->id, ['role_id' => $managerRoleId]);
         }
     }
 

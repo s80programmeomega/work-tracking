@@ -11,6 +11,8 @@ use App\Models\User;
 use App\Models\Workspace;
 use App\Models\WorkspaceInvitation;
 use App\Notifications\WorkspaceInvitationNotification;
+use App\Permissions\ContextualPermissionGate;
+use App\Permissions\Permission;
 use App\Services\MemberRemovalService;
 use App\Services\PermissionService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -113,9 +115,9 @@ class WorkspaceController extends Controller
             }
 
             // Add creator as owner member
+            $ownerRole = \Spatie\Permission\Models\Role::findByName('owner', 'web');
             $workspace->members()->attach($request->user()->id, [
-                'role' => 'owner',
-                'permissions' => json_encode(['all']),
+                'role_id' => $ownerRole->id,
                 'invited_at' => now(),
                 'invited_by' => $request->user()->id,
             ]);
@@ -223,11 +225,11 @@ class WorkspaceController extends Controller
                         // Récupérer le membre existant avec son rôle
                         $existingMember = $workspace->members()
                             ->where('user_id', $user->id)
-                            ->withPivot(['role', 'permissions'])
+                            ->withPivot(['role_id', 'invited_at'])
                             ->first();
 
-                        // Créer un message plus informatif
-                        $roleLabel = $this->getRoleLabel($existingMember->pivot->role);
+                        $existingRoleName = \Spatie\Permission\Models\Role::find($existingMember->pivot->role_id)?->name ?? 'membre';
+                        $roleLabel = $this->getRoleLabel($existingRoleName);
                         $joinedAt = $existingMember->pivot->created_at
                           ? $existingMember->pivot->created_at->format('d/m/Y')
                           : 'Date inconnue';
@@ -250,7 +252,7 @@ class WorkspaceController extends Controller
                             'type' => 'already_member',
                             'user_id' => $user->id,
                             'user_name' => $user->nom,
-                            'existing_role' => $existingMember->pivot->role,
+                            'existing_role' => $existingRoleName,
                             'existing_role_label' => $roleLabel,
                             'joined_at' => $joinedAt,
                             'stats' => [
@@ -501,8 +503,10 @@ class WorkspaceController extends Controller
         // Charger les informations du membre
         $member = $workspace->members()
             ->where('user_id', $user->id)
-            ->withPivot(['role', 'permissions', 'invited_at', 'invited_by'])
+            ->withPivot(['role_id', 'invited_at', 'invited_by'])
             ->first();
+
+        $memberRoleName = \Spatie\Permission\Models\Role::find($member->pivot->role_id)?->name ?? 'membre';
 
         // Charger les statistiques
         $projectsCount = $user->projets()
@@ -534,9 +538,8 @@ class WorkspaceController extends Controller
                     'created_at' => $user->created_at,
                 ],
                 'workspace_membership' => [
-                    'role' => $member->pivot->role,
-                    'role_label' => $this->getRoleLabel($member->pivot->role),
-                    'permissions' => $member->pivot->permissions,
+                    'role' => $memberRoleName,
+                    'role_label' => $this->getRoleLabel($memberRoleName),
                     'invited_at' => $member->pivot->invited_at,
                     'invited_by' => $member->pivot->invited_by,
                 ],
@@ -559,11 +562,7 @@ class WorkspaceController extends Controller
         $this->authorize('manage', $workspace);
 
         $request->validate([
-            'role' => ['required', Rule::in(['owner', 'super_admin', 'admin', 'member', 'viewer'])],
-            'permissions' => 'nullable|array',
-            'permissions.can_create_projects' => 'boolean',
-            'permissions.can_invite_members' => 'boolean',
-            'permissions.can_manage_settings' => 'boolean',
+            'role' => ['required', Rule::in(['owner', 'manager', 'cadre', 'collaborateur', 'stagiaire', 'observateur'])],
         ]);
 
         // Ne pas permettre de modifier le rôle du propriétaire
@@ -580,10 +579,11 @@ class WorkspaceController extends Controller
             ], 404);
         }
 
-        // Mettre à jour le rôle et les permissions
+        $role = \Spatie\Permission\Models\Role::findByName($request->role, 'web');
+
+        // Mettre à jour le rôle
         $workspace->members()->updateExistingPivot($user->id, [
-            'role' => $request->role,
-            'permissions' => $request->permissions ?? [],
+            'role_id' => $role->id,
         ]);
 
         // Log d'activité
@@ -594,7 +594,6 @@ class WorkspaceController extends Controller
                 'member_id' => $user->id,
                 'member_name' => $user->nom,
                 'new_role' => $request->role,
-                'permissions' => $request->permissions,
             ])
             ->log('Membre mis à jour');
 
@@ -713,9 +712,9 @@ class WorkspaceController extends Controller
             }
 
             // Ajouter comme membre
+            $invitedRole = \Spatie\Permission\Models\Role::findByName($invitation->role ?? 'collaborateur', 'web');
             $workspace->members()->attach($user->id, [
-                'role' => $invitation->role,
-                'permissions' => json_encode($invitation->permissions ?? []),
+                'role_id' => $invitedRole->id,
                 'invited_at' => now(),
                 'invited_by' => $invitation->invited_by,
             ]);
@@ -776,9 +775,9 @@ class WorkspaceController extends Controller
             $user->assignRole('member');
 
             // Ajouter au workspace invité
+            $invitedRole = \Spatie\Permission\Models\Role::findByName($invitation->role ?? 'collaborateur', 'web');
             $workspace->members()->attach($user->id, [
-                'role' => $invitation->role,
-                'permissions' => json_encode($invitation->permissions ?? []),
+                'role_id' => $invitedRole->id,
                 'invited_at' => now(),
                 'invited_by' => $invitation->invited_by,
             ]);
@@ -1038,26 +1037,11 @@ class WorkspaceController extends Controller
         }
 
         $members = $workspace->members()
-            ->withPivot(['role', 'permissions', 'invited_at', 'invited_by'])
+            ->withPivot(['role_id', 'invited_at', 'invited_by'])
             ->get()
             ->map(function ($member) {
-                // ✅ Corriger le format des permissions
-                $permissions = $member->pivot->permissions;
-
-                // Si c'est une chaîne JSON, la décoder
-                if (is_string($permissions)) {
-                    $decoded = json_decode($permissions, true);
-                    $member->pivot->permissions = is_array($decoded) ? $decoded : [];
-                }
-
-                // Si c'est "all", convertir en permissions complètes
-                if ($member->pivot->permissions === ['all']) {
-                    $member->pivot->permissions = [
-                        'can_create_projects' => true,
-                        'can_invite_members' => true,
-                        'can_manage_settings' => true,
-                    ];
-                }
+                $roleName = \Spatie\Permission\Models\Role::find($member->pivot->role_id)?->name ?? 'membre';
+                $member->pivot->role = $roleName;
 
                 return $member;
             });
@@ -1081,8 +1065,7 @@ class WorkspaceController extends Controller
 
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
-            'role' => ['required', Rule::in(['owner', 'super_admin', 'admin', 'member', 'viewer'])],
-            'permissions' => 'nullable|array',
+            'role' => ['required', Rule::in(['owner', 'manager', 'cadre', 'collaborateur', 'stagiaire', 'observateur'])],
         ]);
 
         // Check if user is already a member
@@ -1092,9 +1075,10 @@ class WorkspaceController extends Controller
             ], 422);
         }
 
+        $role = \Spatie\Permission\Models\Role::findByName($validated['role'], 'web');
+
         $workspace->members()->attach($validated['user_id'], [
-            'role' => $validated['role'],
-            'permissions' => $validated['permissions'] ?? [],
+            'role_id' => $role->id,
             'invited_at' => now(),
             'invited_by' => $request->user()->id,
         ]);
@@ -1122,7 +1106,6 @@ class WorkspaceController extends Controller
 
         $validated = $request->validate([
             'role' => ['sometimes', Rule::in(['owner', 'manager', 'cadre', 'collaborateur', 'stagiaire', 'observateur'])],
-            'permissions' => 'nullable|array',
         ]);
 
         if (! $workspace->members()->where('user_id', $user->id)->exists()) {
@@ -1131,7 +1114,13 @@ class WorkspaceController extends Controller
             ], 404);
         }
 
-        $workspace->members()->updateExistingPivot($user->id, $validated);
+        $pivotData = [];
+        if (isset($validated['role'])) {
+            $role = \Spatie\Permission\Models\Role::findByName($validated['role'], 'web');
+            $pivotData['role_id'] = $role->id;
+        }
+
+        $workspace->members()->updateExistingPivot($user->id, $pivotData);
 
         return response()->json([
             'message' => 'Membre mis à jour avec succès',
@@ -1323,13 +1312,7 @@ class WorkspaceController extends Controller
      */
     private function isWorkspaceAdmin(User $user, Workspace $workspace): bool
     {
-        $member = $workspace->members()->where('user_id', $user->id)->first();
-
-        if (! $member) {
-            return false;
-        }
-
-        return $member->pivot->role === 'manager';
+        return app(ContextualPermissionGate::class)->userCan($user, Permission::WORKSPACES_MANAGE_SETTINGS, $workspace);
     }
 
     /**
@@ -1402,48 +1385,15 @@ class WorkspaceController extends Controller
      */
     private function userHasAccess(User $user, Workspace $workspace): bool
     {
-        if ($user->isSuperAdmin()) {
-            return true;
-        }
-
-        return $workspace->owner_id === $user->id ||
-            $workspace->members()->where('user_id', $user->id)->exists();
+        return app(ContextualPermissionGate::class)->userCan($user, Permission::WORKSPACES_VIEW, $workspace);
     }
 
     /**
      * Helper: Check if user can manage workspace members.
-     * Grants access to: super_admin, workspace owner, and members with owner/manager role
-     * or with explicit can_invite_members pivot permission.
      */
     private function userCanManageMembers(User $user, Workspace $workspace): bool
     {
-        if ($user->isSuperAdmin()) {
-            return true;
-        }
-
-        if ($workspace->owner_id === $user->id) {
-            return true;
-        }
-
-        $member = $workspace->members()
-            ->where('user_id', $user->id)
-            ->first();
-
-        if (! $member) {
-            return false;
-        }
-
-        // Manager role has implicit invite rights
-        if (in_array($member->pivot->role, ['owner', 'manager'])) {
-            return true;
-        }
-
-        // Explicit pivot flag
-        $permissions = is_array($member->pivot->permissions)
-            ? $member->pivot->permissions
-            : json_decode($member->pivot->permissions ?? '{}', true);
-
-        return ! empty($permissions['can_invite_members']);
+        return app(ContextualPermissionGate::class)->userCan($user, Permission::WORKSPACES_INVITE_MEMBER, $workspace);
     }
 
     /**
@@ -1484,8 +1434,19 @@ class WorkspaceController extends Controller
 
         $workspace->loadCount(['projets', 'members']);
 
+        $user = $request->user();
+        $gate = app(ContextualPermissionGate::class);
+
         return response()->json([
-            'data' => $workspace,
+            'data' => array_merge($workspace->toArray(), [
+                'user_permissions' => [
+                    'can_view_workspace' => $gate->userCan($user, Permission::WORKSPACES_VIEW, $workspace),
+                    'can_create_project' => $gate->userCan($user, Permission::WORKSPACES_CREATE_PROJECT, $workspace),
+                    'can_invite_members' => $gate->userCan($user, Permission::WORKSPACES_INVITE_MEMBER, $workspace),
+                    'can_remove_members' => $gate->userCan($user, Permission::WORKSPACES_REMOVE_MEMBER, $workspace),
+                    'can_manage_workspace_settings' => $gate->userCan($user, Permission::WORKSPACES_MANAGE_SETTINGS, $workspace),
+                ],
+            ]),
         ]);
     }
 
@@ -1788,13 +1749,11 @@ class WorkspaceController extends Controller
             $workspace->update(['owner_id' => $validated['new_owner_id']]);
 
             // Update member roles
-            $workspace->members()->updateExistingPivot($validated['new_owner_id'], [
-                'role' => 'owner',
-            ]);
+            $ownerRoleId = \Spatie\Permission\Models\Role::findByName('owner', 'web')->id;
+            $managerRoleId = \Spatie\Permission\Models\Role::findByName('manager', 'web')->id;
 
-            $workspace->members()->updateExistingPivot($request->user()->id, [
-                'role' => 'manager',
-            ]);
+            $workspace->members()->updateExistingPivot($validated['new_owner_id'], ['role_id' => $ownerRoleId]);
+            $workspace->members()->updateExistingPivot($request->user()->id, ['role_id' => $managerRoleId]);
 
             DB::commit();
 
@@ -1839,8 +1798,7 @@ class WorkspaceController extends Controller
             $members = $workspace->members;
             foreach ($members as $member) {
                 $newWorkspace->members()->attach($member->id, [
-                    'role' => $member->pivot->role,
-                    'permissions' => $member->pivot->permissions,
+                    'role_id' => $member->pivot->role_id,
                     'invited_at' => now(),
                     'invited_by' => $request->user()->id,
                 ]);
@@ -1894,19 +1852,7 @@ class WorkspaceController extends Controller
      */
     private function userCanManageWorkspace(User $user, Workspace $workspace): bool
     {
-        if ($user->isSuperAdmin()) {
-            return true;
-        }
-
-        if ($workspace->owner_id === $user->id) {
-            return true;
-        }
-
-        $member = $workspace->members()
-            ->where('user_id', $user->id)
-            ->first();
-
-        return $member && $member->pivot->role === 'owner';
+        return app(ContextualPermissionGate::class)->userCan($user, Permission::WORKSPACES_MANAGE_SETTINGS, $workspace);
     }
 
     /**

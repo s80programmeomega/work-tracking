@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Permission\Models\Role;
 
 class Tache extends Model
 {
@@ -758,7 +759,9 @@ class Tache extends Model
             return false;
         }
 
-        return in_array($assignment->pivot->role, ['collaborateur', 'stagiaire']);
+        $roleName = Role::find($assignment->pivot->role_id)?->name;
+
+        return in_array($roleName, ['collaborateur', 'stagiaire']);
     }
 
     /**

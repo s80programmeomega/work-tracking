@@ -10,6 +10,7 @@ use App\Models\TacheResultat;
 use App\Models\User;
 use App\Models\Workspace;
 use Illuminate\Support\Facades\Log;
+use Spatie\Permission\Models\Role;
 
 /**
  * Service de résolution des permissions sur les documents
@@ -248,20 +249,13 @@ class DocumentAccessResolver
             return false;
         }
 
-        $role = $member->pivot->role ?? null;
-        $permissions = $member->pivot->permissions ?? [];
+        $roleName = Role::find($member->pivot->role_id)?->name;
 
-        // FIX: Décoder si JSON string
-        if (is_string($permissions)) {
-            $permissions = json_decode($permissions, true) ?? [];
-        }
-
-        if ($role === 'manager' || $role === 'owner') {
+        if (in_array($roleName, ['owner', 'manager'])) {
             return true;
         }
 
-        // Vérifier la permission spécifique
-        return $this->checkPermissionInArray($permissions, "documents_{$action}");
+        return $this->checkPermissionInArray([], "documents_{$action}");
     }
 
     /**
@@ -466,12 +460,7 @@ class DocumentAccessResolver
             return true;
         }
 
-        $member = $workspace->members()->where('user_id', $user->id)->first();
-        if ($member && in_array($member->pivot->role, ['owner', 'manager'])) {
-            return true;
-        }
-
-        return false;
+        return $workspace->isOwnerOrAdmin($user);
     }
 
     protected function canUploadToProjet(User $user, int $projetId): bool

@@ -142,18 +142,7 @@ class ProjetController extends Controller
         }
 
         // ✅ Super admin peut créer dans n'importe quel workspace
-        if (! $request->user()->isSuperAdmin() && ! $workspace->hasAccess($request->user())) {
-            return response()->json([
-                'message' => 'Vous n\'avez pas accès à ce workspace.',
-            ], 403);
-        }
-
-        // Vérifier que l'utilisateur peut créer des projets dans ce workspace
-        if (! $request->user()->isSuperAdmin() && ! $workspace->canCreateProjects($request->user())) {
-            return response()->json([
-                'message' => 'Vous n\'avez pas la permission de créer des projets dans ce workspace.',
-            ], 403);
-        }
+        $this->authorize('createProject', $workspace);
 
         $data['workspace_id'] = $workspaceId;
 
@@ -458,7 +447,7 @@ class ProjetController extends Controller
 
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'role' => 'required|in:admin,member,viewer',
+            'role' => 'required|in:manager,cadre,collaborateur,stagiaire,observateur',
             'can_edit' => 'nullable|boolean',
             'can_delete' => 'nullable|boolean',
             'can_invite' => 'nullable|boolean',
@@ -505,7 +494,7 @@ class ProjetController extends Controller
         $this->authorize('manageMembers', $projet);
 
         $request->validate([
-            'role' => 'sometimes|in:admin,member,viewer',
+            'role' => 'sometimes|in:manager,cadre,collaborateur,stagiaire,observateur',
             'can_edit' => 'nullable|boolean',
             'can_delete' => 'nullable|boolean',
             'can_invite' => 'nullable|boolean',

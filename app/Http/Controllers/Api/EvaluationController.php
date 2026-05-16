@@ -10,6 +10,8 @@ use App\Models\Tache;
 use App\Models\TacheResultat;
 use App\Models\User;
 use App\Models\Workspace;
+use App\Permissions\ContextualPermissionGate;
+use App\Permissions\Permission;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -1431,21 +1433,16 @@ class EvaluationController extends Controller
      */
     private function canViewWorkspacePerformance($user, $workspace): bool
     {
-        if ($user->isSuperAdmin()) {
-            return true;
-        }
+        $gate = app(ContextualPermissionGate::class);
 
-        $membre = $workspace->membres()->where('user_id', $user->id)->first();
-        if ($membre && in_array($membre->pivot->role, ['owner', 'manager'])) {
+        if ($gate->userCan($user, Permission::WORKSPACES_VIEW, $workspace)) {
             return true;
         }
 
         // Responsable d'un projet du workspace
-        $isResponsableProjet = $workspace->projets()
+        return $workspace->projets()
             ->where('responsable_id', $user->id)
             ->exists();
-
-        return $isResponsableProjet;
     }
 
     /**
