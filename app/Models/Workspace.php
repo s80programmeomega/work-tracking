@@ -334,20 +334,20 @@ class Workspace extends Model
 
         $roleName = $this->getMemberRole($user);
 
-        return in_array($roleName, [‘owner’, ‘manager’]);
+        return in_array($roleName, ['owner', 'manager']);
     }
 
     /**
      * Add a member to workspace
      */
-    public function addMember(User $user, string $roleName = ‘collaborateur’): void
+    public function addMember(User $user, string $roleName = 'collaborateur'): void
     {
         if (! $this->isMember($user)) {
-            $role = Role::findByName($roleName, ‘web’);
+            $role = Role::findByName($roleName, 'web');
             $this->members()->attach($user->id, [
-                ‘role_id’ => $role->id,
-                ‘invited_at’ => now(),
-                ‘invited_by’ => auth()->id(),
+                'role_id' => $role->id,
+                'invited_at' => now(),
+                'invited_by' => auth()->id(),
             ]);
         }
     }
@@ -370,8 +370,8 @@ class Workspace extends Model
             throw new \Exception('Impossible de modifier le proprietaire du workspace.');
         }
 
-        $role = Role::findByName($roleName, ‘web’);
-        $this->members()->updateExistingPivot($targetUser->id, [‘role_id’ => $role->id]);
+        $role = Role::findByName($roleName, 'web');
+        $this->members()->updateExistingPivot($targetUser->id, ['role_id' => $role->id]);
     }
 
     /**
