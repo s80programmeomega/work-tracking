@@ -4,6 +4,18 @@
 
 ---
 
+## Guide 0 — Consult Before Acting
+
+Before executing any step of a task:
+
+1. **Read the relevant guides in this document** — identify every guide that applies to what you are about to do (branching, migrations, permissions, translations, emails, logging, etc.) and follow them exactly.
+2. **Before modifying anything that already exists** — search the full codebase for all usages of that code (PHP, Vue, JS, migrations, seeders, tests, translations) and analyse the impact before touching it.
+3. **Never assume** a change is isolated. A method rename, a column addition, a role value change, or a pivot field removal can break things far from the edit site. Always verify scope first.
+
+This guide takes precedence over everything else. Skipping it to save time has caused broken endpoints, wrong role values, and missing columns in this project.
+
+---
+
 ## Guide 1 — Branch Naming
 
 Each task maps to one branch:
@@ -53,9 +65,10 @@ Every task touching permissions follows this exact order:
 2. Add permission string to `database/seeders/RolePermissionSeeder.php`
 3. Add to `Role::permissions()` in `app/Enums/Role.php` for relevant roles
 4. Add to the relevant frontend composable (`useWorkspacePermissions.js`, `useProjetPermissions.js`, `useActivitePermissions.js`, or `useTachePermissions.js`)
-5. **Update `docs/PERMISSIONS_MATRIX.md`** with the new permission row and which roles get it
+5. Expose in the relevant API Resource (`TacheResource`, `ActiviteResource`, etc.) if the frontend needs to read it from API responses
+6. **Update `docs/PERMISSIONS_MATRIX.md`** — see Guide 15. This is a hard gate.
 
-All 5 steps must be done before marking a task complete.
+All 6 steps must be done before marking a task complete.
 
 ---
 
@@ -336,3 +349,25 @@ Dusk tests use `DatabaseMigrations` (not `RefreshDatabase` — transactions don'
 | Job dispatching, notifications | Full user flow (submit → approve → badge updates) |
 
 Write at least one Dusk test for every user-facing flow introduced by a task.
+
+---
+
+## Guide 15 — Permissions Matrix is a Hard Gate
+
+`docs/PERMISSIONS_MATRIX.md` must be updated **in the same commit** as any permission change. A task is not complete if the matrix is out of date.
+
+**Triggers — update the matrix whenever you:**
+- Add a method to `PermissionService`
+- Add a permission string to `RolePermissionSeeder`
+- Add a permission to a frontend composable (`useWorkspacePermissions.js`, `useProjetPermissions.js`, `useActivitePermissions.js`, `useTachePermissions.js`)
+- Expose a permission key in an API Resource (`TacheResource`, `ActiviteResource`, etc.)
+- Register a new Policy in `AuthServiceProvider`
+
+**For each new permission, add a row to the matrix with:**
+- The permission name
+- Which roles get it (✅ / ❌ / 🔑)
+- Any pivot flag conditions (🔑)
+
+**Also append a row to the Changelog table** at the bottom of the matrix with: date, task number, and what changed.
+
+**Why:** The matrix was not updated for Tasks 2, 3, or 4 despite all permission steps being completed — the omission meant there was no single source of truth for role capabilities, making it impossible to audit what each role can do without reading multiple files.
