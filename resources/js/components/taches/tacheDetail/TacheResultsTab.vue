@@ -77,6 +77,48 @@
             <span>{{ tache.my_result.documents_count }} document(s) joint(s)</span>
           </div>
 
+          <!-- Bypass anti-sabotage — visible when N0 returned the result -->
+          <div
+            v-if="tache.my_result.statut === 'a_refaire' && !tache.my_result.bypass?.active"
+            class="border-l-4 border-amber-400 pl-3 py-3 bg-amber-50 dark:bg-amber-900/20 rounded space-y-3"
+          >
+            <p class="text-sm font-medium text-amber-700 dark:text-amber-400">
+              <i class="fas fa-exclamation-triangle mr-1"></i>Votre résultat a été renvoyé
+            </p>
+            <p v-if="tache.my_result.validation_n0?.commentaire" class="text-sm text-gray-700 dark:text-gray-300 italic">
+              "{{ tache.my_result.validation_n0.commentaire }}"
+            </p>
+            <div class="space-y-2">
+              <textarea
+                dusk="bypass-motif-input"
+                v-model="bypassMotif"
+                :placeholder="$t ? $t('circuit_validation.bypass.motif_placeholder') : 'Motif du bypass (min. 50 caractères)…'"
+                rows="3"
+                class="w-full text-sm border border-amber-300 dark:border-amber-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-white resize-none focus:outline-none focus:ring-2 focus:ring-amber-400"
+              />
+              <button
+                dusk="bypass-submit-btn"
+                @click="submitBypass"
+                :disabled="bypassMotif.trim().length < 50 || bypassLoading"
+                class="px-4 py-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors"
+              >
+                <i class="fas fa-share mr-1"></i>
+                {{ bypassLoading ? '…' : $t ? $t('circuit_validation.bypass.submit_label') : 'Soumettre directement au N1' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Bypass already activated — context info for the user -->
+          <div
+            v-if="tache.my_result.bypass?.active"
+            dusk="bypass-active-badge"
+            class="border-l-4 border-amber-500 pl-3 py-2 bg-amber-50 dark:bg-amber-900/20 rounded"
+          >
+            <p class="text-sm font-medium text-amber-700 dark:text-amber-400">
+              <i class="fas fa-shield-alt mr-1"></i>Bypass activé — transmis au N1
+            </p>
+          </div>
+
           <!-- Validation N1 -->
           <div v-if="tache.my_result.valide_par_n1" class="border-l-4 border-green-500 pl-3 py-2 bg-green-50 dark:bg-green-900/20 rounded">
             <p class="text-sm font-medium text-green-700 dark:text-green-400 mb-1">
@@ -212,9 +254,10 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { useNotifications } from '@/composables/useNotifications'; 
+import { useNotifications } from '@/composables/useNotifications';
+import { api } from '@/api';
 import SubmitResultModal from '../../../components/taches/SubmitResultModal.vue';
- 
+
 
 const props = defineProps({
   tache: {
@@ -231,6 +274,32 @@ const emit = defineEmits(['refresh']);
 
 const { showSuccess, showError } = useNotifications();
 const showSubmitModal = ref(false);
+
+// ── Bypass anti-sabotage ──────────────────────────────────────────────────
+const bypassMotif = ref('');
+const bypassLoading = ref(false);
+
+const submitBypass = async () => {
+    if (!props.tache.my_result || bypassMotif.value.trim().length < 50) {
+        return;
+    }
+
+    bypassLoading.value = true;
+    try {
+        await api.post(
+            `/taches/${props.tache.id}/resultats/${props.tache.my_result.id}/activer-bypass`,
+            { motif: bypassMotif.value.trim() },
+        );
+        bypassMotif.value = '';
+        showSuccess('Bypass activé. Votre résultat est transmis au N1.');
+        emit('refresh');
+    } catch (err) {
+        const message = err.response?.data?.message || 'Erreur lors de l\'activation du bypass';
+        showError(message);
+    } finally {
+        bypassLoading.value = false;
+    }
+};
 
 const canSubmitResult = computed(() => {
   return props.tache.my_status?.statut === 'termine' && !props.tache.my_result;
