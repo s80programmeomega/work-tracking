@@ -23,7 +23,7 @@
 | 1 | Queue (database) + Laravel Reverb | `feature/v2-task-1-queue-reverb` | ✅ | 2026-05-14 | 2026-05-14 | — |
 | 2 | Subtask Data Model | `feature/v2-task-2-subtask-model` | ✅ | 2026-05-14 | 2026-05-14 | — |
 | 3 | Subtask CRUD API + Auto Progress | `feature/v2-task-3-subtask-api` | ✅ | 2026-05-14 | 2026-05-14 | — |
-| 4 | Subtask UI | `feature/v2-task-4-subtask-ui` | ⬜ | — | — | — |
+| 4 | Subtask UI | `feature/v2-task-4-subtask-ui` | ✅ | 2026-05-15 | 2026-05-18 | Branch existed but was never merged — restored 2026-05-18 |
 | 5 | Validation N0 + 48h Timer | `feature/v2-task-5-validation-n0` | ✅ | 2026-05-15 | 2026-05-15 | — |
 | 6 | Anti-Sabotage Bypass | `feature/v2-task-6-bypass` | ✅ | 2026-05-18 | 2026-05-18 | — |
 | 7 | N1 Scores + Pending Validations | `feature/v2-task-7-scores-dashboard` | ⬜ | — | — | — |
@@ -90,15 +90,17 @@
 - [ ] PR merged into `jonas`
 
 ### Task 4
-- [ ] `useSousTaches.js` composable created
-- [ ] `SousTacheList.vue` created
-- [ ] `SousTacheForm.vue` created
-- [ ] Kanban card indicator added
-- [ ] Submit result button disabled when blocking subtasks
-- [ ] Permissions added to `useActivitePermissions.js`
-- [ ] Translation keys added
-- [ ] Tests passing
-- [ ] PR opened into `jonas`
+- [x] `useSousTaches.js` composable created (self-contained CRUD, owns its own data)
+- [x] `SousTacheList.vue` created (ordered list, inline edit, quick-complete toggle, weighted progress bar)
+- [x] `SousTacheForm.vue` created (quick-create with poids remaining, date max, validation flags)
+- [x] Kanban card indicator added (count badge + mini progress bar on TacheCard)
+- [ ] Submit result button disabled when blocking subtasks — deferred (not yet implemented)
+- [x] Permissions added to `useActivitePermissions.js` (`canCreateSousTache`, `canAssignSousTacheIntervenant`)
+- [x] Translation keys added (`ui.*` section in fr/en sous_taches.php)
+- [x] `SousTacheList` integrated in `TacheDetail.vue` (Sous-tâches tab)
+- [x] `SousTacheList` integrated in `TacheDetailModal.vue` (compact + detailed view tab)
+- [x] Bug fix: stale `'responsable'`/`'collaborator'` role values replaced across 6 files
+- [x] Merged into `jonas` 2026-05-18 (was previously unmerged)
 
 ### Task 5
 - [x] N0 columns added to `tache_resultats` (statut, soumis_n0_le, action_n0, commentaire_n0, n0_actor_id, action_n0_le)

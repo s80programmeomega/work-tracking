@@ -255,7 +255,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useNotifications } from '@/composables/useNotifications';
-import { api } from '@/api';
+import api from '@/api/axios';
 import SubmitResultModal from '../../../components/taches/SubmitResultModal.vue';
 
 

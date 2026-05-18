@@ -2,9 +2,6 @@
 import { ref, onMounted, nextTick } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/authStore'
-import AcceptProjetInvitation from '../pages/AcceptProjetInvitation.vue'
-import TachesAttendantCollegues from '../pages/TachesAttendantCollegues.vue'
-import TachesParUtilisateur from '../pages/TachesParUtilisateur.vue'
 
 const loading = ref(false)
 export const isLoading = ref(false)
@@ -146,7 +143,7 @@ const router = createRouter({
     {
       path: '/invitations/projet/:token',
       name: 'AcceptProjetInvitation',
-      component: AcceptProjetInvitation,
+      component: () => import('../pages/AcceptProjetInvitation.vue'),
       meta: {
         requiresAuth: false, // Accessible sans authentification
         layout: 'fullscreen'
@@ -361,7 +358,7 @@ const router = createRouter({
     {
       path: '/taches/waiting-colleagues',
       name: 'taches.waiting-colleagues',
-      component: TachesAttendantCollegues,
+      component: () => import('../pages/TachesAttendantCollegues.vue'),
       meta: {
         requiresAuth: true,
         title: 'En Attente de Collègues'
@@ -370,7 +367,7 @@ const router = createRouter({
     {
       path: '/taches/coordination',
       name: 'taches.coordination',
-      component: TachesParUtilisateur,
+      component: () => import('../pages/TachesParUtilisateur.vue'),
       meta: {
         requiresAuth: true,
         title: 'Vue Coordination',

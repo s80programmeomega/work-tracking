@@ -17,25 +17,32 @@
 ## Current Session
 
 **Date:** 2026-05-18
-**Session goal:** Pre-merge checks, Workspace.php curly-quote bug fix, merge to jonas, Task 6 implementation
-**Status:** Task 6 complete. 80 tests passing. Branch pushed; pending merge into `jonas`.
+**Session goal:** Pre-merge checks, bug fixes, Task 6 implementation, Task 4 recovery and merge
+**Status:** Task 6 complete + Task 4 restored. 80 tests passing. Subtask UI back on all branches. Pending: manual bypass testing by Jonas, then merge task-6 into jonas.
 
 ---
 
 ## Current Task
 
-**Task:** 7 — N1 Scores + Pending Validations Dashboard
-**Branch:** `feature/v2-task-7-scores-dashboard` _(not created yet)_
-**Status:** Not started
+**Task:** 6 — Anti-Sabotage Bypass (manual testing by Jonas in progress)
+**Branch:** `feature/v2-task-6-bypass`
+**Status:** Implementation complete — pending Jonas manual testing before merge into `jonas`
 
 **What to do next:**
-1. Merge `feature/v2-task-6-bypass` into `jonas`
-2. Create `feature/v2-task-7-scores-dashboard` from `jonas`
-3. Follow Task 7 in `IMPLEMENTATION_PLAN.md`
+1. Jonas tests Task 6 manually using `docs/testing/TASK_6_TESTING.md`
+2. Merge `feature/v2-task-6-bypass` into `jonas` (local `git merge --no-ff`)
+3. Push `jonas` to `origin`
+4. Create `feature/v2-task-7-scores-dashboard` from `jonas`
 
 ---
 
 ## Last Completed Task
+
+**Task 4** — Subtask UI (recovered and merged 2026-05-18)
+- Branch `feature/v2-task-4-subtask-ui` was complete but never merged into `jonas`
+- Restored: ST badge on kanban cards, `SousTacheList.vue`, `SousTacheForm.vue`, `useSousTaches.js`, sous-taches tab in task detail modal + modal compact view
+- Conflict resolution on merge: kept perm-arch (HEAD) for services/controllers, merged sous-tache permission exports into `useActivitePermissions.js`, kept both Guide 15 and Guide 16 in WORKING_GUIDELINES
+- Now available on both `jonas` and `feature/v2-task-6-bypass`
 
 **Task 6** — Anti-Sabotage Bypass
 - 2 migrations: `add_bypass_columns_to_tache_resultats`, `add_bypass_count_to_tache_user`
