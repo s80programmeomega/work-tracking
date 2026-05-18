@@ -51,7 +51,12 @@ export const useAuthStore = defineStore('auth', {
          */
         isSuperAdmin: (state) => {
             if (!state.user) return false;
-            return state.user.is_super_admin === true;
+            // Check explicit flag (set by UserResource) OR Spatie roles array
+            if (state.user.is_super_admin === true) return true;
+            if (Array.isArray(state.user.roles)) {
+                return state.user.roles.includes('super_admin')
+            }
+            return false
         },
 
         /**

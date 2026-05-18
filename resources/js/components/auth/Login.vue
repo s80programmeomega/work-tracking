@@ -11,6 +11,7 @@
           <form @submit.prevent="login">
             <div class="input-group mb-3">
               <input
+                dusk="email"
                 type="email"
                 class="form-control"
                 :class="{ 'is-invalid': errors.email }"
@@ -30,6 +31,7 @@
 
             <div class="input-group mb-3">
               <input
+                dusk="password"
                 type="password"
                 class="form-control"
                 :class="{ 'is-invalid': errors.password }"
@@ -58,6 +60,7 @@
 
             <div class="w-full">
               <button
+                dusk="login-button"
                 type="submit"
                 class="btn btn-primary w-full"
                 :disabled="loading"

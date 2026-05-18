@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Permission\Models\Role;
 
 class Activite extends Model
 {
@@ -51,7 +52,7 @@ class Activite extends Model
         parent::boot();
 
         static::creating(function ($activite) {
-            if (!$activite->code) {
+            if (! $activite->code) {
                 $activite->code = static::generateUniqueCode();
             }
         });
@@ -62,7 +63,7 @@ class Activite extends Model
         do {
             $latest = static::withTrashed()->latest('id')->first();
             $nextId = $latest ? $latest->id + 1 : 1;
-            $code = 'ACTIV-' . str_pad($nextId, 4, '0', STR_PAD_LEFT);
+            $code = 'ACTIV-'.str_pad($nextId, 4, '0', STR_PAD_LEFT);
         } while (static::where('code', $code)->exists());
 
         return $code;
@@ -77,16 +78,15 @@ class Activite extends Model
     }
 
     public function documents()
-{
-    return $this->morphMany(Document::class, 'documentable');
-}
-
+    {
+        return $this->morphMany(Document::class, 'documentable');
+    }
 
     public function membres()
     {
         return $this->belongsToMany(User::class, 'activite_user')
             ->withPivot([
-                'role',
+                'role_id',
                 'can_edit_activity',
                 'can_delete_activity',
                 'can_create_tasks',
@@ -99,7 +99,6 @@ class Activite extends Model
             ->withTimestamps();
     }
 
-
     public function responsable(): BelongsTo
     {
         return $this->belongsTo(User::class, 'responsable_id');
@@ -111,12 +110,11 @@ class Activite extends Model
         return $this->hasMany(Tache::class);
     }
 
-
     public function members(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'activite_user')
-           ->withPivot([
-                'role',
+            ->withPivot([
+                'role_id',
                 'can_edit_activity',
                 'can_delete_activity',
                 'can_create_tasks',
@@ -145,7 +143,8 @@ class Activite extends Model
         }
 
         $member = $this->members()->where('user_id', $user->id)->first();
-        return $member?->pivot->role;
+
+        return $member ? (Role::find($member->pivot->role_id)?->name) : null;
     }
 
     public function canUserValidateN1(User $user): bool
@@ -155,11 +154,11 @@ class Activite extends Model
         }
 
         $member = $this->members()->where('user_id', $user->id)->first();
+
         return $member?->pivot->can_validate_results ?? false;
     }
 
-
-     /**
+    /**
      * Vérifie si l'utilisateur peut modifier l'activité
      */
     public function canUserEdit(User $user): bool
@@ -181,6 +180,7 @@ class Activite extends Model
 
         // Membre avec permission can_edit_tasks
         $member = $this->members()->where('user_id', $user->id)->first();
+
         return $member && $member->pivot->can_edit_activity === true;
     }
 
@@ -206,6 +206,7 @@ class Activite extends Model
 
         // Membre avec permission can_assign_users
         $member = $this->members()->where('user_id', $user->id)->first();
+
         return $member && $member->pivot->can_assign_users === true;
     }
 
@@ -231,6 +232,7 @@ class Activite extends Model
 
         // Membre avec permission can_create_tasks
         $member = $this->members()->where('user_id', $user->id)->first();
+
         return $member && $member->pivot->can_create_tasks === true;
     }
 
@@ -261,6 +263,7 @@ class Activite extends Model
         }
 
         $member = $this->members()->where('user_id', $user->id)->first();
+
         return $member && $member->pivot->can_delete_tasks === true;
     }
 
@@ -282,6 +285,7 @@ class Activite extends Model
         }
 
         $member = $this->members()->where('user_id', $user->id)->first();
+
         return $member && $member->pivot->can_validate_results === true;
     }
 
@@ -339,7 +343,7 @@ class Activite extends Model
 
         return false;
     }
-    
+
     /**
      * Scopes
      */
@@ -372,7 +376,7 @@ class Activite extends Model
 
     public function scopeSearch($query, $term)
     {
-        if (!$term) {
+        if (! $term) {
             return $query;
         }
 
@@ -393,7 +397,7 @@ class Activite extends Model
      */
     public function getIsOverdueAttribute(): bool
     {
-        if (!$this->date_fin || $this->status !== 'active') {
+        if (! $this->date_fin || $this->status !== 'active') {
             return false;
         }
 
@@ -402,7 +406,7 @@ class Activite extends Model
 
     public function getDaysRemainingAttribute(): ?int
     {
-        if (!$this->date_fin || $this->status !== 'active') {
+        if (! $this->date_fin || $this->status !== 'active') {
             return null;
         }
 
@@ -470,7 +474,4 @@ class Activite extends Model
             static::where('id', $id)->update(['ordre' => $index]);
         }
     }
-
-
-
 }

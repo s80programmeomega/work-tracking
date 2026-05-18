@@ -16,31 +16,31 @@ export function useInvitationPermissions(workspace) {
         key: 'can_create_projects',
         label: 'Créer des projets',
         description: 'Autoriser la création de nouveaux projets dans le workspace',
-        allowedRoles: ['owner', 'admin', 'member']
+        allowedRoles: ['owner', 'manager', 'cadre']
       },
       can_view_all_projects: {
         key: 'can_view_all_projects',
         label: 'Voir tous les projets',
         description: 'Autoriser la visualisation de tous les projets, même ceux auxquels le membre n\'est pas assigné',
-        allowedRoles: ['owner', 'admin', 'member']
+        allowedRoles: ['owner', 'manager', 'cadre']
       },
       can_invite_members: {
         key: 'can_invite_members',
         label: 'Inviter des membres',
         description: 'Autoriser l\'invitation de nouveaux membres au workspace',
-        allowedRoles: ['owner', 'admin']
+        allowedRoles: ['owner', 'manager']
       },
       can_delete_members: {
         key: 'can_delete_members',
         label: 'Supprimer des membres',
         description: 'Autoriser la suppression de membres du workspace',
-        allowedRoles: ['owner', 'admin']
+        allowedRoles: ['owner', 'manager']
       },
       can_manage_settings: {
         key: 'can_manage_settings',
         label: 'Gérer les paramètres',
         description: 'Autoriser la modification des paramètres du workspace',
-        allowedRoles: ['owner', 'admin']
+        allowedRoles: ['owner', 'manager']
       },
       can_transfer_ownership: {
         key: 'can_transfer_ownership',
@@ -98,9 +98,11 @@ export function useInvitationPermissions(workspace) {
   // Détermine si une permission est recommandée pour un rôle
   const isPermissionRecommended = (permissionKey, role) => {
     const recommendations = {
-      admin: ['can_create_projects', 'can_view_all_projects', 'can_invite_members'],
-      member: ['can_create_projects'],
-      viewer: []
+      manager: ['can_create_projects', 'can_view_all_projects', 'can_invite_members'],
+      cadre: ['can_create_projects'],
+      collaborateur: [],
+      stagiaire: [],
+      observateur: []
     }
     return recommendations[role]?.includes(permissionKey) || false
   }
@@ -108,7 +110,7 @@ export function useInvitationPermissions(workspace) {
   // Retourne les permissions par défaut pour un rôle
   const getDefaultPermissionsForRole = (role) => {
     const defaults = {
-      admin: {
+      manager: {
         can_create_projects: true,
         can_view_all_projects: true,
         can_invite_members: true,
@@ -116,7 +118,7 @@ export function useInvitationPermissions(workspace) {
         can_manage_settings: true,
         can_transfer_ownership: false
       },
-      member: {
+      cadre: {
         can_create_projects: true,
         can_view_all_projects: false,
         can_invite_members: false,
@@ -124,7 +126,23 @@ export function useInvitationPermissions(workspace) {
         can_manage_settings: false,
         can_transfer_ownership: false
       },
-      viewer: {
+      collaborateur: {
+        can_create_projects: false,
+        can_view_all_projects: false,
+        can_invite_members: false,
+        can_delete_members: false,
+        can_manage_settings: false,
+        can_transfer_ownership: false
+      },
+      stagiaire: {
+        can_create_projects: false,
+        can_view_all_projects: false,
+        can_invite_members: false,
+        can_delete_members: false,
+        can_manage_settings: false,
+        can_transfer_ownership: false
+      },
+      observateur: {
         can_create_projects: false,
         can_view_all_projects: false,
         can_invite_members: false,
@@ -133,7 +151,7 @@ export function useInvitationPermissions(workspace) {
         can_transfer_ownership: false
       }
     }
-    return defaults[role] || defaults.member
+    return defaults[role] || defaults.observateur
   }
 
   // Valide une configuration de permissions
@@ -151,8 +169,8 @@ export function useInvitationPermissions(workspace) {
     })
 
     // Vérifier les conflits spécifiques
-    if (role === 'viewer' && permissions.can_create_projects) {
-      errors.push('Un viewer ne peut pas avoir la permission de créer des projets')
+    if (role === 'observateur' && permissions.can_create_projects) {
+      errors.push('Un observateur ne peut pas avoir la permission de créer des projets')
     }
 
     if (!isOwner.value && permissions.can_transfer_ownership) {

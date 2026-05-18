@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Builder;
+use Spatie\Permission\Models\Role;
 
 class Projet extends Model
 {
@@ -71,22 +72,21 @@ class Projet extends Model
         });
     }
 
-
     public static function generateUniqueCode(): string
     {
         do {
             $latestProjet = static::withTrashed()->latest('id')->first();
             $nextId = $latestProjet ? $latestProjet->id + 1 : 1;
-            $code = 'PROJ-' . str_pad($nextId, 4, '0', STR_PAD_LEFT);
+            $code = 'PROJ-'.str_pad($nextId, 4, '0', STR_PAD_LEFT);
         } while (static::where('code', $code)->exists());
 
         return $code;
     }
 
     public function documents()
-{
-    return $this->morphMany(Document::class, 'documentable');
-}
+    {
+        return $this->morphMany(Document::class, 'documentable');
+    }
 
     /**
      * Relationships
@@ -101,21 +101,21 @@ class Projet extends Model
         return $this->belongsTo(User::class, 'responsable_id');
     }
 
-public function members(): BelongsToMany
-{
-    return $this->belongsToMany(User::class, 'projet_user')
-        ->withPivot([
-            'role',
-            'can_edit',
-            'can_delete',
-            'can_invite',
-            'can_delete_member',
-            'can_create_activity',
-            'can_edit_activity',
-            'can_delete_activity',
-        ])
-        ->withTimestamps();
-}
+    public function members(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'projet_user')
+            ->withPivot([
+                'role_id',
+                'can_edit',
+                'can_delete',
+                'can_invite',
+                'can_delete_member',
+                'can_create_activity',
+                'can_edit_activity',
+                'can_delete_activity',
+            ])
+            ->withTimestamps();
+    }
 
     public function creator(): BelongsTo
     {
@@ -127,6 +127,7 @@ public function members(): BelongsToMany
         // Responsable du projet = Manager N2
         return $this->responsable_id === $user->id;
     }
+
     public function isAccessibleBy(User $user): bool
     {
         // Super admin
@@ -290,11 +291,15 @@ public function members(): BelongsToMany
                     $workspaceQuery->where(function ($wq) use ($userId) {
                         // Owner du workspace
                         $wq->where('owner_id', $userId)
-                            // OU Admin/Super Admin du workspace
+                            // OU manager/owner du workspace via role_id FK
                             ->orWhereHas('members', function ($memberQuery) use ($userId) {
-                            $memberQuery->where('workspace_members.user_id', $userId)
-                                ->whereIn('workspace_members.role', ['owner', 'admin']);
-                        });
+                                $memberQuery->where('workspace_members.user_id', $userId)
+                                    ->whereIn('workspace_members.role_id', function ($roleQuery) {
+                                        $roleQuery->select('id')
+                                            ->from('roles')
+                                            ->whereIn('name', ['owner', 'manager']);
+                                    });
+                            });
                     });
                 });
         });
@@ -310,7 +315,7 @@ public function members(): BelongsToMany
             ->get(['users.id', 'users.nom', 'users.email', 'users.avatar']);
 
         // Ajouter le responsable du projet s'il n'est pas déjà dans la liste
-        if ($this->responsable && !$members->contains('id', $this->responsable->id)) {
+        if ($this->responsable && ! $members->contains('id', $this->responsable->id)) {
             $members->prepend($this->responsable);
         }
 
@@ -322,31 +327,26 @@ public function members(): BelongsToMany
      */
     public function userCanSeeAllWorkspaceProjects(User $user): bool
     {
-        if (!$this->workspace) {
+        if (! $this->workspace) {
             return false;
         }
 
-        if ($user->isSuperAdmin())
+        if ($user->isSuperAdmin()) {
             return true;
-        if ($this->workspace->owner_id === $user->id)
-            return true;
-
-        // Admin du workspace
-        $member = $this->workspace->members()->where('user_id', $user->id)->first();
-        if ($member && in_array($member->pivot->role, ['owner', 'admin'])) {
+        }
+        if ($this->workspace->owner_id === $user->id) {
             return true;
         }
 
-        return false;
+        return $this->workspace->isOwnerOrAdmin($user);
     }
-
 
     /**
      * Accessors
      */
     public function getIsOverdueAttribute(): bool
     {
-        if (!$this->date_fin || in_array($this->status, ['completed', 'archived'])) {
+        if (! $this->date_fin || in_array($this->status, ['completed', 'archived'])) {
             return false;
         }
 
@@ -355,7 +355,7 @@ public function members(): BelongsToMany
 
     public function getDaysRemainingAttribute(): ?int
     {
-        if (!$this->date_fin || in_array($this->status, ['completed', 'archived'])) {
+        if (! $this->date_fin || in_array($this->status, ['completed', 'archived'])) {
             return null;
         }
 
@@ -380,7 +380,6 @@ public function members(): BelongsToMany
         return $this->members()->where('user_id', $user->id)->exists()
             || $this->responsable_id === $user->id;
     }
-
 
     public function hasAccess(User $user): bool
     {
@@ -407,13 +406,13 @@ public function members(): BelongsToMany
         // Si utilisateur est membre du projet
         return $this->members()->where('user_id', $user->id)->exists();
 
-
     }
 
     public function getMemberRole(User $user): ?string
     {
         $member = $this->members()->where('user_id', $user->id)->first();
-        return $member?->pivot->role;
+
+        return $member ? (Role::find($member->pivot->role_id)?->name) : null;
     }
 
     public function canUserEdit(User $user): bool
@@ -427,6 +426,7 @@ public function members(): BelongsToMany
         // }
 
         $member = $this->members()->where('user_id', $user->id)->first();
+
         return $member?->pivot->can_edit ?? false;
     }
 
@@ -437,6 +437,7 @@ public function members(): BelongsToMany
         }
 
         $member = $this->members()->where('user_id', $user->id)->first();
+
         return $member?->pivot->can_delete ?? false;
     }
 
@@ -447,6 +448,7 @@ public function members(): BelongsToMany
         }
 
         $member = $this->members()->where('user_id', $user->id)->first();
+
         return $member?->pivot->can_invite ?? false;
     }
 
@@ -520,7 +522,6 @@ public function members(): BelongsToMany
                 ->orWhere('visibility', 'public');
         });
     }
-
 
     /**
      * ✅ CALCUL DE LA PROGRESSION BASÉE SUR LA MOYENNE DES ACTIVITÉS AVEC POIDS
@@ -623,7 +624,4 @@ public function members(): BelongsToMany
             $this->update(['progression' => $nouvelleProgression]);
         }
     }
-
-
-
 }

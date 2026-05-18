@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Spatie\Permission\Models\Role;
 
 /**
  * Service de gestion centralisée des accès et permissions
@@ -59,10 +60,9 @@ class AccessManagementService
                     // created_by reste inchangé pour la traçabilité ✅
                 ]);
 
-                // Ajouter le nouveau responsable comme admin du projet s'il n'est pas déjà membre
                 if (! $projet->members()->where('user_id', $newResponsable->id)->exists()) {
                     $projet->members()->attach($newResponsable->id, [
-                        'role' => 'admin',
+                        'role_id' => Role::findByName('manager', 'web')->id,
                         'can_edit' => true,
                         'can_delete' => true,
                         'can_invite' => true,
@@ -83,7 +83,7 @@ class AccessManagementService
                         // Ajouter le nouveau responsable comme membre de l'activité
                         if (! $activite->members()->where('user_id', $newResponsable->id)->exists()) {
                             $activite->members()->attach($newResponsable->id, [
-                                'role' => 'responsable',
+                                'role_id' => Role::findByName('cadre', 'web')->id,
                                 'can_create_tasks' => true,
                                 'can_edit_tasks' => true,
                                 'can_delete_tasks' => true,
@@ -336,45 +336,20 @@ class AccessManagementService
             $workspace->update(['owner_id' => $newOwner->id]);
 
             // Mettre à jour les rôles dans workspace_members
-            // Ancien owner devient admin
-            $workspace->members()->updateExistingPivot($oldOwner->id, [
-                'role' => 'admin',
-                'permissions' => json_encode([
-                    'can_view_all_projects' => true,
-                    'can_create_projects' => true,
-                    'can_invite_members' => true,
-                    'can_manage_settings' => true,
-                    'can_transfer_ownership' => false,
-                    'can_delete_members' => true,
-                ]),
-            ]);
+            $managerRoleId = Role::findByName('manager', 'web')->id;
+            $ownerRoleId = Role::findByName('owner', 'web')->id;
+
+            // Ancien owner devient manager
+            $workspace->members()->updateExistingPivot($oldOwner->id, ['role_id' => $managerRoleId]);
 
             // Nouveau owner
             if (! $workspace->members()->where('user_id', $newOwner->id)->exists()) {
                 $workspace->members()->attach($newOwner->id, [
-                    'role' => 'owner',
-                    'permissions' => json_encode([
-                        'can_view_all_projects' => true,
-                        'can_create_projects' => true,
-                        'can_delete_projects' => true,
-                        'can_invite_members' => true,
-                        'can_manage_settings' => true,
-                        'can_transfer_ownership' => true,
-                    ]),
+                    'role_id' => $ownerRoleId,
                     'invited_at' => now(),
                 ]);
             } else {
-                $workspace->members()->updateExistingPivot($newOwner->id, [
-                    'role' => 'owner',
-                    'permissions' => json_encode([
-                        'can_view_all_projects' => true,
-                        'can_create_projects' => true,
-                        'can_delete_projects' => true,
-                        'can_invite_members' => true,
-                        'can_manage_settings' => true,
-                        'can_transfer_ownership' => true,
-                    ]),
-                ]);
+                $workspace->members()->updateExistingPivot($newOwner->id, ['role_id' => $ownerRoleId]);
             }
 
             // Log

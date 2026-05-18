@@ -6,29 +6,30 @@ namespace App\Policies;
 
 use App\Models\Projet;
 use App\Models\User;
-use App\Services\PermissionService;
+use App\Permissions\ContextualPermissionGate;
+use App\Permissions\Permission;
 
 class ProjetPolicy
 {
-    public function __construct(protected PermissionService $permissionService) {}
+    public function __construct(protected ContextualPermissionGate $gate) {}
 
     public function view(User $user, Projet $projet): bool
     {
-        return $this->permissionService->canViewProject($user, $projet);
+        return $this->gate->userCan($user, Permission::PROJETS_VIEW, $projet);
     }
 
     public function update(User $user, Projet $projet): bool
     {
-        return $this->permissionService->canEditProject($user, $projet);
+        return $this->gate->userCan($user, Permission::PROJETS_EDIT, $projet);
     }
 
     public function delete(User $user, Projet $projet): bool
     {
-        return $this->permissionService->canDeleteProject($user, $projet);
+        return $this->gate->userCan($user, Permission::PROJETS_DELETE, $projet);
     }
 
     public function manageMembers(User $user, Projet $projet): bool
     {
-        return $this->permissionService->canManageProjectMembers($user, $projet);
+        return $this->gate->userCan($user, Permission::PROJETS_MANAGE_MEMBERS, $projet);
     }
 }

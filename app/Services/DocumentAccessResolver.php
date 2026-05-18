@@ -2,18 +2,19 @@
 
 namespace App\Services;
 
-use App\Models\Document;
-use App\Models\User;
-use App\Models\Workspace;
-use App\Models\Projet;
 use App\Models\Activite;
+use App\Models\Document;
+use App\Models\Projet;
 use App\Models\Tache;
 use App\Models\TacheResultat;
+use App\Models\User;
+use App\Models\Workspace;
 use Illuminate\Support\Facades\Log;
+use Spatie\Permission\Models\Role;
 
 /**
  * Service de résolution des permissions sur les documents
- * 
+ *
  * Gère la logique complexe d'accès aux documents selon :
  * - La hiérarchie (Workspace → Projet → Activité → Tâche → Résultat)
  * - Les rôles et permissions des utilisateurs
@@ -182,7 +183,6 @@ class DocumentAccessResolver
      * PERMISSIONS DIRECTES (DocumentPermission)
      * ===================================================================
      */
-
     protected function hasDirectPermission(User $user, Document $document, string $permission): bool
     {
         $perm = $document->permissions()
@@ -203,10 +203,9 @@ class DocumentAccessResolver
      * PERMISSIONS CONTEXTUELLES (Héritées de la hiérarchie)
      * ===================================================================
      */
-
     protected function hasContextualAccess(User $user, Document $document, string $action): bool
     {
-        if (!$document->documentable) {
+        if (! $document->documentable) {
             return false;
         }
 
@@ -239,33 +238,24 @@ class DocumentAccessResolver
      * WORKSPACE : Permissions sur les documents du workspace
      * ===================================================================
      */
-
-   protected function checkWorkspaceAccess(User $user, Workspace $workspace, string $action): bool
+    protected function checkWorkspaceAccess(User $user, Workspace $workspace, string $action): bool
     {
         if ($workspace->owner_id === $user->id) {
             return true;
         }
 
         $member = $workspace->members()->where('user_id', $user->id)->first();
-        if (!$member) {
+        if (! $member) {
             return false;
         }
 
-        $role = $member->pivot->role ?? null;
-        $permissions = $member->pivot->permissions ?? [];
-        
-        // FIX: Décoder si JSON string
-        if (is_string($permissions)) {
-            $permissions = json_decode($permissions, true) ?? [];
-        }
+        $roleName = Role::find($member->pivot->role_id)?->name;
 
-        // Admins ont tous les droits par défaut
-        if ($role === 'admin' || $role === 'owner') {
+        if (in_array($roleName, ['owner', 'manager'])) {
             return true;
         }
 
-        // Vérifier la permission spécifique
-        return $this->checkPermissionInArray($permissions, "documents_{$action}");
+        return $this->checkPermissionInArray([], "documents_{$action}");
     }
 
     /**
@@ -273,7 +263,6 @@ class DocumentAccessResolver
      * PROJET : Permissions sur les documents du projet
      * ===================================================================
      */
-
     protected function checkProjetAccess(User $user, Projet $projet, string $action): bool
     {
         // Responsable du projet (toutes les permissions)
@@ -288,7 +277,7 @@ class DocumentAccessResolver
 
         // Membre du projet avec permissions
         $member = $projet->members()->where('user_id', $user->id)->first();
-        if (!$member) {
+        if (! $member) {
             return false;
         }
 
@@ -315,7 +304,6 @@ class DocumentAccessResolver
      * ACTIVITÉ : Permissions sur les documents de l'activité
      * ===================================================================
      */
-
     protected function checkActiviteAccess(User $user, Activite $activite, string $action): bool
     {
         // Responsable de l'activité (toutes les permissions)
@@ -337,7 +325,7 @@ class DocumentAccessResolver
 
         // Membre de l'activité avec permissions
         $member = $activite->membres()->where('user_id', $user->id)->first();
-        if (!$member) {
+        if (! $member) {
             return false;
         }
 
@@ -364,7 +352,6 @@ class DocumentAccessResolver
      * TÂCHE : Permissions sur les documents de la tâche
      * ===================================================================
      */
-
     protected function checkTacheAccess(User $user, Tache $tache, string $action): bool
     {
         // Responsable de l'activité parente
@@ -386,7 +373,7 @@ class DocumentAccessResolver
 
         // Assigné à la tâche
         $assignee = $tache->assignees()->where('user_id', $user->id)->first();
-        if (!$assignee) {
+        if (! $assignee) {
             return false;
         }
 
@@ -418,7 +405,6 @@ class DocumentAccessResolver
      * RÉSULTAT DE TÂCHE : Permissions sur les documents du résultat
      * ===================================================================
      */
-
     protected function checkResultatAccess(User $user, TacheResultat $resultat, string $action): bool
     {
         // L'assigné qui a soumis le résultat (toutes les permissions)
@@ -462,11 +448,10 @@ class DocumentAccessResolver
      * UPLOAD : Qui peut uploader des documents ?
      * ===================================================================
      */
-
     protected function canUploadToWorkspace(User $user, int $workspaceId): bool
     {
         $workspace = Workspace::find($workspaceId);
-        if (!$workspace) {
+        if (! $workspace) {
             return false;
         }
 
@@ -475,19 +460,13 @@ class DocumentAccessResolver
             return true;
         }
 
-        // Admin du workspace
-        $member = $workspace->members()->where('user_id', $user->id)->first();
-        if ($member && in_array($member->pivot->role, ['owner', 'admin'])) {
-            return true;
-        }
-
-        return false;
+        return $workspace->isOwnerOrAdmin($user);
     }
 
     protected function canUploadToProjet(User $user, int $projetId): bool
     {
         $projet = Projet::find($projetId);
-        if (!$projet) {
+        if (! $projet) {
             return false;
         }
 
@@ -503,13 +482,14 @@ class DocumentAccessResolver
 
         // Membre du projet avec permission can_edit
         $member = $projet->members()->where('user_id', $user->id)->first();
+
         return $member && ($member->pivot->can_edit ?? false);
     }
 
     protected function canUploadToActivite(User $user, int $activiteId): bool
     {
         $activite = Activite::find($activiteId);
-        if (!$activite) {
+        if (! $activite) {
             return false;
         }
 
@@ -530,13 +510,14 @@ class DocumentAccessResolver
 
         // Membre de l'activité avec permission can_edit_activity
         $member = $activite->membres()->where('user_id', $user->id)->first();
+
         return $member && ($member->pivot->can_edit_activity ?? false);
     }
 
     protected function canUploadToTache(User $user, int $tacheId): bool
     {
         $tache = Tache::find($tacheId);
-        if (!$tache) {
+        if (! $tache) {
             return false;
         }
 
@@ -562,7 +543,7 @@ class DocumentAccessResolver
     protected function canUploadToResultat(User $user, int $resultatId): bool
     {
         $resultat = TacheResultat::find($resultatId);
-        if (!$resultat) {
+        if (! $resultat) {
             return false;
         }
 
@@ -575,14 +556,13 @@ class DocumentAccessResolver
      * HELPERS
      * ===================================================================
      */
-
     protected function checkPermissionInArray($permissions, string $permissionKey): bool
     {
         if (is_string($permissions)) {
             $permissions = json_decode($permissions, true) ?? [];
         }
 
-        if (!is_array($permissions)) {
+        if (! is_array($permissions)) {
             return false;
         }
 

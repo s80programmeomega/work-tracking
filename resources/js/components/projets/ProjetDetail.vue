@@ -1059,8 +1059,7 @@ const canCreateActivities = computed(() => {
 
   if (!userMember) return false
 
-  // Admin du projet peut créer
-  if (userMember.role === 'admin') return true
+  if (userMember.role === 'manager') return true
 
   // Vérifier la permission spécifique
   return userMember.can_create_activity === true || userMember.can_create_activity === 1

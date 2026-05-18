@@ -109,17 +109,17 @@
               </label>
               
               <div class="grid grid-cols-1 gap-3">
-                <!-- Admin Role -->
+                <!-- Manager Role -->
                 <label :class="[
                   'relative flex cursor-pointer rounded-lg border p-4 focus:outline-none transition-all',
-                  form.role === 'admin'
+                  form.role === 'manager'
                     ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500 dark:border-blue-400 ring-2 ring-blue-500'
                     : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500'
                 ]">
-                  <input type="radio" v-model="form.role" value="admin" class="sr-only" @change="handleRoleChange">
+                  <input type="radio" v-model="form.role" value="manager" class="sr-only" @change="handleRoleChange">
                   <div class="flex items-start w-full">
                     <div class="flex items-center h-5">
-                      <svg :class="form.role === 'admin' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400'"
+                      <svg :class="form.role === 'manager' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400'"
                         class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd"
                           d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -128,7 +128,7 @@
                     </div>
                     <div class="ml-3 flex-1">
                       <div class="flex items-center gap-2">
-                        <span class="text-sm font-semibold text-gray-900 dark:text-white">Administrateur</span>
+                        <span class="text-sm font-semibold text-gray-900 dark:text-white">Manager</span>
                         <span
                           class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
                           Tous les droits
@@ -141,17 +141,17 @@
                   </div>
                 </label>
 
-                <!-- Member Role -->
+                <!-- Cadre Role -->
                 <label :class="[
                   'relative flex cursor-pointer rounded-lg border p-4 focus:outline-none transition-all',
-                  form.role === 'member'
+                  form.role === 'cadre'
                     ? 'bg-green-50 dark:bg-green-900/20 border-green-500 dark:border-green-400 ring-2 ring-green-500'
                     : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 hover:border-green-400 dark:hover:border-green-500'
                 ]">
-                  <input type="radio" v-model="form.role" value="member" class="sr-only" @change="handleRoleChange">
+                  <input type="radio" v-model="form.role" value="cadre" class="sr-only" @change="handleRoleChange">
                   <div class="flex items-start w-full">
                     <div class="flex items-center h-5">
-                      <svg :class="form.role === 'member' ? 'text-green-600 dark:text-green-400' : 'text-gray-400'"
+                      <svg :class="form.role === 'cadre' ? 'text-green-600 dark:text-green-400' : 'text-gray-400'"
                         class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd"
                           d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -160,30 +160,62 @@
                     </div>
                     <div class="ml-3 flex-1">
                       <div class="flex items-center gap-2">
-                        <span class="text-sm font-semibold text-gray-900 dark:text-white">Membre</span>
+                        <span class="text-sm font-semibold text-gray-900 dark:text-white">Cadre</span>
                         <span
                           class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
                           Édition
                         </span>
                       </div>
                       <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        Peut voir et modifier le projet, créer et éditer des activités, mais ne peut pas supprimer ou inviter
+                        Peut créer et gérer des activités, valider les résultats N1, mais ne peut pas supprimer ou inviter
                       </p>
                     </div>
                   </div>
                 </label>
 
-                <!-- Viewer Role -->
+                <!-- Collaborateur Role -->
                 <label :class="[
                   'relative flex cursor-pointer rounded-lg border p-4 focus:outline-none transition-all',
-                  form.role === 'viewer'
+                  form.role === 'collaborateur'
+                    ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-500 dark:border-yellow-400 ring-2 ring-yellow-500'
+                    : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 hover:border-yellow-400 dark:hover:border-yellow-500'
+                ]">
+                  <input type="radio" v-model="form.role" value="collaborateur" class="sr-only" @change="handleRoleChange">
+                  <div class="flex items-start w-full">
+                    <div class="flex items-center h-5">
+                      <svg :class="form.role === 'collaborateur' ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-400'"
+                        class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                          clip-rule="evenodd" />
+                      </svg>
+                    </div>
+                    <div class="ml-3 flex-1">
+                      <div class="flex items-center gap-2">
+                        <span class="text-sm font-semibold text-gray-900 dark:text-white">Collaborateur</span>
+                        <span
+                          class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
+                          Participation
+                        </span>
+                      </div>
+                      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Participe aux tâches assignées et peut soumettre des résultats
+                      </p>
+                    </div>
+                  </div>
+                </label>
+
+                <!-- Observateur Role -->
+                <label :class="[
+                  'relative flex cursor-pointer rounded-lg border p-4 focus:outline-none transition-all',
+                  form.role === 'observateur'
                     ? 'bg-gray-50 dark:bg-gray-700 border-gray-500 dark:border-gray-400 ring-2 ring-gray-500'
                     : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 hover:border-gray-400'
                 ]">
-                  <input type="radio" v-model="form.role" value="viewer" class="sr-only" @change="handleRoleChange">
+                  <input type="radio" v-model="form.role" value="observateur" class="sr-only" @change="handleRoleChange">
                   <div class="flex items-start w-full">
                     <div class="flex items-center h-5">
-                      <svg :class="form.role === 'viewer' ? 'text-gray-600 dark:text-gray-400' : 'text-gray-400'"
+                      <svg :class="form.role === 'observateur' ? 'text-gray-600 dark:text-gray-400' : 'text-gray-400'"
                         class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd"
                           d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -455,7 +487,7 @@ const form = ref({
 const handleRoleChange = () => {
   const role = form.value.role
 
-  if (role === 'admin') {
+  if (role === 'manager') {
     form.value.can_edit = true
     form.value.can_delete = true
     form.value.can_invite = true
@@ -463,7 +495,7 @@ const handleRoleChange = () => {
     form.value.can_create_activity = true
     form.value.can_edit_activity = true
     form.value.can_delete_activity = true
-  } else if (role === 'member') {
+  } else if (role === 'cadre') {
     form.value.can_edit = true
     form.value.can_delete = false
     form.value.can_invite = false
@@ -471,7 +503,7 @@ const handleRoleChange = () => {
     form.value.can_create_activity = true
     form.value.can_edit_activity = true
     form.value.can_delete_activity = false
-  } else if (role === 'viewer') {
+  } else if (role === 'collaborateur' || role === 'stagiaire' || role === 'observateur') {
     form.value.can_edit = false
     form.value.can_delete = false
     form.value.can_invite = false
@@ -482,15 +514,11 @@ const handleRoleChange = () => {
   }
 }
 
-// ✅ Empêcher la modification manuelle des permissions pour les rôles restreints
 watch(() => form.value.role, (newRole) => {
-  if (newRole === 'member' || newRole === 'viewer') {
+  if (newRole === 'collaborateur' || newRole === 'stagiaire' || newRole === 'observateur') {
     if (form.value.can_delete) form.value.can_delete = false
     if (form.value.can_invite) form.value.can_invite = false
     if (form.value.can_delete_member) form.value.can_delete_member = false
-    if (newRole === 'member' && form.value.can_delete_activity) {
-      form.value.can_delete_activity = false
-    }
   }
 })
 
@@ -507,9 +535,11 @@ const getInitials = (name) => {
 const getRoleLabel = (role) => {
   const labels = {
     owner: 'Propriétaire',
-    admin: 'Administrateur',
-    member: 'Membre',
-    viewer: 'Observateur'
+    manager: 'Manager',
+    cadre: 'Cadre',
+    collaborateur: 'Collaborateur',
+    stagiaire: 'Stagiaire',
+    observateur: 'Observateur'
   }
   return labels[role] || role
 }
@@ -517,11 +547,13 @@ const getRoleLabel = (role) => {
 const getRoleBadgeClass = (role) => {
   const classes = {
     owner: 'text-purple-800 bg-purple-100 dark:bg-purple-900/30 dark:text-purple-300',
-    admin: 'text-blue-800 bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300',
-    member: 'text-green-800 bg-green-100 dark:bg-green-900/30 dark:text-green-300',
-    viewer: 'text-gray-800 bg-gray-100 dark:bg-gray-700 dark:text-gray-300'
+    manager: 'text-blue-800 bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300',
+    cadre: 'text-green-800 bg-green-100 dark:bg-green-900/30 dark:text-green-300',
+    collaborateur: 'text-yellow-800 bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-300',
+    stagiaire: 'text-orange-800 bg-orange-100 dark:bg-orange-900/30 dark:text-orange-300',
+    observateur: 'text-gray-800 bg-gray-100 dark:bg-gray-700 dark:text-gray-300'
   }
-  return classes[role] || classes.viewer
+  return classes[role] || classes.observateur
 }
 
 const handleSubmit = async () => {

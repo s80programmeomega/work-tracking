@@ -259,7 +259,9 @@
         <!-- Bottom Actions -->
         <div v-if="isExpanded || isHovered || isMobileOpen"
             class="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
-            <router-link to="/settings"
+            <router-link
+                v-if="canManageSettings || isSuperAdmin"
+                :to="currentWorkspace?.id ? { name: 'workspaces.settings', params: { id: currentWorkspace.id } } : '/workspaces'"
                 class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                 <SettingsIcon class="w-5 h-5" />
                 <span>Paramètres</span>
@@ -295,6 +297,7 @@ import { useSidebar } from '@/composables/useSidebar';
 import api from '@/api/axios'
 import { useAuthStore } from '@/stores/authStore';
 import { useWorkspace } from '@/composables/useWorkspace';
+import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions';
 
 
 const LogoDark = new URL('@/assets/images/logo/Logo-dark.jpg', import.meta.url).href
@@ -317,6 +320,8 @@ const {
     onWorkspaceChanged,
     initializeCurrentWorkspace
 } = useWorkspace();
+
+const { canManageSettings } = useWorkspacePermissions(currentWorkspace);
 
 // Workspace management
 const showWorkspaceSelector = ref(false);

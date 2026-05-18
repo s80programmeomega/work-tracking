@@ -12,22 +12,24 @@ use App\Models\User;
 use App\Models\Workspace;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Tests\Traits\AttachesWithRoleId;
 
 class SousTacheApiTest extends TestCase
 {
-    use RefreshDatabase;
+    use AttachesWithRoleId, RefreshDatabase;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->artisan('db:seed', ['--class' => 'RolePermissionSeeder']);
+        $this->refreshRoleIdCache();
     }
 
     private function makeContext(): array
     {
         $workspace = Workspace::factory()->create();
         $owner = User::factory()->create();
-        $workspace->members()->attach($owner->id, ['role' => 'owner', 'permissions' => json_encode(['all'])]);
+        $this->attachWithRole($workspace->members(), $owner->id, 'owner');
 
         $projet = Projet::factory()->create(['workspace_id' => $workspace->id]);
         $activite = Activite::factory()->create(['projet_id' => $projet->id]);

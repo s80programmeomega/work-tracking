@@ -10,6 +10,8 @@ use App\Models\Tache;
 use App\Models\TacheResultat;
 use App\Models\User;
 use App\Models\Workspace;
+use App\Permissions\ContextualPermissionGate;
+use App\Permissions\Permission;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,7 +20,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * 🎯 EvaluationController - Gestion stricte des validations
- * 
+ *
  * Règles :
  * - N1 : UNIQUEMENT le responsable de l'activité
  * - N2 : UNIQUEMENT le responsable du projet
@@ -26,7 +28,6 @@ use Illuminate\Support\Facades\Log;
  */
 class EvaluationController extends Controller
 {
-
     /**
      * 📋 Résultats en attente de validation
      * Affiche uniquement ce que l'utilisateur peut réellement valider
@@ -70,7 +71,7 @@ class EvaluationController extends Controller
                 'pending_n1' => TacheResultatResource::collection($pendingN1),
                 'pending_n2' => TacheResultatResource::collection($pendingN2),
                 'counts' => $counts,
-            ]
+            ],
         ]);
     }
 
@@ -90,34 +91,34 @@ class EvaluationController extends Controller
             Log::warning('Tentative de validation N1 non autorisée', [
                 'user_id' => $user->id,
                 'resultat_id' => $resultat->id,
-                'responsable_activite_id' => $resultat->tache->activite->responsable_id
+                'responsable_activite_id' => $resultat->tache->activite->responsable_id,
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Seul le responsable de l\'activité peut valider ce résultat (N1)'
+                'message' => 'Seul le responsable de l\'activité peut valider ce résultat (N1)',
             ], 403);
         }
 
         // Vérifications supplémentaires
-        if (!$resultat->soumis_le) {
+        if (! $resultat->soumis_le) {
             return response()->json([
                 'success' => false,
-                'message' => 'Ce résultat n\'a pas encore été soumis'
+                'message' => 'Ce résultat n\'a pas encore été soumis',
             ], 422);
         }
 
         if ($resultat->valide_par_n1) {
             return response()->json([
                 'success' => false,
-                'message' => 'Ce résultat a déjà été validé N1'
+                'message' => 'Ce résultat a déjà été validé N1',
             ], 422);
         }
 
         if ($resultat->user_id === $user->id) {
             return response()->json([
                 'success' => false,
-                'message' => 'Vous ne pouvez pas valider votre propre résultat'
+                'message' => 'Vous ne pouvez pas valider votre propre résultat',
             ], 422);
         }
 
@@ -130,7 +131,7 @@ class EvaluationController extends Controller
                 'resultat_id' => $resultat->id,
                 'validateur_id' => $user->id,
                 'user_id' => $resultat->user_id,
-                'tache_id' => $resultat->tache_id
+                'tache_id' => $resultat->tache_id,
             ]);
 
             DB::commit();
@@ -143,8 +144,8 @@ class EvaluationController extends Controller
                     'validateurN1',
                     'validateurN2',
                     'documents',
-                    'tache.activite.projet'
-                ]))
+                    'tache.activite.projet',
+                ])),
             ]);
 
         } catch (\Exception $e) {
@@ -153,12 +154,12 @@ class EvaluationController extends Controller
             Log::error('❌ Erreur validation N1', [
                 'resultat_id' => $resultat->id,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 422);
         }
     }
@@ -176,34 +177,34 @@ class EvaluationController extends Controller
 
         // ⚠️ VÉRIFICATION STRICTE : Uniquement responsable du projet
         if (
-            !$resultat->tache->activite->projet ||
+            ! $resultat->tache->activite->projet ||
             $resultat->tache->activite->projet->responsable_id !== $user->id
         ) {
 
             Log::warning('Tentative de validation N2 non autorisée', [
                 'user_id' => $user->id,
                 'resultat_id' => $resultat->id,
-                'responsable_projet_id' => $resultat->tache->activite->projet?->responsable_id
+                'responsable_projet_id' => $resultat->tache->activite->projet?->responsable_id,
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Seul le responsable du projet peut valider ce résultat (N2)'
+                'message' => 'Seul le responsable du projet peut valider ce résultat (N2)',
             ], 403);
         }
 
         // Vérifications supplémentaires
-        if (!$resultat->valide_par_n1) {
+        if (! $resultat->valide_par_n1) {
             return response()->json([
                 'success' => false,
-                'message' => 'Ce résultat doit d\'abord être validé N1'
+                'message' => 'Ce résultat doit d\'abord être validé N1',
             ], 422);
         }
 
         if ($resultat->valide_par_n2) {
             return response()->json([
                 'success' => false,
-                'message' => 'Ce résultat a déjà été validé N2'
+                'message' => 'Ce résultat a déjà été validé N2',
             ], 422);
         }
 
@@ -216,7 +217,7 @@ class EvaluationController extends Controller
                 'resultat_id' => $resultat->id,
                 'validateur_id' => $user->id,
                 'user_id' => $resultat->user_id,
-                'tache_id' => $resultat->tache_id
+                'tache_id' => $resultat->tache_id,
             ]);
 
             DB::commit();
@@ -229,8 +230,8 @@ class EvaluationController extends Controller
                     'validateurN1',
                     'validateurN2',
                     'documents',
-                    'tache.activite.projet'
-                ]))
+                    'tache.activite.projet',
+                ])),
             ]);
 
         } catch (\Exception $e) {
@@ -239,12 +240,12 @@ class EvaluationController extends Controller
             Log::error('❌ Erreur validation N2', [
                 'resultat_id' => $resultat->id,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 422);
         }
     }
@@ -267,17 +268,17 @@ class EvaluationController extends Controller
             if ($resultat->tache->activite->responsable_id !== $user->id) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Seul le responsable de l\'activité peut rejeter ce résultat (N1)'
+                    'message' => 'Seul le responsable de l\'activité peut rejeter ce résultat (N1)',
                 ], 403);
             }
         } else {
             if (
-                !$resultat->tache->activite->projet ||
+                ! $resultat->tache->activite->projet ||
                 $resultat->tache->activite->projet->responsable_id !== $user->id
             ) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Seul le responsable du projet peut rejeter ce résultat (N2)'
+                    'message' => 'Seul le responsable du projet peut rejeter ce résultat (N2)',
                 ], 403);
             }
         }
@@ -298,7 +299,7 @@ class EvaluationController extends Controller
                 'resultat_id' => $resultat->id,
                 'level' => $level,
                 'rejecteur_id' => $user->id,
-                'user_id' => $resultat->user_id
+                'user_id' => $resultat->user_id,
             ]);
 
             DB::commit();
@@ -306,7 +307,7 @@ class EvaluationController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Résultat rejeté. L\'utilisateur devra le soumettre à nouveau.',
-                'data' => new TacheResultatResource($resultat->fresh())
+                'data' => new TacheResultatResource($resultat->fresh()),
             ]);
 
         } catch (\Exception $e) {
@@ -314,12 +315,12 @@ class EvaluationController extends Controller
 
             Log::error('❌ Erreur rejet résultat', [
                 'resultat_id' => $resultat->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 422);
         }
     }
@@ -358,8 +359,8 @@ class EvaluationController extends Controller
                     'activites' => $asResponsableActivite->count(),
                     'projets' => $asResponsableProjet->count(),
                     'total' => $asResponsableActivite->count() + $asResponsableProjet->count(),
-                ]
-            ]
+                ],
+            ],
         ]);
     }
 
@@ -383,7 +384,7 @@ class EvaluationController extends Controller
             'data' => [
                 'permissions' => $permissions,
                 'user_role' => $this->getUserRole($user, $resultat),
-            ]
+            ],
         ]);
     }
 
@@ -415,7 +416,7 @@ class EvaluationController extends Controller
     private function canValidateN1($user, TacheResultat $resultat): bool
     {
         return $resultat->soumis_le &&
-            !$resultat->valide_par_n1 &&
+            ! $resultat->valide_par_n1 &&
             $resultat->user_id !== $user->id &&
             $resultat->tache->activite->responsable_id === $user->id;
     }
@@ -423,7 +424,7 @@ class EvaluationController extends Controller
     private function canValidateN2($user, TacheResultat $resultat): bool
     {
         return $resultat->valide_par_n1 &&
-            !$resultat->valide_par_n2 &&
+            ! $resultat->valide_par_n2 &&
             $resultat->tache->activite->projet &&
             $resultat->tache->activite->projet->responsable_id === $user->id;
     }
@@ -478,12 +479,12 @@ class EvaluationController extends Controller
                 'user',
                 'validateurN1',
                 'validateurN2',
-                'documents'
+                'documents',
             ])
             ->whereNotNull('soumis_le');
 
         // Filtrer par permissions de l'utilisateur
-        if (!$user->isSuperAdmin()) {
+        if (! $user->isSuperAdmin()) {
             $query->where(function ($q) use ($user) {
                 // Résultats que l'utilisateur peut valider (N1)
                 $q->whereHas('tache.activite', function ($aq) use ($user) {
@@ -629,9 +630,9 @@ class EvaluationController extends Controller
         $user = $request->user();
 
         // Vérifier les permissions
-        if ($userId !== $user->id && !$user->isSuperAdmin()) {
+        if ($userId !== $user->id && ! $user->isSuperAdmin()) {
             return response()->json([
-                'message' => 'Accès non autorisé'
+                'message' => 'Accès non autorisé',
             ], 403);
         }
 
@@ -653,7 +654,7 @@ class EvaluationController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $stats
+            'data' => $stats,
         ]);
     }
 
@@ -667,7 +668,7 @@ class EvaluationController extends Controller
         $query = TacheResultat::query()->whereNotNull('soumis_le');
 
         // Filtrer selon les permissions
-        if (!$user->isSuperAdmin()) {
+        if (! $user->isSuperAdmin()) {
             $query->where(function ($q) use ($user) {
                 $q->whereHas('tache.activite', function ($aq) use ($user) {
                     $aq->where('responsable_id', $user->id);
@@ -688,7 +689,7 @@ class EvaluationController extends Controller
             'rejetes' => $resultats->whereNotNull('rejete_le')->count(),
             'this_week' => $resultats->whereBetween('soumis_le', [
                 Carbon::now()->startOfWeek(),
-                Carbon::now()->endOfWeek()
+                Carbon::now()->endOfWeek(),
             ])->count(),
             'taux_validation_moyen' => $resultats->count() > 0
                 ? round(($resultats->where('is_fully_validated', true)->count() / $resultats->count()) * 100)
@@ -697,14 +698,13 @@ class EvaluationController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $stats
+            'data' => $stats,
         ]);
     }
 
-
     /**
-     * 📋 MON RAPPORT HEBDOMADAIRE AMÉLIORÉ 
-     * 
+     * 📋 MON RAPPORT HEBDOMADAIRE AMÉLIORÉ
+     *
      * Logique selon le scénario de Jean :
      * - Affiche les tâches confiées pendant la semaine sélectionnée
      * - Affiche les tâches des semaines précédentes non terminées OU terminées mais non validées
@@ -743,13 +743,13 @@ class EvaluationController extends Controller
                         'progression_individuelle',
                         'started_at',
                         'completed_at',
-                        'created_at' // 🔑 Date d'affectation cruciale
+                        'created_at', // 🔑 Date d'affectation cruciale
                     ]);
             },
             'labels',
             'resultatsIndividuels' => function ($query) use ($user) {
                 $query->where('user_id', $user->id);
-            }
+            },
         ])
             ->whereHas('assignees', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
@@ -761,8 +761,9 @@ class EvaluationController extends Controller
         // 🎯 LOGIQUE DE FILTRAGE SELON LE SCÉNARIO
         $tasksToDisplay = $taches->filter(function ($tache) use ($weekStart, $weekEnd, $user) {
             $assignee = $tache->assignees->first();
-            if (!$assignee)
+            if (! $assignee) {
                 return false;
+            }
 
             // Date d'affectation de la tâche à l'utilisateur
             $affectationDate = Carbon::parse($assignee->pivot->created_at);
@@ -773,8 +774,9 @@ class EvaluationController extends Controller
             if ($affectationDate->between($weekStartCarbon, $weekEndCarbon)) {
                 Log::debug('Tâche affectée cette semaine', [
                     'tache_id' => $tache->id,
-                    'affectation' => $affectationDate->format('Y-m-d')
+                    'affectation' => $affectationDate->format('Y-m-d'),
                 ]);
+
                 return true;
             }
 
@@ -786,8 +788,9 @@ class EvaluationController extends Controller
                 if ($statutIndividuel !== 'termine') {
                     Log::debug('Tâche non terminée d\'avant', [
                         'tache_id' => $tache->id,
-                        'statut' => $statutIndividuel
+                        'statut' => $statutIndividuel,
                     ]);
+
                     return true;
                 }
 
@@ -795,10 +798,11 @@ class EvaluationController extends Controller
                 $monResultat = $tache->monResultat($user);
 
                 // Pas de résultat soumis → AFFICHER
-                if (!$monResultat || !$monResultat->soumis_le) {
+                if (! $monResultat || ! $monResultat->soumis_le) {
                     Log::debug('Tâche terminée mais résultat non soumis', [
-                        'tache_id' => $tache->id
+                        'tache_id' => $tache->id,
                     ]);
+
                     return true;
                 }
 
@@ -826,8 +830,9 @@ class EvaluationController extends Controller
                         Log::debug('Tâche validée avant/pendant cette semaine → masquée', [
                             'tache_id' => $tache->id,
                             'validation_date' => $validationDate->format('Y-m-d'),
-                            'week_end' => $weekEndCarbon->format('Y-m-d')
+                            'week_end' => $weekEndCarbon->format('Y-m-d'),
                         ]);
+
                         return false; // ❌ NE PAS afficher
                     }
                 }
@@ -836,8 +841,9 @@ class EvaluationController extends Controller
                 Log::debug('Tâche pas encore validée → affichée', [
                     'tache_id' => $tache->id,
                     'valide_n1' => $monResultat->valide_par_n1,
-                    'valide_n2' => $monResultat->valide_par_n2
+                    'valide_n2' => $monResultat->valide_par_n2,
                 ]);
+
                 return true;
             }
 
@@ -849,7 +855,7 @@ class EvaluationController extends Controller
         $stats = $this->calculateDetailedStats($tasksToDisplay, $user, Carbon::parse($weekEnd));
 
         // Grouper par activité
-        $byActivite = $tasksToDisplay->groupBy('activite_id')->map(function ($tasks, $activiteId) use ($user) {
+        $byActivite = $tasksToDisplay->groupBy('activite_id')->map(function ($tasks, $activiteId) {
             $activite = $tasks->first()->activite;
 
             return [
@@ -863,26 +869,29 @@ class EvaluationController extends Controller
                 'taches' => TacheResource::collection($tasks),
                 'stats' => [
                     'total' => $tasks->count(),
-                    'a_faire' => $tasks->filter(function ($t) use ($user) {
+                    'a_faire' => $tasks->filter(function ($t) {
                         $assignee = $t->assignees->first();
+
                         return $assignee && $assignee->pivot->statut_individuel === 'a_faire';
                     })->count(),
-                    'en_cours' => $tasks->filter(function ($t) use ($user) {
+                    'en_cours' => $tasks->filter(function ($t) {
                         $assignee = $t->assignees->first();
+
                         return $assignee && $assignee->pivot->statut_individuel === 'en_cours';
                     })->count(),
-                    'termine' => $tasks->filter(function ($t) use ($user) {
+                    'termine' => $tasks->filter(function ($t) {
                         $assignee = $t->assignees->first();
+
                         return $assignee && $assignee->pivot->statut_individuel === 'termine';
                     })->count(),
-                ]
+                ],
             ];
         })->values();
 
         Log::info('✅ Fiche évaluation chargée', [
             'user_id' => $user->id,
             'total_tasks' => $stats['total'],
-            'activites' => $byActivite->count()
+            'activites' => $byActivite->count(),
         ]);
 
         return response()->json([
@@ -903,8 +912,8 @@ class EvaluationController extends Controller
                     'show_if_not_completed' => true,
                     'show_if_completed_but_not_validated' => true,
                     'hide_if_fully_validated_before_week_end' => true,
-                ]
-            ]
+                ],
+            ],
         ]);
     }
 
@@ -915,18 +924,21 @@ class EvaluationController extends Controller
     {
         $total = $tasks->count();
 
-        $a_faire = $tasks->filter(function ($t) use ($user) {
+        $a_faire = $tasks->filter(function ($t) {
             $assignee = $t->assignees->first();
+
             return $assignee && $assignee->pivot->statut_individuel === 'a_faire';
         })->count();
 
-        $en_cours = $tasks->filter(function ($t) use ($user) {
+        $en_cours = $tasks->filter(function ($t) {
             $assignee = $t->assignees->first();
+
             return $assignee && $assignee->pivot->statut_individuel === 'en_cours';
         })->count();
 
-        $termine = $tasks->filter(function ($t) use ($user) {
+        $termine = $tasks->filter(function ($t) {
             $assignee = $t->assignees->first();
+
             return $assignee && $assignee->pivot->statut_individuel === 'termine';
         })->count();
 
@@ -937,24 +949,27 @@ class EvaluationController extends Controller
 
         $valide_n1 = $tasks->filter(function ($t) {
             $r = $t->resultatsIndividuels->first();
+
             return $r && $r->valide_par_n1;
         })->count();
 
         $valide_n2 = $tasks->filter(function ($t) {
             $r = $t->resultatsIndividuels->first();
+
             return $r && $r->valide_par_n2;
         })->count();
 
         // 🚨 EN RETARD : échéance passée ET pas terminé individuellement
-        $en_retard = $tasks->filter(function ($t) use ($user) {
+        $en_retard = $tasks->filter(function ($t) {
             $assignee = $t->assignees->first();
+
             return $t->is_overdue &&
                 $assignee &&
                 $assignee->pivot->statut_individuel !== 'termine';
         })->count();
 
-        $estimated_hours = $tasks->sum(fn($t) => (float) $t->estimated_hours);
-        $actual_hours = $tasks->sum(fn($t) => (float) $t->actual_hours);
+        $estimated_hours = $tasks->sum(fn ($t) => (float) $t->estimated_hours);
+        $actual_hours = $tasks->sum(fn ($t) => (float) $t->actual_hours);
 
         return [
             'total' => $total,
@@ -977,8 +992,9 @@ class EvaluationController extends Controller
      */
     private function getWeekStartDate(int $year, int $week): string
     {
-        $dto = new \DateTime();
+        $dto = new \DateTime;
         $dto->setISODate($year, $week);
+
         return $dto->format('Y-m-d');
     }
 
@@ -987,15 +1003,16 @@ class EvaluationController extends Controller
      */
     private function getWeekEndDate(int $year, int $week): string
     {
-        $dto = new \DateTime();
+        $dto = new \DateTime;
         $dto->setISODate($year, $week, 7);
+
         return $dto->format('Y-m-d');
     }
 
     /**
      * 📊 RAPPORT DE PERFORMANCE D'UN WORKSPACE
      * À ajouter dans EvaluationController.php
-     * 
+     *
      * Permet aux managers de voir les performances de tous les membres du workspace
      */
     public function workspacePerformanceReport(Request $request, int $workspaceId): JsonResponse
@@ -1010,9 +1027,9 @@ class EvaluationController extends Controller
         $user = $request->user();
 
         // Vérifier les permissions
-        if (!$this->canViewWorkspacePerformance($user, $workspace)) {
+        if (! $this->canViewWorkspacePerformance($user, $workspace)) {
             return response()->json([
-                'message' => 'Vous n\'avez pas la permission de consulter ce rapport'
+                'message' => 'Vous n\'avez pas la permission de consulter ce rapport',
             ], 403);
         }
 
@@ -1072,9 +1089,9 @@ class EvaluationController extends Controller
         $currentUser = $request->user();
 
         // Vérifier permissions
-        if (!$this->canViewUserPerformance($currentUser, $membre, $validated['workspace_id'] ?? null)) {
+        if (! $this->canViewUserPerformance($currentUser, $membre, $validated['workspace_id'] ?? null)) {
             return response()->json([
-                'message' => 'Accès non autorisé'
+                'message' => 'Accès non autorisé',
             ], 403);
         }
 
@@ -1123,7 +1140,7 @@ class EvaluationController extends Controller
             },
             'resultatsIndividuels' => function ($query) use ($user) {
                 $query->where('user_id', $user->id);
-            }
+            },
         ])
             ->whereHas('assignees', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
@@ -1146,8 +1163,9 @@ class EvaluationController extends Controller
         $stats = $this->calculateDetailedStats($taches, $user, Carbon::parse($weekEnd));
 
         // Analyse des retards
-        $retards = $taches->filter(function ($t) use ($user) {
+        $retards = $taches->filter(function ($t) {
             $assignee = $t->assignees->first();
+
             return $t->is_overdue && $assignee && $assignee->pivot->statut_individuel !== 'termine';
         });
 
@@ -1288,7 +1306,7 @@ class EvaluationController extends Controller
         }
 
         // Trier par priorité
-        usort($recommendations, fn($a, $b) => $a['priority'] - $b['priority']);
+        usort($recommendations, fn ($a, $b) => $a['priority'] - $b['priority']);
 
         return $recommendations;
     }
@@ -1323,9 +1341,9 @@ class EvaluationController extends Controller
             'total_terminees' => $totalTerminees,
             'total_en_retard' => $totalEnRetard,
             'completion_rate' => $totalTaches > 0 ? round(($totalTerminees / $totalTaches) * 100) : 0,
-            'membres_excellent' => $performanceData->filter(fn($p) => $p['performance_score'] >= 90)->count(),
-            'membres_bien' => $performanceData->filter(fn($p) => $p['performance_score'] >= 60 && $p['performance_score'] < 90)->count(),
-            'membres_a_ameliorer' => $performanceData->filter(fn($p) => $p['performance_score'] < 60)->count(),
+            'membres_excellent' => $performanceData->filter(fn ($p) => $p['performance_score'] >= 90)->count(),
+            'membres_bien' => $performanceData->filter(fn ($p) => $p['performance_score'] >= 60 && $p['performance_score'] < 90)->count(),
+            'membres_a_ameliorer' => $performanceData->filter(fn ($p) => $p['performance_score'] < 60)->count(),
         ];
     }
 
@@ -1415,22 +1433,16 @@ class EvaluationController extends Controller
      */
     private function canViewWorkspacePerformance($user, $workspace): bool
     {
-        if ($user->isSuperAdmin()) {
-            return true;
-        }
+        $gate = app(ContextualPermissionGate::class);
 
-        // Owner ou admin du workspace
-        $membre = $workspace->membres()->where('user_id', $user->id)->first();
-        if ($membre && in_array($membre->pivot->role, ['owner', 'admin'])) {
+        if ($gate->userCan($user, Permission::WORKSPACES_VIEW, $workspace)) {
             return true;
         }
 
         // Responsable d'un projet du workspace
-        $isResponsableProjet = $workspace->projets()
+        return $workspace->projets()
             ->where('responsable_id', $user->id)
             ->exists();
-
-        return $isResponsableProjet;
     }
 
     /**
@@ -1470,8 +1482,9 @@ class EvaluationController extends Controller
     private function shouldDisplayTaskInWeek($tache, $user, $weekStart, $weekEnd): bool
     {
         $assignee = $tache->assignees->first();
-        if (!$assignee)
+        if (! $assignee) {
             return false;
+        }
 
         $affectationDate = Carbon::parse($assignee->pivot->created_at);
         $weekStartCarbon = Carbon::parse($weekStart);
@@ -1490,7 +1503,7 @@ class EvaluationController extends Controller
 
             $monResultat = $tache->monResultat($user);
 
-            if (!$monResultat || !$monResultat->soumis_le) {
+            if (! $monResultat || ! $monResultat->soumis_le) {
                 return true;
             }
 
@@ -1511,5 +1524,4 @@ class EvaluationController extends Controller
 
         return false;
     }
-
 }

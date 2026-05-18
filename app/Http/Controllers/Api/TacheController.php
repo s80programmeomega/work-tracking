@@ -17,6 +17,8 @@ use App\Models\TacheExternalLink;
 use App\Models\TacheResultat;
 use App\Models\User;
 use App\Notifications\ResultatIndividuelSoumisNotification;
+use App\Permissions\ContextualPermissionGate;
+use App\Permissions\Permission;
 use App\Services\PermissionService;
 use App\Services\TacheService;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -28,6 +30,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
 
 class TacheController extends Controller
@@ -166,8 +169,8 @@ class TacheController extends Controller
         $user = $request->user();
 
         try {
-            // Récupérer toutes les tâches où je suis responsable
-            $taches = Tache::where('responsable_id', $user->id)
+            // Super admin sees all active tasks; others see only tasks they are responsable of
+            $query = Tache::query()
                 ->with([
                     'activite:id,nom,code,projet_id',
                     'activite.projet:id,nom',
@@ -175,9 +178,14 @@ class TacheController extends Controller
                     'labels:id,nom,couleur',
                     'responsable:id,nom,email,avatar',
                 ])
-                ->active() // Seulement les tâches actives (non archivées)
-                ->orderBy('created_at', 'desc')
-                ->get();
+                ->active()
+                ->orderBy('created_at', 'desc');
+
+            if (! $user->isSuperAdmin()) {
+                $query->where('responsable_id', $user->id);
+            }
+
+            $taches = $query->get();
 
             Log::info('✅ Tâches en responsabilité récupérées', [
                 'user_id' => $user->id,
@@ -231,7 +239,7 @@ class TacheController extends Controller
     {
         $user = $request->user();
 
-        $taches = Tache::with([
+        $query = Tache::with([
             'activite.projet',
             'assignees',
             'resultatsIndividuels.user',
@@ -239,11 +247,13 @@ class TacheController extends Controller
             'sousTaches',
             'attachments',
             'externalLinks',
-        ])
-            ->assignedTo($user->id)
-            ->active()
-            ->ordered()
-            ->get();
+        ])->active()->ordered();
+
+        if (! $user->isSuperAdmin()) {
+            $query->assignedTo($user->id);
+        }
+
+        $taches = $query->get();
 
         return response()->json([
             'success' => true,
@@ -258,44 +268,34 @@ class TacheController extends Controller
     {
         $user = $request->user();
 
-        // N1: Tâches des activités où je suis responsable OU validateur
-        $pendingN1 = Tache::pendingValidationN1()
-            ->whereHas('activite', function ($q) use ($user) {
-                $q->where('responsable_id', $user->id)
-                    ->orWhereHas('membres', function ($mq) use ($user) {
-                        $mq->where('user_id', $user->id)
-                            ->where('can_validate_results', true);
-                    });
-            })
-            ->with([
-                'activite.projet',
-                'assignees',
-                'labels',
-                'validatedN1By',
-                'validatedN2By',
-            ])
-            ->get()
-            ->filter(function ($tache) {
-                // Double vérification avec Policy
-                return Gate::allows('validateN1', $tache);
-            });
+        $with = ['activite.projet', 'assignees', 'labels', 'validatedN1By', 'validatedN2By'];
 
-        // N2: Tâches des projets où je suis responsable
-        $pendingN2 = Tache::pendingValidationN2()
-            ->whereHas('activite.projet', function ($q) use ($user) {
-                $q->where('responsable_id', $user->id);
-            })
-            ->with([
-                'activite.projet',
-                'assignees',
-                'labels',
-                'validatedN1By',
-                'validatedN2By',
-            ])
-            ->get()
-            ->filter(function ($tache) {
-                return Gate::allows('validateN2', $tache);
-            });
+        if ($user->isSuperAdmin()) {
+            $pendingN1 = Tache::pendingValidationN1()->with($with)->get();
+            $pendingN2 = Tache::pendingValidationN2()->with($with)->get();
+        } else {
+            // N1: activités où l'utilisateur est responsable ou validateur
+            $pendingN1 = Tache::pendingValidationN1()
+                ->whereHas('activite', function ($q) use ($user) {
+                    $q->where('responsable_id', $user->id)
+                        ->orWhereHas('membres', function ($mq) use ($user) {
+                            $mq->where('user_id', $user->id)
+                                ->where('can_validate_results', true);
+                        });
+                })
+                ->with($with)
+                ->get()
+                ->filter(fn ($tache) => Gate::allows('validateN1', $tache));
+
+            // N2: projets dont l'utilisateur est responsable
+            $pendingN2 = Tache::pendingValidationN2()
+                ->whereHas('activite.projet', function ($q) use ($user) {
+                    $q->where('responsable_id', $user->id);
+                })
+                ->with($with)
+                ->get()
+                ->filter(fn ($tache) => Gate::allows('validateN2', $tache));
+        }
 
         return response()->json([
             'pending_n1' => TacheResource::collection($pendingN1),
@@ -315,18 +315,20 @@ class TacheController extends Controller
     {
         $user = $request->user();
 
-        $taches = Tache::overdue()
-            ->where(function ($q) use ($user) {
+        $query = Tache::overdue()->with(['activite.projet', 'labels', 'assignees'])->ordered();
+
+        if (! $user->isSuperAdmin()) {
+            $query->where(function ($q) use ($user) {
                 $q->whereHas('assignees', function ($aq) use ($user) {
                     $aq->where('user_id', $user->id);
                 })
                     ->orWhereHas('activite', function ($actq) use ($user) {
                         $actq->where('responsable_id', $user->id);
                     });
-            })
-            ->with(['activite.projet', 'labels', 'assignees'])
-            ->ordered()
-            ->get();
+            });
+        }
+
+        $taches = $query->get();
 
         return response()->json([
             'data' => TacheResource::collection($taches),
@@ -354,11 +356,10 @@ class TacheController extends Controller
             return true;
         }
 
-        // Membre du workspace (owner/admin)
+        // Workspace owner or manager — check via ContextualPermissionGate
         if ($activite->projet && $activite->projet->workspace) {
-            $workspace = $activite->projet->workspace;
-            $member = $workspace->membres()->where('user_id', $user->id)->first();
-            if ($member && in_array($member->pivot->role, ['owner', 'admin'])) {
+            $gate = app(ContextualPermissionGate::class);
+            if ($gate->userCan($user, Permission::ACTIVITES_VIEW, $activite)) {
                 return true;
             }
         }
@@ -597,13 +598,10 @@ class TacheController extends Controller
                     })
                     ->exists();
 
-            // Vérifier permissions workspace
-            if (! $canCreate && $activite->projet && $activite->projet->workspace) {
-                $workspace = $activite->projet->workspace;
-                $workspaceMember = $workspace->membres()->where('user_id', $user->id)->first();
-                if ($workspaceMember && in_array($workspaceMember->pivot->role, ['owner', 'admin'])) {
-                    $canCreate = true;
-                }
+            // Vérifier permissions via ContextualPermissionGate (inclut workspace owner/manager)
+            if (! $canCreate) {
+                $gate = app(ContextualPermissionGate::class);
+                $canCreate = $gate->userCan($user, Permission::ACTIVITES_CREATE_TASK, $activite);
             }
 
             if (! $canCreate) {
@@ -688,40 +686,19 @@ class TacheController extends Controller
             $activite = Activite::with(['projet.workspace', 'membres'])->findOrFail($activiteId);
             $user = $request->user();
 
-            $membre = $activite->membres()->where('user_id', $user->id)->first();
-
-            // Vérifier les permissions workspace
-            $workspaceRole = null;
-            if ($activite->projet && $activite->projet->workspace) {
-                $workspaceMember = $activite->projet->workspace->membres()->where('user_id', $user->id)->first();
-                $workspaceRole = $workspaceMember ? $workspaceMember->pivot->role : null;
-            }
+            $gate = app(ContextualPermissionGate::class);
 
             $permissions = [
-                'can_view' => $this->canUserAccessActivite($user, $activite),
-                'can_create_tasks' => $user->isSuperAdmin() ||
-                    $activite->responsable_id === $user->id ||
-                    ($activite->projet && $activite->projet->responsable_id === $user->id) ||
-                    ($membre && ($membre->pivot->role === 'responsable' || $membre->pivot->can_create_tasks)) ||
-                    in_array($workspaceRole, ['owner', 'admin']),
-                'can_edit_tasks' => $user->isSuperAdmin() ||
-                    $activite->responsable_id === $user->id ||
-                    ($membre && $membre->pivot->can_edit_tasks),
-                'can_delete_tasks' => $user->isSuperAdmin() ||
-                    $activite->responsable_id === $user->id ||
-                    ($membre && $membre->pivot->can_delete_tasks),
-                'can_validate_results' => $user->isSuperAdmin() ||
-                    $activite->responsable_id === $user->id ||
-                    ($membre && $membre->pivot->can_validate_results),
-                'can_manage_members' => $user->isSuperAdmin() ||
-                    $activite->responsable_id === $user->id ||
-                    ($activite->projet && $activite->projet->responsable_id === $user->id),
+                'can_view' => $gate->userCan($user, Permission::ACTIVITES_VIEW, $activite),
+                'can_create_tasks' => $gate->userCan($user, Permission::ACTIVITES_CREATE_TASK, $activite),
+                'can_edit_tasks' => $gate->userCan($user, Permission::TACHES_EDIT, $activite),
+                'can_delete_tasks' => $gate->userCan($user, Permission::TACHES_DELETE, $activite),
+                'can_validate_results' => $gate->userCan($user, Permission::ACTIVITES_VALIDATE_N1, $activite),
+                'can_manage_members' => $gate->userCan($user, Permission::SOUS_TACHES_ASSIGN, $activite),
             ];
 
             return response()->json([
                 'permissions' => $permissions,
-                'user_role' => $membre ? $membre->pivot->role : 'non-membre',
-                'workspace_role' => $workspaceRole,
                 'is_responsable' => $activite->responsable_id === $user->id,
                 'is_projet_responsable' => $activite->projet && $activite->projet->responsable_id === $user->id,
                 'is_super_admin' => $user->isSuperAdmin(),
@@ -1058,8 +1035,10 @@ class TacheController extends Controller
 
             // ✅ S'assurer que le nouveau responsable est assigné
             if (! $tache->isAssignedTo($user)) {
+                $collaborateurRoleId = Role::findByName('collaborateur', 'web')->id;
                 $tache->assignees()->attach($newResponsableId, [
-                    'role' => 'responsable',
+                    'role_id' => $collaborateurRoleId,
+                    'is_responsable' => true,
                     'can_edit' => true,
                     'can_complete' => true,
                     'can_validate' => true,
@@ -1433,7 +1412,7 @@ class TacheController extends Controller
 
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
-            'role' => 'nullable|in:assignee,validator,observer',
+            'role' => 'nullable|in:collaborateur,stagiaire,observateur',
             'can_edit' => 'boolean',
             'can_complete' => 'boolean',
             'can_validate' => 'boolean',

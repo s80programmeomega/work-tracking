@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Models\Workspace;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role as SpatieRole;
 
 class WorkspaceSeeder extends Seeder
 {
@@ -21,6 +22,12 @@ class WorkspaceSeeder extends Seeder
         $superAdmin = User::where('email', 'superadmin@worktracking.com')->firstOrFail();
         $directeur = User::where('email', 'directeur@worktracking.com')->firstOrFail();
 
+        // Pre-load all contextual role IDs from Spatie — replaces role ENUM strings
+        $roleIds = SpatieRole::whereIn('name', ['owner', 'manager', 'cadre', 'collaborateur', 'stagiaire', 'observateur'])
+            ->where('guard_name', 'web')
+            ->pluck('id', 'name')
+            ->all();
+
         foreach ([
             ['nom' => 'Kouassi',  'prenom' => 'Éric',    'email' => 'manager@worktracking.com'],
             ['nom' => 'Traoré',   'prenom' => 'Aïcha',   'email' => 'cadre@worktracking.com'],
@@ -28,15 +35,18 @@ class WorkspaceSeeder extends Seeder
             ['nom' => 'Diallo',   'prenom' => 'Fatouma', 'email' => 'stagiaire@worktracking.com'],
             ['nom' => 'Sanogo',   'prenom' => 'Mamadou', 'email' => 'observateur@worktracking.com'],
         ] as $data) {
-            User::create([
-                'nom' => $data['nom'],
-                'prenom' => $data['prenom'],
-                'nom_complet' => $data['prenom'].' '.$data['nom'],
-                'email' => $data['email'],
-                'password' => Hash::make('password'),
-                'email_verified_at' => now(),
-                'is_active' => true,
-            ])->assignRole(Role::UTILISATEUR->value);
+            $user = User::firstOrCreate(
+                ['email' => $data['email']],
+                [
+                    'nom' => $data['nom'],
+                    'prenom' => $data['prenom'],
+                    'nom_complet' => $data['prenom'].' '.$data['nom'],
+                    'password' => Hash::make('password'),
+                    'email_verified_at' => now(),
+                    'is_active' => true,
+                ]
+            );
+            $user->syncRoles([Role::UTILISATEUR->value]);
         }
 
         $manager = User::where('email', 'manager@worktracking.com')->firstOrFail();
@@ -65,8 +75,7 @@ class WorkspaceSeeder extends Seeder
         }
 
         $workspace->members()->attach($directeur->id, [
-            'role' => 'owner',
-            'permissions' => json_encode(['all']),
+            'role_id' => $roleIds['owner'],
             'invited_at' => now(),
             'invited_by' => $directeur->id,
         ]);
@@ -79,7 +88,7 @@ class WorkspaceSeeder extends Seeder
             [$observateur,   'observateur'],
         ] as [$user, $role]) {
             $workspace->members()->attach($user->id, [
-                'role' => $role,
+                'role_id' => $roleIds[$role],
                 'invited_at' => now(),
                 'invited_by' => $directeur->id,
             ]);
@@ -451,11 +460,11 @@ class WorkspaceSeeder extends Seeder
                 'status' => 'active',
             ]);
 
-            $projet->members()->attach($manager->id, ['role' => 'manager']);
-            $projet->members()->attach($cadre->id, ['role' => 'cadre']);
-            $projet->members()->attach($collaborateur->id, ['role' => 'collaborateur']);
-            $projet->members()->attach($stagiaire->id, ['role' => 'stagiaire']);
-            $projet->members()->attach($observateur->id, ['role' => 'observateur']);
+            $projet->members()->attach($manager->id, ['role_id' => $roleIds['manager']]);
+            $projet->members()->attach($cadre->id, ['role_id' => $roleIds['cadre']]);
+            $projet->members()->attach($collaborateur->id, ['role_id' => $roleIds['collaborateur']]);
+            $projet->members()->attach($stagiaire->id, ['role_id' => $roleIds['stagiaire']]);
+            $projet->members()->attach($observateur->id, ['role_id' => $roleIds['observateur']]);
 
             foreach ($pd['activites'] as $ad) {
                 $activite = Activite::create([
@@ -468,7 +477,7 @@ class WorkspaceSeeder extends Seeder
                 ]);
 
                 $activite->members()->attach($cadre->id, [
-                    'role' => 'cadre',
+                    'role_id' => $roleIds['cadre'],
                     'can_create_tasks' => true,
                     'can_edit_tasks' => true,
                     'can_delete_tasks' => true,
@@ -476,12 +485,12 @@ class WorkspaceSeeder extends Seeder
                     'can_assign_users' => true,
                 ]);
                 $activite->members()->attach($collaborateur->id, [
-                    'role' => 'collaborateur',
+                    'role_id' => $roleIds['collaborateur'],
                     'can_create_tasks' => false,
                     'can_edit_tasks' => false,
                 ]);
                 $activite->members()->attach($stagiaire->id, [
-                    'role' => 'stagiaire',
+                    'role_id' => $roleIds['stagiaire'],
                     'can_create_tasks' => false,
                     'can_edit_tasks' => false,
                 ]);
@@ -502,12 +511,12 @@ class WorkspaceSeeder extends Seeder
                     ]);
 
                     $tache->assignees()->attach($collaborateur->id, [
-                        'role' => 'collaborateur',
+                        'role_id' => $roleIds['collaborateur'],
                         'is_responsable' => true,
                         'can_edit' => false,
                     ]);
                     $tache->assignees()->attach($stagiaire->id, [
-                        'role' => 'stagiaire',
+                        'role_id' => $roleIds['stagiaire'],
                         'is_responsable' => false,
                         'can_edit' => false,
                     ]);
@@ -540,10 +549,10 @@ class WorkspaceSeeder extends Seeder
         ]);
 
         $workspace2->members()->attach($manager->id, [
-            'role' => 'owner', 'invited_at' => now(), 'invited_by' => $manager->id,
+            'role_id' => $roleIds['owner'], 'invited_at' => now(), 'invited_by' => $manager->id,
         ]);
         $workspace2->members()->attach($directeur->id, [
-            'role' => 'manager', 'invited_at' => now(), 'invited_by' => $manager->id,
+            'role_id' => $roleIds['manager'], 'invited_at' => now(), 'invited_by' => $manager->id,
         ]);
 
         Projet::create([

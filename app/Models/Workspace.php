@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Permission\Models\Role;
 
 class Workspace extends Model
 {
@@ -84,6 +85,7 @@ class Workspace extends Model
             'require_task_validation' => true,
             'require_approval_for_time_off' => true,
             'default_project_visibility' => 'team',
+            'validation_timeout_hours' => 48, // R8: 24–168h, default 48h
         ];
     }
 
@@ -126,26 +128,18 @@ class Workspace extends Model
     public function members(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'workspace_members')
-            ->withPivot(['role', 'permissions', 'invited_at', 'invited_by'])
-            ->withTimestamps()
-            ->using(new class extends Pivot
-            {
-                protected $casts = [
-                    'permissions' => 'array', // ✅ Auto-decode JSON
-                    'invited_at' => 'datetime',
-                ];
-            });
+            ->withPivot(['role_id', 'invited_at', 'invited_by'])
+            ->withTimestamps();
     }
 
     public function membres(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'workspace_members')
-            ->withPivot(['role', 'permissions', 'invited_at', 'invited_by'])
+            ->withPivot(['role_id', 'invited_at', 'invited_by'])
             ->withTimestamps()
             ->using(new class extends Pivot
             {
                 protected $casts = [
-                    'permissions' => 'array', // ✅ Auto-decode JSON
                     'invited_at' => 'datetime',
                 ];
             });
@@ -322,190 +316,62 @@ class Workspace extends Model
 
         $member = $this->members()->where('user_id', $user->id)->first();
 
-        return $member?->pivot->role;
+        return $member ? (Role::find($member->pivot->role_id)?->name) : null;
     }
 
     /**
-     * Vérifier si un utilisateur peut gérer les membres
+     * Vérifie si un utilisateur est Owner ou Manager du workspace
      */
-    public function canManageMembers(User $user): bool
+    public function isOwnerOrAdmin(User $user): bool
     {
         if ($user->isSuperAdmin()) {
             return true;
         }
 
-        $role = $this->getMemberRole($user);
-
-        return in_array($role, ['owner', 'admin']);
-    }
-
-    /**
-     * Check if user can create projects.
-     */
-    public function canCreateProjects(User $user): bool
-    {
-        if ($user->isSuperAdmin()) {
+        if ($this->owner_id === $user->id) {
             return true;
         }
 
-        if ($this->isOwner($user)) {
-            return true;
-        }
+        $roleName = $this->getMemberRole($user);
 
-        if (! $this->getSetting('members_can_create_projects', true)) {
-            return false;
-        }
-
-        $role = $this->getMemberRole($user);
-
-        return in_array($role, ['owner', 'admin', 'member']);
-    }
-
-    /**
-     * Check if user can manage settings.
-     */
-    public function canManageSettings(User $user): bool
-    {
-        if ($user->isSuperAdmin()) {
-            return true;
-        }
-
-        if ($this->isOwner($user)) {
-            return true;
-        }
-
-        $member = $this->members()->where('user_id', $user->id)->first();
-
-        if (! $member) {
-            return false;
-        }
-
-        return in_array($member->pivot->role, ['admin']) ||
-            ($member->pivot->can_manage_settings ?? false);
-    }
-
-    public function canUserManageMembers(User $user): bool
-    {
-        if ($user->isSuperAdmin()) {
-            return true;
-        }
-
-        if ($this->isOwner($user)) {
-            return true;
-        }
-
-        $role = $this->getMemberRole($user);
-
-        return in_array($role, ['owner', 'admin']);
-    }
-
-    public function canUserManageProjets(User $user): bool
-    {
-        if ($user->isSuperAdmin()) {
-            return true;
-        }
-
-        if ($this->isOwner($user)) {
-            return true;
-        }
-
-        $member = $this->members()->where('user_id', $user->id)->first();
-        if (! $member) {
-            return false;
-        }
-
-        $permissions = $member->pivot->permissions ?? [];
-
-        return in_array('manage_projects', $permissions) ||
-            in_array('all', $permissions) ||
-            in_array($member->pivot->role, ['owner', 'admin']);
+        return in_array($roleName, ['owner', 'manager']);
     }
 
     /**
      * Add a member to workspace
      */
-    public function addMember(User $user, string $role = 'member', array $permissions = []): void
+    public function addMember(User $user, string $roleName = 'collaborateur'): void
     {
-        // Seul super admin, owner ou admin peut ajouter
-        if (! ($user->isSuperAdmin() || $this->isOwner($user) || $this->getMemberRole($user) === 'admin')) {
-            throw new \Exception('Permission refusée : vous ne pouvez pas ajouter de membres.');
-        }
-
         if (! $this->isMember($user)) {
+            $role = Role::findByName($roleName, 'web');
             $this->members()->attach($user->id, [
-                'role' => $role,
-                'permissions' => json_encode($permissions), // ✅ Convertir en JSON
+                'role_id' => $role->id,
                 'invited_at' => now(),
                 'invited_by' => auth()->id(),
             ]);
         }
     }
 
-    public function removeMember(User $user, User $targetUser): void
+    public function removeMember(User $targetUser): void
     {
-        // Super admin, owner ou admin peuvent supprimer
-        if (! ($user->isSuperAdmin() || $this->isOwner($user) || $this->getMemberRole($user) === 'admin')) {
-            throw new \Exception('Permission refusée : vous ne pouvez pas supprimer ce membre.');
-        }
-
-        // Personne ne peut supprimer l'owner
         if ($this->isOwner($targetUser)) {
-            throw new \Exception('Impossible de supprimer le propriétaire du workspace.');
+            throw new \Exception('Impossible de supprimer le proprietaire du workspace.');
         }
 
-        if (! $this->isOwner($user)) {
-            $this->members()->detach($user->id);
-        }
-    }
-
-    /**
-     * Vérifie si un utilisateur est Owner, Admin ou Super Admin du workspace
-     */
-    public function isOwnerOrAdmin(User $user): bool
-    {
-        // Super admin global → accès total
-        if ($user->isSuperAdmin()) {
-            return true;
-        }
-
-        // Owner du workspace
-        if ($this->owner_id === $user->id) {
-            return true;
-        }
-
-        // Manager role in workspace_members (replaces old 'admin' role)
-        $member = $this->members()
-            ->where('workspace_members.user_id', $user->id)
-            ->first();
-
-        if ($member && in_array($member->pivot->role, ['owner', 'manager'])) {
-            return true;
-        }
-
-        return false;
+        $this->members()->detach($targetUser->id);
     }
 
     /**
      * Update member role
      */
-    public function updateMemberRole(User $user, string $role, array $permissions = []): void
+    public function updateMemberRole(User $targetUser, string $roleName): void
     {
-        // Super admin, owner ou admin peuvent modifier
-        if (! ($user->isSuperAdmin() || $this->isOwner($user) || $this->getMemberRole($user) === 'admin')) {
-            throw new \Exception('Permission refusée : vous ne pouvez pas modifier ce membre.');
-        }
-
-        // Ne jamais modifier l’owner
         if ($this->isOwner($targetUser)) {
-            throw new \Exception('Impossible de modifier le propriétaire du workspace.');
+            throw new \Exception('Impossible de modifier le proprietaire du workspace.');
         }
 
-        if ($this->isMember($user) && ! $this->isOwner($user)) {
-            $this->members()->updateExistingPivot($user->id, [
-                'role' => $role,
-                'permissions' => json_encode($permissions), // ✅ Convertir en JSON
-            ]);
-        }
+        $role = Role::findByName($roleName, 'web');
+        $this->members()->updateExistingPivot($targetUser->id, ['role_id' => $role->id]);
     }
 
     /**
@@ -568,18 +434,7 @@ class Workspace extends Model
      */
     public function canSeeAllProjects(User $user): bool
     {
-        if ($user->isSuperAdmin()) {
-            return true; // Super admin a tous les droits
-        }
-
-        if ($this->owner_id === $user->id) {
-            return true; // Owner
-        }
-
-        // Admin du workspace
-        $member = $this->members()->where('user_id', $user->id)->first();
-
-        return $member && $member->pivot->role === 'admin';
+        return $this->isOwnerOrAdmin($user);
     }
 
     /**

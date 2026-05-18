@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Notifications\ResultatIndividuelSoumisNotification;
 use App\Notifications\ResultatRejeteNotification;
 use App\Services\PermissionService;
+use App\Services\TacheResultatService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +24,10 @@ use Illuminate\Support\Str;
 
 class TacheResultatController extends Controller
 {
-    public function __construct(protected PermissionService $permissionService) {}
+    public function __construct(
+        protected PermissionService $permissionService,
+        protected TacheResultatService $resultatService,
+    ) {}
 
     /**
      * 📋 Liste des résultats d'une tâche
@@ -48,7 +52,7 @@ class TacheResultatController extends Controller
      */
     public function store(Request $request, Tache $tache)
     {
-        $this->authorize('update', $tache);
+        $this->authorize('submitResult', $tache);
 
         $validated = $request->validate([
             'resultats_attendus' => 'required|string',
@@ -240,14 +244,14 @@ class TacheResultatController extends Controller
             abort(404);
         }
 
-        if ($resultat->soumis_le) {
+        if ($resultat->statut === 'en_verification_n0' || $resultat->soumis_n0_le !== null) {
             return response()->json([
                 'success' => false,
                 'message' => 'Ce résultat a déjà été soumis',
             ], 400);
         }
 
-        $resultat->submit();
+        $this->resultatService->soumettre($resultat, $request->user());
 
         return response()->json([
             'success' => true,
@@ -741,11 +745,13 @@ class TacheResultatController extends Controller
     {
         $user = $request->user();
 
-        $resultats = TacheResultat::query()
-            ->with(['tache.activite.projet', 'user', 'documents'])
-            ->requiringValidationFrom($user)
-            ->latest('soumis_le')
-            ->get();
+        $query = TacheResultat::query()->with(['tache.activite.projet', 'user', 'documents']);
+
+        if (! $user->isSuperAdmin()) {
+            $query->requiringValidationFrom($user);
+        }
+
+        $resultats = $query->latest('soumis_le')->get();
 
         $pendingN1 = $resultats->where('valide_par_n1', false);
         $pendingN2 = $resultats->where('valide_par_n1', true)->where('valide_par_n2', false);
@@ -1036,13 +1042,63 @@ class TacheResultatController extends Controller
         if ($permissions->isNotEmpty()) {
             DocumentPermission::insert($permissions->all());
 
-            // Log pour debug
             Log::info('Permissions créées pour le document', [
                 'document_id' => $document->id,
                 'permissions_count' => $permissions->count(),
                 'users' => $permissions->pluck('permissionable_id')->toArray(),
             ]);
         }
+    }
 
+    /**
+     * N0 approves and forwards result to N1.
+     * POST /taches/{tache}/resultats/{resultat}/approuver-n0
+     */
+    public function approuverN0(Request $request, Tache $tache, TacheResultat $resultat): JsonResponse
+    {
+        $user = $request->user();
+
+        $this->authorize('approveN0', $resultat->tache);
+
+        if ($resultat->statut !== 'en_verification_n0') {
+            return response()->json(['message' => __('circuit_validation.errors.invalid_statut')], 422);
+        }
+
+        $this->resultatService->approuverN0($resultat, $user);
+
+        return response()->json([
+            'message' => __('circuit_validation.success.approuve_n0'),
+            'data' => new TacheResultatResource($resultat->fresh()),
+        ]);
+    }
+
+    /**
+     * N0 returns the result with a mandatory comment (min 30 chars, R4).
+     * POST /taches/{tache}/resultats/{resultat}/renvoyer-n0
+     */
+    public function renvoyerN0(Request $request, Tache $tache, TacheResultat $resultat): JsonResponse
+    {
+        $user = $request->user();
+
+        $this->authorize('approveN0', $resultat->tache);
+
+        if ($resultat->statut !== 'en_verification_n0') {
+            return response()->json(['message' => __('circuit_validation.errors.invalid_statut')], 422);
+        }
+
+        $validated = $request->validate([
+            'commentaire' => 'required|string',
+        ]);
+
+        try {
+            $this->resultatService->renvoyerN0($resultat, $user, $validated['commentaire']);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+
+        return response()->json([
+            'message' => __('circuit_validation.success.renvoye_n0'),
+            'data' => new TacheResultatResource($resultat->fresh()),
+        ]);
     }
 }

@@ -16,21 +16,22 @@ use App\Notifications\ValidationN2ConfirmeeNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Log;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class TacheResultat extends Model
 {
-    use HasFactory, SoftDeletes, LogsActivity;
+    use HasFactory, LogsActivity, SoftDeletes;
 
     protected $fillable = [
         'tache_id',
         'user_id',
         'is_individual',
+        'statut',
         'resultats_attendus',
         'resultats_obtenus',
         'taux_realisation',
@@ -38,6 +39,11 @@ class TacheResultat extends Model
         'solutions_envisagees',
         'observations',
         'soumis_le',
+        'soumis_n0_le',
+        'action_n0',
+        'commentaire_n0',
+        'n0_actor_id',
+        'action_n0_le',
         'valide_par_n1',
         'validateur_n1_id',
         'valide_le_n1',
@@ -50,6 +56,8 @@ class TacheResultat extends Model
 
     protected $casts = [
         'soumis_le' => 'datetime',
+        'soumis_n0_le' => 'datetime',
+        'action_n0_le' => 'datetime',
         'valide_le_n1' => 'datetime',
         'valide_le_n2' => 'datetime',
         'valide_par_n1' => 'boolean',
@@ -65,7 +73,6 @@ class TacheResultat extends Model
         'is_fully_validated',
         'validation_status',
     ];
-
 
     /**
      * Relationships
@@ -88,6 +95,16 @@ class TacheResultat extends Model
     public function validateurN2(): BelongsTo
     {
         return $this->belongsTo(User::class, 'validateur_n2_id');
+    }
+
+    public function n0Actor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'n0_actor_id');
+    }
+
+    public function auditLogs(): HasMany
+    {
+        return $this->hasMany(ValidationAuditLog::class, 'tache_resultat_id')->orderBy('created_at');
     }
 
     /**
@@ -124,7 +141,22 @@ class TacheResultat extends Model
 
     public function getValidationStatusAttribute(): string
     {
-        if (!$this->soumis_le) {
+        // Use the new statut column when present
+        if ($this->statut) {
+            return match ($this->statut) {
+                'brouillon' => 'not_submitted',
+                'en_verification_n0' => 'pending_n0',
+                'en_validation_n1' => 'pending_n1',
+                'en_validation_n2' => 'pending_n2',
+                'valide' => 'fully_validated',
+                'rejete' => 'rejected',
+                'a_refaire' => 'a_refaire',
+                default => 'not_submitted',
+            };
+        }
+
+        // Legacy fallback for rows created before Task 5
+        if (! $this->soumis_le) {
             return 'not_submitted';
         }
 
@@ -133,19 +165,21 @@ class TacheResultat extends Model
         }
 
         if ($this->tache->validation_n2_required) {
-            if (!$this->valide_par_n1) {
+            if (! $this->valide_par_n1) {
                 return 'pending_n1';
             }
-            if (!$this->valide_par_n2) {
+            if (! $this->valide_par_n2) {
                 return 'pending_n2';
             }
+
             return 'fully_validated';
         }
 
         if ($this->tache->validation_n1_required) {
-            if (!$this->valide_par_n1) {
+            if (! $this->valide_par_n1) {
                 return 'pending_n1';
             }
+
             return 'fully_validated';
         }
 
@@ -154,7 +188,7 @@ class TacheResultat extends Model
 
     public function getCanBeEditedAttribute(): bool
     {
-        return !$this->is_fully_validated && !$this->rejete_le;
+        return ! $this->is_fully_validated && ! $this->rejete_le;
     }
 
     /**
@@ -242,15 +276,14 @@ class TacheResultat extends Model
                 })
                     // N2
                     ->orWhere(function ($n2) use ($user) {
-                    $n2->where('valide_par_n1', true)
-                        ->where('valide_par_n2', false)
-                        ->whereHas('tache.activite.projet', function ($pq) use ($user) {
-                            $pq->where('responsable_id', $user->id);
-                        });
-                });
+                        $n2->where('valide_par_n1', true)
+                            ->where('valide_par_n2', false)
+                            ->whereHas('tache.activite.projet', function ($pq) use ($user) {
+                                $pq->where('responsable_id', $user->id);
+                            });
+                    });
             });
     }
-
 
     /**
      * Validation Methods
@@ -269,6 +302,7 @@ class TacheResultat extends Model
         // Notifier les validateurs
         $this->notifyValidators();
     }
+
     public function validateByN1(User $validator, ?string $commentaire = null): void
     {
         $this->update([
@@ -277,8 +311,6 @@ class TacheResultat extends Model
             'valide_le_n1' => now(),
             'commentaire_n1' => $commentaire,
         ]);
-
-       
 
         // 📧 1. Notifier l'auteur du résultat
         $this->user->notify(new ResultatValideN1Notification($this, $validator, $commentaire));
@@ -302,9 +334,9 @@ class TacheResultat extends Model
         ]);
     }
 
-        public function validateByN2(User $validator, ?string $commentaire = null): void
+    public function validateByN2(User $validator, ?string $commentaire = null): void
     {
-        if (!$this->valide_par_n1) {
+        if (! $this->valide_par_n1) {
             throw new \Exception('Le résultat doit d\'abord être validé par le N1');
         }
 
@@ -345,7 +377,6 @@ class TacheResultat extends Model
         ]);
     }
 
-
     /**
      * ✅ NOUVEAU : Recalculer le statut global de la tâche
      */
@@ -353,16 +384,18 @@ class TacheResultat extends Model
     {
         $tache = $this->tache; // récupérer la tâche liée
 
-        if (!$tache)
+        if (! $tache) {
             return;
+        }
 
         // Recharger les assignés avec les pivots
         $assignees = $tache->assignees()
             ->withPivot('statut_individuel', 'progression_individuelle')
             ->get();
 
-        if ($assignees->isEmpty())
+        if ($assignees->isEmpty()) {
             return;
+        }
 
         $countTermine = $assignees->where('pivot.statut_individuel', 'termine')->count();
         $countEnCours = $assignees->where('pivot.statut_individuel', 'en_cours')->count();
@@ -397,7 +430,6 @@ class TacheResultat extends Model
             ]);
         }
     }
-
 
     public function reject(User $validator, string $commentaire, string $level = 'n1'): void
     {
@@ -461,7 +493,6 @@ class TacheResultat extends Model
         ]);
     }
 
-
     // ==================== HELPER METHODS ====================
 
     /**
@@ -481,7 +512,7 @@ class TacheResultat extends Model
         }
 
         // Si pas de N1 requis, notifier directement N2
-        if (!$this->tache->validation_n1_required && $this->tache->validation_n2_required) {
+        if (! $this->tache->validation_n1_required && $this->tache->validation_n2_required) {
             $responsableN2 = $this->tache->activite->projet?->responsable;
             if ($responsableN2 && $responsableN2->id !== $this->user_id) {
                 $responsableN2->notify(new ResultatSoumisNotification($this));
@@ -510,7 +541,7 @@ class TacheResultat extends Model
     public function canBeValidatedByN1(User $user): bool
     {
         // Doit être soumis
-        if (!$this->soumis_le) {
+        if (! $this->soumis_le) {
             return false;
         }
 
@@ -535,7 +566,7 @@ class TacheResultat extends Model
     public function canBeValidatedByN2(User $user): bool
     {
         // N1 doit être validé
-        if (!$this->valide_par_n1) {
+        if (! $this->valide_par_n1) {
             return false;
         }
 
@@ -623,11 +654,11 @@ class TacheResultat extends Model
             'resultats_attendus' => $this->resultats_attendus,
             'delai_execution' => $this->tache->echeance?->format('d/m/Y'),
             'resultats_obtenus' => $this->resultats_obtenus,
-            'taux_realisation' => $this->taux_realisation . '%',
+            'taux_realisation' => $this->taux_realisation.'%',
             'difficultes_rencontrees' => $this->difficultes_rencontrees,
             'solutions_envisagees' => $this->solutions_envisagees,
             'observations' => $this->observations,
-            'documents' => $this->documents->map(fn($doc) => [
+            'documents' => $this->documents->map(fn ($doc) => [
                 'nom' => $doc->nom,
                 'url' => $doc->url,
             ]),
@@ -645,6 +676,4 @@ class TacheResultat extends Model
             ],
         ];
     }
-
-
 }

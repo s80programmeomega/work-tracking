@@ -1,153 +1,285 @@
 # Roles & Permissions Refactor — Implementation Plan
 
 ## Problem Statement
-The current permission system has overlapping layers (global Spatie roles + workspace JSON permissions + project/activity/task pivots) that don't coordinate. Policies have dead code and bugs. Auto-workspace creation on signup prevents users from controlling their first workspace. Role names don't match the organizational context.
 
-## Requirements
-1. Remove auto-workspace creation on signup
-2. Set default role to `utilisateur` for new users
-3. Implement new role hierarchy with clear separation between global and contextual roles
-4. Fix broken policy methods
-5. Align validation workflow with new roles (cadre=N1, manager=N2)
-6. Keep subtask feature in mind (responsable_tache via `is_responsable` flag)
+The current permission system has three uncoordinated layers that can silently diverge:
 
-## New Role Structure
+1. **Spatie global roles** (`super_admin`, `directeur`, `utilisateur`) — DB-driven, context-free
+2. **Pivot ENUM strings** (`workspace_members.role`, `projet_user.role`, etc.) — contextual but hardcoded in PHP/JS, not connected to Spatie
+3. **Pivot boolean columns** (`activite_user.can_edit_tasks`, etc.) — per-row overrides, disconnected from the role system
 
-**Global roles (in `Role` enum):**
-- `super_admin` — platform admin, bypasses all checks
-- `directeur` — workspace owner
-- `utilisateur` — default on signup, can only create workspace
+**Consequences:**
+- Role→permission logic hardcoded in `PermissionService` (30+ `in_array($role, ['owner', 'manager'])` calls)
+- Same authorization decision duplicated across PermissionService, model helpers (`canBeEditedBy`), and API resources
+- Magic role strings scattered across 30+ files — a typo grants no access silently
+- Admin UI (Task 14) cannot change what `cadre` can do without a code deploy
+- `ProjetMemberRole` enum defines `admin/member/viewer` but DB has `manager/cadre/collaborateur` — always inconsistent
 
-**Contextual roles (stored in pivots):**
-- `manager` — N2 validator, sees all workspace projects
-- `cadre` — N1 validator, manages activities
-- `collaborateur` — executes tasks
-- `stagiaire` — intern, limited access
-- `observateur` — read-only
-- `responsable_tache` — (not a role, but `is_responsable=true` on `tache_user`)
+## Solution: DB-Driven Contextual Roles via Spatie FK
 
-**Validation Flow:**
+Replace the `role` ENUM string columns in all pivot tables with `role_id` foreign keys pointing to Spatie's `roles` table. All role→permission mappings live exclusively in `role_has_permissions`. A single `ContextualPermissionGate` resolves effective permissions by walking the resource hierarchy.
+
+**Super admin rule:** `super_admin` is the only globally-scoped role. It bypasses all permission checks app-wide via `Gate::before()`, regardless of workspace. All other roles are strictly contextual — scoped to a specific pivot row.
+
+**Workspace creator rule:** When a workspace is created, the creator's `workspace_members` pivot row is set to `role_id` pointing to the `owner` role. No global role assignment needed.
+
+---
+
+## New Architecture
+
 ```
-collaborateur/stagiaire submits result
-  → cadre validates (N1)
-    → manager validates (N2)
-      → complete
+Spatie roles table          role_has_permissions (editable via admin UI)
+┌─────────────────┐         ┌──────────────────────────────────────────┐
+│ id │ name        │ ──────▶ │ role_id │ permission_id                  │
+│  1 │ super_admin │         │    2    │ taches.edit                    │
+│  2 │ owner       │         │    3    │ projets.view                   │
+│  3 │ manager     │         │    4    │ activites.validate_n1          │
+│  4 │ cadre       │         │    5    │ taches.submit_result           │
+│  5 │ collaborateur│        └──────────────────────────────────────────┘
+│  6 │ stagiaire   │
+│  7 │ observateur │
+│  8 │task_responsable│      ← virtual role for is_responsable=true flag
+└─────────────────┘
+
+Pivot tables — role string replaced by FK
+┌──────────────────────────────────────────────┐
+│ workspace_members:  workspace_id, user_id, role_id ──▶ roles.id │
+│ projet_user:        projet_id,    user_id, role_id ──▶ roles.id │
+│ activite_user:      activite_id,  user_id, role_id ──▶ roles.id │
+│ tache_user:         tache_id,     user_id, role_id ──▶ roles.id │
+└──────────────────────────────────────────────┘
+
+Request flow:
+Controller → $this->authorize('update', $tache)
+                  ↓
+         TachePolicy::update(User, Tache)
+                  ↓
+  ContextualPermissionGate::userCan(user, 'taches.edit', tache)
+      1. Walk hierarchy: workspace → projet → activite → tache
+      2. Collect role_ids from all pivot rows for this user
+      3. workspace.owner_id === user.id → add 'owner' role_id
+      4. tache_user.is_responsable → add 'task_responsable' role_id
+      5. Load permissions for all role_ids from Spatie DB (cached)
+      6. Merge pivot boolean overrides (can_edit_tasks, can_edit, etc.)
+      7. Return 'taches.edit' ∈ deduplicated set
 ```
 
 ---
 
-## Task Breakdown
+## Role Definitions
 
-### ✅ Task 1: Update Role enum and remove auto-workspace creation
-**Branch:** `adjustment/roles-refactor-phase1`
+### Global Roles (Spatie — assigned to user account, context-free)
 
-**Changes:**
-- Update `app/Enums/Role.php`: new cases, update permissions()
-- Update `app/Services/AuthService.php`: remove workspace auto-creation
-- Update `database/seeders/RolePermissionSeeder.php`: new role seeds
+| Role | Value | Scope | Who |
+|---|---|---|---|
+| Super Admin | `super_admin` | **App-wide** — bypasses all checks | Platform administrator |
+| Directeur | `directeur` | Global Spatie role | Workspace creator (also gets `owner` pivot row) |
+| Utilisateur | `utilisateur` | Global Spatie role | New signup, can only create a workspace |
 
-**Tests:** Register new user → no workspace, role is `utilisateur`
+### Contextual Roles (Spatie roles — assigned via pivot `role_id`, scoped per resource)
 
----
+| Role | Value | Valid at levels | Key capabilities |
+|---|---|---|---|
+| Owner | `owner` | workspace, projet | Full control, auto-assigned to workspace creator |
+| Manager | `manager` | workspace, projet, activite | N2 validation, sees all projects |
+| Cadre | `cadre` | workspace, projet, activite | N1 validation, manages activities |
+| Collaborateur | `collaborateur` | workspace, projet, activite, tache | Executes tasks, submits results |
+| Stagiaire | `stagiaire` | workspace, projet, activite, tache | Limited task access, submits results |
+| Observateur | `observateur` | workspace, projet, activite, tache | Read-only |
+| Task Responsable | `task_responsable` | tache (virtual — `is_responsable=true`) | N0 validation, creates subtasks |
 
-### Task 2: Create migration for contextual roles in pivots
-**Branch:** `adjustment/roles-refactor-phase1` (same branch)
+### Permission Propagation (hierarchy)
 
-**Changes:**
-- Migration: add role columns to pivots if missing
-- Verify `tache_user.is_responsable` exists
+A user's effective permissions on a resource = union of permissions from all roles they hold **at or above** that resource level. Deduplication guaranteed by `ContextualPermissionGate`.
 
-**Tests:** Migration runs without errors
+```
+Workspace role (propagates to all resources in this workspace)
+  └── Project role (propagates to activities and tasks in this project)
+        └── Activity role (propagates to tasks in this activity)
+              └── Task role (task-level only — submit_result, approve_n0)
+```
 
----
-
-### Task 3: Build PermissionService
-**Branch:** `feature/permission-service`
-
-**Changes:**
-- Create `app/Services/PermissionService.php` with methods for all 4 hierarchy levels:
-  - Workspace: `canManageWorkspace`, `canCreateProject`
-  - Project: `canEditProject`, `canDeleteProject`
-  - Activity: `canCreateTask`, `canEditActivity`
-  - Task: `canEditTask`, `canValidateN1` (cadre), `canValidateN2` (manager), `canCreateSubtask` (is_responsable)
-- Delete `app/Policies/` folder
-- Unregister policies from `AuthServiceProvider`
-
-**Tests:** Unit tests for each permission method
+Example: A user who is `manager` in workspace and `collaborateur` on a task gets the union of both roles' permissions. If both grant `taches.view`, it appears once.
 
 ---
 
-### Task 4: Update validation workflow to use new roles
-**Branch:** `feature/permission-service` (same branch)
+## Validation Flow (unchanged)
 
-**Changes:**
-- Update `TacheResultatController`, `EvaluationController` to use `PermissionService`
-- N1 validation → cadre role check
-- N2 validation → manager role check
+```
+collaborateur / stagiaire  →  submits TacheResultat
+        ↓
+    cadre (N1)  →  validates at activity level
+        ↓
+   manager (N2)  →  validates at project level
+        ↓
+    task marked complete
+```
 
-**Tests:** Feature tests for N1/N2 validation
-
----
-
-### Task 5: Update workspace creation to assign directeur role
-**Branch:** `feature/workspace-directeur-role`
-
-**Changes:**
-- `WorkspaceController::store()`: assign directeur on creation
-- Update `Workspace` model methods
-
-**Tests:** Create workspace → user becomes directeur
+`taches.submit_result` is only grantable at task level — collaborateur/stagiaire on `tache_user`.
+`activites.validate_n1` is grantable at activity level — cadre on `activite_user`.
+`taches.validate_n2` is grantable at project level — manager on `projet_user`.
 
 ---
 
-### Task 6: Replace policy calls with PermissionService in all controllers
-**Branch:** `feature/permission-service` (same branch)
+## Permission String Constants
 
-**Changes:**
-- Remove all `$this->authorize()` calls from controllers
-- Inject `PermissionService` into controllers that need it
-- Return 403 responses using `PermissionService` checks
+All permission strings defined once in `app/Permissions/Permission.php` (PHP constants) and mirrored in `resources/js/permissions/Permission.js` (JS exports). No magic strings anywhere.
 
-**Tests:** Feature tests for protected endpoints
-
----
-
-### Task 7: Update frontend permission composables
-**Branch:** `feature/frontend-permissions-update`
-
-**Changes:**
-- Update `useWorkspacePermissions.js`
-- Create `useProjetPermissions.js`, `useActivitePermissions.js`
-- Update `authStore.js` for utilisateur state
-
-**Tests:** Manual UI testing
+**Permissions catalogue:**
+```
+workspaces.view, workspaces.create_project, workspaces.invite_member,
+workspaces.remove_member, workspaces.manage_settings
+projets.view, projets.edit, projets.delete, projets.manage_members
+activites.view, activites.edit, activites.delete, activites.create_task, activites.validate_n1
+taches.view, taches.edit, taches.delete, taches.submit_result,
+taches.approve_n0, taches.create_subtask, taches.validate_n1, taches.validate_n2
+sous_taches.view, sous_taches.edit, sous_taches.delete, sous_taches.assign
+documents.view, documents.upload, documents.delete, documents.share
+resultats.approuver_n0, resultats.renvoyer_n0
+```
 
 ---
 
-### Task 8: Update seeders and create test users
-**Branch:** `chore/test-data-seeders`
+## Default Role→Permission Seeding
 
-**Changes:**
-- Update `RolePermissionSeeder.php` with test users
-- Create workspace with members in all roles
+`RolePermissionSeeder` seeds defaults into `role_has_permissions`. Admin UI overwrites at runtime.
 
-**Tests:** Run seeder, login as each user
-
----
-
-### Task 9: Run Laravel Pint and update documentation
-**Branch:** (all branches before merge)
-
-**Changes:**
-- Run `./vendor/bin/pint --dirty`
-- Update `docs/ONBOARDING.md`
-- Create `docs/ROLES_AND_PERMISSIONS.md`
-
-**Tests:** Pint passes, docs reviewed
+| Role | Permission set |
+|---|---|
+| `owner` | All permissions |
+| `manager` | All except `taches.submit_result` |
+| `cadre` | projets.view, activites.*, taches.view/edit/validate_n1/approve_n0, sous_taches.*, documents.view/upload |
+| `collaborateur` | projets.view, activites.view, taches.view/submit_result/approve_n0, sous_taches.view/edit, documents.view/upload |
+| `stagiaire` | projets.view, activites.view, taches.view/submit_result, sous_taches.view, documents.view |
+| `observateur` | projets.view, activites.view, taches.view, sous_taches.view, documents.view |
+| `task_responsable` | taches.approve_n0, taches.create_subtask, sous_taches.assign |
 
 ---
 
-## Notes
-- Keep Spatie package, use only for super_admin bypass
-- Don't remove old role values from DB yet — data migration later
-- Subtask feature builds on `is_responsable`, not part of this refactor
+## Backend Authorization Layer
+
+### ContextualPermissionGate (`app/Permissions/ContextualPermissionGate.php`)
+
+Single resolver — the only place permission decisions are made (beyond the super_admin Gate::before bypass).
+
+```php
+class ContextualPermissionGate {
+    public function userCan(User $user, string $permission, Model $resource): bool
+    // Walks hierarchy, collects role_ids, loads Spatie permissions, merges overrides, deduplicates
+
+    private function collectRoleIds(User $user, Model $resource): array
+    // Returns unique role_id integers from all pivot levels at/above resource
+
+    private function resolvePermissions(array $roleIds): array
+    // Loads from role_has_permissions (request-level cache, no N+1)
+
+    private function applyPivotOverrides(User $user, Model $resource, array $perms): array
+    // Merges activite_user boolean columns, tache_user boolean columns into permission set
+}
+```
+
+### Policies (thin wrappers)
+
+```php
+class TachePolicy {
+    public function update(User $user, Tache $tache): bool {
+        return $this->gate->userCan($user, Permission::TACHES_EDIT, $tache);
+    }
+}
+```
+
+`Gate::before()` in `AuthServiceProvider` handles `super_admin` — no policy method is ever called for super_admin.
+
+### PermissionService (relationship helpers only)
+
+After refactor: no `canXxx()` authorization methods. Only:
+- `isResponsable(User, Model): bool`
+- `isMember(User, Model): bool`
+- `getContextualRoleName(User, Model): ?string`
+- `getPivotFlags(User, Tache): array`
+
+---
+
+## Frontend Authorization Layer
+
+### Permission.js (`resources/js/permissions/Permission.js`)
+
+Mirror of PHP Permission constants. All composables and components import from here.
+
+### Composables (read API response — no raw pivot derivation)
+
+```js
+// useActivitePermissions(activite)
+// reads activite.value.permissions (pre-computed by ContextualPermissionGate in ActiviteResource)
+// returns { canView, canEdit, canCreateTask, canValidateN1, ... }
+```
+
+All composables read from the API resource's `permissions` object. They never re-derive permissions from raw `pivot.role` or boolean columns.
+
+### authStore
+
+Retains `isSuperAdmin` getter (reads `user.is_super_admin`). Removes numeric role hierarchy levels (unused). No changes to login/logout flow.
+
+---
+
+## Migration Path
+
+### Phase 1 — Infrastructure (no behavior change)
+1. Create `app/Permissions/Permission.php`
+2. Create `app/Permissions/ContextualPermissionGate.php`
+3. Seed contextual roles into Spatie `roles` table
+4. Migration: add `role_id` FK to pivot tables, populate from existing `role` string, drop `role` ENUM
+5. Bind `ContextualPermissionGate` in `AppServiceProvider`
+
+### Phase 2 — Backend wiring
+6. Update Policies to use `ContextualPermissionGate`
+7. Refactor `PermissionService` — remove `canXxx()`, keep helpers
+8. Remove model-level permission methods (`canBeEditedBy`, `canBeValidatedN1By`, etc.)
+9. Update API Resources to use `ContextualPermissionGate` for `permissions` key
+
+### Phase 3 — Frontend alignment
+10. Create `resources/js/permissions/Permission.js`
+11. Update composables to read `resource.permissions` instead of raw pivot
+12. Remove raw pivot role checks from components
+
+### Phase 4 — Cleanup
+13. Delete `app/Enums/ProjetMemberRole.php`
+14. Delete `app/Services/MemberRemovalService copy.php`
+15. Remove `User::hasRoleLevel()`, `User::isAdmin()` remnants
+16. Run pint, run tests, update docs
+
+---
+
+## Admin UI (Task 14) Integration
+
+The admin panel interacts with Spatie's standard API:
+
+```php
+// Super admin changes what cadre can do — no deploy needed
+$cadreRole = Role::findByName('cadre');
+$cadreRole->syncPermissions([
+    Permission::PROJETS_VIEW,
+    Permission::ACTIVITES_VIEW,
+    Permission::TACHES_VIEW,
+    // taches.edit removed from cadre
+]);
+```
+
+`ContextualPermissionGate` reads `role_has_permissions` on each request (request-level cache). Change is effective immediately on next request.
+
+Workspace owners get a scoped UI to assign/change member `role_id` in pivot tables. Super admin gets global role→permission matrix editor.
+
+---
+
+## Tests
+
+- All 65 existing PHPUnit tests must pass after refactor
+- `PermissionsMatrixTest` (17 tests) exercises every role × endpoint combination
+- `RoleVisibilityTest` (6 Dusk browser tests) validates UI-level permission enforcement
+- New: unit test for `ContextualPermissionGate` covering:
+  - Super admin bypass
+  - Workspace owner auto-gets owner permissions
+  - User with manager at workspace + collaborateur at task → merged permissions, no duplicates
+  - is_responsable flag grants task_responsable permissions
+  - Pivot boolean override grants permission beyond role
+  - Admin UI change to role_has_permissions takes effect on next request

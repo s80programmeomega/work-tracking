@@ -2,13 +2,19 @@
 
 namespace App\Services;
 
-use App\Models\{User, Workspace, Projet, Activite, Tache};
-use Illuminate\Support\Facades\{DB, Log};
+use App\Models\Activite;
+use App\Models\Projet;
+use App\Models\Tache;
+use App\Models\User;
+use App\Models\Workspace;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Spatie\Permission\Models\Role;
 
 /**
  * Service de gestion du retrait de membres avec transfert de responsabilités
- * 
+ *
  * Hiérarchie : Workspace > Projet > Activité > Tâche
  * - Retrait du Workspace = retrait de TOUT (projets, activités, tâches)
  * - Retrait d'un Projet = retrait des activités et tâches du projet uniquement
@@ -21,9 +27,7 @@ class MemberRemovalService
      * Retire un membre du WORKSPACE et transfère toutes ses responsabilités
      * C'est le niveau le plus haut : on retire TOUT
      *
-     * @param Workspace $workspace
-     * @param User $userToRemove
-     * @param User|null $newResponsable Nouveau responsable (owner par défaut)
+     * @param  User|null  $newResponsable  Nouveau responsable (owner par défaut)
      * @return array Statistiques détaillées du transfert
      */
     public function removeFromWorkspace(
@@ -114,7 +118,7 @@ class MemberRemovalService
                 ])
                 ->log('member_removed_from_workspace_with_transfer');
 
-            Log::info("Member removed from workspace with full transfer", [
+            Log::info('Member removed from workspace with full transfer', [
                 'workspace_id' => $workspace->id,
                 'user_removed' => $userToRemove->id,
                 'new_responsable' => $newResponsable->id,
@@ -128,11 +132,6 @@ class MemberRemovalService
     /**
      * Retire un membre d'un PROJET uniquement (pas du workspace)
      * Ne touche que les activités et tâches de CE projet
-     *
-     * @param Projet $projet
-     * @param User $userToRemove
-     * @param User|null $newResponsable
-     * @return array
      */
     public function removeFromProjet(
         Projet $projet,
@@ -196,11 +195,6 @@ class MemberRemovalService
     /**
      * Retire un membre d'une ACTIVITÉ uniquement
      * Ne touche que les tâches de CETTE activité
-     *
-     * @param Activite $activite
-     * @param User $userToRemove
-     * @param User|null $newResponsable
-     * @return array
      */
     public function removeFromActivite(
         Activite $activite,
@@ -250,10 +244,7 @@ class MemberRemovalService
      * Traite les tâches d'un utilisateur
      * RÈGLE IMPORTANTE : Ne transférer que les tâches NON TERMINÉES
      *
-     * @param Collection $taches
-     * @param User $userToRemove
-     * @param User $newResponsable
-     * @return array
+     * @param  Collection  $taches
      */
     private function handleTachesForUser($taches, User $userToRemove, User $newResponsable): array
     {
@@ -264,13 +255,13 @@ class MemberRemovalService
 
         foreach ($taches as $tache) {
             if ($tache->assignees()->where('user_id', $userToRemove->id)->exists()) {
-                
+
                 // ⚠️ RÈGLE CRUCIALE : Ne transférer que les tâches non terminées
-                if (!in_array($tache->statut, ['termine', 'completed', 'done'])) {
+                if (! in_array($tache->statut, ['termine', 'completed', 'done'])) {
                     // Tâche NON terminée → TRANSFERT au nouveau responsable
                     $tache->assignees()->detach($userToRemove->id);
-                    
-                    if (!$tache->assignees()->where('user_id', $newResponsable->id)->exists()) {
+
+                    if (! $tache->assignees()->where('user_id', $newResponsable->id)->exists()) {
                         $tache->assignees()->attach($newResponsable->id, [
                             'role' => 'assignee',
                             'can_edit' => true,
@@ -279,7 +270,7 @@ class MemberRemovalService
                             'assigned_by' => auth()->id(),
                         ]);
                     }
-                    
+
                     $stats['reassigned']++;
                 } else {
                     // Tâche terminée → Simple désassignation (garde l'historique)
@@ -302,19 +293,17 @@ class MemberRemovalService
             // created_by reste inchangé pour la traçabilité
         ]);
 
-        // Ajouter comme admin du projet si pas déjà membre
-        if (!$projet->members()->where('user_id', $newResponsable->id)->exists()) {
+        $managerRoleId = Role::findByName('manager', 'web')->id;
+
+        if (! $projet->members()->where('user_id', $newResponsable->id)->exists()) {
             $projet->members()->attach($newResponsable->id, [
-                'role' => 'admin',
+                'role_id' => $managerRoleId,
                 'can_edit' => true,
                 'can_delete' => true,
                 'can_invite' => true,
             ]);
         } else {
-            // Mettre à jour le rôle à admin
-            $projet->members()->updateExistingPivot($newResponsable->id, [
-                'role' => 'admin',
-            ]);
+            $projet->members()->updateExistingPivot($newResponsable->id, ['role_id' => $managerRoleId]);
         }
     }
 
@@ -328,7 +317,7 @@ class MemberRemovalService
         ]);
 
         // Ajouter comme membre avec permissions complètes si pas déjà membre
-        if (!$activite->members()->where('user_id', $newResponsable->id)->exists()) {
+        if (! $activite->members()->where('user_id', $newResponsable->id)->exists()) {
             $activite->members()->attach($newResponsable->id, [
                 'role' => 'responsable',
                 'can_create_tasks' => true,
@@ -364,27 +353,27 @@ class MemberRemovalService
                         ->whereIn('accessible_id', $workspace->projets()->pluck('id'));
                 })
                 // Accès aux activités du workspace
-                ->orWhere(function ($q) use ($workspace) {
-                    $q->where('accessible_type', Activite::class)
-                        ->whereIn('accessible_id', function ($subQuery) use ($workspace) {
-                            $subQuery->select('id')
-                                ->from('activites')
-                                ->whereIn('projet_id', $workspace->projets()->pluck('id'));
-                        });
-                })
+                    ->orWhere(function ($q) use ($workspace) {
+                        $q->where('accessible_type', Activite::class)
+                            ->whereIn('accessible_id', function ($subQuery) use ($workspace) {
+                                $subQuery->select('id')
+                                    ->from('activites')
+                                    ->whereIn('projet_id', $workspace->projets()->pluck('id'));
+                            });
+                    })
                 // Accès aux tâches du workspace
-                ->orWhere(function ($q) use ($workspace) {
-                    $q->where('accessible_type', Tache::class)
-                        ->whereIn('accessible_id', function ($subQuery) use ($workspace) {
-                            $subQuery->select('id')
-                                ->from('taches')
-                                ->whereIn('activite_id', function ($subSubQuery) use ($workspace) {
-                                    $subSubQuery->select('id')
-                                        ->from('activites')
-                                        ->whereIn('projet_id', $workspace->projets()->pluck('id'));
-                                });
-                        });
-                });
+                    ->orWhere(function ($q) use ($workspace) {
+                        $q->where('accessible_type', Tache::class)
+                            ->whereIn('accessible_id', function ($subQuery) use ($workspace) {
+                                $subQuery->select('id')
+                                    ->from('taches')
+                                    ->whereIn('activite_id', function ($subSubQuery) use ($workspace) {
+                                        $subSubQuery->select('id')
+                                            ->from('activites')
+                                            ->whereIn('projet_id', $workspace->projets()->pluck('id'));
+                                    });
+                            });
+                    });
             })
             ->delete();
     }
@@ -408,11 +397,8 @@ class MemberRemovalService
     {
         return $workspace->members()
             ->where('user_id', '!=', $excludeUser->id)
-            ->where('user_id', '!=', $workspace->owner_id) // Exclure le owner (il est déjà la valeur par défaut)
-            ->whereHas('roles', function ($query) {
-                // Uniquement les membres avec des rôles suffisants
-                $query->whereIn('name', ['admin', 'manager', 'member']);
-            })
+            ->where('user_id', '!=', $workspace->owner_id)
+            ->wherePivotIn('role', ['manager', 'cadre', 'collaborateur'])
             ->select(['users.id', 'users.nom', 'users.email', 'users.avatar'])
             ->get();
     }

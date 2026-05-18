@@ -103,9 +103,11 @@
                 class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               >
                 <option value="">Sélectionner un rôle</option>
-                <option value="admin">Administrateur - Tous les droits sauf suppression</option>
-                <option value="member">Membre - Peut voir et éditer le projet</option>
-                <option value="viewer">Observateur - Lecture seule</option>
+                <option value="manager">Manager - Gestion complète du projet</option>
+                <option value="cadre">Cadre - Peut créer et gérer les activités</option>
+                <option value="collaborateur">Collaborateur - Participation aux tâches</option>
+                <option value="stagiaire">Stagiaire - Participation aux tâches</option>
+                <option value="observateur">Observateur - Lecture seule</option>
               </select>
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 Le rôle définit les permissions de base du membre
@@ -296,17 +298,22 @@ const getInitials = (name) => {
 
 // Auto-set permissions based on role
 watch(() => form.value.role, (newRole) => {
-  if (newRole === 'admin') {
+  if (newRole === 'manager') {
     form.value.can_edit = true
     form.value.can_delete = true
     form.value.can_invite = true
     form.value.can_delete_member = true
-  } else if (newRole === 'member') {
+  } else if (newRole === 'cadre') {
     form.value.can_edit = true
     form.value.can_delete = false
     form.value.can_invite = false
     form.value.can_delete_member = false
-  } else if (newRole === 'viewer') {
+  } else if (newRole === 'collaborateur' || newRole === 'stagiaire') {
+    form.value.can_edit = false
+    form.value.can_delete = false
+    form.value.can_invite = false
+    form.value.can_delete_member = false
+  } else if (newRole === 'observateur') {
     form.value.can_edit = false
     form.value.can_delete = false
     form.value.can_invite = false

@@ -478,32 +478,22 @@ export function useWorkspace() {
 
     // ==================== HELPERS ====================
 
-    /** Parse and normalize member permissions from pivot */
+    /** Returns workspace-level permissions for a member using the pre-computed user_permissions object. */
     const getMemberPermissions = (member) => {
-        if (!member?.pivot) return { can_create_projects: false, can_invite_members: false, can_manage_settings: false };
-
-        let permissions = member.pivot.permissions || {};
-        if (typeof permissions === 'string') {
-            try { permissions = JSON.parse(permissions); } catch { permissions = {}; }
-        }
-
-        // 'all' shorthand used for owner pivot
-        if (permissions === 'all' || (Array.isArray(permissions) && permissions[0] === 'all')) {
-            return { can_create_projects: true, can_invite_members: true, can_manage_settings: true };
-        }
+        const workspace = authStore.currentWorkspace;
+        const perms = workspace?.user_permissions ?? {};
 
         return {
-            can_create_projects: permissions.can_create_projects ?? false,
-            can_invite_members:  permissions.can_invite_members  ?? false,
-            can_manage_settings: permissions.can_manage_settings ?? false,
+            can_create_projects: perms.can_create_project ?? false,
+            can_invite_members:  perms.can_invite_members ?? false,
+            can_manage_settings: perms.can_manage_workspace_settings ?? false,
         };
     };
 
     const canManageMembers = (workspace, user) => {
         if (!workspace || !user) return false;
         if (workspace.owner_id === user.id) return true;
-        const member = workspace.members?.find(m => m.id === user.id);
-        return ['owner', 'manager'].includes(member?.pivot?.role);
+        return workspace.user_permissions?.can_invite_members ?? false;
     };
 
     /** Available contextual roles for workspace membership */

@@ -10,25 +10,28 @@ use App\Models\SousTache;
 use App\Models\Tache;
 use App\Models\User;
 use App\Models\Workspace;
-use App\Services\PermissionService;
+use App\Permissions\ContextualPermissionGate;
+use App\Permissions\Permission;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Tests\Traits\AttachesWithRoleId;
 
 class SousTacheModelTest extends TestCase
 {
-    use RefreshDatabase;
+    use AttachesWithRoleId, RefreshDatabase;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->artisan('db:seed', ['--class' => 'RolePermissionSeeder']);
+        $this->refreshRoleIdCache();
     }
 
     private function makeTache(): Tache
     {
         $workspace = Workspace::factory()->create();
         $owner = User::factory()->create();
-        $workspace->members()->attach($owner->id, ['role' => 'owner', 'permissions' => json_encode(['all'])]);
+        $this->attachWithRole($workspace->members(), $owner->id, 'owner');
 
         $projet = Projet::factory()->create(['workspace_id' => $workspace->id]);
         $activite = Activite::factory()->create(['projet_id' => $projet->id]);
@@ -100,17 +103,13 @@ class SousTacheModelTest extends TestCase
         $collaborateur = User::factory()->create();
 
         // Assign as collaborateur WITHOUT is_responsable
-        $tache->assignees()->attach($collaborateur->id, [
-            'role' => 'collaborateur',
-            'is_responsable' => false,
-            'can_edit' => false,
-            'can_complete' => true,
-            'can_validate' => false,
+        $this->attachWithRole($tache->assignees(), $collaborateur->id, 'collaborateur', [
+            'is_responsable' => false, 'can_edit' => false, 'can_complete' => true, 'can_validate' => false,
         ]);
 
-        $permissionService = app(PermissionService::class);
+        $gate = app(ContextualPermissionGate::class);
 
-        $this->assertFalse($permissionService->canCreateSousTache($collaborateur, $tache));
+        $this->assertFalse($gate->userCan($collaborateur, Permission::TACHES_CREATE_SUBTASK, $tache));
     }
 
     /** @test */
@@ -120,16 +119,12 @@ class SousTacheModelTest extends TestCase
         $collaborateur = User::factory()->create();
 
         // Assign as collaborateur WITH is_responsable
-        $tache->assignees()->attach($collaborateur->id, [
-            'role' => 'collaborateur',
-            'is_responsable' => true,
-            'can_edit' => false,
-            'can_complete' => true,
-            'can_validate' => false,
+        $this->attachWithRole($tache->assignees(), $collaborateur->id, 'collaborateur', [
+            'is_responsable' => true, 'can_edit' => false, 'can_complete' => true, 'can_validate' => false,
         ]);
 
-        $permissionService = app(PermissionService::class);
+        $gate = app(ContextualPermissionGate::class);
 
-        $this->assertTrue($permissionService->canCreateSousTache($collaborateur, $tache));
+        $this->assertTrue($gate->userCan($collaborateur, Permission::TACHES_CREATE_SUBTASK, $tache));
     }
 }

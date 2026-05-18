@@ -10,6 +10,7 @@ use App\Models\Projet;
 use App\Models\SousTache;
 use App\Models\Tache;
 use App\Models\Workspace;
+use App\Permissions\ContextualPermissionGate;
 use App\Policies\ActivitePolicy;
 use App\Policies\DocumentPolicy;
 use App\Policies\ProjetPolicy;
@@ -34,7 +35,11 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        // Super admin bypasses all policy checks
+        // Bind ContextualPermissionGate as a request-scoped singleton so the
+        // per-request role permission cache is shared across all policy calls.
+        $this->app->scoped(ContextualPermissionGate::class);
+
+        // super_admin bypasses ALL policy checks app-wide — never contextual.
         Gate::before(function ($user, $ability) {
             if ($user->isSuperAdmin()) {
                 return true;

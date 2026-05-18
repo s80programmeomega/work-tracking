@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Spatie\Permission\Models\Role;
 
 class ProjetMemberResource extends JsonResource
 {
@@ -20,10 +21,10 @@ class ProjetMemberResource extends JsonResource
             'email' => $this->email,
             'numero_telephone' => $this->numero_telephone,
             'avatar' => $this->avatar,
-            'role' => $this->pivot->role,
+            'role' => Role::find($this->pivot->role_id)?->name ?? 'collaborateur',
 
             // Pivot data
-            'projet_role' => $this->pivot->role ?? null,
+            'projet_role' => Role::find($this->pivot->role_id)?->name ?? null,
             'can_edit' => $this->pivot->can_edit ?? false,
             'can_delete' => $this->pivot->can_delete ?? false,
             'can_invite' => $this->pivot->can_invite ?? false,

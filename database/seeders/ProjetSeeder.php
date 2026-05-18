@@ -6,6 +6,7 @@ use App\Models\Projet;
 use App\Models\ProjetTag;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Role;
 
 class ProjetSeeder extends Seeder
 {
@@ -17,8 +18,9 @@ class ProjetSeeder extends Seeder
         // Get or create a user
         $user = User::first();
 
-        if (!$user) {
+        if (! $user) {
             echo "Aucun utilisateur trouvé. Veuillez d'abord créer un utilisateur.\n";
+
             return;
         }
 
@@ -107,14 +109,15 @@ class ProjetSeeder extends Seeder
             $projet->tags()->attach($createdTags[array_rand($createdTags)]->id);
 
             // Add the creator as owner member
+            $ownerRole = Role::findByName('owner', 'web');
             $projet->members()->attach($user->id, [
-                'role' => 'owner',
+                'role_id' => $ownerRole->id,
                 'can_edit' => true,
                 'can_delete' => true,
                 'can_invite' => true,
             ]);
         }
 
-        echo "✓ " . count($projets) . " projets créés avec succès!\n";
+        echo '✓ '.count($projets)." projets créés avec succès!\n";
     }
 }

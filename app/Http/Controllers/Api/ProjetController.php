@@ -142,18 +142,7 @@ class ProjetController extends Controller
         }
 
         // ✅ Super admin peut créer dans n'importe quel workspace
-        if (! $request->user()->isSuperAdmin() && ! $workspace->hasAccess($request->user())) {
-            return response()->json([
-                'message' => 'Vous n\'avez pas accès à ce workspace.',
-            ], 403);
-        }
-
-        // Vérifier que l'utilisateur peut créer des projets dans ce workspace
-        if (! $request->user()->isSuperAdmin() && ! $workspace->canCreateProjects($request->user())) {
-            return response()->json([
-                'message' => 'Vous n\'avez pas la permission de créer des projets dans ce workspace.',
-            ], 403);
-        }
+        $this->authorize('createProject', $workspace);
 
         $data['workspace_id'] = $workspaceId;
 
@@ -189,7 +178,7 @@ class ProjetController extends Controller
             // ✅ CORRECTION : Charger members avec withPivot, pas 'members.pivot'
             'members' => function ($query) {
                 $query->withPivot([
-                    'role',
+                    'role_id',
                     'can_edit',
                     'can_delete',
                     'can_invite',
@@ -222,7 +211,7 @@ class ProjetController extends Controller
                     'membres' => function ($mq) {
                         $mq->select('users.id', 'users.nom', 'users.prenom', 'users.email', 'users.avatar')
                             ->withPivot([
-                                'role',
+                                'role_id',
                                 'can_create_tasks',
                                 'can_edit_tasks',
                                 'can_delete_tasks',
@@ -433,7 +422,7 @@ class ProjetController extends Controller
 
         $members = $projet->members()
             ->withPivot([
-                'role',
+                'role_id',
                 'can_edit',
                 'can_delete',
                 'can_invite',
@@ -458,7 +447,7 @@ class ProjetController extends Controller
 
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'role' => 'required|in:admin,member,viewer',
+            'role' => 'required|in:manager,cadre,collaborateur,stagiaire,observateur',
             'can_edit' => 'nullable|boolean',
             'can_delete' => 'nullable|boolean',
             'can_invite' => 'nullable|boolean',
@@ -505,7 +494,7 @@ class ProjetController extends Controller
         $this->authorize('manageMembers', $projet);
 
         $request->validate([
-            'role' => 'sometimes|in:admin,member,viewer',
+            'role' => 'sometimes|in:manager,cadre,collaborateur,stagiaire,observateur',
             'can_edit' => 'nullable|boolean',
             'can_delete' => 'nullable|boolean',
             'can_invite' => 'nullable|boolean',
@@ -964,13 +953,15 @@ class ProjetController extends Controller
     {
         $user = auth()->user();
 
-        $projets = Projet::with('workspace')
-            ->whereHas('workspace', function ($q) use ($user) {
+        $query = Projet::with('workspace');
+
+        if (! $user->isSuperAdmin()) {
+            $query->whereHas('workspace', function ($q) use ($user) {
                 $q->where('owner_id', $user->id)
                     ->orWhereHas('members', fn ($m) => $m->where('user_id', $user->id));
-            })
-            ->get();
+            });
+        }
 
-        return response()->json($projets);
+        return response()->json($query->get());
     }
 }

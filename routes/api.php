@@ -351,6 +351,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Soumettre un résultat
         Route::post('/{resultat}/submit', [TacheResultatController::class, 'submit']);
 
+        // N0 circuit actions
+        Route::post('/{resultat}/approuver-n0', [TacheResultatController::class, 'approuverN0']);
+        Route::post('/{resultat}/renvoyer-n0', [TacheResultatController::class, 'renvoyerN0']);
+
         Route::get('/documents', [TacheResultatController::class, 'getDocuments']);
         Route::delete('/documents/{document}', [TacheResultatController::class, 'deleteDocument']);
         // Nouvelles routes pour les documents

@@ -16,27 +16,37 @@
 
 ## Current Session
 
-**Date:** 2026-05-14
-**Session goal:** Task 0 review + merge, Task 1, Task 2
-**Status:** Complete — Tasks 0, 1, 2 done. 28 tests passing. Branches pushed, PRs pending.
+**Date:** 2026-05-15
+**Session goal:** Task 5 testing + bug fix, Task 6 setup, Laravel Dusk installation
+**Status:** Task 5 submit bug fixed. Dusk installed and configured — 3 browser tests passing.
 
 ---
 
 ## Current Task
 
-**Task:** 4 — Subtask UI
-**Branch:** `feature/v2-task-4-subtask-ui` _(not created yet)_
+**Task:** 6 — Anti-Sabotage Bypass
+**Branch:** `feature/v2-task-6-bypass` _(not created yet)_
 **Status:** Not started
 
 **What to do next:**
-1. Merge PR `feature/v2-task-3-subtask-api` into `jonas`
-2. Manually test Task 3 using `docs/testing/TASK_3_TESTING.md`
-3. Create branch `feature/v2-task-4-subtask-ui` from `jonas`
-4. Follow Task 4 in `IMPLEMENTATION_PLAN.md`
+1. Open PR `feature/v2-task-5-validation-n0` into `jonas`
+2. Create branch `feature/v2-task-6-bypass` from `jonas`
+3. Follow Task 6 in `IMPLEMENTATION_PLAN.md`
+4. Add Dusk tests for Task 6 flows under `tests/Browser/Validation/`
 
 ---
 
 ## Last Completed Task
+
+**Task 5** — N0 Validation Circuit + 48h Timer
+- `ValidationAuditLog` model (immutable, R6)
+- `TacheResultatService`: `soumettre`, `approuverN0`, `renvoyerN0`, `transmettreAuN1`
+- `TransmettreResultatAuN1Job`: dispatched on submit, workspace-configured delay (default 48h), skips if N0 already acted
+- 4 notifications: `ResultatSoumisN0`, `ResultatRenvoye` (Blade), `ResultatApprouveN0` (in-app), `ResultatTransmisAuto`
+- `POST approuver-n0`, `POST renvoyer-n0` endpoints with R4 (min 30 chars)
+- `useTachePermissions.js` created with `canApprouverN0`, `canRenvoyerN0`
+- `circuit_validation.*` translation files (fr + en)
+- 7 new tests, 48 total
 
 **Task 3** — Subtask CRUD API + Automatic Progress
 - `SousTacheService`, `SousTacheController` (5 endpoints), `SousTacheObserver`
@@ -106,3 +116,4 @@
 | 2026-05-11 | Planning | Created IMPLEMENTATION_PLAN.md, WORKING_GUIDELINES.md, PROGRESSION.md, SESSION_STATE.md. Updated ONBOARDING.md. |
 | 2026-05-13 | Task 0 bug fixes | Fixed Pinia readonly conflict, UserResource, hasAccess bypass, sidebar fallbacks. Added 6 factories, expanded seeder. |
 | 2026-05-14 | Task 0 review + merge, Task 1, Task 2 | Reviewed Task 0 (22 tests, all clean). Merged into jonas. Task 1: queue=database, Reverb, useEcho.js. Task 2: sous_taches table, SousTache model with R1/R2, policy, resource, factory, seeder, permissions, translations. Fixed ProjetController bug (soustaches→sousTaches) and Tache assignees pivot (is_responsable missing). 28 tests passing. |
+| 2026-05-15 | Task 4 bugs, Task 5 testing + fix, Dusk setup | Fixed role ENUM mismatch (6 files), ST badge missing from kanban/list (6 queries), SousTacheList modal self-contained refactor. Task 5: fixed submit() not calling TacheResultatService::soumettre() — job now dispatched. Installed Laravel Dusk, fixed 3 fragile migration rollbacks, wrote WorkTrackingTestCase base + AuthenticationTest (3 browser tests passing). |

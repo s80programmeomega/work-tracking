@@ -1,8 +1,11 @@
 <?php
+
 namespace App\Traits;
 
-use App\Models\{Workspace, Projet, Activite, Tache, User};
+use App\Models\User;
+use App\Models\Workspace;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 
 trait HasWorkspacePermissions
 {
@@ -28,7 +31,8 @@ trait HasWorkspacePermissions
         }
 
         $member = $workspace->members()->where('user_id', $this->id)->first();
-        return $member?->pivot->role;
+
+        return $member ? (Role::find($member->pivot->role_id)?->name) : null;
     }
 
     /**
@@ -41,21 +45,17 @@ trait HasWorkspacePermissions
         }
 
         $role = $this->getWorkspaceRole($workspace);
-        
+
         if ($role === 'owner') {
             return $this->getDefaultWorkspacePermissions('owner');
         }
 
         $member = $workspace->members()->where('user_id', $this->id)->first();
-        if (!$member) {
+        if (! $member) {
             return [];
         }
 
-        // Merge default role permissions with custom permissions
-        $defaultPermissions = $this->getDefaultWorkspacePermissions($role);
-        $customPermissions = $member->pivot->permissions ?? [];
-
-        return array_merge($defaultPermissions, $customPermissions);
+        return $this->getDefaultWorkspacePermissions($role);
     }
 
     /**
@@ -63,7 +63,7 @@ trait HasWorkspacePermissions
      */
     private function getDefaultWorkspacePermissions(string $role): array
     {
-        return match($role) {
+        return match ($role) {
             'owner' => [
                 'can_view_all_projects',
                 'can_create_projects',
@@ -77,10 +77,10 @@ trait HasWorkspacePermissions
                 'can_view_all_projects',
                 'can_create_projects',
                 'can_invite_members',
-                'can_manage_settings'
+                'can_manage_settings',
             ],
             'member' => [
-                'can_create_projects' // Can be overridden in JSON
+                'can_create_projects', // Can be overridden in JSON
             ],
             'viewer' => [],
             default => []
@@ -93,6 +93,7 @@ trait HasWorkspacePermissions
     public function canInWorkspace(Workspace $workspace, string $permission): bool
     {
         $permissions = $this->getWorkspacePermissions($workspace);
+
         return in_array('all', $permissions) || in_array($permission, $permissions);
     }
 
@@ -114,9 +115,9 @@ trait HasWorkspacePermissions
         }
 
         // Only projects where user is responsable or member
-        return $workspace->projets()->where(function($q) {
+        return $workspace->projets()->where(function ($q) {
             $q->where('responsable_id', $this->id)
-              ->orWhereHas('members', fn($mq) => $mq->where('user_id', $this->id));
+                ->orWhereHas('members', fn ($mq) => $mq->where('user_id', $this->id));
         });
     }
 
@@ -129,9 +130,9 @@ trait HasWorkspacePermissions
             ->where('user_id', $this->id)
             ->where('accessible_type', get_class($accessible))
             ->where('accessible_id', $accessible->id)
-            ->where(function($q) {
+            ->where(function ($q) {
                 $q->whereNull('expires_at')
-                  ->orWhere('expires_at', '>', now());
+                    ->orWhere('expires_at', '>', now());
             })
             ->exists();
     }

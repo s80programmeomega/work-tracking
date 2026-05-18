@@ -2,8 +2,11 @@
 
 namespace App\Http\Resources;
 
+use App\Permissions\ContextualPermissionGate;
+use App\Permissions\Permission;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Spatie\Permission\Models\Role;
 
 class ActiviteResource extends JsonResource
 {
@@ -40,7 +43,7 @@ class ActiviteResource extends JsonResource
                         'id' => $membre->id,
                         'nom' => $membre->nom,
                         'email' => $membre->email,
-                        'role' => $membre->pivot->role,
+                        'role' => Role::find($membre->pivot->role_id)?->name ?? 'collaborateur',
                         'permissions' => [
                             'can_edit_activity' => (bool) $membre->pivot->can_edit_activity,
                             'can_delete_activity' => (bool) $membre->pivot->can_delete_activity,
@@ -63,45 +66,19 @@ class ActiviteResource extends JsonResource
             // Permissions de l'utilisateur courant
             'user_permissions' => $this->when($request->user(), function () use ($request) {
                 $user = $request->user();
+                $gate = app(ContextualPermissionGate::class);
+                $activite = $this->resource;
 
-                // Super admin a tous les droits
-                if ($user->isSuperAdmin()) {
-                    return $this->getFullPermissions();
-                }
-
-                // ✅ RESPONSABLE DU WORKSPACE a tous les droits
-                if ($this->projet->workspace && $this->projet->workspace->owner_id === $user->id) {
-                    return $this->getFullPermissions();
-                }
-
-                // Responsable de l'activité
-                if ($this->responsable_id === $user->id) {
-                    return $this->getFullPermissions();
-                }
-
-                // Responsable du projet
-                if ($this->projet && $this->projet->responsable_id === $user->id) {
-                    return $this->getFullPermissions();
-                }
-
-                // Membre de l'activité
-                $membre = $this->membres->firstWhere('id', $user->id);
-                if ($membre) {
-                    return [
-                        'can_edit_activity' => (bool) $membre->pivot->can_edit_activity,
-                        'can_delete_activity' => false,
-                        'can_manage_members' => (bool) $membre->pivot->can_assign_users,
-                        'can_create_tasks' => (bool) $membre->pivot->can_create_tasks,
-                        'can_edit_tasks' => (bool) $membre->pivot->can_edit_tasks,
-                        'can_delete_tasks' => (bool) $membre->pivot->can_delete_tasks,
-                        'can_validate_results' => (bool) $membre->pivot->can_validate_results,
-                        'can_assign_users' => (bool) $membre->pivot->can_assign_users,
-                        'can_delete_member' => (bool) $membre->pivot->can_delete_member,
-                    ];
-                }
-
-                // Aucun accès
-                return $this->getDefaultPermissions();
+                return [
+                    'can_edit_activity' => $gate->userCan($user, Permission::ACTIVITES_EDIT, $activite),
+                    'can_delete_activity' => $gate->userCan($user, Permission::ACTIVITES_DELETE, $activite),
+                    'can_manage_members' => $gate->userCan($user, Permission::SOUS_TACHES_ASSIGN, $activite),
+                    'can_create_tasks' => $gate->userCan($user, Permission::ACTIVITES_CREATE_TASK, $activite),
+                    'can_edit_tasks' => $gate->userCan($user, Permission::TACHES_EDIT, $activite),
+                    'can_delete_tasks' => $gate->userCan($user, Permission::TACHES_DELETE, $activite),
+                    'can_validate_results' => $gate->userCan($user, Permission::ACTIVITES_VALIDATE_N1, $activite),
+                    'can_assign_users' => $gate->userCan($user, Permission::SOUS_TACHES_ASSIGN, $activite),
+                ];
             }),
 
             'created_at' => $this->created_at?->toDateTimeString(),

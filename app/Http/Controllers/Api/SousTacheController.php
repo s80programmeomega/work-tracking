@@ -123,9 +123,7 @@ class SousTacheController extends Controller
     {
         $user = $request->user();
 
-        if (! $this->permissionService->canAssignSousTacheIntervenant($user, $sousTache)) {
-            return response()->json(['message' => __('sous_taches.errors.unauthorized')], 403);
-        }
+        $this->authorize('assign', $sousTache);
 
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',

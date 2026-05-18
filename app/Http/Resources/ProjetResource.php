@@ -2,13 +2,15 @@
 
 namespace App\Http\Resources;
 
+use App\Permissions\ContextualPermissionGate;
+use App\Permissions\Permission;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Spatie\Permission\Models\Role;
 
 class ProjetResource extends JsonResource
 {
-    
-     /**
+    /**
      * Transform the resource into an array.
      *
      * @return array<string, mixed>
@@ -17,7 +19,7 @@ class ProjetResource extends JsonResource
     {
         // ✅ CALCUL DE LA PROGRESSION AUTOMATIQUE BASÉE SUR LA MOYENNE DES ACTIVITÉS
         $progressionAuto = $this->calculateAutoProgressionFromActivities();
-        
+
         return [
             'id' => $this->id,
             'workspace_id' => $this->workspace_id,
@@ -40,7 +42,7 @@ class ProjetResource extends JsonResource
             'visibility' => $this->visibility,
             'couleur' => $this->couleur,
             'budget' => $this->budget,
-            
+
             // ✅ PROGRESSION AUTOMATIQUE BASÉE SUR LA MOYENNE DES ACTIVITÉS
             'progression' => $progressionAuto,
             'progression_calculee' => $progressionAuto,
@@ -85,7 +87,7 @@ class ProjetResource extends JsonResource
                     $poids = $this->calculateActivityWeight($activite);
                     $progression = $activite->progression ?? 0;
                     $contribution = $progression * $poids;
-                    
+
                     $details[] = [
                         'activite_id' => $activite->id,
                         'activite_nom' => $activite->nom,
@@ -111,14 +113,29 @@ class ProjetResource extends JsonResource
             // Relationships
             'members' => ProjetMemberResource::collection($this->whenLoaded('members')),
             'tags' => ProjetTagResource::collection($this->whenLoaded('tags')),
-            
+
+            // Gate-computed permissions for this user on this project
+            'user_permissions' => $this->when($request->user(), function () use ($request) {
+                $user = $request->user();
+                $gate = app(ContextualPermissionGate::class);
+                $projet = $this->resource;
+
+                return [
+                    'can_view' => $gate->userCan($user, Permission::PROJETS_VIEW, $projet),
+                    'can_edit' => $gate->userCan($user, Permission::PROJETS_EDIT, $projet),
+                    'can_delete' => $gate->userCan($user, Permission::PROJETS_DELETE, $projet),
+                    'can_manage_members' => $gate->userCan($user, Permission::PROJETS_MANAGE_MEMBERS, $projet),
+                    'can_create_activity' => $gate->userCan($user, Permission::ACTIVITES_CREATE_TASK, $projet),
+                ];
+            }),
+
             // ✅ Activités avec permissions utilisateur
             'activites' => $this->whenLoaded('activites', function () use ($request) {
                 return $this->activites->map(function ($activite) use ($request) {
                     $user = $request->user();
-                    
+
                     $userPermissions = $this->calculateActivityPermissions($activite, $user);
-                    
+
                     return [
                         'id' => $activite->id,
                         'projet_id' => $activite->projet_id,
@@ -143,10 +160,10 @@ class ProjetResource extends JsonResource
                         'days_remaining' => $activite->days_remaining,
                         'tache_count' => $activite->tache_count ?? 0,
                         'membres_count' => $activite->membres_count ?? $activite->membres()->count(),
-                        
+
                         // ✅ POIDS CALCULÉ pour cette activité
                         'poids_calcule' => $this->calculateActivityWeight($activite),
-                        
+
                         'membres' => $activite->membres->map(function ($membre) {
                             return [
                                 'id' => $membre->id,
@@ -154,7 +171,7 @@ class ProjetResource extends JsonResource
                                 'prenom' => $membre->prenom,
                                 'email' => $membre->email,
                                 'avatar' => $membre->avatar,
-                                'role' => $membre->pivot->role,
+                                'role' => Role::find($membre->pivot->role_id)?->name ?? 'collaborateur',
                                 'permissions' => [
                                     'can_edit_activity' => (bool) $membre->pivot->can_edit_activity,
                                     'can_delete_activity' => (bool) $membre->pivot->can_delete_activity,
@@ -168,9 +185,9 @@ class ProjetResource extends JsonResource
                             ];
                         }),
                         'membres_count' => $activite->membres->count(),
-                        
+
                         'user_permissions' => $userPermissions,
-                        
+
                         'created_at' => $activite->created_at?->toDateTimeString(),
                         'updated_at' => $activite->updated_at?->toDateTimeString(),
                     ];
@@ -184,7 +201,7 @@ class ProjetResource extends JsonResource
     }
 
     // Progression Projet = Σ(Progression Activité × Poids Activité) / Σ(Poids)
-    
+
     /**
      * ✅ CALCULE LA PROGRESSION AUTOMATIQUE À PARTIR DES ACTIVITÉS
      */
@@ -198,7 +215,7 @@ class ProjetResource extends JsonResource
         // Si les activités sont chargées
         if ($this->relationLoaded('activites') && $this->activites->isNotEmpty()) {
             $activitesActives = $this->activites->where('status', 'active');
-            
+
             if ($activitesActives->isEmpty()) {
                 return 0;
             }
@@ -209,7 +226,7 @@ class ProjetResource extends JsonResource
             foreach ($activitesActives as $activite) {
                 $poids = $this->calculateActivityWeight($activite);
                 $progressionActivite = $activite->progression ?? 0;
-                
+
                 $totalProgressionPonderee += $progressionActivite * $poids;
                 $totalPoids += $poids;
             }
@@ -229,7 +246,7 @@ class ProjetResource extends JsonResource
     private function calculateActivityWeight($activite): float
     {
         $poids = 1.0;
-        
+
         // Nombre de tâches
         $tacheCount = $activite->tache_count ?? 0;
         if ($tacheCount > 20) {
@@ -267,7 +284,7 @@ class ProjetResource extends JsonResource
 
         return $poids;
     }
-    
+
     /**
      * Retourne les permissions complètes
      */
@@ -275,7 +292,7 @@ class ProjetResource extends JsonResource
     {
         return [
             'can_edit_activity' => true,
-            'can_delete_activity' => true, 
+            'can_delete_activity' => true,
             'can_manage_members' => true,
             'can_create_tasks' => true,
             'can_edit_tasks' => true,
@@ -301,13 +318,13 @@ class ProjetResource extends JsonResource
             'can_assign_users' => false,
         ];
     }
-    
+
     /**
      * ✅ Calcule les permissions de l'utilisateur pour une activité spécifique
      */
     private function calculateActivityPermissions($activite, $user): array
     {
-        if (!$user) {
+        if (! $user) {
             return $this->getDefaultPermissions();
         }
 
@@ -331,7 +348,7 @@ class ProjetResource extends JsonResource
         if ($membre) {
             return [
                 'can_edit_activity' => (bool) $membre->pivot->can_edit_activity,
-                'can_delete_activity' => (bool) $membre->pivot->can_delete_activity,// Les membres simples ne peuvent pas supprimer l'activité
+                'can_delete_activity' => (bool) $membre->pivot->can_delete_activity, // Les membres simples ne peuvent pas supprimer l'activité
                 'can_manage_members' => (bool) $membre->pivot->can_assign_users,
                 'can_create_tasks' => (bool) $membre->pivot->can_create_tasks,
                 'can_edit_tasks' => (bool) $membre->pivot->can_edit_tasks,
@@ -344,8 +361,4 @@ class ProjetResource extends JsonResource
         // ✅ Aucun accès par défaut
         return $this->getDefaultPermissions();
     }
-    
-
 }
-
- 

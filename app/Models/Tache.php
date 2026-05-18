@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Permission\Models\Role;
 
 class Tache extends Model
 {
@@ -228,7 +229,7 @@ class Tache extends Model
     {
         return $this->belongsToMany(User::class, 'tache_user')
             ->withPivot([
-                'role',
+                'role_id',
                 'is_responsable',
                 'can_edit',
                 'can_complete',
@@ -740,6 +741,27 @@ class Tache extends Model
     public function isAssignedTo(User $user): bool
     {
         return $this->assignees()->where('user_id', $user->id)->exists();
+    }
+
+    /**
+     * Only collaborateur/stagiaire role assignments can submit results.
+     * Mirrors PermissionService::canSubmitResult — available here for resource use.
+     */
+    public function canSubmitResultBy(User $user): bool
+    {
+        if ($user->isSuperAdmin()) {
+            return false;
+        }
+
+        $assignment = $this->assignees()->where('user_id', $user->id)->first();
+
+        if (! $assignment) {
+            return false;
+        }
+
+        $roleName = Role::find($assignment->pivot->role_id)?->name;
+
+        return in_array($roleName, ['collaborateur', 'stagiaire']);
     }
 
     /**

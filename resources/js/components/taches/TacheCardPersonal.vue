@@ -213,6 +213,7 @@
 
         <!-- Bouton soumettre résultat -->
         <button
+          dusk="submit-result-btn"
           v-if="canSubmitResult"
           @click.stop="$emit('submit-result', tache)"
           class="flex-1 px-3 py-1.5 text-xs font-medium text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-lg transition-colors flex items-center justify-center gap-1"
@@ -226,6 +227,7 @@
 
       <!-- ✅ NOUVEAU : Bouton "Éditer" si responsable -->
       <button
+        dusk="edit-task-responsable-btn"
         v-if="isResponsable"
         @click.stop="$emit('edit', tache)"
         class="px-3 py-1.5 text-xs font-medium text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-lg transition-colors flex items-center gap-1"
