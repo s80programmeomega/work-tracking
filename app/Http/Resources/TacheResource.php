@@ -304,7 +304,10 @@ class TacheResource extends JsonResource
             'labels' => LabelResource::collection($this->whenLoaded('labels')),
 
             // Sous-tâches
-            'sous_taches_count' => $this->whenLoaded('sousTaches', fn () => $this->sousTaches->count()),
+            // Prefer withCount('sousTaches') (cheap COUNT query). Falls back to the loaded
+            // collection when with('sousTaches') was used instead. Returns 0 if neither.
+            'sous_taches_count' => $this->resource->sous_taches_count
+                ?? ($this->relationLoaded('sousTaches') ? $this->sousTaches->count() : 0),
 
             // Apparence
             'position' => $this->position,

@@ -178,6 +178,7 @@ class TacheController extends Controller
                     'labels:id,nom,couleur',
                     'responsable:id,nom,email,avatar',
                 ])
+                ->withCount('sousTaches')
                 ->active()
                 ->orderBy('created_at', 'desc');
 
@@ -315,7 +316,7 @@ class TacheController extends Controller
     {
         $user = $request->user();
 
-        $query = Tache::overdue()->with(['activite.projet', 'labels', 'assignees'])->ordered();
+        $query = Tache::overdue()->with(['activite.projet', 'labels', 'assignees'])->withCount('sousTaches')->ordered();
 
         if (! $user->isSuperAdmin()) {
             $query->where(function ($q) use ($user) {
@@ -1545,6 +1546,7 @@ class TacheController extends Controller
                 $query->where('user_id', $user->id);
             },
         ])
+            ->withCount('sousTaches')
             ->whereHas('assignees', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             })
@@ -1818,6 +1820,7 @@ class TacheController extends Controller
 
         $taches = Tache::enAttenteCollegues($user)
             ->with(['activite.projet', 'assignees', 'labels'])
+            ->withCount('sousTaches')
             ->active()
             ->ordered()
             ->get();
@@ -1851,6 +1854,7 @@ class TacheController extends Controller
         // Récupérer toutes les tâches de l'activité avec leurs assignés
         $taches = Tache::forActivite($activiteId)
             ->with(['assignees', 'labels', 'resultatsIndividuels'])
+            ->withCount('sousTaches')
             ->active()
             ->get();
 
@@ -2117,6 +2121,7 @@ class TacheController extends Controller
         $myTasks = Tache::assignedTo($user->id)
             ->forWeek($weekInfo['week_number'], $weekInfo['year'])
             ->with(['activite', 'labels'])
+            ->withCount('sousTaches')
             ->get();
 
         // Validations en attente
