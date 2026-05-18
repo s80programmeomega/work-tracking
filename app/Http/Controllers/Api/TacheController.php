@@ -760,6 +760,7 @@ class TacheController extends Controller
                     'links_count' => $tache->externalLinks->count(),
                     // 'comments_count' => $tache->comments->count(),
                     'resultats_count' => $tache->resultats->count(),
+                    'sous_taches_count' => $tache->sousTaches()->count(),
                     'is_overdue' => $tache->is_overdue,
                     'days_until_due' => $tache->echeance ? now()->diffInDays($tache->echeance, false) : null,
                 ],

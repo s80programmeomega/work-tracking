@@ -199,7 +199,7 @@ const breadcrumb = ref({});
 
 const tabs = computed(() => [
   { id: 'details', label: 'Détails', icon: 'fa-info-circle' },
-  { id: 'sous-taches', label: 'Sous-tâches', icon: 'fa-list-check' },
+  { id: 'sous-taches', label: 'Sous-tâches', icon: 'fa-list-check', count: stats.value.sous_taches_count },
   { id: 'assignees', label: 'Assignés', icon: 'fa-users', count: stats.value.assignees_count },
   { id: 'attachments', label: 'Fichiers', icon: 'fa-paperclip', count: stats.value.attachments_count },
   { id: 'links', label: 'Liens', icon: 'fa-link', count: stats.value.links_count },
