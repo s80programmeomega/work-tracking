@@ -25,7 +25,7 @@
 | 3 | Subtask CRUD API + Auto Progress | `feature/v2-task-3-subtask-api` | ✅ | 2026-05-14 | 2026-05-14 | — |
 | 4 | Subtask UI | `feature/v2-task-4-subtask-ui` | ⬜ | — | — | — |
 | 5 | Validation N0 + 48h Timer | `feature/v2-task-5-validation-n0` | ✅ | 2026-05-15 | 2026-05-15 | — |
-| 6 | Anti-Sabotage Bypass | `feature/v2-task-6-bypass` | ⬜ | — | — | — |
+| 6 | Anti-Sabotage Bypass | `feature/v2-task-6-bypass` | ✅ | 2026-05-18 | 2026-05-18 | — |
 | 7 | N1 Scores + Pending Validations | `feature/v2-task-7-scores-dashboard` | ⬜ | — | — | — |
 | 8 | Reverb + Web Push Notifications | `feature/v2-task-8-notifications` | ⬜ | — | — | — |
 | 9 | Agent Sheet + Full Scoring | `feature/v2-task-9-agent-sheet` | ⬜ | — | — | — |
@@ -129,13 +129,16 @@
 - [x] Run: `php artisan serve` + `php artisan dusk`
 
 ### Task 6
-- [ ] Bypass columns added to `tache_resultats`
-- [ ] `activerBypass` added to `TacheResultatService`
-- [ ] `escalades_abusives` flag logic implemented
-- [ ] N1 validation context panel added
-- [ ] `canActiverBypass` permission added
-- [ ] Translation keys added
-- [ ] Tests passing
+- [x] Bypass columns added to `tache_resultats` (`bypass_active`, `motif_bypass`, `bypass_le`, `bypass_count`)
+- [x] `escalades_abusives` + `bypass_count` added to `tache_user`
+- [x] `activerBypass` added to `TacheResultatService` (R3 + R5 + audit log + BypassActivatedNotification)
+- [x] `invaliderBypassN1` added to `TacheResultatService` (escalades_abusives flag at 3 consecutive)
+- [x] N1 context panel data exposed via `TacheResultatResource` (`bypass` block + `audit_logs`)
+- [x] `RESULTATS_ACTIVER_BYPASS` permission: `Permission.php`, `forRole()`, `Permission.js`, `useTachePermissions.js`
+- [x] Translation keys: `success.bypass_active`, `bypass.*`, `notifications.bypass_active`, `notifications.escalades_abusives` (fr + en)
+- [x] `BypassActivatedNotification` + Blade email `emails/bypass-activated/{fr,en}.blade.php`
+- [x] `EscaladesAbusivesNotification` (inline MailMessage)
+- [x] 10 tests passing (`BypassCircuitTest`) — 80 total
 - [ ] PR opened into `jonas`
 
 ### Task 7

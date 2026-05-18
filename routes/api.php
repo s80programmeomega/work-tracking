@@ -355,6 +355,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/{resultat}/approuver-n0', [TacheResultatController::class, 'approuverN0']);
         Route::post('/{resultat}/renvoyer-n0', [TacheResultatController::class, 'renvoyerN0']);
 
+        // Anti-sabotage bypass (R3 + R5)
+        Route::post('/{resultat}/activer-bypass', [TacheResultatController::class, 'activerBypass']);
+
         Route::get('/documents', [TacheResultatController::class, 'getDocuments']);
         Route::delete('/documents/{document}', [TacheResultatController::class, 'deleteDocument']);
         // Nouvelles routes pour les documents

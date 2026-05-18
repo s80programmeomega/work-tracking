@@ -20,6 +20,14 @@ return [
     'success' => [
         'approuve_n0' => 'Result approved and forwarded to N1.',
         'renvoye_n0' => 'Result returned to the author.',
+        'bypass_active' => 'Bypass activated. Your result has been forwarded directly to the N1 validator.',
+    ],
+
+    'bypass' => [
+        'submit_label' => 'Submit directly to N1',
+        'motif_placeholder' => 'Explain why you consider the return unjustified (min. 50 characters)…',
+        'abusive_escalations_label' => 'Abusive escalations',
+        'n1_context_panel_title' => 'N1 validation context',
     ],
     'notifications' => [
         'soumis_n0' => [
@@ -41,6 +49,15 @@ return [
             'subject' => 'Result automatically forwarded to N1',
             'line1' => 'The N0 review deadline has passed for task: :titre.',
             'line2' => 'The result has been automatically forwarded to the N1 validator.',
+            'action' => 'View task',
+        ],
+        'bypass_active' => [
+            'subject' => 'Anti-sabotage bypass activated — action required',
+        ],
+        'escalades_abusives' => [
+            'subject' => 'Alert: abusive escalations detected',
+            'line1' => ':nom has triggered an abusive escalations flag on task ":tache".',
+            'line2' => 'Number of consecutive invalid bypasses: :count.',
             'action' => 'View task',
         ],
     ],

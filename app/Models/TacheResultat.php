@@ -52,6 +52,10 @@ class TacheResultat extends Model
         'validateur_n2_id',
         'valide_le_n2',
         'commentaire_n2',
+        'bypass_active',
+        'motif_bypass',
+        'bypass_le',
+        'bypass_count',
     ];
 
     protected $casts = [
@@ -63,6 +67,9 @@ class TacheResultat extends Model
         'valide_par_n1' => 'boolean',
         'valide_par_n2' => 'boolean',
         'is_individual' => 'boolean',
+        'bypass_active' => 'boolean',
+        'bypass_count' => 'integer',
+        'bypass_le' => 'datetime',
         'taux_realisation' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',

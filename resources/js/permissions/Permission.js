@@ -56,9 +56,10 @@ export const Permission = Object.freeze({
     DOCUMENTS_DELETE:           'documents.delete',
     DOCUMENTS_SHARE:            'documents.share',
 
-    // Results / N0
+    // Results / N0 + bypass
     RESULTATS_APPROUVER_N0:     'resultats.approuver_n0',
     RESULTATS_RENVOYER_N0:      'resultats.renvoyer_n0',
+    RESULTATS_ACTIVER_BYPASS:   'resultats.activer_bypass',
 
     // Reports
     REPORTS_VIEW:               'reports.view',

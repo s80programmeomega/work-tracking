@@ -1051,6 +1051,56 @@ class TacheResultatController extends Controller
     }
 
     /**
+     * Assignee activates anti-sabotage bypass after an unjustified N0 return.
+     * R3: single-use per submission (409). R5: motif min 50 chars (422).
+     * POST /taches/{tache}/resultats/{resultat}/activer-bypass
+     */
+    public function activerBypass(Request $request, Tache $tache, TacheResultat $resultat): JsonResponse
+    {
+        $user = $request->user();
+
+        if ($resultat->tache_id !== $tache->id) {
+            abort(404);
+        }
+
+        if ($resultat->user_id !== $user->id) {
+            Log::warning('Bypass refusé — pas l\'auteur', [
+                'user_id' => $user->id,
+                'tache_resultat_id' => $resultat->id,
+                'reason' => 'unauthorized',
+            ]);
+
+            return response()->json(['message' => __('circuit_validation.errors.unauthorized')], 403);
+        }
+
+        // R3: single-use — check before statut so we return 409, not 422
+        if ($resultat->bypass_active) {
+            return response()->json(['message' => __('circuit_validation.errors.bypass_already_used')], 409);
+        }
+
+        if ($resultat->statut !== 'a_refaire') {
+            return response()->json(['message' => __('circuit_validation.errors.invalid_statut')], 422);
+        }
+
+        $validated = $request->validate([
+            'motif' => 'required|string',
+        ]);
+
+        try {
+            $this->resultatService->activerBypass($resultat, $user, $validated['motif']);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        } catch (\DomainException $e) {
+            return response()->json(['message' => $e->getMessage()], 409);
+        }
+
+        return response()->json([
+            'message' => __('circuit_validation.success.bypass_active'),
+            'data' => new TacheResultatResource($resultat->fresh()),
+        ]);
+    }
+
+    /**
      * N0 approves and forwards result to N1.
      * POST /taches/{tache}/resultats/{resultat}/approuver-n0
      */

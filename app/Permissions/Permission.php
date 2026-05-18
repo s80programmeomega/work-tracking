@@ -84,6 +84,8 @@ final class Permission
 
     const RESULTATS_RENVOYER_N0 = 'resultats.renvoyer_n0';
 
+    const RESULTATS_ACTIVER_BYPASS = 'resultats.activer_bypass';
+
     // ── Reports ───────────────────────────────────────────────────────────
     const REPORTS_VIEW = 'reports.view';
 
@@ -145,6 +147,7 @@ final class Permission
 
             self::RESULTATS_APPROUVER_N0,
             self::RESULTATS_RENVOYER_N0,
+            self::RESULTATS_ACTIVER_BYPASS,
 
             self::REPORTS_VIEW,
             self::REPORTS_CREATE,
@@ -237,6 +240,7 @@ final class Permission
                 self::DOCUMENTS_UPLOAD,
                 self::RESULTATS_APPROUVER_N0,
                 self::RESULTATS_RENVOYER_N0,
+                self::RESULTATS_ACTIVER_BYPASS,
             ],
 
             'stagiaire' => [
@@ -248,6 +252,7 @@ final class Permission
                 self::TACHES_COMMENT,
                 self::SOUS_TACHES_VIEW,
                 self::DOCUMENTS_VIEW,
+                self::RESULTATS_ACTIVER_BYPASS,
             ],
 
             'observateur' => [

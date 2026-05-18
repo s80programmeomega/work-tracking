@@ -16,27 +16,37 @@
 
 ## Current Session
 
-**Date:** 2026-05-15
-**Session goal:** Task 5 testing + bug fix, Task 6 setup, Laravel Dusk installation
-**Status:** Task 5 submit bug fixed. Dusk installed and configured — 3 browser tests passing.
+**Date:** 2026-05-18
+**Session goal:** Pre-merge checks, Workspace.php curly-quote bug fix, merge to jonas, Task 6 implementation
+**Status:** Task 6 complete. 80 tests passing. Branch pushed; pending merge into `jonas`.
 
 ---
 
 ## Current Task
 
-**Task:** 6 — Anti-Sabotage Bypass
-**Branch:** `feature/v2-task-6-bypass` _(not created yet)_
+**Task:** 7 — N1 Scores + Pending Validations Dashboard
+**Branch:** `feature/v2-task-7-scores-dashboard` _(not created yet)_
 **Status:** Not started
 
 **What to do next:**
-1. Open PR `feature/v2-task-5-validation-n0` into `jonas`
-2. Create branch `feature/v2-task-6-bypass` from `jonas`
-3. Follow Task 6 in `IMPLEMENTATION_PLAN.md`
-4. Add Dusk tests for Task 6 flows under `tests/Browser/Validation/`
+1. Merge `feature/v2-task-6-bypass` into `jonas`
+2. Create `feature/v2-task-7-scores-dashboard` from `jonas`
+3. Follow Task 7 in `IMPLEMENTATION_PLAN.md`
 
 ---
 
 ## Last Completed Task
+
+**Task 6** — Anti-Sabotage Bypass
+- 2 migrations: `add_bypass_columns_to_tache_resultats`, `add_bypass_count_to_tache_user`
+- `TacheResultatService`: `activerBypass` (R3 + R5), `invaliderBypassN1` (escalades_abusives flag at 3 consecutive)
+- `TacheResultatController::activerBypass` — R3 checked before statut check (409 > 422 precedence)
+- `RESULTATS_ACTIVER_BYPASS` permission: `Permission.php` + `forRole()` (collaborateur + stagiaire) + `Permission.js` + `useTachePermissions.js`
+- `TacheResultatResource`: `bypass` block + `audit_logs` + `can_activer_bypass`
+- `BypassActivatedNotification` (Blade email, fr + en) + `EscaladesAbusivesNotification` (inline)
+- `circuit_validation.php` (fr + en): `success.bypass_active`, `bypass.*`, `notifications.bypass_active`, `notifications.escalades_abusives`
+- 10 new tests in `BypassCircuitTest` — 80 total, all passing
+- Workspace.php curly-quote bug fixed + `WorkspaceMembershipTest` (5 tests) added in same session
 
 **Task 5** — N0 Validation Circuit + 48h Timer
 - `ValidationAuditLog` model (immutable, R6)
