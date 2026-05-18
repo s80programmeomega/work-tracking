@@ -177,7 +177,7 @@ const filteredActivities = computed(() => {
 const fetchActivities = async () => {
   try {
     const response = await api.get(`/taches/${props.tache.id}/activities`);
-    activities.value = response.data.data;
+    activities.value = response.data?.data ?? [];
   } catch (error) {
     console.error('Erreur lors du chargement des activités:', error);
   }

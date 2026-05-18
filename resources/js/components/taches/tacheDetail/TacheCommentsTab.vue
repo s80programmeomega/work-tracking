@@ -275,7 +275,7 @@ const fetchComments = async () => {
   loading.value = true;
   try {
     const response = await api.get(`/taches/${props.tache.id}/comments`);
-    comments.value = response.data.data;
+    comments.value = response.data?.data ?? [];
   } catch (error) {
     console.error('Erreur lors du chargement des commentaires:', error);
     showError('Erreur lors du chargement des commentaires');
