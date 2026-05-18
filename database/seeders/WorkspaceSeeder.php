@@ -9,7 +9,9 @@ use App\Models\Activite;
 use App\Models\Projet;
 use App\Models\SousTache;
 use App\Models\Tache;
+use App\Models\TacheResultat;
 use App\Models\User;
+use App\Models\ValidationAuditLog;
 use App\Models\Workspace;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -565,6 +567,144 @@ class WorkspaceSeeder extends Seeder
             'visibility' => 'team',
             'status' => 'active',
         ]);
+
+        // ── Demo data: one result per validation circuit state ────────────────
+        // Get all tasks where collaborateur is the responsable (is_responsable = true)
+        // so the results appear in their UI under "Mon résultat".
+        $demoTaches = Tache::whereHas('assignees', function ($q) use ($collaborateur) {
+            $q->where('tache_user.user_id', $collaborateur->id)
+                ->where('tache_user.is_responsable', true);
+        })->take(6)->get();
+
+        $resultScenarios = [
+            // 0: brouillon — result exists but not submitted yet
+            fn (Tache $t) => TacheResultat::create([
+                'tache_id' => $t->id,
+                'user_id' => $collaborateur->id,
+                'is_individual' => true,
+                'statut' => 'brouillon',
+                'resultats_attendus' => 'Livrer un rapport d\'analyse complet.',
+                'resultats_obtenus' => 'Brouillon en cours de rédaction.',
+                'taux_realisation' => 20,
+            ]),
+
+            // 1: en_verification_n0 — submitted, awaiting N0 review
+            function (Tache $t) use ($collaborateur) {
+                $resultat = TacheResultat::factory()->enVerificationN0()->create([
+                    'tache_id' => $t->id,
+                    'user_id' => $collaborateur->id,
+                    'resultats_attendus' => 'Analyse complète des besoins fonctionnels.',
+                    'resultats_obtenus' => 'Analyse réalisée avec cartographie de 12 processus métier et 34 exigences documentées.',
+                    'taux_realisation' => 90,
+                ]);
+                ValidationAuditLog::create([
+                    'tache_resultat_id' => $resultat->id,
+                    'actor_id' => $collaborateur->id,
+                    'action' => 'soumis',
+                    'context' => ['taux_realisation' => 90],
+                ]);
+            },
+
+            // 2: a_refaire — N0 returned the result (KEY scenario for bypass testing)
+            function (Tache $t) use ($collaborateur) {
+                $n0Actor = $t->assignees()->wherePivot('is_responsable', true)->first();
+                $n0Id = $n0Actor?->id ?? $collaborateur->id;
+                $resultat = TacheResultat::factory()->renvoyeParN0($n0Id)->create([
+                    'tache_id' => $t->id,
+                    'user_id' => $collaborateur->id,
+                    'resultats_attendus' => 'Conception de la base de données relationnelle conforme au CDC.',
+                    'resultats_obtenus' => 'Schéma ERD complet avec 18 tables, toutes les relations documentées.',
+                    'taux_realisation' => 75,
+                    'commentaire_n0' => 'Les index de performance ne sont pas documentés et les contraintes d\'intégrité sont manquantes pour 3 tables.',
+                ]);
+                ValidationAuditLog::create([
+                    'tache_resultat_id' => $resultat->id,
+                    'actor_id' => $collaborateur->id,
+                    'action' => 'soumis',
+                    'context' => ['taux_realisation' => 75],
+                ]);
+                ValidationAuditLog::create([
+                    'tache_resultat_id' => $resultat->id,
+                    'actor_id' => $n0Id,
+                    'action' => 'renvoye',
+                    'context' => ['commentaire' => 'Les index de performance ne sont pas documentés et les contraintes d\'intégrité sont manquantes pour 3 tables.'],
+                ]);
+            },
+
+            // 3: en_validation_n1 via bypass — bypass activated, pending N1
+            function (Tache $t) use ($collaborateur) {
+                $motif = 'Le schéma couvre toutes les contraintes du CDC. L\'absence d\'index est un choix de performance documenté dans l\'annexe technique. Le renvoi n\'est pas justifié.';
+                $resultat = TacheResultat::factory()->bypassActive($motif)->create([
+                    'tache_id' => $t->id,
+                    'user_id' => $collaborateur->id,
+                    'resultats_attendus' => 'Développement des endpoints API REST v2.',
+                    'resultats_obtenus' => 'API complète avec 47 endpoints documentés, tests Postman inclus.',
+                    'taux_realisation' => 95,
+                ]);
+                ValidationAuditLog::create([
+                    'tache_resultat_id' => $resultat->id,
+                    'actor_id' => $collaborateur->id,
+                    'action' => 'soumis',
+                    'context' => ['taux_realisation' => 95],
+                ]);
+                ValidationAuditLog::create([
+                    'tache_resultat_id' => $resultat->id,
+                    'actor_id' => $collaborateur->id,
+                    'action' => 'bypass',
+                    'context' => ['motif' => $motif],
+                ]);
+            },
+
+            // 4: en_validation_n1 via N0 approval — normal flow
+            function (Tache $t) use ($collaborateur) {
+                $resultat = TacheResultat::factory()->create([
+                    'tache_id' => $t->id,
+                    'user_id' => $collaborateur->id,
+                    'statut' => 'en_validation_n1',
+                    'soumis_le' => now()->subDays(2),
+                    'soumis_n0_le' => now()->subDays(2),
+                    'action_n0' => 'approuve',
+                    'action_n0_le' => now()->subDay(),
+                    'bypass_active' => false,
+                    'resultats_attendus' => 'Dashboard analytique avec KPIs temps réel.',
+                    'resultats_obtenus' => 'Dashboard livré avec 8 widgets, données actualisées toutes les 5 minutes.',
+                    'taux_realisation' => 100,
+                ]);
+                ValidationAuditLog::create([
+                    'tache_resultat_id' => $resultat->id,
+                    'actor_id' => $collaborateur->id,
+                    'action' => 'soumis',
+                    'context' => ['taux_realisation' => 100],
+                ]);
+                ValidationAuditLog::create([
+                    'tache_resultat_id' => $resultat->id,
+                    'actor_id' => $collaborateur->id,
+                    'action' => 'approuve',
+                    'context' => [],
+                ]);
+            },
+
+            // 5: valide — fully validated by N1 + N2
+            function (Tache $t) use ($collaborateur, $cadre, $manager) {
+                TacheResultat::factory()->valideN2()->create([
+                    'tache_id' => $t->id,
+                    'user_id' => $collaborateur->id,
+                    'resultats_attendus' => 'Documentation technique complète.',
+                    'resultats_obtenus' => 'Documentation de 45 pages couvrant architecture, déploiement et maintenance.',
+                    'taux_realisation' => 100,
+                    'validateur_n1_id' => $cadre->id,
+                    'validateur_n2_id' => $manager->id,
+                    'commentaire_n1' => 'Travail de qualité, bien structuré.',
+                    'commentaire_n2' => 'Validé. Excellent rapport.',
+                ]);
+            },
+        ];
+
+        foreach ($demoTaches as $index => $tache) {
+            if (isset($resultScenarios[$index])) {
+                ($resultScenarios[$index])($tache);
+            }
+        }
 
         $this->command->info('Workspace seeded successfully!');
         $this->command->info('3 projets × 3 activités × 3 tâches = 27 tâches avec objectifs réels');
