@@ -690,26 +690,12 @@ const getFilteredSubItems = (subItems) => {
 
 // OU encore mieux : une solution par route spécifique
 const isActive = (path) => {
-    const currentPath = route.path;
-
-    // Routes exactes qui ne doivent pas activer leurs parents
-    const exactRoutes = [
-        '/taches/mes-taches',
-        '/taches/assignees',
-        '/taches/en-attente',
-        '/projets/mes-projets',
-        '/projets/archives',
-        '/activites/mes-activites',
-        '/activites/en-retard'
-    ];
-
-    // Si c'est une route exacte, vérifier la correspondance exacte
-    if (exactRoutes.includes(path) || exactRoutes.includes(currentPath)) {
-        return currentPath === path;
-    }
-
-    // Pour les autres routes, utiliser la logique normale
-    return currentPath === path || currentPath.startsWith(path + '/');
+    // Exact match only. Prefix matching caused two links to be active
+    // simultaneously (e.g. on /taches/22 both the "Toutes les tâches" subitem
+    // with path /taches AND the actual route lit up). The parent dropdown is
+    // opened separately via syncOpenSubmenuFromRoute, so prefix matching is
+    // no longer needed.
+    return route.path === path;
 };
 
 const toggleSubmenu = (groupIndex, itemIndex) => {
