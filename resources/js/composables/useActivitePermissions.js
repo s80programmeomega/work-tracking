@@ -57,6 +57,19 @@ export function useActivitePermissions(activite = null) {
     const canAssignUsers  = computed(() => isSuperAdmin.value || perms.value.can_assign_users ?? false)
     const canManageMembers = computed(() => isSuperAdmin.value || perms.value.can_manage_members ?? false)
 
+    /** Can create sous-tâches (cadre, collaborateur, or explicit can_create_tasks) */
+    const canCreateSousTache = computed(() => {
+        if (isSuperAdmin.value || isResponsable.value) return true
+        if (isObservateur.value) return false
+        return isCadre.value || isCollaborateur.value || (memberPivot.value?.can_create_tasks ?? false)
+    })
+
+    /** Can assign an intervenant to a sous-tâche */
+    const canAssignSousTacheIntervenant = computed(() => {
+        if (isSuperAdmin.value || isResponsable.value) return true
+        return isCadre.value || (memberPivot.value?.can_assign_users ?? false)
+    })
+
     return {
         currentUser,
         memberRole,
@@ -78,5 +91,7 @@ export function useActivitePermissions(activite = null) {
         canValidateN1,
         canAssignUsers,
         canManageMembers,
+        canCreateSousTache,
+        canAssignSousTacheIntervenant,
     }
 }
