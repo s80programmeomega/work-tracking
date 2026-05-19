@@ -151,3 +151,4 @@ Assigned in: `workspace_members`, `projet_user`, `activite_user`, `tache_user`
 | 2026-05-14 | Task 3 | `canAssignSousTacheIntervenant` wired into `RolePermissionSeeder` |
 | 2026-05-14 | Task 4 | `canCreateSousTache`, `canAssignSousTacheIntervenant` in `useActivitePermissions.js`. `can_create_subtask` in `TacheResource` |
 | 2026-05-15 | Task 5 | `canApprouverN0`, `canRenvoyerN0` in `PermissionService`. `resultats.approuver_n0/renvoyer_n0` seeded. `useTachePermissions.js` created. `can_approuver_n0`, `can_renvoyer_n0` in `TacheResultatResource` |
+| 2026-05-18 | Task 6 | `resultats.activer_bypass` added to `Permission.php`, `forRole()` (collaborateur + stagiaire), `Permission.js`. `canActiverBypass` in `useTachePermissions.js`. `can_activer_bypass` in `TacheResultatResource`. "Activate bypass" row already in matrix from earlier session |
