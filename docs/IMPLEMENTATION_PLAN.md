@@ -933,10 +933,10 @@ test: add feature tests for platform dashboard permissions and stats
 
 > **Update this section at the end of every session.**
 
-- Last completed task: **Task 5** — N0 Validation Circuit + 48h Timer (`feature/v2-task-5-validation-n0`)
-- Next task: **Task 6** — Anti-Sabotage Bypass
-- Branch to create: `feature/v2-task-6-bypass` (from `jonas`)
-- PR pending: `feature/v2-task-5-validation-n0` → `jonas`
+- Last completed task: **Task 6** — Anti-Sabotage Bypass (`feature/v2-task-6-bypass`) — merged 2026-05-19 (commit `f6e98d2`)
+- Next task: **Task 7** — N1 Scores + Pending Validations Dashboard
+- Branch to create: `feature/v2-task-7-scores-dashboard` (from `jonas`)
+- Also recovered: **Task 4** (Subtask UI) — was orphan, merged 2026-05-18
 
 ### Dusk note (applies to all remaining tasks)
 Each task must include at least one Dusk browser test covering its main user flow. Place tests under `tests/Browser/<FeatureArea>/`. Follow Guide 16 in `WORKING_GUIDELINES.md`.

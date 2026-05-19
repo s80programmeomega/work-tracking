@@ -16,35 +16,29 @@
 
 ## Current Session
 
-**Date:** 2026-05-18
-**Session goal:** Pre-merge checks, bug fixes, Task 6 implementation, Task 4 recovery and merge
-**Status:** Task 6 complete + Task 4 restored. 80 tests passing. Subtask UI back on all branches. Pending: manual bypass testing by Jonas, then merge task-6 into jonas.
+**Date:** 2026-05-19
+**Session goal:** Merge Task 6 into jonas, start Task 7
+**Status:** Task 6 merged into `jonas` (commit `f6e98d2`) and pushed to `origin`. 80 tests passing. Task 7 not started.
 
 ---
 
 ## Current Task
 
-**Task:** 6 — Anti-Sabotage Bypass (manual testing by Jonas in progress)
-**Branch:** `feature/v2-task-6-bypass`
-**Status:** Implementation complete — pending Jonas manual testing before merge into `jonas`
+**Task:** 7 — N1 Scores + Pending Validations Dashboard
+**Branch:** `feature/v2-task-7-scores-dashboard` _(not created yet)_
+**Status:** Not started
 
 **What to do next:**
-1. Jonas tests Task 6 manually using `docs/testing/TASK_6_TESTING.md`
-2. Merge `feature/v2-task-6-bypass` into `jonas` (local `git merge --no-ff`)
-3. Push `jonas` to `origin`
-4. Create `feature/v2-task-7-scores-dashboard` from `jonas`
+1. Create `feature/v2-task-7-scores-dashboard` from `jonas`
+2. Follow Task 7 in `IMPLEMENTATION_PLAN.md`
+3. At least one Dusk test for the new dashboard (Guide 16)
+4. Update `PERMISSIONS_MATRIX.md` for `canViewValidationsEnAttente` + `canViewEvaluationScore` (Guide 4 step 5 + Guide 15)
 
 ---
 
 ## Last Completed Task
 
-**Task 4** — Subtask UI (recovered and merged 2026-05-18)
-- Branch `feature/v2-task-4-subtask-ui` was complete but never merged into `jonas`
-- Restored: ST badge on kanban cards, `SousTacheList.vue`, `SousTacheForm.vue`, `useSousTaches.js`, sous-taches tab in task detail modal + modal compact view
-- Conflict resolution on merge: kept perm-arch (HEAD) for services/controllers, merged sous-tache permission exports into `useActivitePermissions.js`, kept both Guide 15 and Guide 16 in WORKING_GUIDELINES
-- Now available on both `jonas` and `feature/v2-task-6-bypass`
-
-**Task 6** — Anti-Sabotage Bypass
+**Task 6** — Anti-Sabotage Bypass (merged 2026-05-19, commit `f6e98d2`)
 - 2 migrations: `add_bypass_columns_to_tache_resultats`, `add_bypass_count_to_tache_user`
 - `TacheResultatService`: `activerBypass` (R3 + R5), `invaliderBypassN1` (escalades_abusives flag at 3 consecutive)
 - `TacheResultatController::activerBypass` — R3 checked before statut check (409 > 422 precedence)
@@ -101,7 +95,10 @@
 |---|---|---|
 | `feature/v2-task-1-queue-reverb` | Task 1 | Merged ✅ |
 | `feature/v2-task-2-subtask-model` | Task 2 | Merged ✅ |
-| `feature/v2-task-3-subtask-api` | Task 3 | Pending review |
+| `feature/v2-task-3-subtask-api` | Task 3 | Merged ✅ |
+| `feature/v2-task-4-subtask-ui` | Task 4 | Merged ✅ (recovered 2026-05-18) |
+| `feature/v2-task-5-validation-n0` | Task 5 | Merged ✅ (via `feature/v2-permission-architecture`) |
+| `feature/v2-task-6-bypass` | Task 6 | Merged ✅ |
 
 ---
 
@@ -134,3 +131,5 @@
 | 2026-05-13 | Task 0 bug fixes | Fixed Pinia readonly conflict, UserResource, hasAccess bypass, sidebar fallbacks. Added 6 factories, expanded seeder. |
 | 2026-05-14 | Task 0 review + merge, Task 1, Task 2 | Reviewed Task 0 (22 tests, all clean). Merged into jonas. Task 1: queue=database, Reverb, useEcho.js. Task 2: sous_taches table, SousTache model with R1/R2, policy, resource, factory, seeder, permissions, translations. Fixed ProjetController bug (soustaches→sousTaches) and Tache assignees pivot (is_responsable missing). 28 tests passing. |
 | 2026-05-15 | Task 4 bugs, Task 5 testing + fix, Dusk setup | Fixed role ENUM mismatch (6 files), ST badge missing from kanban/list (6 queries), SousTacheList modal self-contained refactor. Task 5: fixed submit() not calling TacheResultatService::soumettre() — job now dispatched. Installed Laravel Dusk, fixed 3 fragile migration rollbacks, wrote WorkTrackingTestCase base + AuthenticationTest (3 browser tests passing). |
+| 2026-05-18 | Task 6, Task 4 recovery, bug fixes | Implemented Task 6 (anti-sabotage bypass): migrations, `activerBypass` + `invaliderBypassN1` services, 2 notifications + Blade emails (fr/en), 10 feature tests. Recovered orphan `feature/v2-task-4-subtask-ui` branch and merged into jonas. Fixed `Workspace.php` curly quotes, sidebar dropdown stuck/double-active, three task-detail sub-tab crashes (`/users`→`/members`, defensive `?? []`), ST badge missing from kanban (added `withCount('sousTaches')` in `TacheService`). 80 tests passing. |
+| 2026-05-19 | Task 6 merge | Merged `feature/v2-task-6-bypass` into `jonas` (`--no-ff`, commit `f6e98d2`). Pushed `jonas` to `origin`. Updated SESSION_STATE, PROGRESSION, IMPLEMENTATION_PLAN. |
