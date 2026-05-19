@@ -16,27 +16,44 @@
 
 ## Current Session
 
-**Date:** 2026-05-15
-**Session goal:** Task 5 testing + bug fix, Task 6 setup, Laravel Dusk installation
-**Status:** Task 5 submit bug fixed. Dusk installed and configured — 3 browser tests passing.
+**Date:** 2026-05-18
+**Session goal:** Pre-merge checks, bug fixes, Task 6 implementation, Task 4 recovery and merge
+**Status:** Task 6 complete + Task 4 restored. 80 tests passing. Subtask UI back on all branches. Pending: manual bypass testing by Jonas, then merge task-6 into jonas.
 
 ---
 
 ## Current Task
 
-**Task:** 6 — Anti-Sabotage Bypass
-**Branch:** `feature/v2-task-6-bypass` _(not created yet)_
-**Status:** Not started
+**Task:** 6 — Anti-Sabotage Bypass (manual testing by Jonas in progress)
+**Branch:** `feature/v2-task-6-bypass`
+**Status:** Implementation complete — pending Jonas manual testing before merge into `jonas`
 
 **What to do next:**
-1. Open PR `feature/v2-task-5-validation-n0` into `jonas`
-2. Create branch `feature/v2-task-6-bypass` from `jonas`
-3. Follow Task 6 in `IMPLEMENTATION_PLAN.md`
-4. Add Dusk tests for Task 6 flows under `tests/Browser/Validation/`
+1. Jonas tests Task 6 manually using `docs/testing/TASK_6_TESTING.md`
+2. Merge `feature/v2-task-6-bypass` into `jonas` (local `git merge --no-ff`)
+3. Push `jonas` to `origin`
+4. Create `feature/v2-task-7-scores-dashboard` from `jonas`
 
 ---
 
 ## Last Completed Task
+
+**Task 4** — Subtask UI (recovered and merged 2026-05-18)
+- Branch `feature/v2-task-4-subtask-ui` was complete but never merged into `jonas`
+- Restored: ST badge on kanban cards, `SousTacheList.vue`, `SousTacheForm.vue`, `useSousTaches.js`, sous-taches tab in task detail modal + modal compact view
+- Conflict resolution on merge: kept perm-arch (HEAD) for services/controllers, merged sous-tache permission exports into `useActivitePermissions.js`, kept both Guide 15 and Guide 16 in WORKING_GUIDELINES
+- Now available on both `jonas` and `feature/v2-task-6-bypass`
+
+**Task 6** — Anti-Sabotage Bypass
+- 2 migrations: `add_bypass_columns_to_tache_resultats`, `add_bypass_count_to_tache_user`
+- `TacheResultatService`: `activerBypass` (R3 + R5), `invaliderBypassN1` (escalades_abusives flag at 3 consecutive)
+- `TacheResultatController::activerBypass` — R3 checked before statut check (409 > 422 precedence)
+- `RESULTATS_ACTIVER_BYPASS` permission: `Permission.php` + `forRole()` (collaborateur + stagiaire) + `Permission.js` + `useTachePermissions.js`
+- `TacheResultatResource`: `bypass` block + `audit_logs` + `can_activer_bypass`
+- `BypassActivatedNotification` (Blade email, fr + en) + `EscaladesAbusivesNotification` (inline)
+- `circuit_validation.php` (fr + en): `success.bypass_active`, `bypass.*`, `notifications.bypass_active`, `notifications.escalades_abusives`
+- 10 new tests in `BypassCircuitTest` — 80 total, all passing
+- Workspace.php curly-quote bug fixed + `WorkspaceMembershipTest` (5 tests) added in same session
 
 **Task 5** — N0 Validation Circuit + 48h Timer
 - `ValidationAuditLog` model (immutable, R6)

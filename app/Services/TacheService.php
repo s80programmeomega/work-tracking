@@ -44,7 +44,7 @@ class TacheService
      */
     public function getAllTaches(User $user, array $filters = []): Collection
     {
-        $query = Tache::query()->with(['activite.projet', 'assignees', 'labels']);
+        $query = Tache::query()->with(['activite.projet', 'assignees', 'labels'])->withCount('sousTaches');
 
         // ✅ Appliquer les permissions via Policy
         if (! $user->isSuperAdmin()) {
@@ -153,6 +153,7 @@ class TacheService
                     'validatedN2By:id,nom',
                     'createdBy:id,nom',
                 ])
+                ->withCount('sousTaches')
                 ->orderBy('position')
                 ->orderBy('created_at', 'desc')
                 ->get();
@@ -201,6 +202,7 @@ class TacheService
     {
         return Tache::assignedTo($user->id)
             ->with(['activite', 'assignees', 'labels'])
+            ->withCount('sousTaches')
             ->active()
             ->ordered()
             ->get();
@@ -750,6 +752,7 @@ class TacheService
         $taches = Tache::assignedTo($user->id)
             ->forWeek($weekNumber, $year)
             ->with(['activite.projet', 'labels', 'validatedN1By', 'validatedN2By', 'resultats'])
+            ->withCount('sousTaches')
             ->get();
 
         // Statistiques détaillées
@@ -818,6 +821,7 @@ class TacheService
         $taches = Tache::forActivite($activiteId)
             ->forWeek($weekNumber, $year)
             ->with(['assignees', 'resultats'])
+            ->withCount('sousTaches')
             ->get();
 
         // Statistiques par utilisateur

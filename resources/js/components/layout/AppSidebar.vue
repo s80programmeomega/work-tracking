@@ -690,26 +690,12 @@ const getFilteredSubItems = (subItems) => {
 
 // OU encore mieux : une solution par route spécifique
 const isActive = (path) => {
-    const currentPath = route.path;
-
-    // Routes exactes qui ne doivent pas activer leurs parents
-    const exactRoutes = [
-        '/taches/mes-taches',
-        '/taches/assignees',
-        '/taches/en-attente',
-        '/projets/mes-projets',
-        '/projets/archives',
-        '/activites/mes-activites',
-        '/activites/en-retard'
-    ];
-
-    // Si c'est une route exacte, vérifier la correspondance exacte
-    if (exactRoutes.includes(path) || exactRoutes.includes(currentPath)) {
-        return currentPath === path;
-    }
-
-    // Pour les autres routes, utiliser la logique normale
-    return currentPath === path || currentPath.startsWith(path + '/');
+    // Exact match only. Prefix matching caused two links to be active
+    // simultaneously (e.g. on /taches/22 both the "Toutes les tâches" subitem
+    // with path /taches AND the actual route lit up). The parent dropdown is
+    // opened separately via syncOpenSubmenuFromRoute, so prefix matching is
+    // no longer needed.
+    return route.path === path;
 };
 
 const toggleSubmenu = (groupIndex, itemIndex) => {
@@ -731,17 +717,25 @@ const isAnySubmenuRouteActive = computed(() => {
 
 const isSubmenuOpen = (groupIndex, itemIndex) => {
     const key = `${groupIndex}-${itemIndex}`;
-
-    if (!menuGroups.value[groupIndex]?.items?.[itemIndex]) return false;
-
-    return (
-        openSubmenu.value === key ||
-        (isAnySubmenuRouteActive.value &&
-            menuGroups.value[groupIndex].items[itemIndex].subItems?.some((subItem) =>
-                isActive(subItem.path)
-            ))
-    );
+    return openSubmenu.value === key;
 };
+
+// Auto-open the submenu that contains the active route (only on initial mount + route changes),
+// so the openSubmenu ref stays the single source of truth and toggleSubmenu can always close it.
+const syncOpenSubmenuFromRoute = () => {
+    if (!menuGroups.value) return;
+    for (let g = 0; g < menuGroups.value.length; g++) {
+        const items = menuGroups.value[g]?.items ?? [];
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].subItems?.some((s) => isActive(s.path))) {
+                openSubmenu.value = `${g}-${i}`;
+                return;
+            }
+        }
+    }
+};
+
+watch(() => route.path, syncOpenSubmenuFromRoute);
 
 const startTransition = (el) => {
     el.style.height = 'auto';
@@ -771,6 +765,9 @@ onMounted(async () => {
         unsubscribeWorkspaceListener = onWorkspaceChanged(handleWorkspaceChange);
 
         console.log('✅ Sidebar initialisé, workspace courant:', currentWorkspace.value?.nom);
+
+        // Open the submenu matching the current route on initial load
+        syncOpenSubmenuFromRoute();
     } catch (error) {
         console.error('❌ Erreur lors de l\'initialisation du sidebar:', error);
     }

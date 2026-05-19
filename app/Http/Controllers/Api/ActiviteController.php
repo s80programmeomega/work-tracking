@@ -1052,7 +1052,9 @@ class ActiviteController extends Controller
      */
     public function getTaches(Request $request, $id): JsonResponse
     {
-        $activite = Activite::with('taches.assignees')->findOrFail($id);
+        $activite = Activite::with(['taches' => function ($q) {
+            $q->with('assignees')->withCount('sousTaches');
+        }])->findOrFail($id);
         $user = $request->user();
 
         // Vérifier l'accès

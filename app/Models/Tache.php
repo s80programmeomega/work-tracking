@@ -231,6 +231,8 @@ class Tache extends Model
             ->withPivot([
                 'role_id',
                 'is_responsable',
+                'escalades_abusives',
+                'bypass_count',
                 'can_edit',
                 'can_complete',
                 'can_validate',

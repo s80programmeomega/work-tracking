@@ -240,6 +240,25 @@
       </button>
     </div>
 
+    <!-- Sous-tâches indicator -->
+    <div
+      v-if="tache.sous_taches_count > 0"
+      class="mt-2 flex items-center gap-2"
+    >
+      <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-700 text-xs font-medium text-gray-700 dark:text-gray-300">
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+        </svg>
+        {{ tache.sous_taches_count }} ST
+      </span>
+      <div class="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+        <div
+          class="bg-brand-500 h-1.5 rounded-full transition-all"
+          :style="{ width: `${tache.taux_realisation ?? 0}%` }"
+        ></div>
+      </div>
+    </div>
+
     <!-- Échéance -->
     <div v-if="tache.echeance && !compact" class="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-2">
       <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

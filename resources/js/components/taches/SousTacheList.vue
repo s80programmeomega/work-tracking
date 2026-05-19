@@ -335,7 +335,11 @@ const saveEdit = async (st) => {
 
 const toggleComplete = async (st) => {
     const newStatut = st.statut === 'termine' ? 'en_cours' : 'termine'
-    const newProgression = newStatut === 'termine' ? 100 : st.progression
+    // Forward: jump to 100. Backward (un-toggling from a 100 % completed sous-tâche): reset to 0
+    // so the parent task's weighted progression recalculates downward. Otherwise keep current progression.
+    const newProgression = newStatut === 'termine'
+        ? 100
+        : (st.progression >= 100 ? 0 : st.progression)
     await updateSousTache(st.id, { statut: newStatut, progression: newProgression })
     emit('updated')
 }

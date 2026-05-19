@@ -269,11 +269,12 @@ const fetchAvailableUsers = async () => {
   if (!props.permissions.can_update || !props.tache.activite_id) return;
 
   try {
-    const response = await api.get(`/activites/${props.tache.activite_id}/users`);
-    
+    const response = await api.get(`/activites/${props.tache.activite_id}/members`);
+
     // Filtrer les utilisateurs déjà assignés
     const assignedIds = props.tache.assignees?.map(a => a.id) || [];
-    availableUsers.value = response.data.data.filter(u => !assignedIds.includes(u.id));
+    const members = response.data?.data ?? [];
+    availableUsers.value = members.filter(u => !assignedIds.includes(u.id));
   } catch (error) {
     console.error('Erreur lors du chargement des utilisateurs:', error);
   }

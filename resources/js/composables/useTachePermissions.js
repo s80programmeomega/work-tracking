@@ -49,6 +49,25 @@ export function useTachePermissions(tache = null, resultat = null) {
      */
     const canRenvoyerN0 = computed(() => canApprouverN0.value)
 
+    // ==================== BYPASS PERMISSION ====================
+
+    /**
+     * Can activate the anti-sabotage bypass.
+     * Reserved for the result's own author, only when statut = a_refaire,
+     * and the bypass has not already been used on this submission.
+     */
+    const canActiverBypass = computed(() => {
+        if (isSuperAdmin.value) return true
+        if (!resultat?.value) return false
+        // Only when N0 has returned the result
+        if (resultat.value.statut !== 'a_refaire') return false
+        // Only the result's author
+        if (resultat.value.user?.id !== currentUser.value?.id) return false
+        // Not already bypassed
+        if (resultat.value.bypass_active) return false
+        return true
+    })
+
     return {
         currentUser,
         isSuperAdmin,
@@ -58,5 +77,8 @@ export function useTachePermissions(tache = null, resultat = null) {
         // N0 permissions
         canApprouverN0,
         canRenvoyerN0,
+
+        // Bypass permission
+        canActiverBypass,
     }
 }

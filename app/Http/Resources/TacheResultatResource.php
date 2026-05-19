@@ -49,6 +49,24 @@ class TacheResultatResource extends JsonResource
                 ]),
             ],
 
+            // Bypass circuit (N1 context panel)
+            'bypass' => [
+                'active' => (bool) $this->bypass_active,
+                'motif' => $this->motif_bypass,
+                'bypass_le' => $this->bypass_le?->format('Y-m-d H:i:s'),
+                'bypass_count' => (int) $this->bypass_count,
+            ],
+
+            // Full audit trail for N1 context panel
+            'audit_logs' => $this->when($this->relationLoaded('auditLogs'), function () {
+                return $this->auditLogs->map(fn ($log) => [
+                    'action' => $log->action,
+                    'actor_id' => $log->actor_id,
+                    'context' => $log->context,
+                    'created_at' => $log->created_at?->format('Y-m-d H:i:s'),
+                ]);
+            }),
+
             // Validation N1
             'validation_n1' => [
                 'valide' => $this->valide_par_n1,
@@ -156,6 +174,9 @@ class TacheResultatResource extends JsonResource
                     'can_validate_n2' => $this->canBeValidatedByN2($user),
                     'can_approuver_n0' => $tache && $gate->userCan($user, Permission::TACHES_APPROVE_N0, $tache),
                     'can_renvoyer_n0' => $tache && $gate->userCan($user, Permission::RESULTATS_RENVOYER_N0, $tache),
+                    'can_activer_bypass' => $this->user_id === $user->id
+                        && $this->statut === 'a_refaire'
+                        && ! $this->bypass_active,
                 ];
             }),
         ];

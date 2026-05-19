@@ -20,6 +20,14 @@ return [
     'success' => [
         'approuve_n0' => 'Résultat approuvé et transmis au N1.',
         'renvoye_n0' => 'Résultat renvoyé à l\'auteur.',
+        'bypass_active' => 'Bypass activé. Votre résultat a été transmis directement au validateur N1.',
+    ],
+
+    'bypass' => [
+        'submit_label' => 'Soumettre directement au N1',
+        'motif_placeholder' => 'Expliquez pourquoi vous estimez que le renvoi n\'est pas justifié (min. 50 caractères)…',
+        'abusive_escalations_label' => 'Escalades abusives',
+        'n1_context_panel_title' => 'Contexte de validation N1',
     ],
     'notifications' => [
         'soumis_n0' => [
@@ -41,6 +49,15 @@ return [
             'subject' => 'Résultat transmis automatiquement au N1',
             'line1' => 'Le délai de vérification N0 est écoulé pour la tâche : :titre.',
             'line2' => 'Le résultat a été automatiquement transmis au validateur N1.',
+            'action' => 'Voir la tâche',
+        ],
+        'bypass_active' => [
+            'subject' => 'Bypass anti-sabotage activé — action requise',
+        ],
+        'escalades_abusives' => [
+            'subject' => 'Alerte : escalades abusives détectées',
+            'line1' => ':nom a déclenché un drapeau d\'escalades abusives sur la tâche ":tache".',
+            'line2' => 'Nombre de bypasses invalides consécutifs : :count.',
             'action' => 'Voir la tâche',
         ],
     ],

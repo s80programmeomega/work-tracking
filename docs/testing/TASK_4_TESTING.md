@@ -1,134 +1,124 @@
-# Task 4 — Testing Guide: Subtask UI
+# Task 4 — Testing Guide: Subtask UI in Task Detail View
+
+> **Note:** Task 4 is not yet implemented. This guide documents what must be verified once the UI is built.
+> Update the "Not started" marker in PROGRESSION.md and tick deliverables when complete.
 
 ## Prerequisites
 
 - App running: `php artisan serve` + `npm run dev`
 - DB migrated and seeded: `php artisan migrate:fresh --seed`
-- Authenticated as `cadre@worktracking.com` (password: `password`) — has full sous-tâche permissions
-- Tasks with sous-tâches seeded: tache IDs 1, 2, 4, 10, 11 (each has 3 sous-tâches)
-
----
-
-## How to access sous-tâches
-
-There are two entry points:
-
-**A — Via the kanban modal (primary):**
-1. Go to `/taches` → select an activité
-2. Click any task card → modal opens
-3. Scroll down in the modal to the **"Sous-tâches"** collapsible section (open by default)
-
-**B — Via the full detail page:**
-1. In the modal, click the **↗ icon** (top-right of modal header) → opens `/taches/{id}`
-2. Click the **"Sous-tâches"** tab (second tab, between Détails and Assignés)
+- At least one task exists with a few subtasks (use the API or seeders to create them)
+- At least one subtask assigned to a user
 
 ---
 
 ## Test Cases
 
-### 1. Sous-tâches visible in modal
+### 1. Subtask list visible in task detail
 
-Open tache 1 ("Rédiger le cahier des charges fonctionnel") from the kanban:
-- A "Sous-tâches" collapsible section appears in the modal body.
-- 3 sous-tâches listed: "Interviews parties prenantes", "Rédaction du document", "Validation et signature".
-- Each shows statut badge, poids, and deadline.
+**Action:** Open a task that has subtasks.
 
----
-
-### 2. Sous-tâches tab on full detail page
-
-Click ↗ in the modal header to open `/taches/1`:
-- "Sous-tâches" tab is second in the tab bar.
-- Clicking it shows the same 3 sous-tâches.
+**Expected:**
+- A "Sous-tâches" section is visible in the task detail page
+- Each subtask shows: titre, responsable, due date, progression, statut
+- A global progress bar reflects the weighted average of all subtask progressions
+- Subtasks past their `date_echeance` show an overdue indicator (red)
 
 ---
 
-### 3. Weighted progress bar
+### 2. Create a subtask (authorised user)
 
-On a task with poids > 0 on its sous-tâches:
-- "Progression pondérée" bar appears above the list.
-- Percentage = `Σ(poids_i × progression_i / 100)`.
-- "Poids total alloué: X% / 100%" shown below.
+**Action:** Log in as a `cadre` or `manager`, open a task, click "Add sous-tâche".
 
----
+**Expected:**
+- `SousTacheForm` opens with fields: titre, responsable (from activity members), date_echeance, poids (weight), validation options
+- After saving, the new subtask appears in the list
+- The global progress bar updates
 
-### 4. Quick-complete toggle
-
-Click the circle button on a sous-tâche with `statut ≠ termine`:
-- Circle turns green with a checkmark.
-- Statut badge updates to "Terminé".
-
-Click it again:
-- Reverts to "En cours".
+**Negative:** An `observateur` should NOT see the create button.
 
 ---
 
-### 5. Inline edit (statut + progression)
+### 3. R2 — Weight validation (sum must equal 100%)
 
-Click `⋮` → "Modifier" on any sous-tâche:
-- Inline form appears below that item.
-- Change statut to `en_cours`, progression to `50`.
-- Click "Enregistrer" → changes saved, weighted progress bar updates.
+**Action:** Create two subtasks with weights 40 and 40 (sum = 80).
 
----
+**Expected:** Frontend validation prevents save with message indicating weights must sum to 100%.
 
-### 6. Create a new sous-tâche
+**Action:** Set weights to 60 and 40.
 
-Click "Ajouter" button (top-right of the sous-tâches section):
-- `SousTacheForm` appears.
-- Fill: titre = "Test ST", poids = 5, date within parent echeance.
-- Submit → sous-tâche appears in list; form resets.
+**Expected:** Save succeeds.
 
 ---
 
-### 7. R2: weights > 100% → 422
+### 4. Date validation (date ≤ parent task echeance)
 
-On tache 1 (already has 40+35+25 = 100% poids), try creating with poids = 10:
-- Expected: error `sous_taches.errors.weights_sum_invalid` shown in form.
+**Action:** Set a subtask `date_echeance` to a date AFTER the parent task's `echeance`.
 
----
-
-### 8. Date exceeds parent echeance → 422
-
-Create a sous-tâche with `date_echeance` past the parent task echeance:
-- Expected: error `sous_taches.errors.date_exceeds_parent`.
-- Browser date picker also enforces the `max` attribute.
+**Expected:** Frontend validation error: "La date ne peut pas dépasser l'échéance de la tâche parente."
 
 ---
 
-### 9. Delete a sous-tâche
+### 5. Drag & drop reordering
 
-Click `⋮` → "Supprimer":
-- Confirmation dialog appears.
-- On confirm: item removed from list, parent progress recalculates.
+**Action:** Drag a subtask to a different position in the list.
 
----
-
-### 10. Kanban card indicator
-
-On the kanban board:
-- Task cards with sous-tâches show a badge like "3 ST".
-- A mini progress bar below the badge reflects `taux_realisation`.
+**Expected:**
+- The order updates visually
+- `ordre` field is persisted after the drag (verify via API: `GET /api/taches/{id}/sous-taches`)
 
 ---
 
-### 11. External link navigation
+### 6. Kanban card indicator
 
-In the modal, click the ↗ icon (top-right, beside the expand button):
-- Modal closes.
-- Browser navigates to `/taches/{id}` (full detail page).
+**Action:** View the Kanban board for an activity.
+
+**Expected:**
+- Each task card with subtasks shows a badge "X/Y ST" (e.g. "2/3 ST")
+- A mini progress bar is visible under the badge
+- Clicking the badge expands an inline subtask summary
+
+---
+
+### 7. "Submit result" button disabled when blocking subtasks exist
+
+**Action:** Open a task where one or more subtasks are still in `a_faire` or `en_cours` statut and are set as blocking.
+
+**Expected:**
+- The "Submit result" / "Soumettre résultat" button is disabled
+- A tooltip lists the blocking subtasks by name
+
+**Action:** Mark all blocking subtasks as `termine`.
+
+**Expected:** The submit button becomes enabled.
+
+---
+
+### 8. Permissions — edit/delete buttons conditional
+
+**Action:** Log in as a `collaborateur` (not the subtask's responsable), view the subtask.
+
+**Expected:** Edit and Delete buttons are hidden.
+
+**Action:** Log in as the subtask's `responsable` or a `cadre`.
+
+**Expected:** Edit and Delete buttons are visible.
 
 ---
 
 ## Negative Cases
 
-- Unauthenticated `POST /api/taches/{id}/sous-taches` → 401
-- User with no activité membership → 403
-- Empty titre submitted → client-side error, no request sent
-- Login as `stagiaire@worktracking.com`: sous-tâches are visible but "Ajouter" button must not appear (stagiaire can view, cannot create)
+| Scenario | Expected |
+|---|---|
+| `observateur` opens task with subtasks | List visible, no create/edit/delete buttons |
+| Submit result with blocking subtask active | Button disabled, tooltip explains why |
+| Subtask date > parent task date | Frontend validation error |
+| Weights sum ≠ 100% | Frontend validation error |
 
 ---
 
 ## Cleanup
 
-Nothing required — seeded data is fine for the next task.
+```bash
+php artisan migrate:fresh --seed
+```
