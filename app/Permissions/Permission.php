@@ -91,6 +91,13 @@ final class Permission
 
     const REPORTS_CREATE = 'reports.create';
 
+    // ── Evaluations / Scoring (Task 7) ─────────────────────────────────────
+    /** See the pending-validations dashboard listing TacheResultats awaiting N1/N2 action. */
+    const EVALUATIONS_VIEW_PENDING = 'evaluations.view_pending';
+
+    /** See score totals for users (own score for all roles; others' scores gated by role + scope). */
+    const EVALUATIONS_VIEW_SCORE = 'evaluations.view_score';
+
     // ── Users (platform admin) ────────────────────────────────────────────
     const USERS_VIEW = 'users.view';
 
@@ -152,6 +159,9 @@ final class Permission
             self::REPORTS_VIEW,
             self::REPORTS_CREATE,
 
+            self::EVALUATIONS_VIEW_PENDING,
+            self::EVALUATIONS_VIEW_SCORE,
+
             self::USERS_VIEW,
             self::USERS_CREATE,
             self::USERS_UPDATE,
@@ -203,6 +213,8 @@ final class Permission
                 self::RESULTATS_RENVOYER_N0,
                 self::REPORTS_VIEW,
                 self::REPORTS_CREATE,
+                self::EVALUATIONS_VIEW_PENDING,
+                self::EVALUATIONS_VIEW_SCORE,
             ],
 
             'cadre' => [
@@ -225,6 +237,8 @@ final class Permission
                 self::DOCUMENTS_UPLOAD,
                 self::RESULTATS_RENVOYER_N0,
                 self::REPORTS_VIEW,
+                self::EVALUATIONS_VIEW_PENDING,
+                self::EVALUATIONS_VIEW_SCORE,
             ],
 
             'collaborateur' => [
@@ -241,6 +255,7 @@ final class Permission
                 self::RESULTATS_APPROUVER_N0,
                 self::RESULTATS_RENVOYER_N0,
                 self::RESULTATS_ACTIVER_BYPASS,
+                self::EVALUATIONS_VIEW_SCORE,
             ],
 
             'stagiaire' => [
@@ -253,6 +268,7 @@ final class Permission
                 self::SOUS_TACHES_VIEW,
                 self::DOCUMENTS_VIEW,
                 self::RESULTATS_ACTIVER_BYPASS,
+                self::EVALUATIONS_VIEW_SCORE,
             ],
 
             'observateur' => [
@@ -262,6 +278,7 @@ final class Permission
                 self::TACHES_VIEW,
                 self::SOUS_TACHES_VIEW,
                 self::DOCUMENTS_VIEW,
+                self::EVALUATIONS_VIEW_SCORE,
             ],
 
             // Virtual role — derived from tache_user.is_responsable = true

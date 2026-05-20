@@ -65,6 +65,10 @@ export const Permission = Object.freeze({
     REPORTS_VIEW:               'reports.view',
     REPORTS_CREATE:             'reports.create',
 
+    // Evaluations / Scoring (Task 7)
+    EVALUATIONS_VIEW_PENDING:   'evaluations.view_pending',
+    EVALUATIONS_VIEW_SCORE:     'evaluations.view_score',
+
     // Users
     USERS_VIEW:                 'users.view',
     USERS_CREATE:               'users.create',

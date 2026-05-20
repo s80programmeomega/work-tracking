@@ -26,7 +26,7 @@
 | 4 | Subtask UI | `feature/v2-task-4-subtask-ui` | ✅ | 2026-05-15 | 2026-05-18 | Branch existed but was never merged — restored 2026-05-18 |
 | 5 | Validation N0 + 48h Timer | `feature/v2-task-5-validation-n0` | ✅ | 2026-05-15 | 2026-05-15 | — |
 | 6 | Anti-Sabotage Bypass | `feature/v2-task-6-bypass` | ✅ | 2026-05-18 | 2026-05-18 | Merged into `jonas` 2026-05-19 |
-| 7 | N1 Scores + Pending Validations | `feature/v2-task-7-scores-dashboard` | ⬜ | — | — | — |
+| 7 | N1 Scores + Pending Validations | `feature/v2-task-7-scores-dashboard` | ✅ | 2026-05-19 | 2026-05-19 | — |
 | 8 | Reverb + Web Push Notifications | `feature/v2-task-8-notifications` | ⬜ | — | — | — |
 | 9 | Agent Sheet + Full Scoring | `feature/v2-task-9-agent-sheet` | ⬜ | — | — | — |
 | 10 | Evaluation Dashboard + Global Task View | `feature/v2-task-10-dashboard` | ⬜ | — | — | — |
@@ -144,13 +144,23 @@
 - [ ] PR opened into `jonas`
 
 ### Task 7
-- [ ] `evaluation_scores` table created
-- [ ] `EvaluationScoreService` created
-- [ ] Pending validations dashboard page created
-- [ ] Permissions added
-- [ ] Translation files `lang/fr/evaluation.php` and `lang/en/evaluation.php` created
-- [ ] Tests passing
-- [ ] PR opened into `jonas`
+- [x] `evaluation_scores` table created (user_id, periode_start/end, critere, valeur, meta JSON + composite indexes)
+- [x] `EvaluationScore` model with date/decimal/array casts + `inPeriod` / `decidedBetween` scopes
+- [x] `EvaluationScoreFactory` with `penalty`, `bonus`, `forUser` states
+- [x] `EvaluationScoreService::calculerImpactN1` — three paths: validated_despite_return (PENALTY -1.0), confirmed_return (BONUS +1.0), no_impact (null)
+- [x] `EvaluationScoreService::totalForUser` — SUM helper, defaults to current month
+- [x] `TacheResultatService::validerN1` / `rejeterN1` wrappers — call model + EvaluationScoreService + invaliderBypassN1 when bypass
+- [x] `TacheResultatController::validateN1` / `reject` routed through the service
+- [x] `EvaluationController::pendingValidationsDashboard` — sorted by remaining deadline, urgent flag, bypass + escalades_abusives badges
+- [x] `EvaluationController::userScore` — own-score for all roles, others gated by EVALUATIONS_VIEW_PENDING
+- [x] `ScoreUpdatedNotification` (database channel only — no email per spec)
+- [x] Permissions `EVALUATIONS_VIEW_PENDING` + `EVALUATIONS_VIEW_SCORE` in `Permission.php` + `forRole()` + `Permission.js` + `useWorkspacePermissions.js` + WorkspaceController user_permissions payload
+- [x] Translation files `lang/fr/evaluation.php` and `lang/en/evaluation.php` created (errors, criteria, dashboard, notifications)
+- [x] Vue page `pages/evaluations/PendingValidations.vue` + `PendingRow.vue` component + sidebar link
+- [x] WORKING_GUIDELINES Guide 17 (logs in French) added in same session
+- [x] 10 feature tests (EvaluationScoreServiceTest) + 1 Dusk test (PendingValidationsTest) — 90 total, all passing
+- [x] PERMISSIONS_MATRIX.md changelog row added
+- [ ] PR / merge into `jonas`
 
 ### Task 8
 - [ ] `ValidationNotificationEvent` created

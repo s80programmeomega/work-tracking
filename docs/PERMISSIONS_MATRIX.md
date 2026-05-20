@@ -112,7 +112,7 @@ Assigned in: `workspace_members`, `projet_user`, `activite_user`, `tache_user`
 | Permission | super_admin | directeur/owner | manager | cadre | collaborateur | stagiaire | observateur |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | View pending validations | ✅ | ✅ | ✅ (own projects) | ✅ (own activities) | ❌ | ❌ | ❌ |
-| View evaluation score | ✅ | ✅ | ✅ (own scope) | ✅ (own assignees) | ✅ (own only) | ✅ (own only) | ❌ |
+| View evaluation score | ✅ | ✅ | ✅ (own scope) | ✅ (own assignees) | ✅ (own only) | ✅ (own only) | ✅ (own only) |
 | View agent evaluation sheet | ✅ | ✅ | ✅ (own scope) | ✅ (own assignees) | ✅ (own only) | ✅ (own only, read-only) | ❌ |
 | Export evaluation sheet | ✅ | ✅ | ✅ (own scope) | ✅ (own assignees) | ❌ | ❌ | ❌ |
 | View evaluation dashboard | ✅ | ✅ | ✅ (own projects) | ❌ | ❌ | ❌ | ❌ |
@@ -152,3 +152,4 @@ Assigned in: `workspace_members`, `projet_user`, `activite_user`, `tache_user`
 | 2026-05-14 | Task 4 | `canCreateSousTache`, `canAssignSousTacheIntervenant` in `useActivitePermissions.js`. `can_create_subtask` in `TacheResource` |
 | 2026-05-15 | Task 5 | `canApprouverN0`, `canRenvoyerN0` in `PermissionService`. `resultats.approuver_n0/renvoyer_n0` seeded. `useTachePermissions.js` created. `can_approuver_n0`, `can_renvoyer_n0` in `TacheResultatResource` |
 | 2026-05-18 | Task 6 | `resultats.activer_bypass` added to `Permission.php`, `forRole()` (collaborateur + stagiaire), `Permission.js`. `canActiverBypass` in `useTachePermissions.js`. `can_activer_bypass` in `TacheResultatResource`. "Activate bypass" row already in matrix from earlier session |
+| 2026-05-19 | Task 7 | `evaluations.view_pending` + `evaluations.view_score` added to `Permission.php`, `forRole()` (pending: owner/manager/cadre; score: all roles except contextual-only ones). Mirror in `Permission.js`. `canViewPendingValidations` + `canViewEvaluationScore` in `useWorkspacePermissions.js`. `WorkspaceController` user_permissions payload extended in 3 locations. Matrix: observateur gets ✅ (own only) for view evaluation score |

@@ -18,25 +18,44 @@
 
 **Date:** 2026-05-19
 **Session goal:** Merge Task 6 into jonas, start Task 7
-**Status:** Task 6 merged into `jonas` (commit `f6e98d2`) and pushed to `origin`. 80 tests passing. Task 7 not started.
+**Status:** Task 6 merged into `jonas` (commit `f6e98d2`) and pushed. Task 7 implementation complete on `feature/v2-task-7-scores-dashboard`. 90 tests passing. Awaiting Jonas manual testing per `docs/testing/TASK_7_TESTING.md` before merge.
 
 ---
 
 ## Current Task
 
 **Task:** 7 — N1 Scores + Pending Validations Dashboard
-**Branch:** `feature/v2-task-7-scores-dashboard` _(not created yet)_
-**Status:** Not started
+**Branch:** `feature/v2-task-7-scores-dashboard`
+**Status:** Implementation complete — pending Jonas manual testing per `docs/testing/TASK_7_TESTING.md`, then merge into `jonas`.
 
 **What to do next:**
-1. Create `feature/v2-task-7-scores-dashboard` from `jonas`
-2. Follow Task 7 in `IMPLEMENTATION_PLAN.md`
-3. At least one Dusk test for the new dashboard (Guide 16)
-4. Update `PERMISSIONS_MATRIX.md` for `canViewValidationsEnAttente` + `canViewEvaluationScore` (Guide 4 step 5 + Guide 15)
+1. Jonas tests Task 7 manually using `docs/testing/TASK_7_TESTING.md` (6 test cases covering penalty, bonus, no_impact, dashboard, permission gates)
+2. Merge `feature/v2-task-7-scores-dashboard` into `jonas` (`git merge --no-ff`)
+3. Push `jonas` to `origin`
+4. Create `feature/v2-task-8-notifications` from `jonas`
+
+## Last Completed Task
+
+**Task 7** — N1 Scores + Pending Validations Dashboard (2026-05-19, implementation complete)
+- Migration `create_evaluation_scores_table` (user_id, periode_start/end, critere, valeur, meta JSON + 3 indexes)
+- `EvaluationScore` model with scopes `inPeriod` / `decidedBetween` + factory with `penalty`/`bonus`/`forUser` states
+- `EvaluationScoreService::calculerImpactN1` — 3 paths (penalty / bonus / no_impact), writes evaluation_scores row + mirrors to validation_audit_logs + dispatches ScoreUpdatedNotification
+- `EvaluationScoreService::totalForUser` — SUM helper with optional date range
+- `TacheResultatService::validerN1` / `rejeterN1` — wrap model methods + call scoring service; `rejeterN1` calls `invaliderBypassN1` internally when bypass_active
+- `TacheResultatController::validateN1` / `reject` routed through service
+- `EvaluationController::pendingValidationsDashboard` — sorted by remaining deadline, urgent flag (< 24h), bypass/escalades_abusives badges
+- `EvaluationController::userScore` — own-score for all roles, others gated by privileged permission
+- Routes: `GET /evaluations/validations/en-attente`, `GET /evaluations/score`
+- `ScoreUpdatedNotification` — database channel only (no email, per spec)
+- Permissions: `EVALUATIONS_VIEW_PENDING` + `EVALUATIONS_VIEW_SCORE` across Permission.php + forRole + Permission.js + useWorkspacePermissions.js + WorkspaceController user_permissions
+- Translations `lang/{fr,en}/evaluation.php`
+- Vue: `pages/evaluations/PendingValidations.vue` + `PendingRow.vue` + sidebar link
+- WORKING_GUIDELINES Guide 17 (logs in French) added in same session
+- 10 feature tests + 1 Dusk test (90 total, all passing)
 
 ---
 
-## Last Completed Task
+## Recently Completed Tasks
 
 **Task 6** — Anti-Sabotage Bypass (merged 2026-05-19, commit `f6e98d2`)
 - 2 migrations: `add_bypass_columns_to_tache_resultats`, `add_bypass_count_to_tache_user`
@@ -106,7 +125,8 @@
 
 | # | Question | Context | Status |
 |---|---|---|---|
-| 1 | Frontend composable for SousTache permissions | `useTachePermissions.js` update deferred to Task 4 | Open |
+| 1 | Frontend composable for SousTache permissions | `useTachePermissions.js` update deferred to Task 4 | Closed (Task 4 merged) |
+| 2 | Per-task drill-down modal on evaluation sheet | Jonas's UX request 2026-05-19: each task row in the agent sheet should open a modal listing its sous-tâches with progression + per-sous-tâche score contributions. Implementation belongs in **Task 9** (`evaluation_scores.meta` already supports this; no schema change). Captured in Task 9 spec. | Captured for Task 9 |
 
 ---
 
@@ -133,3 +153,4 @@
 | 2026-05-15 | Task 4 bugs, Task 5 testing + fix, Dusk setup | Fixed role ENUM mismatch (6 files), ST badge missing from kanban/list (6 queries), SousTacheList modal self-contained refactor. Task 5: fixed submit() not calling TacheResultatService::soumettre() — job now dispatched. Installed Laravel Dusk, fixed 3 fragile migration rollbacks, wrote WorkTrackingTestCase base + AuthenticationTest (3 browser tests passing). |
 | 2026-05-18 | Task 6, Task 4 recovery, bug fixes | Implemented Task 6 (anti-sabotage bypass): migrations, `activerBypass` + `invaliderBypassN1` services, 2 notifications + Blade emails (fr/en), 10 feature tests. Recovered orphan `feature/v2-task-4-subtask-ui` branch and merged into jonas. Fixed `Workspace.php` curly quotes, sidebar dropdown stuck/double-active, three task-detail sub-tab crashes (`/users`→`/members`, defensive `?? []`), ST badge missing from kanban (added `withCount('sousTaches')` in `TacheService`). 80 tests passing. |
 | 2026-05-19 | Task 6 merge | Merged `feature/v2-task-6-bypass` into `jonas` (`--no-ff`, commit `f6e98d2`). Pushed `jonas` to `origin`. Updated SESSION_STATE, PROGRESSION, IMPLEMENTATION_PLAN. |
+| 2026-05-19 | Task 7 implementation | Implemented EvaluationScoreService (penalty/bonus/no_impact paths), pending-validations dashboard endpoint + Vue page, permissions, translations. Added Guide 17 (logs in French). Wired TacheResultatService::validerN1/rejeterN1 into the controller. 10 feature tests + 1 Dusk test. 90 tests passing. |

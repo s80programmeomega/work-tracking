@@ -589,6 +589,7 @@ const menuGroups = computed(() => [
                 name: 'Évaluations',
                 subItems: [
                     { name: 'Tableau de bord', path: '/evaluations/dashboard' },
+                    { name: 'Validations en attente', path: '/validations/en-attente' },
                     // { name: 'Rapport hebdomadaire', path: '/evaluations/rapport-hebdomadaire' },
                     { name: 'Fiches d\'évaluation', path: '/evaluations/fiches' },
                     // { name: 'Performance d\'équipe', path: '/evaluations/performance' },

@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Models\Workspace;
 use App\Permissions\ContextualPermissionGate;
 use App\Permissions\Permission;
+use App\Services\EvaluationScoreService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -28,6 +29,182 @@ use Illuminate\Support\Facades\Log;
  */
 class EvaluationController extends Controller
 {
+    public function __construct(
+        protected EvaluationScoreService $scoreService,
+    ) {}
+
+    /**
+     * Task 7: Pending validations dashboard data.
+     *
+     * Returns the N1 and N2 results awaiting the caller's action, sorted by
+     * remaining deadline (most urgent first). Each row is enriched with:
+     *   - hours_remaining       (float — based on N0 action_n0_le + workspace timeout setting)
+     *   - is_urgent             (bool — true when hours_remaining < 24)
+     *   - had_bypass            (bool — was bypass_active when the result reached N1)
+     *   - escalades_abusives    (bool — does the assignee have the flag set on tache_user)
+     *
+     * Permission: EVALUATIONS_VIEW_PENDING (cadre/manager/owner/directeur).
+     * Scope is enforced by responsable_id filters — cadre sees only their
+     * activity's results, manager sees only their projects', owner sees all.
+     */
+    public function pendingValidationsDashboard(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        // Hard role gate. Scoped data filtering still applies below.
+        $gate = app(ContextualPermissionGate::class);
+        $workspace = $user->currentWorkspace;
+        if (! $user->isSuperAdmin()
+            && (! $workspace || ! $gate->userCan($user, Permission::EVALUATIONS_VIEW_PENDING, $workspace))) {
+            return response()->json([
+                'success' => false,
+                'message' => __('evaluation.errors.cannot_view_pending'),
+            ], 403);
+        }
+
+        $timeoutHours = (int) ($workspace?->getSetting('validation_timeout_hours', 48) ?? 48);
+
+        $pendingN1 = TacheResultat::query()
+            ->with(['tache.activite.projet', 'user'])
+            ->where('statut', 'en_validation_n1')
+            ->whereHas('tache.activite', function ($q) use ($user) {
+                if ($user->isSuperAdmin()) {
+                    return;
+                }
+                // cadre/owner: see their activity's results
+                $q->where('responsable_id', $user->id);
+            })
+            ->get();
+
+        $pendingN2 = TacheResultat::query()
+            ->with(['tache.activite.projet', 'user', 'validateurN1'])
+            ->where('statut', 'en_validation_n2')
+            ->whereHas('tache.activite.projet', function ($q) use ($user) {
+                if ($user->isSuperAdmin()) {
+                    return;
+                }
+                $q->where('responsable_id', $user->id);
+            })
+            ->get();
+
+        $now = now();
+
+        $enrich = function (TacheResultat $r) use ($now, $timeoutHours) {
+            $deadlineBase = $r->action_n0_le ?? $r->soumis_le ?? $r->created_at;
+            $deadline = $deadlineBase ? $deadlineBase->copy()->addHours($timeoutHours) : null;
+            $hoursRemaining = $deadline ? $now->diffInHours($deadline, false) : null;
+
+            $assigneePivot = $r->tache->assignees()
+                ->where('user_id', $r->user_id)
+                ->first()?->pivot;
+
+            return [
+                'id' => $r->id,
+                'tache' => [
+                    'id' => $r->tache->id,
+                    'titre' => $r->tache->titre,
+                    'code' => $r->tache->code,
+                    'projet' => $r->tache->activite?->projet?->nom,
+                    'activite' => $r->tache->activite?->nom,
+                ],
+                'assignee' => [
+                    'id' => $r->user?->id,
+                    'nom' => $r->user?->nom,
+                    'email' => $r->user?->email,
+                ],
+                'statut' => $r->statut,
+                'soumis_le' => $r->soumis_le?->toIso8601String(),
+                'action_n0' => $r->action_n0,
+                'action_n0_le' => $r->action_n0_le?->toIso8601String(),
+                'had_bypass' => (bool) $r->bypass_active,
+                'motif_bypass' => $r->motif_bypass,
+                'commentaire_n0' => $r->commentaire_n0,
+                'escalades_abusives' => (bool) ($assigneePivot->escalades_abusives ?? false),
+                'bypass_count' => (int) ($assigneePivot->bypass_count ?? 0),
+                'hours_remaining' => $hoursRemaining,
+                'is_urgent' => $hoursRemaining !== null && $hoursRemaining < 24,
+                'deadline' => $deadline?->toIso8601String(),
+            ];
+        };
+
+        $sortByRemaining = function (array $row) {
+            // null deadlines bubble to the end
+            return $row['hours_remaining'] ?? PHP_INT_MAX;
+        };
+
+        $n1Rows = $pendingN1->map($enrich)->sortBy($sortByRemaining)->values();
+        $n2Rows = $pendingN2->map($enrich)->sortBy($sortByRemaining)->values();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'pending_n1' => $n1Rows,
+                'pending_n2' => $n2Rows,
+                'counts' => [
+                    'n1' => $n1Rows->count(),
+                    'n2' => $n2Rows->count(),
+                    'urgent' => $n1Rows->where('is_urgent', true)->count() + $n2Rows->where('is_urgent', true)->count(),
+                    'total' => $n1Rows->count() + $n2Rows->count(),
+                ],
+                'timeout_hours' => $timeoutHours,
+            ],
+        ]);
+    }
+
+    /**
+     * Task 7: total evaluation score for the current user (or for a target user
+     * when the caller has the right to view it).
+     *
+     * Scope rule (enforced here, not in the permission constant):
+     *   - super_admin / directeur / owner: any user
+     *   - manager / cadre: any user with EVALUATIONS_VIEW_SCORE in their scope
+     *     (simplification for this iteration — caller passes target=user_id and we
+     *     trust the workspace gate; Task 9 will refine to "only my assignees")
+     *   - everyone else: only their own score
+     */
+    public function userScore(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $workspace = $user->currentWorkspace;
+
+        $gate = app(ContextualPermissionGate::class);
+        $canViewScore = $user->isSuperAdmin()
+            || ($workspace && $gate->userCan($user, Permission::EVALUATIONS_VIEW_SCORE, $workspace));
+
+        if (! $canViewScore) {
+            return response()->json(['success' => false, 'message' => __('evaluation.errors.cannot_view_score')], 403);
+        }
+
+        $targetId = (int) $request->query('user_id', $user->id);
+
+        // Restrict non-privileged callers to their own score
+        $isPrivileged = $user->isSuperAdmin()
+            || ($workspace && $gate->userCan($user, Permission::EVALUATIONS_VIEW_PENDING, $workspace));
+
+        if ($targetId !== $user->id && ! $isPrivileged) {
+            return response()->json(['success' => false, 'message' => __('evaluation.errors.cannot_view_others_score')], 403);
+        }
+
+        $target = User::findOrFail($targetId);
+
+        $start = $request->query('start');
+        $end = $request->query('end');
+        $total = $this->scoreService->totalForUser($target, $start, $end);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'user_id' => $target->id,
+                'user_nom' => $target->nom,
+                'total' => $total,
+                'period' => [
+                    'start' => $start ?? now()->startOfMonth()->toDateString(),
+                    'end' => $end ?? now()->endOfMonth()->toDateString(),
+                ],
+            ],
+        ]);
+    }
+
     /**
      * 📋 Résultats en attente de validation
      * Affiche uniquement ce que l'utilisateur peut réellement valider

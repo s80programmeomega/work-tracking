@@ -371,3 +371,37 @@ Write at least one Dusk test for every user-facing flow introduced by a task.
 **Also append a row to the Changelog table** at the bottom of the matrix with: date, task number, and what changed.
 
 **Why:** The matrix was not updated for Tasks 2, 3, or 4 despite all permission steps being completed — the omission meant there was no single source of truth for role capabilities, making it impossible to audit what each role can do without reading multiple files.
+
+---
+
+## Guide 17 — Log Messages in French
+
+All human-readable log messages passed to `Log::info`, `Log::warning`, `Log::error`, or any other logging facade **must be in French**. Structured context keys and values that are machine-readable identifiers stay in English.
+
+**Examples — do this:**
+```php
+Log::info('Résultat soumis au N0', [
+    'user_id' => $actor->id,
+    'tache_resultat_id' => $resultat->id,
+    'reason' => 'submission',           // English key + machine-readable value
+]);
+
+Log::warning('Drapeau escalades_abusives activé', [
+    'user_id' => $auteur->id,
+    'consecutive_invalid_bypasses' => 3,
+]);
+```
+
+**Don't do this:**
+```php
+Log::warning('Score impact skipped — task has no responsable', [...]);   // ❌ English message
+Log::info('Bypass activated by user', [...]);                            // ❌ English message
+```
+
+**Why:** The target user base (CERD Africa team) reads French; logs end up in incident reports, support tickets, and audit exports. Mixing English messages into a French-language operational log breaks the reading flow and can be misclassified by translation tools and grep filters built around French keywords.
+
+**How to apply:**
+- Existing French logs in `TacheResultatService` (`'Résultat soumis au N0'`, `'Bypass anti-sabotage activé'`, `'Drapeau escalades_abusives activé'`) are the reference style — short, in the past tense or descriptive present, with structured context as a separate array.
+- Structured context keys stay in English (`user_id`, `tache_id`, `reason`, `action`) — they're identifiers, not narrative text. The same goes for enum-like values (`'comment_too_short'`, `'n0_inaction'`, `'subtasks_exist'`).
+- Exception messages thrown with `__('...')` keys (e.g., `__('circuit_validation.errors.motif_too_short')`) handle localisation via the translation layer — don't double-translate inside the throw.
+- When you touch an English log message in code you're editing for other reasons, translate it in the same commit. Don't make a separate "translate logs" PR — that's churn.
