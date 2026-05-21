@@ -26,11 +26,11 @@
       </div>
 
       <!-- Résultat existant -->
-      <div v-if="tache.my_result" class="bg-white dark:bg-gray-800 rounded-lg p-4 border-2 border-gray-200 dark:border-gray-700">
+      <div v-if="tache.my_result" dusk="my-result-card" class="bg-white dark:bg-gray-800 rounded-lg p-4 border-2 border-gray-200 dark:border-gray-700">
         <div class="space-y-4">
           <!-- Statut de validation -->
           <div class="flex items-center gap-3 flex-wrap">
-            <span class="px-3 py-1 rounded-full text-xs font-semibold" :class="getValidationStatusClass(tache.my_result.validation_status)">
+            <span dusk="validation-status-badge" class="px-3 py-1 rounded-full text-xs font-semibold" :class="getValidationStatusClass(tache.my_result.validation_status)">
               {{ getValidationStatusLabel(tache.my_result.validation_status) }}
             </span>
             <span class="text-sm text-gray-600 dark:text-gray-400">

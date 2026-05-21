@@ -104,14 +104,15 @@
         <div class="border-b border-gray-200 dark:border-gray-800">
           <nav class="flex gap-1 px-6">
             <button v-for="tab in tabs" :key="tab.id"
+              :dusk="`tab-${tab.id}`"
               @click="activeTab = tab.id"
               class="px-6 py-4 font-semibold text-sm border-b-2 transition-colors"
-              :class="activeTab === tab.id 
-                ? 'border-brand-600 text-brand-600' 
+              :class="activeTab === tab.id
+                ? 'border-brand-600 text-brand-600'
                 : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'">
               <i :class="['fas', tab.icon, 'mr-2']"></i>
               {{ tab.label }}
-              <span v-if="tab.count !== undefined" class="ml-2 px-2 py-0.5 rounded-full text-xs bg-gray-200 dark:bg-gray-800">
+              <span v-if="tab.count !== undefined" :dusk="`tab-${tab.id}-count`" class="ml-2 px-2 py-0.5 rounded-full text-xs bg-gray-200 dark:bg-gray-800">
                 {{ tab.count }}
               </span>
             </button>
