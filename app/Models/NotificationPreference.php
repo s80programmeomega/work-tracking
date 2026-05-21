@@ -46,6 +46,7 @@ class NotificationPreference extends Model
         'digest_frequency',
         'digest_time',
         'digest_day_of_week',
+        'last_digest_sent_at',
         'quiet_hours_enabled',
         'quiet_hours_start',
         'quiet_hours_end',
@@ -85,6 +86,7 @@ class NotificationPreference extends Model
         'team_member_added' => 'boolean',
         'quiet_hours_enabled' => 'boolean',
         'digest_time' => 'datetime:H:i:s',
+        'last_digest_sent_at' => 'datetime',
         'quiet_hours_start' => 'datetime:H:i:s',
         'quiet_hours_end' => 'datetime:H:i:s',
     ];
@@ -106,7 +108,7 @@ class NotificationPreference extends Model
         $typeKey = "{$type}_{$channel}";
 
         // Check global channel setting
-        if (!$this->{$channelKey}) {
+        if (! $this->{$channelKey}) {
             return false;
         }
 
@@ -119,7 +121,7 @@ class NotificationPreference extends Model
      */
     public function isInQuietHours(): bool
     {
-        if (!$this->quiet_hours_enabled) {
+        if (! $this->quiet_hours_enabled) {
             return false;
         }
 

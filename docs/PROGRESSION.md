@@ -27,7 +27,7 @@
 | 5 | Validation N0 + 48h Timer | `feature/v2-task-5-validation-n0` | ✅ | 2026-05-15 | 2026-05-15 | — |
 | 6 | Anti-Sabotage Bypass | `feature/v2-task-6-bypass` | ✅ | 2026-05-18 | 2026-05-18 | Merged into `jonas` 2026-05-19 |
 | 7 | N1 Scores + Pending Validations | `feature/v2-task-7-scores-dashboard` | ✅ | 2026-05-19 | 2026-05-19 | Merged into `jonas` 2026-05-21 |
-| 8 | Reverb + Web Push Notifications | `feature/v2-task-8-notifications` | 🔄 | 2026-05-21 | 2026-05-21 | Real-time + dedup + hierarchy done; Web Push & daily digest deferred to follow-up |
+| 8 | Reverb + Web Push Notifications | `feature/v2-task-8-notifications` | ✅ | 2026-05-21 | 2026-05-21 | Real-time + dedup + hierarchy + daily digest done. Web Push (8b) deferred to dedicated PR. |
 | 9 | Agent Sheet + Full Scoring | `feature/v2-task-9-agent-sheet` | ⬜ | — | — | — |
 | 10 | Evaluation Dashboard + Global Task View | `feature/v2-task-10-dashboard` | ⬜ | — | — | — |
 | 11 | Task Creation UX (wizard + intervenant picker) | `feature/v2-task-11-task-creation-ux` | ⬜ | — | — | — |
@@ -172,9 +172,11 @@
 - [x] phpunit.xml gets `BROADCAST_DRIVER=log` so tests don't hit real Reverb
 - [x] 11 feature tests in `NotificationServiceTest` + 2 Dusk tests in `NotificationBellTest` — 101 total passing
 - [x] PERMISSIONS_MATRIX.md gains a Notification Permissions section + changelog row
-- [ ] Web Push notifications (deferred to dedicated follow-up PR — needs `minishlink/web-push` package + VAPID keys + service worker)
-- [ ] Daily email digest Blade template + scheduled command (deferred — separate concern from real-time)
-- [ ] Translation files `lang/{fr,en}/notifications.php` (deferred — current notifications use `circuit_validation.*` translations)
+- [x] Daily digest: migration `add_last_digest_sent_at_to_notification_preferences_table` + `SendDailyDigest` command (15-min schedule, dry-run + user filter options) + `DailyDigestMail` mailable + Blade templates `emails/daily-digest/{fr,en}.blade.php` + quiet-hours respect
+- [x] `app/Console/Kernel.php` schedules `notifications:send-digest` every 15 min with `withoutOverlapping(20)` + `onOneServer` + `runInBackground`
+- [x] Translation files `lang/{fr,en}/notifications.php` (digest subject only — runtime notifications use `circuit_validation.*`)
+- [x] 8 feature tests in `SendDailyDigestCommandTest` covering: send to eligible, skip when empty/before-time/already-sent/quiet-hours/frequency-none, --dry-run, --user filter
+- [ ] Web Push notifications — **deferred to Task 8b** (`feature/v2-task-8b-web-push`). Needs `minishlink/web-push` composer package + VAPID keys + service worker registration. `push_subscriptions` table already exists.
 - [ ] PR / merge into `jonas`
 
 ### Task 9

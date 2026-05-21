@@ -935,10 +935,9 @@ test: add feature tests for platform dashboard permissions and stats
 > **Update this section at the end of every session.**
 
 - Last completed task: **Task 7** — N1 Scores + Pending Validations Dashboard (`feature/v2-task-7-scores-dashboard`) — merged 2026-05-21 (commit `c891a6e`)
-- Current task: **Task 8** — Real-Time Notifications (partial scope) — implementation complete on `feature/v2-task-8-notifications`, awaiting Jonas manual testing per `docs/testing/TASK_8_TESTING.md`
-- **Deferred from Task 8 to dedicated follow-up PRs** (will spin up when Task 8 base is merged):
-  - `feature/v2-task-8b-web-push` — Web Push notifications. Needs `minishlink/web-push` Composer package, VAPID key generation, service worker registration.
-  - `feature/v2-task-8c-daily-digest` — Daily email digest. Blade templates + scheduled command + per-user `digest_frequency`/`digest_time` honour.
+- Current task: **Task 8** — Real-Time Notifications + Daily Digest — implementation complete on `feature/v2-task-8-notifications`, awaiting Jonas manual testing per `docs/testing/TASK_8_TESTING.md`
+- **Deferred from Task 8 to dedicated follow-up PR**:
+  - `feature/v2-task-8b-web-push` — Web Push notifications. Needs `minishlink/web-push` Composer package, VAPID key generation, service worker registration. The `push_subscriptions` table already exists from earlier work.
 - Next task after Task 8 merge: **Task 9** — Agent Sheet + Full Scoring
 
 ### Dusk note (applies to all remaining tasks)
