@@ -177,9 +177,18 @@ final class Permission
     public static function forRole(string $role): array
     {
         return match ($role) {
-            // owner gets everything except task-assignee-only actions (submit_result, approve_n0).
-            // Those are granted contextually when a user is assigned to a specific task.
-            'owner' => array_diff(self::all(), [self::TACHES_SUBMIT_RESULT, self::TACHES_APPROVE_N0]),
+            // owner gets everything except actions reserved to specific task participants:
+            //   - submit_result + activer_bypass are assignee-only (you must be the result author)
+            //   - approve_n0 + resultats.approuver_n0 + resultats.renvoyer_n0 are task_responsable-only
+            //     (you must have tache_user.is_responsable = true on the task)
+            // These are granted contextually through the task_responsable virtual role.
+            'owner' => array_diff(self::all(), [
+                self::TACHES_SUBMIT_RESULT,
+                self::TACHES_APPROVE_N0,
+                self::RESULTATS_ACTIVER_BYPASS,
+                self::RESULTATS_APPROUVER_N0,
+                self::RESULTATS_RENVOYER_N0,
+            ]),
 
             'manager' => [
                 self::WORKSPACES_VIEW,
@@ -210,7 +219,9 @@ final class Permission
                 self::DOCUMENTS_UPLOAD,
                 self::DOCUMENTS_DELETE,
                 self::DOCUMENTS_SHARE,
-                self::RESULTATS_RENVOYER_N0,
+                // RESULTATS_RENVOYER_N0 removed — manager is N2 reviewer, not N0 gatekeeper.
+                // N0 actions are granted via the task_responsable virtual role when
+                // tache_user.is_responsable = true.
                 self::REPORTS_VIEW,
                 self::REPORTS_CREATE,
                 self::EVALUATIONS_VIEW_PENDING,
@@ -235,7 +246,9 @@ final class Permission
                 self::SOUS_TACHES_ASSIGN,
                 self::DOCUMENTS_VIEW,
                 self::DOCUMENTS_UPLOAD,
-                self::RESULTATS_RENVOYER_N0,
+                // RESULTATS_RENVOYER_N0 removed — cadre is N1 reviewer, not N0 gatekeeper.
+                // N0 actions are granted via the task_responsable virtual role when
+                // tache_user.is_responsable = true.
                 self::REPORTS_VIEW,
                 self::EVALUATIONS_VIEW_PENDING,
                 self::EVALUATIONS_VIEW_SCORE,
@@ -266,7 +279,9 @@ final class Permission
                 self::TACHES_SUBMIT_RESULT,
                 self::TACHES_COMMENT,
                 self::SOUS_TACHES_VIEW,
+                self::SOUS_TACHES_EDIT,   // close gap with collaborateur — stagiaires need to update their own sous-tâche progression
                 self::DOCUMENTS_VIEW,
+                self::DOCUMENTS_UPLOAD,   // close gap with collaborateur — stagiaires need to attach deliverables
                 self::RESULTATS_ACTIVER_BYPASS,
                 self::EVALUATIONS_VIEW_SCORE,
             ],

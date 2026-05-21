@@ -83,11 +83,11 @@ Assigned in: `workspace_members`, `projet_user`, `activite_user`, `tache_user`
 | Delete task | ✅ | ✅ | ❌ | 🔑 | ❌ | ❌ | ❌ |
 | Submit result (TacheResultat) | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ |
 | Create subtask | ✅ | ✅ | ✅ | ✅ | 🔑 | ❌ | ❌ |
-| Approve result at N0 | ✅ | ✅ | ✅ | ✅ | 🔑 | ❌ | ❌ |
-| Return result at N0 with comment | ✅ | ✅ | ✅ | ✅ | 🔑 | ❌ | ❌ |
+| Approve result at N0 | ✅ | 🔑 | 🔑 | 🔑 | 🔑 | 🔑 | ❌ |
+| Return result at N0 with comment | ✅ | 🔑 | 🔑 | 🔑 | ✅ | ❌ | ❌ |
 | Activate bypass | ❌ | ❌ | ❌ | ❌ | ✅ (own result) | ✅ (own result) | ❌ |
 
-> 🔑 pivot flag: `can_edit` on `tache_user`, `can_delete_tasks` on `activite_user`, `is_responsable` on `tache_user` (for subtask creation and N0 approval)
+> 🔑 pivot flag: `can_edit` on `tache_user`, `can_delete_tasks` on `activite_user`, `is_responsable` on `tache_user` (grants the virtual `task_responsable` role which carries N0 actions, subtask creation, and assignment)
 
 ---
 
@@ -153,3 +153,4 @@ Assigned in: `workspace_members`, `projet_user`, `activite_user`, `tache_user`
 | 2026-05-15 | Task 5 | `canApprouverN0`, `canRenvoyerN0` in `PermissionService`. `resultats.approuver_n0/renvoyer_n0` seeded. `useTachePermissions.js` created. `can_approuver_n0`, `can_renvoyer_n0` in `TacheResultatResource` |
 | 2026-05-18 | Task 6 | `resultats.activer_bypass` added to `Permission.php`, `forRole()` (collaborateur + stagiaire), `Permission.js`. `canActiverBypass` in `useTachePermissions.js`. `can_activer_bypass` in `TacheResultatResource`. "Activate bypass" row already in matrix from earlier session |
 | 2026-05-19 | Task 7 | `evaluations.view_pending` + `evaluations.view_score` added to `Permission.php`, `forRole()` (pending: owner/manager/cadre; score: all roles except contextual-only ones). Mirror in `Permission.js`. `canViewPendingValidations` + `canViewEvaluationScore` in `useWorkspacePermissions.js`. `WorkspaceController` user_permissions payload extended in 3 locations. Matrix: observateur gets ✅ (own only) for view evaluation score |
+| 2026-05-21 | Defaults rebalance | Option A cleanup of `Permission::forRole()`: (1) `owner` exclusion list extended to drop auto-grant of `resultats.activer_bypass`, `resultats.approuver_n0`, `resultats.renvoyer_n0` — symmetric with the existing exclusion of `taches.submit_result` and `taches.approve_n0`; (2) `RESULTATS_RENVOYER_N0` removed from `manager` and `cadre` (they are N2/N1 reviewers, not N0 gatekeepers — N0 actions remain available via the `task_responsable` virtual role); (3) `stagiaire` gains `DOCUMENTS_UPLOAD` and `SOUS_TACHES_EDIT` to close the accidental capability gap with `collaborateur`. Matrix Task-Level rows updated to show 🔑 for N0 actions on roles that only get them via `is_responsable` pivot. 90 tests still green. |
