@@ -98,6 +98,10 @@ final class Permission
     /** See score totals for users (own score for all roles; others' scores gated by role + scope). */
     const EVALUATIONS_VIEW_SCORE = 'evaluations.view_score';
 
+    // ── Notifications (Task 8) ─────────────────────────────────────────────
+    /** Manage workspace-level notification policy (defaults, mandatory channels). */
+    const NOTIFICATIONS_MANAGE_PREFERENCES = 'notifications.manage_preferences';
+
     // ── Users (platform admin) ────────────────────────────────────────────
     const USERS_VIEW = 'users.view';
 
@@ -161,6 +165,8 @@ final class Permission
 
             self::EVALUATIONS_VIEW_PENDING,
             self::EVALUATIONS_VIEW_SCORE,
+
+            self::NOTIFICATIONS_MANAGE_PREFERENCES,
 
             self::USERS_VIEW,
             self::USERS_CREATE,
@@ -226,6 +232,9 @@ final class Permission
                 self::REPORTS_CREATE,
                 self::EVALUATIONS_VIEW_PENDING,
                 self::EVALUATIONS_VIEW_SCORE,
+                // NOTIFICATIONS_MANAGE_PREFERENCES intentionally omitted — workspace-level
+                // notification policy is reserved for owner/directeur (granted via the
+                // owner contextual role's array_diff('all() except task-participant actions')).
             ],
 
             'cadre' => [

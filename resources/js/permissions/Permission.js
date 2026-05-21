@@ -69,6 +69,9 @@ export const Permission = Object.freeze({
     EVALUATIONS_VIEW_PENDING:   'evaluations.view_pending',
     EVALUATIONS_VIEW_SCORE:     'evaluations.view_score',
 
+    // Notifications (Task 8)
+    NOTIFICATIONS_MANAGE_PREFERENCES: 'notifications.manage_preferences',
+
     // Users
     USERS_VIEW:                 'users.view',
     USERS_CREATE:               'users.create',

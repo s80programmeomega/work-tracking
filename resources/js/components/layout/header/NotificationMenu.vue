@@ -2,11 +2,13 @@
 <template>
   <div class="relative" ref="dropdownRef">
     <button
+      dusk="notification-bell"
       class="relative flex items-center justify-center text-gray-500 transition-colors bg-white border border-gray-200 rounded-full hover:text-dark-900 h-11 w-11 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
       @click="toggleDropdown"
     >
       <span
         v-if="unreadCount > 0"
+        dusk="notification-badge"
         class="absolute -right-1 -top-1 z-10 flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold text-white bg-red-500 rounded-full"
       >
         {{ unreadCount > 99 ? '99+' : unreadCount }}

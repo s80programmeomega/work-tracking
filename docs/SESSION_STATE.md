@@ -16,27 +16,44 @@
 
 ## Current Session
 
-**Date:** 2026-05-19
-**Session goal:** Merge Task 6 into jonas, start Task 7
-**Status:** Task 6 merged into `jonas` (commit `f6e98d2`) and pushed. Task 7 implementation complete on `feature/v2-task-7-scores-dashboard`. 90 tests passing. Awaiting Jonas manual testing per `docs/testing/TASK_7_TESTING.md` before merge.
+**Date:** 2026-05-21
+**Session goal:** Merge Task 7, build Task 8 (real-time notifications), defer Web Push + daily digest to follow-up
+**Status:** Task 7 merged into `jonas` (commit `c891a6e`) and pushed. Task 8 partial implementation complete on `feature/v2-task-8-notifications` (real-time + dedup + hierarchy + permission). Web Push and daily digest explicitly deferred. 101 tests passing. Awaiting Jonas manual testing per `docs/testing/TASK_8_TESTING.md` before merge.
 
 ---
 
 ## Current Task
 
-**Task:** 7 — N1 Scores + Pending Validations Dashboard
-**Branch:** `feature/v2-task-7-scores-dashboard`
-**Status:** Implementation complete — pending Jonas manual testing per `docs/testing/TASK_7_TESTING.md`, then merge into `jonas`.
+**Task:** 8 — Real-Time Notifications (partial — Web Push and Daily Digest deferred)
+**Branch:** `feature/v2-task-8-notifications`
+**Status:** Implementation complete for the in-scope subset (real-time broadcast, channel resolution, hierarchy propagation, deduplication, `canManageNotificationPreferences` permission). Awaiting manual test per `docs/testing/TASK_8_TESTING.md`, then merge.
 
 **What to do next:**
-1. Jonas tests Task 7 manually using `docs/testing/TASK_7_TESTING.md` (6 test cases covering penalty, bonus, no_impact, dashboard, permission gates)
-2. Merge `feature/v2-task-7-scores-dashboard` into `jonas` (`git merge --no-ff`)
+1. Jonas tests Task 8 manually using `docs/testing/TASK_8_TESTING.md` (5 test cases — live update, channelsFor, hierarchy, dedup, permission gate)
+2. Merge `feature/v2-task-8-notifications` into `jonas` (`git merge --no-ff`)
 3. Push `jonas` to `origin`
-4. Create `feature/v2-task-8-notifications` from `jonas`
+4. Spin up two follow-up branches when ready: `feature/v2-task-8b-web-push` and `feature/v2-task-8c-daily-digest`
 
 ## Last Completed Task
 
-**Task 7** — N1 Scores + Pending Validations Dashboard (2026-05-19, implementation complete)
+**Task 8** — Real-Time Notifications (partial — 2026-05-21, implementation complete)
+- `NotificationService::channelsFor(notifiable, eventType)` — resolves `['database', 'broadcast']` ± `'mail'` based on event signal level; respects per-user `notification_preferences` row
+- `NotificationService::dedupKey(eventType, tacheResultatId)` — deterministic; stored in each notification's `data.dedup_key`
+- `NotificationService::isDuplicate(user, eventType, tacheResultatId)` — looks for matching `dedup_key` in `notifications` table within `DEDUP_WINDOW_MINUTES = 5`
+- `NotificationService::notifyHierarchy(recipient, workspace, notification, eventType, tacheResultatId)` — fans out to direct recipient + workspace directeur (owner_id) + all workspace managers, dedup per user
+- All 7 existing notifications (`ResultatSoumisN0/Renvoye/ApprouveN0/TransmisAuto`, `BypassActivated`, `EscaladesAbusives`, `ScoreUpdated`) now use `channelsFor()` in `via()` and include `dedup_key` in `toArray()`
+- Frontend: `useLiveNotifications.js` composable wraps `useEcho` and subscribes to `private.App.Models.User.{id}`; wired into `App.vue` `onMounted`, surfaces toast on incoming notification
+- Notification bell (`NotificationMenu.vue`) gets `dusk` attributes for Dusk test targeting
+- `NOTIFICATIONS_MANAGE_PREFERENCES` permission across Permission.php + forRole (owner only) + Permission.js + useWorkspacePermissions.js + WorkspaceController user_permissions (3 locations)
+- PERMISSIONS_MATRIX.md: new Notification Permissions section + changelog row
+- `phpunit.xml` adds `BROADCAST_DRIVER=log` so tests don't hit real Reverb
+- 11 feature tests in `NotificationServiceTest` + 2 Dusk tests in `NotificationBellTest` (101 total, all passing)
+
+**Deferred (separate follow-up PRs):**
+- Web Push: needs `minishlink/web-push` Composer package, VAPID key generation, service worker registration
+- Daily email digest: Blade templates + scheduled command
+
+**Task 7** — N1 Scores + Pending Validations Dashboard (merged 2026-05-21, commit `c891a6e`)
 - Migration `create_evaluation_scores_table` (user_id, periode_start/end, critere, valeur, meta JSON + 3 indexes)
 - `EvaluationScore` model with scopes `inPeriod` / `decidedBetween` + factory with `penalty`/`bonus`/`forUser` states
 - `EvaluationScoreService::calculerImpactN1` — 3 paths (penalty / bonus / no_impact), writes evaluation_scores row + mirrors to validation_audit_logs + dispatches ScoreUpdatedNotification
@@ -118,6 +135,8 @@
 | `feature/v2-task-4-subtask-ui` | Task 4 | Merged ✅ (recovered 2026-05-18) |
 | `feature/v2-task-5-validation-n0` | Task 5 | Merged ✅ (via `feature/v2-permission-architecture`) |
 | `feature/v2-task-6-bypass` | Task 6 | Merged ✅ |
+| `feature/v2-task-7-scores-dashboard` | Task 7 | Merged ✅ (commit `c891a6e`) |
+| `feature/v2-task-8-notifications` | Task 8 (partial) | Pending Jonas testing |
 
 ---
 
@@ -154,3 +173,4 @@
 | 2026-05-18 | Task 6, Task 4 recovery, bug fixes | Implemented Task 6 (anti-sabotage bypass): migrations, `activerBypass` + `invaliderBypassN1` services, 2 notifications + Blade emails (fr/en), 10 feature tests. Recovered orphan `feature/v2-task-4-subtask-ui` branch and merged into jonas. Fixed `Workspace.php` curly quotes, sidebar dropdown stuck/double-active, three task-detail sub-tab crashes (`/users`→`/members`, defensive `?? []`), ST badge missing from kanban (added `withCount('sousTaches')` in `TacheService`). 80 tests passing. |
 | 2026-05-19 | Task 6 merge | Merged `feature/v2-task-6-bypass` into `jonas` (`--no-ff`, commit `f6e98d2`). Pushed `jonas` to `origin`. Updated SESSION_STATE, PROGRESSION, IMPLEMENTATION_PLAN. |
 | 2026-05-19 | Task 7 implementation | Implemented EvaluationScoreService (penalty/bonus/no_impact paths), pending-validations dashboard endpoint + Vue page, permissions, translations. Added Guide 17 (logs in French). Wired TacheResultatService::validerN1/rejeterN1 into the controller. 10 feature tests + 1 Dusk test. 90 tests passing. |
+| 2026-05-21 | Task 7 merge + Task 8 partial | Merged feature/v2-task-7-scores-dashboard into jonas (commit c891a6e, --no-ff) + pushed. Implemented Task 8 partial scope: NotificationService channelsFor/dedupKey/isDuplicate/notifyHierarchy, broadcast wired into 7 existing notifications via channelsFor, useLiveNotifications.js composable + App.vue subscription, NOTIFICATIONS_MANAGE_PREFERENCES permission, dusk attributes on NotificationMenu. Web Push and daily digest deferred to dedicated follow-up PRs. 11 feature tests + 2 Dusk tests. 101 tests passing. |

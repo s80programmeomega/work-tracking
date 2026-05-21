@@ -26,8 +26,8 @@
 | 4 | Subtask UI | `feature/v2-task-4-subtask-ui` | ✅ | 2026-05-15 | 2026-05-18 | Branch existed but was never merged — restored 2026-05-18 |
 | 5 | Validation N0 + 48h Timer | `feature/v2-task-5-validation-n0` | ✅ | 2026-05-15 | 2026-05-15 | — |
 | 6 | Anti-Sabotage Bypass | `feature/v2-task-6-bypass` | ✅ | 2026-05-18 | 2026-05-18 | Merged into `jonas` 2026-05-19 |
-| 7 | N1 Scores + Pending Validations | `feature/v2-task-7-scores-dashboard` | ✅ | 2026-05-19 | 2026-05-19 | — |
-| 8 | Reverb + Web Push Notifications | `feature/v2-task-8-notifications` | ⬜ | — | — | — |
+| 7 | N1 Scores + Pending Validations | `feature/v2-task-7-scores-dashboard` | ✅ | 2026-05-19 | 2026-05-19 | Merged into `jonas` 2026-05-21 |
+| 8 | Reverb + Web Push Notifications | `feature/v2-task-8-notifications` | 🔄 | 2026-05-21 | 2026-05-21 | Real-time + dedup + hierarchy done; Web Push & daily digest deferred to follow-up |
 | 9 | Agent Sheet + Full Scoring | `feature/v2-task-9-agent-sheet` | ⬜ | — | — | — |
 | 10 | Evaluation Dashboard + Global Task View | `feature/v2-task-10-dashboard` | ⬜ | — | — | — |
 | 11 | Task Creation UX (wizard + intervenant picker) | `feature/v2-task-11-task-creation-ux` | ⬜ | — | — | — |
@@ -163,15 +163,19 @@
 - [ ] PR / merge into `jonas`
 
 ### Task 8
-- [ ] `ValidationNotificationEvent` created
-- [ ] `useNotifications.js` updated for Echo
-- [ ] Web Push notifications added
-- [ ] Deduplication logic implemented
-- [ ] `canManageNotificationPreferences` permission added
-- [ ] Email templates created (FR + EN)
-- [ ] Translation files `lang/fr/notifications.php` and `lang/en/notifications.php` created
-- [ ] Tests passing
-- [ ] PR opened into `jonas`
+- [x] Broadcast wired into all 7 N0/Bypass/Score/Escalades notifications via `NotificationService::channelsFor()`
+- [x] `useLiveNotifications.js` composable subscribes to `App.Models.User.{id}` private channel and surfaces toasts
+- [x] `useEcho.js` reused from Task 1 (no changes needed)
+- [x] Deduplication logic: `NotificationService::isDuplicate()` + `dedup_key` field on every notification's `toArray()`
+- [x] Hierarchy propagation: `NotificationService::notifyHierarchy()` walks workspace owner + managers, dedup per recipient
+- [x] `canManageNotificationPreferences` permission: `Permission.php` + `forRole('owner')` only + `Permission.js` + `useWorkspacePermissions.js` + `WorkspaceController.user_permissions` (3 locations)
+- [x] phpunit.xml gets `BROADCAST_DRIVER=log` so tests don't hit real Reverb
+- [x] 11 feature tests in `NotificationServiceTest` + 2 Dusk tests in `NotificationBellTest` — 101 total passing
+- [x] PERMISSIONS_MATRIX.md gains a Notification Permissions section + changelog row
+- [ ] Web Push notifications (deferred to dedicated follow-up PR — needs `minishlink/web-push` package + VAPID keys + service worker)
+- [ ] Daily email digest Blade template + scheduled command (deferred — separate concern from real-time)
+- [ ] Translation files `lang/{fr,en}/notifications.php` (deferred — current notifications use `circuit_validation.*` translations)
+- [ ] PR / merge into `jonas`
 
 ### Task 9
 - [ ] `EvaluationService` with 8-criteria scoring created

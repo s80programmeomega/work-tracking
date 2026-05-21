@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Models\TacheResultat;
 use App\Models\User;
+use App\Services\NotificationService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -21,7 +22,7 @@ class EscaladesAbusivesNotification extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        return app(NotificationService::class)->channelsFor($notifiable, 'escalades_abusives');
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -43,6 +44,7 @@ class EscaladesAbusivesNotification extends Notification implements ShouldQueue
     {
         return [
             'type' => 'escalades_abusives',
+            'dedup_key' => app(NotificationService::class)->dedupKey('escalades_abusives', $this->resultat->id),
             'tache_resultat_id' => $this->resultat->id,
             'tache_id' => $this->resultat->tache_id,
             'tache_titre' => $this->resultat->tache->titre,

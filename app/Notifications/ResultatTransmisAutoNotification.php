@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\TacheResultat;
+use App\Services\NotificationService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -16,7 +17,7 @@ class ResultatTransmisAutoNotification extends Notification implements ShouldQue
 
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        return app(NotificationService::class)->channelsFor($notifiable, 'transmis_auto');
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -33,6 +34,7 @@ class ResultatTransmisAutoNotification extends Notification implements ShouldQue
     {
         return [
             'type' => 'resultat_transmis_auto',
+            'dedup_key' => app(NotificationService::class)->dedupKey('transmis_auto', $this->resultat->id),
             'tache_resultat_id' => $this->resultat->id,
             'tache_id' => $this->resultat->tache_id,
             'tache_titre' => $this->resultat->tache->titre,
