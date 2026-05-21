@@ -17,41 +17,54 @@
 ## Current Session
 
 **Date:** 2026-05-21
-**Session goal:** Merge Task 7, build Task 8 (real-time notifications), defer Web Push + daily digest to follow-up
-**Status:** Task 7 merged into `jonas` (commit `c891a6e`) and pushed. Task 8 partial implementation complete on `feature/v2-task-8-notifications` (real-time + dedup + hierarchy + permission). Web Push and daily digest explicitly deferred. 101 tests passing. Awaiting Jonas manual testing per `docs/testing/TASK_8_TESTING.md` before merge.
+**Session goal:** Merge Task 7, build Task 8 (real-time notifications + daily digest), defer Web Push to follow-up
+**Status:** Task 7 merged into `jonas` (commit `c891a6e`) and pushed. Task 8 implementation complete on `feature/v2-task-8-notifications` — real-time broadcast + dedup + hierarchy + permission + **daily digest**. Web Push (8b) explicitly deferred. 109 tests passing. Awaiting Jonas manual testing per `docs/testing/TASK_8_TESTING.md` before merge.
 
 ---
 
 ## Current Task
 
-**Task:** 8 — Real-Time Notifications (partial — Web Push and Daily Digest deferred)
+**Task:** 8 — Real-Time Notifications (Web Push deferred to Task 8b)
 **Branch:** `feature/v2-task-8-notifications`
-**Status:** Implementation complete for the in-scope subset (real-time broadcast, channel resolution, hierarchy propagation, deduplication, `canManageNotificationPreferences` permission). Awaiting manual test per `docs/testing/TASK_8_TESTING.md`, then merge.
+**Status:** Implementation complete for the in-scope subset (real-time broadcast, channel resolution, hierarchy propagation, deduplication, `canManageNotificationPreferences` permission, daily digest). Awaiting manual test per `docs/testing/TASK_8_TESTING.md`, then merge.
 
 **What to do next:**
-1. Jonas tests Task 8 manually using `docs/testing/TASK_8_TESTING.md` (5 test cases — live update, channelsFor, hierarchy, dedup, permission gate)
+1. Jonas tests Task 8 manually using `docs/testing/TASK_8_TESTING.md` (7 test cases — live update, channelsFor, hierarchy, dedup, permission gate, daily digest, quiet hours)
 2. Merge `feature/v2-task-8-notifications` into `jonas` (`git merge --no-ff`)
 3. Push `jonas` to `origin`
-4. Spin up two follow-up branches when ready: `feature/v2-task-8b-web-push` and `feature/v2-task-8c-daily-digest`
+4. Spin up `feature/v2-task-8b-web-push` from `jonas` when ready (push_subscriptions table already exists; needs `minishlink/web-push` + VAPID keys + service worker)
 
 ## Last Completed Task
 
-**Task 8** — Real-Time Notifications (partial — 2026-05-21, implementation complete)
-- `NotificationService::channelsFor(notifiable, eventType)` — resolves `['database', 'broadcast']` ± `'mail'` based on event signal level; respects per-user `notification_preferences` row
-- `NotificationService::dedupKey(eventType, tacheResultatId)` — deterministic; stored in each notification's `data.dedup_key`
-- `NotificationService::isDuplicate(user, eventType, tacheResultatId)` — looks for matching `dedup_key` in `notifications` table within `DEDUP_WINDOW_MINUTES = 5`
+**Task 8** — Real-Time Notifications + Daily Digest (2026-05-21, implementation complete)
+
+Real-time + service helpers:
+- `NotificationService::channelsFor(notifiable, eventType)` — resolves `['database', 'broadcast']` ± `'mail'` based on event signal level
+- `NotificationService::dedupKey(eventType, tacheResultatId)` + `isDuplicate(user, eventType, tacheResultatId)` — 5-minute deduplication window via `data.dedup_key` in `notifications` table
 - `NotificationService::notifyHierarchy(recipient, workspace, notification, eventType, tacheResultatId)` — fans out to direct recipient + workspace directeur (owner_id) + all workspace managers, dedup per user
-- All 7 existing notifications (`ResultatSoumisN0/Renvoye/ApprouveN0/TransmisAuto`, `BypassActivated`, `EscaladesAbusives`, `ScoreUpdated`) now use `channelsFor()` in `via()` and include `dedup_key` in `toArray()`
-- Frontend: `useLiveNotifications.js` composable wraps `useEcho` and subscribes to `private.App.Models.User.{id}`; wired into `App.vue` `onMounted`, surfaces toast on incoming notification
+- All 7 existing notifications (`ResultatSoumisN0/Renvoye/ApprouveN0/TransmisAuto`, `BypassActivated`, `EscaladesAbusives`, `ScoreUpdated`) use `channelsFor()` in `via()` and include `dedup_key` in `toArray()`
+- Frontend: `useLiveNotifications.js` composable wraps `useEcho` and subscribes to `App.Models.User.{id}` private channel; wired into `App.vue` `onMounted`, surfaces toast on incoming notification
 - Notification bell (`NotificationMenu.vue`) gets `dusk` attributes for Dusk test targeting
 - `NOTIFICATIONS_MANAGE_PREFERENCES` permission across Permission.php + forRole (owner only) + Permission.js + useWorkspacePermissions.js + WorkspaceController user_permissions (3 locations)
 - PERMISSIONS_MATRIX.md: new Notification Permissions section + changelog row
-- `phpunit.xml` adds `BROADCAST_DRIVER=log` so tests don't hit real Reverb
-- 11 feature tests in `NotificationServiceTest` + 2 Dusk tests in `NotificationBellTest` (101 total, all passing)
+- `phpunit.xml` adds `BROADCAST_DRIVER=log` + `BROADCAST_CONNECTION=log` so tests don't hit real Reverb
 
-**Deferred (separate follow-up PRs):**
-- Web Push: needs `minishlink/web-push` Composer package, VAPID key generation, service worker registration
-- Daily email digest: Blade templates + scheduled command
+Daily digest (Task 8c — built in same PR):
+- Migration `add_last_digest_sent_at_to_notification_preferences_table` (indexed timestamp column)
+- `SendDailyDigest` command (`notifications:send-digest`) with `--dry-run` and `--user=` options
+- Aggregation logic: filters by `digest_frequency != 'none'`, `digest_time <= now()`, `last_digest_sent_at` empty-or-before-today
+- Quiet hours respected — users inside `quiet_hours_start..end` window skipped (midnight-wrapping windows handled)
+- `DailyDigestMail` mailable + Blade templates `emails/daily-digest/{fr,en}.blade.php` (notifications grouped by type, top 5 per group, link to all)
+- Translation keys `notifications.daily_digest.subject` (fr + en)
+- Scheduled every 15 minutes in `app/Console/Kernel.php` with `withoutOverlapping(20)` + `onOneServer` + `runInBackground`
+
+Tests: 11 feature in `NotificationServiceTest` + 8 feature in `SendDailyDigestCommandTest` + 2 Dusk in `NotificationBellTest` = **109 total, all passing**
+
+**Deferred to Task 8b (Web Push, separate PR):**
+- `minishlink/web-push` Composer package
+- VAPID key generation + secure storage
+- Service worker registration + browser permission UX
+- `WebPushChannel` notification channel
 
 **Task 7** — N1 Scores + Pending Validations Dashboard (merged 2026-05-21, commit `c891a6e`)
 - Migration `create_evaluation_scores_table` (user_id, periode_start/end, critere, valeur, meta JSON + 3 indexes)
