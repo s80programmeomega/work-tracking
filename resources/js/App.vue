@@ -26,6 +26,7 @@ import ThemeProvider from "@/components/layout/ThemeProvider.vue";
 import SidebarProvider from "@/components/layout/SidebarProvider.vue";
 import { ref, onMounted, onErrorCaptured,provide  } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
+import { useLiveNotifications } from '@/composables/useLiveNotifications';
 import NotificationContainer from "@/components/ui/NotificationContainer.vue"
 
 
@@ -71,16 +72,31 @@ onErrorCaptured((err) => {
     return false; // Empêche la propagation de l'erreur
 });
 
+const { start: startLiveNotifications, onNotification } = useLiveNotifications();
+
+// Task 8 — when a live broadcast lands, surface a toast and increment the bell.
+// The actual unread counter lives in useNotifications; this just shows the user
+// that something happened. Consumers (e.g. the bell component) can also subscribe
+// via onNotification to refresh their list.
+onNotification((data) => {
+    const title = data?.tache_titre ?? data?.title ?? 'Nouvelle notification';
+    showNotification(title, 'info', 4000);
+});
+
 onMounted(async () => {
     try {
         console.log('🚀 Initialisation de l\'application...');
-        
+
         // Initialiser l'authentification
         authStore.initialize();
-        
+
         // Attendre un peu pour s'assurer que tout est chargé
         await new Promise(resolve => setTimeout(resolve, 500));
-        
+
+        // Start the Reverb subscription once auth is ready. Safe to call when
+        // unauthenticated — useLiveNotifications no-ops without a user id.
+        startLiveNotifications();
+
         console.log('✅ Application initialisée');
     } catch (err) {
         console.error('❌ Erreur lors de l\'initialisation:', err);

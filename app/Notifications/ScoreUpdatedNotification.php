@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\EvaluationScore;
+use App\Services\NotificationService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
@@ -22,18 +23,22 @@ class ScoreUpdatedNotification extends Notification implements ShouldQueue
     ) {}
 
     /**
-     * Database-only delivery. The mail and broadcast channels are
-     * deliberately absent — score changes shouldn't spam mailboxes.
+     * channelsFor('score_updated') returns ['database', 'broadcast'] —
+     * in-app + live badge update. No mail (score changes shouldn't spam mailboxes).
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return app(NotificationService::class)->channelsFor($notifiable, 'score_updated');
     }
 
     public function toArray(object $notifiable): array
     {
         return [
             'type' => 'score_updated',
+            'dedup_key' => app(NotificationService::class)->dedupKey(
+                'score_updated',
+                $this->score->meta['tache_resultat_id'] ?? null,
+            ),
             'score_id' => $this->score->id,
             'critere' => $this->score->critere,
             'valeur' => (float) $this->score->valeur,

@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Models\TacheResultat;
 use App\Models\User;
+use App\Services\NotificationService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -20,7 +21,7 @@ class ResultatSoumisN0Notification extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        return app(NotificationService::class)->channelsFor($notifiable, 'soumis_n0');
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -40,6 +41,7 @@ class ResultatSoumisN0Notification extends Notification implements ShouldQueue
     {
         return [
             'type' => 'resultat_soumis_n0',
+            'dedup_key' => app(NotificationService::class)->dedupKey('soumis_n0', $this->resultat->id),
             'tache_resultat_id' => $this->resultat->id,
             'tache_id' => $this->resultat->tache_id,
             'tache_titre' => $this->resultat->tache->titre,

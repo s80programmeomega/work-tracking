@@ -61,6 +61,9 @@ export function useWorkspacePermissions(workspace = null) {
     const canViewPendingValidations = computed(() => isSuperAdmin.value || (perms.value.can_view_pending_validations ?? false))
     const canViewEvaluationScore    = computed(() => isSuperAdmin.value || (perms.value.can_view_evaluation_score ?? false))
 
+    // Task 8: Notifications
+    const canManageNotificationPreferences = computed(() => isSuperAdmin.value || (perms.value.can_manage_notification_preferences ?? false))
+
     /**
      * Whether the current user can perform an action on a specific member.
      * @param {Object} targetMember
@@ -119,6 +122,9 @@ export function useWorkspacePermissions(workspace = null) {
         // Task 7
         canViewPendingValidations,
         canViewEvaluationScore,
+
+        // Task 8
+        canManageNotificationPreferences,
 
         hasPermission,
         canPerformMemberAction,
