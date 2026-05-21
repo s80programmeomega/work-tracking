@@ -17,6 +17,10 @@ use Spatie\Permission\Models\Role;
 
 class TacheResultatService
 {
+    public function __construct(
+        protected EvaluationScoreService $scoreService,
+    ) {}
+
     /**
      * Called when an intervenant submits a result.
      * Sets statut to en_verification_n0, notifies the task responsable, dispatches the 48h job.
@@ -263,6 +267,95 @@ class TacheResultatService
                 $manager->notify(new EscaladesAbusivesNotification($resultat, $auteur, $newCount));
             }
         }
+
+        // Scoring is NOT handled here — rejeterN1() owns the scoring decision
+        // and may call this method to update bypass tracking + flag. Keeping
+        // the score side-effect on the wrapper keeps the dispatch single-source.
+    }
+
+    /**
+     * Task 7 wrapper: N1 validates a result.
+     *
+     * Delegates the model-level validation logic to TacheResultat::validateByN1
+     * (which handles statut flags, notifications to author/validator/N2), then
+     * decides the scoring impact based on the pre-validation state of the result:
+     *
+     *   - If the result was returned by N0 (action_n0 = 'renvoye') OR came via
+     *     bypass → 'validated_despite_return' (PENALTY on the responsable).
+     *   - Otherwise (normal submission, no N0 return, no bypass) → 'no_impact'.
+     *
+     * The decision lookup runs BEFORE validateByN1() because validateByN1 doesn't
+     * change action_n0/bypass_active, but reading the snapshot up front makes the
+     * scoring intent obvious to anyone tracing the flow.
+     */
+    public function validerN1(TacheResultat $resultat, User $n1Actor, ?string $commentaire = null): void
+    {
+        $decision = $this->resolveN1Decision($resultat, validate: true);
+
+        $resultat->validateByN1($n1Actor, $commentaire);
+
+        $this->scoreService->calculerImpactN1($resultat, $decision, $n1Actor);
+
+        Log::info('N1 a validé le résultat', [
+            'user_id' => $n1Actor->id,
+            'tache_resultat_id' => $resultat->id,
+            'decision' => $decision,
+        ]);
+    }
+
+    /**
+     * Task 7 wrapper: N1 rejects a result (confirms the N0 return).
+     *
+     * Delegates to TacheResultat::reject() (handles statut flags + notifications),
+     * then triggers a BONUS for the responsable when the rejection confirms a
+     * previous N0 return or invalidates a bypass attempt.
+     */
+    public function rejeterN1(TacheResultat $resultat, User $n1Actor, string $commentaire): void
+    {
+        $decision = $this->resolveN1Decision($resultat, validate: false);
+        $hadBypass = (bool) $resultat->bypass_active;
+
+        $resultat->reject($n1Actor, $commentaire, 'n1');
+
+        // If the rejected result had bypass_active, update the assignee's
+        // bypass_count and (when ≥ 3) flag escalades_abusives. The model's
+        // reject() doesn't know about bypass; this service is the seam.
+        if ($hadBypass) {
+            $this->invaliderBypassN1($resultat, $n1Actor);
+        }
+
+        $this->scoreService->calculerImpactN1($resultat, $decision, $n1Actor);
+
+        Log::info('N1 a rejeté le résultat', [
+            'user_id' => $n1Actor->id,
+            'tache_resultat_id' => $resultat->id,
+            'decision' => $decision,
+            'had_bypass' => $hadBypass,
+        ]);
+    }
+
+    /**
+     * Decide which scoring path applies to this N1 action.
+     *
+     * Returns one of:
+     *   - 'validated_despite_return'  (penalty)  — N1 validates a returned/bypassed result
+     *   - 'confirmed_return'          (bonus)    — N1 rejects a returned/bypassed result
+     *   - 'no_impact'                            — normal flow, no N0 return, no bypass
+     *
+     * Why a separate method: the same rule is consulted by validerN1 AND
+     * rejeterN1, so we centralise it. Also makes tests easier to write — you
+     * can assert the decision string directly without going through the
+     * full controller flow.
+     */
+    private function resolveN1Decision(TacheResultat $resultat, bool $validate): string
+    {
+        $cameViaN0Return = $resultat->action_n0 === 'renvoye' || (bool) $resultat->bypass_active;
+
+        if (! $cameViaN0Return) {
+            return 'no_impact';
+        }
+
+        return $validate ? 'validated_despite_return' : 'confirmed_return';
     }
 
     private function writeAuditLog(TacheResultat $resultat, User $actor, string $action, array $context = []): void

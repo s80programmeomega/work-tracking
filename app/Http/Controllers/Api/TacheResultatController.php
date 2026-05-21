@@ -565,12 +565,10 @@ class TacheResultatController extends Controller
         try {
             DB::beginTransaction();
 
-            $resultat->validateByN1(auth()->user(), $validated['commentaire'] ?? null);
-
-            Log::info('Résultat validé N1', [
-                'resultat_id' => $resultat->id,
-                'validateur_id' => auth()->id(),
-            ]);
+            // Task 7: route N1 validation through the service so scoring + audit
+            // log mirroring happens in one place. The service delegates the model
+            // validation logic and then applies the score impact if applicable.
+            $this->resultatService->validerN1($resultat, auth()->user(), $validated['commentaire'] ?? null);
 
             DB::commit();
 
@@ -673,8 +671,14 @@ class TacheResultatController extends Controller
         try {
             DB::beginTransaction();
 
-            // Rejeter le résultat
-            $resultat->reject(auth()->user(), $validated['commentaire'], $validated['level']);
+            if ($validated['level'] === 'n1') {
+                // Task 7: route N1 rejection through the service for scoring,
+                // audit log, and (when bypass_active) bypass_count tracking.
+                $this->resultatService->rejeterN1($resultat, auth()->user(), $validated['commentaire']);
+            } else {
+                // N2 rejection — model handles it directly (no Task 7 scoring at N2)
+                $resultat->reject(auth()->user(), $validated['commentaire'], $validated['level']);
+            }
 
             // Remettre le statut individuel à "a_faire"
             $tache->updateStatutForUser(
@@ -690,10 +694,15 @@ class TacheResultatController extends Controller
                 'nouveau_statut' => 'a_faire',
             ]);
 
-            // Notifier l'utilisateur
-            $resultat->user->notify(
-                new ResultatRejeteNotification($tache, $resultat, $validated['commentaire'])
-            );
+            // Notifier l'utilisateur (le service ne dédouble pas la notification —
+            // le modèle reject() la fait déjà via ResultatRejeteNotification)
+            // Note: pour N1 via le service, validerN1/rejeterN1 délèguent au modèle
+            // qui notifie déjà. Cette notification reste pour N2 (path non-service).
+            if ($validated['level'] === 'n2') {
+                $resultat->user->notify(
+                    new ResultatRejeteNotification($tache, $resultat, $validated['commentaire'])
+                );
+            }
 
             DB::commit();
 

@@ -57,6 +57,10 @@ export function useWorkspacePermissions(workspace = null) {
     const canViewAllProjects = computed(() => isSuperAdmin.value || isDirecteur.value || isManager.value)
     const canTransferOwnership = computed(() => isSuperAdmin.value || isDirecteur.value)
 
+    // Task 7: Evaluations / Scoring
+    const canViewPendingValidations = computed(() => isSuperAdmin.value || (perms.value.can_view_pending_validations ?? false))
+    const canViewEvaluationScore    = computed(() => isSuperAdmin.value || (perms.value.can_view_evaluation_score ?? false))
+
     /**
      * Whether the current user can perform an action on a specific member.
      * @param {Object} targetMember
@@ -111,6 +115,10 @@ export function useWorkspacePermissions(workspace = null) {
         canCreateProjects,
         canViewAllProjects,
         canTransferOwnership,
+
+        // Task 7
+        canViewPendingValidations,
+        canViewEvaluationScore,
 
         hasPermission,
         canPerformMemberAction,

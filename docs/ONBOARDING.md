@@ -86,11 +86,72 @@ This is a **SPA (Single Page Application)** — Laravel serves as a pure JSON AP
 - `AccessManagementService.php` — temporary access grants
 - `MemberRemovalService.php` — handles cascading removal of members
 
-**Permissions:** `spatie/laravel-permission` package. Roles are defined in `app/Enums/Role.php`:
+**Permissions:** `spatie/laravel-permission` package, DB-driven, with a **two-layer role model**.
+
 ```
-super_admin → admin → manager → member → viewer → cadre → stagiaire
+┌─────────────────────────────────────────────────────────────────┐
+│  LAYER 1 — Global roles (Spatie model_has_roles table)          │
+│  Assigned to the User account itself; apply everywhere          │
+│  Roles: super_admin, directeur, utilisateur                     │
+└─────────────────────────────────────────────────────────────────┘
+                              ⬇  combined with
+┌─────────────────────────────────────────────────────────────────┐
+│  LAYER 2 — Contextual roles (stored in pivot tables)            │
+│  Scoped to a specific workspace/project/activity/task           │
+│  Roles: owner, manager, cadre, collaborateur, stagiaire,        │
+│         observateur, task_responsable (virtual)                 │
+└─────────────────────────────────────────────────────────────────┘
 ```
-Each role has a `permissions()` method listing what it can do. Policies in `app/Policies/` add object-level checks (e.g., "can this user edit *this specific* projet?").
+
+**Where role assignments live:**
+
+| Role kind             | Storage                                                  |
+|---|---|
+| `super_admin`         | `model_has_roles` row → bypasses everything via `Gate::before()` |
+| `directeur`           | `model_has_roles` row, plus `workspaces.owner_id` for workspace ownership |
+| `utilisateur`         | `model_has_roles` row (default for any registered user) |
+| Contextual roles      | `workspace_members.role_id`, `projet_user.role_id`, `activite_user.role_id`, `tache_user.role_id` (all FK to Spatie roles) |
+| `task_responsable`    | **Virtual** — derived from `tache_user.is_responsable = true`, not stored as a row |
+
+**Authorization flow at runtime:**
+
+```
+Controller calls $this->authorize('action', $model)           ← Policy pattern
+  OR
+Controller calls $gate->userCan($user, Permission::X, $resource)  ← Direct gate pattern
+        ↓
+ContextualPermissionGate::userCan()
+  ├── short-circuits if super_admin (Gate::before bypass)
+  ├── walks the resource hierarchy upward:
+  │     Tache → Activite → Projet → Workspace (collects role_ids from each pivot)
+  ├── adds 'task_responsable' if tache_user.is_responsable = true
+  ├── adds 'owner' if workspaces.owner_id matches
+  ├── unions all permissions held by those roles (from Spatie's role_has_permissions)
+  └── applies pivot-flag overrides (Permission::pivotOverrideMap)
+        ↓
+  returns true if requested permission is in the unioned set
+```
+
+**Key files:**
+
+- [`app/Permissions/Permission.php`](app/Permissions/Permission.php) — single source of truth: every permission string constant + the default `forRole()` mapping (overridable at runtime via Spatie tables, future admin UI = Task 14)
+- [`app/Permissions/ContextualPermissionGate.php`](app/Permissions/ContextualPermissionGate.php) — the hierarchy walker
+- [`app/Policies/`](app/Policies/) — per-model CRUD policies (`ProjetPolicy`, `ActivitePolicy`, `TachePolicy`, `SousTachePolicy`, `DocumentPolicy`, `WorkspacePolicy`)
+- [`resources/js/permissions/Permission.js`](resources/js/permissions/Permission.js) — frontend mirror of the constants
+- `useWorkspacePermissions.js`, `useProjetPermissions.js`, `useActivitePermissions.js`, `useTachePermissions.js` — composables reading the pre-computed `user_permissions` payload from API resources
+- [`docs/PERMISSIONS_MATRIX.md`](docs/PERMISSIONS_MATRIX.md) — live reference table per role × permission
+
+**When to use which pattern:**
+
+- **Per-model CRUD** (view/edit/delete on a Projet/Activite/Tache) → Policy via `$this->authorize('action', $model)`
+- **Cross-cutting workspace-scoped action** (activate bypass, view pending validations dashboard, calculate score) → direct gate via `$gate->userCan($user, Permission::X, $workspace_or_resource)`
+
+**To add a new permission** (Guide 4's 5 steps):
+1. Add the constant to `Permission::all()` and `Permission::forRole($roleName)` in `Permission.php`
+2. Permission string lands in DB on next `db:seed --class=RolePermissionSeeder`
+3. Mirror the constant in `resources/js/permissions/Permission.js`
+4. Expose it on the relevant composable (`useWorkspacePermissions.js` etc.)
+5. **Update `docs/PERMISSIONS_MATRIX.md`** (the row + the changelog table) in the same commit (Guide 15 is a hard gate)
 
 **Key Models and their relationships:**
 ```

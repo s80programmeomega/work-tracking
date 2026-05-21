@@ -408,6 +408,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // 📋 Liste des résultats en attente de validation (personnalisée par rôle)
         Route::get('/resultats/en-attente', [EvaluationController::class, 'pendingValidations']);
 
+        // Task 7: Pending validations dashboard + score query
+        Route::get('/validations/en-attente', [EvaluationController::class, 'pendingValidationsDashboard']);
+        Route::get('/score', [EvaluationController::class, 'userScore']);
+
         // 📊 Mes responsabilités (tous les résultats que je peux consulter)
         Route::get('/mes-responsabilites', [EvaluationController::class, 'myResponsibilities']);
 

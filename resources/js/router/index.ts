@@ -413,6 +413,19 @@ const router = createRouter({
       }
     },
     {
+      path: '/validations/en-attente',
+      name: 'validations.en-attente',
+      component: () => import('../pages/evaluations/PendingValidations.vue'),
+      meta: {
+        title: 'Validations en attente',
+        breadcrumb: [
+          { label: 'Accueil', to: '/' },
+          { label: 'Évaluations', to: '/evaluations/dashboard' },
+          { label: 'Validations en attente' }
+        ]
+      }
+    },
+    {
       path: '/evaluations/rapport-hebdomadaire',
       name: 'evaluations.rapport-hebdomadaire',
       component: () => import('../pages/RapportHebdomadaire.vue'),

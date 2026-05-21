@@ -592,6 +592,7 @@ test: add feature tests for notification deduplication and preferences
 
   - Subtasks counted at coefficient 0.5
 - Page `/evaluations/personnel/{id}/historique`: 4 sections (directed tasks, directed subtasks, assignee tasks, assignee subtasks), combinable filters (period, role, status, project), 20 items/page
+- **Task drill-down modal:** each task row in the sheet has a "details" action that opens a modal showing (a) the parent task's score impact + reason (drawn from `evaluation_scores.meta`), (b) the task's sous-tâches with progression, statut, responsable and individual score contributions at coefficient 0.5. Captured 2026-05-19 per Jonas's UX request — `evaluation_scores.meta` is the data source; no schema change needed.
 - "Return quality" indicator: donut chart (justified vs unjustified), alert if unjustified rate > 40%
 - "Escalations" indicator: red badge if `escalades_abusives` flag active, detail per bypass
 - Post-N2 immutability (R6): block all modifications to the task in the sheet → HTTP 422
@@ -933,10 +934,9 @@ test: add feature tests for platform dashboard permissions and stats
 
 > **Update this section at the end of every session.**
 
-- Last completed task: **Task 6** — Anti-Sabotage Bypass (`feature/v2-task-6-bypass`) — merged 2026-05-19 (commit `f6e98d2`)
-- Next task: **Task 7** — N1 Scores + Pending Validations Dashboard
-- Branch to create: `feature/v2-task-7-scores-dashboard` (from `jonas`)
-- Also recovered: **Task 4** (Subtask UI) — was orphan, merged 2026-05-18
+- Last completed task: **Task 7** — N1 Scores + Pending Validations Dashboard (`feature/v2-task-7-scores-dashboard`) — implementation complete 2026-05-19, awaiting Jonas manual testing per `docs/testing/TASK_7_TESTING.md`, then merge
+- Next task: **Task 8** — Real-Time Notifications (Reverb + Web Push)
+- Branch to create: `feature/v2-task-8-notifications` (from `jonas`, after Task 7 merge)
 
 ### Dusk note (applies to all remaining tasks)
 Each task must include at least one Dusk browser test covering its main user flow. Place tests under `tests/Browser/<FeatureArea>/`. Follow Guide 16 in `WORKING_GUIDELINES.md`.
