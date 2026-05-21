@@ -405,3 +405,90 @@ Log::info('Bypass activated by user', [...]);                            // ❌ 
 - Structured context keys stay in English (`user_id`, `tache_id`, `reason`, `action`) — they're identifiers, not narrative text. The same goes for enum-like values (`'comment_too_short'`, `'n0_inaction'`, `'subtasks_exist'`).
 - Exception messages thrown with `__('...')` keys (e.g., `__('circuit_validation.errors.motif_too_short')`) handle localisation via the translation layer — don't double-translate inside the throw.
 - When you touch an English log message in code you're editing for other reasons, translate it in the same commit. Don't make a separate "translate logs" PR — that's churn.
+
+---
+
+## Guide 18 — Dusk Test Is Mandatory Per Task
+
+Every task that touches the UI in any way **must** ship with at least one Laravel Dusk browser test before it is considered complete. This is a hard gate, not a nice-to-have.
+
+**Why it's enforced as a separate guide** (in addition to Guide 16 which describes Dusk usage):
+- A task isn't shipped if its user-facing flow can't be exercised through the browser.
+- Tasks 4, 5 (early in v2) **did** ship without Dusk coverage. This created accumulated debt that had to be paid back later. That regression is the trigger for this guide.
+
+**Mandatory checks at task end (extend the Guide 7 end-of-task checklist):**
+1. New `tests/Browser/<FeatureArea>/<FlowName>Test.php` file exists.
+2. It uses `extends Tests\Browser\WorkTrackingTestCase` and `use DatabaseTruncation` (not `DatabaseMigrations`).
+3. At least one method exercises the **happy path** of the new flow end-to-end (login → action → assertion on rendered UI).
+4. UI elements the test targets have `dusk="…"` attributes added to the Vue component (this is the developer's responsibility, not the tester's).
+5. The test runs green via `php artisan dusk tests/Browser/<FeatureArea>/<FlowName>Test.php` against the dedicated `work-tracking-dusk` database.
+
+**What counts as a "UI-touching" task:**
+- Any new Vue page or component.
+- Any new sidebar entry, modal, or interactive element.
+- Any API endpoint whose response is consumed by an existing UI component.
+- New permissions that gate UI visibility.
+
+**What does NOT need a Dusk test:**
+- Pure backend infrastructure (queues, jobs, broadcasting plumbing — no UI surface).
+- Migrations / seeders / factories that only affect data shape.
+- Documentation-only changes.
+
+**If a task genuinely has no user-facing flow** (e.g., a pure refactor): document that explicitly in the PR description and in `docs/PROGRESSION.md`'s row for that task. Do not silently skip.
+
+**Why this is a stronger guarantee than "we usually write Dusk tests":** I (the AI agent) have a pattern of getting absorbed in the implementation and forgetting Dusk at task end. Guide 18 + the auto-memory entry mean the check happens automatically at every end-of-task wrap-up, regardless of how busy the work was.
+
+---
+
+## Guide 19 — Explanatory Code Comments in French
+
+When code comments are written, they **must be in French** — same language policy as log messages (Guide 17). Applies to all produced code: PHP, JS/Vue, Blade templates, migrations, tests.
+
+**What counts as a comment under this guide:**
+- Inline `//` comments
+- Block `/* … */` comments
+- PHPDoc / JSDoc blocks (`/** … */`) — the human-readable description; type annotations stay English
+- Single-line explanations above a non-obvious block
+
+**Examples — do this:**
+```php
+// On mappe la décision N1 vers un couple (critere, valeur) via match().
+// match() est le commutateur strict de PHP 8 qui retourne une valeur.
+[$critere, $valeur] = match ($decision) {
+    'validated_despite_return' => [self::CRITERE_VALIDATED_DESPITE_RETURN, self::PENALTY],
+    'confirmed_return' => [self::CRITERE_CONFIRMED_RETURN, self::BONUS],
+    default => throw new \InvalidArgumentException("Décision N1 inconnue: {$decision}"),
+};
+```
+
+```php
+/**
+ * Service de scoring pour les décisions de validation N1 sur les TacheResultats.
+ *
+ * Pour chaque décision N1, ce service :
+ *   1. Résout le « responsable de tâche » (utilisateur avec is_responsable = true
+ *      sur le pivot tache_user) — c'est lui qui est scoré, pas l'assignee.
+ *   2. Décide si la décision mérite une pénalité, un bonus ou pas d'impact.
+ *
+ * @param  string  $eventType  identifiant machine, reste en anglais
+ */
+```
+
+**Don't do this:**
+```php
+// Map the decision to a (critere, valeur) pair via match().   ❌ anglais
+// Get the workspace responsable                                ❌ anglais
+```
+
+**What stays in English (consistency with Guide 17):**
+- Class names, method names, variable names, route names, permission strings, event types, audit log action names, constant identifiers.
+- Type annotations inside PHPDoc (`@param string $x`, `@return User|null`).
+- TODO/FIXME markers stay English so grep tooling and shared conventions still work: `// TODO: extraire ce calcul dans un helper`.
+
+**Why:** the codebase ends up reviewed by French-speaking team members. Mixing English explanatory prose into otherwise French operational text breaks the reading flow and creates a translation tax on every review. By keeping the narrative in French and the machine-readable identifiers in English, we get the best of both: code that grep'able internationally + comments that read naturally to the team.
+
+**Default still applies:** Guide 19 doesn't override CLAUDE.md's "default to writing no comments" rule. **Write comments only when the WHY is non-obvious.** When you do write one, write it in French.
+
+**How to apply with existing English comments:**
+- Touch them only when you're editing the surrounding code for other reasons (Guide 14 — no silent rewrites).
+- A comment-only "translate all comments" PR is acceptable scope if explicitly requested, but never a side-effect of a feature PR.

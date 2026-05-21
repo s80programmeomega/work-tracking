@@ -1,11 +1,11 @@
 <template>
-  <div class="space-y-4">
+  <div class="space-y-4" dusk="soustache-list">
     <!-- Header -->
     <div class="flex items-center justify-between">
       <h3 class="text-base font-semibold text-gray-900 dark:text-white flex items-center gap-2">
         <i class="fas fa-list-check text-brand-600"></i>
         Sous-tâches
-        <span class="px-2 py-0.5 rounded-full text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium">
+        <span dusk="soustache-count" class="px-2 py-0.5 rounded-full text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium">
           {{ sousTaches.length }}
         </span>
       </h3>
