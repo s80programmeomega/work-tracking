@@ -271,7 +271,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, watch, h } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import {
     GridIcon,
@@ -347,25 +347,37 @@ const filteredWorkspaces = computed(() => {
         }))
 })
 
-// ✅ Icônes supplémentaires pour le filtre
+// Icônes supplémentaires pour le filtre — définies en fonctions de rendu
+// (h()) plutôt qu'avec template:'<svg…>' car le build de Vue utilisé par
+// Vite est runtime-only et ne sait pas compiler un template à la volée.
+const svgAttrs = {
+    xmlns: 'http://www.w3.org/2000/svg',
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    'stroke-width': 2,
+    'stroke-linecap': 'round',
+    'stroke-linejoin': 'round',
+};
+
 const FilterIcon = {
-    template: `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="className">
-      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
-    </svg>
-  `,
-    props: ['className']
+    props: ['className'],
+    render() {
+        return h('svg', { ...svgAttrs, class: this.className }, [
+            h('polygon', { points: '22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3' }),
+        ]);
+    },
 };
 
 const GlobeIcon = {
-    template: `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="className">
-      <circle cx="12" cy="12" r="10"/>
-      <line x1="2" y1="12" x2="22" y2="12"/>
-      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-    </svg>
-  `,
-    props: ['className']
+    props: ['className'],
+    render() {
+        return h('svg', { ...svgAttrs, class: this.className }, [
+            h('circle', { cx: 12, cy: 12, r: 10 }),
+            h('line', { x1: 2, y1: 12, x2: 22, y2: 12 }),
+            h('path', { d: 'M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z' }),
+        ]);
+    },
 };
 
 const currentWorkspaceInitials = computed(() => {
