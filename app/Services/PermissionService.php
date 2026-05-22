@@ -10,6 +10,8 @@ use App\Models\SousTache;
 use App\Models\Tache;
 use App\Models\User;
 use App\Models\Workspace;
+use App\Permissions\ContextualPermissionGate;
+use App\Permissions\Permission;
 use Spatie\Permission\Models\Role;
 
 /**
@@ -147,5 +149,100 @@ class PermissionService
     {
         return $sousTache->responsable_id === $user->id
             || $this->isTaskAssignee($user, $sousTache->tache);
+    }
+
+    // ── Evaluations / Agent sheet (Task 9) ──────────────────────────────────
+    //
+    // Le permission seul (EVALUATIONS_VIEW_FICHE) dit "ce rôle a le droit de
+    // consulter UNE fiche"; il ne dit pas "laquelle". Le scope est appliqué
+    // ici, en croisant le rôle de l'acteur et son lien avec la cible:
+    //   - lui-même            → toujours autorisé (toute fiche perso)
+    //   - super_admin/owner   → workspace entier
+    //   - manager             → fiches des membres de son scope d'activité
+    //   - cadre               → fiches de ses assignés directs
+    //   - autres rôles        → fiche perso uniquement (déjà couvert par le
+    //                            premier cas)
+
+    /**
+     * Whether $actor can view $target's full evaluation sheet in $workspace.
+     */
+    public function canViewFicheEvaluation(User $actor, User $target, Workspace $workspace, ContextualPermissionGate $gate): bool
+    {
+        // Sa propre fiche est toujours visible (sous réserve du droit de
+        // base, qui est accordé à toutes les rôles authentifiés).
+        if ($actor->id === $target->id) {
+            return $gate->userCan($actor, Permission::EVALUATIONS_VIEW_FICHE, $workspace);
+        }
+
+        // Acteur sans le droit de base → refus immédiat.
+        if (! $gate->userCan($actor, Permission::EVALUATIONS_VIEW_FICHE, $workspace)) {
+            return false;
+        }
+
+        // Super admin global → toute fiche.
+        if ($actor->isSuperAdmin()) {
+            return true;
+        }
+
+        $actorRole = $this->getWorkspaceRoleName($actor, $workspace);
+
+        // Owner ou directeur → workspace entier.
+        if (in_array($actorRole, ['owner', 'directeur'], true)) {
+            return $this->isWorkspaceMember($target, $workspace);
+        }
+
+        // Manager → fiches des membres de ses activités.
+        // Cadre  → fiches des assignés à ses tâches.
+        // On garde la règle large (présence dans une activité/tâche commune)
+        // pour rester compatible avec la définition de "scope" du plan.
+        if (in_array($actorRole, ['manager', 'cadre'], true)) {
+            return $this->sharesActiveScopeWith($actor, $target, $workspace);
+        }
+
+        // Autres rôles: refus (le cas "soi-même" a déjà été traité).
+        return false;
+    }
+
+    /** Whether $actor can export $target's evaluation sheet (same scope as view). */
+    public function canExportFicheEvaluation(User $actor, User $target, Workspace $workspace, ContextualPermissionGate $gate): bool
+    {
+        // L'export exige le droit dédié EN PLUS du droit de consultation.
+        // Cela exclut automatiquement observateur/stagiaire qui n'ont que
+        // VIEW_FICHE.
+        if (! $gate->userCan($actor, Permission::EVALUATIONS_EXPORT_FICHE, $workspace)) {
+            return false;
+        }
+
+        return $this->canViewFicheEvaluation($actor, $target, $workspace, $gate);
+    }
+
+    /**
+     * Quick scope check: $actor and $target share at least one activité ou
+     * tâche where $actor a un rôle d'encadrement (manager / cadre) dans
+     * $workspace.
+     */
+    private function sharesActiveScopeWith(User $actor, User $target, Workspace $workspace): bool
+    {
+        // Une activité commune où l'acteur est responsable couvre les
+        // managers et propriétaires d'activité.
+        $sharesActivity = Activite::query()
+            ->whereHas('projet', fn ($q) => $q->where('workspace_id', $workspace->id))
+            ->where(function ($q) use ($actor) {
+                $q->where('responsable_id', $actor->id)
+                    ->orWhereHas('members', fn ($u) => $u->where('users.id', $actor->id));
+            })
+            ->whereHas('taches.assignees', fn ($u) => $u->where('users.id', $target->id))
+            ->exists();
+
+        if ($sharesActivity) {
+            return true;
+        }
+
+        // Une tâche commune où l'acteur est is_responsable couvre les cadres
+        // qui supervisent une équipe ad hoc.
+        return Tache::query()
+            ->whereHas('assignees', fn ($q) => $q->where('users.id', $actor->id)->where('tache_user.is_responsable', true))
+            ->whereHas('assignees', fn ($q) => $q->where('users.id', $target->id))
+            ->exists();
     }
 }

@@ -69,6 +69,10 @@ export const Permission = Object.freeze({
     EVALUATIONS_VIEW_PENDING:   'evaluations.view_pending',
     EVALUATIONS_VIEW_SCORE:     'evaluations.view_score',
 
+    // Evaluations / Agent sheet (Task 9)
+    EVALUATIONS_VIEW_FICHE:     'evaluations.view_fiche',
+    EVALUATIONS_EXPORT_FICHE:   'evaluations.export_fiche',
+
     // Notifications (Task 8)
     NOTIFICATIONS_MANAGE_PREFERENCES: 'notifications.manage_preferences',
 
