@@ -934,11 +934,9 @@ test: add feature tests for platform dashboard permissions and stats
 
 > **Update this section at the end of every session.**
 
-- Last completed task: **Task 7** — N1 Scores + Pending Validations Dashboard (`feature/v2-task-7-scores-dashboard`) — merged 2026-05-21 (commit `c891a6e`)
-- Current task: **Task 8** — Real-Time Notifications + Daily Digest — implementation complete on `feature/v2-task-8-notifications`, awaiting Jonas manual testing per `docs/testing/TASK_8_TESTING.md`
-- **Deferred from Task 8 to dedicated follow-up PR**:
-  - `feature/v2-task-8b-web-push` — Web Push notifications. Needs `minishlink/web-push` Composer package, VAPID key generation, service worker registration. The `push_subscriptions` table already exists from earlier work.
-- Next task after Task 8 merge: **Task 9** — Agent Sheet + Full Scoring
+- Last completed task: **Task 8** — Real-Time Notifications + Daily Digest (`feature/v2-task-8-notifications`) — merged 2026-05-21
+- Current task: **Task 8b** — Web Push Notifications — implementation complete on `feature/v2-task-8b-web-push`, awaiting Jonas manual testing per `docs/testing/TASK_8B_TESTING.md`. Once merged, the Task 8 notification stack is feature-complete.
+- Next task after Task 8b merge: **Task 9** — Agent Sheet + Full Scoring
 
 ### Dusk note (applies to all remaining tasks)
 Each task must include at least one Dusk browser test covering its main user flow. Place tests under `tests/Browser/<FeatureArea>/`. Follow Guide 16 in `WORKING_GUIDELINES.md`.

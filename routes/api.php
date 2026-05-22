@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\EvaluationController;
 use App\Http\Controllers\Api\ProjetController;
 use App\Http\Controllers\Api\ProjetInvitationController;
+use App\Http\Controllers\Api\PushSubscriptionController;
 use App\Http\Controllers\Api\SousTacheController;
 use App\Http\Controllers\Api\TacheController;
 use App\Http\Controllers\Api\TacheResultatController;
@@ -723,6 +724,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('notification-preferences')->group(function () {
         Route::get('/', [NotificationPreferenceController::class, 'show']);
         Route::put('/', [NotificationPreferenceController::class, 'update']);
+    });
+
+    // Task 8b — Web Push subscription management
+    Route::prefix('webpush')->group(function () {
+        Route::get('/vapid-key', [PushSubscriptionController::class, 'vapidKey']);
+        Route::get('/subscriptions', [PushSubscriptionController::class, 'index']);
+        Route::post('/subscribe', [PushSubscriptionController::class, 'subscribe']);
+        Route::delete('/unsubscribe', [PushSubscriptionController::class, 'unsubscribe']);
     });
 
     // Team Management Routes

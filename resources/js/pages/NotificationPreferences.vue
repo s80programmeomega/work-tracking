@@ -61,6 +61,52 @@
               <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
             </label>
           </div>
+
+          <!-- Task 8b — Inscription de cet appareil aux notifications Web Push -->
+          <!-- Apparaît seulement quand le master switch push_enabled est activé -->
+          <div
+            v-if="preferences.push_enabled"
+            class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700"
+          >
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex-1">
+                <label class="font-medium text-gray-900 dark:text-white">Cet appareil</label>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  <template v-if="webPushStatus === 'unsupported'">
+                    Ce navigateur ne supporte pas les notifications push.
+                  </template>
+                  <template v-else-if="webPushStatus === 'denied'">
+                    Permission refusée. Réactivez les notifications dans les paramètres du navigateur.
+                  </template>
+                  <template v-else-if="webPushStatus === 'subscribed'">
+                    Inscrit aux notifications push sur ce navigateur.
+                  </template>
+                  <template v-else>
+                    Cet appareil n'est pas encore inscrit. Cliquez pour autoriser les notifications.
+                  </template>
+                </p>
+                <p v-if="webPushError" class="text-xs text-red-600 dark:text-red-400 mt-1">
+                  {{ webPushError }}
+                </p>
+              </div>
+              <button
+                v-if="webPushStatus === 'not-subscribed'"
+                @click="onWebPushSubscribe"
+                :disabled="webPushLoading"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+              >
+                {{ webPushLoading ? 'En cours…' : 'Activer' }}
+              </button>
+              <button
+                v-else-if="webPushStatus === 'subscribed'"
+                @click="onWebPushUnsubscribe"
+                :disabled="webPushLoading"
+                class="px-4 py-2 bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium hover:bg-gray-300 disabled:opacity-50"
+              >
+                {{ webPushLoading ? 'En cours…' : 'Désactiver' }}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -201,10 +247,30 @@ import { useRouter } from 'vue-router';
 import api from '@/api/axios';
 import AdminLayout from '@/components/layout/AdminLayout.vue';
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue';
+import { useWebPush } from '@/composables/useWebPush';
 
 const router = useRouter();
 const loading = ref(true);
 const saving = ref(false);
+
+// Task 8b — composable Web Push : gère l'inscription navigateur de cet appareil.
+// On expose ses propriétés sous des alias pour éviter les collisions de noms
+// avec les variables existantes du fichier (loading, error).
+const {
+    status: webPushStatus,
+    loading: webPushLoading,
+    error: webPushError,
+    subscribe: webPushSubscribe,
+    unsubscribe: webPushUnsubscribe,
+} = useWebPush();
+
+const onWebPushSubscribe = async () => {
+    await webPushSubscribe();
+};
+
+const onWebPushUnsubscribe = async () => {
+    await webPushUnsubscribe();
+};
 
 const preferences = ref({
   in_app_enabled: true,
