@@ -118,6 +118,75 @@
         </div>
       </div>
 
+      <!-- ── Indicateur qualité des renvois (donut justifié vs injustifié) ─ -->
+      <div v-if="sheet" class="bg-white dark:bg-gray-900 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-800">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Qualité des renvois</h2>
+          <span
+            v-if="sheet.indicators.unjustified_alert"
+            dusk="return-quality-alert"
+            class="text-xs px-2 py-1 rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 font-medium"
+          >
+            <i class="fas fa-exclamation-triangle mr-1"></i>
+            Au-dessus du seuil (40%)
+          </span>
+        </div>
+
+        <div class="flex items-center gap-8 flex-wrap">
+          <!-- Donut SVG inline — pas de dépendance externe.
+               Chaque secteur est un cercle stroked avec stroke-dasharray
+               calculé à partir de la circonférence (2πr=100) et du %. -->
+          <svg
+            dusk="return-quality-donut"
+            viewBox="0 0 36 36"
+            class="w-32 h-32"
+          >
+            <!-- Fond gris (100% du cercle) -->
+            <circle
+              cx="18" cy="18" r="15.915"
+              fill="none" stroke="currentColor"
+              class="text-gray-200 dark:text-gray-800"
+              stroke-width="3.5"
+            />
+            <!-- Secteur "justifiés" en vert -->
+            <circle
+              cx="18" cy="18" r="15.915"
+              fill="none" stroke="currentColor"
+              class="text-green-500"
+              stroke-width="3.5"
+              :stroke-dasharray="`${donutJustifiedPercent} ${100 - donutJustifiedPercent}`"
+              stroke-dashoffset="25"
+              transform="rotate(-90 18 18)"
+            />
+            <text
+              x="18" y="20"
+              text-anchor="middle"
+              class="fill-gray-900 dark:fill-white"
+              font-size="6"
+              font-weight="600"
+            >
+              {{ Math.round(donutJustifiedPercent) }}%
+            </text>
+          </svg>
+
+          <div class="flex-1 space-y-2 text-sm min-w-[180px]">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-green-500"></span>
+              <span class="text-gray-700 dark:text-gray-300">Renvois justifiés</span>
+              <strong class="ml-auto text-gray-900 dark:text-white">{{ Math.round(donutJustifiedPercent) }}%</strong>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-gray-300 dark:bg-gray-700"></span>
+              <span class="text-gray-700 dark:text-gray-300">Renvois injustifiés</span>
+              <strong class="ml-auto text-gray-900 dark:text-white">{{ Math.round(sheet.indicators.unjustified_return_rate * 100) }}%</strong>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400 pt-2 border-t border-gray-200 dark:border-gray-800">
+              Un taux d'injustifiés supérieur à 40% déclenche une alerte automatique au manager.
+            </p>
+          </div>
+        </div>
+      </div>
+
       <!-- ── 8 critères ───────────────────────────────────────────────── -->
       <div v-if="sheet" class="bg-white dark:bg-gray-900 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-800">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Détail des 8 critères</h2>
@@ -327,6 +396,14 @@ const initials = computed(() => {
 const isSubtaskSection = computed(() =>
   activeSection.value === 'directed_subtasks' || activeSection.value === 'assignee_subtasks',
 )
+
+// Pourcentage de renvois justifiés pour le donut.
+// Le backend renvoie unjustified_return_rate ∈ [0..1]; on calcule le
+// complémentaire pour afficher la part "justifiés".
+const donutJustifiedPercent = computed(() => {
+  const r = sheet.value?.indicators?.unjustified_return_rate ?? 0
+  return Math.max(0, Math.min(100, (1 - r) * 100))
+})
 
 // Libellés FR pour les 8 critères — alignés avec lang/fr/evaluation.php
 // (les clés exhaustives arrivent à l'étape 8 mais on prévoit ici).
