@@ -176,7 +176,7 @@
 - [x] `app/Console/Kernel.php` schedules `notifications:send-digest` every 15 min with `withoutOverlapping(20)` + `onOneServer` + `runInBackground`
 - [x] Translation files `lang/{fr,en}/notifications.php` (digest subject only — runtime notifications use `circuit_validation.*`)
 - [x] 8 feature tests in `SendDailyDigestCommandTest` covering: send to eligible, skip when empty/before-time/already-sent/quiet-hours/frequency-none, --dry-run, --user filter
-- [ ] Web Push notifications — **deferred to Task 8b** (`feature/v2-task-8b-web-push`). Needs `minishlink/web-push` composer package + VAPID keys + service worker registration. `push_subscriptions` table already exists.
+- [x] Web Push notifications — **Task 8b** completed 2026-05-22 (`feature/v2-task-8b-web-push`). `minishlink/web-push` v10.0.3 installed, VAPID keys generated via `php artisan webpush:generate-vapid`, `WebPushChannel` written, `PushSubscriptionController` with subscribe/unsubscribe/vapid-key/index endpoints, `useWebPush.js` composable + `/sw-webpush.js` service worker, UI panel in `NotificationPreferences.vue`, `channelsFor()` extended with webpush channel gated by active subscription + high-signal event + `push_enabled` master switch. 13 feature tests in `WebPushSubscriptionTest`. Manual test guide `docs/testing/TASK_8B_TESTING.md`.
 - [ ] PR / merge into `jonas`
 
 ### Task 9

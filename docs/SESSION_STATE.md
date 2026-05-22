@@ -16,27 +16,39 @@
 
 ## Current Session
 
-**Date:** 2026-05-21
-**Session goal:** Merge Task 7, build Task 8 (real-time notifications + daily digest), defer Web Push to follow-up
-**Status:** Task 7 merged into `jonas` (commit `c891a6e`) and pushed. Task 8 implementation complete on `feature/v2-task-8-notifications` — real-time broadcast + dedup + hierarchy + permission + **daily digest**. Web Push (8b) explicitly deferred. 109 tests passing. Awaiting Jonas manual testing per `docs/testing/TASK_8_TESTING.md` before merge.
+**Date:** 2026-05-22
+**Session goal:** Implement Task 8b (Web Push notifications)
+**Status:** Task 8b implementation complete on `feature/v2-task-8b-web-push`. 122 tests passing (109 from Task 8 + 13 new). Awaiting Jonas manual testing per `docs/testing/TASK_8B_TESTING.md` before merge into `jonas`.
 
 ---
 
 ## Current Task
 
-**Task:** 8 — Real-Time Notifications (Web Push deferred to Task 8b)
-**Branch:** `feature/v2-task-8-notifications`
-**Status:** Implementation complete for the in-scope subset (real-time broadcast, channel resolution, hierarchy propagation, deduplication, `canManageNotificationPreferences` permission, daily digest). Awaiting manual test per `docs/testing/TASK_8_TESTING.md`, then merge.
+**Task:** 8b — Web Push Notifications
+**Branch:** `feature/v2-task-8b-web-push`
+**Status:** Implementation complete. Awaiting manual test per `docs/testing/TASK_8B_TESTING.md`, then merge.
 
 **What to do next:**
-1. Jonas tests Task 8 manually using `docs/testing/TASK_8_TESTING.md` (7 test cases — live update, channelsFor, hierarchy, dedup, permission gate, daily digest, quiet hours)
-2. Merge `feature/v2-task-8-notifications` into `jonas` (`git merge --no-ff`)
+1. Jonas tests Task 8b manually using `docs/testing/TASK_8B_TESTING.md` (6 test cases — inscription, vraie push, désabonnement, expiration, push_enabled gate, multi-device)
+2. Merge `feature/v2-task-8b-web-push` into `jonas` (`git merge --no-ff`)
 3. Push `jonas` to `origin`
-4. Spin up `feature/v2-task-8b-web-push` from `jonas` when ready (push_subscriptions table already exists; needs `minishlink/web-push` + VAPID keys + service worker)
+4. Pick next task — likely **Task 9** (Agent Sheet + Full Scoring)
 
 ## Last Completed Task
 
-**Task 8** — Real-Time Notifications + Daily Digest (2026-05-21, implementation complete)
+**Task 8b** — Web Push Notifications (2026-05-22, implementation complete)
+- `composer require minishlink/web-push` v10.0.3 (free, MIT, pure PHP, no external service)
+- `php artisan webpush:generate-vapid` command — génère les clés VAPID à coller dans `.env`
+- `config/webpush.php` + .env.example block (VAPID_SUBJECT / VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY / TTL / urgency / VITE_VAPID_PUBLIC_KEY)
+- `App\Notifications\Channels\WebPushChannel` — sérialise le payload, signe avec VAPID, gère 410/404 (soft-disable de la souscription)
+- API `/webpush` : vapid-key (GET), subscribe (POST, upsert), unsubscribe (DELETE), subscriptions (GET, liste active du user)
+- `NotificationService::channelsFor()` étendu : ajoute `WebPushChannel::class` quand le user a une souscription active ET `push_enabled = true` ET event high-signal (renvoye_n0/transmis_auto/bypass/escalades_abusives)
+- Frontend : `public/sw-webpush.js` service worker (event 'push' → showNotification, 'notificationclick' → focus/openWindow) + `useWebPush.js` composable (permission flow, urlBase64ToUint8Array, subscribe/unsubscribe avec persistance backend)
+- UI : panneau « Cet appareil » dans `NotificationPreferences.vue` quand `push_enabled` est on — boutons Activer/Désactiver, statut humain
+- 13 feature tests in `WebPushSubscriptionTest` couvrant : vapid-key (200/503/401), subscribe (create/upsert/validation), unsubscribe (deactivate/no-op), index (filtre active + own), channelsFor() (with/without subscription, push_enabled false, low-signal events)
+- 122 tests passing total, all green
+
+**Task 8** — Real-Time Notifications + Daily Digest (2026-05-21, merged into jonas)
 
 Real-time + service helpers:
 - `NotificationService::channelsFor(notifiable, eventType)` — resolves `['database', 'broadcast']` ± `'mail'` based on event signal level

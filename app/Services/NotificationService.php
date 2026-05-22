@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\NotificationPreference;
 use App\Models\User;
 use App\Models\Workspace;
+use App\Notifications\Channels\WebPushChannel;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Collection;
@@ -51,7 +52,47 @@ class NotificationService
             $channels[] = 'mail';
         }
 
+        // Task 8b — ajout du canal Web Push si l'utilisateur a au moins une
+        // souscription active ET que son préférence push est activée pour ce
+        // type d'événement. Sans souscription active, inutile de passer par
+        // le canal (il serait inerte de toute façon).
+        if ($this->wantsWebPush($pref, $eventType) && $this->hasActiveWebPushSubscription($notifiable)) {
+            $channels[] = WebPushChannel::class;
+        }
+
         return $channels;
+    }
+
+    /**
+     * L'utilisateur a-t-il au moins une souscription Web Push active ?
+     * Pas de souscription active = pas de canal webpush ajouté.
+     */
+    private function hasActiveWebPushSubscription(User $user): bool
+    {
+        return $user->pushSubscriptions()->active()->exists();
+    }
+
+    /**
+     * Le push activé pour ce type d'événement dans les préférences ?
+     *
+     * Politique par défaut (mêmes événements que pour email — voir wantsEmail) :
+     * les événements à fort signal génèrent un push. Les événements à faible
+     * signal (approuve_n0, score_updated) restent silencieux côté push.
+     *
+     * Le master switch `push_enabled` du user override tout — si désactivé,
+     * aucun push n'est envoyé peu importe le type d'événement.
+     */
+    private function wantsWebPush(NotificationPreference $pref, string $eventType): bool
+    {
+        if (! ($pref->push_enabled ?? true)) {
+            return false;
+        }
+
+        return match ($eventType) {
+            'renvoye_n0', 'transmis_auto', 'bypass', 'escalades_abusives' => true,
+            'approuve_n0', 'score_updated' => false,
+            default => false,
+        };
     }
 
     /**
