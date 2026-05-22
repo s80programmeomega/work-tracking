@@ -5,6 +5,8 @@ return [
         'cannot_view_pending' => 'Vous n\'avez pas la permission de voir les validations en attente.',
         'cannot_view_score' => 'Vous n\'avez pas la permission de voir les scores d\'évaluation.',
         'cannot_view_others_score' => 'Vous n\'avez pas la permission de voir le score d\'un autre utilisateur.',
+        'cannot_view_fiche' => 'Vous n\'avez pas la permission de consulter cette fiche d\'évaluation.',
+        'no_workspace' => 'Aucun workspace courant n\'est sélectionné.',
     ],
 
     'criteria' => [

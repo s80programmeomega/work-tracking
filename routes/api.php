@@ -413,6 +413,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/validations/en-attente', [EvaluationController::class, 'pendingValidationsDashboard']);
         Route::get('/score', [EvaluationController::class, 'userScore']);
 
+        // Task 9: full agent evaluation sheet (8 criteria + indicators).
+        // Réponse JSON consommée par la page /evaluations/personnel/:id/historique.
+        Route::get('/personnel/{user}/score', [EvaluationController::class, 'agentSheet']);
+
         // 📊 Mes responsabilités (tous les résultats que je peux consulter)
         Route::get('/mes-responsabilites', [EvaluationController::class, 'myResponsibilities']);
 

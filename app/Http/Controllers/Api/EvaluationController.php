@@ -13,6 +13,7 @@ use App\Models\Workspace;
 use App\Permissions\ContextualPermissionGate;
 use App\Permissions\Permission;
 use App\Services\EvaluationScoreService;
+use App\Services\PermissionService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -162,6 +163,80 @@ class EvaluationController extends Controller
      *     trust the workspace gate; Task 9 will refine to "only my assignees")
      *   - everyone else: only their own score
      */
+    /**
+     * Task 9: full agent evaluation sheet for a target user over a period.
+     *
+     * Endpoint: GET /api/evaluations/personnel/{user}/score
+     *
+     * Query params (all optional):
+     *   - start: ISO date Y-m-d. Defaults to today-30 days.
+     *   - end:   ISO date Y-m-d. Defaults to today.
+     *
+     * Permission check happens in two layers:
+     *   1. Hard role gate: caller must have EVALUATIONS_VIEW_FICHE
+     *      in their current workspace (covers manager/cadre/owner/observateur…).
+     *   2. Per-target scope: PermissionService::canViewFicheEvaluation
+     *      enforces "own only / cadre→assignees / manager→activity /
+     *      owner→workspace" — the actual fiche of $target must be in
+     *      the caller's reach.
+     *
+     * Response shape mirrors EvaluationScoreService::calculerScore() and
+     * adds the target's identity for the UI header.
+     */
+    public function agentSheet(Request $request, User $user): JsonResponse
+    {
+        $validated = $request->validate([
+            'start' => 'sometimes|nullable|date_format:Y-m-d',
+            'end' => 'sometimes|nullable|date_format:Y-m-d|after_or_equal:start',
+        ]);
+
+        $actor = $request->user();
+        $workspace = $actor->currentWorkspace;
+
+        if (! $workspace) {
+            return response()->json([
+                'success' => false,
+                'message' => __('evaluation.errors.no_workspace'),
+            ], 403);
+        }
+
+        $permissionService = app(PermissionService::class);
+        $gate = app(ContextualPermissionGate::class);
+
+        if (! $permissionService->canViewFicheEvaluation($actor, $user, $workspace, $gate)) {
+            return response()->json([
+                'success' => false,
+                'message' => __('evaluation.errors.cannot_view_fiche'),
+            ], 403);
+        }
+
+        $start = $validated['start'] ?? now()->subDays(30)->toDateString();
+        $end = $validated['end'] ?? now()->toDateString();
+
+        $sheet = $this->scoreService->calculerScore($user, $start, $end);
+
+        // Indicators metadata for the UI header — actor permissions are
+        // baked in so the frontend doesn't need to re-derive them.
+        $canExport = $permissionService->canExportFicheEvaluation($actor, $user, $workspace, $gate);
+
+        return response()->json([
+            'success' => true,
+            'data' => array_merge($sheet, [
+                'user' => [
+                    'id' => $user->id,
+                    'nom' => $user->nom,
+                    'nom_complet' => $user->nom_complet ?? trim(($user->prenom ?? '').' '.($user->nom ?? '')),
+                    'email' => $user->email,
+                    'avatar' => $user->avatar ?? null,
+                ],
+                'meta' => [
+                    'can_export' => $canExport,
+                    'is_self' => $actor->id === $user->id,
+                ],
+            ]),
+        ]);
+    }
+
     public function userScore(Request $request): JsonResponse
     {
         $user = $request->user();
