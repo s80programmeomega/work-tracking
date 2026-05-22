@@ -78,4 +78,40 @@ class EvaluationAgentSheetEndpointTest extends TestCase
             ->assertStatus(403)
             ->assertJsonPath('success', false);
     }
+
+    /** @test */
+    public function observateur_cannot_view_another_users_sheet(): void
+    {
+        // Le plan exige explicitement que observateur (read-only) ne
+        // puisse pas consulter une fiche autre que la sienne.
+        $workspace = Workspace::factory()->create();
+        $actor = User::factory()->create(['current_workspace_id' => $workspace->id]);
+        $target = User::factory()->create(['current_workspace_id' => $workspace->id]);
+
+        $this->attachWithRole($workspace->members(), $actor->id, 'observateur');
+        $this->attachWithRole($workspace->members(), $target->id, 'collaborateur');
+
+        Sanctum::actingAs($actor);
+
+        $this->getJson("/api/evaluations/personnel/{$target->id}/score")
+            ->assertStatus(403)
+            ->assertJsonPath('success', false);
+    }
+
+    /** @test */
+    public function observateur_can_view_their_own_sheet_read_only(): void
+    {
+        $workspace = Workspace::factory()->create();
+        $actor = User::factory()->create(['current_workspace_id' => $workspace->id]);
+        $this->attachWithRole($workspace->members(), $actor->id, 'observateur');
+
+        Sanctum::actingAs($actor);
+
+        $this->getJson("/api/evaluations/personnel/{$actor->id}/score")
+            ->assertOk()
+            // L'observateur n'a pas EVALUATIONS_EXPORT_FICHE: meta.can_export
+            // doit être false même sur sa propre fiche.
+            ->assertJsonPath('data.meta.is_self', true)
+            ->assertJsonPath('data.meta.can_export', false);
+    }
 }
