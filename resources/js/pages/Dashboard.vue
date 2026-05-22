@@ -568,10 +568,10 @@ const resetFilters = () => {
   loadDashboardData()
 }
 const goToProject = (project) => {
-  router.push({ name: 'ProjectDetail', params: { id: project.id } })
+  router.push({ name: 'projets.show', params: { id: project.id } })
 }
 const goToTask = (taskId) => {
-  router.push({ name: 'TaskDetail', params: { id: taskId } })
+  router.push({ name: 'taches.show', params: { id: taskId } })
 }
 const taskBorderClass = (task) => {
   if (task.is_overdue) {
