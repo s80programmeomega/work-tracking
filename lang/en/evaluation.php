@@ -13,6 +13,52 @@ return [
     'criteria' => [
         'n1_validated_despite_return' => 'Unjustified return (penalty)',
         'n1_confirmed_return' => 'Confirmed return (bonus)',
+
+        // Task 9 — 8 weighted criteria of the evaluation sheet.
+        'completion_rate' => 'Completion rate',
+        'deadline_respect' => 'Deadline respect',
+        'result_quality' => 'Result quality',
+        'first_pass_validation' => 'First-pass validation',
+        'justified_returns' => 'Justified returns',
+        'inactions' => 'Inactions (timeouts)',
+        'work_volume' => 'Work volume',
+        'team_coordination' => 'Team coordination',
+    ],
+
+    // Task 9 — Agent evaluation sheet page.
+    'sheet' => [
+        'title' => 'Evaluation sheet',
+        'global_score' => 'Global score',
+        'period_label' => 'Period',
+        'sections' => [
+            'directed_tasks' => 'Directed tasks',
+            'directed_subtasks' => 'Directed subtasks',
+            'assignee_tasks' => 'Assigned tasks',
+            'assignee_subtasks' => 'Assigned subtasks',
+        ],
+        'filters' => [
+            'from' => 'From',
+            'to' => 'To',
+            'statut' => 'Status',
+            'apply' => 'Apply',
+            'reset' => 'Reset',
+            'all' => 'All',
+        ],
+        'indicators' => [
+            'return_quality' => 'Return quality',
+            'unjustified_threshold' => 'Above threshold (40%)',
+            'escalades_abusives' => 'Abusive escalations',
+            'export' => 'Export',
+            'justified' => 'Justified returns',
+            'unjustified' => 'Unjustified returns',
+            'threshold_note' => 'An unjustified-return rate above 40% triggers an automatic manager alert.',
+        ],
+        'criteria_panel_title' => '8-criteria breakdown',
+        'weight_label' => 'Weight',
+        'raw_label' => 'Value',
+        'weighted_label' => 'Weighted',
+        'subtask_coefficient_note' => 'Subtasks contribute to the score at coefficient 0.5.',
+        'empty' => 'No items in this section for the selected period.',
     ],
 
     'dashboard' => [

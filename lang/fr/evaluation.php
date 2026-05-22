@@ -13,6 +13,53 @@ return [
     'criteria' => [
         'n1_validated_despite_return' => 'Renvoi non justifié (pénalité)',
         'n1_confirmed_return' => 'Renvoi confirmé (bonus)',
+
+        // Task 9 — Les 8 critères pondérés de la fiche d'évaluation.
+        // Libellés courts (≤ 30 chars) optimisés pour l'affichage en grille.
+        'completion_rate' => 'Taux de complétion',
+        'deadline_respect' => 'Respect des échéances',
+        'result_quality' => 'Qualité des résultats',
+        'first_pass_validation' => 'Validation 1er passage',
+        'justified_returns' => 'Renvois justifiés',
+        'inactions' => 'Inactions (timeouts)',
+        'work_volume' => 'Volume de travail',
+        'team_coordination' => 'Coordination d\'équipe',
+    ],
+
+    // Task 9 — Page Fiche d'évaluation (FichesEvaluation / AgentSheet).
+    'sheet' => [
+        'title' => 'Fiche d\'évaluation',
+        'global_score' => 'Score global',
+        'period_label' => 'Période',
+        'sections' => [
+            'directed_tasks' => 'Tâches dirigées',
+            'directed_subtasks' => 'Sous-tâches dirigées',
+            'assignee_tasks' => 'Tâches assignées',
+            'assignee_subtasks' => 'Sous-tâches assignées',
+        ],
+        'filters' => [
+            'from' => 'Du',
+            'to' => 'Au',
+            'statut' => 'Statut',
+            'apply' => 'Appliquer',
+            'reset' => 'Réinitialiser',
+            'all' => 'Tous',
+        ],
+        'indicators' => [
+            'return_quality' => 'Qualité des renvois',
+            'unjustified_threshold' => 'Au-dessus du seuil (40%)',
+            'escalades_abusives' => 'Escalades abusives',
+            'export' => 'Exporter',
+            'justified' => 'Renvois justifiés',
+            'unjustified' => 'Renvois injustifiés',
+            'threshold_note' => 'Un taux d\'injustifiés supérieur à 40% déclenche une alerte automatique au manager.',
+        ],
+        'criteria_panel_title' => 'Détail des 8 critères',
+        'weight_label' => 'Poids',
+        'raw_label' => 'Valeur',
+        'weighted_label' => 'Pondéré',
+        'subtask_coefficient_note' => 'Les sous-tâches contribuent au score à coefficient 0.5.',
+        'empty' => 'Aucun élément dans cette section sur la période.',
     ],
 
     'dashboard' => [
