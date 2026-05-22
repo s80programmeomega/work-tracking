@@ -44,7 +44,13 @@ class BypassTest extends WorkTrackingTestCase
         $this->browse(function (Browser $browser) use ($intervenant, $tache) {
             $this->signInAs($browser, $intervenant);
 
+            // L'onglet « Résultats » n'est pas actif par défaut (l'onglet
+            // « Détails » l'est) — on doit cliquer dessus pour que
+            // TacheResultsTab soit affiché et que le bandeau bypass
+            // (statut a_refaire) soit rendu.
             $browser->visit("/taches/{$tache->id}")
+                ->waitFor('[dusk="tab-results"]', 15)
+                ->click('[dusk="tab-results"]')
                 ->waitFor('[dusk="bypass-motif-input"]', 15)
                 ->assertPresent('[dusk="bypass-submit-btn"]')
                 ->assertAttributeContains('[dusk="bypass-submit-btn"]', 'disabled', '');
@@ -63,8 +69,13 @@ class BypassTest extends WorkTrackingTestCase
         $this->browse(function (Browser $browser) use ($intervenant, $tache, $resultat, $token, $motif) {
             $this->signInAs($browser, $intervenant);
 
-            // Activate bypass via the API using fetch in the browser context
+            // Activate bypass via the API using fetch in the browser context.
+            // L'onglet « Résultats » doit être actif pour que le bandeau
+            // bypass soit rendu (statut a_refaire) — sinon le motif input
+            // n'existe pas dans le DOM.
             $browser->visit("/taches/{$tache->id}")
+                ->waitFor('[dusk="tab-results"]', 15)
+                ->click('[dusk="tab-results"]')
                 ->waitFor('[dusk="bypass-motif-input"]', 15)
                 ->script([
                     "fetch('/api/taches/{$tache->id}/resultats/{$resultat->id}/activer-bypass', {
@@ -82,6 +93,8 @@ class BypassTest extends WorkTrackingTestCase
             // Wait for the response then reload to see updated state
             $browser->pause(2000)
                 ->visit("/taches/{$tache->id}")
+                ->waitFor('[dusk="tab-results"]', 15)
+                ->click('[dusk="tab-results"]')
                 ->waitFor('[dusk="bypass-active-badge"]', 15)
                 ->assertPresent('[dusk="bypass-active-badge"]')
                 ->assertMissing('[dusk="bypass-submit-btn"]');

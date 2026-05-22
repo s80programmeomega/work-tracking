@@ -254,6 +254,9 @@ class TacheResource extends JsonResource
                     'difficultes_rencontrees' => $resultat->difficultes_rencontrees,
                     'solutions_envisagees' => $resultat->solutions_envisagees,
                     'observations' => $resultat->observations,
+                    // Statut courant du résultat — nécessaire au front pour
+                    // gater l'affichage du bandeau anti-sabotage (Task 6).
+                    'statut' => $resultat->statut,
                     'soumis_le' => $formatDate($resultat->soumis_le),
                     'valide_par_n1' => $resultat->valide_par_n1,
                     'valide_le_n1' => $formatDate($resultat->valide_le_n1),
@@ -265,6 +268,25 @@ class TacheResource extends JsonResource
                     'validation_status' => $resultat->validation_status ?? 'not_submitted',
                     'documents_count' => $resultat->documents()->count(),
                     'created_at' => $formatDate($resultat->created_at),
+
+                    // Validation N0 — utilisée par l'UI pour afficher le
+                    // commentaire de renvoi et permettre la saisie du motif
+                    // de bypass quand le résultat a été renvoyé.
+                    'validation_n0' => [
+                        'soumis_n0_le' => $formatDate($resultat->soumis_n0_le),
+                        'action' => $resultat->action_n0,
+                        'commentaire' => $resultat->commentaire_n0,
+                        'action_le' => $formatDate($resultat->action_n0_le),
+                    ],
+
+                    // Bypass anti-sabotage (Task 6) — état exposé pour gater
+                    // l'affichage du bandeau "Bypass activé" côté front.
+                    'bypass' => [
+                        'active' => (bool) $resultat->bypass_active,
+                        'motif' => $resultat->motif_bypass,
+                        'bypass_le' => $formatDate($resultat->bypass_le),
+                        'bypass_count' => (int) $resultat->bypass_count,
+                    ],
                 ] : null;
             }),
 

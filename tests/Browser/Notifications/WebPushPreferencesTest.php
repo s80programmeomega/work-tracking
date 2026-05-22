@@ -60,8 +60,8 @@ class WebPushPreferencesTest extends WorkTrackingTestCase
         $this->browse(function (Browser $browser) use ($user, $toggle) {
             $this->signInAs($browser, $user)
                 ->visit('/notification-preferences')
-                ->waitFor('@push-enabled-toggle', 10)
-                ->waitFor('@webpush-device-panel', 5)
+                ->waitFor('@push-enabled-toggle', 15)
+                ->waitFor('@webpush-device-panel', 20)
                 ->assertVisible('@webpush-device-panel');
 
             // Couper le master switch → le panneau disparaît
@@ -90,7 +90,12 @@ class WebPushPreferencesTest extends WorkTrackingTestCase
         $this->browse(function (Browser $browser) use ($user) {
             $this->signInAs($browser, $user)
                 ->visit('/notification-preferences')
-                ->waitFor('@webpush-device-panel', 10)
+                ->waitFor('@push-enabled-toggle', 15)
+                // Le panneau apparaît seulement après que loadPreferences()
+                // a synchronisé push_enabled=true depuis le backend.
+                // Sous charge (suite Dusk complète + serveur dev partagé),
+                // l'aller-retour peut dépasser 10s — on laisse 20s de marge.
+                ->waitFor('@webpush-device-panel', 20)
                 // En env Dusk, aucune permission n'est accordée et aucun SW
                 // n'est enregistré → useWebPush() reste en 'not-subscribed'
                 // et le bouton "Activer" est rendu.
@@ -141,7 +146,8 @@ class WebPushPreferencesTest extends WorkTrackingTestCase
         $this->browse(function (Browser $browser) use ($user) {
             $this->signInAs($browser, $user)
                 ->visit('/notification-preferences')
-                ->waitFor('@webpush-device-panel', 10)
+                ->waitFor('@push-enabled-toggle', 15)
+                ->waitFor('@webpush-device-panel', 20)
                 ->assertVisible('@webpush-subscribe')
                 ->assertMissing('@webpush-unsubscribe');
         });

@@ -73,7 +73,14 @@ class TacheController extends Controller
      */
     public function show(Tache $tache): TacheResource
     {
-        return new TacheResource($tache->load(['activite', 'assignees', 'validateur', 'labels', 'dependencies', 'dependents']));
+        // Charge uniquement les relations qui existent sur le modèle. Les
+        // relations 'validateur' et 'dependents' étaient référencées ici mais
+        // ne sont pas définies sur Tache: l'appel ->load() levait une
+        // RelationNotFoundException, le toArray() de la resource échouait
+        // silencieusement et c'était le modèle brut qui partait en JSON
+        // (sans my_result, sans validation, sans permissions — d'où
+        // l'invisibilité du bandeau bypass côté front).
+        return new TacheResource($tache->load(['activite', 'assignees', 'labels', 'dependencies']));
     }
 
     /**
@@ -107,7 +114,7 @@ class TacheController extends Controller
     public function move(Request $request, Tache $tache): JsonResponse
     {
         $request->validate([
-            'statut' => ['required', 'in:' . implode(',', TacheStatut::values())],
+            'statut' => ['required', 'in:'.implode(',', TacheStatut::values())],
             'position' => ['required', 'integer', 'min:0'],
         ]);
 
