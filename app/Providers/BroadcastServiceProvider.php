@@ -12,7 +12,13 @@ class BroadcastServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Broadcast::routes();
+        // L'application utilise des tokens Sanctum (Bearer) et non la session web.
+        // On expose l'endpoint d'autorisation sous /api/broadcasting/auth
+        // avec auth:sanctum, ce qui aligne l'auth temps réel sur le reste de l'API.
+        Broadcast::routes([
+            'prefix' => 'api',
+            'middleware' => ['api', 'auth:sanctum'],
+        ]);
 
         require base_path('routes/channels.php');
     }
