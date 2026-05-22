@@ -126,11 +126,13 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useNotifications } from '@/composables/useNotifications'
+import { useAuthStore } from '@/stores/authStore'
 import NotificationItem from './NotificationItem.vue'
 import NotificationDetailModal from './NotificationDetailModal.vue'
 import ResultatDetailModal from '@/components/modals/ResultatDetailModal.vue'
 
 const router = useRouter()
+const authStore = useAuthStore()
 const dropdownOpen = ref(false)
 const dropdownRef = ref(null)
 const maxDisplayed = 5
@@ -156,7 +158,7 @@ const toggleDropdown = async () => {
   dropdownOpen.value = !dropdownOpen.value
 
   if (dropdownOpen.value && notifications.value.length === 0) {
-    await fetchUnread()
+    safeFetchUnread()
   }
 }
 
@@ -232,13 +234,19 @@ const handleDelete = async (notificationId) => {
   }
 }
 
+// Évite de spammer l'API si l'utilisateur n'est pas connecté: sinon
+// chaque appel renvoie 401 et déclenche un rejet de promesse non géré.
+// Les erreurs réseau transitoires sont avalées car ce polling est best-effort.
+const safeFetchUnread = () => {
+  if (!authStore.isAuthenticated) return
+  fetchUnread().catch(() => {})
+}
+
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
-  fetchUnread()
+  safeFetchUnread()
 
-  const interval = setInterval(() => {
-    fetchUnread()
-  }, 30000)
+  const interval = setInterval(safeFetchUnread, 30000)
 
   onUnmounted(() => {
     clearInterval(interval)
