@@ -7,6 +7,7 @@ return [
         'cannot_view_others_score' => 'Vous n\'avez pas la permission de voir le score d\'un autre utilisateur.',
         'cannot_view_fiche' => 'Vous n\'avez pas la permission de consulter cette fiche d\'évaluation.',
         'no_workspace' => 'Aucun workspace courant n\'est sélectionné.',
+        'immutable_post_n2' => 'Cette tâche est verrouillée: elle a été validée au niveau N2 et ne peut plus être modifiée.',
     ],
 
     'criteria' => [

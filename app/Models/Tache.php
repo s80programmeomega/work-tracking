@@ -323,6 +323,24 @@ class Tache extends Model
     }
 
     /**
+     * Indique si la tâche est verrouillée par la règle R6 (post-N2):
+     * dès qu'un résultat de cette tâche est validé N2, toute mutation
+     * (édition, suppression, déplacement, archivage, (dés)assignation)
+     * doit être refusée par TacheService avec HTTP 422.
+     *
+     * On lit la relation déjà chargée si possible pour éviter une
+     * requête SQL supplémentaire au milieu d'un service.
+     */
+    public function isLockedPostN2(): bool
+    {
+        if ($this->relationLoaded('resultats')) {
+            return $this->resultats->contains(fn ($r) => (bool) $r->valide_par_n2);
+        }
+
+        return $this->resultats()->where('valide_par_n2', true)->exists();
+    }
+
+    /**
      * ✅ NOUVEAU : Obtenir le statut individuel d'un utilisateur
      */
     public function getStatutForUser(User $user): string

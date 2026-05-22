@@ -7,6 +7,7 @@ return [
         'cannot_view_others_score' => 'You do not have permission to view another user\'s score.',
         'cannot_view_fiche' => 'You do not have permission to view this evaluation sheet.',
         'no_workspace' => 'No current workspace selected.',
+        'immutable_post_n2' => 'This task is locked: it has been validated at N2 and can no longer be modified.',
     ],
 
     'criteria' => [
