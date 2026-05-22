@@ -279,7 +279,11 @@ const onWebPushUnsubscribe = async () => {
 const preferences = ref({
   in_app_enabled: true,
   email_enabled: true,
-  push_enabled: false,
+  // Activé par défaut: aligné sur la valeur par défaut côté BDD
+  // (migration enable_push_notifications_by_default). loadPreferences()
+  // synchronisera ensuite avec ce que le backend a réellement persisté
+  // pour cet utilisateur.
+  push_enabled: true,
   task_assigned_in_app: true,
   task_assigned_email: true,
   task_assigned_push: false,
