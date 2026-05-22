@@ -417,6 +417,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Réponse JSON consommée par la page /evaluations/personnel/:id/historique.
         Route::get('/personnel/{user}/score', [EvaluationController::class, 'agentSheet']);
 
+        // Task 9: historique paginé en 4 sections (directed tasks, directed
+        // subtasks, assignee tasks, assignee subtasks) pour la même page.
+        Route::get('/personnel/{user}/historique', [EvaluationController::class, 'agentSheetSections']);
+
         // 📊 Mes responsabilités (tous les résultats que je peux consulter)
         Route::get('/mes-responsabilites', [EvaluationController::class, 'myResponsibilities']);
 

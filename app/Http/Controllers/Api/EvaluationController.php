@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\TacheResource;
 use App\Http\Resources\TacheResultatResource;
 use App\Models\Activite;
+use App\Models\SousTache;
 use App\Models\Tache;
 use App\Models\TacheResultat;
 use App\Models\User;
@@ -235,6 +236,169 @@ class EvaluationController extends Controller
                 ],
             ]),
         ]);
+    }
+
+    /**
+     * Task 9: 4-section paginated history for the agent sheet page.
+     *
+     * Endpoint: GET /api/evaluations/personnel/{user}/historique
+     *
+     * Query params:
+     *   - section: 'directed_tasks' | 'directed_subtasks' | 'assignee_tasks' | 'assignee_subtasks'
+     *   - start, end: ISO date Y-m-d window (defaults: last 30 days)
+     *   - statut: optional filter on tache.statut / sous_tache.statut
+     *   - projet_id, activite_id: optional scope filter
+     *   - per_page: 1..50 (default 20)
+     *
+     * Same two-layer auth as agentSheet().
+     */
+    public function agentSheetSections(Request $request, User $user): JsonResponse
+    {
+        $validated = $request->validate([
+            'section' => 'required|in:directed_tasks,directed_subtasks,assignee_tasks,assignee_subtasks',
+            'start' => 'sometimes|nullable|date_format:Y-m-d',
+            'end' => 'sometimes|nullable|date_format:Y-m-d|after_or_equal:start',
+            'statut' => 'sometimes|nullable|string',
+            'projet_id' => 'sometimes|nullable|integer|exists:projets,id',
+            'activite_id' => 'sometimes|nullable|integer|exists:activites,id',
+            'per_page' => 'sometimes|integer|min:1|max:50',
+        ]);
+
+        $actor = $request->user();
+        $workspace = $actor->currentWorkspace;
+
+        if (! $workspace) {
+            return response()->json(['success' => false, 'message' => __('evaluation.errors.no_workspace')], 403);
+        }
+
+        $permissionService = app(PermissionService::class);
+        $gate = app(ContextualPermissionGate::class);
+
+        if (! $permissionService->canViewFicheEvaluation($actor, $user, $workspace, $gate)) {
+            return response()->json(['success' => false, 'message' => __('evaluation.errors.cannot_view_fiche')], 403);
+        }
+
+        $start = $validated['start'] ?? now()->subDays(30)->toDateString();
+        $end = $validated['end'] ?? now()->toDateString();
+        $perPage = (int) ($validated['per_page'] ?? 20);
+        $section = $validated['section'];
+
+        $payload = match ($section) {
+            'directed_tasks' => $this->sectionDirectedTasks($user, $start, $end, $validated, $perPage),
+            'directed_subtasks' => $this->sectionDirectedSubtasks($user, $start, $end, $validated, $perPage),
+            'assignee_tasks' => $this->sectionAssigneeTasks($user, $start, $end, $validated, $perPage),
+            'assignee_subtasks' => $this->sectionAssigneeSubtasks($user, $start, $end, $validated, $perPage),
+        };
+
+        return response()->json([
+            'success' => true,
+            'section' => $section,
+            'periode' => ['start' => $start, 'end' => $end],
+            ...$payload,
+        ]);
+    }
+
+    /** Tâches dont l'utilisateur est responsable (tache_user.is_responsable=true). */
+    private function sectionDirectedTasks(User $user, string $start, string $end, array $filters, int $perPage): array
+    {
+        $query = Tache::query()
+            ->whereHas('assignees', fn ($q) => $q->where('users.id', $user->id)->where('tache_user.is_responsable', true))
+            ->with(['activite:id,nom,projet_id', 'activite.projet:id,nom'])
+            ->whereBetween('created_at', [$start, $end.' 23:59:59']);
+
+        $this->applyTacheFilters($query, $filters);
+
+        $paginator = $query->orderByDesc('created_at')->paginate($perPage);
+
+        return [
+            'data' => $paginator->items(),
+            'meta' => ['current_page' => $paginator->currentPage(), 'last_page' => $paginator->lastPage(), 'total' => $paginator->total()],
+        ];
+    }
+
+    /** Sous-tâches dont l'utilisateur est responsable (sous_taches.responsable_id). */
+    private function sectionDirectedSubtasks(User $user, string $start, string $end, array $filters, int $perPage): array
+    {
+        $query = SousTache::query()
+            ->where('responsable_id', $user->id)
+            ->with(['tache:id,titre,activite_id', 'tache.activite:id,nom,projet_id', 'tache.activite.projet:id,nom'])
+            ->whereBetween('created_at', [$start, $end.' 23:59:59']);
+
+        if (! empty($filters['statut'])) {
+            $query->where('statut', $filters['statut']);
+        }
+        if (! empty($filters['activite_id'])) {
+            $query->whereHas('tache', fn ($q) => $q->where('activite_id', $filters['activite_id']));
+        }
+        if (! empty($filters['projet_id'])) {
+            $query->whereHas('tache.activite', fn ($q) => $q->where('projet_id', $filters['projet_id']));
+        }
+
+        $paginator = $query->orderByDesc('created_at')->paginate($perPage);
+
+        return [
+            'data' => $paginator->items(),
+            'meta' => ['current_page' => $paginator->currentPage(), 'last_page' => $paginator->lastPage(), 'total' => $paginator->total()],
+        ];
+    }
+
+    /** Tâches dont l'utilisateur est simple assigné (non-responsable). */
+    private function sectionAssigneeTasks(User $user, string $start, string $end, array $filters, int $perPage): array
+    {
+        $query = Tache::query()
+            ->whereHas('assignees', fn ($q) => $q->where('users.id', $user->id)->where('tache_user.is_responsable', false))
+            ->with(['activite:id,nom,projet_id', 'activite.projet:id,nom'])
+            ->whereBetween('created_at', [$start, $end.' 23:59:59']);
+
+        $this->applyTacheFilters($query, $filters);
+
+        $paginator = $query->orderByDesc('created_at')->paginate($perPage);
+
+        return [
+            'data' => $paginator->items(),
+            'meta' => ['current_page' => $paginator->currentPage(), 'last_page' => $paginator->lastPage(), 'total' => $paginator->total()],
+        ];
+    }
+
+    /** Sous-tâches sur lesquelles l'utilisateur est intervenant (sous_tache_user). */
+    private function sectionAssigneeSubtasks(User $user, string $start, string $end, array $filters, int $perPage): array
+    {
+        $query = SousTache::query()
+            ->whereHas('intervenants', fn ($q) => $q->where('users.id', $user->id))
+            ->where('responsable_id', '!=', $user->id)
+            ->with(['tache:id,titre,activite_id', 'tache.activite:id,nom,projet_id', 'tache.activite.projet:id,nom'])
+            ->whereBetween('created_at', [$start, $end.' 23:59:59']);
+
+        if (! empty($filters['statut'])) {
+            $query->where('statut', $filters['statut']);
+        }
+        if (! empty($filters['activite_id'])) {
+            $query->whereHas('tache', fn ($q) => $q->where('activite_id', $filters['activite_id']));
+        }
+        if (! empty($filters['projet_id'])) {
+            $query->whereHas('tache.activite', fn ($q) => $q->where('projet_id', $filters['projet_id']));
+        }
+
+        $paginator = $query->orderByDesc('created_at')->paginate($perPage);
+
+        return [
+            'data' => $paginator->items(),
+            'meta' => ['current_page' => $paginator->currentPage(), 'last_page' => $paginator->lastPage(), 'total' => $paginator->total()],
+        ];
+    }
+
+    /** Applique les filtres communs (statut, projet_id, activite_id) à une query Tache. */
+    private function applyTacheFilters($query, array $filters): void
+    {
+        if (! empty($filters['statut'])) {
+            $query->where('statut', $filters['statut']);
+        }
+        if (! empty($filters['activite_id'])) {
+            $query->where('activite_id', $filters['activite_id']);
+        }
+        if (! empty($filters['projet_id'])) {
+            $query->whereHas('activite', fn ($q) => $q->where('projet_id', $filters['projet_id']));
+        }
     }
 
     public function userScore(Request $request): JsonResponse
