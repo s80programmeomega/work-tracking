@@ -21,7 +21,7 @@
 
 **Steps:**
 1. Log in (any role is sufficient).
-2. Open **Notification Preferences** (`/notifications/preferences`).
+2. Open **Notification Preferences** (`/notification-preferences`).
 3. Turn on the "Push notifications" master switch (if not already on).
 4. Under the toggle, the "This device" panel appears with an **Enable** button.
 5. Click **Enable**.
@@ -136,7 +136,13 @@ app(\App\Services\NotificationService::class)->channelsFor($user, 'renvoye_n0');
   - `channelsFor()`: excludes webpush when `push_enabled = false`
   - `channelsFor()`: excludes webpush for low-signal events (score_updated, approuve_n0)
 
-- **No Dusk**: testing a real Web Push subscription automatically requires an external push service, which is out of scope for the test runner. The manual Cases 1–6 cover the full chain.
+- **`tests/Browser/Notifications/WebPushPreferencesTest.php`** — Dusk coverage for what is automatable:
+  - The `push_enabled` master switch toggles the "This device" panel on/off.
+  - When `push_enabled = false` in the DB, the panel never shows on load.
+  - The "Activer" button is rendered when no browser-side subscription exists (the default state in headless Chrome).
+  - A soft-disabled (`active = false`) row in `push_subscriptions` does not flip the UI to a "subscribed" state — the browser state is the source of truth for the panel.
+
+- **What stays manual** (Cases 2, 4, 6): a real Web Push subscription requires browser permission + an external push service, which Dusk cannot drive. The manual cases cover that end-to-end.
 
 ---
 

@@ -14,6 +14,10 @@ class DatabaseSeeder extends Seeder
             RolePermissionSeeder::class,
             WorkspaceSeeder::class,
             SousTacheSeeder::class,
+            // Préférences notification + souscriptions Web Push de démo
+            // (Tasks 8 / 8b). Doit s'exécuter après WorkspaceSeeder qui
+            // crée les comptes de démo.
+            NotificationDemoSeeder::class,
         ]);
     }
 }
