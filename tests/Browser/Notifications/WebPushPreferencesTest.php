@@ -49,25 +49,29 @@ class WebPushPreferencesTest extends WorkTrackingTestCase
         // doit être visible dès le chargement.
         NotificationPreference::factory()->forUser($user)->create();
 
-        $this->browse(function (Browser $browser) use ($user) {
+        // L'input est sr-only (caché derrière son label stylé) → on
+        // déclenche un click() sur l'élément via JS pour basculer
+        // proprement le v-model sans dépendre de la visibilité.
+        // Note: Browser::script() retourne un array (résultat des scripts)
+        // et non $this, donc impossible de chaîner après — on l'appelle
+        // sur sa propre ligne.
+        $toggle = ["document.querySelector('[dusk=\"push-enabled-toggle\"]').click()"];
+
+        $this->browse(function (Browser $browser) use ($user, $toggle) {
             $this->signInAs($browser, $user)
                 ->visit('/notification-preferences')
                 ->waitFor('@push-enabled-toggle', 10)
                 ->waitFor('@webpush-device-panel', 5)
-                ->assertVisible('@webpush-device-panel')
-                // L'input est sr-only (caché derrière son label stylé) → on
-                // déclenche un click() sur l'élément via JS pour basculer
-                // proprement le v-model sans dépendre de la visibilité.
-                ->script([
-                    "document.querySelector('[dusk=\"push-enabled-toggle\"]').click()",
-                ])
-                ->pause(300)
-                ->assertMissing('@webpush-device-panel')
-                // Le réactiver → le panneau revient
-                ->script([
-                    "document.querySelector('[dusk=\"push-enabled-toggle\"]').click()",
-                ])
-                ->pause(300)
+                ->assertVisible('@webpush-device-panel');
+
+            // Couper le master switch → le panneau disparaît
+            $browser->script($toggle);
+            $browser->pause(300)
+                ->assertMissing('@webpush-device-panel');
+
+            // Le réactiver → le panneau revient
+            $browser->script($toggle);
+            $browser->pause(300)
                 ->assertVisible('@webpush-device-panel');
         });
     }
