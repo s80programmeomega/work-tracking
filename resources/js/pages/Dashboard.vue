@@ -307,7 +307,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, computed, onBeforeUnmount } from 'vue'
+import { ref, onMounted, nextTick, computed, onBeforeUnmount, markRaw } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/api/axios'
 import Chart from 'chart.js/auto'
@@ -414,14 +414,15 @@ const kanbanColumns = ref([
   }
 ])
 
-// Stats cards
+// Cartes de statistiques — markRaw() évite la proxification réactive
+// des composants d'icônes (Vue émet sinon un avertissement).
 const statsCards = ref([
   {
     title: 'Projets Actifs',
     value: 0,
     change: '+0%',
     trend: 'up',
-    icon: FolderKanbanIcon,
+    icon: markRaw(FolderKanbanIcon),
     lightColor: 'bg-blue-50 dark:bg-blue-900/20 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30',
     textColor: 'text-blue-600 dark:text-blue-400',
     hoverColor: '#3b82f6'
@@ -431,7 +432,7 @@ const statsCards = ref([
     value: 0,
     change: '+0%',
     trend: 'up',
-    icon: ListTodoIcon,
+    icon: markRaw(ListTodoIcon),
     lightColor: 'bg-purple-50 dark:bg-purple-900/20 group-hover:bg-purple-100 dark:group-hover:bg-purple-900/30',
     textColor: 'text-purple-600 dark:text-purple-400',
     hoverColor: '#8b5cf6'
@@ -441,7 +442,7 @@ const statsCards = ref([
     value: '0%',
     change: '+0%',
     trend: 'up',
-    icon: TargetIcon,
+    icon: markRaw(TargetIcon),
     lightColor: 'bg-green-50 dark:bg-green-900/20 group-hover:bg-green-100 dark:group-hover:bg-green-900/30',
     textColor: 'text-green-600 dark:text-green-400',
     hoverColor: '#10b981'
@@ -451,7 +452,7 @@ const statsCards = ref([
     value: 0,
     change: '0%',
     trend: 'down',
-    icon: AlertCircleIcon,
+    icon: markRaw(AlertCircleIcon),
     lightColor: 'bg-red-50 dark:bg-red-900/20 group-hover:bg-red-100 dark:group-hover:bg-red-900/30',
     textColor: 'text-red-600 dark:text-red-400',
     hoverColor: '#ef4444'
