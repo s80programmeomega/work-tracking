@@ -47,5 +47,14 @@ return [
         'score_updated' => [
             'subject' => 'Votre score a été mis à jour',
         ],
+        'sheet_ready' => [
+            'subject' => 'Votre fiche d\'évaluation est prête',
+        ],
+        'unjustified_return_alert' => [
+            'subject' => 'Alerte: taux de renvois injustifiés élevé',
+            'line1' => ':nom a dépassé le seuil de renvois injustifiés (:rate% des décisions N1 ont inversé un renvoi).',
+            'line2' => 'Période évaluée: :start → :end.',
+            'action' => 'Consulter sa fiche',
+        ],
     ],
 ];

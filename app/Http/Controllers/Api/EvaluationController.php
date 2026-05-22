@@ -11,9 +11,12 @@ use App\Models\Tache;
 use App\Models\TacheResultat;
 use App\Models\User;
 use App\Models\Workspace;
+use App\Notifications\EvaluationSheetReadyNotification;
+use App\Notifications\InjustifiedReturnAlertNotification;
 use App\Permissions\ContextualPermissionGate;
 use App\Permissions\Permission;
 use App\Services\EvaluationScoreService;
+use App\Services\NotificationService;
 use App\Services\PermissionService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -216,6 +219,14 @@ class EvaluationController extends Controller
 
         $sheet = $this->scoreService->calculerScore($user, $start, $end);
 
+        // Dispatch notifications — chacune est dédupée par NotificationService
+        // (fenêtre de 5 min), donc un visiteur qui recharge la page ne génère
+        // pas un flot de notifications. Ces appels sont fire-and-forget: les
+        // notifications implémentent ShouldQueue et leur via() consulte
+        // channelsFor() pour respecter les préférences de l'utilisateur.
+        $this->dispatchSheetReadyIfNeeded($user, $sheet);
+        $this->dispatchUnjustifiedAlertIfNeeded($user, $sheet, $workspace);
+
         // Indicators metadata for the UI header — actor permissions are
         // baked in so the frontend doesn't need to re-derive them.
         $canExport = $permissionService->canExportFicheEvaluation($actor, $user, $workspace, $gate);
@@ -398,6 +409,73 @@ class EvaluationController extends Controller
         }
         if (! empty($filters['projet_id'])) {
             $query->whereHas('activite', fn ($q) => $q->where('projet_id', $filters['projet_id']));
+        }
+    }
+
+    /**
+     * Notifie l'agent que sa fiche d'évaluation a été (re)calculée.
+     * Dédupé sur (agent_id, evaluation_sheet_ready) via NotificationService
+     * pour éviter les emails à chaque rafraîchissement de la page.
+     */
+    private function dispatchSheetReadyIfNeeded(User $agent, array $sheet): void
+    {
+        $notifService = app(NotificationService::class);
+        if ($notifService->isDuplicate($agent, 'evaluation_sheet_ready', $agent->id)) {
+            return;
+        }
+
+        $agent->notify(new EvaluationSheetReadyNotification(
+            agent: $agent,
+            scoreGlobal: (float) $sheet['score_global'],
+            periodeStart: $sheet['periode_start'],
+            periodeEnd: $sheet['periode_end'],
+        ));
+    }
+
+    /**
+     * Notifie le(s) manager(s) du workspace quand le taux de renvois
+     * injustifiés de l'agent dépasse le seuil.
+     *
+     * On cible les utilisateurs ayant le rôle 'manager' dans le workspace
+     * courant — pour les workspaces sans manager identifiable, on retombe
+     * sur l'owner. Le destinataire est dédupé sur (manager_id, alert)
+     * pour ne pas spammer si plusieurs consultations de la fiche
+     * surviennent en cascade.
+     */
+    private function dispatchUnjustifiedAlertIfNeeded(User $agent, array $sheet, Workspace $workspace): void
+    {
+        if (! ($sheet['indicators']['unjustified_alert'] ?? false)) {
+            return;
+        }
+
+        $rate = (float) $sheet['indicators']['unjustified_return_rate'];
+        $notifService = app(NotificationService::class);
+
+        // Trouver les managers du workspace via le pivot workspace_members.
+        // Si aucun manager: on retombe sur l'owner pour ne pas laisser
+        // l'alerte muette.
+        $recipients = $workspace->members()
+            ->wherePivot('role', 'manager')
+            ->get();
+
+        if ($recipients->isEmpty()) {
+            $owner = $workspace->owner;
+            if ($owner) {
+                $recipients = collect([$owner]);
+            }
+        }
+
+        foreach ($recipients as $manager) {
+            if ($notifService->isDuplicate($manager, 'unjustified_return_alert', $agent->id)) {
+                continue;
+            }
+
+            $manager->notify(new InjustifiedReturnAlertNotification(
+                agent: $agent,
+                rate: $rate,
+                periodeStart: $sheet['periode_start'],
+                periodeEnd: $sheet['periode_end'],
+            ));
         }
     }
 

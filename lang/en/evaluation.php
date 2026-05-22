@@ -47,5 +47,14 @@ return [
         'score_updated' => [
             'subject' => 'Your score has been updated',
         ],
+        'sheet_ready' => [
+            'subject' => 'Your evaluation sheet is ready',
+        ],
+        'unjustified_return_alert' => [
+            'subject' => 'Alert: high unjustified-return rate',
+            'line1' => ':nom has exceeded the unjustified-return threshold (:rate% of N1 decisions reversed a return).',
+            'line2' => 'Period assessed: :start → :end.',
+            'action' => 'View their sheet',
+        ],
     ],
 ];
