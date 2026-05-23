@@ -312,7 +312,17 @@ class TacheResultat extends Model
 
     public function validateByN1(User $validator, ?string $commentaire = null): void
     {
+        // ⚠️ statut: transition explicite vers l'étape suivante du circuit.
+        // - Si N2 requis → 'en_validation_n2' (le résultat doit apparaître
+        //   dans le compteur pending_n2 du responsable projet).
+        // - Sinon → 'valide' (circuit terminé, déclenche la règle R6).
+        // Avant cette correction, seul valide_par_n1 était mis à jour et
+        // le statut restait à 'en_validation_n1', d'où l'invisibilité côté
+        // dashboard N2.
+        $nextStatut = $this->tache->validation_n2_required ? 'en_validation_n2' : 'valide';
+
         $this->update([
+            'statut' => $nextStatut,
             'valide_par_n1' => true,
             'validateur_n1_id' => $validator->id,
             'valide_le_n1' => now(),
@@ -338,6 +348,7 @@ class TacheResultat extends Model
             'auteur_id' => $this->user_id,
             'validateur_id' => $validator->id,
             'n2_required' => $this->tache->validation_n2_required,
+            'statut' => $nextStatut,
         ]);
     }
 
@@ -347,7 +358,12 @@ class TacheResultat extends Model
             throw new \Exception('Le résultat doit d\'abord être validé par le N1');
         }
 
+        // ⚠️ statut: passe à 'valide' (circuit terminé). Indispensable pour
+        // que la règle R6 (post-N2 immutabilité, Task 9) déclenche via
+        // Tache::isLockedPostN2() qui lit valide_par_n2, ET pour que les
+        // dashboards filtrant sur statut='valide' voient le résultat.
         $this->update([
+            'statut' => 'valide',
             'valide_par_n2' => true,
             'validateur_n2_id' => $validator->id,
             'valide_le_n2' => now(),
