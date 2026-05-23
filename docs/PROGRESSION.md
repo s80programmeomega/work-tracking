@@ -28,7 +28,7 @@
 | 6 | Anti-Sabotage Bypass | `feature/v2-task-6-bypass` | ✅ | 2026-05-18 | 2026-05-18 | Merged into `jonas` 2026-05-19 |
 | 7 | N1 Scores + Pending Validations | `feature/v2-task-7-scores-dashboard` | ✅ | 2026-05-19 | 2026-05-19 | Merged into `jonas` 2026-05-21 |
 | 8 | Reverb + Web Push Notifications | `feature/v2-task-8-notifications` | ✅ | 2026-05-21 | 2026-05-21 | Real-time + dedup + hierarchy + daily digest done. Web Push (8b) deferred to dedicated PR. |
-| 9 | Agent Sheet + Full Scoring | `feature/v2-task-9-agent-sheet` | ⬜ | — | — | — |
+| 9 | Agent Sheet + Full Scoring | `feature/v2-task-9-agent-sheet` | ✅ | 2026-05-22 | 2026-05-23 | All 9 steps shipped on branch; 142 PHPUnit + 2 Dusk tests green. Pending merge into `jonas`. |
 | 10 | Evaluation Dashboard + Global Task View | `feature/v2-task-10-dashboard` | ⬜ | — | — | — |
 | 11 | Task Creation UX (wizard + intervenant picker) | `feature/v2-task-11-task-creation-ux` | ⬜ | — | — | — |
 | 12 | Document Management per Project + Workspace | `feature/v2-task-12-document-management` | ⬜ | — | — | — |
@@ -180,14 +180,18 @@
 - [ ] PR / merge into `jonas`
 
 ### Task 9
-- [ ] `EvaluationService` with 8-criteria scoring created
-- [ ] Agent sheet page created (4 sections)
-- [ ] Return quality and escalations indicators added
-- [ ] Post-N2 immutability enforced
-- [ ] Permissions added
-- [ ] Translation keys added
-- [ ] Tests passing
-- [ ] PR opened into `jonas`
+- [x] `EvaluationScoreService::calculerScore()` with 8-criteria weighted scoring (completion_rate, deadline_respect, result_quality, first_pass_validation, justified_returns, inactions, work_volume, team_coordination) — 10 unit tests in `EvaluationScoreServiceCalculerScoreTest`
+- [x] Agent sheet page `resources/js/pages/evaluations/AgentSheet.vue` mounted at `/evaluations/personnel/:id/historique` (4 sections + period/statut filters + paginated lists + drill-down modal)
+- [x] Return-quality donut (inline SVG) + escalations + unjustified-return alert banner indicators
+- [x] Post-N2 immutability enforced (R6) — `Tache::isLockedPostN2()` + `TacheService::guardPostN2Immutability()` blocks update/delete/move/archive/unarchive/assignUser/unassignUser with `HttpException(422)`; 6 tests in `PostN2ImmutabilityTest`
+- [x] Permissions `evaluations.view_fiche` + `evaluations.export_fiche` added to `Permission.php`, `Permission::all()`, `forRole()` (see PERMISSIONS_MATRIX changelog 2026-05-22 Task 9); `PermissionService::canViewFicheEvaluation` + `canExportFicheEvaluation` encode per-target scope (own / cadre→assignees / manager→activity / owner→workspace); mirror in `Permission.js` + `useWorkspacePermissions.js`; `WorkspaceController` user_permissions payload extended in 3 locations
+- [x] Translation keys added (`evaluation.criteria.*` 8 criteria, `evaluation.sheet.sections.*`, `evaluation.sheet.filters.*`, `evaluation.sheet.indicators.*`, `evaluation.errors.immutable_post_n2` + 2 new error keys, `evaluation.notifications.sheet_ready.*` + `evaluation.notifications.unjustified_return_alert.*`) in `lang/fr/evaluation.php` and `lang/en/evaluation.php`
+- [x] Notifications wired: `EvaluationSheetReadyNotification` (ShouldQueue, in-app + email via Blade template `emails/evaluation-sheet-ready/{fr,en}.blade.php`, dedup 5min) → agent; `InjustifiedReturnAlertNotification` (ShouldQueue, in-app + email inline MailMessage, fires only when `unjustified_alert` true) → workspace managers (fallback to owner). Both dispatched from `EvaluationController::agentSheet`. `NotificationService::wantsEmail/wantsWebPush` extended with the two new event keys.
+- [x] Endpoints `GET /api/evaluations/personnel/{user}/score` (full sheet) + `GET /api/evaluations/personnel/{user}/historique` (4-section paginated history with filters) added to `EvaluationController`
+- [x] Feature tests: 4 in `EvaluationAgentSheetEndpointTest` (own-200, collaborateur-403, observateur-403, observateur own read-only 200 with can_export=false); 6 in `PostN2ImmutabilityTest`; 10 in `EvaluationScoreServiceCalculerScoreTest`
+- [x] Dusk: 2 tests in `tests/Browser/Evaluation/AgentSheetTest` (header+8 criteria+donut render; section tabs switch)
+- [x] Documentation: `docs/testing/TASK_9_TESTING.md` manual test guide written; PROGRESSION + IMPLEMENTATION_PLAN + PERMISSIONS_MATRIX updated
+- [ ] PR / merge into `jonas`
 
 ### Task 10
 - [ ] Evaluation dashboard page created

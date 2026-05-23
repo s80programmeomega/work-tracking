@@ -641,6 +641,12 @@ test: add unit tests for all 8 scoring criteria
 test: add feature tests for evaluation sheet permissions and immutability
 ```
 
+**Deviations from plan (recorded 2026-05-23):**
+- Service is named `EvaluationScoreService` (matches Task 7 naming) instead of the plan's `EvaluationService`. No new class introduced — `calculerScore()` was added to the existing service.
+- A second endpoint `GET /evaluations/personnel/{user}/historique` was added alongside `/score` to back the 4-section paginated history; the plan only mentioned `/score`, but separating concerns kept the sheet payload bounded and the sections lazily loadable per tab.
+- Export action (PDF/Excel) is a UI stub in this task — the actual export endpoint and the `Log::info()` on sheet export will land in Task 10's "Evaluation dashboard exports" scope. `EVALUATIONS_EXPORT_FICHE` permission is already in place so wiring it later is a backend-only change.
+- Per-target scope helpers live in `PermissionService::canViewFicheEvaluation/canExportFicheEvaluation` (not as standalone gate methods). They take `(actor, target, workspace, gate)` and combine the role permission with a per-relationship scope check — kept here because the contextual gate signature is single-resource.
+
 ---
 
 ## Task 10 — Evaluation Dashboard + Workspace-Wide Task View

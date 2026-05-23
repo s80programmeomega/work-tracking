@@ -198,6 +198,8 @@ Assignee submits TacheResultat → N1 (responsable_n1) validates → N2 (respons
 ```
 This is handled by `TacheResultatController` + `EvaluationController` + multiple Notifications.
 
+After N2, the task becomes **immutable** (rule R6 — Task 9): `TacheService::guardPostN2Immutability()` throws an `HttpException(422)` on every mutation method (update/delete/move/archive/(un)assignUser). The check is centralised in the service so all controllers inherit it for free; the predicate `Tache::isLockedPostN2()` returns true as soon as any `TacheResultat` of the task has `valide_par_n2 = true`.
+
 **2. Workspace invitation flow:**
 ```
 Admin sends invite (token email) → recipient clicks link → frontend calls /api/workspace-invitations/{token}/accept → user joins workspace
