@@ -794,9 +794,16 @@ class TacheController extends Controller
                 ],
             ];
 
+            // ✅ Bug PROGRESSION #1: wrapper indispensable. Sans la resource,
+            // la sérialisation Eloquent expose seulement les colonnes/relations
+            // brutes — donc my_result, validation_status, bypass.*, permissions,
+            // can_activer_bypass (et tout autre champ injecté par la resource)
+            // disparaissent du payload côté front. Conséquence directe: le
+            // bouton "Soumettre résultat" et le bandeau bypass devenaient
+            // invisibles selon le rôle.
             return response()->json([
                 'success' => true,
-                'data' => $tache,
+                'data' => new TacheResource($tache),
                 'additional_info' => $additionalInfo,
             ]);
 
