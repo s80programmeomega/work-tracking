@@ -71,6 +71,13 @@ export function useWorkspacePermissions(workspace = null) {
     // Task 8: Notifications
     const canManageNotificationPreferences = computed(() => isSuperAdmin.value || (perms.value.can_manage_notification_preferences ?? false))
 
+    // G8: Sidebar gating helpers
+    // canViewAllTasks: managers, owners and super_admins can see the full task list.
+    const canViewAllTasks = computed(() => isSuperAdmin.value || isDirecteur.value || isManager.value || isCadre.value)
+    // canSubmitResult: any member who is a collaborateur, cadre or above can submit
+    // results — corresponds to TACHES_SUBMIT_RESULT permission on the backend.
+    const canSubmitResult = computed(() => isSuperAdmin.value || (perms.value.can_submit_result ?? isMember.value))
+
     /**
      * Whether the current user can perform an action on a specific member.
      * @param {Object} targetMember
@@ -136,6 +143,10 @@ export function useWorkspacePermissions(workspace = null) {
 
         // Task 8
         canManageNotificationPreferences,
+
+        // G8
+        canViewAllTasks,
+        canSubmitResult,
 
         hasPermission,
         canPerformMemberAction,
