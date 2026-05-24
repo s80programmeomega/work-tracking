@@ -21,6 +21,7 @@ return [
         'updated' => 'Sous-tâche mise à jour.',
         'deleted' => 'Sous-tâche supprimée.',
         'intervenant_assigned' => 'Intervenant assigné à la sous-tâche.',
+        'intervenant_removed' => 'Intervenant retiré de la sous-tâche.',
     ],
     'notifications' => [
         'assigned' => [

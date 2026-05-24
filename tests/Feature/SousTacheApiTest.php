@@ -180,4 +180,80 @@ class SousTacheApiTest extends TestCase
 
         $response->assertStatus(403);
     }
+
+    /** @test */
+    public function authorized_user_can_assign_intervenant_to_sous_tache(): void
+    {
+        ['workspace' => $workspace, 'tache' => $tache, 'owner' => $owner] = $this->makeContext();
+        $sousTache = SousTache::factory()->create(['tache_id' => $tache->id]);
+        $member = User::factory()->create();
+        $this->attachWithRole($workspace->members(), $member->id, 'cadre');
+
+        $response = $this->actingAs($owner)->postJson("/api/sous-taches/{$sousTache->id}/intervenants", [
+            'user_id' => $member->id,
+        ]);
+
+        $response->assertOk();
+        $this->assertDatabaseHas('sous_tache_user', [
+            'sous_tache_id' => $sousTache->id,
+            'user_id' => $member->id,
+        ]);
+    }
+
+    /** @test */
+    public function authorized_user_can_remove_intervenant_from_sous_tache(): void
+    {
+        ['workspace' => $workspace, 'tache' => $tache, 'owner' => $owner] = $this->makeContext();
+        $sousTache = SousTache::factory()->create(['tache_id' => $tache->id]);
+        $member = User::factory()->create();
+        $this->attachWithRole($workspace->members(), $member->id, 'cadre');
+        $sousTache->intervenants()->attach($member->id);
+
+        $response = $this->actingAs($owner)->deleteJson("/api/sous-taches/{$sousTache->id}/intervenants/{$member->id}");
+
+        $response->assertOk();
+        $this->assertDatabaseMissing('sous_tache_user', [
+            'sous_tache_id' => $sousTache->id,
+            'user_id' => $member->id,
+        ]);
+    }
+
+    /** @test */
+    public function unauthorized_user_cannot_remove_intervenant_from_sous_tache(): void
+    {
+        ['workspace' => $workspace, 'tache' => $tache] = $this->makeContext();
+        $sousTache = SousTache::factory()->create(['tache_id' => $tache->id]);
+        $member = User::factory()->create();
+        $outsider = User::factory()->create();
+        $this->attachWithRole($workspace->members(), $member->id, 'cadre');
+        $sousTache->intervenants()->attach($member->id);
+
+        $response = $this->actingAs($outsider)->deleteJson("/api/sous-taches/{$sousTache->id}/intervenants/{$member->id}");
+
+        $response->assertStatus(403);
+        $this->assertDatabaseHas('sous_tache_user', [
+            'sous_tache_id' => $sousTache->id,
+            'user_id' => $member->id,
+        ]);
+    }
+
+    /** @test */
+    public function creating_sous_tache_with_responsable_stores_responsable_id(): void
+    {
+        ['workspace' => $workspace, 'tache' => $tache, 'owner' => $owner] = $this->makeContext();
+        $member = User::factory()->create();
+        $this->attachWithRole($workspace->members(), $member->id, 'cadre');
+
+        $response = $this->actingAs($owner)->postJson("/api/taches/{$tache->id}/sous-taches", [
+            'titre' => 'Sous-tâche avec responsable',
+            'responsable_id' => $member->id,
+        ]);
+
+        $response->assertCreated();
+        $this->assertDatabaseHas('sous_taches', [
+            'tache_id' => $tache->id,
+            'titre' => 'Sous-tâche avec responsable',
+            'responsable_id' => $member->id,
+        ]);
+    }
 }

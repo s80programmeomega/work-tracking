@@ -137,6 +137,7 @@
                   :can-create="true"
                   :can-edit="true"
                   :can-delete="true"
+                  :can-assign="true"
                 />
               </SectionCollapsible>
 
@@ -195,6 +196,7 @@
               :can-create="true"
               :can-edit="true"
               :can-delete="true"
+              :can-assign="true"
             />
           </div>
 

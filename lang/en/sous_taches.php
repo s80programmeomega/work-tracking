@@ -21,6 +21,7 @@ return [
         'updated' => 'Subtask updated.',
         'deleted' => 'Subtask deleted.',
         'intervenant_assigned' => 'Intervenant assigned to subtask.',
+        'intervenant_removed' => 'Intervenant removed from subtask.',
     ],
     'notifications' => [
         'assigned' => [

@@ -339,6 +339,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('/{sousTache}', [SousTacheController::class, 'update']);
         Route::delete('/{sousTache}', [SousTacheController::class, 'destroy']);
         Route::post('/{sousTache}/intervenants', [SousTacheController::class, 'assignIntervenant']);
+        Route::delete('/{sousTache}/intervenants/{user}', [SousTacheController::class, 'removeIntervenant']);
     });
 
     // ======================================== RÉSULTATS DE TÂCHES  ========================================
