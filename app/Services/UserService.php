@@ -3,10 +3,10 @@
 namespace App\Services;
 
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Activitylog\Facades\Activity;
 
 class UserService
@@ -87,6 +87,18 @@ class UserService
     }
 
     /**
+     * Self-requested account deletion (own account only)
+     */
+    public function deleteAccount(User $user): bool
+    {
+        if ($user->avatar) {
+            Storage::disk('public')->delete($user->avatar);
+        }
+
+        return $user->delete();
+    }
+
+    /**
      * Delete user
      */
     public function deleteUser(User $user): bool
@@ -112,7 +124,7 @@ class UserService
     /**
      * Update user profile
      */
-  public function updateProfile(User $user, array $data)
+    public function updateProfile(User $user, array $data)
     {
         // Handle avatar upload
         if (request()->hasFile('avatar')) {
@@ -136,34 +148,29 @@ class UserService
         return $user->fresh();
     }
 
-    protected function handleAvatarUpload(User $user, $file)
+    protected function handleAvatarUpload(User $user, $file): string
     {
-        // Delete old avatar if exists
         if ($user->avatar) {
             Storage::disk('public')->delete($user->avatar);
         }
 
-        // Generate unique filename
-        $filename = 'avatars/' . $user->id . '/' . time() . '.' . $file->getClientOriginalExtension();
+        $filename = 'avatars/'.$user->id.'/'.time().'.'.$file->getClientOriginalExtension();
+        Storage::disk('public')->put($filename, $file->get());
 
-        // Store the file
-        $path = $file->storeAs('public', $filename);
-
-        return str_replace('public/', '', $path);
+        return $filename;
     }
-
 
     /**
      * Change user password
      */
-   public function changePassword(User $user, string $currentPassword, string $newPassword)
+    public function changePassword(User $user, string $currentPassword, string $newPassword)
     {
-        if (!Hash::check($currentPassword, $user->password)) {
+        if (! Hash::check($currentPassword, $user->password)) {
             throw new \Exception('Le mot de passe actuel est incorrect');
         }
 
         $user->update([
-            'password' => Hash::make($newPassword)
+            'password' => Hash::make($newPassword),
         ]);
 
         activity()
@@ -192,13 +199,13 @@ class UserService
     public function toggleActiveStatus(User $user): User
     {
         $user->update([
-            'is_active' => !$user->is_active,
+            'is_active' => ! $user->is_active,
         ]);
 
         activity()
             ->performedOn($user)
             ->causedBy(auth()->user())
-            ->log('User ' . ($user->is_active ? 'activated' : 'deactivated'));
+            ->log('User '.($user->is_active ? 'activated' : 'deactivated'));
 
         return $user->fresh();
     }
@@ -206,7 +213,7 @@ class UserService
     /**
      * Get user statistics
      */
-   public function getUserStats(User $user)
+    public function getUserStats(User $user)
     {
         return [
             'projects_count' => $user->projets()->count(),
@@ -229,7 +236,7 @@ class UserService
 
         return round(($completedTasks / $totalTasks) * 100, 1);
     }
-    
+
     /**
      * Get user activity log
      */

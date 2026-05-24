@@ -314,6 +314,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import api from '@/api/axios'
 
 const props = defineProps({
   user: {
@@ -367,27 +368,25 @@ const updatePreferences = () => {
 
 const savePreferences = async () => {
   saving.value = true
-  
+
   try {
-    // Save to localStorage (replace with API call)
     localStorage.setItem('userPreferences', JSON.stringify(preferences))
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    // Apply theme if changed
+
+    await api.put('/users/profile', {
+      language: preferences.language,
+      timezone: preferences.timezone,
+    })
+
     if (originalPreferences.value.theme !== preferences.theme) {
       applyTheme(preferences.theme)
     }
-    
+
     hasChanges.value = false
     originalPreferences.value = { ...preferences }
-    
-    alert('Préférences enregistrées avec succès')
+
     emit('refresh')
   } catch (error) {
     console.error('Error saving preferences:', error)
-    alert('Erreur lors de l\'enregistrement')
   } finally {
     saving.value = false
   }

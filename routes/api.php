@@ -600,6 +600,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/profile', [UserController::class, 'profile']);
         Route::put('/profile', [UserController::class, 'updateProfile']);
         Route::post('/profile', [UserController::class, 'updateProfile']); // For file uploads
+        Route::delete('/profile', [UserController::class, 'deleteAccount']);
         Route::post('/change-password', [UserController::class, 'changePassword']);
 
         // User CRUD
