@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Models\TacheResultat;
 use App\Models\User;
+use App\Services\NotificationService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -24,16 +25,18 @@ class ResultatValideN2Notification extends Notification implements ShouldQueue
 
     public function via($notifiable): array
     {
-        return ['mail', 'database'];
+        // G3: cf. NotificationService::wantsWebPush — 'valide_n2' est dans
+        // le set high-signal, donc push activé pour les abonnés.
+        return app(NotificationService::class)->channelsFor($notifiable, 'valide_n2');
     }
 
     public function toMail($notifiable): MailMessage
     {
         $mail = (new MailMessage)
-            ->subject("🎉 Votre résultat est entièrement validé !")
+            ->subject('🎉 Votre résultat est entièrement validé !')
             ->greeting("Félicitations {$notifiable->nom} !")
             ->line("Votre résultat pour la tâche **{$this->resultat->tache->titre}** a été validé par {$this->validateur->nom}.")
-            ->line("**Validation complète:** N1 ✓ + N2 ✓")
+            ->line('**Validation complète:** N1 ✓ + N2 ✓')
             ->line("**Taux de réalisation:** {$this->resultat->taux_realisation}%");
 
         if ($this->commentaire) {
@@ -48,17 +51,17 @@ class ResultatValideN2Notification extends Notification implements ShouldQueue
     public function toArray($notifiable): array
     {
         return [
-        'type' => 'resultat_valide_n2',
-        'resultat_id' => $this->resultat->id,
-        'tache_id' => $this->resultat->tache->id,
-        'tache_titre' => $this->resultat->tache->titre,
-        'validateur_id' => $this->validateur->id,
-        'validateur_nom' => $this->validateur->nom,
-        'commentaire' => $this->commentaire,
-        'taux_realisation' => $this->resultat->taux_realisation,
-        'url' => "/resultats/{$this->resultat->id}",  
-        'title' => 'Validation complète !',
-        'message' => "Félicitations ! Votre résultat pour « {$this->resultat->tache->titre} » est entièrement validé (N1 + N2)"
-    ];
+            'type' => 'resultat_valide_n2',
+            'resultat_id' => $this->resultat->id,
+            'tache_id' => $this->resultat->tache->id,
+            'tache_titre' => $this->resultat->tache->titre,
+            'validateur_id' => $this->validateur->id,
+            'validateur_nom' => $this->validateur->nom,
+            'commentaire' => $this->commentaire,
+            'taux_realisation' => $this->resultat->taux_realisation,
+            'url' => "/resultats/{$this->resultat->id}",
+            'title' => 'Validation complète !',
+            'message' => "Félicitations ! Votre résultat pour « {$this->resultat->tache->titre} » est entièrement validé (N1 + N2)",
+        ];
     }
 }

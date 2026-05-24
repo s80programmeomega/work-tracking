@@ -88,9 +88,22 @@ class NotificationService
             return false;
         }
 
+        // G3: les événements N1/N2 ont été ajoutés au "high-signal" set
+        // pour que les validateurs reçoivent un push quand un résultat
+        // arrive dans leur file. Avant cette extension, les 5 notifs
+        // de validation hard-codaient leur via() en ['mail', 'database']
+        // et ne touchaient jamais le canal webpush — d'où le bug "push
+        // ne fonctionne pas même après Task 8b".
         return match ($eventType) {
+            // High-signal — push activé par défaut
             'renvoye_n0', 'transmis_auto', 'bypass', 'escalades_abusives',
-            'unjustified_return_alert' => true,
+            'unjustified_return_alert',
+            'soumis_n1', 'en_validation_n2',
+            'valide_n1', 'valide_n2',
+            'rejete_n1', 'rejete_n2',
+            'validation_complete' => true,
+
+            // Low-signal — uniquement in-app
             'evaluation_sheet_ready', 'approuve_n0', 'score_updated' => false,
             default => false,
         };
@@ -215,9 +228,16 @@ class NotificationService
     {
         // Map known event types to preference columns (when they exist) or
         // a default. We use match() so the dispatch is explicit and greppable.
+        //
+        // G3: événements N1/N2 ajoutés pour qu'ils héritent du canal mail
+        // via channelsFor() — alignement avec wantsWebPush().
         return match ($eventType) {
             'renvoye_n0', 'transmis_auto', 'bypass', 'escalades_abusives',
-            'evaluation_sheet_ready', 'unjustified_return_alert' => true,
+            'evaluation_sheet_ready', 'unjustified_return_alert',
+            'soumis_n1', 'en_validation_n2',
+            'valide_n1', 'valide_n2',
+            'rejete_n1', 'rejete_n2',
+            'validation_complete' => true,
             'approuve_n0', 'score_updated' => false,
             // Unknown event type — opt out of email by default to be safe.
             default => false,
