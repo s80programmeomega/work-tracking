@@ -565,8 +565,8 @@ const menuGroups = computed(() => [
                     },
  
                     {
-                        name: 'Tâches en attente de validation',
-                        path: '/taches/resultats/en-attente',
+                        name: 'Mes validations en attente',
+                        path: '/mes-validations',
                         icon: '⏳'
                     },
                     // {
@@ -601,7 +601,7 @@ const menuGroups = computed(() => [
                 name: 'Évaluations',
                 subItems: [
                     { name: 'Tableau de bord', path: '/evaluations/dashboard' },
-                    { name: 'Validations en attente', path: '/validations/en-attente' },
+                    { name: 'Validations à traiter', path: '/validations/a-traiter' },
                     // { name: 'Rapport hebdomadaire', path: '/evaluations/rapport-hebdomadaire' },
                     { name: 'Fiches d\'évaluation', path: '/evaluations/fiches' },
                     // { name: 'Performance d\'équipe', path: '/evaluations/performance' },

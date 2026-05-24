@@ -570,6 +570,40 @@ class EvaluationController extends Controller
     }
 
     /**
+     * G5: Results I submitted that are awaiting someone else's validation action.
+     *
+     * Audience: the result author (assignee POV).
+     * Returns results where user_id = auth()->id() and statut is en_validation_n1
+     * or en_validation_n2. No permission gate beyond auth — every authenticated
+     * user can see their own pending results.
+     */
+    public function mesResultatsEnAttente(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $resultats = TacheResultat::query()
+            ->with(['tache.activite.projet', 'validateurN1', 'validateurN2'])
+            ->where('user_id', $user->id)
+            ->whereIn('statut', ['en_validation_n1', 'en_validation_n2'])
+            ->latest('soumis_le')
+            ->get();
+
+        $counts = [
+            'en_validation_n1' => $resultats->where('statut', 'en_validation_n1')->count(),
+            'en_validation_n2' => $resultats->where('statut', 'en_validation_n2')->count(),
+            'total' => $resultats->count(),
+        ];
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'resultats' => TacheResultatResource::collection($resultats),
+                'counts' => $counts,
+            ],
+        ]);
+    }
+
+    /**
      * ✅ Validation N1 - STRICT
      */
     public function validateN1(Request $request, TacheResultat $resultat): JsonResponse

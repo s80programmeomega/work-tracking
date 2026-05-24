@@ -348,11 +348,26 @@ const router = createRouter({
     {
       path: '/taches/resultats/en-attente',
       name: 'taches.resultats.pending',
+      redirect: '/validations/a-traiter',
+    },
+    {
+      path: '/validations/a-traiter',
+      name: 'validations.a-traiter',
       component: () => import('../pages/ValidationResultats.vue'),
       meta: {
-        title: 'Tâches en Attente Validation',
+        title: 'Validations à traiter',
         requiresAuth: true,
-        breadcrumb: 'Tache en Attente de Validation'
+        breadcrumb: 'Validations à traiter'
+      }
+    },
+    {
+      path: '/mes-validations',
+      name: 'mes-validations',
+      component: () => import('../pages/MesValidationsEnAttente.vue'),
+      meta: {
+        title: 'Mes validations en attente',
+        requiresAuth: true,
+        breadcrumb: 'Mes validations en attente'
       }
     },
     {

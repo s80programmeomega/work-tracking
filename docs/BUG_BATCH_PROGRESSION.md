@@ -22,7 +22,7 @@
 | G1 | `TacheController::show` returns raw model | #1, #8 | `c9d1bda` | ✅ | 2026-05-24 | +8 tests (156 total) | `TacheResource` wrap + `TacheControllerShowResourceTest` |
 | G2 | Central self-notification guard + delete 3 self-confirm classes | #1, #9, #11 | `2304798` | ✅ | 2026-05-24 | +8 tests (156 total) | `sendUnlessSelf()` + `NoSelfNotificationTest` |
 | G3 | Route 7 N1/N2 notifications through `channelsFor()` + add event types to push/email matchers | #4, #10 (partial) | `af0484a` | ✅ | 2026-05-24 | +15 tests (171 total) | `NotificationServiceChannelsForTest` |
-| G4 | Verify N1→N2 pending counter + Dusk coverage | #5 | — | ⬜ | — | — | Half-fixed by `451aa4d`; needs counter assertion + Dusk |
+| G4 | Verify N1→N2 pending counter + Dusk coverage | #5 | `c2e6f48` | ✅ | 2026-05-24 | +2 tests (173 total) | `ValidationStatutTransitionTest` extended + `PendingValidationsTest` Dusk case |
 | G5 | Split "Validations" pages by audience (assignee vs validator) | #2 | — | ⬜ | — | — | Rename routes + sidebar labels + scope queries |
 | G6 | Subtask badge on all Kanban variants | #7 | — | ⬜ | — | — | Extract `SubtaskCountBadge.vue` + wire 3 Kanban files |
 | G7 | Consolidate duplicate modals (3× ResultatDetail, 2× ValidationModal) | #12 | — | ⬜ | — | — | Keep `taches/resultats/`; delete legacy; rewire imports |
@@ -83,14 +83,14 @@
 
 ---
 
-### G4 — N1→N2 transition verification ⬜
+### G4 — N1→N2 transition verification ✅
 
-- [ ] Confirm `ValidationStatutTransitionTest` still covers the pending-N2 counter query after `validateByN1`
-- [ ] Extend `ValidationStatutTransitionTest`: assert pending-N2 dashboard query returns the right `user_id` after `validateByN1`
-- [ ] Dusk: extend `tests/Browser/Evaluation/PendingValidationsTest.php` — pending counter increments after N1 click, no F5
-- [ ] `vendor/bin/pint --dirty` clean
-- [ ] `php artisan test --compact` passing
-- [ ] Dusk filter `PendingValidationsTest` passing
+- [x] Confirm `ValidationStatutTransitionTest` still covers the pending-N2 counter query after `validateByN1`
+- [x] Extend `ValidationStatutTransitionTest`: assert pending-N2 row has correct `user_id` (author) and `validateur_n1_id`
+- [x] Extend `ValidationStatutTransitionTest`: two-context scope-leak test confirms both rows appear with distinct `user_id`s
+- [x] Dusk: extend `tests/Browser/Evaluation/PendingValidationsTest.php` — pending-N2 section visible when result is seeded in `en_validation_n2`
+- [x] `vendor/bin/pint --dirty` clean
+- [x] `php artisan test --compact --filter=ValidationStatutTransitionTest` — 6 passing
 
 ---
 

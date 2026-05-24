@@ -406,8 +406,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Statistiques globales de validation
         Route::get('/stats/global', [EvaluationController::class, 'globalValidationStats']);
 
-        // 📋 Liste des résultats en attente de validation (personnalisée par rôle)
+        // 📋 Validator queue: results awaiting MY action as N1 or N2 (by responsable_id scope)
         Route::get('/resultats/en-attente', [EvaluationController::class, 'pendingValidations']);
+
+        // G5: Assignee view — results I submitted that are waiting on someone else's action
+        Route::get('/mes-resultats/en-attente', [EvaluationController::class, 'mesResultatsEnAttente']);
 
         // Task 7: Pending validations dashboard + score query
         Route::get('/validations/en-attente', [EvaluationController::class, 'pendingValidationsDashboard']);
