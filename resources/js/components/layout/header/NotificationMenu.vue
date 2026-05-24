@@ -129,7 +129,7 @@ import { useNotifications } from '@/composables/useNotifications'
 import { useAuthStore } from '@/stores/authStore'
 import NotificationItem from './NotificationItem.vue'
 import NotificationDetailModal from './NotificationDetailModal.vue'
-import ResultatDetailModal from '@/components/modals/ResultatDetailModal.vue'
+import ResultatDetailModal from '@/components/taches/resultats/ResultatDetailModal.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()

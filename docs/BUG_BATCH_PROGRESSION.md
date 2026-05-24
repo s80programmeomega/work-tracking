@@ -24,7 +24,7 @@
 | G3 | Route 7 N1/N2 notifications through `channelsFor()` + add event types to push/email matchers | #4, #10 (partial) | `af0484a` | ✅ | 2026-05-24 | +15 tests (171 total) | `NotificationServiceChannelsForTest` |
 | G4 | Verify N1→N2 pending counter + Dusk coverage | #5 | `c2e6f48` | ✅ | 2026-05-24 | +2 tests (173 total) | `ValidationStatutTransitionTest` extended + `PendingValidationsTest` Dusk case |
 | G5 | Split "Validations" pages by audience (assignee vs validator) | #2 | `a8fb52f` | ✅ | 2026-05-24 | +9 tests (182 total) | `/mes-validations` + `/validations/a-traiter` + `MesValidationsEnAttente.vue` |
-| G6 | Subtask badge on all Kanban variants | #7 | — | ⬜ | — | — | Extract `SubtaskCountBadge.vue` + wire 3 Kanban files |
+| G6 | Subtask badge on all Kanban variants | #7 | `73a8ef4` | ✅ | 2026-05-24 | no new tests | All main cards already had badge; only `dashboard/KanbanTaskCard.vue` was missing it |
 | G7 | Consolidate duplicate modals (3× ResultatDetail, 2× ValidationModal) | #12 | — | ⬜ | — | — | Keep `taches/resultats/`; delete legacy; rewire imports |
 | G8 | Gate every sidebar entry via `useWorkspacePermissions` | #13 | — | ⬜ | — | — | `AppSidebar.vue` + new composable helpers |
 | G9 | Finish subtasks: `removeIntervenant` endpoint + intervenant UI + responsable field | #3 | — | ⬜ | — | — | Backend endpoint + `SousTacheIntervenantsPanel.vue` |

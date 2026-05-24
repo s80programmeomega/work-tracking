@@ -311,7 +311,7 @@ import AdminLayout from '@/components/layout/AdminLayout.vue'
 // import StatCard from '@/components/common/StatCard.vue'
 import EvaluationRow from '@/components/taches/EvaluationRow.vue'
 import ResultatFormModal from '@/components/taches/ResultatForm.vue'
-import ResultatDetailModal from '@/components/taches/ResultatDetailModal.vue'
+import ResultatDetailModal from '@/components/taches/resultats/ResultatDetailModal.vue'
 
 // État réactif
 const router = useRouter()

@@ -334,7 +334,7 @@ import DatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import TacheDetailModal from '@/components/taches/TacheDetailModal.vue'
-import ValidationModal from '@/components/taches/ValidationModal.vue'
+import ValidationModal from '@/components/taches/resultats/ValidationModal.vue'
 import ReportModal from '@/components/reports/ReportModal.vue'
 import api from '@/api/axios'
 
