@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git commit -m ' *)",
+      "Bash(grep -nE ''\\\\''data'\\\\''\\\\s*=>\\\\s*\\\\$tache\\\\b|'\\\\''data'\\\\''\\\\s*=>\\\\s*\\\\$newTache' /media/jonas/Jonas/Work-traking/app/Http/Controllers/Api/TacheController.php)"
+    ]
+  }
+}

@@ -83,7 +83,13 @@ class SousTacheService
             ],
         ]);
 
-        $intervenant->notify(new SousTacheAssigneeNotification($sousTache, $actor));
+        // G2: garde-fou — l'acteur peut s'auto-assigner (rare, mais ne sert
+        // à rien de se notifier soi-même).
+        app(NotificationService::class)->sendUnlessSelf(
+            $intervenant,
+            $actor,
+            new SousTacheAssigneeNotification($sousTache, $actor)
+        );
 
         Log::info('SousTache intervenant assigned', [
             'user_id' => $actor->id,

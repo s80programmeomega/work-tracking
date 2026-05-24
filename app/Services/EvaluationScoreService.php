@@ -195,7 +195,10 @@ class EvaluationScoreService
 
         // In-app notification so the responsable sees their score moved.
         // Email policy lives in the Notification class (Guide 12).
-        $responsable->notify(new ScoreUpdatedNotification($score));
+        // G2: guard contre l'auto-notification quand le responsable est
+        // lui-même l'acteur N1 (cas de bord rare mais possible).
+        app(NotificationService::class)
+            ->sendUnlessSelf($responsable, $n1Actor, new ScoreUpdatedNotification($score));
 
         Log::info('Score N1 enregistré', [
             'user_id' => $responsable->id,

@@ -373,4 +373,37 @@ class NotificationService
             'time_ago' => $notification->created_at->diffForHumans(),
         ];
     }
+
+    /**
+     * Garde-fou central anti-auto-notification (G2 du bug-batch).
+     *
+     * Règle métier: l'acteur d'une action ne doit jamais recevoir lui-même
+     * la notification déclenchée par cette action. C'est juste du bruit:
+     * "vous avez approuvé X" est déjà confirmé par le toast/réponse de
+     * l'API.
+     *
+     * Avant ce helper, chaque site d'appel pouvait oublier le `if
+     * ($actor->id !== $notifiable->id)` et générer une notif vers soi-même
+     * (vu sur les *ConfirmeeNotification* de N1/N2 et RejetConfirme).
+     *
+     * Usage:
+     *   app(NotificationService::class)
+     *       ->sendUnlessSelf($recipient, $actor, new XNotification(...));
+     *
+     * Si `$actor` est null (système, scheduler, timeout-auto), on envoie
+     * sans condition — il n'y a personne à confondre avec le destinataire.
+     */
+    public function sendUnlessSelf(User $notifiable, ?User $actor, Notification $notification): void
+    {
+        if ($actor && $actor->id === $notifiable->id) {
+            Log::debug('Auto-notification supprimée', [
+                'user_id' => $notifiable->id,
+                'notification' => $notification::class,
+            ]);
+
+            return;
+        }
+
+        $notifiable->notify($notification);
+    }
 }

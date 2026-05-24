@@ -214,12 +214,18 @@ class TacheService
      */
     public function handleFileUploads(Tache $tache, array $files, User $uploadedBy): void
     {
+        $notifService = app(NotificationService::class);
+
         foreach ($files as $file) {
             $attachment = $this->uploadFile($tache, $file, $uploadedBy);
 
-            // Notifier tous les assignees
+            // Notifier tous les assignees sauf l'uploader (G2 garde-fou).
             foreach ($tache->assignees as $assignee) {
-                $assignee->notify(new TacheFileAddedNotification($tache, $uploadedBy, $attachment));
+                $notifService->sendUnlessSelf(
+                    $assignee,
+                    $uploadedBy,
+                    new TacheFileAddedNotification($tache, $uploadedBy, $attachment)
+                );
             }
         }
     }
@@ -305,10 +311,15 @@ class TacheService
 
         $deleted = $attachment->delete();
 
-        // Notifier les assignees
+        // Notifier les assignees sauf l'acteur (G2).
         if ($deleted) {
+            $notifService = app(NotificationService::class);
             foreach ($tache->assignees as $assignee) {
-                $assignee->notify(new TacheFileRemovedNotification($tache, $deletedBy, $attachment));
+                $notifService->sendUnlessSelf(
+                    $assignee,
+                    $deletedBy,
+                    new TacheFileRemovedNotification($tache, $deletedBy, $attachment)
+                );
             }
         }
 
@@ -320,6 +331,8 @@ class TacheService
      */
     public function addExternalLinks(Tache $tache, array $links, User $createdBy): void
     {
+        $notifService = app(NotificationService::class);
+
         foreach ($links as $link) {
             $linkModel = TacheExternalLink::create([
                 'tache_id' => $tache->id,
@@ -328,9 +341,13 @@ class TacheService
                 'created_by' => $createdBy->id,
             ]);
 
-            // Notifier les assignees
+            // Notifier les assignees sauf l'acteur (G2).
             foreach ($tache->assignees as $assignee) {
-                $assignee->notify(new TacheLinkAddedNotification($tache, $createdBy, $linkModel));
+                $notifService->sendUnlessSelf(
+                    $assignee,
+                    $createdBy,
+                    new TacheLinkAddedNotification($tache, $createdBy, $linkModel)
+                );
             }
         }
     }
@@ -343,10 +360,15 @@ class TacheService
         $tache = $link->tache;
         $deleted = $link->delete();
 
-        // Notifier les assignees
+        // Notifier les assignees sauf l'acteur (G2).
         if ($deleted) {
+            $notifService = app(NotificationService::class);
             foreach ($tache->assignees as $assignee) {
-                $assignee->notify(new TacheLinkRemovedNotification($tache, $deletedBy, $link));
+                $notifService->sendUnlessSelf(
+                    $assignee,
+                    $deletedBy,
+                    new TacheLinkRemovedNotification($tache, $deletedBy, $link)
+                );
             }
         }
 
