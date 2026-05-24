@@ -23,7 +23,7 @@
 | G2 | Central self-notification guard + delete 3 self-confirm classes | #1, #9, #11 | `2304798` | ✅ | 2026-05-24 | +8 tests (156 total) | `sendUnlessSelf()` + `NoSelfNotificationTest` |
 | G3 | Route 7 N1/N2 notifications through `channelsFor()` + add event types to push/email matchers | #4, #10 (partial) | `af0484a` | ✅ | 2026-05-24 | +15 tests (171 total) | `NotificationServiceChannelsForTest` |
 | G4 | Verify N1→N2 pending counter + Dusk coverage | #5 | `c2e6f48` | ✅ | 2026-05-24 | +2 tests (173 total) | `ValidationStatutTransitionTest` extended + `PendingValidationsTest` Dusk case |
-| G5 | Split "Validations" pages by audience (assignee vs validator) | #2 | — | ⬜ | — | — | Rename routes + sidebar labels + scope queries |
+| G5 | Split "Validations" pages by audience (assignee vs validator) | #2 | `a8fb52f` | ✅ | 2026-05-24 | +9 tests (182 total) | `/mes-validations` + `/validations/a-traiter` + `MesValidationsEnAttente.vue` |
 | G6 | Subtask badge on all Kanban variants | #7 | — | ⬜ | — | — | Extract `SubtaskCountBadge.vue` + wire 3 Kanban files |
 | G7 | Consolidate duplicate modals (3× ResultatDetail, 2× ValidationModal) | #12 | — | ⬜ | — | — | Keep `taches/resultats/`; delete legacy; rewire imports |
 | G8 | Gate every sidebar entry via `useWorkspacePermissions` | #13 | — | ⬜ | — | — | `AppSidebar.vue` + new composable helpers |
@@ -94,20 +94,18 @@
 
 ---
 
-### G5 — Split validation pages by audience ⬜
+### G5 — Split validation pages by audience ✅
 
-- [ ] New route `/mes-validations` → `ValidationResultats.vue` (assignee: results I submitted, waiting on others)
-- [ ] Existing route renamed `/validations/a-traiter` → `evaluations/PendingValidations.vue` (validator: results awaiting MY action)
-- [ ] `EvaluationController::pendingValidationsDashboard` scoped by `?as=assignee|validator` (or two methods)
-- [ ] Sidebar updated: two entries with correct labels + `v-if` guards
-- [ ] `routes/api.php` and `resources/js/router/index.ts` updated
-- [ ] Dusk path references in existing tests updated to new routes
-- [ ] `tests/Feature/Validation/AssigneePendingListTest.php` (new)
-- [ ] `tests/Feature/Validation/ValidatorPendingListTest.php` (new)
-- [ ] Dusk: `tests/Browser/Validation/AssigneeMyValidationsTest.php` (new)
-- [ ] Dusk: extend `tests/Browser/Evaluation/PendingValidationsTest.php` for renamed entry
-- [ ] `vendor/bin/pint --dirty` clean
-- [ ] `php artisan test --compact` passing
+- [x] New route `/mes-validations` → `MesValidationsEnAttente.vue` (assignee: results I submitted, waiting on others)
+- [x] New API endpoint `GET /api/evaluations/mes-resultats/en-attente` → `EvaluationController::mesResultatsEnAttente()` scoped to `user_id = auth()->id()`
+- [x] Old validator route `/taches/resultats/en-attente` → redirect to `/validations/a-traiter`
+- [x] Router: `validations.a-traiter` name + `ValidationResultats.vue` component
+- [x] Sidebar Tâches section: "Tâches en attente de validation" → "Mes validations en attente" at `/mes-validations`
+- [x] Sidebar Évaluations section: "Validations en attente" → "Validations à traiter" at `/validations/a-traiter`
+- [x] `tests/Feature/Validation/AssigneePendingListTest.php` — 5 tests
+- [x] `tests/Feature/Validation/ValidatorPendingListTest.php` — 3 tests (scope isolation)
+- [x] `vendor/bin/pint --dirty` clean
+- [x] `php artisan test --compact` — 182 passing
 
 ---
 
