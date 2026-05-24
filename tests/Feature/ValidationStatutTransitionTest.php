@@ -131,4 +131,46 @@ class ValidationStatutTransitionTest extends TestCase
             'Après validation N1 (avec N2 requis), le résultat doit apparaître dans la file N2.'
         );
     }
+
+    /** @test */
+    public function n2_pending_query_returns_correct_user_id_after_n1_validation(): void
+    {
+        // G4: vérifie que la row en_validation_n2 appartient bien à l'auteur du résultat,
+        // pas au validateur N1 — scoping bug potentiel si user_id était mal propagé.
+        ['resultat' => $resultat, 'author' => $author] = $this->makeContext(n2Required: true);
+        $n1 = User::factory()->create();
+
+        $resultat->validateByN1($n1, 'OK');
+
+        $pending = TacheResultat::where('statut', 'en_validation_n2')->first();
+
+        $this->assertNotNull($pending, 'Une row en_validation_n2 doit exister après validateByN1.');
+        $this->assertSame($author->id, $pending->user_id, 'La row doit appartenir à l\'auteur du résultat, pas au validateur N1.');
+        $this->assertSame($n1->id, $pending->validateur_n1_id, 'validateur_n1_id doit pointer vers le validateur N1.');
+    }
+
+    /** @test */
+    public function n2_pending_query_does_not_include_unrelated_users_results(): void
+    {
+        // G4: scope leak — un résultat en_validation_n2 d'un autre auteur ne doit pas
+        // polluer la file d'un autre contexte. Crée deux résultats indépendants.
+        ['resultat' => $resultat1] = $this->makeContext(n2Required: true);
+        ['resultat' => $resultat2] = $this->makeContext(n2Required: true);
+
+        $n1a = User::factory()->create();
+        $n1b = User::factory()->create();
+
+        $resultat1->validateByN1($n1a, 'OK A');
+        $resultat2->validateByN1($n1b, 'OK B');
+
+        $this->assertSame(
+            2,
+            TacheResultat::where('statut', 'en_validation_n2')->count(),
+            'Les deux résultats doivent être en file N2 indépendamment.'
+        );
+
+        // Chaque row a un user_id distinct
+        $userIds = TacheResultat::where('statut', 'en_validation_n2')->pluck('user_id');
+        $this->assertCount(2, $userIds->unique(), 'Les deux rows doivent appartenir à des auteurs différents.');
+    }
 }
