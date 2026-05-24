@@ -73,6 +73,8 @@ class WorkspaceController extends Controller
                 'can_manage_workspace_settings' => $gate->userCan($user, Permission::WORKSPACES_MANAGE_SETTINGS, $workspace),
                 'can_view_pending_validations' => $gate->userCan($user, Permission::EVALUATIONS_VIEW_PENDING, $workspace),
                 'can_view_evaluation_score' => $gate->userCan($user, Permission::EVALUATIONS_VIEW_SCORE, $workspace),
+                'can_view_fiche_evaluation' => $gate->userCan($user, Permission::EVALUATIONS_VIEW_FICHE, $workspace),
+                'can_export_fiche_evaluation' => $gate->userCan($user, Permission::EVALUATIONS_EXPORT_FICHE, $workspace),
                 'can_manage_notification_preferences' => $gate->userCan($user, Permission::NOTIFICATIONS_MANAGE_PREFERENCES, $workspace),
             ];
 
@@ -713,6 +715,8 @@ class WorkspaceController extends Controller
                         'can_manage_workspace_settings' => $gate->userCan($user, Permission::WORKSPACES_MANAGE_SETTINGS, $workspace),
                         'can_view_pending_validations' => $gate->userCan($user, Permission::EVALUATIONS_VIEW_PENDING, $workspace),
                         'can_view_evaluation_score' => $gate->userCan($user, Permission::EVALUATIONS_VIEW_SCORE, $workspace),
+                        'can_view_fiche_evaluation' => $gate->userCan($user, Permission::EVALUATIONS_VIEW_FICHE, $workspace),
+                        'can_export_fiche_evaluation' => $gate->userCan($user, Permission::EVALUATIONS_EXPORT_FICHE, $workspace),
                         'can_manage_notification_preferences' => $gate->userCan($user, Permission::NOTIFICATIONS_MANAGE_PREFERENCES, $workspace),
                     ],
                 ];
@@ -1476,6 +1480,8 @@ class WorkspaceController extends Controller
                     'can_manage_workspace_settings' => $gate->userCan($user, Permission::WORKSPACES_MANAGE_SETTINGS, $workspace),
                     'can_view_pending_validations' => $gate->userCan($user, Permission::EVALUATIONS_VIEW_PENDING, $workspace),
                     'can_view_evaluation_score' => $gate->userCan($user, Permission::EVALUATIONS_VIEW_SCORE, $workspace),
+                    'can_view_fiche_evaluation' => $gate->userCan($user, Permission::EVALUATIONS_VIEW_FICHE, $workspace),
+                    'can_export_fiche_evaluation' => $gate->userCan($user, Permission::EVALUATIONS_EXPORT_FICHE, $workspace),
                     'can_manage_notification_preferences' => $gate->userCan($user, Permission::NOTIFICATIONS_MANAGE_PREFERENCES, $workspace),
                 ],
             ]),

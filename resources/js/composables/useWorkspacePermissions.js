@@ -61,6 +61,13 @@ export function useWorkspacePermissions(workspace = null) {
     const canViewPendingValidations = computed(() => isSuperAdmin.value || (perms.value.can_view_pending_validations ?? false))
     const canViewEvaluationScore    = computed(() => isSuperAdmin.value || (perms.value.can_view_evaluation_score ?? false))
 
+    // Task 9: Agent evaluation sheet
+    // canViewFicheEvaluation gates the entry to the sheet page; the controller
+    // re-applies a per-target scope check (own / cadre→assignees / manager→activity).
+    // canExportFicheEvaluation gates the export action (PDF/Excel) — same scope.
+    const canViewFicheEvaluation   = computed(() => isSuperAdmin.value || (perms.value.can_view_fiche_evaluation ?? false))
+    const canExportFicheEvaluation = computed(() => isSuperAdmin.value || (perms.value.can_export_fiche_evaluation ?? false))
+
     // Task 8: Notifications
     const canManageNotificationPreferences = computed(() => isSuperAdmin.value || (perms.value.can_manage_notification_preferences ?? false))
 
@@ -122,6 +129,10 @@ export function useWorkspacePermissions(workspace = null) {
         // Task 7
         canViewPendingValidations,
         canViewEvaluationScore,
+
+        // Task 9
+        canViewFicheEvaluation,
+        canExportFicheEvaluation,
 
         // Task 8
         canManageNotificationPreferences,

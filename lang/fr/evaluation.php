@@ -5,11 +5,61 @@ return [
         'cannot_view_pending' => 'Vous n\'avez pas la permission de voir les validations en attente.',
         'cannot_view_score' => 'Vous n\'avez pas la permission de voir les scores d\'évaluation.',
         'cannot_view_others_score' => 'Vous n\'avez pas la permission de voir le score d\'un autre utilisateur.',
+        'cannot_view_fiche' => 'Vous n\'avez pas la permission de consulter cette fiche d\'évaluation.',
+        'no_workspace' => 'Aucun workspace courant n\'est sélectionné.',
+        'immutable_post_n2' => 'Cette tâche est verrouillée: elle a été validée au niveau N2 et ne peut plus être modifiée.',
     ],
 
     'criteria' => [
         'n1_validated_despite_return' => 'Renvoi non justifié (pénalité)',
         'n1_confirmed_return' => 'Renvoi confirmé (bonus)',
+
+        // Task 9 — Les 8 critères pondérés de la fiche d'évaluation.
+        // Libellés courts (≤ 30 chars) optimisés pour l'affichage en grille.
+        'completion_rate' => 'Taux de complétion',
+        'deadline_respect' => 'Respect des échéances',
+        'result_quality' => 'Qualité des résultats',
+        'first_pass_validation' => 'Validation 1er passage',
+        'justified_returns' => 'Renvois justifiés',
+        'inactions' => 'Inactions (timeouts)',
+        'work_volume' => 'Volume de travail',
+        'team_coordination' => 'Coordination d\'équipe',
+    ],
+
+    // Task 9 — Page Fiche d'évaluation (FichesEvaluation / AgentSheet).
+    'sheet' => [
+        'title' => 'Fiche d\'évaluation',
+        'global_score' => 'Score global',
+        'period_label' => 'Période',
+        'sections' => [
+            'directed_tasks' => 'Tâches dirigées',
+            'directed_subtasks' => 'Sous-tâches dirigées',
+            'assignee_tasks' => 'Tâches assignées',
+            'assignee_subtasks' => 'Sous-tâches assignées',
+        ],
+        'filters' => [
+            'from' => 'Du',
+            'to' => 'Au',
+            'statut' => 'Statut',
+            'apply' => 'Appliquer',
+            'reset' => 'Réinitialiser',
+            'all' => 'Tous',
+        ],
+        'indicators' => [
+            'return_quality' => 'Qualité des renvois',
+            'unjustified_threshold' => 'Au-dessus du seuil (40%)',
+            'escalades_abusives' => 'Escalades abusives',
+            'export' => 'Exporter',
+            'justified' => 'Renvois justifiés',
+            'unjustified' => 'Renvois injustifiés',
+            'threshold_note' => 'Un taux d\'injustifiés supérieur à 40% déclenche une alerte automatique au manager.',
+        ],
+        'criteria_panel_title' => 'Détail des 8 critères',
+        'weight_label' => 'Poids',
+        'raw_label' => 'Valeur',
+        'weighted_label' => 'Pondéré',
+        'subtask_coefficient_note' => 'Les sous-tâches contribuent au score à coefficient 0.5.',
+        'empty' => 'Aucun élément dans cette section sur la période.',
     ],
 
     'dashboard' => [
@@ -43,6 +93,15 @@ return [
     'notifications' => [
         'score_updated' => [
             'subject' => 'Votre score a été mis à jour',
+        ],
+        'sheet_ready' => [
+            'subject' => 'Votre fiche d\'évaluation est prête',
+        ],
+        'unjustified_return_alert' => [
+            'subject' => 'Alerte: taux de renvois injustifiés élevé',
+            'line1' => ':nom a dépassé le seuil de renvois injustifiés (:rate% des décisions N1 ont inversé un renvoi).',
+            'line2' => 'Période évaluée: :start → :end.',
+            'action' => 'Consulter sa fiche',
         ],
     ],
 ];

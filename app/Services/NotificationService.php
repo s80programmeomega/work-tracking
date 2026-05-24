@@ -89,8 +89,9 @@ class NotificationService
         }
 
         return match ($eventType) {
-            'renvoye_n0', 'transmis_auto', 'bypass', 'escalades_abusives' => true,
-            'approuve_n0', 'score_updated' => false,
+            'renvoye_n0', 'transmis_auto', 'bypass', 'escalades_abusives',
+            'unjustified_return_alert' => true,
+            'evaluation_sheet_ready', 'approuve_n0', 'score_updated' => false,
             default => false,
         };
     }
@@ -215,7 +216,8 @@ class NotificationService
         // Map known event types to preference columns (when they exist) or
         // a default. We use match() so the dispatch is explicit and greppable.
         return match ($eventType) {
-            'renvoye_n0', 'transmis_auto', 'bypass', 'escalades_abusives' => true,
+            'renvoye_n0', 'transmis_auto', 'bypass', 'escalades_abusives',
+            'evaluation_sheet_ready', 'unjustified_return_alert' => true,
             'approuve_n0', 'score_updated' => false,
             // Unknown event type — opt out of email by default to be safe.
             default => false,

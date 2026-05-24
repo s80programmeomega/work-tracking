@@ -6,13 +6,18 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\TacheResource;
 use App\Http\Resources\TacheResultatResource;
 use App\Models\Activite;
+use App\Models\SousTache;
 use App\Models\Tache;
 use App\Models\TacheResultat;
 use App\Models\User;
 use App\Models\Workspace;
+use App\Notifications\EvaluationSheetReadyNotification;
+use App\Notifications\InjustifiedReturnAlertNotification;
 use App\Permissions\ContextualPermissionGate;
 use App\Permissions\Permission;
 use App\Services\EvaluationScoreService;
+use App\Services\NotificationService;
+use App\Services\PermissionService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -162,6 +167,318 @@ class EvaluationController extends Controller
      *     trust the workspace gate; Task 9 will refine to "only my assignees")
      *   - everyone else: only their own score
      */
+    /**
+     * Task 9: full agent evaluation sheet for a target user over a period.
+     *
+     * Endpoint: GET /api/evaluations/personnel/{user}/score
+     *
+     * Query params (all optional):
+     *   - start: ISO date Y-m-d. Defaults to today-30 days.
+     *   - end:   ISO date Y-m-d. Defaults to today.
+     *
+     * Permission check happens in two layers:
+     *   1. Hard role gate: caller must have EVALUATIONS_VIEW_FICHE
+     *      in their current workspace (covers manager/cadre/owner/observateur…).
+     *   2. Per-target scope: PermissionService::canViewFicheEvaluation
+     *      enforces "own only / cadre→assignees / manager→activity /
+     *      owner→workspace" — the actual fiche of $target must be in
+     *      the caller's reach.
+     *
+     * Response shape mirrors EvaluationScoreService::calculerScore() and
+     * adds the target's identity for the UI header.
+     */
+    public function agentSheet(Request $request, User $user): JsonResponse
+    {
+        $validated = $request->validate([
+            'start' => 'sometimes|nullable|date_format:Y-m-d',
+            'end' => 'sometimes|nullable|date_format:Y-m-d|after_or_equal:start',
+        ]);
+
+        $actor = $request->user();
+        $workspace = $actor->currentWorkspace;
+
+        if (! $workspace) {
+            return response()->json([
+                'success' => false,
+                'message' => __('evaluation.errors.no_workspace'),
+            ], 403);
+        }
+
+        $permissionService = app(PermissionService::class);
+        $gate = app(ContextualPermissionGate::class);
+
+        if (! $permissionService->canViewFicheEvaluation($actor, $user, $workspace, $gate)) {
+            return response()->json([
+                'success' => false,
+                'message' => __('evaluation.errors.cannot_view_fiche'),
+            ], 403);
+        }
+
+        $start = $validated['start'] ?? now()->subDays(30)->toDateString();
+        $end = $validated['end'] ?? now()->toDateString();
+
+        $sheet = $this->scoreService->calculerScore($user, $start, $end);
+
+        // Dispatch notifications — chacune est dédupée par NotificationService
+        // (fenêtre de 5 min), donc un visiteur qui recharge la page ne génère
+        // pas un flot de notifications. Ces appels sont fire-and-forget: les
+        // notifications implémentent ShouldQueue et leur via() consulte
+        // channelsFor() pour respecter les préférences de l'utilisateur.
+        $this->dispatchSheetReadyIfNeeded($user, $sheet);
+        $this->dispatchUnjustifiedAlertIfNeeded($user, $sheet, $workspace);
+
+        // Indicators metadata for the UI header — actor permissions are
+        // baked in so the frontend doesn't need to re-derive them.
+        $canExport = $permissionService->canExportFicheEvaluation($actor, $user, $workspace, $gate);
+
+        return response()->json([
+            'success' => true,
+            'data' => array_merge($sheet, [
+                'user' => [
+                    'id' => $user->id,
+                    'nom' => $user->nom,
+                    'nom_complet' => $user->nom_complet ?? trim(($user->prenom ?? '').' '.($user->nom ?? '')),
+                    'email' => $user->email,
+                    'avatar' => $user->avatar ?? null,
+                ],
+                'meta' => [
+                    'can_export' => $canExport,
+                    'is_self' => $actor->id === $user->id,
+                ],
+            ]),
+        ]);
+    }
+
+    /**
+     * Task 9: 4-section paginated history for the agent sheet page.
+     *
+     * Endpoint: GET /api/evaluations/personnel/{user}/historique
+     *
+     * Query params:
+     *   - section: 'directed_tasks' | 'directed_subtasks' | 'assignee_tasks' | 'assignee_subtasks'
+     *   - start, end: ISO date Y-m-d window (defaults: last 30 days)
+     *   - statut: optional filter on tache.statut / sous_tache.statut
+     *   - projet_id, activite_id: optional scope filter
+     *   - per_page: 1..50 (default 20)
+     *
+     * Same two-layer auth as agentSheet().
+     */
+    public function agentSheetSections(Request $request, User $user): JsonResponse
+    {
+        $validated = $request->validate([
+            'section' => 'required|in:directed_tasks,directed_subtasks,assignee_tasks,assignee_subtasks',
+            'start' => 'sometimes|nullable|date_format:Y-m-d',
+            'end' => 'sometimes|nullable|date_format:Y-m-d|after_or_equal:start',
+            'statut' => 'sometimes|nullable|string',
+            'projet_id' => 'sometimes|nullable|integer|exists:projets,id',
+            'activite_id' => 'sometimes|nullable|integer|exists:activites,id',
+            'per_page' => 'sometimes|integer|min:1|max:50',
+        ]);
+
+        $actor = $request->user();
+        $workspace = $actor->currentWorkspace;
+
+        if (! $workspace) {
+            return response()->json(['success' => false, 'message' => __('evaluation.errors.no_workspace')], 403);
+        }
+
+        $permissionService = app(PermissionService::class);
+        $gate = app(ContextualPermissionGate::class);
+
+        if (! $permissionService->canViewFicheEvaluation($actor, $user, $workspace, $gate)) {
+            return response()->json(['success' => false, 'message' => __('evaluation.errors.cannot_view_fiche')], 403);
+        }
+
+        $start = $validated['start'] ?? now()->subDays(30)->toDateString();
+        $end = $validated['end'] ?? now()->toDateString();
+        $perPage = (int) ($validated['per_page'] ?? 20);
+        $section = $validated['section'];
+
+        $payload = match ($section) {
+            'directed_tasks' => $this->sectionDirectedTasks($user, $start, $end, $validated, $perPage),
+            'directed_subtasks' => $this->sectionDirectedSubtasks($user, $start, $end, $validated, $perPage),
+            'assignee_tasks' => $this->sectionAssigneeTasks($user, $start, $end, $validated, $perPage),
+            'assignee_subtasks' => $this->sectionAssigneeSubtasks($user, $start, $end, $validated, $perPage),
+        };
+
+        return response()->json([
+            'success' => true,
+            'section' => $section,
+            'periode' => ['start' => $start, 'end' => $end],
+            ...$payload,
+        ]);
+    }
+
+    /** Tâches dont l'utilisateur est responsable (tache_user.is_responsable=true). */
+    private function sectionDirectedTasks(User $user, string $start, string $end, array $filters, int $perPage): array
+    {
+        $query = Tache::query()
+            ->whereHas('assignees', fn ($q) => $q->where('users.id', $user->id)->where('tache_user.is_responsable', true))
+            ->with(['activite:id,nom,projet_id', 'activite.projet:id,nom'])
+            ->whereBetween('created_at', [$start, $end.' 23:59:59']);
+
+        $this->applyTacheFilters($query, $filters);
+
+        $paginator = $query->orderByDesc('created_at')->paginate($perPage);
+
+        return [
+            'data' => $paginator->items(),
+            'meta' => ['current_page' => $paginator->currentPage(), 'last_page' => $paginator->lastPage(), 'total' => $paginator->total()],
+        ];
+    }
+
+    /** Sous-tâches dont l'utilisateur est responsable (sous_taches.responsable_id). */
+    private function sectionDirectedSubtasks(User $user, string $start, string $end, array $filters, int $perPage): array
+    {
+        $query = SousTache::query()
+            ->where('responsable_id', $user->id)
+            ->with(['tache:id,titre,activite_id', 'tache.activite:id,nom,projet_id', 'tache.activite.projet:id,nom'])
+            ->whereBetween('created_at', [$start, $end.' 23:59:59']);
+
+        if (! empty($filters['statut'])) {
+            $query->where('statut', $filters['statut']);
+        }
+        if (! empty($filters['activite_id'])) {
+            $query->whereHas('tache', fn ($q) => $q->where('activite_id', $filters['activite_id']));
+        }
+        if (! empty($filters['projet_id'])) {
+            $query->whereHas('tache.activite', fn ($q) => $q->where('projet_id', $filters['projet_id']));
+        }
+
+        $paginator = $query->orderByDesc('created_at')->paginate($perPage);
+
+        return [
+            'data' => $paginator->items(),
+            'meta' => ['current_page' => $paginator->currentPage(), 'last_page' => $paginator->lastPage(), 'total' => $paginator->total()],
+        ];
+    }
+
+    /** Tâches dont l'utilisateur est simple assigné (non-responsable). */
+    private function sectionAssigneeTasks(User $user, string $start, string $end, array $filters, int $perPage): array
+    {
+        $query = Tache::query()
+            ->whereHas('assignees', fn ($q) => $q->where('users.id', $user->id)->where('tache_user.is_responsable', false))
+            ->with(['activite:id,nom,projet_id', 'activite.projet:id,nom'])
+            ->whereBetween('created_at', [$start, $end.' 23:59:59']);
+
+        $this->applyTacheFilters($query, $filters);
+
+        $paginator = $query->orderByDesc('created_at')->paginate($perPage);
+
+        return [
+            'data' => $paginator->items(),
+            'meta' => ['current_page' => $paginator->currentPage(), 'last_page' => $paginator->lastPage(), 'total' => $paginator->total()],
+        ];
+    }
+
+    /** Sous-tâches sur lesquelles l'utilisateur est intervenant (sous_tache_user). */
+    private function sectionAssigneeSubtasks(User $user, string $start, string $end, array $filters, int $perPage): array
+    {
+        $query = SousTache::query()
+            ->whereHas('intervenants', fn ($q) => $q->where('users.id', $user->id))
+            ->where('responsable_id', '!=', $user->id)
+            ->with(['tache:id,titre,activite_id', 'tache.activite:id,nom,projet_id', 'tache.activite.projet:id,nom'])
+            ->whereBetween('created_at', [$start, $end.' 23:59:59']);
+
+        if (! empty($filters['statut'])) {
+            $query->where('statut', $filters['statut']);
+        }
+        if (! empty($filters['activite_id'])) {
+            $query->whereHas('tache', fn ($q) => $q->where('activite_id', $filters['activite_id']));
+        }
+        if (! empty($filters['projet_id'])) {
+            $query->whereHas('tache.activite', fn ($q) => $q->where('projet_id', $filters['projet_id']));
+        }
+
+        $paginator = $query->orderByDesc('created_at')->paginate($perPage);
+
+        return [
+            'data' => $paginator->items(),
+            'meta' => ['current_page' => $paginator->currentPage(), 'last_page' => $paginator->lastPage(), 'total' => $paginator->total()],
+        ];
+    }
+
+    /** Applique les filtres communs (statut, projet_id, activite_id) à une query Tache. */
+    private function applyTacheFilters($query, array $filters): void
+    {
+        if (! empty($filters['statut'])) {
+            $query->where('statut', $filters['statut']);
+        }
+        if (! empty($filters['activite_id'])) {
+            $query->where('activite_id', $filters['activite_id']);
+        }
+        if (! empty($filters['projet_id'])) {
+            $query->whereHas('activite', fn ($q) => $q->where('projet_id', $filters['projet_id']));
+        }
+    }
+
+    /**
+     * Notifie l'agent que sa fiche d'évaluation a été (re)calculée.
+     * Dédupé sur (agent_id, evaluation_sheet_ready) via NotificationService
+     * pour éviter les emails à chaque rafraîchissement de la page.
+     */
+    private function dispatchSheetReadyIfNeeded(User $agent, array $sheet): void
+    {
+        $notifService = app(NotificationService::class);
+        if ($notifService->isDuplicate($agent, 'evaluation_sheet_ready', $agent->id)) {
+            return;
+        }
+
+        $agent->notify(new EvaluationSheetReadyNotification(
+            agent: $agent,
+            scoreGlobal: (float) $sheet['score_global'],
+            periodeStart: $sheet['periode_start'],
+            periodeEnd: $sheet['periode_end'],
+        ));
+    }
+
+    /**
+     * Notifie le(s) manager(s) du workspace quand le taux de renvois
+     * injustifiés de l'agent dépasse le seuil.
+     *
+     * On cible les utilisateurs ayant le rôle 'manager' dans le workspace
+     * courant — pour les workspaces sans manager identifiable, on retombe
+     * sur l'owner. Le destinataire est dédupé sur (manager_id, alert)
+     * pour ne pas spammer si plusieurs consultations de la fiche
+     * surviennent en cascade.
+     */
+    private function dispatchUnjustifiedAlertIfNeeded(User $agent, array $sheet, Workspace $workspace): void
+    {
+        if (! ($sheet['indicators']['unjustified_alert'] ?? false)) {
+            return;
+        }
+
+        $rate = (float) $sheet['indicators']['unjustified_return_rate'];
+        $notifService = app(NotificationService::class);
+
+        // Trouver les managers du workspace via le pivot workspace_members.
+        // Si aucun manager: on retombe sur l'owner pour ne pas laisser
+        // l'alerte muette.
+        $recipients = $workspace->members()
+            ->wherePivot('role', 'manager')
+            ->get();
+
+        if ($recipients->isEmpty()) {
+            $owner = $workspace->owner;
+            if ($owner) {
+                $recipients = collect([$owner]);
+            }
+        }
+
+        foreach ($recipients as $manager) {
+            if ($notifService->isDuplicate($manager, 'unjustified_return_alert', $agent->id)) {
+                continue;
+            }
+
+            $manager->notify(new InjustifiedReturnAlertNotification(
+                agent: $agent,
+                rate: $rate,
+                periodeStart: $sheet['periode_start'],
+                periodeEnd: $sheet['periode_end'],
+            ));
+        }
+    }
+
     public function userScore(Request $request): JsonResponse
     {
         $user = $request->user();

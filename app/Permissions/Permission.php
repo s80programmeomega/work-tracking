@@ -98,6 +98,21 @@ final class Permission
     /** See score totals for users (own score for all roles; others' scores gated by role + scope). */
     const EVALUATIONS_VIEW_SCORE = 'evaluations.view_score';
 
+    // ── Evaluations / Agent sheet (Task 9) ──────────────────────────────────
+    /**
+     * See the full agent evaluation sheet (8-criterion breakdown + 4 sections).
+     * Scope rules — applied per-row by the controller, not by the seed:
+     *   - own sheet: every authenticated role
+     *   - cadre: their direct assignees
+     *   - manager: their activity scope
+     *   - owner / directeur / super_admin: workspace-wide
+     *   - observateur, stagiaire: own only, read-only
+     */
+    const EVALUATIONS_VIEW_FICHE = 'evaluations.view_fiche';
+
+    /** Export the agent sheet (PDF/Excel). Same role gates as VIEW_FICHE. */
+    const EVALUATIONS_EXPORT_FICHE = 'evaluations.export_fiche';
+
     // ── Notifications (Task 8) ─────────────────────────────────────────────
     /** Manage workspace-level notification policy (defaults, mandatory channels). */
     const NOTIFICATIONS_MANAGE_PREFERENCES = 'notifications.manage_preferences';
@@ -165,6 +180,8 @@ final class Permission
 
             self::EVALUATIONS_VIEW_PENDING,
             self::EVALUATIONS_VIEW_SCORE,
+            self::EVALUATIONS_VIEW_FICHE,
+            self::EVALUATIONS_EXPORT_FICHE,
 
             self::NOTIFICATIONS_MANAGE_PREFERENCES,
 
@@ -232,6 +249,9 @@ final class Permission
                 self::REPORTS_CREATE,
                 self::EVALUATIONS_VIEW_PENDING,
                 self::EVALUATIONS_VIEW_SCORE,
+                // Task 9 — managers voient + exportent les fiches de leur scope.
+                self::EVALUATIONS_VIEW_FICHE,
+                self::EVALUATIONS_EXPORT_FICHE,
                 // NOTIFICATIONS_MANAGE_PREFERENCES intentionally omitted — workspace-level
                 // notification policy is reserved for owner/directeur (granted via the
                 // owner contextual role's array_diff('all() except task-participant actions')).
@@ -261,6 +281,9 @@ final class Permission
                 self::REPORTS_VIEW,
                 self::EVALUATIONS_VIEW_PENDING,
                 self::EVALUATIONS_VIEW_SCORE,
+                // Task 9 — cadres voient + exportent les fiches de leurs assignés.
+                self::EVALUATIONS_VIEW_FICHE,
+                self::EVALUATIONS_EXPORT_FICHE,
             ],
 
             'collaborateur' => [
@@ -278,6 +301,9 @@ final class Permission
                 self::RESULTATS_RENVOYER_N0,
                 self::RESULTATS_ACTIVER_BYPASS,
                 self::EVALUATIONS_VIEW_SCORE,
+                // Task 9 — voient leur propre fiche (scope verrouillé en controller).
+                // Pas d'export: réservé au cadre/manager/owner.
+                self::EVALUATIONS_VIEW_FICHE,
             ],
 
             'stagiaire' => [
@@ -293,6 +319,8 @@ final class Permission
                 self::DOCUMENTS_UPLOAD,   // close gap with collaborateur — stagiaires need to attach deliverables
                 self::RESULTATS_ACTIVER_BYPASS,
                 self::EVALUATIONS_VIEW_SCORE,
+                // Task 9 — fiche perso en lecture seule, pas d'export.
+                self::EVALUATIONS_VIEW_FICHE,
             ],
 
             'observateur' => [
@@ -303,6 +331,8 @@ final class Permission
                 self::SOUS_TACHES_VIEW,
                 self::DOCUMENTS_VIEW,
                 self::EVALUATIONS_VIEW_SCORE,
+                // Task 9 — fiche perso en lecture seule, pas d'export.
+                self::EVALUATIONS_VIEW_FICHE,
             ],
 
             // Virtual role — derived from tache_user.is_responsable = true

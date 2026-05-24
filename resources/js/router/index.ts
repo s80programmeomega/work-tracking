@@ -486,6 +486,20 @@ const router = createRouter({
     },
 
     {
+      // Task 9 — Fiche d'évaluation détaillée d'un agent (8 critères + 4 sections).
+      // L'ID est l'utilisateur cible: c'est l'acteur qui peut consulter sa
+      // propre fiche par défaut, et les rôles d'encadrement (cadre, manager,
+      // owner) peuvent voir celles de leur scope (vérification serveur).
+      path: '/evaluations/personnel/:id/historique',
+      name: 'evaluations.personnel.historique',
+      component: () => import('../pages/evaluations/AgentSheet.vue'),
+      meta: {
+        title: "Fiche d'évaluation",
+        requiresAuth: true,
+      },
+    },
+
+    {
       path: '/users/invitations',
       name: 'invitations',
       component: () => import('../pages/Users/Invitations.vue'),

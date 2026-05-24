@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Role;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class TacheService
 {
@@ -454,10 +455,41 @@ class TacheService
     }
 
     /**
+     * Règle R6 (Task 9) — verrou post-N2.
+     *
+     * Dès qu'au moins un résultat de la tâche a été validé au niveau N2,
+     * la tâche devient immuable: aucune édition, suppression, déplacement,
+     * archivage ou (dés)assignation n'est autorisée.
+     *
+     * On lève une HttpException 422 plutôt qu'une exception de domaine
+     * pure: Laravel la convertit automatiquement en JSON 422 sans que
+     * le contrôleur n'ait à l'attraper. Cela garde la règle R6 valable
+     * pour tout futur appelant de TacheService.
+     */
+    private function guardPostN2Immutability(Tache $tache): void
+    {
+        if (! $tache->isLockedPostN2()) {
+            return;
+        }
+
+        \Log::warning('Tentative de modification d\'une tâche verrouillée post-N2', [
+            'tache_id' => $tache->id,
+            'reason' => 'immutable_post_n2',
+        ]);
+
+        throw new HttpException(
+            422,
+            __('evaluation.errors.immutable_post_n2')
+        );
+    }
+
+    /**
      * ✅ Mettre à jour une tâche avec gestion COMPLÈTE des fichiers
      */
     public function updateTache(Tache $tache, array $data): Tache
     {
+        $this->guardPostN2Immutability($tache);
+
         DB::beginTransaction();
 
         try {
@@ -592,6 +624,7 @@ class TacheService
      */
     public function deleteTache(Tache $tache): void
     {
+        $this->guardPostN2Immutability($tache);
         $tache->delete();
     }
 
@@ -600,6 +633,8 @@ class TacheService
      */
     public function moveTache(Tache $tache, TacheStatut $newStatut, int $newPosition): Tache
     {
+        $this->guardPostN2Immutability($tache);
+
         return DB::transaction(function () use ($tache, $newStatut, $newPosition) {
             $oldStatut = $tache->statut;
             $oldPosition = $tache->position;
@@ -694,6 +729,8 @@ class TacheService
      */
     public function archiveTache(Tache $tache): Tache
     {
+        $this->guardPostN2Immutability($tache);
+
         $tache->archive();
 
         return $tache->load(['activite', 'assignees', 'labels']);
@@ -704,6 +741,8 @@ class TacheService
      */
     public function unarchiveTache(Tache $tache): Tache
     {
+        $this->guardPostN2Immutability($tache);
+
         $tache->unarchive();
 
         return $tache->load(['activite', 'assignees', 'labels']);
@@ -714,6 +753,8 @@ class TacheService
      */
     public function assignUser(Tache $tache, array $data): Tache
     {
+        $this->guardPostN2Immutability($tache);
+
         $userId = $data['user_id'];
 
         if (! $tache->assignees->contains($userId)) {
@@ -735,6 +776,8 @@ class TacheService
      */
     public function unassignUser(Tache $tache, int $userId): Tache
     {
+        $this->guardPostN2Immutability($tache);
+
         $tache->assignees()->detach($userId);
 
         return $tache->fresh(['activite', 'assignees']);
