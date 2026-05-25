@@ -137,6 +137,7 @@ import { ref, computed, onMounted } from 'vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import api from '@/api/axios'
 import { useToast } from 'vue-toastification'
+import { useRealtimeRefresh } from '@/composables/useRealtimeRefresh'
 
 const toast = useToast()
 
@@ -201,6 +202,8 @@ function statutClass(statut) {
   }
   return classes[statut] ?? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
 }
+
+useRealtimeRefresh({ onResultatChanged: () => loadData() })
 
 onMounted(loadData)
 </script>

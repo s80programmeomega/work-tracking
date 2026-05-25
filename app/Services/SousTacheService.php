@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Events\Realtime\SousTacheChanged;
 use App\Models\SousTache;
 use App\Models\Tache;
 use App\Models\User;
@@ -22,6 +23,8 @@ class SousTacheService
             'tache_id' => $tache->id,
             'poids' => $poids,
         ]));
+
+        event(new SousTacheChanged($sousTache->load(['tache.activite']), 'created'));
 
         Log::info('SousTache created', [
             'user_id' => $actor->id,
@@ -50,6 +53,8 @@ class SousTacheService
 
         $sousTache->update($data);
 
+        event(new SousTacheChanged($sousTache->load(['tache.activite']), 'updated'));
+
         Log::info('SousTache updated', [
             'user_id' => $actor->id,
             'sous_tache_id' => $sousTache->id,
@@ -63,6 +68,8 @@ class SousTacheService
     {
         $sousTacheId = $sousTache->id;
         $tacheId = $sousTache->tache_id;
+
+        event(new SousTacheChanged($sousTache->loadMissing(['tache.activite']), 'deleted'));
 
         $sousTache->delete();
 

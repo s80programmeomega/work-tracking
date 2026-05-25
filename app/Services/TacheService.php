@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\TacheStatut;
+use App\Events\Realtime\TacheStatutChanged;
 use App\Models\Activite;
 use App\Models\Tache;
 use App\Models\TacheAttachment;
@@ -682,7 +683,10 @@ class TacheService
                 'position' => $newPosition,
             ]);
 
-            return $tache->fresh(['activite', 'assignees']);
+            $fresh = $tache->fresh(['activite', 'assignees']);
+            event(new TacheStatutChanged($fresh));
+
+            return $fresh;
         });
     }
 

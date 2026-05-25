@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Events\Realtime\PendingValidationCountChanged;
+use App\Events\Realtime\ResultatStatutChanged;
 use App\Jobs\TransmettreResultatAuN1Job;
 use App\Models\TacheResultat;
 use App\Models\User;
@@ -60,6 +62,8 @@ class TacheResultatService
         $job = new TransmettreResultatAuN1Job($resultat->id);
         dispatch($job->delay(now()->addHours($timeoutHours)));
 
+        $this->broadcastResultatChanged($resultat);
+
         Log::info('Résultat soumis au N0', [
             'user_id' => $actor->id,
             'tache_resultat_id' => $resultat->id,
@@ -90,6 +94,8 @@ class TacheResultatService
             $actor,
             new ResultatApprouveN0Notification($resultat, $actor)
         );
+
+        $this->broadcastResultatChanged($resultat);
 
         Log::info('Résultat approuvé N0', [
             'user_id' => $actor->id,
@@ -320,6 +326,8 @@ class TacheResultatService
 
         $this->scoreService->calculerImpactN1($resultat, $decision, $n1Actor);
 
+        $this->broadcastResultatChanged($resultat);
+
         Log::info('N1 a validé le résultat', [
             'user_id' => $n1Actor->id,
             'tache_resultat_id' => $resultat->id,
@@ -349,6 +357,8 @@ class TacheResultatService
         }
 
         $this->scoreService->calculerImpactN1($resultat, $decision, $n1Actor);
+
+        $this->broadcastResultatChanged($resultat);
 
         Log::info('N1 a rejeté le résultat', [
             'user_id' => $n1Actor->id,
@@ -380,6 +390,22 @@ class TacheResultatService
         }
 
         return $validate ? 'validated_despite_return' : 'confirmed_return';
+    }
+
+    private function broadcastResultatChanged(TacheResultat $resultat): void
+    {
+        $resultat->loadMissing(['tache.activite.projet']);
+        $workspaceId = $resultat->tache?->activite?->projet?->workspace_id;
+
+        event(new ResultatStatutChanged($resultat));
+
+        if ($workspaceId) {
+            $validatorIds = collect([$resultat->validateur_n1_id, $resultat->validateur_n2_id])
+                ->filter()
+                ->values()
+                ->all();
+            event(new PendingValidationCountChanged($workspaceId, $validatorIds));
+        }
     }
 
     private function writeAuditLog(TacheResultat $resultat, User $actor, string $action, array $context = []): void
