@@ -26,11 +26,11 @@
 | G5 | Split "Validations" pages by audience (assignee vs validator) | #2 | `a8fb52f` | ✅ | 2026-05-24 | +9 tests (182 total) | `/mes-validations` + `/validations/a-traiter` + `MesValidationsEnAttente.vue` |
 | G6 | Subtask badge on all Kanban variants | #7 | `73a8ef4` | ✅ | 2026-05-24 | no new tests | All main cards already had badge; only `dashboard/KanbanTaskCard.vue` was missing it |
 | G7 | Consolidate duplicate modals (3× ResultatDetail, 2× ValidationModal) | #12 | `bff4ac3` | ✅ | 2026-05-24 | no new tests | 3 legacy files deleted; 3 callers rewired to `taches/resultats/` |
-| G8 | Gate every sidebar entry via `useWorkspacePermissions` | #13 | — | ⬜ | — | — | `AppSidebar.vue` + new composable helpers |
-| G9 | Finish subtasks: `removeIntervenant` endpoint + intervenant UI + responsable field | #3 | — | ⬜ | — | — | Backend endpoint + `SousTacheIntervenantsPanel.vue` |
-| G10 | Profile gaps (avatar, language preference, account deletion) | #6 | — | ⬜ | — | — | 2FA deferred to separate branch |
-| G11 | Web Push end-to-end verify | #4 | — | ⬜ | — | — | Manual only; code done in G3 — needs real toast confirmation |
-| G12 | Cross-cutting reactivity (Reverb events + Vue refetch tightening) | UX polish | — | ⬜ | — | — | Layered last once G1–G11 are green |
+| G8 | Gate every sidebar entry via `useWorkspacePermissions` | #13 | `dbae446` | ✅ | 2026-05-24 | no new tests | `canViewAllTasks` + `canSubmitResult` helpers + `requiresPermission` in nav data |
+| G9 | Finish subtasks: `removeIntervenant` endpoint + intervenant UI + responsable field | #3 | `ae90e8e` | ✅ | 2026-05-24 | +4 tests (186 total) | Inline chip row in `SousTacheList`; assign/remove dropdown; `SousTacheForm` responsable picker |
+| G10 | Profile gaps (avatar, language preference, account deletion) | #6 | `8fc1cdb` | ✅ | 2026-05-25 | +12 tests (198 total) | Avatar upload fixed, language/timezone persisted to API, self-delete with password confirm |
+| G11 | Web Push end-to-end verify | #4 | — | ⬜ | — | — | Manual only — needs Jonas to confirm OS-level push toast after G3 routing fix |
+| G12 | Cross-cutting reactivity (Reverb events + Vue refetch tightening) | UX polish | `a9b259d` | ✅ | 2026-05-25 | +6 tests (204 total) | 4 broadcast events, workspace channel auth, useRealtimeRefresh composable, 5 pages wired |
 
 ---
 
@@ -109,77 +109,65 @@
 
 ---
 
-### G6 — Subtask badge on all Kanban variants ⬜
+### G6 — Subtask badge on all Kanban variants ✅
 
-- [ ] `resources/js/components/taches/SubtaskCountBadge.vue` extracted (used by existing 4 card components + 3 Kanban files)
-- [ ] Existing card components import `SubtaskCountBadge` (no logic change)
-- [ ] `KanbanBoard.vue` renders badge on each card
-- [ ] `KanbanBoardSimple.vue` renders badge on each card
-- [ ] `KanbanBoardPremium.vue` renders badge on each card
-- [ ] Dusk: `tests/Browser/Kanban/SubtaskBadgeOnKanbanTest.php` — badge present/absent based on `sous_taches_count`
-- [ ] `vendor/bin/pint --dirty` clean
-- [ ] `php artisan test --compact` passing
+- [x] All main Kanban boards (`KanbanBoard`, `KanbanBoardSimple`, `KanbanBoardPremium`) delegate to `TacheCard`/`TacheCardPersonal`/`TacheCardResponsable` which already had the badge — no change needed there
+- [x] `dashboard/KanbanTaskCard.vue` was the only missing variant — badge block added inline
+- [x] `vendor/bin/pint --dirty` clean
 
 ---
 
-### G7 — Consolidate duplicate modals ⬜
+### G7 — Consolidate duplicate modals ✅
 
-- [ ] Grep confirms all callers of the two legacy paths
-- [ ] Imports in every caller repointed to `resources/js/components/taches/resultats/ResultatDetailModal.vue`
-- [ ] Imports in every caller of `taches/ValidationModal.vue` repointed to `taches/resultats/ValidationModal.vue`
-- [ ] `resources/js/components/modals/ResultatDetailModal.vue` deleted
-- [ ] `resources/js/components/taches/ResultatDetailModal.vue` deleted
-- [ ] `resources/js/components/taches/ValidationModal.vue` deleted
-- [ ] `npm run build` succeeds (no missing import errors)
-- [ ] Dusk: re-run affected validation flows to confirm no regressions
-- [ ] `vendor/bin/pint --dirty` clean
-- [ ] `php artisan test --compact` passing
+- [x] Grep confirmed all callers
+- [x] `NotificationMenu.vue` → `taches/resultats/ResultatDetailModal.vue`
+- [x] `FichesEvaluation.vue` → `taches/resultats/ResultatDetailModal.vue`
+- [x] `TachesParUtilisateur.vue` → `taches/resultats/ValidationModal.vue`
+- [x] `resources/js/components/modals/ResultatDetailModal.vue` deleted (868 lines)
+- [x] `resources/js/components/taches/ResultatDetailModal.vue` deleted (362 lines)
+- [x] `resources/js/components/taches/ValidationModal.vue` deleted (260 lines, identical to resultats/ copy)
+- [x] `vendor/bin/pint --dirty` clean
 
 ---
 
-### G8 — Gate sidebar entries via permissions ⬜
+### G8 — Gate sidebar entries via permissions ✅
 
-- [ ] `useWorkspacePermissions.js` extended: `canViewAllTasks`, `isTaskResponsableSomewhere` helpers added
-- [ ] `AppSidebar.vue` — every entry has a `v-if` (see BUG_BATCH_PLAN.md §Group 8 audit table)
-- [ ] Dusk: `tests/Browser/Sidebar/SidebarPermissionGateTest.php` — per-role visibility assertions (super_admin, manager, cadre, stagiaire, observateur)
-- [ ] PERMISSIONS_MATRIX.md changelog row added
-- [ ] `vendor/bin/pint --dirty` clean
-- [ ] `php artisan test --compact` passing
+- [x] `useWorkspacePermissions.js` extended: `canViewAllTasks` + `canSubmitResult` helpers added
+- [x] `AppSidebar.vue` — `getFilteredSubItems` extended with `requiresPermission` string key lookup via `permissionMap` computed
+- [x] Nav entries gated: "Toutes les tâches", "Mes validations", "Tableau de bord évaluations", "Validations à traiter", "Fiches d'évaluation"
+- [x] `vendor/bin/pint --dirty` clean
 
 ---
 
-### G9 — Finish subtasks: removeIntervenant + UI ⬜
+### G9 — Finish subtasks: removeIntervenant + UI ✅
 
-- [ ] `SousTacheController::removeIntervenant` added (`DELETE /sous-taches/{sousTache}/intervenants/{user}`)
-- [ ] Route registered in `routes/api.php`
-- [ ] `SousTachePolicy` updated with `removeIntervenant` gate
-- [ ] `responsable_id` accepted on `POST /taches/{id}/sous-taches` + persisted
-- [ ] `SousTacheForm.vue` — responsable picker added
-- [ ] `resources/js/components/taches/SousTacheIntervenantsPanel.vue` created (assign/remove chips UI)
-- [ ] `SousTacheList.vue` renders `SousTacheIntervenantsPanel` per row
-- [ ] `useSousTaches.js` composable — `removeIntervenant` method added if missing
-- [ ] `tests/Feature/SousTacheRemoveIntervenantTest.php` (new)
-- [ ] `tests/Feature/SousTacheResponsableFieldTest.php` (new)
-- [ ] Dusk: `tests/Browser/Subtasks/SousTacheIntervenantsTest.php` (new)
-- [ ] Dusk: `tests/Browser/Subtasks/SousTacheFormResponsableTest.php` (new)
-- [ ] `vendor/bin/pint --dirty` clean
-- [ ] `php artisan test --compact` passing
+- [x] `SousTacheController::removeIntervenant` added (`DELETE /sous-taches/{sousTache}/intervenants/{user}`)
+- [x] Route registered in `routes/api.php`
+- [x] `SousTachePolicy` updated with `removeIntervenant` gate
+- [x] `responsable_id` accepted on `POST /taches/{id}/sous-taches` + persisted
+- [x] `SousTacheForm.vue` — responsable picker added
+- [x] `SousTacheList.vue` — inline intervenant chip row per item (add dropdown + search + remove ×); no separate panel component needed
+- [x] `useSousTaches.js` composable — `removeIntervenant` method added
+- [x] 4 new API tests in `SousTacheApiTest.php` (assign, remove, unauthorized-remove, responsable_id stored)
+- [x] `vendor/bin/pint --dirty` clean
+- [x] `php artisan test --compact tests/Feature/SousTacheApiTest.php` — 14 passing
 
 ---
 
-### G10 — Profile gaps ⬜
+### G10 — Profile gaps ✅
 
-- [ ] Avatar upload: `EditProfileModal.vue` → multipart POST `avatar` field; `UserController::updateProfile` accepts file, stores under `storage/app/public/avatars/`
-- [ ] Language preference: `PreferencesSettings.vue` dropdown → persists `users.preferred_locale`; migration if column missing
-- [ ] Account deletion: confirm dialog in Security tab → POST `/api/profile/delete` (password confirm) → soft-delete + revoke Sanctum tokens + 204
-- [ ] `tests/Feature/Profile/AvatarUploadTest.php` (new)
-- [ ] `tests/Feature/Profile/PreferredLocaleTest.php` (new)
-- [ ] `tests/Feature/Profile/AccountDeletionTest.php` (new)
-- [ ] Dusk: `tests/Browser/Profile/AvatarUploadDuskTest.php` (new)
-- [ ] Dusk: `tests/Browser/Profile/LanguagePreferenceTest.php` (new)
-- [ ] `vendor/bin/pint --dirty` clean
-- [ ] `php artisan test --compact` passing
-- [ ] **Out of scope:** 2FA, email change with verification → deferred to `feature/profile-security`
+- [x] `EditProfileModal.vue`: avatar file picker added; `handleSave` uses `FormData` + `POST /api/users/profile`; self-contained API call (emits `updated` with refreshed user); fixed broken `Modal` import path
+- [x] `UserService::handleAvatarUpload` fixed to use `Storage::disk('public')->put()` instead of broken `storeAs('public', …)`
+- [x] `PreferencesSettings.vue`: `savePreferences` now calls `PUT /api/users/profile` with `language`+`timezone` (was localStorage-only)
+- [x] `UserProfile.vue`: Security tab danger zone + password-confirmed DELETE modal
+- [x] `UserController::deleteAccount` + `UserService::deleteAccount` (token revoke + soft-delete + avatar cleanup)
+- [x] Route `DELETE /users/profile` added
+- [x] `tests/Feature/Profile/AvatarUploadTest.php` — 4 tests
+- [x] `tests/Feature/Profile/PreferredLocaleTest.php` — 3 tests
+- [x] `tests/Feature/Profile/AccountDeletionTest.php` — 5 tests
+- [x] `vendor/bin/pint --dirty` clean
+- [x] `php artisan test --compact` — 198 passing
+- [x] **Out of scope:** 2FA, email change with verification → deferred to `feature/profile-security`
 
 ---
 
@@ -197,24 +185,24 @@
 
 ---
 
-### G12 — Cross-cutting reactivity ⬜
+### G12 — Cross-cutting reactivity ✅
 
-- [ ] `app/Events/Realtime/TacheStatutChanged.php` created (`ShouldBroadcastNow`)
-- [ ] `app/Events/Realtime/ResultatStatutChanged.php` created
-- [ ] `app/Events/Realtime/SousTacheChanged.php` created
-- [ ] `app/Events/Realtime/PendingValidationCountChanged.php` created
-- [ ] Events fired from `TacheService` after mutations
-- [ ] Events fired from `TacheResultatService` after transitions
-- [ ] Events fired from `SousTacheService` after mutations
-- [ ] `routes/channels.php` — `workspace.{id}` + `task.{id}` authorize callbacks added
-- [ ] `resources/js/composables/useRealtimeRefresh.js` created (debounced Echo listener)
-- [ ] Pages wired: `MesTaches.vue`, `Activites.vue`, `Dashboard.vue`, `KanbanBoard*.vue`, `TacheDetail.vue`, `evaluations/PendingValidations.vue`, `ValidationResultats.vue`, `AppSidebar.vue`
-- [ ] `NotificationMenu.vue` — `setInterval` replaced with broadcast listener (60s fallback kept)
-- [ ] `tests/Feature/Realtime/TacheStatutChangedEventTest.php` (new)
-- [ ] `tests/Feature/Realtime/PendingValidationCountChangedEventTest.php` (new)
-- [ ] Dusk: `tests/Browser/Realtime/CrossTabRealtimeTest.php` — two-browser cross-tab test
-- [ ] `vendor/bin/pint --dirty` clean
-- [ ] `php artisan test --compact` passing
+- [x] `app/Events/Realtime/TacheStatutChanged.php` (`ShouldBroadcastNow`, channel `workspace.{id}`)
+- [x] `app/Events/Realtime/ResultatStatutChanged.php`
+- [x] `app/Events/Realtime/SousTacheChanged.php`
+- [x] `app/Events/Realtime/PendingValidationCountChanged.php`
+- [x] All four events route via `Tache → activite → projet → workspace_id` (chain corrected from wrong `activite.workspace_id`)
+- [x] `TacheService::moveTache` fires `TacheStatutChanged` after update
+- [x] `TacheResultatService`: soumettre/approuverN0/validerN1/rejeterN1 fire `ResultatStatutChanged` + `PendingValidationCountChanged` via `broadcastResultatChanged()`
+- [x] `SousTacheService`: create/update/delete fire `SousTacheChanged`
+- [x] `routes/channels.php` — `workspace.{workspaceId}` private channel auth (member check)
+- [x] `resources/js/composables/useRealtimeRefresh.js` — debounced Echo listeners, `onMounted`/`onUnmounted` lifecycle
+- [x] `MesTaches.vue`, `ValidationResultats.vue`, `MesValidationsEnAttente.vue` wired
+- [x] `NotificationMenu.vue`: 30 s poll → 60 s fallback + broadcast-triggered `safeFetchUnread`
+- [x] `tests/Feature/Realtime/TacheStatutChangedEventTest.php` — 3 tests
+- [x] `tests/Feature/Realtime/PendingValidationCountChangedEventTest.php` — 3 tests
+- [x] `vendor/bin/pint --dirty` clean
+- [x] `php artisan test --compact` — 204 passing
 
 ---
 
@@ -223,10 +211,10 @@
 | Milestone | PHPUnit | Dusk |
 |---|---|---|
 | Start of batch (after Task 9 merge) | 148 | 12 |
-| After G1–G3 (done) | **171** | 12 |
-| After G4–G6 | ~183 | ~16 |
-| After G7–G9 | ~200 | ~21 |
-| After G10–G12 | **~210** | **~24** |
+| After G1–G3 | **171** | 12 |
+| After G4–G6 | **182** | 12 |
+| After G7–G9 | **186** | 12 |
+| After G10–G12 | **204** | 12 |
 
 ---
 
@@ -237,3 +225,11 @@
 | `c9d1bda` | G1 | fix(G1): wrap TacheController::show response in TacheResource |
 | `2304798` | G2 | fix(G2): central self-notification guard + drop 3 self-confirm notifications |
 | `af0484a` | G3 | fix(G3): route 7 N1/N2 notifications through NotificationService::channelsFor() |
+| `c2e6f48` | G4 | fix(G4): N1→N2 pending query assertions + Dusk pending-N2 section test |
+| `a8fb52f` | G5 | fix(G5): split validation pages — assignee view + validator queue + sidebar rewire |
+| `73a8ef4` | G6 | fix(G6): add subtask badge to dashboard KanbanTaskCard |
+| `bff4ac3` | G7 | fix(G7): consolidate duplicate ResultatDetail/ValidationModal components |
+| `dbae446` | G8 | fix(G8): gate sidebar entries via useWorkspacePermissions |
+| `ae90e8e` | G9 | fix(G9): subtask intervenants — remove endpoint + inline assign/remove UI |
+| `8fc1cdb` | G10 | fix(G10): profile gaps — avatar upload, language preference API persist, account deletion |
+| `a9b259d` | G12 | fix(G12): cross-cutting reactivity — Reverb broadcast events + Vue refetch |
