@@ -9,6 +9,8 @@ use App\Models\Tache;
 use App\Models\TacheAttachment;
 use App\Models\TacheExternalLink;
 use App\Models\User;
+use App\Notifications\TacheAssigneeNotification;
+use App\Notifications\TacheResourcesNotification;
 use App\Notifications\Taches\TacheFileAddedNotification;
 use App\Notifications\Taches\TacheFileRemovedNotification;
 use App\Notifications\Taches\TacheLinkAddedNotification;
@@ -458,7 +460,7 @@ class TacheService
 
             DB::commit();
 
-            return $tache->fresh([
+            $fresh = $tache->fresh([
                 'activite',
                 'assignees',
                 'labels',
@@ -466,6 +468,11 @@ class TacheService
                 'externalLinks',
                 'responsable',
             ]);
+
+            // Task 11 — notifier les intervenants après commit (hors transaction).
+            $this->notifyIntervenantsOnCreation($fresh, $user);
+
+            return $fresh;
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -475,6 +482,59 @@ class TacheService
             ]);
             throw $e;
         }
+    }
+
+    /**
+     * Task 11 — Notifie chaque intervenant (sauf le créateur) et déclenche
+     * TacheResourcesNotification si la tâche possède des ressources.
+     */
+    private function notifyIntervenantsOnCreation(Tache $tache, User $creator): void
+    {
+        $resources = $this->buildResourceList($tache);
+
+        foreach ($tache->assignees as $assignee) {
+            if ($assignee->id === $creator->id) {
+                continue;
+            }
+
+            $assignee->notify(new TacheAssigneeNotification($tache, $creator, $resources));
+
+            if (count($resources) > 0) {
+                $assignee->notify(new TacheResourcesNotification($tache, $creator, $resources));
+            }
+        }
+
+        Log::info('Notifications intervenants envoyées après création tâche wizard', [
+            'tache_id' => $tache->id,
+            'intervenants_count' => $tache->assignees->count(),
+            'resources_count' => count($resources),
+        ]);
+    }
+
+    /**
+     * Construit la liste des ressources (fichiers + liens) pour les notifications.
+     *
+     * @return array<int, array{nom: string, url: string|null}>
+     */
+    private function buildResourceList(Tache $tache): array
+    {
+        $resources = [];
+
+        foreach ($tache->attachments ?? [] as $attachment) {
+            $resources[] = [
+                'nom' => $attachment->original_name ?? $attachment->file_name ?? 'Fichier',
+                'url' => null,
+            ];
+        }
+
+        foreach ($tache->externalLinks ?? [] as $link) {
+            $resources[] = [
+                'nom' => $link->title ?? $link->url,
+                'url' => $link->url,
+            ];
+        }
+
+        return $resources;
     }
 
     /**
