@@ -8,8 +8,9 @@
           Mon résultat
         </h3>
         <div class="flex gap-2">
-          <button 
+          <button
             v-if="!tache.my_result && canSubmitResult"
+            dusk="open-submit-result-btn"
             @click="openSubmitModal"
             class="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
           >

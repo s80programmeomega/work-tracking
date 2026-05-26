@@ -397,14 +397,18 @@ class TacheResultatService
         $resultat->loadMissing(['tache.activite.projet']);
         $workspaceId = $resultat->tache?->activite?->projet?->workspace_id;
 
-        event(new ResultatStatutChanged($resultat));
+        try {
+            event(new ResultatStatutChanged($resultat));
 
-        if ($workspaceId) {
-            $validatorIds = collect([$resultat->validateur_n1_id, $resultat->validateur_n2_id])
-                ->filter()
-                ->values()
-                ->all();
-            event(new PendingValidationCountChanged($workspaceId, $validatorIds));
+            if ($workspaceId) {
+                $validatorIds = collect([$resultat->validateur_n1_id, $resultat->validateur_n2_id])
+                    ->filter()
+                    ->values()
+                    ->all();
+                event(new PendingValidationCountChanged($workspaceId, $validatorIds));
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Resultat broadcast failed', ['error' => $e->getMessage()]);
         }
     }
 

@@ -42,6 +42,7 @@
         <div class="flex gap-3">
           <button
             @click="showCreateModal = true"
+            dusk="open-create-team-btn"
             class="px-5 py-2.5 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all transform hover:scale-105 flex items-center gap-2"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -123,6 +124,7 @@
         <div
           v-for="team in filteredTeams"
           :key="team.uuid"
+          :dusk="`team-card-${team.uuid}`"
           @click="goToTeam(team.uuid)"
           class="group relative bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 hover:border-brand-500 dark:hover:border-brand-500 hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
         >
@@ -241,6 +243,7 @@
                 v-model="newTeam.name"
                 type="text"
                 required
+                dusk="team-form-name"
                 placeholder="Ex: Équipe Marketing, Développement..."
                 class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
               />
@@ -293,6 +296,7 @@
 
         <!-- Modal Footer -->
         <div class="px-8 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end gap-3">
+          <p v-if="createError" class="text-sm text-red-600 dark:text-red-400 self-center mr-auto">{{ createError }}</p>
           <button
             type="button"
             @click="showCreateModal = false"
@@ -304,6 +308,7 @@
             type="button"
             @click="createTeam"
             :disabled="creating || !newTeam.name"
+            dusk="team-form-submit"
             class="px-5 py-2.5 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             <svg v-if="creating" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
@@ -332,6 +337,7 @@ const searchQuery = ref('')
 const visibilityFilter = ref('')
 const showCreateModal = ref(false)
 const creating = ref(false)
+const createError = ref('')
 const newTeam = ref({
   name: '',
   description: '',
@@ -403,14 +409,16 @@ const createTeam = async () => {
   if (!newTeam.value.name) return
 
   creating.value = true
+  createError.value = ''
   try {
     const team = await createTeamApi(newTeam.value)
     showCreateModal.value = false
+    createError.value = ''
     newTeam.value = { name: '', description: '', visibility: 'private' }
     goToTeam(team.uuid)
-  } catch (error) {
-    console.error('Error creating team:', error)
-    alert('Erreur lors de la création de l\'équipe')
+  } catch (err) {
+    console.error('Error creating team:', err)
+    createError.value = err.response?.data?.message || 'Erreur lors de la création de l\'équipe'
   } finally {
     creating.value = false
   }

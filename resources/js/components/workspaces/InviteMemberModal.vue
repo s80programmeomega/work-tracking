@@ -344,6 +344,7 @@
               <!-- Email Input Area -->
               <div class="relative">
                 <textarea v-model="emailInput" @input="processEmailInput" @paste="handlePaste" rows="3"
+                  dusk="invite-email-input"
                   placeholder="exemple@email.com, autre@domaine.com" :disabled="submitting"
                   class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none font-mono text-sm disabled:opacity-50"></textarea>
                 <div class="absolute top-2 right-2">
@@ -505,6 +506,7 @@
               {{ invitationResult ? 'Fermer' : 'Annuler' }}
             </button>
             <button @click="handleSubmit" :disabled="submitting || !canSubmit"
+              dusk="invite-submit-btn"
               class="px-6 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
               <MailIcon v-if="!submitting" class="w-4 h-4" />
               <div v-else class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>

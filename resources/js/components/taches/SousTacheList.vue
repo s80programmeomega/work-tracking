@@ -12,6 +12,7 @@
 
       <button
         v-if="canCreate && !showForm"
+        dusk="add-soustache-btn"
         @click="showForm = true"
         class="px-3 py-1.5 text-xs bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors flex items-center gap-1"
       >

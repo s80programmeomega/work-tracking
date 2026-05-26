@@ -111,7 +111,7 @@
               </select>
             </div>
 
-            <button v-if="canManageMembers" @click="showInviteModal = true"
+            <button v-if="canManageMembers" dusk="invite-member-btn" @click="showInviteModal = true"
               class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors">
               <UserPlusIcon class="w-5 h-5" />
               Inviter un membre
@@ -355,7 +355,11 @@ const props = defineProps({
   workspaceId: {
     type: Number,
     required: true
-  }
+  },
+  canManageMembers: {
+    type: Boolean,
+    default: null,
+  },
 })
 
 // Créer une référence réactive pour le workspace
@@ -365,6 +369,7 @@ const emit = defineEmits(['member-updated'])
 
 const {
   loading,
+  fetchWorkspace,
   fetchMembers,
   fetchInvitations,
   removeMember: removeMemberService,
@@ -377,11 +382,16 @@ const {
 
 // Initialiser les permissions avec le workspace
 const {
-  canManageMembers,
+  canManageMembers: canManageMembersFromComposable,
   canDeleteMembers,
   canPerformMemberAction,
   debugPermissions
 } = useWorkspacePermissions(workspace)
+
+// Prefer prop (pre-computed in parent) when provided, otherwise fall back to local composable
+const canManageMembers = computed(() =>
+  props.canManageMembers !== null ? props.canManageMembers : canManageMembersFromComposable.value
+)
 
 
 const members = ref([])
@@ -613,9 +623,13 @@ const loadData = async () => {
     const membersResponse = await fetchMembers(props.workspaceId)
     members.value = membersResponse || []
 
+    // Fetch the workspace to get owner_id and user_permissions for permission checks
+    const workspaceData = await fetchWorkspace(props.workspaceId).catch(() => null)
+
     // Mettre à jour l'objet workspace avec les membres
     workspace.value = {
       ...(currentWorkspace.value || {}),
+      ...(workspaceData || {}),
       id: props.workspaceId,
       members: members.value,
     }

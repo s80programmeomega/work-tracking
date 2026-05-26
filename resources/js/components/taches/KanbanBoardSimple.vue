@@ -12,7 +12,7 @@
     <!-- Kanban Columns -->
     <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <!-- Column: À faire -->
-      <div class="kanban-column">
+      <div class="kanban-column" dusk="kanban-column-a_faire">
         <div class="column-header bg-gray-50 dark:bg-gray-800">
           <div class="flex items-center gap-2">
             <div class="w-3 h-3 rounded-full bg-gray-500"></div>
@@ -71,7 +71,7 @@
       </div>
 
       <!-- Column: En cours -->
-      <div class="kanban-column">
+      <div class="kanban-column" dusk="kanban-column-en_cours">
         <div class="column-header bg-blue-50 dark:bg-blue-900/20">
           <div class="flex items-center gap-2">
             <div class="w-3 h-3 rounded-full bg-blue-500"></div>
@@ -130,7 +130,7 @@
       </div>
 
       <!-- Column: Terminé -->
-      <div class="kanban-column">
+      <div class="kanban-column" dusk="kanban-column-termine">
         <div class="column-header bg-green-50 dark:bg-green-900/20">
           <div class="flex items-center gap-2">
             <div class="w-3 h-3 rounded-full bg-green-500"></div>

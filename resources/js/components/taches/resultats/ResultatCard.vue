@@ -306,6 +306,7 @@
 
         <!-- Bouton Valider (N1 ou N2) -->
         <button v-if="availableActions.canValidateN1 || availableActions.canValidateN2" @click="handleValidate"
+          dusk="resultat-validate-btn"
           class="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-lg shadow-green-500/30">
           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd"

@@ -104,7 +104,7 @@ class PendingValidationsTest extends WorkTrackingTestCase
                 ->waitForText('Validations en attente', 10)
                 ->waitFor('[dusk="pending-n2-section"]', 5)
                 ->assertVisible('@pending-n2-section')
-                ->assertSeeIn('@pending-n2-section', 'N2 en attente');
+                ->assertSeeIn('@pending-n2-section', 'En attente N2');
         });
     }
 }

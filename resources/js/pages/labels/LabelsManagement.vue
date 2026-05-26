@@ -30,6 +30,7 @@
             </button>
             <button
               @click="openCreateLabelModal"
+              dusk="open-create-label-btn"
               class="px-4 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl hover:from-indigo-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl flex items-center gap-2 font-medium"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -160,6 +161,7 @@
           <div
             v-for="label in filteredLabels"
             :key="label.id"
+            :dusk="`label-card-${label.id}`"
             class="group relative p-5 border-2 border-gray-200 dark:border-gray-700 rounded-xl hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-lg transition-all cursor-pointer"
             @click="openEditLabelModal(label)"
           >

@@ -116,6 +116,7 @@
           <button
             type="button"
             class="btn btn-primary"
+            dusk="change-password-submit"
             @click="changePassword"
             :disabled="!canSubmit || loading">
             <span v-if="loading" class="spinner-border spinner-border-sm" role="status"></span>

@@ -241,7 +241,8 @@
     </h3>
     <div class="flex items-center gap-2">
       <!-- Bouton Vue Kanban -->
-      <button 
+      <button
+        dusk="toggle-kanban-btn"
         @click="toggleKanbanView"
         class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
       >
@@ -251,8 +252,9 @@
         {{ showKanbanView ? 'Liste' : 'Kanban' }}
       </button>
       
-      <button 
-        v-if="canCreateTasks" 
+      <button
+        v-if="canCreateTasks"
+        dusk="create-task-btn"
         @click="openCreateTaskForm"
         class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
       >
@@ -280,9 +282,10 @@
   <!-- Vue Liste (par défaut) -->
   <div v-else>
     <div v-if="taches.length > 0" class="space-y-3">
-      <div 
-        v-for="tache in recentTaches" 
+      <div
+        v-for="tache in recentTaches"
         :key="tache.id"
+        :dusk="`task-row-${tache.id}`"
         class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group"
         @click="viewTaskDetails(tache)"
       >

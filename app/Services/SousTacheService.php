@@ -24,7 +24,11 @@ class SousTacheService
             'poids' => $poids,
         ]));
 
-        event(new SousTacheChanged($sousTache->load(['tache.activite']), 'created'));
+        try {
+            event(new SousTacheChanged($sousTache->load(['tache.activite']), 'created'));
+        } catch (\Throwable $e) {
+            Log::warning('SousTache broadcast failed', ['error' => $e->getMessage()]);
+        }
 
         Log::info('SousTache created', [
             'user_id' => $actor->id,
@@ -53,7 +57,11 @@ class SousTacheService
 
         $sousTache->update($data);
 
-        event(new SousTacheChanged($sousTache->load(['tache.activite']), 'updated'));
+        try {
+            event(new SousTacheChanged($sousTache->load(['tache.activite']), 'updated'));
+        } catch (\Throwable $e) {
+            Log::warning('SousTache broadcast failed', ['error' => $e->getMessage()]);
+        }
 
         Log::info('SousTache updated', [
             'user_id' => $actor->id,
@@ -69,7 +77,11 @@ class SousTacheService
         $sousTacheId = $sousTache->id;
         $tacheId = $sousTache->tache_id;
 
-        event(new SousTacheChanged($sousTache->loadMissing(['tache.activite']), 'deleted'));
+        try {
+            event(new SousTacheChanged($sousTache->loadMissing(['tache.activite']), 'deleted'));
+        } catch (\Throwable $e) {
+            Log::warning('SousTache broadcast failed', ['error' => $e->getMessage()]);
+        }
 
         $sousTache->delete();
 
