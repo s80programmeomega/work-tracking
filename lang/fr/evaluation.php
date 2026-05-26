@@ -38,6 +38,7 @@ return [
             'directed_subtasks' => 'Sous-tâches dirigées',
             'assignee_tasks' => 'Tâches assignées',
             'assignee_subtasks' => 'Sous-tâches assignées',
+            'submitted_results' => 'Résultats soumis',
         ],
         'filters' => [
             'from' => 'Du',

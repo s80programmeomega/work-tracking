@@ -37,6 +37,7 @@ return [
             'directed_subtasks' => 'Directed subtasks',
             'assignee_tasks' => 'Assigned tasks',
             'assignee_subtasks' => 'Assigned subtasks',
+            'submitted_results' => 'Submitted results',
         ],
         'filters' => [
             'from' => 'From',

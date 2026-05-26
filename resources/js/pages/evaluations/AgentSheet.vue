@@ -248,10 +248,14 @@
             >
               <div class="min-w-0 flex-1">
                 <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
-                  {{ item.titre }}
+                  {{ activeSection === 'submitted_results' ? item.tache_titre : item.titre }}
                 </p>
                 <p class="text-xs text-gray-500 truncate">
-                  <template v-if="activeSection.startsWith('directed_subtask') || activeSection === 'assignee_subtasks'">
+                  <template v-if="activeSection === 'submitted_results'">
+                    {{ item.projet?.nom || '—' }} · {{ item.activite?.nom || '—' }}
+                    <span class="ml-2 text-gray-400">Soumis le {{ item.soumis_le ? new Date(item.soumis_le).toLocaleDateString() : '—' }}</span>
+                  </template>
+                  <template v-else-if="activeSection.startsWith('directed_subtask') || activeSection === 'assignee_subtasks'">
                     {{ item.tache?.activite?.projet?.nom || '—' }} · {{ item.tache?.activite?.nom || '—' }} · Tâche {{ item.tache?.titre }}
                   </template>
                   <template v-else>
@@ -379,6 +383,7 @@ const sections = [
   { id: 'directed_subtasks', label: 'Sous-tâches dirigées', icon: 'fa-list-check' },
   { id: 'assignee_tasks', label: 'Tâches assignées', icon: 'fa-tasks' },
   { id: 'assignee_subtasks', label: 'Sous-tâches assignées', icon: 'fa-clipboard-list' },
+  { id: 'submitted_results', label: 'Résultats soumis', icon: 'fa-paper-plane' },
 ]
 const activeSection = ref('directed_tasks')
 const sectionItems = ref([])
