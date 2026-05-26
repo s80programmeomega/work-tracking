@@ -81,6 +81,9 @@ export const Permission = Object.freeze({
     // Notifications (Task 8)
     NOTIFICATIONS_MANAGE_PREFERENCES: 'notifications.manage_preferences',
 
+    // Subscription (Task 13)
+    SUBSCRIPTION_MANAGE: 'subscription.manage',
+
     // Users
     USERS_VIEW:                 'users.view',
     USERS_CREATE:               'users.create',

@@ -17,24 +17,42 @@
 ## Current Session
 
 **Date:** 2026-05-26
-**Session goal:** CDC compliance review + CDC hotfixes (R7 guard, audit-log endpoint, agent sheet §5)
-**Status:** CDC review complete. Docs updated. `fix/cdc-hotfixes` branch cut from `feature/v2-task-12-document-management`. Hotfix implementation in progress.
+**Session goal:** Task 13 — Subscription Modes + Trial Duration
+**Status:** Complete. 253 tests green. Ready to commit and push.
 
 ---
 
 ## Current Task
 
-**Task:** CDC Hotfixes
-**Branch:** `fix/cdc-hotfixes`
-**Status:** Complete — all 4 hotfixes shipped, 232 tests green. Awaiting merge into `jonas`.
+**Task:** Task 14 — Platform Super Admin Dashboard
+**Branch:** `feature/v2-task-14-platform-dashboard` (not yet cut)
+**Status:** Not started.
 
 **What to do next:**
-1. Merge `fix/cdc-hotfixes` into `jonas` (`git merge --no-ff`)
-2. Push `jonas` to `origin`
-3. Cut `feature/v2-task-13-subscription` from `jonas`
-4. Implement Task 13 — Subscription Modes + Trial Duration
+1. Commit `feature/v2-task-13-subscription` (all changes staged)
+2. Push `feature/v2-task-13-subscription` to `origin`
+3. Cut `feature/v2-task-14-platform-dashboard` from `feature/v2-task-13-subscription`
 
 ## Last Completed Task
+
+**Task 13** — Subscription Modes + Trial Duration (2026-05-26)
+- Migration: `subscription_mode` (default `trial`), `trial_started_at`, `trial_duration_days` (default 30) on workspaces
+- `config/subscription.php` with env-driven defaults for all limits and warning window
+- `Workspace` model updated: 3 fillable fields, casts, `trial_started_at` auto-seeded in `boot()::creating()`
+- `SubscriptionService`: `isPaid`, `isTrialExpired`, `getRemainingTrialDays`, `isExpiringSoon`, `canAddMember`, `canUploadFile`, `canUploadStorage`, `summary`
+- `CheckSubscriptionLimits` middleware (`subscription.limits`): bypasses super_admin, checks trial expiry first, then limit-specific check via `$limitType` param
+- Routes gated: `subscription.limits:add_member` on invite route, `subscription.limits:upload_file` on document store route
+- `Permission::SUBSCRIPTION_MANAGE` constant + all() + Permission.js + useWorkspacePermissions.js
+- `WorkspaceController::show()`: `can_manage_subscription` in user_permissions (3 locations) + `subscription_summary` in response
+- `GET /api/workspaces/{id}/subscription` + `PATCH /api/workspaces/{id}/subscription` (super_admin only)
+- 3 notifications: `TrialExpiringNotification`, `TrialExpiredNotification`, `SubscriptionLimitReachedNotification` (all ShouldQueue, channelsFor-routed as high-signal)
+- `NotificationService::wantsEmail()` + `wantsWebPush()`: 3 new subscription event types added as high-signal
+- Translation files: `lang/fr/subscription.php` + `lang/en/subscription.php`
+- `TrialBanner.vue`: amber/red dismissible banner, shown when expiring soon or expired
+- `AdminLayout.vue`: TrialBanner mounted above content, workspace-reactive
+- `WorkspaceFactory`: `paid()`, `trialExpired()`, `trialExpiringSoon()` states
+- PHPUnit: 13 tests (`SubscriptionServiceTest`) + 8 tests (`SubscriptionMiddlewareTest`) = 21 new tests
+- **253 PHPUnit tests, all passing.**
 
 **Task 12** — Document Management per Project + Workspace (2026-05-26)
 - `DOCUMENTS_MANAGE_WORKSPACE` permission added to Permission.php + forRole() + `all()` (owner only)
@@ -194,7 +212,8 @@ Tests: 11 feature in `NotificationServiceTest` + 8 feature in `SendDailyDigestCo
 | `feature/v2-task-10-dashboard` | Task 10 | Merged ✅ (into `jonas` 2026-05-26) |
 | `feature/v2-task-11-task-creation-ux` | Task 11 | Merged ✅ (into `jonas` 2026-05-26) |
 | `feature/v2-task-12-document-management` | Task 12 | Merged ✅ (into `jonas` 2026-05-26) |
-| `fix/cdc-hotfixes` | CDC Hotfixes | In progress 🔄 |
+| `fix/cdc-hotfixes` | CDC Hotfixes | Merged ✅ (into `jonas` 2026-05-26) |
+| `feature/v2-task-13-subscription` | Task 13 | Complete — awaiting push 🔄 |
 
 ---
 

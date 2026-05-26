@@ -130,6 +130,10 @@ final class Permission
     /** Manage workspace-level notification policy (defaults, mandatory channels). */
     const NOTIFICATIONS_MANAGE_PREFERENCES = 'notifications.manage_preferences';
 
+    // ── Subscription (Task 13) ────────────────────────────────────────────
+    /** Configure subscription mode and trial duration — super_admin only. */
+    const SUBSCRIPTION_MANAGE = 'subscription.manage';
+
     // ── Users (platform admin) ────────────────────────────────────────────
     const USERS_VIEW = 'users.view';
 
@@ -201,6 +205,8 @@ final class Permission
             self::TACHES_INLINE_EDIT,
 
             self::NOTIFICATIONS_MANAGE_PREFERENCES,
+
+            self::SUBSCRIPTION_MANAGE,
 
             self::USERS_VIEW,
             self::USERS_CREATE,

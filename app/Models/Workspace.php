@@ -25,11 +25,16 @@ class Workspace extends Model
         'settings',
         'is_active',
         'logo',
+        'subscription_mode',
+        'trial_started_at',
+        'trial_duration_days',
     ];
 
     protected $casts = [
         'settings' => 'array',
         'is_active' => 'boolean',
+        'trial_started_at' => 'datetime',
+        'trial_duration_days' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
@@ -53,14 +58,23 @@ class Workspace extends Model
         parent::boot();
 
         static::creating(function ($workspace) {
-            // Générer un code unique
             if (empty($workspace->code)) {
                 $workspace->code = static::generateUniqueCode();
             }
 
-            // Initialiser les settings par défaut si vides
             if (empty($workspace->settings)) {
                 $workspace->settings = static::getDefaultSettings();
+            }
+
+            // Initialise le mode d'essai à la création
+            if (empty($workspace->subscription_mode)) {
+                $workspace->subscription_mode = 'trial';
+            }
+            if (empty($workspace->trial_started_at)) {
+                $workspace->trial_started_at = now();
+            }
+            if (empty($workspace->trial_duration_days)) {
+                $workspace->trial_duration_days = config('subscription.trial_duration_days', 30);
             }
         });
     }

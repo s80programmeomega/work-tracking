@@ -32,11 +32,11 @@
 | 10 | Evaluation Dashboard + Global Task View | `feature/v2-task-10-dashboard` | ✅ | 2026-05-26 | 2026-05-26 | 216 PHPUnit + 2 Dusk tests green. Merged into `jonas` 2026-05-26. |
 | 11 | Task Creation UX (wizard + intervenant picker) | `feature/v2-task-11-task-creation-ux` | ✅ | 2026-05-26 | 2026-05-26 | 221 PHPUnit + 3 Dusk tests green. Merged into `jonas` 2026-05-26. |
 | 12 | Document Management per Project + Workspace | `feature/v2-task-12-document-management` | ✅ | 2026-05-26 | 2026-05-26 | 226 PHPUnit tests green. Merged into `jonas` 2026-05-26. |
-| 13 | Subscription Modes + Trial Duration | `feature/v2-task-13-subscription` | ⬜ | — | — | — |
+| 13 | Subscription Modes + Trial Duration | `feature/v2-task-13-subscription` | ✅ | 2026-05-26 | 2026-05-26 | 253 PHPUnit tests green. |
 | 14 | Platform Super Admin Dashboard | `feature/v2-task-14-platform-dashboard` | ⬜ | — | — | — |
 | 15 | Task List UX (table mode + activity shortcut) | `feature/v2-task-15-task-list-ux` | ⬜ | — | — | CDC gaps A.10–A.13 |
 | 16 | PDF/Excel Export (evaluation sheet + project/task) | `feature/v2-task-16-export` | ⬜ | — | — | CDC gaps B.1 + ST.7/E.2 |
-| — | CDC Hotfixes (R7 guard + audit-log endpoint + rate limiting + agent sheet §5) | `fix/cdc-hotfixes` | 🔄 | 2026-05-26 | — | Slots between T12 and T13 |
+| — | CDC Hotfixes (R7 guard + audit-log endpoint + rate limiting + agent sheet §5) | `fix/cdc-hotfixes` | ✅ | 2026-05-26 | 2026-05-26 | Merged into `jonas` 2026-05-26. |
 
 ---
 
@@ -266,14 +266,24 @@ CDC gaps B.1 + ST.7/E.2.
 - [ ] PR opened into `jonas`
 
 ### Task 13
-- [ ] `subscription_mode` and trial columns added to `workspaces`
-- [ ] `config/subscription.php` created with defaults
-- [ ] `SubscriptionService` created
-- [ ] `CheckSubscriptionLimits` middleware created
-- [ ] Trial expiry banner added to frontend
-- [ ] `canManageSubscription` permission added
-- [ ] Translation files `lang/fr/subscription.php` and `lang/en/subscription.php` created
-- [ ] Tests passing
+- [x] Migration: `subscription_mode`, `trial_started_at`, `trial_duration_days` added to `workspaces`
+- [x] `config/subscription.php` created with env-driven defaults (duration, member limit, file size, storage, warning days)
+- [x] `Workspace` model: 3 fillable fields + casts + auto-init `trial_started_at` in `boot()::creating()`
+- [x] `SubscriptionService` created: `isPaid`, `isTrialExpired`, `getRemainingTrialDays`, `isExpiringSoon`, `canAddMember`, `canUploadFile`, `canUploadStorage`, `summary`
+- [x] `CheckSubscriptionLimits` middleware registered as `subscription.limits`, takes `$limitType` param, bypasses super_admin
+- [x] `subscription.limits:add_member` applied to invite route; `subscription.limits:upload_file` applied to document store route
+- [x] `Permission::SUBSCRIPTION_MANAGE` constant + `all()` + `Permission.js` + `useWorkspacePermissions.js` (canManageSubscription)
+- [x] `WorkspaceController::show()`: `can_manage_subscription` key in user_permissions (3 locations) + `subscription_summary` in response
+- [x] `GET /api/workspaces/{id}/subscription` endpoint (lightweight summary for banner)
+- [x] `PATCH /api/workspaces/{id}/subscription` endpoint (super_admin only — configure trial duration/mode)
+- [x] `TrialExpiringNotification`, `TrialExpiredNotification`, `SubscriptionLimitReachedNotification` (all ShouldQueue, channelsFor-routed)
+- [x] `NotificationService::wantsEmail()` + `wantsWebPush()` updated with 3 new high-signal subscription events
+- [x] Translation files `lang/fr/subscription.php` + `lang/en/subscription.php` (trial, limits, errors, notifications sections)
+- [x] `TrialBanner.vue` component — amber/red banner, dismissible, shown when trial expiring or expired
+- [x] `AdminLayout.vue`: TrialBanner mounted above content area, changes workspace-reactively
+- [x] `WorkspaceFactory`: 3 states added — `paid()`, `trialExpired()`, `trialExpiringSoon(daysLeft)`
+- [x] PHPUnit: 13 tests in `SubscriptionServiceTest` (unit logic) + 8 tests in `SubscriptionMiddlewareTest` (HTTP middleware + API endpoints)
+- [x] **253 PHPUnit tests, all passing.**
 - [ ] PR opened into `jonas`
 
 ### Task 14

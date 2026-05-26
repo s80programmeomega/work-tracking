@@ -76,6 +76,9 @@ export function useWorkspacePermissions(workspace = null) {
     // Task 12: Documents
     const canManageWorkspaceDocuments = computed(() => isSuperAdmin.value || (perms.value.can_manage_workspace_documents ?? false))
 
+    // Task 13: Subscription
+    const canManageSubscription = computed(() => isSuperAdmin.value || (perms.value.can_manage_subscription ?? false))
+
     // Task 8: Notifications
     const canManageNotificationPreferences = computed(() => isSuperAdmin.value || (perms.value.can_manage_notification_preferences ?? false))
 
@@ -156,6 +159,9 @@ export function useWorkspacePermissions(workspace = null) {
 
         // Task 12
         canManageWorkspaceDocuments,
+
+        // Task 13
+        canManageSubscription,
 
         // Task 8
         canManageNotificationPreferences,

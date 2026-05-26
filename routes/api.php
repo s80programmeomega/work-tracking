@@ -105,7 +105,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('/', [WorkspaceController::class, 'addMember']);
 
             // Static routes MUST come before /{user} to avoid being swallowed by the wildcard
-            Route::post('/invite', [WorkspaceController::class, 'inviteMembers']);
+            Route::post('/invite', [WorkspaceController::class, 'inviteMembers'])->middleware('subscription.limits:add_member');
             Route::get('/invitations', [WorkspaceController::class, 'invitations']);
             Route::post('/invitations/{invitation}/resend', [WorkspaceController::class, 'resendInvitation']);
             Route::delete('/invitations/{invitation}', [WorkspaceController::class, 'cancelInvitation']);
@@ -121,6 +121,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         // Workspace Statistics
         Route::get('/{workspace}/statistics', [WorkspaceController::class, 'statistics']);
+
+        // Subscription summary (used by the trial banner)
+        Route::get('/{workspace}/subscription', [WorkspaceController::class, 'subscriptionSummary'])->name('workspaces.subscription');
+
+        // Super-admin: configure trial duration per workspace
+        Route::patch('/{workspace}/subscription', [WorkspaceController::class, 'updateSubscription'])->name('workspaces.subscription.update');
 
         // ========================================  MEMBRE REMOVAL WITH TRANSFER  ========================================
         Route::prefix('/{workspace}')->group(function () {
@@ -494,7 +500,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
          * Upload un ou plusieurs documents
          * Body: files[], documentable_type, documentable_id, description, visibility, disk
          */
-        Route::post('/', [DocumentController::class, 'store'])->name('documents.store');
+        Route::post('/', [DocumentController::class, 'store'])->name('documents.store')->middleware('subscription.limits:upload_file');
 
         /**
          * GET /api/documents/{document}

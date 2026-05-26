@@ -15,8 +15,10 @@ use App\Permissions\ContextualPermissionGate;
 use App\Permissions\Permission;
 use App\Services\MemberRemovalService;
 use App\Services\PermissionService;
+use App\Services\SubscriptionService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -80,6 +82,7 @@ class WorkspaceController extends Controller
                 'can_view_workspace_taches' => $gate->userCan($user, Permission::EVALUATIONS_VIEW_WORKSPACE_TACHES, $workspace),
                 'can_inline_edit_tache' => $gate->userCan($user, Permission::TACHES_INLINE_EDIT, $workspace),
                 'can_manage_workspace_documents' => $gate->userCan($user, Permission::DOCUMENTS_MANAGE_WORKSPACE, $workspace),
+                'can_manage_subscription' => $user->isSuperAdmin(),
             ];
 
             return $workspace;
@@ -726,6 +729,7 @@ class WorkspaceController extends Controller
                         'can_view_workspace_taches' => $gate->userCan($user, Permission::EVALUATIONS_VIEW_WORKSPACE_TACHES, $workspace),
                         'can_inline_edit_tache' => $gate->userCan($user, Permission::TACHES_INLINE_EDIT, $workspace),
                         'can_manage_workspace_documents' => $gate->userCan($user, Permission::DOCUMENTS_MANAGE_WORKSPACE, $workspace),
+                        'can_manage_subscription' => $user->isSuperAdmin(),
                     ],
                 ];
             })
@@ -1495,8 +1499,53 @@ class WorkspaceController extends Controller
                     'can_view_workspace_taches' => $gate->userCan($user, Permission::EVALUATIONS_VIEW_WORKSPACE_TACHES, $workspace),
                     'can_inline_edit_tache' => $gate->userCan($user, Permission::TACHES_INLINE_EDIT, $workspace),
                     'can_manage_workspace_documents' => $gate->userCan($user, Permission::DOCUMENTS_MANAGE_WORKSPACE, $workspace),
+                    'can_manage_subscription' => $user->isSuperAdmin(),
                 ],
+                'subscription_summary' => app(SubscriptionService::class)->summary($workspace),
             ]),
+        ]);
+    }
+
+    /**
+     * Super-admin: configure subscription mode and trial duration for a workspace.
+     */
+    public function updateSubscription(Request $request, Workspace $workspace): JsonResponse
+    {
+        $user = $request->user();
+
+        if (! $user->isSuperAdmin()) {
+            return response()->json(['message' => 'Accès réservé au super-admin'], 403);
+        }
+
+        $validated = $request->validate([
+            'subscription_mode' => 'sometimes|string|in:trial,paid,free',
+            'trial_duration_days' => 'sometimes|integer|min:1|max:365',
+            'trial_started_at' => 'sometimes|nullable|date',
+        ]);
+
+        $workspace->fill($validated)->save();
+
+        return response()->json([
+            'data' => app(SubscriptionService::class)->summary($workspace->fresh()),
+        ]);
+    }
+
+    /**
+     * Lightweight subscription summary for the trial banner.
+     */
+    public function subscriptionSummary(Request $request, Workspace $workspace): JsonResponse
+    {
+        $user = $request->user();
+
+        $isMember = $workspace->owner_id === $user->id
+            || $workspace->members()->where('user_id', $user->id)->exists();
+
+        if (! $isMember && ! $user->isSuperAdmin()) {
+            return response()->json(['message' => 'Accès refusé'], 403);
+        }
+
+        return response()->json([
+            'data' => app(SubscriptionService::class)->summary($workspace),
         ]);
     }
 
