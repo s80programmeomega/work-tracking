@@ -26,15 +26,13 @@
 
 **Task:** CDC Hotfixes
 **Branch:** `fix/cdc-hotfixes`
-**Status:** In progress — branch cut, docs updated, implementation not yet started.
+**Status:** Complete — all 4 hotfixes shipped, 232 tests green. Awaiting merge into `jonas`.
 
 **What to do next:**
-1. R7 guard: add `enforceMandatorySousTaches()` check at top of `TacheResultatService::soumettre()`
-2. Audit-log endpoint: `GET /api/audit-logs/validation/{tache}` in `EvaluationController` + route
-3. Agent sheet §5: résultats soumis avec statut validation in `EvaluationController::historique()` + `AgentSheet.vue`
-4. PHPUnit tests for R7 + audit-log endpoint
-5. Pint + full test suite
-6. Commit + push `fix/cdc-hotfixes` to `origin`
+1. Merge `fix/cdc-hotfixes` into `jonas` (`git merge --no-ff`)
+2. Push `jonas` to `origin`
+3. Cut `feature/v2-task-13-subscription` from `jonas`
+4. Implement Task 13 — Subscription Modes + Trial Duration
 
 ## Last Completed Task
 
@@ -242,3 +240,4 @@ Tests: 11 feature in `NotificationServiceTest` + 8 feature in `SendDailyDigestCo
 | 2026-05-26 | Task 11 | Task Creation UX. TacheCreateWizard.vue (4-step modal), IntervenantPicker.vue, TacheAssigneeNotification (mail+db queued) + TacheResourcesNotification (db), Blade email templates (fr/en), i18n keys. ActiviteDetail.vue + Taches.vue wired. 5 PHPUnit + 3 Dusk tests. 221 tests green. Merged into jonas. |
 | 2026-05-26 | Task 12 | Document Management. DOCUMENTS_MANAGE_WORKSPACE permission (owner only), WorkspaceDocuments.vue, workspace docs endpoint gated, share-by-email endpoint + DocumentSharedNotification, DocumentUploaded/DeletedNotification wired, document permission keys in ProjetResource + composables, lang/fr+en/documents.php. 5 PHPUnit tests. 226 tests green. Merged into jonas. |
 | 2026-05-26 | CDC Review | Cross-referenced CDC_WorkTracking_v2.pdf Rev.3 against all completed and planned tasks (T0–T14). Found 10+ gaps: A.1 (design assets), A.10–A.13 (task list UX), R7 (backend guard missing), CDC-API (audit-log endpoint missing), ST.7/E.2 (agent sheet §5 + export), B.1–B.5 (export, SMS, search, billing, rate limiting). Rate limiting verified ✅ already in place. Two new tasks added: T15 (task list UX), T16 (export). CDC hotfix batch created on `fix/cdc-hotfixes`. IMPLEMENTATION_PLAN.md + PROGRESSION.md + SESSION_STATE.md updated. |
+| 2026-05-26 | CDC Hotfixes | R7 guard (`enforceMandatorySousTaches` in TacheResultatService::soumettre), `GET /api/audit-logs/validation/{tache}` endpoint, agent sheet §5 (`submitted_results` section in agentSheetSections + AgentSheet.vue 5th tab). 6 new PHPUnit tests. 232 total, all green. Committed on `fix/cdc-hotfixes`. |

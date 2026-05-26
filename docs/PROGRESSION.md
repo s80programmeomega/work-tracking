@@ -239,10 +239,10 @@
 
 Gaps identified in CDC compliance review 2026-05-26 against `CDC_WorkTracking_v2.pdf` Rev.3.
 
-- [ ] R7 backend guard: `TacheResultatService::soumettre()` aborts 422 when mandatory sous-taches not terminal (CDC Section 7 / Module ST.5)
-- [ ] `GET /api/audit-logs/validation/{tache}` endpoint — CDC Section 6 API list (table exists, no standalone endpoint)
-- [ ] Rate limiting verified — `throttle:60,1` already in `RouteServiceProvider` ✅ (no change needed)
-- [ ] Agent sheet 5th section: résultats soumis avec statut validation — CDC Module E.2 (currently 4 sections, missing §5)
+- [x] R7 backend guard: `TacheResultatService::soumettre()` aborts 422 when mandatory sous-taches not terminal (CDC Section 7 / Module ST.5)
+- [x] `GET /api/audit-logs/validation/{tache}` endpoint — CDC Section 6 API list (table exists, no standalone endpoint)
+- [x] Rate limiting verified — `throttle:60,1` already in `RouteServiceProvider` ✅ (no change needed)
+- [x] Agent sheet 5th section: résultats soumis avec statut validation — CDC Module E.2 (`submitted_results` section added)
 
 ### Task 15 (feature/v2-task-15-task-list-ux)
 
