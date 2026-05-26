@@ -593,6 +593,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
          * Body: user_ids[], permissions{}, expires_at
          */
         Route::post('/{document}/share', [DocumentController::class, 'shareWithUsers'])->name('documents.share');
+
+        /**
+         * POST /api/documents/{document}/share-by-email
+         * Partage par email à un destinataire externe (peut ne pas avoir de compte)
+         * Body: email
+         */
+        Route::post('/{document}/share-by-email', [DocumentController::class, 'shareByEmail'])->name('documents.share-by-email');
     });
 
     // User Management Routes

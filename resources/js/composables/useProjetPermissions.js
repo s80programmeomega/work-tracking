@@ -54,6 +54,12 @@ export function useProjetPermissions(projet = null) {
     const canManageMembers  = computed(() => isSuperAdmin.value || perms.value.can_manage_members ?? false)
     const canCreateActivity = computed(() => isSuperAdmin.value || perms.value.can_create_activity ?? false)
 
+    // Task 12: Documents
+    const canViewDocuments   = computed(() => isSuperAdmin.value || (perms.value.can_view_documents ?? false))
+    const canUploadDocuments = computed(() => isSuperAdmin.value || (perms.value.can_upload_documents ?? false))
+    const canDeleteDocuments = computed(() => isSuperAdmin.value || (perms.value.can_delete_documents ?? false))
+    const canShareDocuments  = computed(() => isSuperAdmin.value || (perms.value.can_share_documents ?? false))
+
     return {
         currentUser,
         memberRole,
@@ -72,5 +78,11 @@ export function useProjetPermissions(projet = null) {
         canDelete,
         canManageMembers,
         canCreateActivity,
+
+        // Task 12
+        canViewDocuments,
+        canUploadDocuments,
+        canDeleteDocuments,
+        canShareDocuments,
     }
 }

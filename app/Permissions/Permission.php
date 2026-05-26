@@ -79,6 +79,9 @@ final class Permission
 
     const DOCUMENTS_SHARE = 'documents.share';
 
+    /** Full CRUD over workspace-level documents (reserved for owner/directeur). */
+    const DOCUMENTS_MANAGE_WORKSPACE = 'documents.manage_workspace';
+
     // ── Results / N0 circuit ──────────────────────────────────────────────
     const RESULTATS_APPROUVER_N0 = 'resultats.approuver_n0';
 
@@ -180,6 +183,7 @@ final class Permission
             self::DOCUMENTS_UPLOAD,
             self::DOCUMENTS_DELETE,
             self::DOCUMENTS_SHARE,
+            self::DOCUMENTS_MANAGE_WORKSPACE,
 
             self::RESULTATS_APPROUVER_N0,
             self::RESULTATS_RENVOYER_N0,

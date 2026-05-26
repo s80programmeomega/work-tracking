@@ -126,6 +126,10 @@ class ProjetResource extends JsonResource
                     'can_delete' => $gate->userCan($user, Permission::PROJETS_DELETE, $projet),
                     'can_manage_members' => $gate->userCan($user, Permission::PROJETS_MANAGE_MEMBERS, $projet),
                     'can_create_activity' => $gate->userCan($user, Permission::ACTIVITES_CREATE_TASK, $projet),
+                    'can_view_documents' => $gate->userCan($user, Permission::DOCUMENTS_VIEW, $projet),
+                    'can_upload_documents' => $gate->userCan($user, Permission::DOCUMENTS_UPLOAD, $projet),
+                    'can_delete_documents' => $gate->userCan($user, Permission::DOCUMENTS_DELETE, $projet),
+                    'can_share_documents' => $gate->userCan($user, Permission::DOCUMENTS_SHARE, $projet),
                 ];
             }),
 

@@ -10,12 +10,19 @@ use App\Models\Projet;
 use App\Models\Tache;
 use App\Models\User;
 use App\Models\Workspace;
+use App\Notifications\DocumentDeletedNotification;
+use App\Notifications\DocumentSharedNotification;
+use App\Notifications\DocumentUploadedNotification;
+use App\Permissions\ContextualPermissionGate;
+use App\Permissions\Permission;
 use App\Services\DocumentAccessResolver;
 use App\Services\DocumentService;
 use App\Services\PermissionService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -68,6 +75,13 @@ class DocumentController extends Controller
     public function workspaceDocuments(Request $request, Workspace $workspace): JsonResponse
     {
         try {
+            $gate = app(ContextualPermissionGate::class);
+            abort_unless(
+                $gate->userCan($request->user(), Permission::DOCUMENTS_MANAGE_WORKSPACE, $workspace),
+                403,
+                __('documents.errors.unauthorized_view')
+            );
+
             $request->validate([
                 'type' => 'sometimes|string',
                 'search' => 'sometimes|string|min:2',
@@ -167,6 +181,8 @@ class DocumentController extends Controller
                     $options
                 );
 
+                $this->notifyDocumentUploaded($document, $user);
+
                 return response()->json([
                     'success' => true,
                     'message' => 'Document uploadé avec succès',
@@ -182,6 +198,10 @@ class DocumentController extends Controller
                 $user,
                 $options
             );
+
+            foreach ($documents as $doc) {
+                $this->notifyDocumentUploaded($doc, $user);
+            }
 
             return response()->json([
                 'success' => true,
@@ -271,13 +291,39 @@ class DocumentController extends Controller
         try {
             $this->authorize('delete', $document);
 
+            $user = $request->user();
+            $documentNom = $document->nom;
+            $documentable = $document->documentable;
+
+            // Avertir le responsable du projet si le suppresseur n'est pas le propriétaire du document
+            $shouldNotify = $document->user_id !== $user->id;
+
             $this->documentService->delete($document);
+
+            if ($shouldNotify && $documentable instanceof Projet && $documentable->responsable_id) {
+                $responsable = User::find($documentable->responsable_id);
+                if ($responsable && $responsable->id !== $user->id) {
+                    $responsable->notify(new DocumentDeletedNotification($documentNom, $user));
+                }
+            }
+
+            Log::warning('Suppression de document', [
+                'user_id' => $user->id,
+                'document_nom' => $documentNom,
+                'suppresseur' => $user->nom_complet,
+            ]);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Document supprimé avec succès',
             ]);
         } catch (AuthorizationException $e) {
+            Log::warning('Tentative non autorisée de suppression de document', [
+                'user_id' => $request->user()?->id,
+                'document_id' => $document->id,
+                'reason' => 'unauthorized',
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Vous n\'avez pas la permission de supprimer ce document',
@@ -864,6 +910,67 @@ class DocumentController extends Controller
                 'success' => false,
                 'message' => $e->getMessage(),
             ], 500);
+        }
+    }
+
+    /**
+     * Partage un document par email à un destinataire externe (ne doit pas nécessairement être un utilisateur).
+     */
+    public function shareByEmail(Request $request, Document $document): JsonResponse
+    {
+        $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        try {
+            $this->authorize('share', $document);
+
+            $user = $request->user();
+            $email = $request->string('email')->lower()->toString();
+
+            Notification::route('mail', $email)
+                ->notify(new DocumentSharedNotification($document, $user, $email));
+
+            Log::info('Partage de document par email', [
+                'user_id' => $user->id,
+                'document_id' => $document->id,
+                'shared_to_email' => $email,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => __('documents.share.success'),
+            ]);
+        } catch (AuthorizationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => __('documents.errors.unauthorized_share'),
+            ], 403);
+        }
+    }
+
+    /**
+     * Notifie les membres cadre/manager du projet quand un document est uploadé.
+     */
+    private function notifyDocumentUploaded(Document $document, User $uploader): void
+    {
+        $documentable = $document->documentable;
+
+        if (! $documentable instanceof Projet) {
+            return;
+        }
+
+        $recipients = $documentable->members()
+            ->wherePivotIn('role_id', function ($q) {
+                $q->select('id')
+                    ->from('roles')
+                    ->whereIn('name', ['cadre', 'manager', 'owner']);
+            })
+            ->where('users.id', '!=', $uploader->id)
+            ->get();
+
+        foreach ($recipients as $member) {
+            $member->notify(new DocumentUploadedNotification($document, $uploader));
         }
     }
 }

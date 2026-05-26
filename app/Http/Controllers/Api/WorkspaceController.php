@@ -79,6 +79,7 @@ class WorkspaceController extends Controller
                 'can_view_evaluation_dashboard' => $gate->userCan($user, Permission::EVALUATIONS_VIEW_DASHBOARD, $workspace),
                 'can_view_workspace_taches' => $gate->userCan($user, Permission::EVALUATIONS_VIEW_WORKSPACE_TACHES, $workspace),
                 'can_inline_edit_tache' => $gate->userCan($user, Permission::TACHES_INLINE_EDIT, $workspace),
+                'can_manage_workspace_documents' => $gate->userCan($user, Permission::DOCUMENTS_MANAGE_WORKSPACE, $workspace),
             ];
 
             return $workspace;
@@ -724,6 +725,7 @@ class WorkspaceController extends Controller
                         'can_view_evaluation_dashboard' => $gate->userCan($user, Permission::EVALUATIONS_VIEW_DASHBOARD, $workspace),
                         'can_view_workspace_taches' => $gate->userCan($user, Permission::EVALUATIONS_VIEW_WORKSPACE_TACHES, $workspace),
                         'can_inline_edit_tache' => $gate->userCan($user, Permission::TACHES_INLINE_EDIT, $workspace),
+                        'can_manage_workspace_documents' => $gate->userCan($user, Permission::DOCUMENTS_MANAGE_WORKSPACE, $workspace),
                     ],
                 ];
             })
@@ -1492,6 +1494,7 @@ class WorkspaceController extends Controller
                     'can_view_evaluation_dashboard' => $gate->userCan($user, Permission::EVALUATIONS_VIEW_DASHBOARD, $workspace),
                     'can_view_workspace_taches' => $gate->userCan($user, Permission::EVALUATIONS_VIEW_WORKSPACE_TACHES, $workspace),
                     'can_inline_edit_tache' => $gate->userCan($user, Permission::TACHES_INLINE_EDIT, $workspace),
+                    'can_manage_workspace_documents' => $gate->userCan($user, Permission::DOCUMENTS_MANAGE_WORKSPACE, $workspace),
                 ],
             ]),
         ]);
