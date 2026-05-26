@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\TacheResource;
 use App\Http\Resources\TacheResultatResource;
 use App\Models\Activite;
+use App\Models\EvaluationScore;
 use App\Models\SousTache;
 use App\Models\Tache;
 use App\Models\TacheResultat;
@@ -2051,5 +2052,182 @@ class EvaluationController extends Controller
         }
 
         return false;
+    }
+
+    /**
+     * Task 10 — Tableau de bord évaluations.
+     *
+     * Retourne pour la période demandée :
+     *  - scores par membre (total EvaluationScore sur la période)
+     *  - top_performers (5 meilleurs scores)
+     *  - alertes : membres avec escalades_abusives = true ou taux_inaction élevé
+     *
+     * Portée :
+     *  - owner/directeur/super_admin → workspace entier
+     *  - manager                     → membres de ses projets
+     *  - cadre                       → membres de ses activités
+     *
+     * @param  Request  $request  periode_start, periode_end (YYYY-MM-DD, défaut = mois courant)
+     */
+    public function evaluationDashboard(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $gate = app(ContextualPermissionGate::class);
+        $workspace = $user->currentWorkspace;
+
+        if (! $user->isSuperAdmin()
+            && (! $workspace || ! $gate->userCan($user, Permission::EVALUATIONS_VIEW_DASHBOARD, $workspace))) {
+            Log::warning('Accès refusé au tableau de bord évaluations', [
+                'user_id' => $user->id,
+                'workspace_id' => $workspace?->id,
+                'reason' => 'insufficient_role',
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => __('evaluation.errors.cannot_view_dashboard'),
+            ], 403);
+        }
+
+        $periodeStart = $request->input('periode_start')
+            ? Carbon::parse($request->input('periode_start'))->startOfDay()
+            : now()->startOfMonth();
+
+        $periodeEnd = $request->input('periode_end')
+            ? Carbon::parse($request->input('periode_end'))->endOfDay()
+            : now()->endOfMonth();
+
+        Log::info('Tableau de bord évaluations consulté', [
+            'user_id' => $user->id,
+            'workspace_id' => $workspace?->id,
+            'periode' => "{$periodeStart->toDateString()} → {$periodeEnd->toDateString()}",
+            'scope' => $user->isSuperAdmin() ? 'super_admin' : ($workspace?->owner_id === $user->id ? 'owner' : 'scoped'),
+        ]);
+
+        // Résolution du scope : quels user_ids sont visibles par cet acteur ?
+        $scopedUserIds = $this->resolveDashboardScope($user, $workspace);
+
+        // Agrégation des scores sur la période.
+        $scores = EvaluationScore::query()
+            ->whereIn('user_id', $scopedUserIds)
+            ->where('periode_start', '>=', $periodeStart)
+            ->where('periode_end', '<=', $periodeEnd)
+            ->selectRaw('user_id, SUM(valeur) as total_score, COUNT(*) as decision_count')
+            ->groupBy('user_id')
+            ->with('user:id,nom,prenom,email,avatar')
+            ->get()
+            ->map(fn ($row) => [
+                'user_id' => $row->user_id,
+                'user' => $row->user,
+                'total_score' => round((float) $row->total_score, 2),
+                'decision_count' => (int) $row->decision_count,
+            ]);
+
+        $topPerformers = $scores->sortByDesc('total_score')->take(5)->values();
+
+        // Alertes : membres avec escalades_abusives actif dans ce workspace.
+        $escaladeAlerts = Tache::query()
+            ->whereHas('activite.projet', fn ($q) => $q->where('workspace_id', $workspace?->id))
+            ->whereHas('assignees', function ($q) use ($scopedUserIds) {
+                $q->whereIn('users.id', $scopedUserIds)
+                    ->where('tache_user.escalades_abusives', true);
+            })
+            ->with(['assignees' => fn ($q) => $q->where('tache_user.escalades_abusives', true)->select('users.id', 'nom', 'prenom', 'email')])
+            ->get()
+            ->flatMap(fn ($tache) => $tache->assignees->map(fn ($u) => [
+                'user_id' => $u->id,
+                'user' => $u->only(['id', 'nom', 'prenom', 'email']),
+                'tache_id' => $tache->id,
+                'tache_titre' => $tache->titre,
+            ]))
+            ->unique('user_id')
+            ->values();
+
+        // Alertes : taux d'inaction N0 élevé (> 33 % des résultats transmis par timeout).
+        // Calculé sur les résultats validés sur la période pour les responsables dans le scope.
+        $inactionAlerts = TacheResultat::query()
+            ->whereIn('user_id', $scopedUserIds)
+            ->whereBetween('created_at', [$periodeStart, $periodeEnd])
+            ->whereIn('statut', ['en_validation_n1', 'en_validation_n2', 'valide', 'rejete'])
+            ->selectRaw('user_id,
+                COUNT(*) as total,
+                SUM(CASE WHEN action_n0 = \'timeout\' THEN 1 ELSE 0 END) as inactions')
+            ->groupBy('user_id')
+            ->having(\DB::raw('SUM(CASE WHEN action_n0 = \'timeout\' THEN 1 ELSE 0 END)'), '>', 0)
+            ->get()
+            ->filter(fn ($row) => $row->total > 0 && ($row->inactions / $row->total) >= 0.33)
+            ->map(fn ($row) => [
+                'user_id' => $row->user_id,
+                'inaction_rate' => round($row->inactions / $row->total, 2),
+                'inaction_count' => (int) $row->inactions,
+                'total_resultats' => (int) $row->total,
+            ])
+            ->values();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'periode' => [
+                    'start' => $periodeStart->toDateString(),
+                    'end' => $periodeEnd->toDateString(),
+                ],
+                'scores' => $scores->values(),
+                'top_performers' => $topPerformers,
+                'alerts' => [
+                    'escalades_abusives' => $escaladeAlerts,
+                    'high_inaction_rate' => $inactionAlerts,
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * Résout les user_ids visibles par $actor pour le tableau de bord.
+     * Owner/super_admin → tous les membres du workspace.
+     * Manager → membres des projets dont il est responsable.
+     * Cadre → membres des activités dont il est responsable.
+     *
+     * @return array<int>
+     */
+    private function resolveDashboardScope(User $actor, ?Workspace $workspace): array
+    {
+        if (! $workspace) {
+            return [$actor->id];
+        }
+
+        if ($actor->isSuperAdmin() || $workspace->owner_id === $actor->id) {
+            // Workspace entier — tous les membres.
+            return $workspace->members()->pluck('users.id')->toArray();
+        }
+
+        $gate = app(ContextualPermissionGate::class);
+        $role = app(PermissionService::class)->getWorkspaceRoleName($actor, $workspace);
+
+        if ($role === 'manager') {
+            // Membres des projets dont l'acteur est responsable.
+            return User::query()
+                ->whereHas('taches.activite.projet', fn ($q) => $q
+                    ->where('workspace_id', $workspace->id)
+                    ->where('responsable_id', $actor->id))
+                ->pluck('id')
+                ->push($actor->id)
+                ->unique()
+                ->toArray();
+        }
+
+        if ($role === 'cadre') {
+            // Membres des activités dont l'acteur est responsable.
+            return User::query()
+                ->whereHas('taches.activite', fn ($q) => $q
+                    ->whereHas('projet', fn ($p) => $p->where('workspace_id', $workspace->id))
+                    ->where('responsable_id', $actor->id))
+                ->pluck('id')
+                ->push($actor->id)
+                ->unique()
+                ->toArray();
+        }
+
+        // Fallback : soi-même uniquement.
+        return [$actor->id];
     }
 }

@@ -76,6 +76,9 @@ class WorkspaceController extends Controller
                 'can_view_fiche_evaluation' => $gate->userCan($user, Permission::EVALUATIONS_VIEW_FICHE, $workspace),
                 'can_export_fiche_evaluation' => $gate->userCan($user, Permission::EVALUATIONS_EXPORT_FICHE, $workspace),
                 'can_manage_notification_preferences' => $gate->userCan($user, Permission::NOTIFICATIONS_MANAGE_PREFERENCES, $workspace),
+                'can_view_evaluation_dashboard' => $gate->userCan($user, Permission::EVALUATIONS_VIEW_DASHBOARD, $workspace),
+                'can_view_workspace_taches' => $gate->userCan($user, Permission::EVALUATIONS_VIEW_WORKSPACE_TACHES, $workspace),
+                'can_inline_edit_tache' => $gate->userCan($user, Permission::TACHES_INLINE_EDIT, $workspace),
             ];
 
             return $workspace;
@@ -718,6 +721,9 @@ class WorkspaceController extends Controller
                         'can_view_fiche_evaluation' => $gate->userCan($user, Permission::EVALUATIONS_VIEW_FICHE, $workspace),
                         'can_export_fiche_evaluation' => $gate->userCan($user, Permission::EVALUATIONS_EXPORT_FICHE, $workspace),
                         'can_manage_notification_preferences' => $gate->userCan($user, Permission::NOTIFICATIONS_MANAGE_PREFERENCES, $workspace),
+                        'can_view_evaluation_dashboard' => $gate->userCan($user, Permission::EVALUATIONS_VIEW_DASHBOARD, $workspace),
+                        'can_view_workspace_taches' => $gate->userCan($user, Permission::EVALUATIONS_VIEW_WORKSPACE_TACHES, $workspace),
+                        'can_inline_edit_tache' => $gate->userCan($user, Permission::TACHES_INLINE_EDIT, $workspace),
                     ],
                 ];
             })
@@ -1483,6 +1489,9 @@ class WorkspaceController extends Controller
                     'can_view_fiche_evaluation' => $gate->userCan($user, Permission::EVALUATIONS_VIEW_FICHE, $workspace),
                     'can_export_fiche_evaluation' => $gate->userCan($user, Permission::EVALUATIONS_EXPORT_FICHE, $workspace),
                     'can_manage_notification_preferences' => $gate->userCan($user, Permission::NOTIFICATIONS_MANAGE_PREFERENCES, $workspace),
+                    'can_view_evaluation_dashboard' => $gate->userCan($user, Permission::EVALUATIONS_VIEW_DASHBOARD, $workspace),
+                    'can_view_workspace_taches' => $gate->userCan($user, Permission::EVALUATIONS_VIEW_WORKSPACE_TACHES, $workspace),
+                    'can_inline_edit_tache' => $gate->userCan($user, Permission::TACHES_INLINE_EDIT, $workspace),
                 ],
             ]),
         ]);

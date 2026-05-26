@@ -113,6 +113,16 @@ final class Permission
     /** Export the agent sheet (PDF/Excel). Same role gates as VIEW_FICHE. */
     const EVALUATIONS_EXPORT_FICHE = 'evaluations.export_fiche';
 
+    // ── Evaluations / Dashboard (Task 10) ──────────────────────────────────
+    /** Voir le tableau de bord évaluations (scores équipe, top performers, alertes). */
+    const EVALUATIONS_VIEW_DASHBOARD = 'evaluations.view_dashboard';
+
+    /** Voir la vue globale des tâches du workspace (réservé owner/directeur). */
+    const EVALUATIONS_VIEW_WORKSPACE_TACHES = 'evaluations.view_workspace_taches';
+
+    /** Modifier une tâche en ligne depuis la vue workspace-wide (même portée que TACHES_EDIT). */
+    const TACHES_INLINE_EDIT = 'taches.inline_edit';
+
     // ── Notifications (Task 8) ─────────────────────────────────────────────
     /** Manage workspace-level notification policy (defaults, mandatory channels). */
     const NOTIFICATIONS_MANAGE_PREFERENCES = 'notifications.manage_preferences';
@@ -182,6 +192,9 @@ final class Permission
             self::EVALUATIONS_VIEW_SCORE,
             self::EVALUATIONS_VIEW_FICHE,
             self::EVALUATIONS_EXPORT_FICHE,
+            self::EVALUATIONS_VIEW_DASHBOARD,
+            self::EVALUATIONS_VIEW_WORKSPACE_TACHES,
+            self::TACHES_INLINE_EDIT,
 
             self::NOTIFICATIONS_MANAGE_PREFERENCES,
 
@@ -252,6 +265,10 @@ final class Permission
                 // Task 9 — managers voient + exportent les fiches de leur scope.
                 self::EVALUATIONS_VIEW_FICHE,
                 self::EVALUATIONS_EXPORT_FICHE,
+                // Task 10 — managers voient le dashboard évaluations (scope projet).
+                self::EVALUATIONS_VIEW_DASHBOARD,
+                // Task 10 — inline edit autorisé pour manager (même portée que TACHES_EDIT).
+                self::TACHES_INLINE_EDIT,
                 // NOTIFICATIONS_MANAGE_PREFERENCES intentionally omitted — workspace-level
                 // notification policy is reserved for owner/directeur (granted via the
                 // owner contextual role's array_diff('all() except task-participant actions')).
@@ -284,6 +301,10 @@ final class Permission
                 // Task 9 — cadres voient + exportent les fiches de leurs assignés.
                 self::EVALUATIONS_VIEW_FICHE,
                 self::EVALUATIONS_EXPORT_FICHE,
+                // Task 10 — cadres voient le dashboard évaluations (scope activité).
+                self::EVALUATIONS_VIEW_DASHBOARD,
+                // Task 10 — inline edit autorisé pour cadre (même portée que TACHES_EDIT).
+                self::TACHES_INLINE_EDIT,
             ],
 
             'collaborateur' => [

@@ -8,6 +8,8 @@ return [
         'cannot_view_fiche' => 'You do not have permission to view this evaluation sheet.',
         'no_workspace' => 'No current workspace selected.',
         'immutable_post_n2' => 'This task is locked: it has been validated at N2 and can no longer be modified.',
+        'cannot_view_dashboard' => 'You do not have permission to view the evaluation dashboard.',
+        'cannot_view_workspace_taches' => 'You do not have permission to view the workspace-wide task view.',
     ],
 
     'criteria' => [
@@ -102,5 +104,50 @@ return [
             'line2' => 'Period assessed: :start → :end.',
             'action' => 'View their sheet',
         ],
+        'abusive_escalation_alert' => [
+            'subject' => 'Alert: abusive escalations detected',
+            'line1' => ':nom triggered the abusive escalations flag on task ":tache".',
+            'line2' => 'Consecutive unjustified bypasses: :count.',
+            'action' => 'View evaluation dashboard',
+        ],
+        'high_inaction_rate_alert' => [
+            'subject' => 'Alert: high N0 inaction rate',
+            'line1' => ':nom has a N0 inaction rate of :rate% for this period.',
+        ],
+    ],
+
+    'dashboard' => [
+        'title' => 'Evaluation Dashboard',
+        'period_label' => 'Period',
+        'top_performers' => 'Top Performers',
+        'alerts' => 'Alerts',
+        'alert_escalades_abusives' => 'Abusive Escalations',
+        'alert_high_inaction' => 'High Inaction Rate',
+        'no_scores' => 'No scores recorded for this period.',
+        'no_alerts' => 'No active alerts.',
+        'score_total' => 'Total score',
+        'decisions_count' => 'Decisions',
+        'inaction_rate' => 'Inaction rate',
+    ],
+
+    'workspace_tasks' => [
+        'title' => 'All Tasks',
+        'filters' => [
+            'project' => 'Project',
+            'activity' => 'Activity',
+            'status' => 'Status',
+            'assignee' => 'Assignee',
+        ],
+        'columns' => [
+            'titre' => 'Title',
+            'statut' => 'Status',
+            'priorite' => 'Priority',
+            'echeance' => 'Due date',
+            'assignees' => 'Assignees',
+            'projet' => 'Project',
+            'activite' => 'Activity',
+            'sous_taches' => 'Subtasks',
+        ],
+        'no_tasks' => 'No tasks found for these criteria.',
     ],
 ];

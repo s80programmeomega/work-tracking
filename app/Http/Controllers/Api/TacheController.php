@@ -2212,4 +2212,85 @@ class TacheController extends Controller
 
         return $pdf->download("rapport-hebdomadaire-{$user->nom}-S{$weekNumber}-{$year}.pdf");
     }
+
+    /**
+     * Task 10 — Vue globale des tâches du workspace (owner/directeur uniquement).
+     *
+     * Retourne toutes les tâches du workspace avec filtres optionnels :
+     *  - projet_id, activite_id, statut, assignee_id
+     * Résultat paginé (25 par page). Chaque tâche inclut son sous-tâche count,
+     * ses assignés et les métadonnées de validation.
+     *
+     * @param  Request  $request  projet_id?, activite_id?, statut?, assignee_id?, per_page?
+     */
+    public function workspaceTaches(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $gate = app(ContextualPermissionGate::class);
+        $workspace = $user->currentWorkspace;
+
+        if (! $user->isSuperAdmin()
+            && (! $workspace || ! $gate->userCan($user, Permission::EVALUATIONS_VIEW_WORKSPACE_TACHES, $workspace))) {
+            Log::warning('Accès refusé à la vue globale des tâches', [
+                'user_id' => $user->id,
+                'workspace_id' => $workspace?->id,
+                'reason' => 'insufficient_role',
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => __('evaluation.errors.cannot_view_workspace_taches'),
+            ], 403);
+        }
+
+        $query = Tache::query()
+            ->whereHas('activite.projet', fn ($q) => $q->where('workspace_id', $workspace?->id))
+            ->with([
+                'activite:id,nom,projet_id',
+                'activite.projet:id,nom,workspace_id',
+                'assignees:id,nom,prenom,email,avatar',
+            ])
+            ->withCount('sousTaches');
+
+        // Filtre par projet
+        if ($request->filled('projet_id')) {
+            $query->whereHas('activite', fn ($q) => $q->where('projet_id', $request->integer('projet_id')));
+        }
+
+        // Filtre par activité
+        if ($request->filled('activite_id')) {
+            $query->where('activite_id', $request->integer('activite_id'));
+        }
+
+        // Filtre par statut
+        if ($request->filled('statut')) {
+            $query->where('statut', $request->string('statut'));
+        }
+
+        // Filtre par assigné
+        if ($request->filled('assignee_id')) {
+            $query->whereHas('assignees', fn ($q) => $q->where('users.id', $request->integer('assignee_id')));
+        }
+
+        $taches = $query
+            ->orderBy('echeance', 'asc')
+            ->paginate($request->integer('per_page', 25));
+
+        Log::info('Vue globale des tâches consultée', [
+            'user_id' => $user->id,
+            'workspace_id' => $workspace?->id,
+            'filters' => $request->only(['projet_id', 'activite_id', 'statut', 'assignee_id']),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => TacheResource::collection($taches),
+            'meta' => [
+                'current_page' => $taches->currentPage(),
+                'last_page' => $taches->lastPage(),
+                'total' => $taches->total(),
+                'per_page' => $taches->perPage(),
+            ],
+        ]);
+    }
 }

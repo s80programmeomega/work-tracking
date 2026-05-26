@@ -245,4 +245,35 @@ class PermissionService
             ->whereHas('assignees', fn ($q) => $q->where('users.id', $target->id))
             ->exists();
     }
+
+    /**
+     * Vérifie si l'acteur peut voir le tableau de bord évaluations.
+     * Owner/directeur → workspace entier. Manager → scope projet.
+     * Cadre → scope activité (via EVALUATIONS_VIEW_DASHBOARD accordé au rôle).
+     */
+    public function canViewEvaluationDashboard(User $actor, Workspace $workspace, ContextualPermissionGate $gate): bool
+    {
+        return $actor->isSuperAdmin()
+            || $gate->userCan($actor, Permission::EVALUATIONS_VIEW_DASHBOARD, $workspace);
+    }
+
+    /**
+     * Vérifie si l'acteur peut accéder à la vue globale des tâches du workspace.
+     * Réservé à owner/directeur/super_admin — EVALUATIONS_VIEW_WORKSPACE_TACHES.
+     */
+    public function canViewWorkspaceTaches(User $actor, Workspace $workspace, ContextualPermissionGate $gate): bool
+    {
+        return $actor->isSuperAdmin()
+            || $gate->userCan($actor, Permission::EVALUATIONS_VIEW_WORKSPACE_TACHES, $workspace);
+    }
+
+    /**
+     * Vérifie si l'acteur peut modifier une tâche en ligne (inline edit).
+     * Même portée que TACHES_EDIT — accordé à cadre, manager, owner.
+     */
+    public function canInlineEditTache(User $actor, Tache $tache, ContextualPermissionGate $gate): bool
+    {
+        return $actor->isSuperAdmin()
+            || $gate->userCan($actor, Permission::TACHES_INLINE_EDIT, $tache);
+    }
 }

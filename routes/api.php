@@ -147,6 +147,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         });
     });
 
+    // Task 10: Vue globale des tâches du workspace (owner/directeur uniquement)
+    Route::get('/workspace/taches', [TacheController::class, 'workspaceTaches'])->name('workspace.taches');
+
     // ======================================== PROJETS ========================================
     Route::prefix('projets')->group(function () {
 
@@ -416,6 +419,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Task 7: Pending validations dashboard + score query
         Route::get('/validations/en-attente', [EvaluationController::class, 'pendingValidationsDashboard']);
         Route::get('/score', [EvaluationController::class, 'userScore']);
+
+        // Task 10: Evaluation dashboard (scores équipe, top performers, alertes)
+        Route::get('/tableau-de-bord', [EvaluationController::class, 'evaluationDashboard']);
 
         // Task 9: full agent evaluation sheet (8 criteria + indicators).
         // Réponse JSON consommée par la page /evaluations/personnel/:id/historique.

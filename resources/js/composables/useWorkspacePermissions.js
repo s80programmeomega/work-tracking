@@ -68,6 +68,11 @@ export function useWorkspacePermissions(workspace = null) {
     const canViewFicheEvaluation   = computed(() => isSuperAdmin.value || (perms.value.can_view_fiche_evaluation ?? false))
     const canExportFicheEvaluation = computed(() => isSuperAdmin.value || (perms.value.can_export_fiche_evaluation ?? false))
 
+    // Task 10: Evaluation dashboard + workspace-wide task view
+    const canViewEvaluationDashboard  = computed(() => isSuperAdmin.value || (perms.value.can_view_evaluation_dashboard ?? false))
+    const canViewWorkspaceTaches      = computed(() => isSuperAdmin.value || isDirecteur.value || (perms.value.can_view_workspace_taches ?? false))
+    const canInlineEditTache          = computed(() => isSuperAdmin.value || (perms.value.can_inline_edit_tache ?? false))
+
     // Task 8: Notifications
     const canManageNotificationPreferences = computed(() => isSuperAdmin.value || (perms.value.can_manage_notification_preferences ?? false))
 
@@ -140,6 +145,11 @@ export function useWorkspacePermissions(workspace = null) {
         // Task 9
         canViewFicheEvaluation,
         canExportFicheEvaluation,
+
+        // Task 10
+        canViewEvaluationDashboard,
+        canViewWorkspaceTaches,
+        canInlineEditTache,
 
         // Task 8
         canManageNotificationPreferences,

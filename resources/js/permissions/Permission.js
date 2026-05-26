@@ -73,6 +73,11 @@ export const Permission = Object.freeze({
     EVALUATIONS_VIEW_FICHE:     'evaluations.view_fiche',
     EVALUATIONS_EXPORT_FICHE:   'evaluations.export_fiche',
 
+    // Evaluations / Dashboard (Task 10)
+    EVALUATIONS_VIEW_DASHBOARD:          'evaluations.view_dashboard',
+    EVALUATIONS_VIEW_WORKSPACE_TACHES:   'evaluations.view_workspace_taches',
+    TACHES_INLINE_EDIT:                  'taches.inline_edit',
+
     // Notifications (Task 8)
     NOTIFICATIONS_MANAGE_PREFERENCES: 'notifications.manage_preferences',
 
