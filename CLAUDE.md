@@ -2,6 +2,36 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+---
+
+## Session Bootstrap
+
+At the start of every session, before doing anything else:
+
+1. Read `docs/SESSION_STATE.md` — current task, branch, what to do next.
+2. Read `docs/WORKING_GUIDELINES.md` — conventions and doc-trail checklist.
+3. Read `docs/PROGRESSION.md` — full task status table.
+4. If `/home/jonas/.claude/projects/` exists on this machine, read the `MEMORY.md` index there for accumulated user preferences and feedback. If absent (different machine), the rules below apply instead.
+
+Then say: _"Read SESSION_STATE, WORKING_GUIDELINES, PROGRESSION. Resuming from [current task] — [what's next]."_
+
+---
+
+## Persistent Rules
+
+These rules apply on every machine and every session. They do not change task to task.
+
+- **Commits:** Never commit without explicit user instruction. Never push unless explicitly asked. No AI references in commit messages. Run `vendor/bin/pint --dirty --format agent` before every commit.
+- **Git remotes:** Two remotes — `origin` (Jonas, `s80programmeomega`) and `client` (frozen). Always push to `origin` only. Never `git push client`. Never `git checkout main`.
+- **Code deletions:** Never delete code without a full impact check and explicit approval, even in auto-edit mode.
+- **Language:** Docs in English. Code comments and log messages in French.
+- **Testing docs:** Write `docs/testing/TASK_{N}_TESTING.md` for every completed task.
+- **State docs:** Update `docs/PROGRESSION.md` and `docs/SESSION_STATE.md` at the end of every task.
+- **Servers:** Stop any background server started (serve, vite, queue, reverb) before ending a turn.
+- **Memory sync:** When the user says _"Update CLAUDE.md with current memory"_ — read local memory files, update the Persistent Rules section if anything has changed, and commit.
+
+---
+
 ## Project Overview
 
 **Work Tracking** is a task management application with a hierarchy: **Projet → Activité → Tâches**. Built with Laravel 10 backend and Vue.js 3 frontend.
