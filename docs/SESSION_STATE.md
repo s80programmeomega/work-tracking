@@ -17,21 +17,20 @@
 ## Current Session
 
 **Date:** 2026-05-26
-**Session goal:** Task 15 — Task List UX
-**Status:** Complete. 269 tests green. Ready to commit.
+**Session goal:** Task 16 — PDF/Excel Export
+**Status:** Complete. 274 tests green. Ready to commit.
 
 ---
 
 ## Current Task
 
 **Task:** Task 16 — PDF/Excel Export
-**Branch:** `feature/v2-task-16-export` (not yet cut)
-**Status:** Not started.
+**Branch:** `feature/v2-task-16-export`
+**Status:** Complete — awaiting commit + push.
 
 **What to do next:**
-1. Commit `feature/v2-task-15-task-list-ux`
-2. Push `feature/v2-task-15-task-list-ux` to `origin`
-3. Cut `feature/v2-task-16-export` from `feature/v2-task-15-task-list-ux`
+1. Commit `feature/v2-task-16-export` (user will say "ready")
+2. Push `feature/v2-task-16-export` to `origin`
 
 ## Last Completed Task
 
@@ -240,6 +239,7 @@ Tests: 11 feature in `NotificationServiceTest` + 8 feature in `SendDailyDigestCo
 | `feature/v2-task-13-subscription` | Task 13 | Complete — awaiting push 🔄 |
 | `feature/v2-task-14-platform-dashboard` | Task 14 | Complete — awaiting push 🔄 |
 | `feature/v2-task-15-task-list-ux` | Task 15 | Complete — awaiting push 🔄 |
+| `feature/v2-task-16-export` | Task 16 | Complete — awaiting push 🔄 |
 
 ---
 
@@ -288,3 +288,4 @@ Tests: 11 feature in `NotificationServiceTest` + 8 feature in `SendDailyDigestCo
 | 2026-05-26 | CDC Hotfixes | R7 guard (`enforceMandatorySousTaches` in TacheResultatService::soumettre), `GET /api/audit-logs/validation/{tache}` endpoint, agent sheet §5 (`submitted_results` section in agentSheetSections + AgentSheet.vue 5th tab). 6 new PHPUnit tests. 232 total, all green. Committed on `fix/cdc-hotfixes`. |
 | 2026-05-26 | Task 13 + Task 14 | Task 13: SubscriptionService, CheckSubscriptionLimits middleware, 3 notifications, TrialBanner.vue, WorkspaceFactory states, 21 PHPUnit tests. Task 14: AdminController (6 endpoints), 2 notifications, lang/fr+en/admin.php, AdminDashboard/Workspaces/Users pages, SubscriptionBadge, router guard, sidebar admin section, 11 PHPUnit tests. 264 total, all green. |
 | 2026-05-26 | Task 15 | TacheTable.vue (table view + inline edit), Taches.vue (table default, assignee filter, deep-link), ActiviteDetail.vue shortcut, PATCH route, statut validation fix, 5 PHPUnit tests. 269 total, all green. |
+| 2026-05-26 | Task 16 | PDF export (GET /api/evaluations/personnel/{user}/export-pdf, Blade+DomPDF, A4 portrait, criteria bars), Excel export (GET /api/workspace/taches/export-excel, WorkspaceTachesExport, 10-col, blue header, filter-aware). AgentSheet.vue + WorkspaceTaches.vue buttons wired. 5 PHPUnit tests. 274 total, all green. |

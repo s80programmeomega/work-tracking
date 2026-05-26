@@ -35,7 +35,7 @@
 | 13 | Subscription Modes + Trial Duration | `feature/v2-task-13-subscription` | ✅ | 2026-05-26 | 2026-05-26 | 253 PHPUnit tests green. |
 | 14 | Platform Super Admin Dashboard | `feature/v2-task-14-platform-dashboard` | ✅ | 2026-05-26 | 2026-05-26 | 264 PHPUnit tests green. |
 | 15 | Task List UX (table mode + activity shortcut) | `feature/v2-task-15-task-list-ux` | ✅ | 2026-05-26 | 2026-05-26 | 269 PHPUnit tests green. |
-| 16 | PDF/Excel Export (evaluation sheet + project/task) | `feature/v2-task-16-export` | ⬜ | — | — | CDC gaps B.1 + ST.7/E.2 |
+| 16 | PDF/Excel Export (evaluation sheet + project/task) | `feature/v2-task-16-export` | ✅ | 2026-05-26 | 2026-05-26 | CDC gaps B.1 + ST.7/E.2. 274 PHPUnit tests green. |
 | — | CDC Hotfixes (R7 guard + audit-log endpoint + rate limiting + agent sheet §5) | `fix/cdc-hotfixes` | ✅ | 2026-05-26 | 2026-05-26 | Merged into `jonas` 2026-05-26. |
 
 ---
@@ -265,10 +265,15 @@ CDC gaps A.10–A.13.
 
 CDC gaps B.1 + ST.7/E.2.
 
-- [ ] PDF export of evaluation sheet (per agent, per period)
-- [ ] Excel export of project/task list (with sous-taches when filter active)
-- [ ] Agent sheet §5: résultats soumis avec statut validation (deferred from CDC Hotfixes if medium effort)
-- [ ] Tests passing
+- [x] PDF export of evaluation sheet — `GET /api/evaluations/personnel/{user}/export-pdf` (CDC B.1)
+- [x] Excel export of workspace task list — `GET /api/workspace/taches/export-excel` (CDC ST.7 / E.2)
+- [x] `WorkspaceTachesExport` class (10-column, blue header, auto-size, filter-aware)
+- [x] Blade template `resources/views/exports/agent-sheet.blade.php` (score_global, 8 criteria bars, task tables)
+- [x] "Exporter PDF" button wired in `AgentSheet.vue`; "Exporter Excel" button wired in `WorkspaceTaches.vue`
+- [x] Permission gates: `canExportFicheEvaluation` for PDF; owner-only for Excel
+- [x] PHPUnit: 5 tests in `tests/Feature/Task16/ExportTest.php`
+- [x] Manual test guide: `docs/testing/TASK_16_TESTING.md`
+- [x] **274 PHPUnit tests, all passing.**
 - [ ] PR opened into `jonas`
 
 ### Task 13

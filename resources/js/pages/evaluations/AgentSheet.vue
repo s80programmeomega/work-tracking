@@ -500,9 +500,8 @@ function openDrillDown(item) {
 }
 
 function exportSheet() {
-  // Stub — l'export PDF/Excel arrive plus tard (Task 9 step suivant ou Task 10).
-  // Sécurise au moins le bouton: pas de crash si cliqué.
-  window.alert('Export à venir — endpoint dédié à brancher.')
+  const params = new URLSearchParams({ start: filters.value.start, end: filters.value.end })
+  window.open(`/api/evaluations/personnel/${userId.value}/export-pdf?${params}`, '_blank')
 }
 
 onMounted(() => {

@@ -15,10 +15,22 @@
           </p>
         </div>
 
-        <!-- Total -->
-        <span class="text-sm text-gray-500 dark:text-gray-400" dusk="task-total">
-          {{ meta.total ?? '—' }} tâche(s)
-        </span>
+        <!-- Total + Export -->
+        <div class="flex items-center gap-3">
+          <span class="text-sm text-gray-500 dark:text-gray-400" dusk="task-total">
+            {{ meta.total ?? '—' }} tâche(s)
+          </span>
+          <button
+            dusk="export-excel-btn"
+            @click="exportExcel"
+            class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          >
+            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Exporter Excel
+          </button>
+        </div>
       </div>
 
       <!-- Filtres -->
@@ -228,6 +240,15 @@ async function fetchTaches(page = 1) {
 function clearFilters() {
   filters.value = { statut: '', projetId: '', activiteId: '', assigneeId: '' }
   fetchTaches(1)
+}
+
+function exportExcel() {
+  const params = new URLSearchParams()
+  if (filters.value.statut) params.append('statut', filters.value.statut)
+  if (filters.value.projetId) params.append('projet_id', filters.value.projetId)
+  if (filters.value.activiteId) params.append('activite_id', filters.value.activiteId)
+  if (filters.value.assigneeId) params.append('assignee_id', filters.value.assigneeId)
+  window.open(`/api/workspace/taches/export-excel?${params}`, '_blank')
 }
 
 function goToTache(tache) {

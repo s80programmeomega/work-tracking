@@ -166,6 +166,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Task 10: Vue globale des tâches du workspace (owner/directeur uniquement)
     Route::get('/workspace/taches', [TacheController::class, 'workspaceTaches'])->name('workspace.taches');
+    // Task 16: Export Excel des tâches du workspace
+    Route::get('/workspace/taches/export-excel', [TacheController::class, 'exportWorkspaceTachesExcel'])->name('workspace.taches.export-excel');
 
     // ======================================== PROJETS ========================================
     Route::prefix('projets')->group(function () {
@@ -448,6 +450,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Task 9: historique paginé en 4 sections (directed tasks, directed
         // subtasks, assignee tasks, assignee subtasks) pour la même page.
         Route::get('/personnel/{user}/historique', [EvaluationController::class, 'agentSheetSections']);
+
+        // Task 16: Export PDF de la fiche d'évaluation
+        Route::get('/personnel/{user}/export-pdf', [EvaluationController::class, 'exportAgentSheetPdf'])->name('evaluations.export-pdf');
 
         // 📊 Mes responsabilités (tous les résultats que je peux consulter)
         Route::get('/mes-responsabilites', [EvaluationController::class, 'myResponsibilities']);

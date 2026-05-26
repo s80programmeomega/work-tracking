@@ -20,9 +20,11 @@ use App\Permissions\Permission;
 use App\Services\EvaluationScoreService;
 use App\Services\NotificationService;
 use App\Services\PermissionService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -249,6 +251,68 @@ class EvaluationController extends Controller
                 ],
             ]),
         ]);
+    }
+
+    /**
+     * Task 16: Export the agent evaluation sheet as a PDF.
+     *
+     * Endpoint: GET /api/evaluations/personnel/{user}/export-pdf
+     * Query params: start, end (Y-m-d)
+     */
+    public function exportAgentSheetPdf(Request $request, User $user): Response
+    {
+        $validated = $request->validate([
+            'start' => 'sometimes|nullable|date_format:Y-m-d',
+            'end' => 'sometimes|nullable|date_format:Y-m-d|after_or_equal:start',
+        ]);
+
+        $actor = $request->user();
+        $workspace = $actor->currentWorkspace;
+
+        abort_unless($workspace, 403, __('evaluation.errors.no_workspace'));
+
+        $permissionService = app(PermissionService::class);
+        $gate = app(ContextualPermissionGate::class);
+
+        abort_unless(
+            $permissionService->canExportFicheEvaluation($actor, $user, $workspace, $gate),
+            403,
+            __('evaluation.errors.cannot_view_fiche')
+        );
+
+        $start = $validated['start'] ?? now()->subDays(30)->toDateString();
+        $end = $validated['end'] ?? now()->toDateString();
+        $sheet = $this->scoreService->calculerScore($user, $start, $end);
+
+        Log::info('Export PDF fiche évaluation', [
+            'actor_id' => $actor->id,
+            'target_id' => $user->id,
+            'start' => $start,
+            'end' => $end,
+        ]);
+
+        $criteria = [
+            'completion_rate' => 'Taux de réalisation',
+            'deadline_respect' => 'Respect des délais',
+            'result_quality' => 'Qualité des résultats',
+            'first_pass_validation' => 'Validation au premier passage',
+            'justified_returns' => 'Retours justifiés',
+            'inactions' => 'Absence d\'inactions',
+            'work_volume' => 'Volume de travail',
+            'team_coordination' => 'Coordination équipe',
+        ];
+
+        $pdf = Pdf::loadView('exports.agent-sheet', [
+            'user' => ['nom' => $user->nom, 'nom_complet' => trim(($user->prenom ?? '').' '.($user->nom ?? ''))],
+            'start' => $start,
+            'end' => $end,
+            'sheet' => $sheet,
+            'criteria' => $criteria,
+        ])->setPaper('a4', 'portrait');
+
+        $filename = 'fiche-evaluation-'.str_replace(' ', '-', strtolower($user->nom)).'-'.$start.'.pdf';
+
+        return $pdf->download($filename);
     }
 
     /**
