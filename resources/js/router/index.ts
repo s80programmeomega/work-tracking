@@ -606,15 +606,15 @@ const router = createRouter({
     //     requiresAuth: true,
     //   },
     // },
-    // {
-    //   path: '/workspaces/:workspaceId/documents',
-    //   name: 'WorkspaceDocuments',
-    //   component: () => import('../pages/documents/WorkspaceDocuments.vue'),
-    //   meta: {
-    //     title: 'Documents du workspace',
-    //     requiresAuth: true,
-    //   },
-    // },
+    {
+      path: '/workspaces/:workspaceId/documents',
+      name: 'WorkspaceDocuments',
+      component: () => import('../pages/documents/WorkspaceDocuments.vue'),
+      meta: {
+        title: 'Documents du workspace',
+        requiresAuth: true,
+      },
+    },
     {
       path: '/projets/:projetId/documents',
       name: 'ProjetDocuments',
