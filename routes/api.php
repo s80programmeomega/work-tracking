@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\Api\ActiviteController;
+use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DocumentController;
@@ -81,6 +82,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/refresh', [AuthController::class, 'refresh']);
         Route::post('/verify-email', [AuthController::class, 'verifyEmail']);
         Route::put('/language', [AuthController::class, 'updateLanguage']);
+    });
+
+    // ========================================  PLATFORM ADMIN  ========================================
+    Route::prefix('admin')->middleware('super_admin')->group(function () {
+        Route::get('/stats', [AdminController::class, 'stats'])->name('admin.stats');
+        Route::get('/workspaces', [AdminController::class, 'workspaces'])->name('admin.workspaces');
+        Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
+        Route::post('/workspaces/{workspace}/extend-trial', [AdminController::class, 'extendTrial'])->name('admin.workspaces.extend-trial');
+        Route::post('/workspaces/{workspace}/suspend', [AdminController::class, 'suspendWorkspace'])->name('admin.workspaces.suspend');
+        Route::post('/workspaces/{workspace}/reactivate', [AdminController::class, 'reactivateWorkspace'])->name('admin.workspaces.reactivate');
     });
 
     // Dashboard routes

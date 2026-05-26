@@ -293,6 +293,7 @@ import FolderIcon from '@/icons/FolderIcon.vue';
 import TaskIcon from '@/icons/TaskIcon.vue';
 import ClipboardCheckIcon from '@/icons/ClipboardCheckIcon.vue';
 import UsersIcon from '@/icons/UsersIcon.vue';
+import ShieldIcon from '@/icons/ShieldIcon.vue';
 import { useSidebar } from '@/composables/useSidebar';
 import api from '@/api/axios'
 import { useAuthStore } from '@/stores/authStore';
@@ -674,6 +675,30 @@ const menuGroups = computed(() => [
                 icon: UserCircleIcon,
                 name: 'Mon Profil',
                 path: '/profile',
+            },
+        ],
+    },
+    {
+        title: 'Administration',
+        superAdminOnly: true,
+        items: [
+            {
+                icon: ShieldIcon,
+                name: 'Platform Dashboard',
+                path: '/admin/dashboard',
+                superAdminOnly: true,
+            },
+            {
+                icon: UsersIcon,
+                name: 'Workspaces',
+                path: '/admin/workspaces',
+                superAdminOnly: true,
+            },
+            {
+                icon: UsersIcon,
+                name: 'Utilisateurs',
+                path: '/admin/users',
+                superAdminOnly: true,
             },
         ],
     },

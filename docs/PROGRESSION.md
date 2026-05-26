@@ -33,7 +33,7 @@
 | 11 | Task Creation UX (wizard + intervenant picker) | `feature/v2-task-11-task-creation-ux` | ✅ | 2026-05-26 | 2026-05-26 | 221 PHPUnit + 3 Dusk tests green. Merged into `jonas` 2026-05-26. |
 | 12 | Document Management per Project + Workspace | `feature/v2-task-12-document-management` | ✅ | 2026-05-26 | 2026-05-26 | 226 PHPUnit tests green. Merged into `jonas` 2026-05-26. |
 | 13 | Subscription Modes + Trial Duration | `feature/v2-task-13-subscription` | ✅ | 2026-05-26 | 2026-05-26 | 253 PHPUnit tests green. |
-| 14 | Platform Super Admin Dashboard | `feature/v2-task-14-platform-dashboard` | ⬜ | — | — | — |
+| 14 | Platform Super Admin Dashboard | `feature/v2-task-14-platform-dashboard` | ✅ | 2026-05-26 | 2026-05-26 | 264 PHPUnit tests green. |
 | 15 | Task List UX (table mode + activity shortcut) | `feature/v2-task-15-task-list-ux` | ⬜ | — | — | CDC gaps A.10–A.13 |
 | 16 | PDF/Excel Export (evaluation sheet + project/task) | `feature/v2-task-16-export` | ⬜ | — | — | CDC gaps B.1 + ST.7/E.2 |
 | — | CDC Hotfixes (R7 guard + audit-log endpoint + rate limiting + agent sheet §5) | `fix/cdc-hotfixes` | ✅ | 2026-05-26 | 2026-05-26 | Merged into `jonas` 2026-05-26. |
@@ -219,6 +219,7 @@
 - [x] ActiviteDetail.vue + Taches.vue wired (wizard for create, TacheForm for edit)
 - [x] PHPUnit: 5 tests in `tests/Feature/Task11/WizardValidationTest.php`
 - [x] Dusk: 3 tests in `tests/Browser/Tasks/WizardTest.php`
+- [x] Manual test guide: `docs/testing/TASK_11_TESTING.md`
 - [x] 221 tests green. Merged into `jonas` 2026-05-26.
 
 ### Task 12
@@ -283,18 +284,25 @@ CDC gaps B.1 + ST.7/E.2.
 - [x] `AdminLayout.vue`: TrialBanner mounted above content area, changes workspace-reactively
 - [x] `WorkspaceFactory`: 3 states added — `paid()`, `trialExpired()`, `trialExpiringSoon(daysLeft)`
 - [x] PHPUnit: 13 tests in `SubscriptionServiceTest` (unit logic) + 8 tests in `SubscriptionMiddlewareTest` (HTTP middleware + API endpoints)
+- [x] Manual test guide: `docs/testing/TASK_13_TESTING.md`
 - [x] **253 PHPUnit tests, all passing.**
 - [ ] PR opened into `jonas`
 
 ### Task 14
-- [ ] `/admin/dashboard` page created
-- [ ] `/admin/workspaces` page created
-- [ ] `/admin/users` page created
-- [ ] `GET /admin/stats` endpoint created
-- [ ] All `/admin/*` routes protected by `super_admin` middleware
-- [ ] `canAccessPlatformDashboard` permission added
-- [ ] Translation files `lang/fr/admin.php` and `lang/en/admin.php` created
-- [ ] Tests passing
+- [x] `AdminController` created: `stats`, `workspaces`, `users`, `extendTrial`, `suspendWorkspace`, `reactivateWorkspace`
+- [x] All `/api/admin/*` routes protected by `super_admin` middleware (prefix group in `api.php`)
+- [x] `TrialExtendedNotification` + `WorkspaceSuspendedNotification` (both ShouldQueue, channelsFor-routed)
+- [x] `NotificationService::wantsEmail()` + `wantsWebPush()` updated with `trial_extended` + `workspace_suspended` high-signal events
+- [x] Translation files `lang/fr/admin.php` + `lang/en/admin.php` (dashboard, workspaces, users, actions, notifications sections)
+- [x] `AdminDashboard.vue` — 6 workspace + 2 user stat cards, recent workspaces table, quick links
+- [x] `AdminWorkspaces.vue` — paginated table with search/mode/status filters, extend-trial modal, suspend modal, reactivate button
+- [x] `AdminUsers.vue` — paginated table with search filter
+- [x] `SubscriptionBadge.vue` component (trial=amber, paid=green, free=gray)
+- [x] Vue router: 4 admin routes with `requiresSuperAdmin` meta + `beforeEach` guard → redirects non-super-admins to 404
+- [x] AppSidebar: Administration section (3 items) gated by `superAdminOnly`, auto-hidden for non-admins
+- [x] PHPUnit: 11 tests in `PlatformDashboardTest` (403/200 by role, stats structure, notification assertions via `Notification::fake()`)
+- [x] Manual test guide: `docs/testing/TASK_14_TESTING.md`
+- [x] **264 PHPUnit tests, all passing.**
 - [ ] PR opened into `jonas`
 
 ---

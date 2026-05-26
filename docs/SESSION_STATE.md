@@ -17,23 +17,38 @@
 ## Current Session
 
 **Date:** 2026-05-26
-**Session goal:** Task 13 — Subscription Modes + Trial Duration
-**Status:** Complete. 253 tests green. Ready to commit and push.
+**Session goal:** Task 14 — Platform Super Admin Dashboard
+**Status:** Complete. 264 tests green. Ready to commit.
 
 ---
 
 ## Current Task
 
-**Task:** Task 14 — Platform Super Admin Dashboard
-**Branch:** `feature/v2-task-14-platform-dashboard` (not yet cut)
+**Task:** Task 15 — Task List UX (table mode + activity shortcut)
+**Branch:** `feature/v2-task-15-task-list-ux` (not yet cut)
 **Status:** Not started.
 
 **What to do next:**
-1. Commit `feature/v2-task-13-subscription` (all changes staged)
-2. Push `feature/v2-task-13-subscription` to `origin`
-3. Cut `feature/v2-task-14-platform-dashboard` from `feature/v2-task-13-subscription`
+1. Commit `feature/v2-task-14-platform-dashboard` (all changes staged)
+2. Push `feature/v2-task-14-platform-dashboard` to `origin`
+3. Cut `feature/v2-task-15-task-list-ux` from `feature/v2-task-14-platform-dashboard`
 
 ## Last Completed Task
+
+**Task 14** — Platform Super Admin Dashboard (2026-05-26)
+- `AdminController` with 6 methods: `stats`, `workspaces`, `users`, `extendTrial`, `suspendWorkspace`, `reactivateWorkspace`
+- All `/api/admin/*` routes protected by `super_admin` middleware (prefix group in `routes/api.php`)
+- `TrialExtendedNotification` + `WorkspaceSuspendedNotification` (ShouldQueue, channelsFor-routed as high-signal events)
+- `NotificationService::wantsEmail()` + `wantsWebPush()` extended with `trial_extended` + `workspace_suspended`
+- Translation files `lang/fr/admin.php` + `lang/en/admin.php` (5 sections: dashboard, workspaces, users, actions, notifications)
+- `AdminDashboard.vue` — 6 workspace stat cards + 2 user stat cards, recent workspaces table, quick links
+- `AdminWorkspaces.vue` — paginated table with search/mode/status filters, extend-trial modal, suspend modal, reactivate button
+- `AdminUsers.vue` — paginated table with search filter
+- `SubscriptionBadge.vue` component (color-coded by subscription mode)
+- Vue router: 4 admin routes with `requiresSuperAdmin` meta + `beforeEach` guard → redirects non-super-admins to 404
+- AppSidebar: Administration section (3 items, `superAdminOnly: true`), auto-hidden from non-admins
+- PHPUnit: 11 tests in `tests/Feature/Admin/PlatformDashboardTest.php`
+- **264 PHPUnit tests, all passing.**
 
 **Task 13** — Subscription Modes + Trial Duration (2026-05-26)
 - Migration: `subscription_mode` (default `trial`), `trial_started_at`, `trial_duration_days` (default 30) on workspaces
@@ -214,6 +229,7 @@ Tests: 11 feature in `NotificationServiceTest` + 8 feature in `SendDailyDigestCo
 | `feature/v2-task-12-document-management` | Task 12 | Merged ✅ (into `jonas` 2026-05-26) |
 | `fix/cdc-hotfixes` | CDC Hotfixes | Merged ✅ (into `jonas` 2026-05-26) |
 | `feature/v2-task-13-subscription` | Task 13 | Complete — awaiting push 🔄 |
+| `feature/v2-task-14-platform-dashboard` | Task 14 | Complete — awaiting push 🔄 |
 
 ---
 
@@ -260,3 +276,4 @@ Tests: 11 feature in `NotificationServiceTest` + 8 feature in `SendDailyDigestCo
 | 2026-05-26 | Task 12 | Document Management. DOCUMENTS_MANAGE_WORKSPACE permission (owner only), WorkspaceDocuments.vue, workspace docs endpoint gated, share-by-email endpoint + DocumentSharedNotification, DocumentUploaded/DeletedNotification wired, document permission keys in ProjetResource + composables, lang/fr+en/documents.php. 5 PHPUnit tests. 226 tests green. Merged into jonas. |
 | 2026-05-26 | CDC Review | Cross-referenced CDC_WorkTracking_v2.pdf Rev.3 against all completed and planned tasks (T0–T14). Found 10+ gaps: A.1 (design assets), A.10–A.13 (task list UX), R7 (backend guard missing), CDC-API (audit-log endpoint missing), ST.7/E.2 (agent sheet §5 + export), B.1–B.5 (export, SMS, search, billing, rate limiting). Rate limiting verified ✅ already in place. Two new tasks added: T15 (task list UX), T16 (export). CDC hotfix batch created on `fix/cdc-hotfixes`. IMPLEMENTATION_PLAN.md + PROGRESSION.md + SESSION_STATE.md updated. |
 | 2026-05-26 | CDC Hotfixes | R7 guard (`enforceMandatorySousTaches` in TacheResultatService::soumettre), `GET /api/audit-logs/validation/{tache}` endpoint, agent sheet §5 (`submitted_results` section in agentSheetSections + AgentSheet.vue 5th tab). 6 new PHPUnit tests. 232 total, all green. Committed on `fix/cdc-hotfixes`. |
+| 2026-05-26 | Task 13 + Task 14 | Task 13: SubscriptionService, CheckSubscriptionLimits middleware, 3 notifications, TrialBanner.vue, WorkspaceFactory states, 21 PHPUnit tests. Task 14: AdminController (6 endpoints), 2 notifications, lang/fr+en/admin.php, AdminDashboard/Workspaces/Users pages, SubscriptionBadge, router guard, sidebar admin section, 11 PHPUnit tests. 264 total, all green. |
