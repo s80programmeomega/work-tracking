@@ -89,9 +89,49 @@ class TacheResultatFactory extends Factory
         return $this->state([
             'statut' => 'valide',
             'valide_par_n1' => true,
-            'valide_le_n1' => now(),
+            'valide_le_n1' => now()->subHours(2),
+            'validateur_n1_id' => User::factory(),
             'valide_par_n2' => true,
             'valide_le_n2' => now(),
+            'validateur_n2_id' => User::factory(),
+        ]);
+    }
+
+    /** Result rejected at N1 — sent back to author for rework. */
+    public function rejectedN1(?int $validateurId = null): static
+    {
+        return $this->state([
+            'statut' => 'rejete',
+            'soumis_le' => now()->subHours(4),
+            'soumis_n0_le' => now()->subHours(4),
+            'action_n0' => 'approuve',
+            'action_n0_le' => now()->subHours(3),
+            'validateur_n1_id' => $validateurId,
+            'commentaire_n1' => fake()->sentence(12),
+            'rejete_par' => $validateurId,
+            'rejete_le' => now()->subHour(),
+            'niveau_rejet' => 'n1',
+        ]);
+    }
+
+    /** Result rejected at N2 — N1 had already validated. */
+    public function rejectedN2(?int $validateurN1Id = null, ?int $validateurN2Id = null): static
+    {
+        return $this->state([
+            'statut' => 'rejete',
+            'soumis_le' => now()->subHours(6),
+            'soumis_n0_le' => now()->subHours(6),
+            'action_n0' => 'approuve',
+            'action_n0_le' => now()->subHours(5),
+            'valide_par_n1' => true,
+            'valide_le_n1' => now()->subHours(3),
+            'validateur_n1_id' => $validateurN1Id,
+            'commentaire_n1' => fake()->sentence(10),
+            'validateur_n2_id' => $validateurN2Id,
+            'commentaire_n2' => fake()->sentence(12),
+            'rejete_par' => $validateurN2Id,
+            'rejete_le' => now()->subHour(),
+            'niveau_rejet' => 'n2',
         ]);
     }
 }
