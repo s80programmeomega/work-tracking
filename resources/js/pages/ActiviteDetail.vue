@@ -714,15 +714,25 @@
        
  
 
-    <!-- Task Form Modal -->
-   <TacheForm
-  v-if="showTaskForm"
-  :tache="selectedTask"
-  :activite-context="activite"
-  :initial-statut="newTaskStatut"
-  @close="closeTaskForm"
-  @saved="handleTaskSaved"
-/>
+    <!-- Create: wizard (no selectedTask) -->
+    <TacheCreateWizard
+      v-if="showTaskForm && !selectedTask"
+      :activite-context="activite"
+      :initial-statut="newTaskStatut"
+      dusk="task-create-wizard"
+      @close="closeTaskForm"
+      @saved="handleTaskSaved"
+    />
+
+    <!-- Edit: tabbed form (selectedTask present) -->
+    <TacheForm
+      v-if="showTaskForm && selectedTask"
+      :tache="selectedTask"
+      :activite-context="activite"
+      :initial-statut="newTaskStatut"
+      @close="closeTaskForm"
+      @saved="handleTaskSaved"
+    />
 
     <!-- Task Detail Modal -->
     <TacheDetailModal
@@ -750,7 +760,8 @@ import ManageMembersModal from '@/components/activites/ManageMembersModal.vue'
 import EditMemberPermissionsModal from '@/components/activites/EditMemberPermissionsModal.vue'
 import AddMemberModal from '@/components/activites/AddMemberModal.vue'
 import { useActivityPermissions } from '@/composables/useActivityPermissions'
-import TacheForm from '@/components/taches/TacheForm.vue' 
+import TacheForm from '@/components/taches/TacheForm.vue'
+import TacheCreateWizard from '@/components/taches/TacheCreateWizard.vue'
 import TacheDetailModal from '@/components/taches/TacheDetailModal.vue'
 import KanbanBoard from '@/components/taches/KanbanBoardSimple.vue'
 import { useTaches } from '@/composables/useTaches'

@@ -298,9 +298,18 @@
       </div>
     </div>
 
-    <!-- Task Form Modal -->
+    <!-- Create: wizard -->
+    <TacheCreateWizard
+      v-if="showForm && !currentTache"
+      :activite-id="selectedActiviteId"
+      :initial-statut="currentStatut"
+      @close="closeForm"
+      @saved="handleTaskSaved"
+    />
+
+    <!-- Edit: tabbed form -->
     <TacheForm
-      v-if="showForm"
+      v-if="showForm && currentTache"
       :tache="currentTache"
       :activite-id="selectedActiviteId"
       :initial-statut="currentStatut"
@@ -334,6 +343,7 @@ import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import KanbanBoard from '@/components/taches/KanbanBoardSimple.vue'
 import TacheForm from '@/components/taches/TacheForm.vue'
+import TacheCreateWizard from '@/components/taches/TacheCreateWizard.vue'
 import TacheCard from '@/components/taches/TacheCard.vue'
 import TacheDetailModal from '@/components/taches/TacheDetailModal.vue'
 import PendingValidationsModal from '@/components/taches/PendingValidationsModal.vue'
