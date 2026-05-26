@@ -197,6 +197,7 @@ import TacheCardPersonal from '@/components/taches/TacheCardPersonal.vue'
 import TacheDetailModal from '@/components/taches/TacheDetailModal.vue'
 import SubmitResultModal from '@/components/taches/SubmitResultModal.vue'
 import api from '@/api/axios'
+import { useRealtimeRefresh } from '@/composables/useRealtimeRefresh'
 
 // State
 const taches = ref([])
@@ -395,6 +396,8 @@ async function handleViewTask(tache) {
     alert('Erreur lors du chargement des détails')
   }
 }
+
+useRealtimeRefresh({ onTacheChanged: () => loadTaches() })
 
 // Lifecycle
 onMounted(async () => {

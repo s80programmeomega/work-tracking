@@ -32,7 +32,7 @@
 
             <!-- Team Info -->
             <div>
-              <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ team.name }}</h1>
+              <h1 class="text-3xl font-bold text-gray-900 dark:text-white" dusk="team-detail-name">{{ team.name }}</h1>
               <p v-if="team.description" class="text-gray-600 dark:text-gray-400 mt-1">{{ team.description }}</p>
               <div class="flex items-center gap-3 mt-2">
                 <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full" :class="{

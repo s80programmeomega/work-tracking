@@ -12,6 +12,7 @@
           v-model="form.titre"
           type="text"
           required
+          dusk="soustache-form-titre"
           placeholder="Titre de la sous-tâche…"
           class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
         />
@@ -26,6 +27,18 @@
           placeholder="Description (optionnel)…"
           class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none"
         ></textarea>
+      </div>
+
+      <!-- Responsable -->
+      <div v-if="members.length > 0">
+        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Responsable (optionnel)</label>
+        <select
+          v-model="form.responsable_id"
+          class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+        >
+          <option :value="null">— Aucun —</option>
+          <option v-for="m in members" :key="m.id" :value="m.id">{{ m.nom || m.name }}</option>
+        </select>
       </div>
 
       <!-- Row: poids + date_echeance -->
@@ -89,6 +102,7 @@
         <button
           type="submit"
           :disabled="loading"
+          dusk="soustache-form-submit"
           class="px-4 py-2 text-sm bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           <i v-if="loading" class="fas fa-spinner fa-spin mr-1"></i>
@@ -108,6 +122,7 @@ const props = defineProps({
     parentEcheance: { type: String, default: null },
     totalPoids: { type: Number, default: 0 },
     loading: { type: Boolean, default: false },
+    members: { type: Array, default: () => [] },
 })
 
 const emit = defineEmits(['submit', 'cancel'])
@@ -115,6 +130,7 @@ const emit = defineEmits(['submit', 'cancel'])
 const form = ref({
     titre: '',
     description: '',
+    responsable_id: null,
     poids: 0,
     date_echeance: '',
     necessite_validation: false,
@@ -160,6 +176,7 @@ const reset = () => {
     form.value = {
         titre: '',
         description: '',
+        responsable_id: null,
         poids: 0,
         date_echeance: '',
         necessite_validation: false,

@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Events\Realtime\PendingValidationCountChanged;
+use App\Events\Realtime\ResultatStatutChanged;
 use App\Jobs\TransmettreResultatAuN1Job;
 use App\Models\TacheResultat;
 use App\Models\User;
@@ -19,6 +21,7 @@ class TacheResultatService
 {
     public function __construct(
         protected EvaluationScoreService $scoreService,
+        protected NotificationService $notificationService,
     ) {}
 
     /**
@@ -42,8 +45,14 @@ class TacheResultatService
             ->wherePivot('is_responsable', true)
             ->first();
 
-        if ($responsable && $responsable->id !== $actor->id) {
-            $responsable->notify(new ResultatSoumisN0Notification($resultat, $actor));
+        if ($responsable) {
+            // G2: garde-fou central remplace l'ancien if inline. Couvre
+            // aussi le cas où le responsable serait l'acteur (auto-soumis).
+            $this->notificationService->sendUnlessSelf(
+                $responsable,
+                $actor,
+                new ResultatSoumisN0Notification($resultat, $actor)
+            );
         }
 
         // Dispatch the timeout job
@@ -52,6 +61,8 @@ class TacheResultatService
 
         $job = new TransmettreResultatAuN1Job($resultat->id);
         dispatch($job->delay(now()->addHours($timeoutHours)));
+
+        $this->broadcastResultatChanged($resultat);
 
         Log::info('Résultat soumis au N0', [
             'user_id' => $actor->id,
@@ -76,7 +87,15 @@ class TacheResultatService
             'taux_realisation' => $resultat->taux_realisation,
         ]);
 
-        $resultat->user->notify(new ResultatApprouveN0Notification($resultat, $actor));
+        // G2: si l'acteur N0 est aussi l'auteur du résultat (auto-approbation,
+        // cas rare mais possible), on n'envoie pas la notification.
+        $this->notificationService->sendUnlessSelf(
+            $resultat->user,
+            $actor,
+            new ResultatApprouveN0Notification($resultat, $actor)
+        );
+
+        $this->broadcastResultatChanged($resultat);
 
         Log::info('Résultat approuvé N0', [
             'user_id' => $actor->id,
@@ -112,7 +131,12 @@ class TacheResultatService
             'commentaire' => $commentaire,
         ]);
 
-        $resultat->user->notify(new ResultatRenvoyeNotification($resultat, $actor, $commentaire));
+        // G2: garde-fou anti-auto-notification (cas pathologique où N0 = auteur).
+        $this->notificationService->sendUnlessSelf(
+            $resultat->user,
+            $actor,
+            new ResultatRenvoyeNotification($resultat, $actor, $commentaire)
+        );
 
         Log::info('Résultat renvoyé N0', [
             'user_id' => $actor->id,
@@ -201,10 +225,16 @@ class TacheResultatService
             'motif' => $motif,
         ]);
 
-        // Notify the N1 validator (activity responsable)
+        // Notify the N1 validator (activity responsable).
+        // G2: garde-fou si l'acteur du bypass est lui-même le N1 (rare,
+        // mais possible si un cadre est responsable d'une de ses activités).
         $n1 = $resultat->tache->activite?->responsable;
         if ($n1) {
-            $n1->notify(new BypassActivatedNotification($resultat, $actor));
+            $this->notificationService->sendUnlessSelf(
+                $n1,
+                $actor,
+                new BypassActivatedNotification($resultat, $actor)
+            );
         }
 
         Log::info('Bypass anti-sabotage activé', [
@@ -296,6 +326,8 @@ class TacheResultatService
 
         $this->scoreService->calculerImpactN1($resultat, $decision, $n1Actor);
 
+        $this->broadcastResultatChanged($resultat);
+
         Log::info('N1 a validé le résultat', [
             'user_id' => $n1Actor->id,
             'tache_resultat_id' => $resultat->id,
@@ -325,6 +357,8 @@ class TacheResultatService
         }
 
         $this->scoreService->calculerImpactN1($resultat, $decision, $n1Actor);
+
+        $this->broadcastResultatChanged($resultat);
 
         Log::info('N1 a rejeté le résultat', [
             'user_id' => $n1Actor->id,
@@ -356,6 +390,26 @@ class TacheResultatService
         }
 
         return $validate ? 'validated_despite_return' : 'confirmed_return';
+    }
+
+    private function broadcastResultatChanged(TacheResultat $resultat): void
+    {
+        $resultat->loadMissing(['tache.activite.projet']);
+        $workspaceId = $resultat->tache?->activite?->projet?->workspace_id;
+
+        try {
+            event(new ResultatStatutChanged($resultat));
+
+            if ($workspaceId) {
+                $validatorIds = collect([$resultat->validateur_n1_id, $resultat->validateur_n2_id])
+                    ->filter()
+                    ->values()
+                    ->all();
+                event(new PendingValidationCountChanged($workspaceId, $validatorIds));
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Resultat broadcast failed', ['error' => $e->getMessage()]);
+        }
     }
 
     private function writeAuditLog(TacheResultat $resultat, User $actor, string $action, array $context = []): void

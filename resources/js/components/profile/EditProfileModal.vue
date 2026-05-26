@@ -46,6 +46,31 @@
 
           <!-- Informations Personnelles -->
           <div v-if="activeTab === 'personal'" class="space-y-6">
+            <!-- Avatar picker -->
+            <div class="flex items-center gap-4">
+              <div class="relative">
+                <img
+                  :src="avatarPreview || user.avatar || '/images/default-avatar.png'"
+                  alt="Avatar"
+                  class="w-16 h-16 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
+                />
+                <label class="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center cursor-pointer hover:bg-blue-700 transition-colors">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a4 4 0 01-1.414.94l-4.243 1.415 1.415-4.243a4 4 0 01.94-1.414z" />
+                  </svg>
+                  <input type="file" accept="image/jpeg,image/png,image/gif" class="sr-only" @change="onAvatarChange" />
+                </label>
+              </div>
+              <div class="text-sm text-gray-500 dark:text-gray-400">
+                <p>JPG, PNG ou GIF — max 5 Mo</p>
+                <p v-if="avatarFile" class="text-blue-600 dark:text-blue-400">{{ avatarFile.name }}</p>
+              </div>
+            </div>
+
+            <div v-if="globalError" class="text-sm text-red-600 bg-red-50 dark:bg-red-900/20 rounded-lg px-3 py-2">
+              {{ globalError }}
+            </div>
+
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div>
                 <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -254,28 +279,28 @@
 <script setup>
 import { ref, reactive, watch } from 'vue'
 import Modal from './Modal.vue'
+import api from '@/api/axios'
 
 const props = defineProps({
   user: {
     type: Object,
-    required: true
+    required: true,
   },
-  initialData: {
-    type: Object,
-    default: () => ({})
-  }
 })
 
-const emit = defineEmits(['close', 'save'])
+const emit = defineEmits(['close', 'updated'])
 
 const activeTab = ref('personal')
 const saving = ref(false)
 const errors = reactive({})
+const globalError = ref(null)
+const avatarFile = ref(null)
+const avatarPreview = ref(null)
 
 const tabs = [
   { id: 'personal', label: 'Informations personnelles' },
   { id: 'address', label: 'Adresse' },
-  { id: 'social', label: 'Réseaux sociaux' }
+  { id: 'social', label: 'Réseaux sociaux' },
 ]
 
 const form = reactive({
@@ -289,34 +314,47 @@ const form = reactive({
   timezone: 'Europe/Paris',
   linkedin: '',
   twitter: '',
-  github: ''
+  github: '',
 })
 
-watch(() => props.initialData, (newData) => {
-  Object.assign(form, newData)
+watch(() => props.user, (u) => {
+  if (!u) { return }
+  const parts = (u.nom || '').split(' ')
+  form.nom = parts[0] ?? ''
+  form.prenom = parts.slice(1).join(' ')
+  form.email = u.email ?? ''
+  form.phone = u.numero_telephone ?? ''
+  form.bio = u.bio ?? ''
+  form.address = u.adresse ?? ''
+  form.language = u.language ?? 'fr'
+  form.timezone = u.timezone ?? 'Europe/Paris'
+  const links = u.social_links ?? {}
+  form.linkedin = links.linkedin ?? ''
+  form.twitter = links.twitter ?? ''
+  form.github = links.github ?? ''
 }, { immediate: true })
 
-const validateForm = () => {
-  // Clear errors
-  Object.keys(errors).forEach(key => delete errors[key])
+const onAvatarChange = (e) => {
+  const file = e.target.files?.[0]
+  if (!file) { return }
+  avatarFile.value = file
+  avatarPreview.value = URL.createObjectURL(file)
+}
 
+const validateForm = () => {
+  Object.keys(errors).forEach(key => delete errors[key])
+  globalError.value = null
   let isValid = true
 
   if (!form.nom.trim()) {
-    errors.nom = 'Le prénom est requis'
+    errors.nom = 'Le nom est requis'
     isValid = false
   }
-
-  if (!form.prenom.trim()) {
-    errors.prenom = 'Le nom est requis'
-    isValid = false
-  }
-
   if (!form.email.trim()) {
-    errors.email = 'L\'email est requis'
+    errors.email = "L'email est requis"
     isValid = false
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-    errors.email = 'Format d\'email invalide'
+    errors.email = "Format d'email invalide"
     isValid = false
   }
 
@@ -324,37 +362,46 @@ const validateForm = () => {
 }
 
 const handleSave = async () => {
-  if (!validateForm()) {
-    return
-  }
-
+  if (!validateForm()) { return }
   saving.value = true
 
   try {
-    const data = {
-      nom: `${form.nom} ${form.prenom}`.trim(),
-      email: form.email,
-      numero_telephone: form.phone,
-      bio: form.bio,
-      adresse: form.address,
-      language: form.language,
-      timezone: form.timezone,
-      social_links: {
-        linkedin: form.linkedin,
-        twitter: form.twitter,
-        github: form.github
-      }
-    }
+    const fd = new FormData()
+    fd.append('nom', form.nom)
+    if (form.prenom) { fd.append('prenom', form.prenom) }
+    fd.append('email', form.email)
+    if (form.phone) { fd.append('numero_telephone', form.phone) }
+    if (form.bio) { fd.append('bio', form.bio) }
+    if (form.address) { fd.append('adresse', form.address) }
+    fd.append('language', form.language)
+    fd.append('timezone', form.timezone)
+    fd.append('social_links[linkedin]', form.linkedin)
+    fd.append('social_links[twitter]', form.twitter)
+    fd.append('social_links[github]', form.github)
+    if (avatarFile.value) { fd.append('avatar', avatarFile.value) }
 
-    await emit('save', data)
-  } catch (error) {
-    console.error('Error saving profile:', error)
+    const { data } = await api.post('/users/profile', fd, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+
+    emit('updated', data.data ?? data)
+    emit('close')
+  } catch (err) {
+    const serverErrors = err.response?.data?.errors
+    if (serverErrors) {
+      Object.assign(errors, serverErrors)
+    } else {
+      globalError.value = err.response?.data?.message ?? 'Une erreur est survenue.'
+    }
   } finally {
     saving.value = false
   }
 }
 
 const resetForm = () => {
-  Object.assign(form, props.initialData)
+  avatarFile.value = null
+  avatarPreview.value = null
+  Object.keys(errors).forEach(key => delete errors[key])
+  globalError.value = null
 }
 </script>

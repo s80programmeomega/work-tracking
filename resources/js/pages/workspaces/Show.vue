@@ -207,7 +207,7 @@
             <!-- Tab Navigation -->
             <div class="border-b border-gray-200 dark:border-gray-700">
               <nav class="flex space-x-8 px-6">
-                <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id" :class="[
+                <button v-for="tab in tabs" :key="tab.id" :dusk="`workspace-tab-${tab.id}`" @click="activeTab = tab.id" :class="[
                   'py-4 px-1 border-b-2 font-medium text-sm transition-colors whitespace-nowrap',
                   activeTab === tab.id
                     ? 'border-blue-600 text-blue-600 dark:text-blue-400'
@@ -264,7 +264,7 @@
 
               <!-- Members Tab -->
               <div v-if="activeTab === 'members'">
-                <WorkspaceMemberManagement :workspace-id="workspace.id" @member-updated="handleMemberUpdated"/>
+                <WorkspaceMemberManagement :workspace-id="workspace.id" :can-manage-members="canManageMembers" @member-updated="handleMemberUpdated"/>
               </div>
             </div>
           </div>
@@ -400,16 +400,15 @@ const tabs = [
 ]
 
 // Initialize permissions
-const permissions = computed(() => {
-  return useWorkspacePermissions(workspace)
-})
+const {
+  isDirecteur: isOwner,
+  canManageSettings,
+  canInviteMembers: canManageMembers,
+  canCreateProjects,
+} = useWorkspacePermissions(workspace)
 
-// Computed properties for permissions
-const isOwner = computed(() => permissions.value?.isOwner?.value || false)
-const canEditWorkspace = computed(() => permissions.value?.canEditWorkspace?.value || false)
-const canManageSettings = computed(() => permissions.value?.canManageSettings?.value || false)
-const canManageMembers = computed(() => permissions.value?.canManageMembers?.value || false)
-const canCreateProjects = computed(() => permissions.value?.canCreateProjects?.value || false)
+// canEditWorkspace — alias for canManageSettings for backward compatibility
+const canEditWorkspace = canManageSettings
 
 // Methods
 const showNotification = (type, title, message, duration = 5000) => {

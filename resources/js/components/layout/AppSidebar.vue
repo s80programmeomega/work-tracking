@@ -321,7 +321,14 @@ const {
     initializeCurrentWorkspace
 } = useWorkspace();
 
-const { canManageSettings } = useWorkspacePermissions(currentWorkspace);
+const {
+    canManageSettings,
+    canViewPendingValidations,
+    canViewEvaluationScore,
+    canViewFicheEvaluation,
+    canViewAllTasks,
+    canSubmitResult,
+} = useWorkspacePermissions(currentWorkspace);
 
 // Workspace management
 const showWorkspaceSelector = ref(false);
@@ -549,9 +556,8 @@ const menuGroups = computed(() => [
                     {
                         name: 'Toutes les tâches',
                         path: '/taches',
-                        superAdminOnly: false
-                    }, 
-                    
+                        requiresPermission: 'canViewAllTasks',
+                    },
                     {
                         name: 'En tant que responsable',
                         path: '/taches/responsable',
@@ -563,11 +569,11 @@ const menuGroups = computed(() => [
                         path: '/taches/assignees',
                         icon: '👤'
                     },
- 
                     {
-                        name: 'Tâches en attente de validation',
-                        path: '/taches/resultats/en-attente',
-                        icon: '⏳'
+                        name: 'Mes validations en attente',
+                        path: '/mes-validations',
+                        icon: '⏳',
+                        requiresPermission: 'canSubmitResult',
                     },
                     // {
                     //     name: 'En attente de collègues',
@@ -600,10 +606,10 @@ const menuGroups = computed(() => [
                 icon: ClipboardCheckIcon,
                 name: 'Évaluations',
                 subItems: [
-                    { name: 'Tableau de bord', path: '/evaluations/dashboard' },
-                    { name: 'Validations en attente', path: '/validations/en-attente' },
+                    { name: 'Tableau de bord', path: '/evaluations/dashboard', requiresPermission: 'canViewEvaluationScore' },
+                    { name: 'Validations à traiter', path: '/validations/a-traiter', requiresPermission: 'canViewPendingValidations' },
                     // { name: 'Rapport hebdomadaire', path: '/evaluations/rapport-hebdomadaire' },
-                    { name: 'Fiches d\'évaluation', path: '/evaluations/fiches' },
+                    { name: 'Fiches d\'évaluation', path: '/evaluations/fiches', requiresPermission: 'canViewFicheEvaluation' },
                     // { name: 'Performance d\'équipe', path: '/evaluations/performance' },
                 ],
             },
@@ -690,13 +696,26 @@ const filteredMenuGroups = computed(() => {
     })).filter(group => group.items && group.items.length > 0);
 });
 
-// CORRECTION : Filtrer les sous-items selon les permissions avec sécurité
+// Filtrer les sous-items selon les permissions avec sécurité
+const permissionMap = computed(() => ({
+    canViewAllTasks:          canViewAllTasks.value,
+    canSubmitResult:          canSubmitResult.value,
+    canViewPendingValidations: canViewPendingValidations.value,
+    canViewEvaluationScore:   canViewEvaluationScore.value,
+    canViewFicheEvaluation:   canViewFicheEvaluation.value,
+    isSuperAdmin:             isSuperAdmin.value,
+}));
+
 const getFilteredSubItems = (subItems) => {
     if (!subItems || !Array.isArray(subItems)) return [];
 
     return subItems.filter(subItem => {
         if (!subItem) return false;
-        return !subItem.superAdminOnly || isSuperAdmin.value;
+        if (subItem.superAdminOnly && !isSuperAdmin.value) return false;
+        if (subItem.requiresPermission) {
+            return permissionMap.value[subItem.requiresPermission] ?? true;
+        }
+        return true;
     });
 };
 

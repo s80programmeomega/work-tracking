@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\TachePriorite;
 use App\Enums\TacheStatut;
 use App\Notifications\AssigneCompletedTaskNotification;
+use App\Services\NotificationService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -526,26 +527,27 @@ class Tache extends Model
      */
     protected function notifyResponsableOfCompletion(User $assigneWhoCompleted): void
     {
-        $responsable = $this->activite->responsable;
+        // G2: garde-fou central. Le `&& $projetResponsable->id !== $responsable->id`
+        // reste en place pour empêcher la double notif si la même personne est
+        // responsable activité + projet.
+        $notifService = app(NotificationService::class);
 
-        if ($responsable && $responsable->id !== $assigneWhoCompleted->id) {
-            $responsable->notify(new AssigneCompletedTaskNotification(
-                $this,
-                $assigneWhoCompleted
-            ));
+        $responsable = $this->activite->responsable;
+        if ($responsable) {
+            $notifService->sendUnlessSelf(
+                $responsable,
+                $assigneWhoCompleted,
+                new AssigneCompletedTaskNotification($this, $assigneWhoCompleted)
+            );
         }
 
-        // Notifier aussi le responsable du projet
         $projetResponsable = $this->activite->projet->responsable ?? null;
-        if (
-            $projetResponsable &&
-            $projetResponsable->id !== $assigneWhoCompleted->id &&
-            $projetResponsable->id !== $responsable->id
-        ) {
-            $projetResponsable->notify(new AssigneCompletedTaskNotification(
-                $this,
-                $assigneWhoCompleted
-            ));
+        if ($projetResponsable && $projetResponsable->id !== $responsable?->id) {
+            $notifService->sendUnlessSelf(
+                $projetResponsable,
+                $assigneWhoCompleted,
+                new AssigneCompletedTaskNotification($this, $assigneWhoCompleted)
+            );
         }
     }
 

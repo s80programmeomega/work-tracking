@@ -98,6 +98,24 @@ class UserController extends Controller
     }
 
     /**
+     * Self-delete current user account
+     */
+    public function deleteAccount(Request $request): JsonResponse
+    {
+        $request->validate([
+            'password' => ['required', 'string', 'current_password'],
+        ]);
+
+        $user = $request->user();
+
+        $user->tokens()->delete();
+
+        $this->userService->deleteAccount($user);
+
+        return response()->json(['success' => true, 'message' => 'Account deleted successfully.'], 204);
+    }
+
+    /**
      * Change password
      */
     public function changePassword(Request $request): JsonResponse

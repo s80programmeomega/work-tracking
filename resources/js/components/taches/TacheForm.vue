@@ -93,6 +93,7 @@
         <div class="px-8">
           <nav class="flex space-x-8" aria-label="Tabs">
             <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
+              :dusk="`tache-form-tab-${tab.id}`"
               class="py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200"
               :class="activeTab === tab.id
                 ? 'border-blue-500 text-blue-600 dark:text-blue-400'
@@ -164,6 +165,7 @@
                   <span class="text-red-500">*</span> Titre de la tâche
                 </label>
                 <input v-model="formData.titre" type="text" required
+                  dusk="tache-form-titre"
                   placeholder="Ex: Implémenter l'authentification utilisateur"
                   class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
               </div>
@@ -361,10 +363,11 @@
           </div>
         </div>
 
-        <select 
-          v-else 
+        <select
+          v-else
           v-model="formData.responsable_id"
           required
+          dusk="tache-form-responsable"
           :disabled="availableUsers.length === 0"
           class="w-full px-4 py-3.5 border-2 rounded-xl transition-all"
           :class="availableUsers.length === 0
@@ -770,11 +773,12 @@
         </div>
 
         <div class="flex items-center gap-3">
-          <button type="button" @click="$emit('close')"
+          <button type="button" @click="$emit('close')" dusk="tache-form-cancel"
             class="px-6 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 font-semibold text-gray-700 dark:text-gray-300 transition-all hover:scale-105">
             Annuler
           </button>
           <button type="button" @click="handleSubmit" :disabled="loading || !hasPermission || isCheckingPermissions"
+            dusk="tache-form-submit"
             class="px-6 py-3 rounded-xl font-semibold shadow-lg transition-all flex items-center gap-2 hover:scale-105 disabled:scale-100"
             :class="loading || !hasPermission || isCheckingPermissions
               ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 cursor-not-allowed'

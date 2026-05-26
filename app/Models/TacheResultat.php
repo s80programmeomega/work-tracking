@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Enums\TacheStatut;
-use App\Notifications\RejetConfirmeNotification;
 use App\Notifications\ResultatEnAttenteN2Notification;
 use App\Notifications\ResultatRejeteN2InfoNotification;
 use App\Notifications\ResultatRejeteNotification;
@@ -11,8 +10,10 @@ use App\Notifications\ResultatSoumisNotification;
 use App\Notifications\ResultatValidationCompleteNotification;
 use App\Notifications\ResultatValideN1Notification;
 use App\Notifications\ResultatValideN2Notification;
-use App\Notifications\ValidationN1ConfirmeeNotification;
-use App\Notifications\ValidationN2ConfirmeeNotification;
+// G2: ValidationN1ConfirmeeNotification, ValidationN2ConfirmeeNotification,
+// RejetConfirmeNotification — supprimées (auto-notifications du validateur
+// envers lui-même, déjà couvertes par le toast UI et la réponse API).
+use App\Services\NotificationService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -329,17 +330,28 @@ class TacheResultat extends Model
             'commentaire_n1' => $commentaire,
         ]);
 
-        // 📧 1. Notifier l'auteur du résultat
-        $this->user->notify(new ResultatValideN1Notification($this, $validator, $commentaire));
+        // 📧 G2: garde-fou anti-auto-notification centralisé. L'ancien
+        // ValidationN1ConfirmeeNotification (envoyée à $validator pour
+        // "confirmer" sa propre action) a été supprimée — c'est du bruit
+        // que le toast UI et la réponse API couvrent déjà.
+        $notifService = app(NotificationService::class);
 
-        // 📧 2. Notifier le validateur N1 (confirmation de sa validation)
-        $validator->notify(new ValidationN1ConfirmeeNotification($this));
+        // 1. Notifier l'auteur du résultat (sauf s'il s'auto-valide)
+        $notifService->sendUnlessSelf(
+            $this->user,
+            $validator,
+            new ResultatValideN1Notification($this, $validator, $commentaire)
+        );
 
-        // 📧 3. Si N2 requis, notifier le responsable projet
+        // 2. Si N2 requis, notifier le responsable projet
         if ($this->tache->validation_n2_required) {
             $responsableN2 = $this->tache->activite->projet?->responsable;
-            if ($responsableN2 && $responsableN2->id !== $validator->id) {
-                $responsableN2->notify(new ResultatEnAttenteN2Notification($this));
+            if ($responsableN2) {
+                $notifService->sendUnlessSelf(
+                    $responsableN2,
+                    $validator,
+                    new ResultatEnAttenteN2Notification($this)
+                );
             }
         }
 
@@ -381,15 +393,26 @@ class TacheResultat extends Model
             $this->recalculateGlobalStatus();
         }
 
-        // 📧 1. Notifier l'auteur du résultat
-        $this->user->notify(new ResultatValideN2Notification($this, $validator, $commentaire));
+        // 📧 G2: ValidationN2ConfirmeeNotification supprimée (toujours auto-
+        // notification du validateur N2 envers lui-même). Le reste passe
+        // par sendUnlessSelf pour empêcher tout cas pathologique où le
+        // validateur N2 serait aussi auteur ou validateur N1.
+        $notifService = app(NotificationService::class);
 
-        // 📧 2. Notifier le validateur N2 (confirmation)
-        $validator->notify(new ValidationN2ConfirmeeNotification($this));
+        // 1. Notifier l'auteur du résultat
+        $notifService->sendUnlessSelf(
+            $this->user,
+            $validator,
+            new ResultatValideN2Notification($this, $validator, $commentaire)
+        );
 
-        // 📧 3. Notifier le validateur N1 (validation complète)
-        if ($this->validateurN1 && $this->validateurN1->id !== $validator->id) {
-            $this->validateurN1->notify(new ResultatValidationCompleteNotification($this));
+        // 2. Notifier le validateur N1 (validation complète)
+        if ($this->validateurN1) {
+            $notifService->sendUnlessSelf(
+                $this->validateurN1,
+                $validator,
+                new ResultatValidationCompleteNotification($this)
+            );
         }
 
         Log::info('✅ Notifications N2 envoyées', [
@@ -483,15 +506,25 @@ class TacheResultat extends Model
         // Remettre le statut individuel à "a_faire"
         $this->tache->updateStatutForUser($this->user, 'a_faire', 0);
 
-        // 📧 1. Notifier l'auteur du résultat (PRIORITAIRE)
-        $this->user->notify(new ResultatRejeteNotification($this, $validator, $commentaire, $level));
+        // 📧 G2: RejetConfirmeNotification supprimée (auto-notification
+        // pure du validateur envers lui-même). Le reste passe par
+        // sendUnlessSelf.
+        $notifService = app(NotificationService::class);
 
-        // 📧 2. Notifier le validateur (confirmation de son rejet)
-        $validator->notify(new RejetConfirmeNotification($this, $level));
+        // 1. Notifier l'auteur du résultat (priorité haute)
+        $notifService->sendUnlessSelf(
+            $this->user,
+            $validator,
+            new ResultatRejeteNotification($this, $validator, $commentaire, $level)
+        );
 
-        // 📧 3. Si rejet N2, notifier aussi le validateur N1 (pour info)
-        if ($level === 'n2' && $this->validateurN1 && $this->validateurN1->id !== $validator->id) {
-            $this->validateurN1->notify(new ResultatRejeteN2InfoNotification($this, $commentaire));
+        // 2. Si rejet N2, notifier aussi le validateur N1 (pour info)
+        if ($level === 'n2' && $this->validateurN1) {
+            $notifService->sendUnlessSelf(
+                $this->validateurN1,
+                $validator,
+                new ResultatRejeteN2InfoNotification($this, $commentaire)
+            );
         }
 
         Log::info('❌ Notifications rejet envoyées', [
@@ -523,10 +556,15 @@ class TacheResultat extends Model
      */
     protected function notifyValidators(): void
     {
+        // G2: garde-fou central. L'acteur ici est l'auteur du résultat
+        // (this->user) — si lui-même est aussi N1 ou N2, on n'envoie pas.
+        $notifService = app(NotificationService::class);
+        $author = $this->user;
+
         // Notifier responsable N1 (activité)
         $responsableN1 = $this->tache->activite->responsable;
-        if ($responsableN1 && $responsableN1->id !== $this->user_id) {
-            $responsableN1->notify(new ResultatSoumisNotification($this));
+        if ($responsableN1) {
+            $notifService->sendUnlessSelf($responsableN1, $author, new ResultatSoumisNotification($this));
 
             Log::info('📧 Notification N1 envoyée', [
                 'resultat_id' => $this->id,
@@ -537,8 +575,8 @@ class TacheResultat extends Model
         // Si pas de N1 requis, notifier directement N2
         if (! $this->tache->validation_n1_required && $this->tache->validation_n2_required) {
             $responsableN2 = $this->tache->activite->projet?->responsable;
-            if ($responsableN2 && $responsableN2->id !== $this->user_id) {
-                $responsableN2->notify(new ResultatSoumisNotification($this));
+            if ($responsableN2) {
+                $notifService->sendUnlessSelf($responsableN2, $author, new ResultatSoumisNotification($this));
 
                 Log::info('📧 Notification N2 directe envoyée', [
                     'resultat_id' => $this->id,

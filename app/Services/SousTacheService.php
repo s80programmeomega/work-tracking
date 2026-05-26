@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Events\Realtime\SousTacheChanged;
 use App\Models\SousTache;
 use App\Models\Tache;
 use App\Models\User;
@@ -22,6 +23,12 @@ class SousTacheService
             'tache_id' => $tache->id,
             'poids' => $poids,
         ]));
+
+        try {
+            event(new SousTacheChanged($sousTache->load(['tache.activite']), 'created'));
+        } catch (\Throwable $e) {
+            Log::warning('SousTache broadcast failed', ['error' => $e->getMessage()]);
+        }
 
         Log::info('SousTache created', [
             'user_id' => $actor->id,
@@ -50,6 +57,12 @@ class SousTacheService
 
         $sousTache->update($data);
 
+        try {
+            event(new SousTacheChanged($sousTache->load(['tache.activite']), 'updated'));
+        } catch (\Throwable $e) {
+            Log::warning('SousTache broadcast failed', ['error' => $e->getMessage()]);
+        }
+
         Log::info('SousTache updated', [
             'user_id' => $actor->id,
             'sous_tache_id' => $sousTache->id,
@@ -63,6 +76,12 @@ class SousTacheService
     {
         $sousTacheId = $sousTache->id;
         $tacheId = $sousTache->tache_id;
+
+        try {
+            event(new SousTacheChanged($sousTache->loadMissing(['tache.activite']), 'deleted'));
+        } catch (\Throwable $e) {
+            Log::warning('SousTache broadcast failed', ['error' => $e->getMessage()]);
+        }
 
         $sousTache->delete();
 
@@ -83,7 +102,13 @@ class SousTacheService
             ],
         ]);
 
-        $intervenant->notify(new SousTacheAssigneeNotification($sousTache, $actor));
+        // G2: garde-fou — l'acteur peut s'auto-assigner (rare, mais ne sert
+        // à rien de se notifier soi-même).
+        app(NotificationService::class)->sendUnlessSelf(
+            $intervenant,
+            $actor,
+            new SousTacheAssigneeNotification($sousTache, $actor)
+        );
 
         Log::info('SousTache intervenant assigned', [
             'user_id' => $actor->id,

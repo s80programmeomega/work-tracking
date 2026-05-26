@@ -339,6 +339,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('/{sousTache}', [SousTacheController::class, 'update']);
         Route::delete('/{sousTache}', [SousTacheController::class, 'destroy']);
         Route::post('/{sousTache}/intervenants', [SousTacheController::class, 'assignIntervenant']);
+        Route::delete('/{sousTache}/intervenants/{user}', [SousTacheController::class, 'removeIntervenant']);
     });
 
     // ======================================== RÉSULTATS DE TÂCHES  ========================================
@@ -406,8 +407,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Statistiques globales de validation
         Route::get('/stats/global', [EvaluationController::class, 'globalValidationStats']);
 
-        // 📋 Liste des résultats en attente de validation (personnalisée par rôle)
+        // 📋 Validator queue: results awaiting MY action as N1 or N2 (by responsable_id scope)
         Route::get('/resultats/en-attente', [EvaluationController::class, 'pendingValidations']);
+
+        // G5: Assignee view — results I submitted that are waiting on someone else's action
+        Route::get('/mes-resultats/en-attente', [EvaluationController::class, 'mesResultatsEnAttente']);
 
         // Task 7: Pending validations dashboard + score query
         Route::get('/validations/en-attente', [EvaluationController::class, 'pendingValidationsDashboard']);
@@ -596,6 +600,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/profile', [UserController::class, 'profile']);
         Route::put('/profile', [UserController::class, 'updateProfile']);
         Route::post('/profile', [UserController::class, 'updateProfile']); // For file uploads
+        Route::delete('/profile', [UserController::class, 'deleteAccount']);
         Route::post('/change-password', [UserController::class, 'changePassword']);
 
         // User CRUD

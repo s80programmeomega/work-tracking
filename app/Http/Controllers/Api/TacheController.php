@@ -767,15 +767,22 @@ class TacheController extends Controller
                 ],
 
                 // Permissions de l'utilisateur actuel
-                'permissions' => [
-                    'can_update' => auth()->user()->can('update', $tache),
-                    'can_delete' => auth()->user()->can('delete', $tache),
-                    'can_validate_n1' => auth()->user()->can('validateN1', $tache),
-                    'can_validate_n2' => auth()->user()->can('validateN2', $tache),
-                    'can_add_attachments' => auth()->user()->can('addAttachments', $tache),
-                    'can_add_links' => auth()->user()->can('addLinks', $tache),
-                    'can_comment' => auth()->user()->can('comment', $tache),
-                ],
+                'permissions' => (function () use ($tache) {
+                    $user = auth()->user();
+                    $gate = app(ContextualPermissionGate::class);
+
+                    return [
+                        'can_update' => $user->can('update', $tache),
+                        'can_delete' => $user->can('delete', $tache),
+                        'can_validate_n1' => $user->can('validateN1', $tache),
+                        'can_validate_n2' => $user->can('validateN2', $tache),
+                        'can_add_attachments' => $user->can('addAttachments', $tache),
+                        'can_add_links' => $user->can('addLinks', $tache),
+                        'can_comment' => $user->can('comment', $tache),
+                        'can_create_subtask' => $gate->userCan($user, Permission::TACHES_CREATE_SUBTASK, $tache),
+                        'can_submit_result' => $gate->userCan($user, Permission::TACHES_SUBMIT_RESULT, $tache),
+                    ];
+                })(),
 
                 // Informations de navigation
                 'breadcrumb' => [
@@ -794,9 +801,16 @@ class TacheController extends Controller
                 ],
             ];
 
+            // ✅ Bug PROGRESSION #1: wrapper indispensable. Sans la resource,
+            // la sérialisation Eloquent expose seulement les colonnes/relations
+            // brutes — donc my_result, validation_status, bypass.*, permissions,
+            // can_activer_bypass (et tout autre champ injecté par la resource)
+            // disparaissent du payload côté front. Conséquence directe: le
+            // bouton "Soumettre résultat" et le bandeau bypass devenaient
+            // invisibles selon le rôle.
             return response()->json([
                 'success' => true,
-                'data' => $tache,
+                'data' => new TacheResource($tache),
                 'additional_info' => $additionalInfo,
             ]);
 

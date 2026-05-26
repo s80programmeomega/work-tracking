@@ -129,7 +129,8 @@ import { useNotifications } from '@/composables/useNotifications'
 import { useAuthStore } from '@/stores/authStore'
 import NotificationItem from './NotificationItem.vue'
 import NotificationDetailModal from './NotificationDetailModal.vue'
-import ResultatDetailModal from '@/components/modals/ResultatDetailModal.vue'
+import ResultatDetailModal from '@/components/taches/resultats/ResultatDetailModal.vue'
+import { useRealtimeRefresh } from '@/composables/useRealtimeRefresh'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -242,11 +243,17 @@ const safeFetchUnread = () => {
   fetchUnread().catch(() => {})
 }
 
+// Refresh on any domain event; keep a 60 s fallback poll for silent updates.
+useRealtimeRefresh({
+  onResultatChanged: () => safeFetchUnread(),
+  onPendingChanged: () => safeFetchUnread(),
+})
+
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
   safeFetchUnread()
 
-  const interval = setInterval(safeFetchUnread, 30000)
+  const interval = setInterval(safeFetchUnread, 60000)
 
   onUnmounted(() => {
     clearInterval(interval)

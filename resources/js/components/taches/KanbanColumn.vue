@@ -1,6 +1,6 @@
 <!-- resources\js\components\taches\KanbanColumn.vue -->
 <template>
-  <div class="flex flex-col h-full bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+  <div class="flex flex-col h-full bg-gray-50 dark:bg-gray-900 rounded-lg p-4" :dusk="`kanban-column-${statut}`">
     <!-- Column header -->
     <div class="flex items-center justify-between mb-4">
       <div class="flex items-center gap-2">
@@ -24,7 +24,7 @@
     </div>
 
     <!-- Task list -->
-    <div class="flex-1 overflow-y-auto min-h-[400px]">
+    <div class="flex-1 overflow-y-auto min-h-[400px]" :dusk="`kanban-column-list-${statut}`">
       <div v-if="taches.length === 0" class="flex items-center justify-center h-full text-gray-400 dark:text-gray-600 text-sm">
         <div class="text-center">
           <svg class="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">

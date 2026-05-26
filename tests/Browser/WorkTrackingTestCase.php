@@ -28,32 +28,37 @@ abstract class WorkTrackingTestCase extends DuskTestCase
     {
         $token = $user->createToken('dusk')->plainTextToken;
 
+        // JSON_HEX_APOS escapes ' → ' so the string is safe inside a JS
+        // single-quoted or double-quoted context without breaking the JS parser.
         $payload = json_encode([
             'id' => $user->id,
             'nom' => $user->nom,
             'email' => $user->email,
             'current_workspace_id' => $user->current_workspace_id,
             'is_super_admin' => $user->hasRole('super_admin'),
-        ]);
+        ], JSON_HEX_APOS | JSON_HEX_TAG | JSON_UNESCAPED_UNICODE);
 
-        // 1. Clear any existing session so Vue doesn't redirect away from /signin.
-        // We visit a neutral URL first to ensure localStorage is accessible.
+        // 1. Clear localStorage on the current page so the SPA's auth guard
+        // sees no token and lets /signin render instead of redirecting away.
         try {
             $browser->script(['localStorage.clear();']);
         } catch (\Throwable) {
             // No page loaded yet — safe to ignore
         }
 
-        // 2. Visit /signin, wait for the form, inject the new token.
-        $browser->visit('/signin')->waitFor('[dusk="email"]', 10);
+        // 2. Now visit /signin — with no token in localStorage, Vue Router
+        // will render the signin form instead of redirecting to the dashboard.
+        $browser->visit('/signin')->waitFor('[dusk="email"]', 20);
 
+        // 3. Inject fresh credentials.
         $browser->script([
             "localStorage.setItem('auth_token', '{$token}');",
             "localStorage.setItem('user', '{$payload}');",
         ]);
 
-        // 3. Navigate to the target page — Vue boots fresh with the token set.
-        return $browser->visit('/taches/mes-taches')->pause(3000);
+        // 4. Navigate to the app and wait until the authenticated layout is visible
+        // (user-menu-toggle only renders after auth state is confirmed by the SPA).
+        return $browser->visit('/taches/mes-taches')->waitFor('[dusk="user-menu-toggle"]', 20);
     }
 
     /**

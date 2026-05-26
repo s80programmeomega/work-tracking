@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Models\TacheResultat;
 use App\Models\User;
+use App\Services\NotificationService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -25,7 +26,11 @@ class ResultatRejeteNotification extends Notification implements ShouldQueue
 
     public function via($notifiable): array
     {
-        return ['mail', 'database'];
+        // G3: l'event type dépend du niveau de rejet ('rejete_n1' vs 'rejete_n2'),
+        // les deux high-signal — l'auteur DOIT être notifié vite (refaire son travail).
+        $eventType = $this->level === 'n2' ? 'rejete_n2' : 'rejete_n1';
+
+        return app(NotificationService::class)->channelsFor($notifiable, $eventType);
     }
 
     public function toMail($notifiable): MailMessage
@@ -33,10 +38,10 @@ class ResultatRejeteNotification extends Notification implements ShouldQueue
         $niveau = $this->level === 'n1' ? 'N1' : 'N2';
 
         return (new MailMessage)
-            ->subject("❌ Votre résultat nécessite des corrections")
+            ->subject('❌ Votre résultat nécessite des corrections')
             ->greeting("Bonjour {$notifiable->nom},")
             ->line("Votre résultat pour la tâche **{$this->resultat->tache->titre}** a été rejeté par {$this->validateur->nom} (Niveau {$niveau}).")
-            ->line("**Motif du rejet:**")
+            ->line('**Motif du rejet:**')
             ->line($this->commentaire)
             ->action('Modifier le résultat', url("/taches/{$this->resultat->tache->id}/resultats/{$this->resultat->id}/edit"))
             ->line('Merci de corriger et soumettre à nouveau votre résultat.');
@@ -44,19 +49,19 @@ class ResultatRejeteNotification extends Notification implements ShouldQueue
 
     public function toArray($notifiable): array
     {
-       return [
-        'type' => 'resultat_rejete',
-        'resultat_id' => $this->resultat->id,
-        'tache_id' => $this->resultat->tache->id,
-        'tache_titre' => $this->resultat->tache->titre,
-        'validateur_id' => $this->validateur->id,
-        'validateur_nom' => $this->validateur->nom,
-        'commentaire' => $this->commentaire,
-        'level' => $this->level,
-        'taux_realisation' => $this->resultat->taux_realisation,
-        'url' => "/resultats/{$this->resultat->id}",  
-        'title' => 'Résultat rejeté',
-        'message' => "Votre résultat pour « {$this->resultat->tache->titre} » nécessite des corrections"
-    ];
+        return [
+            'type' => 'resultat_rejete',
+            'resultat_id' => $this->resultat->id,
+            'tache_id' => $this->resultat->tache->id,
+            'tache_titre' => $this->resultat->tache->titre,
+            'validateur_id' => $this->validateur->id,
+            'validateur_nom' => $this->validateur->nom,
+            'commentaire' => $this->commentaire,
+            'level' => $this->level,
+            'taux_realisation' => $this->resultat->taux_realisation,
+            'url' => "/resultats/{$this->resultat->id}",
+            'title' => 'Résultat rejeté',
+            'message' => "Votre résultat pour « {$this->resultat->tache->titre} » nécessite des corrections",
+        ];
     }
 }

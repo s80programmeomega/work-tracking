@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Models\TacheResultat;
 use App\Models\User;
+use App\Services\NotificationService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -20,19 +21,20 @@ class ResultatValideN1Notification extends Notification implements ShouldQueue
         public TacheResultat $resultat,
         public User $validateur,
         public ?string $commentaire
-    ) {
-    }
-
+    ) {}
 
     public function via($notifiable): array
     {
-        return ['mail', 'database'];
+        // G3: delegate to NotificationService so the user's notification_preferences
+        // + push_subscriptions are honoured. Adds the WebPushChannel automatically
+        // when the user is push-subscribed and 'valide_n1' is a high-signal event.
+        return app(NotificationService::class)->channelsFor($notifiable, 'valide_n1');
     }
 
     public function toMail($notifiable): MailMessage
     {
         $mail = (new MailMessage)
-            ->subject("✅ Votre résultat a été validé (N1)")
+            ->subject('✅ Votre résultat a été validé (N1)')
             ->greeting("Bonjour {$notifiable->nom},")
             ->line("Votre résultat pour la tâche **{$this->resultat->tache->titre}** a été validé par {$this->validateur->nom}.")
             ->line("**Taux de réalisation:** {$this->resultat->tache->taux_realisation}%");
@@ -64,7 +66,7 @@ class ResultatValideN1Notification extends Notification implements ShouldQueue
             'taux_realisation' => $this->resultat->taux_realisation,
             'url' => "/resultats/{$this->resultat->id}",
             'title' => 'Résultat validé (N1)',
-            'message' => "Votre résultat pour « {$this->resultat->tache->titre} » a été validé par {$this->validateur->nom}"
+            'message' => "Votre résultat pour « {$this->resultat->tache->titre} » a été validé par {$this->validateur->nom}",
         ];
     }
 }

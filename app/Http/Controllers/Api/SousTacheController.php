@@ -117,6 +117,20 @@ class SousTacheController extends Controller
     }
 
     /**
+     * DELETE /sous-taches/{sousTache}/intervenants/{user}
+     */
+    public function removeIntervenant(Request $request, SousTache $sousTache, User $user): JsonResponse
+    {
+        $this->authorize('removeIntervenant', $sousTache);
+
+        $sousTache->intervenants()->detach($user->id);
+
+        return response()->json([
+            'message' => __('sous_taches.success.intervenant_removed'),
+        ]);
+    }
+
+    /**
      * POST /sous-taches/{sousTache}/intervenants
      */
     public function assignIntervenant(Request $request, SousTache $sousTache): JsonResponse

@@ -12,6 +12,7 @@
 
       <button
         v-if="canCreate && !showForm"
+        dusk="add-soustache-btn"
         @click="showForm = true"
         class="px-3 py-1.5 text-xs bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors flex items-center gap-1"
       >
@@ -240,6 +241,71 @@
               </button>
             </div>
           </div>
+
+          <!-- Intervenants row -->
+          <div
+            v-if="canAssign || (st.intervenants && st.intervenants.length > 0)"
+            class="mt-2 pt-2 border-t border-gray-100 dark:border-gray-800 flex items-center gap-2 flex-wrap"
+          >
+            <!-- Existing intervenant chips -->
+            <span
+              v-for="iv in (st.intervenants ?? [])"
+              :key="iv.id"
+              class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 font-medium"
+            >
+              {{ iv.nom || iv.name }}
+              <button
+                v-if="canAssign"
+                @click="handleRemoveIntervenant(st, iv.id)"
+                class="ml-0.5 text-brand-500 hover:text-red-500 transition-colors leading-none"
+                :title="`Retirer ${iv.nom || iv.name}`"
+              >&times;</button>
+            </span>
+
+            <!-- Add intervenant dropdown -->
+            <div v-if="canAssign" class="relative">
+              <button
+                @click.stop="toggleIntervenantMenu(st.id)"
+                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border border-dashed border-gray-400 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-brand-500 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
+              >
+                <i class="fas fa-user-plus text-xs"></i>
+                Ajouter
+              </button>
+
+              <div
+                v-if="intervenantMenuId === st.id"
+                v-click-outside="closeIntervenantMenus"
+                class="absolute left-0 mt-1 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-30 py-1 text-sm border border-gray-200 dark:border-gray-700"
+              >
+                <div class="px-2 py-1">
+                  <input
+                    v-model="memberSearch"
+                    type="text"
+                    placeholder="Rechercher…"
+                    class="w-full px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-1 focus:ring-brand-500"
+                    @click.stop
+                  />
+                </div>
+                <div class="max-h-40 overflow-y-auto">
+                  <button
+                    v-for="m in filteredMembers"
+                    :key="m.id"
+                    @click="handleAssignIntervenant(st, m.id)"
+                    :disabled="(st.intervenants ?? []).some(i => i.id === m.id) || assigningId === m.id"
+                    class="w-full px-3 py-1.5 text-left hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 text-xs"
+                  >
+                    <i v-if="assigningId === m.id" class="fas fa-spinner fa-spin text-gray-400"></i>
+                    <i v-else-if="(st.intervenants ?? []).some(i => i.id === m.id)" class="fas fa-check text-green-500"></i>
+                    <i v-else class="fas fa-user text-gray-400 w-3"></i>
+                    {{ m.nom || m.name }}
+                  </button>
+                  <div v-if="filteredMembers.length === 0" class="px-3 py-2 text-xs text-gray-400">
+                    Aucun résultat
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -251,6 +317,7 @@
         :parent-echeance="parentEcheance"
         :total-poids="totalPoids"
         :loading="creating"
+        :members="canAssign ? workspaceMembers : []"
         @submit="handleCreate"
         @cancel="showForm = false"
       />
@@ -262,6 +329,7 @@
 import { ref, computed } from 'vue'
 import SousTacheForm from './SousTacheForm.vue'
 import { useSousTaches } from '@/composables/useSousTaches'
+import { useAuthStore } from '@/stores/authStore'
 
 const props = defineProps({
     tacheId: { type: Number, required: true },
@@ -269,7 +337,11 @@ const props = defineProps({
     canCreate: { type: Boolean, default: false },
     canEdit: { type: Boolean, default: false },
     canDelete: { type: Boolean, default: false },
+    canAssign: { type: Boolean, default: false },
 })
+
+const authStore = useAuthStore()
+const workspaceMembers = computed(() => authStore.currentWorkspace?.members ?? [])
 
 const emit = defineEmits(['updated'])
 
@@ -282,6 +354,8 @@ const {
     createSousTache,
     updateSousTache,
     deleteSousTache,
+    assignIntervenant,
+    removeIntervenant,
 } = useSousTaches(props.tacheId)
 
 fetchSousTaches()
@@ -293,6 +367,57 @@ const openMenuId = ref(null)
 const editingId = ref(null)
 const formRef = ref(null)
 const editForm = ref({ statut: '', progression: 0 })
+
+const intervenantMenuId = ref(null)
+const assigningId = ref(null)
+const memberSearch = ref('')
+
+const filteredMembers = computed(() => {
+    const q = memberSearch.value.toLowerCase().trim()
+    return workspaceMembers.value.filter(m => {
+        const name = (m.nom || m.name || '').toLowerCase()
+        return !q || name.includes(q)
+    })
+})
+
+const toggleIntervenantMenu = (stId) => {
+    intervenantMenuId.value = intervenantMenuId.value === stId ? null : stId
+    memberSearch.value = ''
+}
+
+const closeIntervenantMenus = () => {
+    intervenantMenuId.value = null
+    memberSearch.value = ''
+}
+
+const handleAssignIntervenant = async (st, userId) => {
+    assigningId.value = userId
+    try {
+        const updated = await assignIntervenant(st.id, userId)
+        const idx = sousTaches.value.findIndex(s => s.id === st.id)
+        if (idx !== -1 && updated?.data) { sousTaches.value[idx] = updated.data }
+        intervenantMenuId.value = null
+        emit('updated')
+    } finally {
+        assigningId.value = null
+    }
+}
+
+const handleRemoveIntervenant = async (st, userId) => {
+    try {
+        await removeIntervenant(st.id, userId)
+        const idx = sousTaches.value.findIndex(s => s.id === st.id)
+        if (idx !== -1 && sousTaches.value[idx].intervenants) {
+            sousTaches.value[idx] = {
+                ...sousTaches.value[idx],
+                intervenants: sousTaches.value[idx].intervenants.filter(i => i.id !== userId),
+            }
+        }
+        emit('updated')
+    } catch {
+        // silent — user stays in place
+    }
+}
 
 const orderedSousTaches = computed(() =>
     [...sousTaches.value].sort((a, b) => (a.ordre ?? 0) - (b.ordre ?? 0))

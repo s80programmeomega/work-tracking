@@ -53,6 +53,11 @@ export function useSousTaches(tacheId) {
         return data
     }
 
+    const removeIntervenant = async (sousTacheId, userId) => {
+        const { data } = await api.delete(`/sous-taches/${sousTacheId}/intervenants/${userId}`)
+        return data
+    }
+
     return {
         sousTaches,
         loading,
@@ -64,5 +69,6 @@ export function useSousTaches(tacheId) {
         updateSousTache,
         deleteSousTache,
         assignIntervenant,
+        removeIntervenant,
     }
 }

@@ -158,6 +158,7 @@ import ValidationModal from '@/components/taches/resultats/ValidationModal.vue'
 import ResultatDetailModal from '@/components/taches/resultats/ResultatDetailModal.vue'
 import api from '@/api/axios'
 import { useToast } from 'vue-toastification'
+import { useRealtimeRefresh } from '@/composables/useRealtimeRefresh'
 
 const toast = useToast()
 
@@ -391,6 +392,11 @@ watch(activeTab, (newTab) => {
   if (newTab === 'history') {
     loadHistory()
   }
+})
+
+useRealtimeRefresh({
+  onResultatChanged: () => loadData(),
+  onPendingChanged: () => loadData(),
 })
 
 onMounted(() => {

@@ -38,4 +38,9 @@ class SousTachePolicy
     {
         return $this->gate->userCan($user, Permission::SOUS_TACHES_ASSIGN, $sousTache);
     }
+
+    public function removeIntervenant(User $user, SousTache $sousTache): bool
+    {
+        return $this->gate->userCan($user, Permission::SOUS_TACHES_ASSIGN, $sousTache);
+    }
 }

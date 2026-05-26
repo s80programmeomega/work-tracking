@@ -46,8 +46,60 @@
           </div>
 
           <!-- Sécurité Tab -->
-          <div v-if="activeTab === 'security'">
+          <div v-if="activeTab === 'security'" class="space-y-6">
             <session-settings />
+
+            <!-- Danger Zone: account deletion -->
+            <div class="p-5 border border-red-200 dark:border-red-800/50 rounded-xl bg-red-50/50 dark:bg-red-900/10">
+              <h5 class="font-semibold text-red-700 dark:text-red-400 mb-1">Zone dangereuse</h5>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                La suppression de votre compte est irréversible. Toutes vos données seront effacées.
+              </p>
+              <button
+                @click="showDeleteAccountModal = true"
+                class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Supprimer mon compte
+              </button>
+            </div>
+          </div>
+
+          <!-- Delete Account confirm dialog -->
+          <div
+            v-if="showDeleteAccountModal"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+            @click.self="showDeleteAccountModal = false"
+          >
+            <div class="bg-white dark:bg-gray-900 rounded-2xl p-6 w-full max-w-md shadow-xl">
+              <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Supprimer votre compte ?</h3>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                Cette action est irréversible. Confirmez votre mot de passe pour continuer.
+              </p>
+              <input
+                v-model="deleteAccountPassword"
+                type="password"
+                placeholder="Mot de passe actuel"
+                class="w-full px-4 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white mb-3 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                @keyup.enter="confirmDeleteAccount"
+              />
+              <p v-if="deleteAccountError" class="text-xs text-red-600 mb-3">{{ deleteAccountError }}</p>
+              <div class="flex justify-end gap-3">
+                <button
+                  @click="showDeleteAccountModal = false"
+                  class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  @click="confirmDeleteAccount"
+                  :disabled="deletingAccount || !deleteAccountPassword"
+                  class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <i v-if="deletingAccount" class="fas fa-spinner fa-spin mr-1"></i>
+                  Confirmer la suppression
+                </button>
+              </div>
+            </div>
           </div>
 
           <!-- Notifications Tab -->
@@ -90,6 +142,9 @@ import NotificationSettings from '@/components/settings/NotificationSettings.vue
 import PreferencesSettings from '@/components/settings/PreferencesSettings.vue'
 import ActivityLog from '@/components/profile/ActivityLog.vue'
 import { useUsers } from '@/composables/useUsers'
+import api from '@/api/axios'
+import { useAuthStore } from '@/stores/authStore'
+import { useRouter } from 'vue-router'
 
 // Icons
 import {
@@ -100,11 +155,19 @@ import {
   ClockIcon
 } from '@heroicons/vue/24/outline'
 
+const authStore = useAuthStore()
+const router = useRouter()
+
 const currentPageTitle = ref('Mon Profil')
 const profileData = ref(null)
 const loading = ref(false)
 const error = ref(null)
 const activeTab = ref('profile')
+
+const showDeleteAccountModal = ref(false)
+const deleteAccountPassword = ref('')
+const deletingAccount = ref(false)
+const deleteAccountError = ref(null)
 
 const tabs = [
   { id: 'profile', name: 'Profil', icon: UserIcon },
@@ -127,6 +190,21 @@ const loadProfile = async () => {
     console.error('Error loading profile:', err)
   } finally {
     loading.value = false
+  }
+}
+
+const confirmDeleteAccount = async () => {
+  if (!deleteAccountPassword.value) { return }
+  deletingAccount.value = true
+  deleteAccountError.value = null
+  try {
+    await api.delete('/users/profile', { data: { password: deleteAccountPassword.value } })
+    await authStore.logout?.()
+    router.push('/login')
+  } catch (err) {
+    deleteAccountError.value = err.response?.data?.message ?? 'Mot de passe incorrect.'
+  } finally {
+    deletingAccount.value = false
   }
 }
 
