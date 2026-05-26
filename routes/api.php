@@ -314,6 +314,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // CRUD basique
         Route::get('/{tache}', [TacheController::class, 'show'])->name('taches.show');
         Route::put('/{tache}', [TacheController::class, 'update']);
+        Route::patch('/{tache}', [TacheController::class, 'update']);
         Route::delete('/{tache}', [TacheController::class, 'destroy']);
 
         // ✅ Actions principales

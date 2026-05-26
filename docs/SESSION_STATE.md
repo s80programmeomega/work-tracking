@@ -17,23 +17,32 @@
 ## Current Session
 
 **Date:** 2026-05-26
-**Session goal:** Task 14 — Platform Super Admin Dashboard
-**Status:** Complete. 264 tests green. Ready to commit.
+**Session goal:** Task 15 — Task List UX
+**Status:** Complete. 269 tests green. Ready to commit.
 
 ---
 
 ## Current Task
 
-**Task:** Task 15 — Task List UX (table mode + activity shortcut)
-**Branch:** `feature/v2-task-15-task-list-ux` (not yet cut)
+**Task:** Task 16 — PDF/Excel Export
+**Branch:** `feature/v2-task-16-export` (not yet cut)
 **Status:** Not started.
 
 **What to do next:**
-1. Commit `feature/v2-task-14-platform-dashboard` (all changes staged)
-2. Push `feature/v2-task-14-platform-dashboard` to `origin`
-3. Cut `feature/v2-task-15-task-list-ux` from `feature/v2-task-14-platform-dashboard`
+1. Commit `feature/v2-task-15-task-list-ux`
+2. Push `feature/v2-task-15-task-list-ux` to `origin`
+3. Cut `feature/v2-task-16-export` from `feature/v2-task-15-task-list-ux`
 
 ## Last Completed Task
+
+**Task 15** — Task List UX (2026-05-26)
+- `TacheTable.vue` component: table with statut/priorité/échéance inline edit via `PATCH /api/taches/{id}`
+- `Taches.vue`: `currentView` defaults to `'table'`; `filterAssignee` ref defaults to `'me'`; `filteredTasks` computed; `route.query.activite` read in `onMounted`; view toggle shows Tableau/Kanban/Liste
+- `ActiviteDetail.vue`: "Voir toutes les tâches" `router-link` added to header → `/taches?activite={id}`
+- `PATCH /api/taches/{id}` route added (same controller as PUT)
+- `statut` validation in `TacheController::update()` extended with `en_retard` and `a_refaire`
+- PHPUnit: 5 tests in `tests/Feature/Task15/TaskListUxTest.php`
+- **269 PHPUnit tests, all passing.**
 
 **Task 14** — Platform Super Admin Dashboard (2026-05-26)
 - `AdminController` with 6 methods: `stats`, `workspaces`, `users`, `extendTrial`, `suspendWorkspace`, `reactivateWorkspace`
@@ -230,6 +239,7 @@ Tests: 11 feature in `NotificationServiceTest` + 8 feature in `SendDailyDigestCo
 | `fix/cdc-hotfixes` | CDC Hotfixes | Merged ✅ (into `jonas` 2026-05-26) |
 | `feature/v2-task-13-subscription` | Task 13 | Complete — awaiting push 🔄 |
 | `feature/v2-task-14-platform-dashboard` | Task 14 | Complete — awaiting push 🔄 |
+| `feature/v2-task-15-task-list-ux` | Task 15 | Complete — awaiting push 🔄 |
 
 ---
 
@@ -277,3 +287,4 @@ Tests: 11 feature in `NotificationServiceTest` + 8 feature in `SendDailyDigestCo
 | 2026-05-26 | CDC Review | Cross-referenced CDC_WorkTracking_v2.pdf Rev.3 against all completed and planned tasks (T0–T14). Found 10+ gaps: A.1 (design assets), A.10–A.13 (task list UX), R7 (backend guard missing), CDC-API (audit-log endpoint missing), ST.7/E.2 (agent sheet §5 + export), B.1–B.5 (export, SMS, search, billing, rate limiting). Rate limiting verified ✅ already in place. Two new tasks added: T15 (task list UX), T16 (export). CDC hotfix batch created on `fix/cdc-hotfixes`. IMPLEMENTATION_PLAN.md + PROGRESSION.md + SESSION_STATE.md updated. |
 | 2026-05-26 | CDC Hotfixes | R7 guard (`enforceMandatorySousTaches` in TacheResultatService::soumettre), `GET /api/audit-logs/validation/{tache}` endpoint, agent sheet §5 (`submitted_results` section in agentSheetSections + AgentSheet.vue 5th tab). 6 new PHPUnit tests. 232 total, all green. Committed on `fix/cdc-hotfixes`. |
 | 2026-05-26 | Task 13 + Task 14 | Task 13: SubscriptionService, CheckSubscriptionLimits middleware, 3 notifications, TrialBanner.vue, WorkspaceFactory states, 21 PHPUnit tests. Task 14: AdminController (6 endpoints), 2 notifications, lang/fr+en/admin.php, AdminDashboard/Workspaces/Users pages, SubscriptionBadge, router guard, sidebar admin section, 11 PHPUnit tests. 264 total, all green. |
+| 2026-05-26 | Task 15 | TacheTable.vue (table view + inline edit), Taches.vue (table default, assignee filter, deep-link), ActiviteDetail.vue shortcut, PATCH route, statut validation fix, 5 PHPUnit tests. 269 total, all green. |

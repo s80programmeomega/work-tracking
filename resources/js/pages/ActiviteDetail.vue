@@ -56,9 +56,21 @@
 
               <!-- Actions dans le header -->
               <div class="flex items-center space-x-3">
-                <button 
-                  v-if="canEdit" 
-                  @click="editActivite(activite)" 
+                <!-- A.10: Voir toutes les tâches de cette activité -->
+                <router-link
+                  dusk="voir-toutes-taches-btn"
+                  :to="{ path: '/taches', query: { activite: activite.id } }"
+                  class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                >
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  Voir toutes les tâches
+                </router-link>
+
+                <button
+                  v-if="canEdit"
+                  @click="editActivite(activite)"
                   class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
                   <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

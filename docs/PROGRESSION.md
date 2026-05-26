@@ -34,7 +34,7 @@
 | 12 | Document Management per Project + Workspace | `feature/v2-task-12-document-management` | ✅ | 2026-05-26 | 2026-05-26 | 226 PHPUnit tests green. Merged into `jonas` 2026-05-26. |
 | 13 | Subscription Modes + Trial Duration | `feature/v2-task-13-subscription` | ✅ | 2026-05-26 | 2026-05-26 | 253 PHPUnit tests green. |
 | 14 | Platform Super Admin Dashboard | `feature/v2-task-14-platform-dashboard` | ✅ | 2026-05-26 | 2026-05-26 | 264 PHPUnit tests green. |
-| 15 | Task List UX (table mode + activity shortcut) | `feature/v2-task-15-task-list-ux` | ⬜ | — | — | CDC gaps A.10–A.13 |
+| 15 | Task List UX (table mode + activity shortcut) | `feature/v2-task-15-task-list-ux` | ✅ | 2026-05-26 | 2026-05-26 | 269 PHPUnit tests green. |
 | 16 | PDF/Excel Export (evaluation sheet + project/task) | `feature/v2-task-16-export` | ⬜ | — | — | CDC gaps B.1 + ST.7/E.2 |
 | — | CDC Hotfixes (R7 guard + audit-log endpoint + rate limiting + agent sheet §5) | `fix/cdc-hotfixes` | ✅ | 2026-05-26 | 2026-05-26 | Merged into `jonas` 2026-05-26. |
 
@@ -249,11 +249,16 @@ Gaps identified in CDC compliance review 2026-05-26 against `CDC_WorkTracking_v2
 
 CDC gaps A.10–A.13.
 
-- [ ] "Voir toutes les tâches" shortcut from activity header (A.10)
-- [ ] Default filter set to current user's tasks on task list page (A.11)
-- [ ] Table mode as default view, `TacheTable.vue` component (A.12)
-- [ ] Inline editing in table mode (A.13)
-- [ ] Tests passing
+- [x] "Voir toutes les tâches" router-link in `ActiviteDetail.vue` header → `/taches?activite={id}` (A.10)
+- [x] `filterAssignee` ref defaults to `'me'`; `filteredTasks` computed filters by assignee/responsable_id (A.11)
+- [x] `TacheTable.vue` component created; `currentView` defaults to `'table'` in `Taches.vue` (A.12)
+- [x] Inline edit on statut/priorité/échéance cells: click → select/input → `PATCH /api/taches/{id}` → row updates (A.13)
+- [x] `PATCH /api/taches/{id}` route added (mirrors PUT, uses same `update()` controller method)
+- [x] `statut` validation extended to include `en_retard` and `a_refaire` (was missing from update validation)
+- [x] `route.query.activite` read in `onMounted` to pre-select activity from deep-link
+- [x] Manual test guide: `docs/testing/TASK_15_TESTING.md`
+- [x] PHPUnit: 5 tests in `tests/Feature/Task15/TaskListUxTest.php`
+- [x] **269 PHPUnit tests, all passing.**
 - [ ] PR opened into `jonas`
 
 ### Task 16 (feature/v2-task-16-export)

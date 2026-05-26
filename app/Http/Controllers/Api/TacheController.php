@@ -847,7 +847,7 @@ class TacheController extends Controller
             'description' => 'nullable|string',
             'objectif' => 'nullable|string',
             'indicateurs_resultats' => 'nullable|string',
-            'statut' => 'sometimes|required|in:a_faire,en_cours,termine',
+            'statut' => 'sometimes|required|in:a_faire,en_cours,termine,en_retard,a_refaire',
             'priorite' => 'sometimes|required|in:faible,moyenne,elevee,critique',
             // Dates
             'echeance' => 'nullable|date_format:Y-m-d',
