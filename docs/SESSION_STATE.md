@@ -17,25 +17,37 @@
 ## Current Session
 
 **Date:** 2026-05-26
-**Session goal:** Implement Task 10 (Evaluation Dashboard + Workspace-Wide Task View)
-**Status:** Task 10 implementation complete on `feature/v2-task-10-dashboard`. 216 PHPUnit tests + 2 Dusk tests green. Pending merge into `jonas`.
+**Session goal:** Task 10 merge + Task 11 (Wizard UX) + Task 12 (Document Management)
+**Status:** Tasks 10, 11, 12 complete and merged into `jonas`. 226 PHPUnit tests green.
 
 ---
 
 ## Current Task
 
-**Task:** 10 — Evaluation Dashboard + Global Task View
-**Branch:** `feature/v2-task-10-dashboard`
-**Status:** Implementation complete. Ready to merge.
+**Task:** 13 — Subscription Modes + Trial Duration
+**Branch:** `feature/v2-task-13-subscription` (not yet cut)
+**Status:** Not started.
 
 **What to do next:**
-1. Merge `feature/v2-task-10-dashboard` into `jonas` (`git merge --no-ff`)
-2. Push `jonas` to `origin`
-3. Pick next task — **Task 11** (Task Creation UX: wizard + intervenant picker)
+1. Cut branch `feature/v2-task-13-subscription` from `jonas`
+2. Implement subscription_mode + trial columns + SubscriptionService + middleware + frontend banner
 
 ## Last Completed Task
 
-**Task 10** — Evaluation Dashboard + Global Task View (2026-05-26)
+**Task 12** — Document Management per Project + Workspace (2026-05-26)
+- `DOCUMENTS_MANAGE_WORKSPACE` permission added to Permission.php + forRole() + `all()` (owner only)
+- `can_manage_workspace_documents` added to WorkspaceController user_permissions (3 places) + useWorkspacePermissions.js
+- Document permission keys (view/upload/delete/share) added to ProjetResource + useProjetPermissions.js
+- `WorkspaceDocuments.vue` page created; workspace router entry uncommented
+- `POST /api/documents/{id}/share-by-email` endpoint + `DocumentSharedNotification` (mail-only, queued, external email)
+- `DocumentUploadedNotification` (in-app, cadre+manager project members) wired into `store()`
+- `DocumentDeletedNotification` (in-app, project responsable) wired into `destroy()` with Log::warning on unauthorized attempt
+- `GET /api/documents/workspace/{id}` gated to `DOCUMENTS_MANAGE_WORKSPACE` (was open to all workspace members)
+- `lang/fr/documents.php` + `lang/en/documents.php` with actions/share/notifications/errors keys
+- PHPUnit: 5 tests in `tests/Feature/Task12/DocumentManagementTest.php` (view 200, non-member not exposed, share-by-email notification, workspace 403/200)
+- **226 PHPUnit tests, all passing. Merged into `jonas` 2026-05-26.**
+
+**Task 11** — Task Creation UX (2026-05-26)
 - 3 new permissions: `evaluations.view_dashboard`, `evaluations.view_workspace_taches`, `taches.inline_edit` — wired into Permission.php + forRole() + Permission.js + useWorkspacePermissions.js + WorkspaceController user_permissions (3 locations) + PermissionService (3 helpers)
 - `EvaluationController::evaluationDashboard` — scope-aware: owner→all workspace members, manager→project members, cadre→activity members; top_performers (top 5 by score) + all scores + alerts (escalades_abusives + high_inaction_rate ≥ 33%)
 - `TacheController::workspaceTaches` — owner/super_admin only; filterable by statut/projet_id/activite_id/assignee_id; paginated (25/page); TacheResource + eager loads
@@ -213,4 +225,6 @@ Tests: 11 feature in `NotificationServiceTest` + 8 feature in `SendDailyDigestCo
 | 2026-05-19 | Task 6 merge | Merged `feature/v2-task-6-bypass` into `jonas` (`--no-ff`, commit `f6e98d2`). Pushed `jonas` to `origin`. Updated SESSION_STATE, PROGRESSION, IMPLEMENTATION_PLAN. |
 | 2026-05-19 | Task 7 implementation | Implemented EvaluationScoreService (penalty/bonus/no_impact paths), pending-validations dashboard endpoint + Vue page, permissions, translations. Added Guide 17 (logs in French). Wired TacheResultatService::validerN1/rejeterN1 into the controller. 10 feature tests + 1 Dusk test. 90 tests passing. |
 | 2026-05-21 | Task 7 merge + Task 8 partial | Merged feature/v2-task-7-scores-dashboard into jonas (commit c891a6e, --no-ff) + pushed. Implemented Task 8 partial scope: NotificationService channelsFor/dedupKey/isDuplicate/notifyHierarchy, broadcast wired into 7 existing notifications via channelsFor, useLiveNotifications.js composable + App.vue subscription, NOTIFICATIONS_MANAGE_PREFERENCES permission, dusk attributes on NotificationMenu. Web Push and daily digest deferred to dedicated follow-up PRs. 11 feature tests + 2 Dusk tests. 101 tests passing. |
-| 2026-05-26 | fix/bug-batch merge + Task 10 | Merged fix/bug-batch (G1–G10, G12; G11 skipped) into jonas. Cut feature/v2-task-10-dashboard. Implemented: 3 permissions, EvaluationController::evaluationDashboard, TacheController::workspaceTaches, 2 routes, 2 notifications, translation keys, EvaluationDashboard.vue, WorkspaceTaches.vue, sidebar + router. 12 PHPUnit feature tests + 2 Dusk tests. 216 tests passing. |
+| 2026-05-26 | fix/bug-batch merge + Task 10 | Merged fix/bug-batch (G1–G10, G12; G11 skipped) into jonas. Cut feature/v2-task-10-dashboard. Implemented: 3 permissions, EvaluationController::evaluationDashboard, TacheController::workspaceTaches, 2 routes, 2 notifications, translation keys, EvaluationDashboard.vue, WorkspaceTaches.vue, sidebar + router. 12 PHPUnit feature tests + 2 Dusk tests. 216 tests passing. Merged into jonas. |
+| 2026-05-26 | Task 11 | Task Creation UX. TacheCreateWizard.vue (4-step modal), IntervenantPicker.vue, TacheAssigneeNotification (mail+db queued) + TacheResourcesNotification (db), Blade email templates (fr/en), i18n keys. ActiviteDetail.vue + Taches.vue wired. 5 PHPUnit + 3 Dusk tests. 221 tests green. Merged into jonas. |
+| 2026-05-26 | Task 12 | Document Management. DOCUMENTS_MANAGE_WORKSPACE permission (owner only), WorkspaceDocuments.vue, workspace docs endpoint gated, share-by-email endpoint + DocumentSharedNotification, DocumentUploaded/DeletedNotification wired, document permission keys in ProjetResource + composables, lang/fr+en/documents.php. 5 PHPUnit tests. 226 tests green. Merged into jonas. |
