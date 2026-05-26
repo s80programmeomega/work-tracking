@@ -328,6 +328,8 @@ const {
     canViewFicheEvaluation,
     canViewAllTasks,
     canSubmitResult,
+    canViewEvaluationDashboard,
+    canViewWorkspaceTaches,
 } = useWorkspacePermissions(currentWorkspace);
 
 // Workspace management
@@ -606,11 +608,12 @@ const menuGroups = computed(() => [
                 icon: ClipboardCheckIcon,
                 name: 'Évaluations',
                 subItems: [
-                    { name: 'Tableau de bord', path: '/evaluations/dashboard', requiresPermission: 'canViewEvaluationScore' },
+                    { name: 'Tableau de bord', path: '/evaluations/tableau-de-bord', requiresPermission: 'canViewEvaluationDashboard' },
                     { name: 'Validations à traiter', path: '/validations/a-traiter', requiresPermission: 'canViewPendingValidations' },
                     // { name: 'Rapport hebdomadaire', path: '/evaluations/rapport-hebdomadaire' },
                     { name: 'Fiches d\'évaluation', path: '/evaluations/fiches', requiresPermission: 'canViewFicheEvaluation' },
                     // { name: 'Performance d\'équipe', path: '/evaluations/performance' },
+                    { name: 'Toutes les tâches', path: '/workspace/taches', requiresPermission: 'canViewWorkspaceTaches' },
                 ],
             },
         ],
@@ -698,12 +701,14 @@ const filteredMenuGroups = computed(() => {
 
 // Filtrer les sous-items selon les permissions avec sécurité
 const permissionMap = computed(() => ({
-    canViewAllTasks:          canViewAllTasks.value,
-    canSubmitResult:          canSubmitResult.value,
-    canViewPendingValidations: canViewPendingValidations.value,
-    canViewEvaluationScore:   canViewEvaluationScore.value,
-    canViewFicheEvaluation:   canViewFicheEvaluation.value,
-    isSuperAdmin:             isSuperAdmin.value,
+    canViewAllTasks:             canViewAllTasks.value,
+    canSubmitResult:             canSubmitResult.value,
+    canViewPendingValidations:   canViewPendingValidations.value,
+    canViewEvaluationScore:      canViewEvaluationScore.value,
+    canViewFicheEvaluation:      canViewFicheEvaluation.value,
+    canViewEvaluationDashboard:  canViewEvaluationDashboard.value,
+    canViewWorkspaceTaches:      canViewWorkspaceTaches.value,
+    isSuperAdmin:                isSuperAdmin.value,
 }));
 
 const getFilteredSubItems = (subItems) => {

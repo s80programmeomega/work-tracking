@@ -16,25 +16,39 @@
 
 ## Current Session
 
-**Date:** 2026-05-22
-**Session goal:** Implement Task 8b (Web Push notifications)
-**Status:** Task 8b implementation complete on `feature/v2-task-8b-web-push`. 122 tests passing (109 from Task 8 + 13 new). Awaiting Jonas manual testing per `docs/testing/TASK_8B_TESTING.md` before merge into `jonas`.
+**Date:** 2026-05-26
+**Session goal:** Implement Task 10 (Evaluation Dashboard + Workspace-Wide Task View)
+**Status:** Task 10 implementation complete on `feature/v2-task-10-dashboard`. 216 PHPUnit tests + 2 Dusk tests green. Pending merge into `jonas`.
 
 ---
 
 ## Current Task
 
-**Task:** 8b — Web Push Notifications
-**Branch:** `feature/v2-task-8b-web-push`
-**Status:** Implementation complete. Awaiting manual test per `docs/testing/TASK_8B_TESTING.md`, then merge.
+**Task:** 10 — Evaluation Dashboard + Global Task View
+**Branch:** `feature/v2-task-10-dashboard`
+**Status:** Implementation complete. Ready to merge.
 
 **What to do next:**
-1. Jonas tests Task 8b manually using `docs/testing/TASK_8B_TESTING.md` (6 test cases — inscription, vraie push, désabonnement, expiration, push_enabled gate, multi-device)
-2. Merge `feature/v2-task-8b-web-push` into `jonas` (`git merge --no-ff`)
-3. Push `jonas` to `origin`
-4. Pick next task — likely **Task 9** (Agent Sheet + Full Scoring)
+1. Merge `feature/v2-task-10-dashboard` into `jonas` (`git merge --no-ff`)
+2. Push `jonas` to `origin`
+3. Pick next task — **Task 11** (Task Creation UX: wizard + intervenant picker)
 
 ## Last Completed Task
+
+**Task 10** — Evaluation Dashboard + Global Task View (2026-05-26)
+- 3 new permissions: `evaluations.view_dashboard`, `evaluations.view_workspace_taches`, `taches.inline_edit` — wired into Permission.php + forRole() + Permission.js + useWorkspacePermissions.js + WorkspaceController user_permissions (3 locations) + PermissionService (3 helpers)
+- `EvaluationController::evaluationDashboard` — scope-aware: owner→all workspace members, manager→project members, cadre→activity members; top_performers (top 5 by score) + all scores + alerts (escalades_abusives + high_inaction_rate ≥ 33%)
+- `TacheController::workspaceTaches` — owner/super_admin only; filterable by statut/projet_id/activite_id/assignee_id; paginated (25/page); TacheResource + eager loads
+- Routes: `GET /api/evaluations/tableau-de-bord` + `GET /api/workspace/taches`
+- 2 notifications: `AbusiveEscalationAlertNotification` (in-app + email) + `HighInactionRateAlertNotification` (in-app only)
+- Translation keys in `lang/fr/evaluation.php` + `lang/en/evaluation.php` (dashboard section + workspace_tasks section)
+- `EvaluationDashboard.vue` — period filter, top performers grid, all-scores table, alerts section (escalades_abusives + high_inaction_rate)
+- `WorkspaceTaches.vue` — filter bar, sortable table, pagination, row click → taches.show
+- AppSidebar + Vue router wired for both pages
+- PHPUnit: 12 tests in `tests/Feature/Task10/` (dashboard 200/403 by role + manager scope isolation; workspace taches 200/403 by role + statut filter)
+- Dusk: 2 tests in `tests/Browser/Evaluation/EvaluationDashboardTest` (owner sees all sections; period filter + refresh)
+- PERMISSIONS_MATRIX.md: 3 new rows + 1 correction (cadre now ✅ for dashboard) + changelog entry
+- **216 PHPUnit tests, all passing**
 
 **Task 8b** — Web Push Notifications (2026-05-22, implementation complete)
 - `composer require minishlink/web-push` v10.0.3 (free, MIT, pure PHP, no external service)
@@ -199,3 +213,4 @@ Tests: 11 feature in `NotificationServiceTest` + 8 feature in `SendDailyDigestCo
 | 2026-05-19 | Task 6 merge | Merged `feature/v2-task-6-bypass` into `jonas` (`--no-ff`, commit `f6e98d2`). Pushed `jonas` to `origin`. Updated SESSION_STATE, PROGRESSION, IMPLEMENTATION_PLAN. |
 | 2026-05-19 | Task 7 implementation | Implemented EvaluationScoreService (penalty/bonus/no_impact paths), pending-validations dashboard endpoint + Vue page, permissions, translations. Added Guide 17 (logs in French). Wired TacheResultatService::validerN1/rejeterN1 into the controller. 10 feature tests + 1 Dusk test. 90 tests passing. |
 | 2026-05-21 | Task 7 merge + Task 8 partial | Merged feature/v2-task-7-scores-dashboard into jonas (commit c891a6e, --no-ff) + pushed. Implemented Task 8 partial scope: NotificationService channelsFor/dedupKey/isDuplicate/notifyHierarchy, broadcast wired into 7 existing notifications via channelsFor, useLiveNotifications.js composable + App.vue subscription, NOTIFICATIONS_MANAGE_PREFERENCES permission, dusk attributes on NotificationMenu. Web Push and daily digest deferred to dedicated follow-up PRs. 11 feature tests + 2 Dusk tests. 101 tests passing. |
+| 2026-05-26 | fix/bug-batch merge + Task 10 | Merged fix/bug-batch (G1–G10, G12; G11 skipped) into jonas. Cut feature/v2-task-10-dashboard. Implemented: 3 permissions, EvaluationController::evaluationDashboard, TacheController::workspaceTaches, 2 routes, 2 notifications, translation keys, EvaluationDashboard.vue, WorkspaceTaches.vue, sidebar + router. 12 PHPUnit feature tests + 2 Dusk tests. 216 tests passing. |

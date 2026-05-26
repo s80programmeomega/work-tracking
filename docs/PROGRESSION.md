@@ -29,7 +29,7 @@
 | 7 | N1 Scores + Pending Validations | `feature/v2-task-7-scores-dashboard` | ✅ | 2026-05-19 | 2026-05-19 | Merged into `jonas` 2026-05-21 |
 | 8 | Reverb + Web Push Notifications | `feature/v2-task-8-notifications` | ✅ | 2026-05-21 | 2026-05-21 | Real-time + dedup + hierarchy + daily digest done. Web Push (8b) deferred to dedicated PR. |
 | 9 | Agent Sheet + Full Scoring | `feature/v2-task-9-agent-sheet` | ✅ | 2026-05-22 | 2026-05-23 | All 9 steps shipped on branch; 142 PHPUnit + 2 Dusk tests green. Pending merge into `jonas`. |
-| 10 | Evaluation Dashboard + Global Task View | `feature/v2-task-10-dashboard` | ⬜ | — | — | — |
+| 10 | Evaluation Dashboard + Global Task View | `feature/v2-task-10-dashboard` | 🔄 | 2026-05-26 | — | 216 PHPUnit + 2 Dusk tests green. Pending merge into `jonas`. |
 | 11 | Task Creation UX (wizard + intervenant picker) | `feature/v2-task-11-task-creation-ux` | ⬜ | — | — | — |
 | 12 | Document Management per Project + Workspace | `feature/v2-task-12-document-management` | ⬜ | — | — | — |
 | 13 | Subscription Modes + Trial Duration | `feature/v2-task-13-subscription` | ⬜ | — | — | — |
@@ -194,12 +194,17 @@
 - [ ] PR / merge into `jonas`
 
 ### Task 10
-- [ ] Evaluation dashboard page created
-- [ ] Workspace-wide task view created
-- [ ] `GET /evaluations/dashboard` endpoint created
-- [ ] Permissions added
-- [ ] Translation keys added
-- [ ] Tests passing
+- [x] Evaluation dashboard page created (`resources/js/pages/evaluations/EvaluationDashboard.vue`)
+- [x] Workspace-wide task view created (`resources/js/pages/workspace/WorkspaceTaches.vue`)
+- [x] `GET /api/evaluations/tableau-de-bord` endpoint created (`EvaluationController::evaluationDashboard`)
+- [x] `GET /api/workspace/taches` endpoint created (`TacheController::workspaceTaches`)
+- [x] 3 permissions added (`evaluations.view_dashboard`, `evaluations.view_workspace_taches`, `taches.inline_edit`)
+- [x] 2 notifications added (`AbusiveEscalationAlertNotification`, `HighInactionRateAlertNotification`)
+- [x] Translation keys added (`lang/fr/evaluation.php` + `lang/en/evaluation.php`)
+- [x] Sidebar + Vue router wired for both pages
+- [x] PHPUnit: 12 tests in `tests/Feature/Task10/` (dashboard + workspace taches permission boundaries)
+- [x] Dusk: 2 tests in `tests/Browser/Evaluation/EvaluationDashboardTest` (owner sees all sections; refresh after period change)
+- [x] Documentation: PROGRESSION + PERMISSIONS_MATRIX updated; `docs/testing/TASK_10_TESTING.md` pending
 - [ ] PR opened into `jonas`
 
 ### Task 11

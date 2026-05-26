@@ -514,6 +514,28 @@ const router = createRouter({
       },
     },
 
+    // Task 10 — Tableau de bord évaluations (owner/manager/cadre)
+    {
+      path: '/evaluations/tableau-de-bord',
+      name: 'evaluations.tableau-de-bord',
+      component: () => import('../pages/evaluations/EvaluationDashboard.vue'),
+      meta: {
+        title: 'Tableau de bord évaluations',
+        requiresAuth: true,
+      },
+    },
+
+    // Task 10 — Vue globale des tâches du workspace (owner/directeur)
+    {
+      path: '/workspace/taches',
+      name: 'workspace.taches',
+      component: () => import('../pages/workspace/WorkspaceTaches.vue'),
+      meta: {
+        title: 'Toutes les tâches',
+        requiresAuth: true,
+      },
+    },
+
     {
       path: '/users/invitations',
       name: 'invitations',
