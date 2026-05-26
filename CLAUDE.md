@@ -28,7 +28,7 @@ These rules apply on every machine and every session. They do not change task to
 - **Testing docs:** Write `docs/testing/TASK_{N}_TESTING.md` for every completed task.
 - **State docs:** Update `docs/PROGRESSION.md` and `docs/SESSION_STATE.md` at the end of every task.
 - **Servers:** Stop any background server started (serve, vite, queue, reverb) before ending a turn.
-- **Memory sync:** When the user says _"Update CLAUDE.md with current memory"_ — read local memory files, update the Persistent Rules section if anything has changed, and commit.
+- **Memory sync:** When the user says _"Update CLAUDE.md with current memory"_ — read only the memory files for this project (the ones whose path corresponds to the current working directory), update the Persistent Rules section if anything has changed, and commit.
 
 ---
 
