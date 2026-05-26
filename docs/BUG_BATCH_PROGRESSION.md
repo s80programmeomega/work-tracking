@@ -29,7 +29,7 @@
 | G8 | Gate every sidebar entry via `useWorkspacePermissions` | #13 | `dbae446` | ✅ | 2026-05-24 | no new tests | `canViewAllTasks` + `canSubmitResult` helpers + `requiresPermission` in nav data |
 | G9 | Finish subtasks: `removeIntervenant` endpoint + intervenant UI + responsable field | #3 | `ae90e8e` | ✅ | 2026-05-24 | +4 tests (186 total) | Inline chip row in `SousTacheList`; assign/remove dropdown; `SousTacheForm` responsable picker |
 | G10 | Profile gaps (avatar, language preference, account deletion) | #6 | `8fc1cdb` | ✅ | 2026-05-25 | +12 tests (198 total) | Avatar upload fixed, language/timezone persisted to API, self-delete with password confirm |
-| G11 | Web Push end-to-end verify | #4 | — | ⬜ | — | — | Manual only — needs Jonas to confirm OS-level push toast after G3 routing fix |
+| G11 | Web Push end-to-end verify | #4 | — | ⚠️ skipped | 2026-05-26 | — | Manual gate — skipped by Jonas; G3 routing fix is in place; OS-level toast confirmation deferred |
 | G12 | Cross-cutting reactivity (Reverb events + Vue refetch tightening) | UX polish | `a9b259d` | ✅ | 2026-05-25 | +6 tests (204 total) | 4 broadcast events, workspace channel auth, useRealtimeRefresh composable, 5 pages wired |
 
 ---
@@ -171,17 +171,12 @@
 
 ---
 
-### G11 — Web Push end-to-end verify ⬜
+### G11 — Web Push end-to-end verify ⚠️ skipped
 
-> No code change expected. G3 should have restored the routing. This group is a manual verification gate.
+> Skipped by Jonas on 2026-05-26. G3 routing fix is in place (7 N1/N2 event types added to `wantsWebPush`/`wantsEmail`). OS-level push toast confirmation deferred — no blocker for Task 10.
 
-- [ ] `php artisan migrate:fresh --seed` with `NotificationDemoSeeder` active
-- [ ] Queue worker running: `php artisan queue:work`
-- [ ] Sign in as cadre in Chrome, grant push permission (follow `docs/testing/TASK_8B_TESTING.md` Case 1)
-- [ ] Collaborateur submits a result targeting cadre as N1 validator
-- [ ] Cadre receives a system (OS-level) browser notification within ~10s
-- [ ] If push still fails: debug `WebPushChannel::send` with `Log::info` of SDK response and fix root cause
-- [ ] Marked complete only after Jonas confirms receiving a real toast
+- [x] G3 routing fix landed — `channelsFor()` now covers all N1/N2 event types
+- [ ] OS-level toast confirm — **deferred**
 
 ---
 
