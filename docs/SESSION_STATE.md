@@ -17,20 +17,24 @@
 ## Current Session
 
 **Date:** 2026-05-26
-**Session goal:** Task 10 merge + Task 11 (Wizard UX) + Task 12 (Document Management)
-**Status:** Tasks 10, 11, 12 complete and merged into `jonas`. 226 PHPUnit tests green.
+**Session goal:** CDC compliance review + CDC hotfixes (R7 guard, audit-log endpoint, agent sheet §5)
+**Status:** CDC review complete. Docs updated. `fix/cdc-hotfixes` branch cut from `feature/v2-task-12-document-management`. Hotfix implementation in progress.
 
 ---
 
 ## Current Task
 
-**Task:** 13 — Subscription Modes + Trial Duration
-**Branch:** `feature/v2-task-13-subscription` (not yet cut)
-**Status:** Not started.
+**Task:** CDC Hotfixes
+**Branch:** `fix/cdc-hotfixes`
+**Status:** In progress — branch cut, docs updated, implementation not yet started.
 
 **What to do next:**
-1. Cut branch `feature/v2-task-13-subscription` from `jonas`
-2. Implement subscription_mode + trial columns + SubscriptionService + middleware + frontend banner
+1. R7 guard: add `enforceMandatorySousTaches()` check at top of `TacheResultatService::soumettre()`
+2. Audit-log endpoint: `GET /api/audit-logs/validation/{tache}` in `EvaluationController` + route
+3. Agent sheet §5: résultats soumis avec statut validation in `EvaluationController::historique()` + `AgentSheet.vue`
+4. PHPUnit tests for R7 + audit-log endpoint
+5. Pint + full test suite
+6. Commit + push `fix/cdc-hotfixes` to `origin`
 
 ## Last Completed Task
 
@@ -187,7 +191,12 @@ Tests: 11 feature in `NotificationServiceTest` + 8 feature in `SendDailyDigestCo
 | `feature/v2-task-5-validation-n0` | Task 5 | Merged ✅ (via `feature/v2-permission-architecture`) |
 | `feature/v2-task-6-bypass` | Task 6 | Merged ✅ |
 | `feature/v2-task-7-scores-dashboard` | Task 7 | Merged ✅ (commit `c891a6e`) |
-| `feature/v2-task-8-notifications` | Task 8 (partial) | Pending Jonas testing |
+| `feature/v2-task-8-notifications` | Task 8 + 8b + 8c | Merged ✅ (into `jonas` 2026-05-26) |
+| `feature/v2-task-9-agent-sheet` | Task 9 | Merged ✅ (into `jonas` 2026-05-26) |
+| `feature/v2-task-10-dashboard` | Task 10 | Merged ✅ (into `jonas` 2026-05-26) |
+| `feature/v2-task-11-task-creation-ux` | Task 11 | Merged ✅ (into `jonas` 2026-05-26) |
+| `feature/v2-task-12-document-management` | Task 12 | Merged ✅ (into `jonas` 2026-05-26) |
+| `fix/cdc-hotfixes` | CDC Hotfixes | In progress 🔄 |
 
 ---
 
@@ -196,7 +205,11 @@ Tests: 11 feature in `NotificationServiceTest` + 8 feature in `SendDailyDigestCo
 | # | Question | Context | Status |
 |---|---|---|---|
 | 1 | Frontend composable for SousTache permissions | `useTachePermissions.js` update deferred to Task 4 | Closed (Task 4 merged) |
-| 2 | Per-task drill-down modal on evaluation sheet | Jonas's UX request 2026-05-19: each task row in the agent sheet should open a modal listing its sous-tâches with progression + per-sous-tâche score contributions. Implementation belongs in **Task 9** (`evaluation_scores.meta` already supports this; no schema change). Captured in Task 9 spec. | Captured for Task 9 |
+| 2 | Per-task drill-down modal on evaluation sheet | Jonas's UX request 2026-05-19: captured in Task 9 spec. | Closed (Task 9 merged) |
+| 3 | Design assets (colour palette, logo, mockups) from M. Kemtio | CDC gap A.1 — needed before UI polish sprint | Open — awaiting assets |
+| 4 | SMS provider for critical alerts | CDC gap B.2 — Twilio / Vonage / local? | Open — pending decision |
+| 5 | Billing/invoicing module scope | CDC gap B.4 — integrated vs external service? | Open — pending decision |
+| 6 | Agent sheet §5 timing | Small enough for CDC Hotfixes, or defer to Task 16? | Open — decide during hotfix implementation |
 
 ---
 
@@ -228,3 +241,4 @@ Tests: 11 feature in `NotificationServiceTest` + 8 feature in `SendDailyDigestCo
 | 2026-05-26 | fix/bug-batch merge + Task 10 | Merged fix/bug-batch (G1–G10, G12; G11 skipped) into jonas. Cut feature/v2-task-10-dashboard. Implemented: 3 permissions, EvaluationController::evaluationDashboard, TacheController::workspaceTaches, 2 routes, 2 notifications, translation keys, EvaluationDashboard.vue, WorkspaceTaches.vue, sidebar + router. 12 PHPUnit feature tests + 2 Dusk tests. 216 tests passing. Merged into jonas. |
 | 2026-05-26 | Task 11 | Task Creation UX. TacheCreateWizard.vue (4-step modal), IntervenantPicker.vue, TacheAssigneeNotification (mail+db queued) + TacheResourcesNotification (db), Blade email templates (fr/en), i18n keys. ActiviteDetail.vue + Taches.vue wired. 5 PHPUnit + 3 Dusk tests. 221 tests green. Merged into jonas. |
 | 2026-05-26 | Task 12 | Document Management. DOCUMENTS_MANAGE_WORKSPACE permission (owner only), WorkspaceDocuments.vue, workspace docs endpoint gated, share-by-email endpoint + DocumentSharedNotification, DocumentUploaded/DeletedNotification wired, document permission keys in ProjetResource + composables, lang/fr+en/documents.php. 5 PHPUnit tests. 226 tests green. Merged into jonas. |
+| 2026-05-26 | CDC Review | Cross-referenced CDC_WorkTracking_v2.pdf Rev.3 against all completed and planned tasks (T0–T14). Found 10+ gaps: A.1 (design assets), A.10–A.13 (task list UX), R7 (backend guard missing), CDC-API (audit-log endpoint missing), ST.7/E.2 (agent sheet §5 + export), B.1–B.5 (export, SMS, search, billing, rate limiting). Rate limiting verified ✅ already in place. Two new tasks added: T15 (task list UX), T16 (export). CDC hotfix batch created on `fix/cdc-hotfixes`. IMPLEMENTATION_PLAN.md + PROGRESSION.md + SESSION_STATE.md updated. |

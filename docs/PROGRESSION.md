@@ -34,6 +34,9 @@
 | 12 | Document Management per Project + Workspace | `feature/v2-task-12-document-management` | ✅ | 2026-05-26 | 2026-05-26 | 226 PHPUnit tests green. Merged into `jonas` 2026-05-26. |
 | 13 | Subscription Modes + Trial Duration | `feature/v2-task-13-subscription` | ⬜ | — | — | — |
 | 14 | Platform Super Admin Dashboard | `feature/v2-task-14-platform-dashboard` | ⬜ | — | — | — |
+| 15 | Task List UX (table mode + activity shortcut) | `feature/v2-task-15-task-list-ux` | ⬜ | — | — | CDC gaps A.10–A.13 |
+| 16 | PDF/Excel Export (evaluation sheet + project/task) | `feature/v2-task-16-export` | ⬜ | — | — | CDC gaps B.1 + ST.7/E.2 |
+| — | CDC Hotfixes (R7 guard + audit-log endpoint + rate limiting + agent sheet §5) | `fix/cdc-hotfixes` | 🔄 | 2026-05-26 | — | Slots between T12 and T13 |
 
 ---
 
@@ -231,6 +234,36 @@
 - [x] Translation keys added to `lang/fr/documents.php` and `lang/en/documents.php`
 - [x] PHPUnit: 5 tests in `tests/Feature/Task12/DocumentManagementTest.php`
 - [x] 226 tests green. Merged into `jonas` 2026-05-26.
+
+### CDC Hotfixes (fix/cdc-hotfixes)
+
+Gaps identified in CDC compliance review 2026-05-26 against `CDC_WorkTracking_v2.pdf` Rev.3.
+
+- [ ] R7 backend guard: `TacheResultatService::soumettre()` aborts 422 when mandatory sous-taches not terminal (CDC Section 7 / Module ST.5)
+- [ ] `GET /api/audit-logs/validation/{tache}` endpoint — CDC Section 6 API list (table exists, no standalone endpoint)
+- [ ] Rate limiting verified — `throttle:60,1` already in `RouteServiceProvider` ✅ (no change needed)
+- [ ] Agent sheet 5th section: résultats soumis avec statut validation — CDC Module E.2 (currently 4 sections, missing §5)
+
+### Task 15 (feature/v2-task-15-task-list-ux)
+
+CDC gaps A.10–A.13.
+
+- [ ] "Voir toutes les tâches" shortcut from activity header (A.10)
+- [ ] Default filter set to current user's tasks on task list page (A.11)
+- [ ] Table mode as default view, `TacheTable.vue` component (A.12)
+- [ ] Inline editing in table mode (A.13)
+- [ ] Tests passing
+- [ ] PR opened into `jonas`
+
+### Task 16 (feature/v2-task-16-export)
+
+CDC gaps B.1 + ST.7/E.2.
+
+- [ ] PDF export of evaluation sheet (per agent, per period)
+- [ ] Excel export of project/task list (with sous-taches when filter active)
+- [ ] Agent sheet §5: résultats soumis avec statut validation (deferred from CDC Hotfixes if medium effort)
+- [ ] Tests passing
+- [ ] PR opened into `jonas`
 
 ### Task 13
 - [ ] `subscription_mode` and trial columns added to `workspaces`

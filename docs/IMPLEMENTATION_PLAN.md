@@ -936,13 +936,59 @@ test: add feature tests for platform dashboard permissions and stats
 
 ---
 
+---
+
+## CDC Gap Tracker
+
+> Cross-referenced against `CDC_WorkTracking_v2.pdf` Rev.3 on 2026-05-26. All gaps logged here; tasks 15–16 added to PROGRESSION.md.
+
+### A.1 — Design assets (colour palette, logo, mockup screens)
+Not implemented — no design assets received from M. Kemtio. **Pending:** Jonas to obtain assets before UI polish sprint.
+
+### A.10–A.13 — Task list UX gaps → Task 15
+- A.10: No "Voir toutes les tâches" shortcut from activity header
+- A.11: Default filter not set to current user on task list
+- A.12: Table mode not default; `TacheTable.vue` not yet built
+- A.13: No inline editing in table mode
+→ Consolidated as **Task 15** (`feature/v2-task-15-task-list-ux`)
+
+### R7 — Backend guard for mandatory sous-taches → CDC Hotfix
+CDC Section 7 / Module ST.5: `TacheResultatService::soumettre()` must abort 422 when any mandatory sous-tache (any with `validation_n0_required = true`) is not in `termine` status. The Task 4 checklist marked this deferred; it was never implemented.
+→ **CDC Hotfix** on `fix/cdc-hotfixes`
+
+### CDC-API — Missing audit-log endpoint → CDC Hotfix
+CDC Section 6 API list includes `GET /audit-logs/validation/{tache_id}`. The `validation_audit_logs` table exists and data is nested in `TacheResultatResource`, but no standalone route was created.
+→ **CDC Hotfix** on `fix/cdc-hotfixes`
+
+### ST.7 / E.2 — Agent sheet §5 + export → Task 16
+CDC Module E.2 specifies 5 sections on the agent sheet; Task 9 only implemented 4 (missing: résultats soumis avec statut validation). CDC also specifies PDF export of the evaluation sheet and Excel export for project/task lists.
+→ **Task 16** (`feature/v2-task-16-export`) — §5 may be absorbed into CDC hotfixes if small
+
+### B.1 — PDF/Excel export → Task 16
+CDC Section B.1: export evaluation sheet as PDF, project/task list as Excel with sous-taches.
+→ **Task 16** (`feature/v2-task-16-export`)
+
+### B.2 — SMS notifications
+CDC suggestion B.2: SMS channel for critical alerts (bypass, escalades_abusives). **Pending decision:** SMS provider choice (Twilio, Vonage, local). Deferred until provider selected.
+
+### B.3 — Global search
+CDC suggestion B.3: cross-entity search (tasks, projects, users). Not scoped in any current task. Flag for backlog.
+
+### B.4 — Billing / invoicing module
+CDC suggestion B.4: workspace billing and invoicing UI. **Pending decision:** scope (integrated vs external). Deferred.
+
+### B.5 — Rate limiting
+Already implemented: `RouteServiceProvider` applies `Limit::perMinute(60)->by(user_id ?: ip)`, test-exempt. ✅ No change needed.
+
+---
+
 ## Current Task
 
 > **Update this section at the end of every session.**
 
-- Last completed task: **Task 8** — Real-Time Notifications + Daily Digest (`feature/v2-task-8-notifications`) — merged 2026-05-21
-- Current task: **Task 8b** — Web Push Notifications — implementation complete on `feature/v2-task-8b-web-push`, awaiting Jonas manual testing per `docs/testing/TASK_8B_TESTING.md`. Once merged, the Task 8 notification stack is feature-complete.
-- Next task after Task 8b merge: **Task 9** — Agent Sheet + Full Scoring
+- Last completed task: **Task 12** — Document Management (`feature/v2-task-12-document-management`) — merged into `jonas` 2026-05-26
+- Current task: **CDC Hotfixes** — R7 backend guard + audit-log endpoint + agent sheet §5 (`fix/cdc-hotfixes`) — in progress
+- Next task after CDC Hotfixes: **Task 13** — Subscription Modes + Trial Duration (`feature/v2-task-13-subscription`)
 
 ### Dusk note (applies to all remaining tasks)
 Each task must include at least one Dusk browser test covering its main user flow. Place tests under `tests/Browser/<FeatureArea>/`. Follow Guide 16 in `WORKING_GUIDELINES.md`.
