@@ -30,6 +30,9 @@ class TacheResultatService
      */
     public function soumettre(TacheResultat $resultat, User $actor): void
     {
+        // R7 (CDC §7 / ST.5) : les sous-tâches obligatoires bloquent la soumission
+        $this->enforceMandatorySousTaches($resultat, $actor);
+
         $resultat->update([
             'statut' => 'en_verification_n0',
             'soumis_le' => now(),
@@ -420,5 +423,32 @@ class TacheResultatService
             'action' => $action,
             'context' => $context,
         ]);
+    }
+
+    /**
+     * R7 (CDC §7 / ST.5) : vérifie que toutes les sous-tâches obligatoires
+     * (validation_n0_required = true) sont au statut "termine" avant soumission.
+     * Lève une InvalidArgumentException (→ HTTP 422) si ce n'est pas le cas.
+     */
+    private function enforceMandatorySousTaches(TacheResultat $resultat, User $actor): void
+    {
+        $blocking = $resultat->tache
+            ->sousTaches()
+            ->where('validation_n0_required', true)
+            ->whereNotIn('statut', ['termine', 'annule'])
+            ->count();
+
+        if ($blocking === 0) {
+            return;
+        }
+
+        Log::warning('Soumission bloquée — sous-tâches obligatoires non terminées', [
+            'user_id' => $actor->id,
+            'tache_resultat_id' => $resultat->id,
+            'reason' => 'mandatory_subtasks_not_done',
+            'blocking_count' => $blocking,
+        ]);
+
+        throw new \InvalidArgumentException(__('circuit_validation.errors.mandatory_subtasks_not_done'));
     }
 }

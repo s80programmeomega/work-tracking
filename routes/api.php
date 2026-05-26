@@ -450,6 +450,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/history', [EvaluationController::class, 'validationHistory']);
     });
 
+    // CDC §6 — journal d'audit de validation par tâche
+    Route::get('/audit-logs/validation/{tache}', [EvaluationController::class, 'auditLogs'])
+        ->name('audit-logs.validation');
+
     // Routes pour les rapports
     Route::prefix('reports')->group(function () {
         Route::get('/activite/{activiteId}/performance', [TacheController::class, 'activityPerformanceReport']);

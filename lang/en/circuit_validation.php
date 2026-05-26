@@ -16,6 +16,7 @@ return [
         'invalid_statut' => 'The result is not in the correct state for this action.',
         'motif_too_short' => 'The bypass reason must be at least 50 characters.',
         'bypass_already_used' => 'The bypass has already been used for this submission.',
+        'mandatory_subtasks_not_done' => 'Some mandatory subtasks are not yet complete. Please finish them before submitting your result.',
     ],
     'success' => [
         'approuve_n0' => 'Result approved and forwarded to N1.',

@@ -11,6 +11,7 @@ use App\Models\SousTache;
 use App\Models\Tache;
 use App\Models\TacheResultat;
 use App\Models\User;
+use App\Models\ValidationAuditLog;
 use App\Models\Workspace;
 use App\Notifications\EvaluationSheetReadyNotification;
 use App\Notifications\InjustifiedReturnAlertNotification;
@@ -267,7 +268,7 @@ class EvaluationController extends Controller
     public function agentSheetSections(Request $request, User $user): JsonResponse
     {
         $validated = $request->validate([
-            'section' => 'required|in:directed_tasks,directed_subtasks,assignee_tasks,assignee_subtasks',
+            'section' => 'required|in:directed_tasks,directed_subtasks,assignee_tasks,assignee_subtasks,submitted_results',
             'start' => 'sometimes|nullable|date_format:Y-m-d',
             'end' => 'sometimes|nullable|date_format:Y-m-d|after_or_equal:start',
             'statut' => 'sometimes|nullable|string',
@@ -300,6 +301,7 @@ class EvaluationController extends Controller
             'directed_subtasks' => $this->sectionDirectedSubtasks($user, $start, $end, $validated, $perPage),
             'assignee_tasks' => $this->sectionAssigneeTasks($user, $start, $end, $validated, $perPage),
             'assignee_subtasks' => $this->sectionAssigneeSubtasks($user, $start, $end, $validated, $perPage),
+            'submitted_results' => $this->sectionSubmittedResults($user, $start, $end, $validated, $perPage),
         };
 
         return response()->json([
@@ -395,6 +397,52 @@ class EvaluationController extends Controller
 
         return [
             'data' => $paginator->items(),
+            'meta' => ['current_page' => $paginator->currentPage(), 'last_page' => $paginator->lastPage(), 'total' => $paginator->total()],
+        ];
+    }
+
+    /**
+     * §5 (CDC Module E.2) : résultats soumis par l'utilisateur avec leur statut
+     * de validation (en_verification_n0, en_validation_n1, valide, rejete, etc.).
+     */
+    private function sectionSubmittedResults(User $user, string $start, string $end, array $filters, int $perPage): array
+    {
+        $query = TacheResultat::query()
+            ->where('user_id', $user->id)
+            ->whereBetween('soumis_le', [$start.' 00:00:00', $end.' 23:59:59'])
+            ->with([
+                'tache:id,titre,activite_id',
+                'tache.activite:id,nom,projet_id',
+                'tache.activite.projet:id,nom',
+            ]);
+
+        if (! empty($filters['statut'])) {
+            $query->where('statut', $filters['statut']);
+        }
+        if (! empty($filters['projet_id'])) {
+            $query->whereHas('tache.activite', fn ($q) => $q->where('projet_id', $filters['projet_id']));
+        }
+        if (! empty($filters['activite_id'])) {
+            $query->whereHas('tache', fn ($q) => $q->where('activite_id', $filters['activite_id']));
+        }
+
+        $paginator = $query->orderByDesc('soumis_le')->paginate($perPage);
+
+        $items = collect($paginator->items())->map(fn ($r) => [
+            'id' => $r->id,
+            'tache_id' => $r->tache_id,
+            'tache_titre' => $r->tache?->titre,
+            'activite' => $r->tache?->activite ? ['id' => $r->tache->activite->id, 'nom' => $r->tache->activite->nom] : null,
+            'projet' => $r->tache?->activite?->projet ? ['id' => $r->tache->activite->projet->id, 'nom' => $r->tache->activite->projet->nom] : null,
+            'statut' => $r->statut,
+            'taux_realisation' => $r->taux_realisation,
+            'soumis_le' => $r->soumis_le?->toISOString(),
+            'action_n0' => $r->action_n0,
+            'bypass_active' => (bool) $r->bypass_active,
+        ]);
+
+        return [
+            'data' => $items,
             'meta' => ['current_page' => $paginator->currentPage(), 'last_page' => $paginator->lastPage(), 'total' => $paginator->total()],
         ];
     }
@@ -2229,5 +2277,67 @@ class EvaluationController extends Controller
 
         // Fallback : soi-même uniquement.
         return [$actor->id];
+    }
+
+    /**
+     * CDC §6 — journal d'audit de validation pour une tâche donnée.
+     * Retourne toutes les entrées de validation_audit_logs liées aux résultats
+     * de la tâche, triées par ordre chronologique.
+     *
+     * Accès : tout utilisateur ayant accès à la tâche (assignee, responsable,
+     * cadre de l'activité, manager du projet, owner du workspace).
+     */
+    public function auditLogs(Request $request, Tache $tache): JsonResponse
+    {
+        $user = $request->user();
+
+        // Vérifie que l'utilisateur a accès à cette tâche.
+        $hasAccess = $tache->assignees()->where('user_id', $user->id)->exists()
+            || $tache->activite?->responsable_id === $user->id
+            || $tache->activite?->projet?->responsable_id === $user->id
+            || $tache->activite?->projet?->workspace?->owner_id === $user->id
+            || $user->isSuperAdmin();
+
+        if (! $hasAccess) {
+            Log::warning('Accès refusé au journal d\'audit de validation', [
+                'user_id' => $user->id,
+                'tache_id' => $tache->id,
+                'reason' => 'unauthorized',
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => __('circuit_validation.errors.unauthorized'),
+            ], 403);
+        }
+
+        $logs = ValidationAuditLog::query()
+            ->whereHas('resultat', fn ($q) => $q->where('tache_id', $tache->id))
+            ->with(['actor:id,nom,prenom,email', 'resultat:id,tache_id,user_id'])
+            ->orderBy('created_at')
+            ->get()
+            ->map(fn ($log) => [
+                'id' => $log->id,
+                'tache_resultat_id' => $log->tache_resultat_id,
+                'actor' => $log->actor ? [
+                    'id' => $log->actor->id,
+                    'nom' => $log->actor->nom,
+                    'prenom' => $log->actor->prenom,
+                ] : null,
+                'action' => $log->action,
+                'context' => $log->context,
+                'created_at' => $log->created_at?->toISOString(),
+            ]);
+
+        Log::info('Journal d\'audit de validation consulté', [
+            'user_id' => $user->id,
+            'tache_id' => $tache->id,
+            'entries_count' => $logs->count(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $logs,
+        ]);
     }
 }

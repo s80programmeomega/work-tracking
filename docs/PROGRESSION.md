@@ -29,11 +29,14 @@
 | 7 | N1 Scores + Pending Validations | `feature/v2-task-7-scores-dashboard` | ✅ | 2026-05-19 | 2026-05-19 | Merged into `jonas` 2026-05-21 |
 | 8 | Reverb + Web Push Notifications | `feature/v2-task-8-notifications` | ✅ | 2026-05-21 | 2026-05-21 | Real-time + dedup + hierarchy + daily digest done. Web Push (8b) deferred to dedicated PR. |
 | 9 | Agent Sheet + Full Scoring | `feature/v2-task-9-agent-sheet` | ✅ | 2026-05-22 | 2026-05-23 | All 9 steps shipped on branch; 142 PHPUnit + 2 Dusk tests green. Pending merge into `jonas`. |
-| 10 | Evaluation Dashboard + Global Task View | `feature/v2-task-10-dashboard` | 🔄 | 2026-05-26 | — | 216 PHPUnit + 2 Dusk tests green. Pending merge into `jonas`. |
-| 11 | Task Creation UX (wizard + intervenant picker) | `feature/v2-task-11-task-creation-ux` | ⬜ | — | — | — |
-| 12 | Document Management per Project + Workspace | `feature/v2-task-12-document-management` | ⬜ | — | — | — |
+| 10 | Evaluation Dashboard + Global Task View | `feature/v2-task-10-dashboard` | ✅ | 2026-05-26 | 2026-05-26 | 216 PHPUnit + 2 Dusk tests green. Merged into `jonas` 2026-05-26. |
+| 11 | Task Creation UX (wizard + intervenant picker) | `feature/v2-task-11-task-creation-ux` | ✅ | 2026-05-26 | 2026-05-26 | 221 PHPUnit + 3 Dusk tests green. Merged into `jonas` 2026-05-26. |
+| 12 | Document Management per Project + Workspace | `feature/v2-task-12-document-management` | ✅ | 2026-05-26 | 2026-05-26 | 226 PHPUnit tests green. Merged into `jonas` 2026-05-26. |
 | 13 | Subscription Modes + Trial Duration | `feature/v2-task-13-subscription` | ⬜ | — | — | — |
 | 14 | Platform Super Admin Dashboard | `feature/v2-task-14-platform-dashboard` | ⬜ | — | — | — |
+| 15 | Task List UX (table mode + activity shortcut) | `feature/v2-task-15-task-list-ux` | ⬜ | — | — | CDC gaps A.10–A.13 |
+| 16 | PDF/Excel Export (evaluation sheet + project/task) | `feature/v2-task-16-export` | ⬜ | — | — | CDC gaps B.1 + ST.7/E.2 |
+| — | CDC Hotfixes (R7 guard + audit-log endpoint + rate limiting + agent sheet §5) | `fix/cdc-hotfixes` | 🔄 | 2026-05-26 | — | Slots between T12 and T13 |
 
 ---
 
@@ -208,20 +211,57 @@
 - [ ] PR opened into `jonas`
 
 ### Task 11
-- [ ] `TacheCreateWizard.vue` step wizard created (4 steps)
-- [ ] `IntervenantPicker.vue` searchable multi-select created
-- [ ] Resource notification on task creation implemented
-- [ ] Translation keys added to `lang/fr/taches.php` and `lang/en/taches.php`
+- [x] `TacheCreateWizard.vue` step wizard created (4 steps: Informations, Assignation, Ressources, Validation)
+- [x] `IntervenantPicker.vue` searchable multi-select created (locked chip for responsable, v-model array)
+- [x] `TacheAssigneeNotification` (mail + database, queued) + `TacheResourcesNotification` (database) wired into TacheService
+- [x] Blade email templates: `resources/views/emails/tache-assigned/{fr,en}.blade.php`
+- [x] Translation keys added to `lang/fr/taches.php` and `lang/en/taches.php`
+- [x] ActiviteDetail.vue + Taches.vue wired (wizard for create, TacheForm for edit)
+- [x] PHPUnit: 5 tests in `tests/Feature/Task11/WizardValidationTest.php`
+- [x] Dusk: 3 tests in `tests/Browser/Tasks/WizardTest.php`
+- [x] 221 tests green. Merged into `jonas` 2026-05-26.
+
+### Task 12
+- [x] Project-level document endpoints already existed; gated `workspaceDocuments` to owner-only
+- [x] `ProjetDocuments.vue` page already existed
+- [x] `DOCUMENTS_MANAGE_WORKSPACE` permission added to Permission.php + forRole() + all()
+- [x] `WorkspaceDocuments.vue` page created; router entry uncommented
+- [x] `can_manage_workspace_documents` added to WorkspaceController user_permissions (3 locations)
+- [x] Document permission keys added to ProjetResource + useProjetPermissions.js + useWorkspacePermissions.js
+- [x] `POST /api/documents/{id}/share-by-email` endpoint added (DocumentSharedNotification email-only)
+- [x] `DocumentUploadedNotification` (in-app, project cadre+manager) wired into store()
+- [x] `DocumentDeletedNotification` (in-app, project responsable) wired into destroy()
+- [x] Translation keys added to `lang/fr/documents.php` and `lang/en/documents.php`
+- [x] PHPUnit: 5 tests in `tests/Feature/Task12/DocumentManagementTest.php`
+- [x] 226 tests green. Merged into `jonas` 2026-05-26.
+
+### CDC Hotfixes (fix/cdc-hotfixes)
+
+Gaps identified in CDC compliance review 2026-05-26 against `CDC_WorkTracking_v2.pdf` Rev.3.
+
+- [x] R7 backend guard: `TacheResultatService::soumettre()` aborts 422 when mandatory sous-taches not terminal (CDC Section 7 / Module ST.5)
+- [x] `GET /api/audit-logs/validation/{tache}` endpoint — CDC Section 6 API list (table exists, no standalone endpoint)
+- [x] Rate limiting verified — `throttle:60,1` already in `RouteServiceProvider` ✅ (no change needed)
+- [x] Agent sheet 5th section: résultats soumis avec statut validation — CDC Module E.2 (`submitted_results` section added)
+
+### Task 15 (feature/v2-task-15-task-list-ux)
+
+CDC gaps A.10–A.13.
+
+- [ ] "Voir toutes les tâches" shortcut from activity header (A.10)
+- [ ] Default filter set to current user's tasks on task list page (A.11)
+- [ ] Table mode as default view, `TacheTable.vue` component (A.12)
+- [ ] Inline editing in table mode (A.13)
 - [ ] Tests passing
 - [ ] PR opened into `jonas`
 
-### Task 12
-- [ ] Project-level document endpoints created (list, upload, access, delete, share)
-- [ ] `ProjetDocuments.vue` page created
-- [ ] Workspace-level document endpoints created
-- [ ] `WorkspaceDocuments.vue` page created
-- [ ] Permissions added (PermissionService + Seeder + composables)
-- [ ] Translation keys added to `lang/fr/documents.php` and `lang/en/documents.php`
+### Task 16 (feature/v2-task-16-export)
+
+CDC gaps B.1 + ST.7/E.2.
+
+- [ ] PDF export of evaluation sheet (per agent, per period)
+- [ ] Excel export of project/task list (with sous-taches when filter active)
+- [ ] Agent sheet §5: résultats soumis avec statut validation (deferred from CDC Hotfixes if medium effort)
 - [ ] Tests passing
 - [ ] PR opened into `jonas`
 
