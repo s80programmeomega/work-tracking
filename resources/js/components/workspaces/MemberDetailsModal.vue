@@ -181,9 +181,9 @@ onMounted(() => {
 <!-- Le template reste identique, juste quelques ajustements pour debug -->
 <template>
   <Teleport to="body">
-    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
       <div
-        class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden"
+        class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 max-w-2xl w-full max-h-[90vh] overflow-hidden"
         @click.stop
       >
         <!-- Header -->
@@ -221,7 +221,7 @@ onMounted(() => {
               </div>
               <div
                 v-else
-                class="w-20 h-20 rounded-full bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center text-white text-2xl font-medium flex-shrink-0"
+                class="w-20 h-20 rounded-full bg-brand-500 flex items-center justify-center text-white text-2xl font-medium shrink-0"
               >
                 {{ getInitials(member.nom) }}
               </div>
@@ -262,7 +262,7 @@ onMounted(() => {
 
           <!-- Statistics Grid -->
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg p-4 text-center border border-blue-200 dark:border-blue-700/50">
+            <div class="bg-brand-50 dark:bg-brand-500/10 rounded-3 p-4 text-center border border-blue-200 dark:border-blue-700/50">
               <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">
                 {{ statistics.projets_count || 0 }}
               </div>
@@ -270,7 +270,7 @@ onMounted(() => {
                 Projets
               </div>
             </div>
-            <div class="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg p-4 text-center border border-green-200 dark:border-green-700/50">
+            <div class="bg-success-50 dark:bg-success-500/10 rounded-3 p-4 text-center border border-green-200 dark:border-green-700/50">
               <div class="text-2xl font-bold text-green-600 dark:text-green-400">
                 {{ statistics.taches_count || 0 }}
               </div>
@@ -278,7 +278,7 @@ onMounted(() => {
                 Tâches
               </div>
             </div>
-            <div class="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg p-4 text-center border border-purple-200 dark:border-purple-700/50">
+            <div class="bg-purple-50 dark:bg-purple-500/10 rounded-3 p-4 text-center border border-purple-200 dark:border-purple-700/50">
               <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">
                 {{ statistics.taches_completees || 0 }}
               </div>
@@ -286,7 +286,7 @@ onMounted(() => {
                 Complétées
               </div>
             </div>
-            <div class="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 rounded-lg p-4 text-center border border-orange-200 dark:border-orange-700/50">
+            <div class="bg-warning-50 dark:bg-warning-500/10 rounded-3 p-4 text-center border border-orange-200 dark:border-orange-700/50">
               <div class="text-2xl font-bold text-orange-600 dark:text-orange-400">
                 {{ Math.round(statistics.taux_completion || 0) }}%
               </div>

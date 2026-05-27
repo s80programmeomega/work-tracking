@@ -4,10 +4,10 @@
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
     
     <!-- Header -->
-    <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+    <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 ">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-          <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center">
+          <div class="w-12 h-12 rounded-3 flex items-center justify-center">
             <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
@@ -108,7 +108,7 @@
         <!-- Graphiques -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <!-- Progression hebdomadaire -->
-          <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+          <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               Progression hebdomadaire
             </h3>
@@ -135,7 +135,7 @@
           </div>
 
           <!-- Répartition par priorité -->
-          <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+          <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               Répartition par priorité
             </h3>
@@ -165,13 +165,13 @@
         </div>
 
         <!-- Actions rapides -->
-        <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-8 text-white">
+        <div class="rounded-3 p-8 text-white">
           <h2 class="text-2xl font-bold mb-4">Actions rapides</h2>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <router-link 
               to="/evaluations/fiches"
-              class="flex items-center gap-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg p-4 transition-all">
-              <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+              class="flex items-center gap-4 bg-white/10 hover:bg-white/20 rounded-3 p-4 transition-all">
+              <div class="w-12 h-12 bg-white/20 rounded-3 flex items-center justify-center">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
@@ -184,8 +184,8 @@
 
             <router-link 
               to="/evaluations/rapport-hebdomadaire"
-              class="flex items-center gap-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg p-4 transition-all">
-              <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+              class="flex items-center gap-4 bg-white/10 hover:bg-white/20 rounded-3 p-4 transition-all">
+              <div class="w-12 h-12 bg-white/20 rounded-3 flex items-center justify-center">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
@@ -198,8 +198,8 @@
 
             <router-link 
               to="/evaluations/performance"
-              class="flex items-center gap-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg p-4 transition-all">
-              <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+              class="flex items-center gap-4 bg-white/10 hover:bg-white/20 rounded-3 p-4 transition-all">
+              <div class="w-12 h-12 bg-white/20 rounded-3 flex items-center justify-center">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>

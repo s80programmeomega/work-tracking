@@ -5,7 +5,7 @@
 
     <div class="space-y-6">
       <!-- Header avec Stats Globales -->
-      <div class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
+      <div class="rounded-3 border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
         <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
@@ -18,7 +18,7 @@
 
           <!-- Quick Stats -->
           <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            <div class="rounded-lg bg-blue-50 px-4 py-3 dark:bg-blue-900/20">
+            <div class="rounded-3 bg-blue-50 px-4 py-3 dark:bg-blue-900/20">
               <p class="text-xs font-medium text-blue-600 dark:text-blue-400">
                 Workspaces
               </p>
@@ -26,7 +26,7 @@
                 {{ stats.workspaces || 0 }}
               </p>
             </div>
-            <div class="rounded-lg bg-green-50 px-4 py-3 dark:bg-green-900/20">
+            <div class="rounded-3 bg-green-50 px-4 py-3 dark:bg-green-900/20">
               <p class="text-xs font-medium text-green-600 dark:text-green-400">
                 Projets
               </p>
@@ -34,7 +34,7 @@
                 {{ stats.projects || 0 }}
               </p>
             </div>
-            <div class="rounded-lg bg-purple-50 px-4 py-3 dark:bg-purple-900/20">
+            <div class="rounded-3 bg-purple-50 px-4 py-3 dark:bg-purple-900/20">
               <p class="text-xs font-medium text-purple-600 dark:text-purple-400">
                 Documents
               </p>
@@ -42,7 +42,7 @@
                 {{ stats.documents || 0 }}
               </p>
             </div>
-            <div class="rounded-lg bg-orange-50 px-4 py-3 dark:bg-orange-900/20">
+            <div class="rounded-3 bg-orange-50 px-4 py-3 dark:bg-orange-900/20">
               <p class="text-xs font-medium text-orange-600 dark:text-orange-400">
                 Espace
               </p>
@@ -55,7 +55,7 @@
       </div>
 
       <!-- Navigation par Niveau -->
-      <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+      <div class="rounded-3 border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
         <div class="border-b border-gray-200 dark:border-gray-800">
           <nav class="flex space-x-1 overflow-x-auto px-6" aria-label="Tabs">
             <button

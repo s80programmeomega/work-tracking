@@ -1,15 +1,15 @@
 <template>
   <Teleport to="body">
-    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div
-        class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+        class="bg-white dark:bg-gray-800 rounded-3 max-w-3xl w-full max-h-[90vh] overflow-y-auto"
         @click.stop
       >
         <!-- Header -->
         <div class="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 z-10">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+              <div class="p-2 bg-red-100 dark:bg-red-900/30 rounded-3">
                 <AlertCircleIcon class="w-6 h-6 text-red-600 dark:text-red-400" />
               </div>
               <div>
@@ -23,7 +23,7 @@
             </div>
             <button
               @click="$emit('close')"
-              class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             >
               <XIcon class="w-5 h-5" />
             </button>
@@ -33,7 +33,7 @@
         <!-- Body -->
         <div class="p-6">
           <!-- Member Info -->
-          <div class="flex items-center gap-3 mb-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+          <div class="flex items-center gap-3 mb-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-3">
             <div
               v-if="member.avatar"
               class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0"
@@ -82,7 +82,7 @@
               
               <!-- Stats Grid -->
               <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
+                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-3 p-3">
                   <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">
                     {{ preview.impact.projets_as_responsable }}
                   </div>
@@ -91,7 +91,7 @@
                   </div>
                 </div>
                 
-                <div class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3">
+                <div class="bg-purple-50 dark:bg-purple-900/20 rounded-3 p-3">
                   <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">
                     {{ preview.impact.activites_as_responsable }}
                   </div>
@@ -100,7 +100,7 @@
                   </div>
                 </div>
                 
-                <div class="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3">
+                <div class="bg-orange-50 dark:bg-orange-900/20 rounded-3 p-3">
                   <div class="text-2xl font-bold text-orange-600 dark:text-orange-400">
                     {{ preview.impact.taches_non_terminees }}
                   </div>
@@ -109,7 +109,7 @@
                   </div>
                 </div>
                 
-                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-3 p-3">
                   <div class="text-2xl font-bold text-gray-600 dark:text-gray-400">
                     {{ preview.impact.projets_as_member }}
                   </div>
@@ -122,7 +122,7 @@
               <!-- Transfer Required Alert -->
               <div
                 v-if="preview.impact.requires_transfer"
-                class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4"
+                class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-3 p-4"
               >
                 <div class="flex gap-3">
                   <AlertCircleIcon class="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
@@ -140,7 +140,7 @@
               <!-- No Transfer Required -->
               <div
                 v-else
-                class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4"
+                class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-3 p-4"
               >
                 <div class="flex gap-3">
                   <CheckCircleIcon class="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
@@ -171,7 +171,7 @@
               
               <div
                 v-else
-                class="border border-gray-200 dark:border-gray-700 rounded-lg divide-y divide-gray-200 dark:divide-gray-700 max-h-48 overflow-y-auto"
+                class="border border-gray-200 dark:border-gray-700 rounded-3 divide-y divide-gray-200 dark:divide-gray-700 max-h-48 overflow-y-auto"
               >
                 <div
                   v-for="projet in userProjects"
@@ -208,7 +208,7 @@
                 <!-- Default Owner Option -->
                 <label
                   v-if="candidatesData?.default_candidate"
-                  class="flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all"
+                  class="flex items-center gap-3 p-4 border-2 rounded-3 cursor-pointer transition-all"
                   :class="selectedResponsable === candidatesData.default_candidate.id
                     ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20'
                     : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'"
@@ -262,7 +262,7 @@
                     <label
                       v-for="candidate in candidatesData.data"
                       :key="candidate.id"
-                      class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all"
+                      class="flex items-center gap-3 p-3 border rounded-3 cursor-pointer transition-all"
                       :class="selectedResponsable === candidate.id
                         ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20'
                         : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'"
@@ -313,7 +313,7 @@
             </div>
 
             <!-- Actions Impact -->
-            <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+            <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-3">
               <p class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Actions automatiques lors du retrait :
               </p>
@@ -344,7 +344,7 @@
           <!-- Error Message -->
           <div
             v-if="error"
-            class="mt-4 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800"
+            class="mt-4 p-4 rounded-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800"
           >
             <div class="flex gap-2">
               <AlertCircleIcon class="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
@@ -366,14 +366,14 @@
                 type="button"
                 @click="$emit('close')"
                 :disabled="submitting"
-                class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
+                class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
               >
                 Annuler
               </button>
               <button
                 @click="handleRemove"
                 :disabled="submitting || (preview?.impact.requires_transfer && !selectedResponsable)"
-                class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 font-medium"
+                class="px-6 py-2 bg-red-600 text-white rounded-3 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 font-medium"
               >
                 <span v-if="submitting" class="animate-spin">⏳</span>
                 <span v-else>Retirer définitivement</span>

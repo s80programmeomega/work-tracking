@@ -1,7 +1,7 @@
 <!-- resources/js/components/taches/PriorityBadge.vue -->
 <template>
-  <span 
-    class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full"
+  <span
+    class="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded-1 border"
     :class="priorityClasses">
     <svg v-if="priority === 'faible'" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
@@ -33,19 +33,19 @@ const props = defineProps({
 const priorityConfig = {
   faible: {
     label: 'Faible',
-    classes: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+    classes: 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
   },
   moyenne: {
     label: 'Moyenne',
-    classes: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+    classes: 'bg-warning-50 text-warning-500 border-warning-300 dark:bg-warning-500/15 dark:text-warning-300 dark:border-warning-500/30'
   },
   elevee: {
     label: 'Élevée',
-    classes: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
+    classes: 'bg-brand-50 text-brand-500 border-brand-200 dark:bg-brand-500/15 dark:text-brand-400 dark:border-brand-500/30'
   },
   critique: {
     label: 'Critique',
-    classes: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+    classes: 'bg-error-50 text-error-500 border-error-300 dark:bg-error-500/15 dark:text-error-300 dark:border-error-500/30'
   }
 }
 

@@ -14,7 +14,7 @@
         v-if="canCreate && !showForm"
         dusk="add-soustache-btn"
         @click="showForm = true"
-        class="px-3 py-1.5 text-xs bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors flex items-center gap-1"
+        class="px-3 py-1.5 text-xs bg-brand-600 text-white rounded-3 hover:bg-brand-700 transition-colors flex items-center gap-1"
       >
         <i class="fas fa-plus"></i>
         Ajouter
@@ -27,13 +27,13 @@
     </div>
 
     <!-- Error -->
-    <div v-else-if="error" class="text-sm text-red-600 bg-red-50 dark:bg-red-900/20 rounded-lg px-4 py-3">
+    <div v-else-if="error" class="text-sm text-red-600 bg-red-50 dark:bg-red-900/20 rounded-3 px-4 py-3">
       {{ error }}
     </div>
 
     <template v-else>
       <!-- Global progress when weighted -->
-      <div v-if="sousTaches.length > 0 && totalPoids > 0" class="bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-3">
+      <div v-if="sousTaches.length > 0 && totalPoids > 0" class="bg-gray-50 dark:bg-gray-800 rounded-3 px-4 py-3">
         <div class="flex justify-between text-xs text-gray-600 dark:text-gray-400 mb-1.5">
           <span>Progression pondérée</span>
           <span class="font-semibold">{{ weightedProgress }}%</span>
@@ -67,7 +67,7 @@
         <div
           v-for="st in orderedSousTaches"
           :key="st.id"
-          class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4 transition-all"
+          class="bg-white dark:bg-gray-900 rounded-3 border border-gray-200 dark:border-gray-700 p-4 transition-all"
           :class="{
             'border-l-4 border-l-red-400': st.statut === 'en_retard',
             'border-l-4 border-l-green-400': st.statut === 'termine',
@@ -262,7 +262,7 @@
               <div
                 v-if="openMenuId === st.id"
                 v-click-outside="closeMenus"
-                class="absolute right-0 mt-1 w-36 bg-white dark:bg-gray-700 rounded-lg shadow-lg z-20 py-1 text-sm"
+                class="absolute right-0 mt-1 w-36 bg-white dark:bg-gray-700 rounded-3 z-20 py-1 text-sm"
               >
                 <button
                   @click="confirmDelete(st)"
@@ -306,7 +306,7 @@
               <div
                 v-if="intervenantMenuId === st.id"
                 v-click-outside="closeIntervenantMenus"
-                class="absolute left-0 mt-1 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-30 py-1 text-sm border border-gray-200 dark:border-gray-700"
+                class="absolute left-0 mt-1 w-48 bg-white dark:bg-gray-800 rounded-3 z-30 py-1 text-sm border border-gray-200 dark:border-gray-700"
               >
                 <div class="px-2 py-1">
                   <input

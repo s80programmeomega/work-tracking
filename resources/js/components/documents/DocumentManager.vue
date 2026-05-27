@@ -17,7 +17,7 @@
         <button
           v-if="canUpload"
           @click="showUploadModal = true"
-          class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+          class="inline-flex items-center gap-2 rounded-3 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
         >
           <CloudArrowUpIcon class="h-5 w-5" />
           Télécharger
@@ -26,7 +26,7 @@
         <!-- Bouton Stats -->
         <button
           @click="showStats = !showStats"
-          class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+          class="inline-flex items-center gap-2 rounded-3 border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
         >
           <ChartBarIcon class="h-5 w-5" />
           Statistiques
@@ -52,7 +52,7 @@
     </transition>
 
     <!-- Filtres et recherche -->
-    <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
+    <div class="rounded-3 border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
       <div class="flex flex-col sm:flex-row gap-4">
         <!-- Barre de recherche -->
         <div class="flex-1">
@@ -62,7 +62,7 @@
               v-model="searchQuery"
               type="text"
               placeholder="Rechercher un document..."
-              class="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
+              class="w-full rounded-3 border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
             />
           </div>
         </div>
@@ -72,7 +72,7 @@
           <!-- Filtre par type -->
           <select
             v-model="filterType"
-            class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+            class="rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
           >
             <option value="">Tous les types</option>
             <option value="image">Images</option>
@@ -84,7 +84,7 @@
           </select>
 
           <!-- Vue Grid/List -->
-          <div class="flex rounded-lg border border-gray-300 dark:border-gray-700">
+          <div class="flex rounded-3 border border-gray-300 dark:border-gray-700">
             <button
               @click="viewMode = 'grid'"
               :class="[

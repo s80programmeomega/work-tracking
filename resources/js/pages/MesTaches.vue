@@ -3,11 +3,11 @@
   <AdminLayout>
     <div class="space-y-6">
       <!-- Header avec statistiques personnelles -->
-      <div class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
+      <div class="rounded-3 border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
         <div class="flex items-center justify-between mb-6">
           <div>
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center">
+              <div class="w-12 h-12 rounded-3 flex items-center justify-center">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
@@ -21,7 +21,7 @@
 
           <div class="flex items-center gap-3">
             <!-- Filtre par semaine -->
-            <div class="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+            <div class="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-3 p-1">
               <button @click="changeWeek(-1)" class="p-2 rounded-md hover:bg-white dark:hover:bg-gray-700 transition-colors" title="Semaine précédente">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -41,14 +41,14 @@
             </div>
 
             <!-- Toggle vue -->
-            <div class="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
-              <button @click="currentView = 'kanban'" :class="['px-3 py-2 rounded-md transition-all flex items-center gap-2 text-sm', currentView === 'kanban' ? 'bg-white dark:bg-gray-700 shadow-sm text-brand-600 dark:text-brand-400' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white']">
+            <div class="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-3">
+              <button @click="currentView = 'kanban'" :class="['px-3 py-2 rounded-md transition-all flex items-center gap-2 text-sm', currentView === 'kanban' ? 'bg-white dark:bg-gray-700 text-brand-600 dark:text-brand-400' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white']">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
                 </svg>
                 Kanban
               </button>
-              <button @click="currentView = 'list'" :class="['px-3 py-2 rounded-md transition-all flex items-center gap-2 text-sm', currentView === 'list' ? 'bg-white dark:bg-gray-700 shadow-sm text-brand-600 dark:text-brand-400' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white']">
+              <button @click="currentView = 'list'" :class="['px-3 py-2 rounded-md transition-all flex items-center gap-2 text-sm', currentView === 'list' ? 'bg-white dark:bg-gray-700 text-brand-600 dark:text-brand-400' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white']">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                 </svg>
@@ -70,24 +70,24 @@
       </div>
 
       <!-- Filtres avancés -->
-      <div class="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
+      <div class="rounded-3 border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
         <div class="flex flex-wrap items-center gap-4">
           <div class="flex-1 min-w-[200px]">
-            <select v-model="filters.activite_id" @change="applyFilters" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500">
+            <select v-model="filters.activite_id" @change="applyFilters" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500">
               <option value="">Toutes les activités</option>
               <option v-for="activite in activites" :key="activite.id" :value="activite.id">
                 {{ activite.nom }} ({{ activite.projet?.nom }})
               </option>
             </select>
           </div>
-          <select v-model="filters.priorite" @change="applyFilters" class="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500">
+          <select v-model="filters.priorite" @change="applyFilters" class="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500">
             <option value="">Toutes priorités</option>
             <option value="critique">🔴 Critique</option>
             <option value="elevee">🟠 Élevée</option>
             <option value="moyenne">🟡 Moyenne</option>
             <option value="faible">🟢 Faible</option>
           </select>
-          <select v-model="filters.statut" @change="applyFilters" class="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500">
+          <select v-model="filters.statut" @change="applyFilters" class="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500">
             <option value="">Tous statuts</option>
             <option value="a_faire">À faire</option>
             <option value="en_cours">En cours</option>
@@ -112,7 +112,7 @@
       </div>
 
       <!-- Error State -->
-      <div v-else-if="error" class="rounded-2xl border border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800 p-6">
+      <div v-else-if="error" class="rounded-3 border border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800 p-6">
         <div class="flex items-center gap-3 text-red-700 dark:text-red-300">
           <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
@@ -122,8 +122,8 @@
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="filteredTaches.length === 0" class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] p-12 text-center">
-        <div class="w-20 h-20 mx-auto mb-6 bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center">
+      <div v-else-if="filteredTaches.length === 0" class="rounded-3 border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] p-12 text-center">
+        <div class="w-20 h-20 mx-auto mb-6 bg-gray-100 dark:bg-gray-800 rounded-3 flex items-center justify-center">
           <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
           </svg>
@@ -132,13 +132,13 @@
         <p class="text-gray-500 dark:text-gray-400 mb-6">
           {{ hasActiveFilters ? 'Essayez de modifier vos filtres' : 'Vous n\'avez aucune tâche pour cette période' }}
         </p>
-        <button v-if="hasActiveFilters" @click="resetFilters" class="px-6 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors">
+        <button v-if="hasActiveFilters" @click="resetFilters" class="px-6 py-2 bg-brand-500 text-white rounded-3 hover:bg-brand-600 transition-colors">
           Réinitialiser les filtres
         </button>
       </div>
 
       <!-- Content Views -->
-      <div v-else class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] p-6">
+      <div v-else class="rounded-3 border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] p-6">
         <!-- Vue Kanban avec Statuts Individuels -->
         <div v-if="currentView === 'kanban'" class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <KanbanColumnPersonal

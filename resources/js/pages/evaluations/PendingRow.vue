@@ -1,7 +1,7 @@
 <template>
   <div
     :dusk="`pending-row-${row.id}`"
-    class="bg-white dark:bg-gray-800 border rounded-lg p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 cursor-pointer hover:shadow"
+    class="bg-white dark:bg-gray-800 border rounded-3 p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 cursor-pointer hover:shadow"
     :class="row.is_urgent
       ? 'border-red-300 dark:border-red-700'
       : 'border-gray-200 dark:border-gray-700'"

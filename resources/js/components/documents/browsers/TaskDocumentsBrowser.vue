@@ -9,14 +9,14 @@
           v-model="searchQuery"
           type="text"
           placeholder="Rechercher une tâche..."
-          class="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+          class="w-full rounded-3 border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
         />
       </div>
 
       <!-- Activity Filter -->
       <select
         v-model="selectedActivityId"
-        class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+        class="rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
       >
         <option value="">Toutes les activités</option>
         <option
@@ -31,7 +31,7 @@
       <!-- Status Filter -->
       <select
         v-model="statusFilter"
-        class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+        class="rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
       >
         <option value="">Tous les statuts</option>
         <option value="a_faire">À faire</option>
@@ -42,7 +42,7 @@
       <!-- Priority Filter -->
       <select
         v-model="priorityFilter"
-        class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+        class="rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
       >
         <option value="">Toutes priorités</option>
         <option value="faible">Faible</option>
@@ -54,7 +54,7 @@
 
     <!-- Loading State -->
     <div v-if="loading" class="space-y-3">
-      <div v-for="i in 10" :key="i" class="h-28 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-800"></div>
+      <div v-for="i in 10" :key="i" class="h-28 animate-pulse rounded-3 bg-gray-200 dark:bg-gray-800"></div>
     </div>
 
     <!-- Tasks List -->
@@ -63,14 +63,14 @@
         v-for="task in filteredTasks"
         :key="task.id"
         @click="$emit('select', task)"
-        class="group cursor-pointer overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:border-blue-500 hover:shadow-md dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-blue-400"
+        class="group cursor-pointer overflow-hidden rounded-3 border border-gray-200 bg-white transition-all hover:border-blue-500 dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-blue-400"
       >
         <div class="flex items-start gap-4 p-4">
           <!-- Priority Indicator -->
           <div class="flex flex-col items-center gap-2">
             <div
               :class="[
-                'flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg',
+                'flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-3',
                 getPriorityBgClass(task.priorite)
               ]"
             >
@@ -166,8 +166,8 @@
                     :class="[
                       'h-full transition-all',
                       task.taux_realisation === 100
-                        ? 'bg-green-500'
-                        : 'bg-gradient-to-r from-blue-500 to-blue-600'
+                        ? 'bg-success-500'
+                        : 'bg-brand-500'
                     ]"
                     :style="{ width: (task.taux_realisation || 0) + '%' }"
                   ></div>
@@ -186,7 +186,7 @@
     </div>
 
     <!-- Empty State -->
-    <div v-else class="rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-12 text-center dark:border-gray-700 dark:bg-gray-800/50">
+    <div v-else class="rounded-3 border-2 border-dashed border-gray-300 bg-gray-50 p-12 text-center dark:border-gray-700 dark:bg-gray-800/50">
       <CheckCircleIcon class="mx-auto h-12 w-12 text-gray-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">
         Aucune tâche trouvée

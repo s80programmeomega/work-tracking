@@ -1,9 +1,9 @@
 <template>
   <div
-    class="rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03]"
+    class="rounded-3 border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03]"
   >
     <div
-      class="px-5 pt-5 bg-white shadow-default rounded-2xl pb-11 dark:bg-gray-900 sm:px-6 sm:pt-6"
+      class="px-5 pt-5 bg-white shadow-default rounded-3 pb-11 dark:bg-gray-900 sm:px-6 sm:pt-6"
     >
       <div class="flex justify-between">
         <div>

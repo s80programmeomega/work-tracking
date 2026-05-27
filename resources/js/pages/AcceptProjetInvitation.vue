@@ -1,7 +1,7 @@
 <!-- resources/js/pages/AcceptProjetInvitation.vue -->
 <template>
   <FullScreenLayout>
-    <div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+    <div class="min-h-screen flex items-center justify-center p-4">
       <!-- Loading State -->
       <div v-if="loading" class="text-center">
         <div class="relative inline-block">
@@ -15,7 +15,7 @@
 
       <!-- Error State -->
       <div v-else-if="error" class="max-w-md w-full">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 border border-red-100 dark:border-red-900">
+        <div class="bg-white dark:bg-gray-800 rounded-3 p-8 border border-red-100 dark:border-red-900">
           <div class="text-center">
             <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 dark:bg-red-900/30 mb-4">
               <svg class="h-8 w-8 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -26,7 +26,7 @@
             <p class="text-gray-600 dark:text-gray-400 mb-6">{{ error }}</p>
             <router-link
               to="/workspaces"
-              class="inline-flex items-center gap-2 px-6 py-3 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors shadow-lg hover:shadow-xl font-medium"
+              class="inline-flex items-center gap-2 px-6 py-3 bg-brand-600 text-white rounded-3 hover:bg-brand-700 transition-colors font-medium"
             >
               <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -39,9 +39,9 @@
 
       <!-- Invitation Details -->
       <div v-else-if="invitation" class="max-w-3xl w-full">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-3 overflow-hidden border border-gray-100 dark:border-gray-700">
           <!-- Header avec couleur du projet -->
-          <div class="relative h-32 bg-gradient-to-r from-brand-600 to-brand-700 overflow-hidden">
+          <div class="relative h-32 overflow-hidden">
             <!-- Pattern décoratif -->
             <div class="absolute inset-0 opacity-10">
               <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
@@ -55,7 +55,7 @@
             <!-- Icône projet -->
             <div class="absolute -bottom-12 left-8">
               <div 
-                class="w-24 h-24 rounded-2xl shadow-2xl flex items-center justify-center border-4 border-white dark:border-gray-800"
+                class="w-24 h-24 rounded-3 flex items-center justify-center border-4 border-white dark:border-gray-800"
                 :style="{ backgroundColor: invitation.projet.couleur || '#3B82F6' }"
               >
                 <svg class="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -83,9 +83,9 @@
             <!-- Info cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               <!-- Workspace -->
-              <div class="p-4 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-xl border border-purple-200 dark:border-purple-800">
+              <div class="p-4 rounded-3 border border-purple-200 dark:border-purple-800">
                 <div class="flex items-center gap-3">
-                  <div class="p-2 bg-purple-100 dark:bg-purple-900/40 rounded-lg">
+                  <div class="p-2 bg-purple-100 dark:bg-purple-900/40 rounded-3">
                     <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
@@ -98,9 +98,9 @@
               </div>
 
               <!-- Invité par -->
-              <div class="p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-xl border border-blue-200 dark:border-blue-800">
+              <div class="p-4 rounded-3 border border-blue-200 dark:border-blue-800">
                 <div class="flex items-center gap-3">
-                  <div class="p-2 bg-blue-100 dark:bg-blue-900/40 rounded-lg">
+                  <div class="p-2 bg-blue-100 dark:bg-blue-900/40 rounded-3">
                     <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
@@ -113,9 +113,9 @@
               </div>
 
               <!-- Rôle -->
-              <div class="p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl border border-green-200 dark:border-green-800">
+              <div class="p-4 rounded-3 border border-green-200 dark:border-green-800">
                 <div class="flex items-center gap-3">
-                  <div class="p-2 bg-green-100 dark:bg-green-900/40 rounded-lg">
+                  <div class="p-2 bg-green-100 dark:bg-green-900/40 rounded-3">
                     <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
@@ -129,12 +129,12 @@
             </div>
 
             <!-- Description du projet -->
-            <div v-if="invitation.projet.description" class="mb-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600">
+            <div v-if="invitation.projet.description" class="mb-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-3 border border-gray-200 dark:border-gray-600">
               <p class="text-sm text-gray-700 dark:text-gray-300">{{ invitation.projet.description }}</p>
             </div>
 
             <!-- Message personnel -->
-            <div v-if="invitation.message" class="mb-6 p-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-xl border border-amber-200 dark:border-amber-800">
+            <div v-if="invitation.message" class="mb-6 p-4 rounded-3 border border-amber-200 dark:border-amber-800">
               <div class="flex items-start gap-3">
                 <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
@@ -157,9 +157,9 @@
             <!-- Actions section -->
             <div v-if="userExists">
               <!-- Utilisateur existant -->
-              <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6 mb-6">
+              <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-3 p-6 mb-6">
                 <div class="flex items-start gap-4">
-                  <div class="p-3 bg-blue-100 dark:bg-blue-900/40 rounded-lg">
+                  <div class="p-3 bg-blue-100 dark:bg-blue-900/40 rounded-3">
                     <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -177,7 +177,7 @@
                 <button
                   @click="acceptInvitation"
                   :disabled="accepting"
-                  class="flex-1 px-6 py-4 bg-gradient-to-r from-brand-600 to-brand-700 text-white rounded-xl hover:from-brand-700 hover:to-brand-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 font-semibold shadow-lg hover:shadow-xl transition-all"
+                  class="flex-1 px-6 py-4 text-white rounded-3 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 font-semibold transition-all"
                 >
                   <span v-if="accepting" class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></span>
                   <svg v-else class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -187,7 +187,7 @@
                 </button>
                 <button
                   @click="declineInvitation"
-                  class="px-6 py-4 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all font-semibold"
+                  class="px-6 py-4 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all font-semibold"
                 >
                   Refuser
                 </button>
@@ -212,7 +212,7 @@
                       v-model="form.prenom"
                       type="text"
                       required
-                      class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+                      class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
                       placeholder="Jean"
                     />
                   </div>
@@ -224,7 +224,7 @@
                       v-model="form.nom"
                       type="text"
                       required
-                      class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+                      class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
                       placeholder="Dupont"
                     />
                   </div>
@@ -238,7 +238,7 @@
                     :value="invitation.email"
                     type="email"
                     disabled
-                    class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                    class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-3 bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
                   />
                 </div>
 
@@ -251,7 +251,7 @@
                     type="password"
                     required
                     minlength="8"
-                    class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+                    class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
                     placeholder="••••••••"
                   />
                   <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Minimum 8 caractères</p>
@@ -266,12 +266,12 @@
                     type="password"
                     required
                     minlength="8"
-                    class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+                    class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
                     placeholder="••••••••"
                   />
                 </div>
 
-                <div v-if="formError" class="rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4">
+                <div v-if="formError" class="rounded-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4">
                   <div class="flex items-center gap-3">
                     <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -283,7 +283,7 @@
                 <button
                   type="submit"
                   :disabled="accepting"
-                  class="w-full px-6 py-4 bg-gradient-to-r from-brand-600 to-brand-700 text-white rounded-xl hover:from-brand-700 hover:to-brand-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 font-semibold shadow-lg hover:shadow-xl transition-all"
+                  class="w-full px-6 py-4 text-white rounded-3 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 font-semibold transition-all"
                 >
                   <span v-if="accepting" class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></span>
                   <svg v-else class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

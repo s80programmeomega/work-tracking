@@ -3,7 +3,7 @@
   <AdminLayout>
     <PageBreadcrumb :pageTitle="'Gestion des Tâches'" />
 
-    <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
+    <div class="rounded-3 border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
       
       <!-- Header avec filtres et statistiques -->
       <div class="mb-6 space-y-4">
@@ -15,7 +15,7 @@
               <select
                 v-model="selectedActiviteId"
                 @change="handleActiviteChange"
-                class="w-full px-4 py-2.5 pl-10 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
+                class="w-full px-4 py-2.5 pl-10 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
               >
                 <option value="">📋 Toutes les activités</option>
                 <option v-for="activite in activites" :key="activite.id" :value="activite.id">
@@ -28,14 +28,14 @@
             </div>
 
             <!-- Vue Toggle -->
-            <div class="flex gap-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+            <div class="flex gap-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-3">
               <button
                 dusk="view-table-btn"
                 @click="currentView = 'table'"
                 :class="[
                   'px-3 py-2 rounded-md transition-all flex items-center gap-2 text-sm',
                   currentView === 'table'
-                    ? 'bg-white dark:bg-gray-700 shadow-sm text-brand-600 dark:text-brand-400'
+                    ? 'bg-white dark:bg-gray-700 text-brand-600 dark:text-brand-400'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                 ]"
               >
@@ -50,7 +50,7 @@
                 :class="[
                   'px-3 py-2 rounded-md transition-all flex items-center gap-2 text-sm',
                   currentView === 'kanban'
-                    ? 'bg-white dark:bg-gray-700 shadow-sm text-brand-600 dark:text-brand-400'
+                    ? 'bg-white dark:bg-gray-700 text-brand-600 dark:text-brand-400'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                 ]"
               >
@@ -65,7 +65,7 @@
                 :class="[
                   'px-3 py-2 rounded-md transition-all flex items-center gap-2 text-sm',
                   currentView === 'list'
-                    ? 'bg-white dark:bg-gray-700 shadow-sm text-brand-600 dark:text-brand-400'
+                    ? 'bg-white dark:bg-gray-700 text-brand-600 dark:text-brand-400'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                 ]"
               >
@@ -80,7 +80,7 @@
             <select
               v-model="filterAssignee"
               dusk="filter-assignee"
-              class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+              class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
             >
               <option value="me">Mes tâches</option>
               <option value="all">Toutes les tâches</option>
@@ -93,7 +93,7 @@
             <button
               v-if="pendingValidationsCount > 0"
               @click="showPendingValidations = true"
-              class="relative px-4 py-2 border border-amber-300 dark:border-amber-700 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/20 flex items-center gap-2 text-amber-700 dark:text-amber-400 transition-all"
+              class="relative px-4 py-2 border border-amber-300 dark:border-amber-700 rounded-3 hover:bg-amber-50 dark:hover:bg-amber-900/20 flex items-center gap-2 text-amber-700 dark:text-amber-400 transition-all"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -108,7 +108,7 @@
             <button
               @click="showArchived = !showArchived"
               :class="[
-                'px-4 py-2 border rounded-lg flex items-center gap-2 transition-all',
+                'px-4 py-2 border rounded-3 flex items-center gap-2 transition-all',
                 showArchived 
                   ? 'bg-gray-100 dark:bg-gray-700 border-gray-400 dark:border-gray-600' 
                   : 'border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
@@ -124,7 +124,7 @@
             <button
               v-if="canCreateTask"
               @click="openCreateForm"
-              class="px-4 py-2 bg-linear-to-r from-brand-500 to-brand-600 text-white rounded-lg hover:from-brand-600 hover:to-brand-700 flex items-center gap-2 shadow-lg hover:shadow-xl transition-all"
+              class="px-4 py-2 text-white rounded-3 flex items-center gap-2 transition-all"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -135,10 +135,10 @@
         </div>
 
         <!-- Ligne 2: Statistiques (si activité sélectionnée) -->
-        <div v-if="selectedActiviteId && !showArchived && stats.total > 0" class="flex items-center gap-6 p-4 bg-linear-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <div v-if="selectedActiviteId && !showArchived && stats.total > 0" class="flex items-center gap-6 p-4 rounded-3 border border-gray-200 dark:border-gray-700">
           <!-- À faire -->
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+            <div class="w-10 h-10 rounded-3 bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
               <div class="w-3 h-3 rounded-full bg-gray-500"></div>
             </div>
             <div>
@@ -149,7 +149,7 @@
 
           <!-- En cours -->
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
+            <div class="w-10 h-10 rounded-3 bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
               <div class="w-3 h-3 rounded-full bg-blue-500"></div>
             </div>
             <div>
@@ -160,7 +160,7 @@
 
           <!-- Terminé -->
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
+            <div class="w-10 h-10 rounded-3 bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
               <div class="w-3 h-3 rounded-full bg-green-500"></div>
             </div>
             <div>
@@ -201,7 +201,7 @@
       </div>
 
       <!-- Debug Info (si activé) -->
-      <div v-if="$route.query.debug" class="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 rounded-lg">
+      <div v-if="$route.query.debug" class="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 rounded-3">
         <p class="text-sm text-blue-800 dark:text-blue-300">
           <strong>Debug Info:</strong><br>
           Activité sélectionnée: {{ selectedActiviteId }}<br>
@@ -224,7 +224,7 @@
       </div>
 
       <!-- Error State -->
-      <div v-else-if="error" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg relative">
+      <div v-else-if="error" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-3 relative">
         <div class="flex items-center gap-2">
           <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
@@ -235,7 +235,7 @@
 
       <!-- Empty State - No Activity Selected -->
       <div v-else-if="!selectedActiviteId && !showArchived" class="text-center py-16">
-        <div class="w-24 h-24 mx-auto mb-6 bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center">
+        <div class="w-24 h-24 mx-auto mb-6 bg-gray-100 dark:bg-gray-800 rounded-3 flex items-center justify-center">
           <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>

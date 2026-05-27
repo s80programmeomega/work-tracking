@@ -1,6 +1,6 @@
 <!-- resources\js\components\taches\KanbanColumn.vue -->
 <template>
-  <div class="flex flex-col h-full bg-gray-50 dark:bg-gray-900 rounded-lg p-4" :dusk="`kanban-column-${statut}`">
+  <div class="flex flex-col h-full bg-gray-50 dark:bg-gray-900 rounded-3 p-4" :dusk="`kanban-column-${statut}`">
     <!-- Column header -->
     <div class="flex items-center justify-between mb-4">
       <div class="flex items-center gap-2">

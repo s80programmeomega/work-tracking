@@ -12,7 +12,7 @@
         </p>
       </div>
       <button @click="refreshData" :disabled="loading"
-        class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+        class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
         <RefreshIcon :class="{ 'animate-spin': loading }" class="w-5 h-5" />
         Actualiser
       </button>
@@ -20,7 +20,7 @@
 
     <!-- Error Alert -->
     <div v-if="errors.stats"
-      class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+      class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-3 p-4">
       <div class="flex items-center gap-3">
         <AlertCircleIcon class="w-5 h-5 text-red-600 dark:text-red-400" />
         <div>
@@ -44,7 +44,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <!-- Total Projects -->
         <div
-          class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow">
+          class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-6 transition-shadow">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -54,7 +54,7 @@
                 {{ stats.total_projets }}
               </p>
             </div>
-            <div class="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+            <div class="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-3">
               <FolderIcon class="w-8 h-8 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
@@ -70,7 +70,7 @@
 
         <!-- Activities -->
         <div
-          class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow">
+          class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-6 transition-shadow">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -80,7 +80,7 @@
                 {{ stats.total_activites }}
               </p>
             </div>
-            <div class="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
+            <div class="p-3 bg-green-100 dark:bg-green-900/30 rounded-3">
               <ListIcon class="w-8 h-8 text-green-600 dark:text-green-400" />
             </div>
           </div>
@@ -93,7 +93,7 @@
 
         <!-- Tasks -->
         <div
-          class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow">
+          class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-6 transition-shadow">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -103,7 +103,7 @@
                 {{ stats.total_taches }}
               </p>
             </div>
-            <div class="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+            <div class="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-3">
               <CheckCircleIcon class="w-8 h-8 text-purple-600 dark:text-purple-400" />
             </div>
           </div>
@@ -119,7 +119,7 @@
 
         <!-- Overdue -->
         <div
-          class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow">
+          class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-6 transition-shadow">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -129,7 +129,7 @@
                 {{ stats.projets_en_retard }}
               </p>
             </div>
-            <div class="p-3 bg-red-100 dark:bg-red-900/30 rounded-lg">
+            <div class="p-3 bg-red-100 dark:bg-red-900/30 rounded-3">
               <AlertCircleIcon class="w-8 h-8 text-red-600 dark:text-red-400" />
             </div>
           </div>
@@ -145,7 +145,7 @@
       <!-- Charts Row -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Projects by Status -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-6">
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Projets par statut
           </h3>
@@ -178,7 +178,7 @@
         </div>
 
         <!-- Recent Activity -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-6">
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Activité récente
           </h3>
@@ -213,7 +213,7 @@
       </div>
 
       <!-- Recent Projects -->
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+      <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700">
         <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
             Projets récents
@@ -232,7 +232,7 @@
             </p>
             
             <button @click="openCreateModal"
-              class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors">
+              class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700 transition-colors">
               <PlusIcon class="w-5 h-5" />
               Nouveau projet
             </button>
@@ -240,9 +240,9 @@
 
           <div v-else class="space-y-3">
             <div v-for="projet in recentProjects" :key="projet.id" @click="$emit('view-projet', projet.id)"
-              class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors group">
+              class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors group">
               <div class="flex items-center gap-4 flex-1 min-w-0">
-                <div class="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0"
+                <div class="w-12 h-12 rounded-3 flex items-center justify-center flex-shrink-0"
                   :style="{ backgroundColor: (projet.couleur || '#3B82F6') + '20' }">
                   <FolderIcon class="w-6 h-6" :style="{ color: projet.couleur || '#3B82F6' }" />
                 </div>
@@ -304,8 +304,8 @@
       <!-- Quick Actions -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <button @click="$emit('view-all')"
-          class="flex items-center gap-4 p-6 bg-gradient-to-br from-brand-500 to-brand-600 rounded-lg text-white hover:from-brand-600 hover:to-brand-700 transition-all group">
-          <div class="p-3 bg-white/20 rounded-lg">
+          class="flex items-center gap-4 p-6 rounded-3 text-white transition-all group">
+          <div class="p-3 bg-white/20 rounded-3">
             <FolderIcon class="w-6 h-6" />
           </div>
           <div class="text-left">
@@ -316,8 +316,8 @@
         </button>
 
         <button @click="$emit('view-favorites')"
-          class="flex items-center gap-4 p-6 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg text-white hover:from-purple-600 hover:to-purple-700 transition-all group">
-          <div class="p-3 bg-white/20 rounded-lg">
+          class="flex items-center gap-4 p-6 rounded-3 text-white transition-all group">
+          <div class="p-3 bg-white/20 rounded-3">
             <StarIcon class="w-6 h-6" />
           </div>
           <div class="text-left">
@@ -328,8 +328,8 @@
         </button>
 
         <button @click="$emit('view-overdue')"
-          class="flex items-center gap-4 p-6 bg-gradient-to-br from-red-500 to-red-600 rounded-lg text-white hover:from-red-600 hover:to-red-700 transition-all group">
-          <div class="p-3 bg-white/20 rounded-lg">
+          class="flex items-center gap-4 p-6 rounded-3 text-white transition-all group">
+          <div class="p-3 bg-white/20 rounded-3">
             <AlertCircleIcon class="w-6 h-6" />
           </div>
           <div class="text-left">

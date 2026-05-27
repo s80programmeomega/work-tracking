@@ -1,26 +1,26 @@
 <!-- resources\js\components\layout\header\NotificationItem.vue -->
 <template>
   <div
-    class="notification-item group relative flex gap-4 border-b border-gray-100 p-4 transition-all duration-200 hover:bg-gradient-to-r hover:from-gray-50 hover:to-transparent dark:border-gray-800 dark:hover:from-gray-800/50 dark:hover:to-transparent cursor-pointer"
+    class="notification-item group relative flex gap-4 border-b border-gray-100 p-4 transition-all duration-200 hover:dark:border-gray-800 dark:dark:cursor-pointer"
     :class="{
-      'bg-gradient-to-r from-blue-50/50 to-transparent dark:from-blue-900/10 dark:to-transparent border-l-4 border-l-blue-500': !notification.read_at,
+      'border-l-4 border-l-blue-500': !notification.read_at,
       'opacity-75': notification.read_at
     }" @click="handleClick">
     <!-- Unread indicator dot -->
     <div v-if="!notification.read_at"
-      class="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-gradient-to-b from-blue-500 to-blue-600 rounded-r-full shadow-lg shadow-blue-500/50">
+      class="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-12 rounded-r-full shadow-blue-500/50">
     </div>
 
     <!-- Icon with gradient background -->
     <div class="flex-shrink-0 relative">
       <div
-        class="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg transition-transform duration-200 group-hover:scale-110"
+        class="w-12 h-12 rounded-3 flex items-center justify-center transition-transform duration-200 "
         :class="getIconBackgroundClass(iconColor)">
         <i :class="['fas', icon, 'text-white text-lg']"></i>
       </div>
       <!-- Badge pour les notifications importantes -->
       <div v-if="isUrgentNotification"
-        class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center shadow-lg">
+        class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center ">
         <i class="fas fa-exclamation text-white text-xs"></i>
       </div>
     </div>
@@ -68,12 +68,12 @@
     <div
       class="flex-shrink-0 flex items-start gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
       <button v-if="!notification.read_at" type="button"
-        class="p-2 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/20 text-green-600 dark:text-green-400 transition-colors duration-200"
+        class="p-2 rounded-3 hover:bg-green-100 dark:hover:bg-green-900/20 text-green-600 dark:text-green-400 transition-colors duration-200"
         @click.stop="markAsRead" title="Marquer comme lu">
         <i class="fas fa-check text-sm"></i>
       </button>
       <button type="button"
-        class="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 transition-colors duration-200"
+        class="p-2 rounded-3 hover:bg-red-100 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 transition-colors duration-200"
         @click.stop="confirmDelete" title="Supprimer">
         <i class="fas fa-trash-alt text-sm"></i>
       </button>
@@ -81,7 +81,7 @@
 
     <!-- Hover effect overlay -->
     <div
-      class="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+      class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
     </div>
   </div>
 </template>
@@ -115,19 +115,19 @@ const isUrgentNotification = computed(() => {
 });
 
 const getIconBackgroundClass = (color) => {
-  const gradients = {
-    blue: 'bg-gradient-to-br from-blue-500 to-blue-600',
-    orange: 'bg-gradient-to-br from-orange-500 to-orange-600',
-    green: 'bg-gradient-to-br from-green-500 to-green-600',
-    purple: 'bg-gradient-to-br from-purple-500 to-purple-600',
-    cyan: 'bg-gradient-to-br from-cyan-500 to-cyan-600',
-    indigo: 'bg-gradient-to-br from-indigo-500 to-indigo-600',
-    red: 'bg-gradient-to-br from-red-500 to-red-600',
-    yellow: 'bg-gradient-to-br from-yellow-500 to-yellow-600',
-    emerald: 'bg-gradient-to-br from-emerald-500 to-emerald-600',
-    brand: 'bg-gradient-to-br from-brand-500 to-brand-600',
+  const colors = {
+    blue: 'bg-brand-500',
+    orange: 'bg-warning-500',
+    green: 'bg-success-500',
+    purple: 'bg-purple-500',
+    cyan: 'bg-brand-500',
+    indigo: 'bg-purple-500',
+    red: 'bg-error-500',
+    yellow: 'bg-warning-500',
+    emerald: 'bg-success-500',
+    brand: 'bg-brand-500',
   };
-  return gradients[color] || 'bg-gradient-to-br from-gray-500 to-gray-600';
+  return colors[color] || 'bg-gray-500';
 };
 
 const getNotificationBadge = () => {

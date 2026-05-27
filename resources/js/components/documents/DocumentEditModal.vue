@@ -24,7 +24,7 @@
             leave-from="opacity-100 translate-y-0 sm:scale-100"
             leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
-            <DialogPanel class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all dark:bg-gray-900 sm:my-8 sm:w-full sm:max-w-lg">
+            <DialogPanel class="relative transform overflow-hidden rounded-3 bg-white text-left transition-all dark:bg-gray-900 sm:my-8 sm:w-full sm:max-w-lg">
               <!-- Header -->
               <div class="border-b border-gray-200 bg-white px-6 py-4 dark:border-gray-800 dark:bg-gray-900">
                 <div class="flex items-center justify-between">
@@ -33,7 +33,7 @@
                   </DialogTitle>
                   <button
                     @click="$emit('close')"
-                    class="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500 dark:hover:bg-gray-800"
+                    class="rounded-3 p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500 dark:hover:bg-gray-800"
                   >
                     <XMarkIcon class="h-6 w-6" />
                   </button>
@@ -44,7 +44,7 @@
               <form @submit.prevent="handleSubmit" class="bg-white px-6 py-5 dark:bg-gray-900">
                 <div class="space-y-5">
                   <!-- Document Preview -->
-                  <div class="flex items-center gap-4 rounded-lg bg-gray-50 p-4 dark:bg-gray-800/50">
+                  <div class="flex items-center gap-4 rounded-3 bg-gray-50 p-4 dark:bg-gray-800/50">
                     <div class="flex-shrink-0">
                       <component
                         :is="getFileIcon(document)"
@@ -70,7 +70,7 @@
                       v-model="form.nom"
                       type="text"
                       required
-                      class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                      class="mt-1 block w-full rounded-3 border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                       placeholder="Mon document.pdf"
                     />
                   </div>
@@ -83,7 +83,7 @@
                     <textarea
                       v-model="form.description"
                       rows="3"
-                      class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                      class="mt-1 block w-full rounded-3 border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                       placeholder="Ajoutez une description..."
                     ></textarea>
                   </div>
@@ -95,7 +95,7 @@
                     </label>
                     <select
                       v-model="form.visibility"
-                      class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                      class="mt-1 block w-full rounded-3 border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                     >
                       <option value="private">Privé (propriétaire uniquement)</option>
                       <option value="team">Équipe (membres de l'entité)</option>
@@ -108,7 +108,7 @@
                 </div>
 
                 <!-- Error Message -->
-                <div v-if="error" class="mt-5 rounded-lg bg-red-50 p-4 dark:bg-red-900/20">
+                <div v-if="error" class="mt-5 rounded-3 bg-red-50 p-4 dark:bg-red-900/20">
                   <div class="flex items-start gap-3">
                     <ExclamationTriangleIcon class="h-5 w-5 flex-shrink-0 text-red-600 dark:text-red-400" />
                     <p class="text-sm text-red-800 dark:text-red-300">{{ error }}</p>
@@ -123,7 +123,7 @@
                     @click="$emit('close')"
                     :disabled="loading"
                     type="button"
-                    class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                    class="rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                   >
                     Annuler
                   </button>
@@ -131,7 +131,7 @@
                     @click="handleSubmit"
                     :disabled="loading"
                     type="button"
-                    class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    class="inline-flex items-center gap-2 rounded-3 bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <div v-if="loading" class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                     {{ loading ? 'Enregistrement...' : 'Enregistrer' }}

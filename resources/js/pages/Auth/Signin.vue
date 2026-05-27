@@ -27,7 +27,7 @@
                             <div>
                                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-1 sm:gap-5">
                                     <button
-                                        class="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
+                                        class="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-3 px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
                                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
                                             xmlns="http://www.w3.org/2000/svg">
                                             <!-- Icône Google -->
@@ -74,7 +74,7 @@
                                                         ? 'border-error-500 focus:border-error-500 focus:ring-error-500/10'
                                                         : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
                                                     "
-                                                class="dark:bg-dark-900 h-11 w-full rounded-lg border bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                                                class="dark:bg-dark-900 h-11 w-full rounded-3 border bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                                                 :disabled="loading" />
                                             <p v-if="validationErrors.email" class="mt-1 text-sm text-error-500">
                                                 {{ getTranslatedError(validationErrors.email[0]) }}
@@ -96,7 +96,7 @@
                                                             ? 'border-error-500 focus:border-error-500 focus:ring-error-500/10'
                                                             : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
                                                         "
-                                                    class="dark:bg-dark-900 h-11 w-full rounded-lg border bg-transparent py-2.5 pl-4 pr-11 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                                                    class="dark:bg-dark-900 h-11 w-full rounded-3 border bg-transparent py-2.5 pl-4 pr-11 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                                                     :disabled="loading" />
                                                 <!-- Bouton pour afficher/masquer le mot de passe -->
                                                 <button type="button" @click="togglePasswordVisibility"
@@ -157,7 +157,7 @@
                                         </div>
 
                                         <!-- Registration success message -->
-                                        <div v-if="registrationSuccess" class="rounded-lg bg-success-50 p-4 dark:bg-success-500/10">
+                                        <div v-if="registrationSuccess" class="rounded-3 bg-success-50 p-4 dark:bg-success-500/10">
                                             <div class="flex items-center">
                                                 <svg class="w-5 h-5 mr-2 text-success-500" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
@@ -169,7 +169,7 @@
                                         </div>
 
                                         <!-- Message d'erreur -->
-                                        <div v-if="authError" class="rounded-lg bg-error-50 p-4 dark:bg-error-500/10">
+                                        <div v-if="authError" class="rounded-3 bg-error-50 p-4 dark:bg-error-500/10">
                                             <div class="flex items-center">
                                                 <svg class="w-5 h-5 mr-2 text-error-500" fill="currentColor"
                                                     viewBox="0 0 20 20">
@@ -186,7 +186,7 @@
                                         <!-- Bouton de soumission -->
                                         <div>
                                             <button dusk="login-button" type="submit" :disabled="loading"
-                                                class="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-hidden focus:ring-2 focus:ring-brand-500 focus:ring-offset-2">
+                                                class="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-3 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-hidden focus:ring-2 focus:ring-brand-500 focus:ring-offset-2">
                                                 <!-- Indicateur de chargement -->
                                                 <svg v-if="loading" class="w-5 h-5 mr-3 -ml-1 text-white animate-spin"
                                                     xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -236,7 +236,7 @@
         height="180"
         :src="LogoDark"
         alt="Uptiimum Work Tracking"
-        class="mx-auto rounded-lg"
+        class="mx-auto rounded-3"
     />
 </div>
 

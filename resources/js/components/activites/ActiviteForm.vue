@@ -1,12 +1,12 @@
 <!-- resources/js/components/activites/ActiviteForm.vue -->
 <template>
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" @click.self="$emit('close')">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 " @click.self="$emit('close')">
+    <div class="bg-white dark:bg-gray-800 rounded-3 max-w-3xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
 
       <!-- Header -->
-      <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-purple-50 to-white dark:from-gray-900 dark:to-gray-800 flex-shrink-0">
+      <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center shadow-lg">
+          <div class="w-12 h-12 rounded-3 flex items-center justify-center ">
             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
             </svg>
@@ -19,7 +19,7 @@
               {{ activite ? 'Mettre à jour les informations de l\'activité' : 'Créer une nouvelle activité pour votre projet' }}
             </p>
           </div>
-          <button @click="$emit('close')" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+          <button @click="$emit('close')" class="p-2 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
             <XIcon class="w-5 h-5 text-gray-400" />
           </button>
         </div>
@@ -54,7 +54,7 @@
               </ul>
             </div>
             <button @click="clearErrors()"
-              class="flex-shrink-0 p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-800 transition-colors">
+              class="flex-shrink-0 p-1.5 rounded-3 hover:bg-red-100 dark:hover:bg-red-800 transition-colors">
               <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -81,7 +81,7 @@
                 Nom de l'activité <span class="text-red-500">*</span>
               </label>
               <input v-model="formData.nom" type="text" required placeholder="Ex: Phase de développement"
-                :class="['w-full px-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-4 transition-all',
+                :class="['w-full px-4 py-3 border-2 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-4 transition-all',
                   fieldErrors.nom
                     ? 'border-red-400 dark:border-red-500 bg-red-50 dark:bg-red-900/10 focus:ring-red-500/20 focus:border-red-500'
                     : 'border-gray-300 dark:border-gray-600 focus:border-purple-500 focus:ring-purple-500/10']" />
@@ -96,7 +96,7 @@
             <div>
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Description</label>
               <textarea v-model="formData.description" rows="3" placeholder="Décrivez les objectifs et le périmètre de cette activité..."
-                class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all resize-none"></textarea>
+                class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all resize-none"></textarea>
             </div>
           </div>
 
@@ -113,7 +113,7 @@
               <!-- Projet verrouillé -->
               <div v-if="isProjetLocked">
                 <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Projet</label>
-                <div class="p-4 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900/40">
+                <div class="p-4 border-2 border-gray-200 dark:border-gray-700 rounded-3 bg-gray-50 dark:bg-gray-900/40">
                   <div class="flex items-start justify-between gap-3">
                     <div>
                       <div class="text-sm font-semibold text-gray-900 dark:text-white">
@@ -124,7 +124,7 @@
                         <template v-else>ID projet : {{ formData.projet_id }}</template>
                       </div>
                     </div>
-                    <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">Verrouillé</span>
+                    <span class="inline-flex items-center px-2 py-1 rounded-3 text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">Verrouillé</span>
                   </div>
                   <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">ⓘ Le projet est fixé car ce formulaire a été ouvert depuis sa vue.</p>
                 </div>
@@ -136,7 +136,7 @@
                   Projet <span class="text-red-500">*</span>
                 </label>
                 <select v-model="formData.projet_id" required @change="onProjetChange" :disabled="loadingProjets"
-                  :class="['w-full px-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-4 transition-all disabled:opacity-50 disabled:cursor-not-allowed',
+                  :class="['w-full px-4 py-3 border-2 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-4 transition-all disabled:opacity-50 disabled:cursor-not-allowed',
                     fieldErrors.projet_id
                       ? 'border-red-400 dark:border-red-500 bg-red-50 dark:bg-red-900/10 focus:ring-red-500/20 focus:border-red-500'
                       : 'border-gray-300 dark:border-gray-600 focus:border-purple-500 focus:ring-purple-500/10']">
@@ -151,7 +151,7 @@
                   </svg>
                   {{ fieldErrors.projet_id }}
                 </p>
-                <div v-if="!loadingProjets && accessibleProjets.length === 0" class="mt-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                <div v-if="!loadingProjets && accessibleProjets.length === 0" class="mt-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-3">
                   <p class="text-sm font-medium text-amber-800 dark:text-amber-200">Aucun projet disponible</p>
                   <p class="text-xs text-amber-700 dark:text-amber-300 mt-1">Vous n'avez accès à aucun projet dans ce workspace.</p>
                 </div>
@@ -163,7 +163,7 @@
                   Responsable <span class="text-red-500">*</span>
                 </label>
                 <select v-model="formData.responsable_id" required :disabled="!formData.projet_id || loadingMembers"
-                  :class="['w-full px-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-4 transition-all disabled:opacity-50 disabled:cursor-not-allowed',
+                  :class="['w-full px-4 py-3 border-2 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-4 transition-all disabled:opacity-50 disabled:cursor-not-allowed',
                     fieldErrors.responsable_id
                       ? 'border-red-400 dark:border-red-500 bg-red-50 dark:bg-red-900/10 focus:ring-red-500/20 focus:border-red-500'
                       : 'border-gray-300 dark:border-gray-600 focus:border-purple-500 focus:ring-purple-500/10']">
@@ -236,7 +236,7 @@
                 <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Statut</label>
                 <div class="grid grid-cols-2 gap-3">
                   <label v-for="statut in statusOptions" :key="statut.value"
-                    class="relative flex items-center gap-3 p-3 border-2 rounded-xl cursor-pointer transition-all hover:shadow-md"
+                    class="relative flex items-center gap-3 p-3 border-2 rounded-3 cursor-pointer transition-all "
                     :class="formData.status === statut.value
                       ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
                       : 'border-gray-300 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-700'">
@@ -256,7 +256,7 @@
                 <input v-model.number="formData.progression" type="range" min="0" max="100" step="5"
                   class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full appearance-none cursor-pointer accent-purple-500" />
                 <div class="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-                  <div class="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full transition-all duration-300"
+                  <div class="h-2 rounded-full transition-all duration-300"
                     :style="{ width: `${formData.progression}%` }"></div>
                 </div>
                 <div class="flex justify-between mt-1 text-xs text-gray-500 dark:text-gray-400">
@@ -277,15 +277,15 @@
             <div>
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Couleur de l'activité</label>
               <div class="flex gap-3 items-center">
-                <input v-model="formData.couleur" type="color" class="h-12 w-16 border-2 border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer" />
+                <input v-model="formData.couleur" type="color" class="h-12 w-16 border-2 border-gray-300 dark:border-gray-600 rounded-3 cursor-pointer" />
                 <input v-model="formData.couleur" type="text" placeholder="#3B82F6" pattern="^#[0-9A-Fa-f]{6}$"
-                  class="flex-1 px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all font-mono" />
-                <div class="h-12 w-16 rounded-xl border-2 border-gray-300 dark:border-gray-600" :style="{ backgroundColor: formData.couleur }"></div>
+                  class="flex-1 px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all font-mono" />
+                <div class="h-12 w-16 rounded-3 border-2 border-gray-300 dark:border-gray-600" :style="{ backgroundColor: formData.couleur }"></div>
               </div>
               <div class="flex gap-2 mt-3">
                 <button v-for="color in presetColors" :key="color" type="button" @click="formData.couleur = color"
                   :style="{ backgroundColor: color }"
-                  :class="['w-8 h-8 rounded-lg border-2 transition-transform hover:scale-110',
+                  :class="['w-8 h-8 rounded-3 border-2 transition-transform ',
                     formData.couleur === color ? 'border-gray-900 dark:border-white scale-110' : 'border-transparent']"></button>
               </div>
             </div>
@@ -298,11 +298,11 @@
       <div class="px-8 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex-shrink-0">
         <div class="flex justify-end gap-3">
           <button type="button" @click="$emit('close')"
-            class="px-6 py-2.5 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
+            class="px-6 py-2.5 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-3 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
             Annuler
           </button>
           <button type="submit" @click="handleSubmit" :disabled="loading"
-            class="px-6 py-2.5 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transition-all">
+            class="px-6 py-2.5 text-white font-semibold rounded-3 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
             <span v-if="loading" class="flex items-center gap-2">
               <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

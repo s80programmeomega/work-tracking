@@ -1,5 +1,5 @@
 <template>
-  <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+  <div class="border border-gray-200 dark:border-gray-700 rounded-3 overflow-hidden">
     <!-- Header cliquable -->
     <button
       @click="isOpen = !isOpen"

@@ -2,13 +2,13 @@
 <template>
   <div>
     <!-- Loading State -->
-    <div v-if="loading" class="rounded-2xl border border-gray-200 bg-white p-12 text-center dark:border-gray-800 dark:bg-white/[0.03]">
+    <div v-if="loading" class="rounded-3 border border-gray-200 bg-white p-12 text-center dark:border-gray-800 dark:bg-white/[0.03]">
       <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"></div>
       <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">Chargement des documents...</p>
     </div>
 
     <!-- Empty State -->
-    <div v-else-if="documents.length === 0" class="rounded-2xl border border-gray-200 bg-white p-12 text-center dark:border-gray-800 dark:bg-white/[0.03]">
+    <div v-else-if="documents.length === 0" class="rounded-3 border border-gray-200 bg-white p-12 text-center dark:border-gray-800 dark:bg-white/[0.03]">
       <DocumentIcon class="mx-auto h-16 w-16 text-gray-400" />
       <h3 class="mt-4 text-lg font-semibold text-gray-900 dark:text-white">
         Aucun document
@@ -34,7 +34,7 @@
     </div>
 
     <!-- List View -->
-    <div v-else class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] overflow-hidden">
+    <div v-else class="rounded-3 border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] overflow-hidden">
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
           <thead class="bg-gray-50 dark:bg-gray-900/50">
@@ -68,7 +68,7 @@
               <!-- Document Name -->
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex items-center gap-3">
-                  <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
+                  <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-3 bg-gray-100 dark:bg-gray-800">
                     <component :is="getFileIcon(document)" class="h-5 w-5 text-gray-600 dark:text-gray-400" />
                   </div>
                   <div class="min-w-0 flex-1">

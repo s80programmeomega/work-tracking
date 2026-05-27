@@ -1,13 +1,13 @@
 <!-- resources/js/components/workspaces/InviteMemberModal.vue -->
 <template>
   <Teleport to="body">
-    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden"
+    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white dark:bg-gray-800 rounded-3 max-w-3xl w-full max-h-[90vh] overflow-hidden"
         @click.stop>
         <!-- Header -->
         <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <div class="flex items-center gap-3">
-            <div class="p-2 bg-brand-100 dark:bg-brand-900/30 rounded-lg">
+            <div class="p-2 bg-brand-100 dark:bg-brand-900/30 rounded-3">
               <MailIcon class="w-6 h-6 text-brand-600 dark:text-brand-400" />
             </div>
             <div>
@@ -20,7 +20,7 @@
             </div>
           </div>
           <button @click="handleClose"
-            class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+            class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
             <XIcon class="w-5 h-5" />
           </button>
         </div>
@@ -33,7 +33,7 @@
             <div v-if="invitationResult" class="space-y-3">
               <!-- Message principal -->
               <div v-if="invitationResult.message" :class="[
-                'p-4 rounded-lg border',
+                'p-4 rounded-3 border',
                 invitationResult.success_count > 0
                   ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
                   : invitationResult.warning_count > 0 && invitationResult.error_count === 0
@@ -71,7 +71,7 @@
 
               <!-- Succès détaillés -->
               <div v-if="invitationResult.success_count > 0"
-                class="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                class="p-4 rounded-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
                 <div class="flex items-start gap-3">
                   <svg class="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" fill="none"
                     stroke="currentColor" viewBox="0 0 24 24">
@@ -112,7 +112,7 @@
 
               <!-- Warnings: Invitations déjà en attente -->
               <div v-if="invitationResult.warnings && invitationResult.warnings.length > 0"
-                class="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                class="p-4 rounded-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
                 <div class="flex items-start gap-3">
                   <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" fill="none"
                     stroke="currentColor" viewBox="0 0 24 24">
@@ -175,7 +175,7 @@
 
               <!-- Section pour les membres déjà présents -->
               <div v-if="alreadyMemberErrors.length > 0"
-                class="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+                class="p-4 rounded-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
                 <div class="flex items-start gap-3">
                   <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" fill="none"
                     stroke="currentColor" viewBox="0 0 24 24">
@@ -189,7 +189,7 @@
 
                     <div v-for="err in alreadyMemberErrors" :key="err.email" class="mb-4 last:mb-0">
                       <div
-                        class="flex items-start gap-2 p-3 bg-white dark:bg-amber-800/10 rounded-lg border border-amber-100 dark:border-amber-800/30">
+                        class="flex items-start gap-2 p-3 bg-white dark:bg-amber-800/10 rounded-3 border border-amber-100 dark:border-amber-800/30">
                         <div class="flex-1">
                           <div class="flex items-center justify-between mb-2">
                             <div class="flex items-center gap-2">
@@ -253,7 +253,7 @@
 
               <!-- Section pour les autres erreurs (non already_member) -->
               <div v-if="otherErrors.length > 0"
-                class="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                class="p-4 rounded-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
                 <div class="flex items-start gap-3">
                   <svg class="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" fill="none"
                     stroke="currentColor" viewBox="0 0 24 24">
@@ -289,7 +289,7 @@
 
               <!-- Suggestions -->
               <div v-if="hasActionableItems"
-                class="p-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+                class="p-4 rounded-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
                 <div class="flex items-start gap-3">
                   <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" fill="none"
                     stroke="currentColor" viewBox="0 0 24 24">
@@ -322,7 +322,7 @@
               <div v-if="invitationResult && (invitationResult.warning_count > 0 || invitationResult.error_count > 0)"
                 class="flex justify-center mt-4">
                 <button @click="resetAndRetry"
-                  class="px-4 py-2 text-sm bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 rounded-lg hover:bg-brand-200 dark:hover:bg-brand-800/50 transition-colors flex items-center gap-2">
+                  class="px-4 py-2 text-sm bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 rounded-3 hover:bg-brand-200 dark:hover:bg-brand-800/50 transition-colors flex items-center gap-2">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -346,7 +346,7 @@
                 <textarea v-model="emailInput" @input="processEmailInput" @paste="handlePaste" rows="3"
                   dusk="invite-email-input"
                   placeholder="exemple@email.com, autre@domaine.com" :disabled="submitting"
-                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none font-mono text-sm disabled:opacity-50"></textarea>
+                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none font-mono text-sm disabled:opacity-50"></textarea>
                 <div class="absolute top-2 right-2">
                   <button type="button" @click="clearEmails"
                     class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" title="Effacer tout"
@@ -392,7 +392,7 @@
 
               <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
                 <div v-for="role in availableRoles" :key="role.value" @click="form.role = role.value" :class="[
-                  'p-4 border-2 rounded-lg cursor-pointer transition-all duration-200',
+                  'p-4 border-2 rounded-3 cursor-pointer transition-all duration-200',
                   form.role === role.value
                     ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20 dark:border-brand-400'
                     : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
@@ -418,13 +418,13 @@
             </div>
 
             <!-- Permissions Section -->
-            <div class="bg-gray-50 dark:bg-gray-700/30 rounded-lg p-4">
+            <div class="bg-gray-50 dark:bg-gray-700/30 rounded-3 p-4">
               <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">
                 Permissions supplémentaires
               </h4>
               <div class="space-y-3">
                 <div v-for="permission in availablePermissions" :key="permission.key"
-                  class="flex items-start gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
+                  class="flex items-start gap-3 p-3 bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-600">
                   <input :id="permission.key" v-model="form.permissions[permission.key]" type="checkbox"
                     :disabled="permission.disabled || submitting"
                     class="mt-1 w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-brand-500 dark:focus:ring-brand-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 disabled:opacity-50" />
@@ -457,7 +457,7 @@
               <div class="relative">
                 <textarea v-model="form.message" rows="3" :disabled="submitting"
                   placeholder="Bonjour, je vous invite à rejoindre notre workspace..."
-                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none disabled:opacity-50"
+                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none disabled:opacity-50"
                   maxlength="500"></textarea>
                 <div class="absolute bottom-2 right-2">
                   <span class="text-xs text-gray-400">
@@ -468,7 +468,7 @@
             </div>
 
             <!-- Notification Options -->
-            <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+            <div class="bg-blue-50 dark:bg-blue-900/20 rounded-3 p-4 border border-blue-200 dark:border-blue-800">
               <div class="flex items-start gap-3">
                 <input v-model="form.send_email" type="checkbox" id="send_email" :disabled="submitting"
                   class="mt-1 w-4 h-4 text-brand-600 bg-white border-gray-300 rounded focus:ring-brand-500 dark:focus:ring-brand-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 disabled:opacity-50" />
@@ -502,12 +502,12 @@
           </div>
           <div class="flex items-center gap-3">
             <button type="button" @click="handleClose" :disabled="submitting"
-              class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors disabled:opacity-50">
+              class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors disabled:opacity-50">
               {{ invitationResult ? 'Fermer' : 'Annuler' }}
             </button>
             <button @click="handleSubmit" :disabled="submitting || !canSubmit"
               dusk="invite-submit-btn"
-              class="px-6 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
+              class="px-6 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
               <MailIcon v-if="!submitting" class="w-4 h-4" />
               <div v-else class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
               {{ submitting ? 'Envoi en cours...' : `Inviter (${emailTags.length})` }}

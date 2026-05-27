@@ -9,7 +9,7 @@
       v-for="notification in notifications"
       :key="notification.id"
       :class="[
-        'relative flex items-start p-4 rounded-lg shadow-lg border transform transition-all duration-300',
+        'relative flex items-start p-4 rounded-3 border transform transition-all duration-300',
         getNotificationClass(notification.type)
       ]"
     >

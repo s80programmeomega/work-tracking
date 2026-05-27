@@ -15,7 +15,7 @@
           @click="refresh"
           :disabled="loading"
           dusk="refresh-pending-btn"
-          class="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50"
+          class="px-4 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700 disabled:opacity-50"
         >
           <i class="fas fa-sync-alt mr-2" :class="{ 'animate-spin': loading }"></i>
           Rafraîchir

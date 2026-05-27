@@ -1,13 +1,13 @@
 <!-- resources\js\components\taches\ResultatForm.vue -->
 <template>
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm"
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 "
        @click.self="$emit('close')">
     
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+    <div class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
       
       <!-- Header -->
-      <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-brand-500 to-brand-600">
-        <div class="flex justify-between items-center">
+      <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <div class="flex justify-between items-center">
           <h2 class="text-xl font-bold text-white">
             {{ isEditing ? 'Modifier le résultat' : 'Nouveau résultat' }}
           </h2>
@@ -33,7 +33,7 @@
             rows="4"
             required
             placeholder="Décrivez les résultats qui étaient attendus pour cette tâche..."
-            class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-900 dark:text-white transition-all"
+            class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-900 dark:text-white transition-all"
           ></textarea>
         </div>
 
@@ -47,7 +47,7 @@
             rows="4"
             required
             placeholder="Décrivez les résultats que vous avez réellement obtenus..."
-            class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-900 dark:text-white transition-all"
+            class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-900 dark:text-white transition-all"
           ></textarea>
         </div>
 
@@ -63,7 +63,7 @@
               min="0"
               max="100"
               step="5"
-              class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-brand-500"
+              class="w-full h-2 bg-gray-200 rounded-3 appearance-none cursor-pointer dark:bg-gray-700 accent-brand-500"
             />
             <div class="flex justify-between items-center">
               <div class="flex items-center gap-3">
@@ -72,11 +72,11 @@
                   type="number"
                   min="0"
                   max="100"
-                  class="w-20 px-3 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg text-center font-bold text-lg dark:bg-gray-900 dark:text-white"
+                  class="w-20 px-3 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-3 text-center font-bold text-lg dark:bg-gray-900 dark:text-white"
                 />
                 <span class="text-2xl font-bold text-gray-900 dark:text-white">%</span>
               </div>
-              <div class="px-4 py-2 rounded-lg font-semibold"
+              <div class="px-4 py-2 rounded-3 font-semibold"
                    :class="getProgressColorClass(form.taux_realisation)">
                 {{ getProgressLabel(form.taux_realisation) }}
               </div>
@@ -93,7 +93,7 @@
             v-model="form.difficultes_rencontrees"
             rows="3"
             placeholder="Décrivez les difficultés ou obstacles rencontrés (optionnel)..."
-            class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-900 dark:text-white transition-all"
+            class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-900 dark:text-white transition-all"
           ></textarea>
         </div>
 
@@ -106,7 +106,7 @@
             v-model="form.solutions_envisagees"
             rows="3"
             placeholder="Décrivez les solutions que vous avez mises en place ou envisagées (optionnel)..."
-            class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-900 dark:text-white transition-all"
+            class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-900 dark:text-white transition-all"
           ></textarea>
         </div>
 
@@ -119,12 +119,12 @@
             v-model="form.observations"
             rows="3"
             placeholder="Ajoutez des observations ou commentaires supplémentaires (optionnel)..."
-            class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-900 dark:text-white transition-all"
+            class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-900 dark:text-white transition-all"
           ></textarea>
         </div>
 
         <!-- Info helper -->
-        <div class="p-4 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 rounded-lg">
+        <div class="p-4 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 rounded-3">
           <div class="flex gap-3">
             <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -142,7 +142,7 @@
         <button
           type="button"
           @click="$emit('close')"
-          class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all"
+          class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all"
         >
           Annuler
         </button>
@@ -153,7 +153,7 @@
             @click="handleSubmit(false)"
             :disabled="saving || !isFormValid"
             type="button"
-            class="px-5 py-2.5 border-2 border-brand-500 text-brand-600 dark:text-brand-400 rounded-lg hover:bg-brand-50 dark:hover:bg-brand-900/20 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            class="px-5 py-2.5 border-2 border-brand-500 text-brand-600 dark:text-brand-400 rounded-3 hover:bg-brand-50 dark:hover:bg-brand-900/20 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             💾 Enregistrer le brouillon
           </button>
@@ -162,7 +162,7 @@
             @click="handleSubmit(true)"
             :disabled="saving || !isFormValid"
             type="button"
-            class="px-5 py-2.5 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+            class="px-5 py-2.5 text-white rounded-3 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
           >
             <svg v-if="saving" class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

@@ -1,8 +1,8 @@
 <!-- resources/js/components/projets/ProjetFormModal.vue -->
 <template>
   <Teleport to="body">
-    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white dark:bg-gray-800 rounded-3 max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col"
         @click.stop>
 
         <!-- Header -->
@@ -11,7 +11,7 @@
             {{ isEdit ? 'Modifier le projet: ' + projet.nom : 'Créer un nouveau projet' }}
           </h2>
           <button @click="$emit('close')"
-            class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+            class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
             <XIcon class="w-5 h-5" />
           </button>
         </div>
@@ -45,7 +45,7 @@
                 </ul>
               </div>
               <button @click="clearErrors()"
-                class="flex-shrink-0 p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-800 transition-colors">
+                class="flex-shrink-0 p-1.5 rounded-3 hover:bg-red-100 dark:hover:bg-red-800 transition-colors">
                 <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -64,7 +64,7 @@
                 Workspace <span class="text-red-500">*</span>
               </label>
               <select v-model="form.workspace_id" required :disabled="!!workspaceId"
-                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed">
+                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed">
                 <option value="">Sélectionner un workspace</option>
                 <option v-for="workspace in workspaces" :key="workspace.id" :value="workspace.id">
                   {{ workspace.nom }}
@@ -81,7 +81,7 @@
                 Nom du projet <span class="text-red-500">*</span>
               </label>
               <input v-model="form.nom" type="text" required placeholder="Ex: Système de gestion RH"
-                :class="['w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-colors',
+                :class="['w-full px-4 py-2 border rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-colors',
                   fieldErrors.nom
                     ? 'border-red-400 dark:border-red-500 bg-red-50 dark:bg-red-900/10 focus:ring-red-300'
                     : 'border-gray-300 dark:border-gray-600']" />
@@ -97,7 +97,7 @@
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Code du projet</label>
               <input v-model="form.code" type="text" placeholder="Auto-généré si vide"
-                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
+                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Laissez vide pour générer automatiquement</p>
             </div>
 
@@ -105,7 +105,7 @@
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
               <textarea v-model="form.description" rows="4" placeholder="Décrivez votre projet..."
-                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none"></textarea>
+                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none"></textarea>
             </div>
 
             <!-- Dates -->
@@ -156,7 +156,7 @@
                 Responsable du projet <span class="text-red-500">*</span>
               </label>
               <select v-model="form.responsable_id" required
-                :class="['w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-colors',
+                :class="['w-full px-4 py-2 border rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-colors',
                   fieldErrors.responsable_id
                     ? 'border-red-400 dark:border-red-500 bg-red-50 dark:bg-red-900/10 focus:ring-red-300'
                     : 'border-gray-300 dark:border-gray-600']">
@@ -181,7 +181,7 @@
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Statut</label>
                 <select v-model="form.status"
-                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent">
                   <option value="active">Actif</option>
                   <option value="pending">En attente</option>
                   <option value="completed">Terminé</option>
@@ -191,7 +191,7 @@
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Visibilité</label>
                 <select v-model="form.visibility"
-                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent">
                   <option value="public">Public - Visible par tous</option>
                   <option value="team">Équipe - Visible par les membres</option>
                   <option value="private">Privé - Visible uniquement par le responsable</option>
@@ -204,7 +204,7 @@
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Budget (optionnel)</label>
               <div class="relative">
                 <input v-model.number="form.budget" type="number" step="0.01" min="0" placeholder="0.00"
-                  class="w-full px-4 py-2 pl-12 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
+                  class="w-full px-4 py-2 pl-12 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">XAF</span>
               </div>
             </div>
@@ -214,14 +214,14 @@
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Couleur du projet</label>
               <div class="flex items-center gap-4">
                 <input v-model="form.couleur" type="color"
-                  class="w-16 h-10 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer" />
+                  class="w-16 h-10 rounded-3 border border-gray-300 dark:border-gray-600 cursor-pointer" />
                 <input v-model="form.couleur" type="text" placeholder="#3B82F6"
-                  class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
+                  class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
               </div>
               <div class="flex gap-2 mt-3">
                 <button v-for="color in presetColors" :key="color" type="button" @click="form.couleur = color"
                   :style="{ backgroundColor: color }"
-                  :class="['w-8 h-8 rounded-lg border-2 transition-transform hover:scale-110',
+                  :class="['w-8 h-8 rounded-3 border-2 transition-transform ',
                     form.couleur === color ? 'border-gray-900 dark:border-white scale-110' : 'border-transparent']"></button>
               </div>
             </div>
@@ -230,7 +230,7 @@
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Objectifs du projet</label>
               <textarea v-model="form.objectifs" rows="3" placeholder="Décrivez les objectifs principaux du projet..."
-                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none"></textarea>
+                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none"></textarea>
             </div>
 
             <!-- Options -->
@@ -253,11 +253,11 @@
         <!-- Footer -->
         <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex-shrink-0">
           <button type="button" @click="$emit('close')"
-            class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+            class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
             Annuler
           </button>
           <button @click="handleSubmit" :disabled="loading"
-            class="px-6 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
+            class="px-6 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
             <svg v-if="loading" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>

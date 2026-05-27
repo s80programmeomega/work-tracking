@@ -1,12 +1,12 @@
 <!-- resources/js/components/taches/KanbanColumnResponsable.vue -->
 <template>
-  <div class="flex flex-col h-full bg-gray-50 dark:bg-gray-900/50 rounded-xl border-2 transition-all duration-200"
+  <div class="flex flex-col h-full bg-gray-50 dark:bg-gray-900/50 rounded-3 border-2 transition-all duration-200"
     :class="[
       isDragOver ? 'border-purple-400 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-700'
     ]">
     <!-- Header -->
-    <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20">
-      <div class="flex items-center gap-3">
+    <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+          <div class="flex items-center gap-3">
         <span class="text-2xl">{{ statusIcon }}</span>
         <div>
           <h3 class="font-semibold text-gray-900 dark:text-white">{{ title }}</h3>

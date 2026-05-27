@@ -1,12 +1,12 @@
 <template>
-  <div class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
+  <div class="rounded-3 border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
     <div class="flex items-center justify-between mb-6">
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
         Statistiques des documents
       </h3>
       <button
         @click="$emit('close')"
-        class="rounded-lg p-1 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+        class="rounded-3 p-1 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
       >
         <XMarkIcon class="h-5 w-5" />
       </button>
@@ -23,7 +23,7 @@
       <!-- Overview Cards -->
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <!-- Total Documents -->
-        <div class="rounded-xl border border-gray-200 bg-gradient-to-br from-blue-50 to-blue-100 p-4 dark:border-gray-700 dark:from-blue-900/20 dark:to-blue-900/10">
+        <div class="rounded-3 border border-gray-200 p-4 dark:border-gray-700">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm font-medium text-blue-600 dark:text-blue-400">
@@ -38,7 +38,7 @@
         </div>
 
         <!-- Total Size -->
-        <div class="rounded-xl border border-gray-200 bg-gradient-to-br from-green-50 to-green-100 p-4 dark:border-gray-700 dark:from-green-900/20 dark:to-green-900/10">
+        <div class="rounded-3 border border-gray-200 p-4 dark:border-gray-700">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm font-medium text-green-600 dark:text-green-400">
@@ -53,7 +53,7 @@
         </div>
 
         <!-- Total Downloads -->
-        <div class="rounded-xl border border-gray-200 bg-gradient-to-br from-purple-50 to-purple-100 p-4 dark:border-gray-700 dark:from-purple-900/20 dark:to-purple-900/10">
+        <div class="rounded-3 border border-gray-200 p-4 dark:border-gray-700">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm font-medium text-purple-600 dark:text-purple-400">
@@ -68,7 +68,7 @@
         </div>
 
         <!-- Users Count -->
-        <div class="rounded-xl border border-gray-200 bg-gradient-to-br from-orange-50 to-orange-100 p-4 dark:border-gray-700 dark:from-orange-900/20 dark:to-orange-900/10">
+        <div class="rounded-3 border border-gray-200 p-4 dark:border-gray-700">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm font-medium text-orange-600 dark:text-orange-400">
@@ -84,7 +84,7 @@
       </div>
 
       <!-- Documents by Type -->
-      <div class="rounded-xl border border-gray-200 bg-gray-50 p-5 dark:border-gray-700 dark:bg-gray-800/50">
+      <div class="rounded-3 border border-gray-200 bg-gray-50 p-5 dark:border-gray-700 dark:bg-gray-800/50">
         <h4 class="mb-4 text-sm font-semibold text-gray-900 dark:text-white">
           Documents par type
         </h4>
@@ -119,7 +119,7 @@
       </div>
 
       <!-- Documents by MIME Type -->
-      <div class="rounded-xl border border-gray-200 bg-gray-50 p-5 dark:border-gray-700 dark:bg-gray-800/50">
+      <div class="rounded-3 border border-gray-200 bg-gray-50 p-5 dark:border-gray-700 dark:bg-gray-800/50">
         <h4 class="mb-4 text-sm font-semibold text-gray-900 dark:text-white">
           Formats de fichiers
         </h4>
@@ -127,7 +127,7 @@
           <div
             v-for="(count, mimeType) in stats.by_mime_type"
             :key="mimeType"
-            class="rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800"
+            class="rounded-3 border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800"
           >
             <p class="truncate text-xs text-gray-500 dark:text-gray-400" :title="mimeType">
               {{ mimeType.split('/')[1] || mimeType }}
@@ -140,7 +140,7 @@
       </div>
 
       <!-- Recent Uploads -->
-      <div v-if="stats.recent_uploads && stats.recent_uploads.length > 0" class="rounded-xl border border-gray-200 bg-gray-50 p-5 dark:border-gray-700 dark:bg-gray-800/50">
+      <div v-if="stats.recent_uploads && stats.recent_uploads.length > 0" class="rounded-3 border border-gray-200 bg-gray-50 p-5 dark:border-gray-700 dark:bg-gray-800/50">
         <h4 class="mb-4 text-sm font-semibold text-gray-900 dark:text-white">
           Téléchargements récents
         </h4>
@@ -148,7 +148,7 @@
           <div
             v-for="doc in stats.recent_uploads.slice(0, 5)"
             :key="doc.id"
-            class="flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800"
+            class="flex items-center gap-3 rounded-3 border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800"
           >
             <component
               :is="getFileIcon(doc.mime_type)"

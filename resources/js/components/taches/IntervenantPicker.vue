@@ -7,7 +7,7 @@
         type="text"
         :placeholder="placeholder"
         dusk="intervenant-picker-search"
-        class="w-full px-4 py-3 pl-10 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all"
+        class="w-full px-4 py-3 pl-10 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all"
         @focus="open = true"
         @blur="onBlur"
       />
@@ -17,7 +17,7 @@
     <!-- Dropdown -->
     <div
       v-if="open && filtered.length > 0"
-      class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-56 overflow-y-auto"
+      class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3 max-h-56 overflow-y-auto"
       dusk="intervenant-picker-dropdown"
     >
       <button
@@ -46,7 +46,7 @@
     <!-- No results -->
     <div
       v-if="open && query && filtered.length === 0"
-      class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg px-4 py-3 text-sm text-gray-500 dark:text-gray-400"
+      class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3 px-4 py-3 text-sm text-gray-500 dark:text-gray-400"
     >
       {{ noResultsLabel }}
     </div>

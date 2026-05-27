@@ -14,7 +14,7 @@
             leave-from="opacity-100 translate-y-0 sm:scale-100"
             leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
             <DialogPanel
-              class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all dark:bg-gray-900 sm:my-8 sm:w-full sm:max-w-2xl">
+              class="relative transform overflow-hidden rounded-3 bg-white text-left transition-all dark:bg-gray-900 sm:my-8 sm:w-full sm:max-w-2xl">
               <!-- Header -->
               <div class="border-b border-gray-200 bg-white px-6 py-4 dark:border-gray-800 dark:bg-gray-900">
                 <div class="flex items-center justify-between">
@@ -22,7 +22,7 @@
                     Télécharger des documents
                   </DialogTitle>
                   <button @click="$emit('close')"
-                    class="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500 dark:hover:bg-gray-800">
+                    class="rounded-3 p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500 dark:hover:bg-gray-800">
                     <XMarkIcon class="h-6 w-6" />
                   </button>
                 </div>
@@ -33,7 +33,7 @@
                 <!-- Drag & Drop Zone -->
                 <div @drop.prevent="handleDrop" @dragover.prevent="isDragging = true"
                   @dragleave.prevent="isDragging = false" :class="[
-                    'relative rounded-xl border-2 border-dashed transition-all',
+                    'relative rounded-3 border-2 border-dashed transition-all',
                     isDragging
                       ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/20'
                       : 'border-gray-300 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50'
@@ -49,7 +49,7 @@
                       ou cliquez pour sélectionner
                     </p>
                     <button @click="$refs.fileInput.click()"
-                      class="mt-4 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+                      class="mt-4 inline-flex items-center gap-2 rounded-3 bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
                       <DocumentPlusIcon class="h-5 w-5" />
                       Parcourir les fichiers
                     </button>
@@ -71,7 +71,7 @@
 
                     <div class="max-h-64 space-y-2 overflow-y-auto">
                       <div v-for="(file, index) in selectedFiles" :key="index"
-                        class="flex items-center gap-3 rounded-lg bg-white p-3 dark:bg-gray-800">
+                        class="flex items-center gap-3 rounded-3 bg-white p-3 dark:bg-gray-800">
                         <component :is="getFileIcon(file.type)" class="h-8 w-8 flex-shrink-0 text-gray-400" />
                         <div class="min-w-0 flex-1">
                           <p class="truncate text-sm font-medium text-gray-900 dark:text-white">
@@ -88,7 +88,7 @@
                     </div>
 
                     <button @click="$refs.fileInput.click()"
-                      class="w-full rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 py-2 text-sm text-gray-600 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:border-blue-400 dark:hover:bg-blue-900/20">
+                      class="w-full rounded-3 border-2 border-dashed border-gray-300 bg-gray-50 py-2 text-sm text-gray-600 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:border-blue-400 dark:hover:bg-blue-900/20">
                       + Ajouter d'autres fichiers
                     </button>
                   </div>
@@ -102,7 +102,7 @@
                       Description (optionnelle)
                     </label>
                     <textarea v-model="description" rows="2"
-                      class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                      class="mt-1 block w-full rounded-3 border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                       placeholder="Ajoutez une description pour ces documents..."></textarea>
                   </div>
 
@@ -112,7 +112,7 @@
                       Visibilité
                     </label>
                     <select v-model="visibility"
-                      class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                      class="mt-1 block w-full rounded-3 border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
                       <option value="private">Privé (propriétaire uniquement)</option>
                       <option value="team">Équipe (membres de l'entité)</option>
                       <option value="public">Public (tous les utilisateurs)</option>
@@ -142,7 +142,7 @@
                 </div>
 
                 <!-- Error Message -->
-                <div v-if="error" class="mt-4 rounded-lg bg-red-50 p-4 dark:bg-red-900/20">
+                <div v-if="error" class="mt-4 rounded-3 bg-red-50 p-4 dark:bg-red-900/20">
                   <div class="flex items-start gap-3">
                     <ExclamationTriangleIcon class="h-5 w-5 flex-shrink-0 text-red-600 dark:text-red-400" />
                     <p class="text-sm text-red-800 dark:text-red-300">{{ error }}</p>
@@ -154,11 +154,11 @@
               <div class="border-t border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-800 dark:bg-gray-800/50">
                 <div class="flex justify-end gap-3">
                   <button @click="$emit('close')" :disabled="uploading"
-                    class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
+                    class="rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
                     Annuler
                   </button>
                   <button @click="handleUpload" :disabled="selectedFiles.length === 0 || uploading"
-                    class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                    class="inline-flex items-center gap-2 rounded-3 bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
                     <CloudArrowUpIcon v-if="!uploading" class="h-5 w-5" />
                     <div v-else class="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent">
                     </div>

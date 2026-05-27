@@ -10,7 +10,7 @@
         leave-from="opacity-100"
         leave-to="opacity-0"
       >
-        <div class="fixed inset-0 bg-gray-500/75 backdrop-blur-sm transition-opacity dark:bg-gray-900/80" />
+        <div class="fixed inset-0 bg-gray-500/75 transition-opacity dark:bg-gray-900/80" />
       </TransitionChild>
 
       <div class="fixed inset-0 z-10 overflow-y-auto">
@@ -24,7 +24,7 @@
             leave-from="opacity-100 translate-y-0 sm:scale-100"
             leave-to="opacity-0 translate-y-4 sm:scale-95"
           >
-            <DialogPanel class="relative w-full max-w-7xl transform overflow-hidden rounded-2xl bg-white shadow-2xl transition-all dark:bg-gray-900">
+            <DialogPanel class="relative w-full max-w-7xl transform overflow-hidden rounded-3 bg-white transition-all dark:bg-gray-900">
               <!-- Header -->
               <div class="border-b border-gray-200 bg-white px-6 py-4 dark:border-gray-800 dark:bg-gray-900">
                 <div class="flex items-center justify-between">
@@ -41,7 +41,7 @@
                   </div>
                   <button
                     @click="$emit('close')"
-                    class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 dark:hover:bg-gray-800"
+                    class="rounded-3 p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 dark:hover:bg-gray-800"
                   >
                     <XMarkIcon class="h-6 w-6" />
                   </button>

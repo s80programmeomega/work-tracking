@@ -1,5 +1,5 @@
 <template>
-  <div :class="['overflow-hidden rounded-lg', aspectRatioClass, className]">
+  <div :class="['overflow-hidden rounded-3', aspectRatioClass, className]">
     <iframe
       :src="`https://www.youtube.com/embed/${videoId}`"
       :title="title"

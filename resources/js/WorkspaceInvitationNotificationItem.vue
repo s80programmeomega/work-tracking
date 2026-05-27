@@ -1,19 +1,18 @@
 <template>
   <div
-    class="relative flex gap-3 rounded-lg border border-brand-200 dark:border-brand-800 p-4 bg-gradient-to-r from-brand-50 to-white dark:from-brand-900/20 dark:to-gray-900"
-    :class="{ 'opacity-60': !notification.data.is_pending }"
+    class="relative flex gap-3 rounded-3 border border-brand-200 dark:border-brand-800 p-4 :class="{ 'opacity-60': !notification.data.is_pending }"
   >
     <!-- Workspace Logo/Icon -->
     <div class="flex-shrink-0">
       <div
         v-if="notification.data.workspace_logo"
-        class="w-12 h-12 rounded-lg overflow-hidden border-2 border-brand-200 dark:border-brand-700"
+        class="w-12 h-12 rounded-3 overflow-hidden border-2 border-brand-200 dark:border-brand-700"
       >
         <img :src="notification.data.workspace_logo" :alt="notification.data.workspace_name" class="w-full h-full object-cover" />
       </div>
       <div
         v-else
-        class="w-12 h-12 rounded-lg bg-brand-600 dark:bg-brand-700 flex items-center justify-center border-2 border-brand-200 dark:border-brand-700"
+        class="w-12 h-12 rounded-3 bg-brand-600 dark:bg-brand-700 flex items-center justify-center border-2 border-brand-200 dark:border-brand-700"
       >
         <span class="text-white font-bold text-lg">{{ getInitials(notification.data.workspace_name) }}</span>
       </div>
@@ -89,7 +88,7 @@
         <button
           @click="acceptInvitation"
           :disabled="accepting"
-          class="flex-1 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors flex items-center justify-center gap-2"
+          class="flex-1 px-4 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors flex items-center justify-center gap-2"
         >
           <span v-if="accepting" class="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-white"></span>
           <svg v-else class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -101,14 +100,14 @@
         <button
           @click="declineInvitation"
           :disabled="declining"
-          class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors"
+          class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-3 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors"
         >
           {{ declining ? 'Refus...' : 'Refuser' }}
         </button>
 
         <button
           @click="viewDetails"
-          class="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          class="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           title="Voir les détails"
         >
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -124,7 +123,7 @@
     </div>
 
     <!-- Success/Error Messages -->
-    <div v-if="successMessage" class="absolute inset-0 flex items-center justify-center bg-green-50/95 dark:bg-green-900/95 rounded-lg">
+    <div v-if="successMessage" class="absolute inset-0 flex items-center justify-center bg-green-50/95 dark:bg-green-900/95 rounded-3">
       <div class="text-center p-4">
         <svg class="w-12 h-12 text-green-600 dark:text-green-400 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -133,7 +132,7 @@
       </div>
     </div>
 
-    <div v-if="errorMessage" class="absolute inset-0 flex items-center justify-center bg-red-50/95 dark:bg-red-900/95 rounded-lg">
+    <div v-if="errorMessage" class="absolute inset-0 flex items-center justify-center bg-red-50/95 dark:bg-red-900/95 rounded-3">
       <div class="text-center p-4">
         <svg class="w-12 h-12 text-red-600 dark:text-red-400 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />

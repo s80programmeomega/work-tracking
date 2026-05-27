@@ -24,18 +24,18 @@
             <!-- Filter buttons -->
             <button @click="filterType = 'all'"
               :class="filterType === 'all' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'"
-              class="px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-gray-700">
+              class="px-4 py-2 rounded-3 text-sm font-medium border border-gray-300 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-gray-700">
               Toutes ({{ statistics.total || 0 }})
             </button>
             <button @click="filterType = 'unread'"
               :class="filterType === 'unread' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'"
-              class="px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-gray-700">
+              class="px-4 py-2 rounded-3 text-sm font-medium border border-gray-300 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-gray-700">
               Non lues ({{ unreadCount }})
             </button>
 
             <!-- Actions -->
             <button v-if="unreadCount > 0" @click="handleMarkAllAsRead"
-              class="px-4 py-2 rounded-lg text-sm font-medium bg-green-600 text-white hover:bg-green-700">
+              class="px-4 py-2 rounded-3 text-sm font-medium bg-green-600 text-white hover:bg-green-700">
               <i class="fas fa-check-double mr-2"></i>
               Tout marquer comme lu
             </button>
@@ -46,9 +46,9 @@
         <div class="grid grid-cols-1 gap-4 md:grid-cols-4 md:gap-6 mb-6">
           <!-- Total Card -->
           <div
-            class="rounded-xl border border-blue-200 dark:border-blue-500/30 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 p-6 shadow-lg hover:shadow-xl transition-all duration-300">
+            class="rounded-3 border border-blue-200 dark:border-blue-500/30 p-6 transition-all duration-300">
             <div class="flex items-center gap-3">
-              <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-500 dark:bg-blue-600 shadow-lg">
+              <div class="flex h-14 w-14 items-center justify-center rounded-3 bg-blue-500 dark:bg-blue-600 ">
                 <i class="fas fa-bell text-2xl text-white"></i>
               </div>
               <div>
@@ -60,10 +60,10 @@
 
           <!-- Unread Card -->
           <div
-            class="rounded-xl border border-orange-200 dark:border-orange-500/30 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950 dark:to-orange-900 p-6 shadow-lg hover:shadow-xl transition-all duration-300">
+            class="rounded-3 border border-orange-200 dark:border-orange-500/30 p-6 transition-all duration-300">
             <div class="flex items-center gap-3">
               <div
-                class="flex h-14 w-14 items-center justify-center rounded-xl bg-orange-500 dark:bg-orange-600 shadow-lg">
+                class="flex h-14 w-14 items-center justify-center rounded-3 bg-orange-500 dark:bg-orange-600 ">
                 <i class="fas fa-envelope text-2xl text-white"></i>
               </div>
               <div>
@@ -75,10 +75,10 @@
 
           <!-- Read Today Card -->
           <div
-            class="rounded-xl border border-green-200 dark:border-green-500/30 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 p-6 shadow-lg hover:shadow-xl transition-all duration-300">
+            class="rounded-3 border border-green-200 dark:border-green-500/30 p-6 transition-all duration-300">
             <div class="flex items-center gap-3">
               <div
-                class="flex h-14 w-14 items-center justify-center rounded-xl bg-green-500 dark:bg-green-600 shadow-lg">
+                class="flex h-14 w-14 items-center justify-center rounded-3 bg-green-500 dark:bg-green-600 ">
                 <i class="fas fa-check-circle text-2xl text-white"></i>
               </div>
               <div>
@@ -90,11 +90,11 @@
 
           <!-- Preferences Card -->
           <div
-            class="rounded-xl border border-purple-200 dark:border-purple-500/30 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900 p-6 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group"
+            class="rounded-3 border border-purple-200 dark:border-purple-500/30 p-6 transition-all duration-300 cursor-pointer group"
             @click="$router.push('/notification-preferences')">
             <div class="flex items-center gap-3">
               <div
-                class="flex h-14 w-14 items-center justify-center rounded-xl bg-purple-500 dark:bg-purple-600 shadow-lg group-hover:scale-110 transition-transform">
+                class="flex h-14 w-14 items-center justify-center rounded-3 bg-purple-500 dark:bg-purple-600 transition-transform">
                 <i class="fas fa-cog text-2xl text-white"></i>
               </div>
               <div>
@@ -107,7 +107,7 @@
         </div>
 
         <!-- Notifications List -->
-        <div class="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
+        <div class="rounded-3 border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
           <!-- Loading State -->
           <div v-if="loading" class="flex items-center justify-center py-20">
             <i class="fas fa-spinner fa-spin text-4xl text-gray-400"></i>
@@ -142,14 +142,14 @@
               <div class="flex gap-2">
                 <button @click="loadPage(pagination.current_page - 1)" :disabled="pagination.current_page === 1"
                   :class="pagination.current_page === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-800'"
-                  class="px-4 py-2 rounded-lg text-sm font-medium bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-700">
+                  class="px-4 py-2 rounded-3 text-sm font-medium bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-700">
                   <i class="fas fa-chevron-left"></i>
                   Précédent
                 </button>
                 <button @click="loadPage(pagination.current_page + 1)"
                   :disabled="pagination.current_page === pagination.last_page"
                   :class="pagination.current_page === pagination.last_page ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-800'"
-                  class="px-4 py-2 rounded-lg text-sm font-medium bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-700">
+                  class="px-4 py-2 rounded-3 text-sm font-medium bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-700">
                   Suivant
                   <i class="fas fa-chevron-right ml-2"></i>
                 </button>

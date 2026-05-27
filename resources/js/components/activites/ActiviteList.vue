@@ -24,7 +24,7 @@
 
         <button
           @click="showCreateForm = true"
-          class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 transition-colors"
+          class="inline-flex items-center justify-center gap-2 rounded-3 bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 transition-colors"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -34,21 +34,21 @@
       </div>
 
       <!-- Filters -->
-      <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+      <div class="bg-white dark:bg-gray-800 p-4 rounded-3 border border-gray-200 dark:border-gray-700">
         <div class="flex flex-col space-y-4 md:flex-row md:items-center md:space-y-0 md:space-x-4">
           <div class="flex-1">
             <input
               v-model="filters.search"
               type="text"
               placeholder="Rechercher par nom ou code..."
-              class="w-full max-w-sm px-4 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+              class="w-full max-w-sm px-4 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               @input="debouncedSearch"
             />
           </div>
 
           <select
             v-model="filters.status"
-            class="px-4 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+            class="px-4 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
             @change="loadActivites"
           >
             <option value="">Tous les statuts</option>
@@ -58,7 +58,7 @@
 
           <button
             @click="resetFilters"
-            class="inline-flex items-center gap-2 px-4 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            class="inline-flex items-center gap-2 px-4 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -75,7 +75,7 @@
       </div>
 
       <!-- Activities Table -->
-      <div v-else class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+      <div v-else class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 ">
         <div class="overflow-x-auto">
           <table class="w-full text-sm text-left">
             <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700">
@@ -149,7 +149,7 @@
                     <!-- Bouton Voir détails -->
                     <button
                       @click="viewActivityDetail(activite)"
-                      class="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                      class="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-blue-500 text-white rounded-3 hover:bg-blue-600 transition-colors"
                       title="Voir les détails"
                     >
                       <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -162,7 +162,7 @@
                     <!-- Bouton Modifier -->
                     <button
                       @click="editActivite(activite)"
-                      class="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                      class="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-green-500 text-white rounded-3 hover:bg-green-600 transition-colors"
                       title="Modifier"
                     >
                       <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -174,7 +174,7 @@
                     <!-- Bouton Supprimer -->
                     <button
                       @click="deleteActivite(activite)"
-                      class="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                      class="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-red-500 text-white rounded-3 hover:bg-red-600 transition-colors"
                       title="Supprimer"
                     >
                       <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -213,7 +213,7 @@
             <button
               @click="changePage(pagination.current_page - 1)"
               :disabled="pagination.current_page === 1"
-              class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Précédent
             </button>
@@ -222,7 +222,7 @@
               :key="page"
               @click="changePage(page)"
               :class="[
-                'px-3 py-1.5 text-sm border rounded-lg transition-colors',
+                'px-3 py-1.5 text-sm border rounded-3 transition-colors',
                 page === pagination.current_page
                   ? 'bg-brand-500 text-white border-brand-500'
                   : 'border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
@@ -233,7 +233,7 @@
             <button
               @click="changePage(pagination.current_page + 1)"
               :disabled="pagination.current_page === pagination.last_page"
-              class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Suivant
             </button>

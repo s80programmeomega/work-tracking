@@ -1,6 +1,6 @@
 <!-- resources/js/components/taches/TacheCardResponsable.vue -->
 <template>
-  <div class="bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-purple-400 transition-all shadow-sm hover:shadow-md">
+  <div class="bg-white dark:bg-gray-800 rounded-3 border-2 border-gray-200 dark:border-gray-700 hover:border-purple-400 transition-all ">
     <!-- Header -->
     <div class="p-3 border-b border-gray-100 dark:border-gray-700">
       <div class="flex items-start justify-between gap-2 mb-2">

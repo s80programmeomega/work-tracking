@@ -6,7 +6,7 @@
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
       <!-- Progression inline-editable -->
       <div
-        class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
+        class="rounded-3 p-4 border border-blue-200 dark:border-blue-800">
         <div class="flex items-center justify-between mb-2">
           <span class="text-sm font-medium text-blue-700 dark:text-blue-300">Progression</span>
           <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -50,7 +50,7 @@
 
       <!-- Temps (display only) -->
       <div
-        class="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-xl p-4 border border-purple-200 dark:border-purple-800">
+        class="rounded-3 p-4 border border-purple-200 dark:border-purple-800">
         <div class="flex items-center justify-between mb-2">
           <span class="text-sm font-medium text-purple-700 dark:text-purple-300">Temps</span>
           <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -71,7 +71,7 @@
 
       <!-- Échéance inline-editable -->
       <div
-        class="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 rounded-xl p-4 border border-amber-200 dark:border-amber-800">
+        class="rounded-3 p-4 border border-amber-200 dark:border-amber-800">
         <div class="flex items-center justify-between mb-2">
           <span class="text-sm font-medium text-amber-700 dark:text-amber-300">Échéance</span>
           <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,7 +125,7 @@
 
       <!-- Validation (display only) -->
       <div
-        class="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl p-4 border border-green-200 dark:border-green-800">
+        class="rounded-3 p-4 border border-green-200 dark:border-green-800">
         <div class="flex items-center justify-between mb-2">
           <span class="text-sm font-medium text-green-700 dark:text-green-300">Validation</span>
           <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -165,7 +165,7 @@
     <!-- Description et objectifs -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- Description inline-editable -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-6">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
           <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -180,14 +180,14 @@
             @keydown.escape="cancelEdit"
             autofocus
             rows="5"
-            class="w-full text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 border border-brand-400 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-y"
+            class="w-full text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 border border-brand-400 rounded-3 p-3 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-y"
           />
           <p class="text-xs text-gray-400 mt-1">Cliquer ailleurs pour enregistrer · Echap pour annuler</p>
         </div>
         <div
           v-else-if="localTache.description"
           class="prose prose-sm dark:prose-invert max-w-none"
-          :class="tache.permissions?.can_edit ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 rounded-lg p-2 -m-2 transition-colors' : ''"
+          :class="tache.permissions?.can_edit ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 rounded-3 p-2 -m-2 transition-colors' : ''"
           :title="tache.permissions?.can_edit ? 'Cliquer pour modifier' : ''"
           @click="startEdit('description', localTache.description)"
         >
@@ -196,7 +196,7 @@
         <div
           v-else
           class="text-center py-8"
-          :class="tache.permissions?.can_edit ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 rounded-lg transition-colors' : ''"
+          :class="tache.permissions?.can_edit ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 rounded-3 transition-colors' : ''"
           @click="startEdit('description', '')"
         >
           <svg class="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -211,7 +211,7 @@
       </div>
 
       <!-- Objectif inline-editable -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-6">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
           <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -226,14 +226,14 @@
             @keydown.escape="cancelEdit"
             autofocus
             rows="5"
-            class="w-full text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 border border-brand-400 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-y"
+            class="w-full text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 border border-brand-400 rounded-3 p-3 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-y"
           />
           <p class="text-xs text-gray-400 mt-1">Cliquer ailleurs pour enregistrer · Echap pour annuler</p>
         </div>
         <div
           v-else-if="localTache.objectif"
           class="prose prose-sm dark:prose-invert max-w-none"
-          :class="tache.permissions?.can_edit ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 rounded-lg p-2 -m-2 transition-colors' : ''"
+          :class="tache.permissions?.can_edit ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 rounded-3 p-2 -m-2 transition-colors' : ''"
           :title="tache.permissions?.can_edit ? 'Cliquer pour modifier' : ''"
           @click="startEdit('objectif', localTache.objectif)"
         >
@@ -242,7 +242,7 @@
         <div
           v-else
           class="text-center py-8"
-          :class="tache.permissions?.can_edit ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 rounded-lg transition-colors' : ''"
+          :class="tache.permissions?.can_edit ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 rounded-3 transition-colors' : ''"
           @click="startEdit('objectif', '')"
         >
           <svg class="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -259,7 +259,7 @@
 
     <!-- Indicateurs de résultats inline-editable -->
     <div
-      class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800 p-6">
+      class="rounded-3 border border-blue-200 dark:border-blue-800 p-6">
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
         <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -274,14 +274,14 @@
           @keydown.escape="cancelEdit"
           autofocus
           rows="4"
-          class="w-full text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-brand-400 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-y"
+          class="w-full text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-brand-400 rounded-3 p-3 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-y"
         />
         <p class="text-xs text-gray-400 mt-1">Cliquer ailleurs pour enregistrer · Echap pour annuler</p>
       </div>
       <p
         v-else-if="localTache.indicateurs_resultats"
         class="text-gray-700 dark:text-gray-300 whitespace-pre-line"
-        :class="tache.permissions?.can_edit ? 'cursor-pointer hover:bg-white/50 dark:hover:bg-gray-800/50 rounded-lg p-2 -m-2 transition-colors' : ''"
+        :class="tache.permissions?.can_edit ? 'cursor-pointer hover:bg-white/50 dark:hover:bg-gray-800/50 rounded-3 p-2 -m-2 transition-colors' : ''"
         :title="tache.permissions?.can_edit ? 'Cliquer pour modifier' : ''"
         @click="startEdit('indicateurs_resultats', localTache.indicateurs_resultats)"
       >{{ localTache.indicateurs_resultats }}</p>
@@ -299,7 +299,7 @@
     <!-- Informations détaillées en grille -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <!-- Dates (display only — already editable above) -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-6">
         <h4 class="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
           <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -309,7 +309,7 @@
         </h4>
         <div class="space-y-4">
           <div v-if="tache.date_debut" class="flex items-start gap-3">
-            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center shrink-0">
+            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-3 flex items-center justify-center shrink-0">
               <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
@@ -321,7 +321,7 @@
           </div>
 
           <div v-if="localTache.echeance" class="flex items-start gap-3">
-            <div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+            <div class="w-10 h-10 rounded-3 flex items-center justify-center shrink-0"
               :class="localTache.is_overdue ? 'bg-red-100 dark:bg-red-900/30' : 'bg-amber-100 dark:bg-amber-900/30'">
               <svg class="w-5 h-5"
                 :class="localTache.is_overdue ? 'text-red-600 dark:text-red-400' : 'text-amber-600 dark:text-amber-400'"
@@ -339,7 +339,7 @@
           </div>
 
           <div v-if="tache.week_number" class="flex items-start gap-3">
-            <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center shrink-0">
+            <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-3 flex items-center justify-center shrink-0">
               <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -361,7 +361,7 @@
 
     <!-- Validation Status (display only) -->
     <div v-if="tache.validation"
-      class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+      class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-6">
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
         <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -370,12 +370,12 @@
         Statut de validation
       </h3>
       <div class="space-y-4">
-        <div class="p-4 rounded-lg border-2 transition-all" :class="tache.validation.n1_validated_at
+        <div class="p-4 rounded-3 border-2 transition-all" :class="tache.validation.n1_validated_at
           ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
           : 'bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700'">
           <div class="flex items-start gap-4">
             <div class="flex-shrink-0">
-              <div v-if="tache.validation.n1_validated_at" class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
+              <div v-if="tache.validation.n1_validated_at" class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center ">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
@@ -390,7 +390,7 @@
                 Validé par <span class="font-medium">{{ tache.validation.n1_validated_by?.nom }}</span>
                 le {{ formatDateTime(tache.validation.n1_validated_at) }}
               </p>
-              <p v-if="tache.validation.n1_commentaire" class="text-sm text-gray-700 dark:text-gray-300 mt-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 italic">
+              <p v-if="tache.validation.n1_commentaire" class="text-sm text-gray-700 dark:text-gray-300 mt-2 p-3 bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 italic">
                 "{{ tache.validation.n1_commentaire }}"
               </p>
               <p v-if="!tache.validation.n1_validated_at && tache.validation.n1_required" class="text-sm text-amber-600 dark:text-amber-400 mt-1">
@@ -400,12 +400,12 @@
           </div>
         </div>
 
-        <div v-if="tache.validation.n2_required" class="p-4 rounded-lg border-2 transition-all" :class="tache.validation.n2_validated_at
+        <div v-if="tache.validation.n2_required" class="p-4 rounded-3 border-2 transition-all" :class="tache.validation.n2_validated_at
           ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800'
           : 'bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700'">
           <div class="flex items-start gap-4">
             <div class="flex-shrink-0">
-              <div v-if="tache.validation.n2_validated_at" class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center shadow-lg">
+              <div v-if="tache.validation.n2_validated_at" class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center ">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
@@ -420,7 +420,7 @@
                 Validé par <span class="font-medium">{{ tache.validation.n2_validated_by?.nom }}</span>
                 le {{ formatDateTime(tache.validation.n2_validated_at) }}
               </p>
-              <p v-if="tache.validation.n2_commentaire" class="text-sm text-gray-700 dark:text-gray-300 mt-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 italic">
+              <p v-if="tache.validation.n2_commentaire" class="text-sm text-gray-700 dark:text-gray-300 mt-2 p-3 bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 italic">
                 "{{ tache.validation.n2_commentaire }}"
               </p>
               <p v-if="!tache.validation.n2_validated_at && tache.validation.n1_validated_at" class="text-sm text-amber-600 dark:text-amber-400 mt-1">
@@ -433,7 +433,7 @@
     </div>
 
     <!-- Commentaire inline-editable -->
-    <div class="bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-800 p-6">
+    <div class="bg-amber-50 dark:bg-amber-900/20 rounded-3 border border-amber-200 dark:border-amber-800 p-6">
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
         <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -448,14 +448,14 @@
           @keydown.escape="cancelEdit"
           autofocus
           rows="3"
-          class="w-full text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-amber-400 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-amber-500 resize-y"
+          class="w-full text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-amber-400 rounded-3 p-3 focus:outline-none focus:ring-2 focus:ring-amber-500 resize-y"
         />
         <p class="text-xs text-gray-400 mt-1">Cliquer ailleurs pour enregistrer · Echap pour annuler</p>
       </div>
       <p
         v-else-if="localTache.commentaire"
         class="text-gray-700 dark:text-gray-300 whitespace-pre-line"
-        :class="tache.permissions?.can_edit ? 'cursor-pointer hover:bg-amber-100/50 dark:hover:bg-amber-900/30 rounded-lg p-2 -m-2 transition-colors' : ''"
+        :class="tache.permissions?.can_edit ? 'cursor-pointer hover:bg-amber-100/50 dark:hover:bg-amber-900/30 rounded-3 p-2 -m-2 transition-colors' : ''"
         :title="tache.permissions?.can_edit ? 'Cliquer pour modifier' : ''"
         @click="startEdit('commentaire', localTache.commentaire)"
       >{{ localTache.commentaire }}</p>
@@ -471,7 +471,7 @@
     </div>
 
     <!-- Métadonnées (display only) -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-6">
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
         <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -480,19 +480,19 @@
         Informations système
       </h3>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+        <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded-3">
           <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Code</p>
           <p class="font-mono font-semibold text-gray-900 dark:text-white">{{ tache.code }}</p>
         </div>
-        <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+        <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded-3">
           <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Créé le</p>
           <p class="text-sm text-gray-900 dark:text-white">{{ formatDate(tache.created_at) }}</p>
         </div>
-        <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+        <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded-3">
           <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Modifié le</p>
           <p class="text-sm text-gray-900 dark:text-white">{{ formatDate(localTache.updated_at) }}</p>
         </div>
-        <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+        <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded-3">
           <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Visibilité</p>
           <p class="text-sm text-gray-900 dark:text-white capitalize">{{ tache.visibility || 'Public' }}</p>
         </div>

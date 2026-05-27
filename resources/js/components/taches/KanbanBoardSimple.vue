@@ -192,7 +192,7 @@
     <!-- ✅ CORRECTION : Overlay subtil au lieu de complètement opaque -->
     <div
       v-if="isDragging"
-      class="fixed inset-0 bg-blue-500/5 backdrop-blur-[2px] pointer-events-none z-10"
+      class="fixed inset-0 bg-brand-500/5 pointer-events-none z-10"
     ></div>
   </div>
 </template>
@@ -409,7 +409,8 @@ const checkMove = (event) => {
 }
 
 .dragging-card {
-  @apply transform rotate-3 scale-105 shadow-2xl opacity-80 cursor-grabbing;
+  @apply transform rotate-3 scale-105 opacity-80 cursor-grabbing;
+  border: 2px solid var(--color-brand-300);
 }
 
 /* Animation lors du drop */

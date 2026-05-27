@@ -1,7 +1,7 @@
 <!-- resources/js/components/taches/ValidationTaskCard.vue -->
 <template>
   <div 
-    class="rounded-xl border p-4 transition-all hover:shadow-lg group"
+    class="rounded-3 border p-4 transition-all group"
     :class="cardClass"
   >
     <div class="flex items-start justify-between gap-4">
@@ -103,7 +103,7 @@
         <!-- Info validation N1 (pour N2) -->
         <div 
           v-if="validationLevel === 'n2' && tache.validation?.n1_validated_at" 
-          class="mt-3 p-2 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800"
+          class="mt-3 p-2 rounded-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800"
         >
           <div class="flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,7 +125,7 @@
         <!-- Bouton voir -->
         <button
           @click="$emit('view', tache)"
-          class="p-2 rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          class="p-2 rounded-3 border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           title="Voir les détails"
         >
           <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,7 +137,7 @@
         <!-- Bouton valider -->
         <button
           @click="$emit('validate', tache)"
-          class="px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 shadow-sm hover:shadow-md"
+          class="px-4 py-2 rounded-3 font-medium transition-all flex items-center gap-2 "
           :class="validationLevel === 'n1' 
             ? 'bg-green-500 hover:bg-green-600 text-white' 
             : 'bg-purple-500 hover:bg-purple-600 text-white'"

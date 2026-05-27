@@ -3,25 +3,25 @@
   <AdminLayout>
     <div class="min-h-screen bg-gray-50/50 dark:bg-gray-900/50">
       <!-- Header Premium -->
-      <div class="bg-white dark:bg-gray-900 border-b border-gray-200/80 dark:border-gray-800/80 backdrop-blur-sm">
+      <div class="bg-white dark:bg-gray-900 border-b border-gray-200/80 dark:border-gray-800/80 ">
         <div class="max-w-7xl mx-auto px-6 py-8">
           <div class="flex items-start justify-between">
             <div class="flex items-center gap-5">
               <div class="relative">
                 <div
-                  class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-lg shadow-green-500/25">
+                  class="w-16 h-16 rounded-3 flex items-center justify-center shadow-green-500/25">
                   <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <div class="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center shadow-lg">
+                <div class="absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center ">
                   <span class="text-xs font-bold text-white">{{ countsN1.pending + countsN2.pending }}</span>
                 </div>
               </div>
               <div>
                 <h1
-                  class="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent"> Validation des Résultats
+                  class="text-3xl font-bold bg-clip-text text-transparent"> Validation des Résultats
                 </h1>
                 <p class="text-gray-600 dark:text-gray-400 mt-2 text-lg">
                   Valider ou rejeter les résultats soumis par les membres
@@ -31,7 +31,7 @@
 
             <div class="flex items-center gap-3">
               <button @click="loadData" :disabled="loading"
-                class="p-3 rounded-xl border border-gray-300/80 dark:border-gray-700/80 bg-white/80 dark:bg-gray-800/80 hover:bg-gray-50 dark:hover:bg-gray-800 backdrop-blur-sm transition-all duration-200 hover:scale-105 disabled:opacity-50 shadow-sm"
+                class="p-3 rounded-3 border border-gray-300/80 dark:border-gray-700/80 bg-white/80 dark:bg-gray-800/80 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 disabled:opacity-50 "
                 title="Actualiser">
                 <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" :class="{ 'animate-spin': loading }" fill="none"
                   stroke="currentColor" viewBox="0 0 24 24">
@@ -43,11 +43,11 @@
           </div>
 
           <!-- Enhanced Tabs -->
-          <div class="flex gap-1 mt-8 bg-gray-100/80 dark:bg-gray-800/80 rounded-2xl p-1.5 backdrop-blur-sm">
+          <div class="flex gap-1 mt-8 bg-gray-100/80 dark:bg-gray-800/80 rounded-3 p-1.5 ">
             <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
-              class="flex items-center gap-3 px-6 py-3.5 text-sm font-semibold transition-all duration-200 rounded-xl relative group"
+              class="flex items-center gap-3 px-6 py-3.5 text-sm font-semibold transition-all duration-200 rounded-3 relative group"
               :class="activeTab === tab.id
-                ? 'text-white shadow-lg' + tab.activeGradient
+                ? 'text-white ' + tab.activeGradient
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-gray-700/50'">
               <div class="flex items-center gap-2.5">
                 <component :is="tab.icon" class="w-4 h-4" />
@@ -66,13 +66,13 @@
       <div class="max-w-7xl mx-auto px-6 py-6">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
           <div v-for="stat in stats" :key="stat.id"
-            class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-200/50 dark:border-gray-700/50 hover:shadow-lg transition-all duration-200 hover:border-gray-300/80 dark:hover:border-gray-600/80">
+            class="bg-white/80 dark:bg-gray-800/80 rounded-3 p-6 border border-gray-200/50 dark:border-gray-700/50 transition-all duration-200 hover:border-gray-300/80 dark:hover:border-gray-600/80">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ stat.label }}</p>
                 <p class="text-3xl font-bold mt-2" :class="stat.color">{{ stat.value }}</p>
               </div>
-              <div class="w-12 h-12 rounded-xl flex items-center justify-center" :class="stat.bgColor">
+              <div class="w-12 h-12 rounded-3 flex items-center justify-center" :class="stat.bgColor">
                 <component :is="stat.icon" class="w-6 h-6" :class="stat.iconColor" />
               </div>
             </div>
@@ -92,9 +92,9 @@
 
         <!-- Error State -->
         <div v-else-if="error"
-          class="rounded-2xl border border-red-200 bg-red-50/80 dark:bg-red-900/20 dark:border-red-800/50 p-8 backdrop-blur-sm">
+          class="rounded-3 border border-red-200 bg-red-50/80 dark:bg-red-900/20 dark:border-red-800/50 p-8 ">
           <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+            <div class="w-12 h-12 rounded-3 bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
               <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -113,9 +113,9 @@
         <div v-else class="space-y-6">
           <!-- Empty State -->
           <div v-if="currentResults.length === 0"
-            class="rounded-2xl border-2 border-dashed border-gray-300/80 dark:border-gray-700/80 bg-white/50 dark:bg-gray-800/50 p-16 text-center backdrop-blur-sm">
+            class="rounded-3 border-2 border-dashed border-gray-300/80 dark:border-gray-700/80 bg-white/50 dark:bg-gray-800/50 p-16 text-center ">
             <div
-              class="w-24 h-24 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center">
+              class="w-24 h-24 mx-auto mb-6 rounded-3 flex items-center justify-center">
               <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -186,7 +186,7 @@ const tabs = computed(() => [
     label: 'Validation N1',
     icon: 'ClockIcon',
     count: countsN1.value.pending,
-    activeGradient: ' bg-gradient-to-r from-orange-500 to-amber-500',
+    activeGradient: ' bg-warning-500',
     iconComponent: ClockIcon
   },
   {
@@ -194,7 +194,7 @@ const tabs = computed(() => [
     label: 'Validation N2',
     icon: 'CheckCircleIcon',
     count: countsN2.value.pending,
-    activeGradient: ' bg-gradient-to-r from-blue-500 to-cyan-500',
+    activeGradient: ' bg-brand-500',
     iconComponent: CheckCircleIcon
   },
   {
@@ -202,7 +202,7 @@ const tabs = computed(() => [
     label: 'Historique',
     icon: 'ArchiveIcon',
     count: 0,
-    activeGradient: ' bg-gradient-to-r from-purple-500 to-pink-500',
+    activeGradient: ' bg-purple-500',
     iconComponent: ArchiveIcon
   }
 ])

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-move border border-gray-200 dark:border-gray-700"
+    class="bg-white dark:bg-gray-800 rounded-3 p-4 transition-shadow cursor-move border border-gray-200 dark:border-gray-700"
     :style="{ borderLeftColor: tache.couleur, borderLeftWidth: '4px' }"
   >
     <!-- Cover Image -->
@@ -63,7 +63,7 @@
         <div
           v-if="showMenu"
           v-click-outside="() => showMenu = false"
-          class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-lg z-10 py-1"
+          class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-3 z-10 py-1"
         >
           <button
             @click.stop="$emit('edit', tache)"

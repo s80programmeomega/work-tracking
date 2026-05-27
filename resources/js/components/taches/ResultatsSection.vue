@@ -23,7 +23,7 @@
           <div class="relative" v-if="resultats.length > 0">
             <button
               @click="showFilters = !showFilters"
-              class="px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all flex items-center gap-2"
+              class="px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all flex items-center gap-2"
               :class="{ 'bg-brand-50 dark:bg-brand-900/20 border-brand-500': activeFilters.length > 0 }"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -36,7 +36,7 @@
             </button>
             
             <!-- Dropdown filtres -->
-            <div v-if="showFilters" class="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-10">
+            <div v-if="showFilters" class="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 z-10">
               <div class="p-4 space-y-3">
                 <div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-2">
                   <h4 class="font-semibold text-gray-900 dark:text-white">Filtres</h4>
@@ -75,7 +75,7 @@
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Trier par
                   </label>
-                  <select v-model="sortBy" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm">
+                  <select v-model="sortBy" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 dark:bg-gray-700 dark:text-white text-sm">
                     <option value="date_desc">Plus récent</option>
                     <option value="date_asc">Plus ancien</option>
                     <option value="progress_desc">Progression (desc)</option>
@@ -90,7 +90,7 @@
           <button
             v-if="canAddResultat"
             @click="showForm = true"
-            class="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
+            class="px-4 py-2 text-white rounded-3 font-medium transition-all flex items-center gap-2"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -103,7 +103,7 @@
 
       <!-- Statistiques -->
       <div v-if="resultats.length > 0" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
+        <div class="rounded-3 p-3 border border-blue-200 dark:border-blue-800">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-xs font-medium text-blue-700 dark:text-blue-300 uppercase">Total</p>
@@ -117,7 +117,7 @@
           </div>
         </div>
 
-        <div class="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 rounded-lg p-3 border border-amber-200 dark:border-amber-800">
+        <div class="rounded-3 p-3 border border-amber-200 dark:border-amber-800">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-xs font-medium text-amber-700 dark:text-amber-300 uppercase">Brouillons</p>
@@ -131,7 +131,7 @@
           </div>
         </div>
 
-        <div class="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg p-3 border border-purple-200 dark:border-purple-800">
+        <div class="rounded-3 p-3 border border-purple-200 dark:border-purple-800">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-xs font-medium text-purple-700 dark:text-purple-300 uppercase">Validation</p>
@@ -145,7 +145,7 @@
           </div>
         </div>
 
-        <div class="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg p-3 border border-green-200 dark:border-green-800">
+        <div class="rounded-3 p-3 border border-green-200 dark:border-green-800">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-xs font-medium text-green-700 dark:text-green-300 uppercase">Validés</p>
@@ -168,8 +168,8 @@
     </div>
 
     <!-- Empty State -->
-    <div v-else-if="resultats.length === 0" class="text-center py-16 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700">
-      <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+    <div v-else-if="resultats.length === 0" class="text-center py-16 rounded-3 border-2 border-dashed border-gray-300 dark:border-gray-700">
+      <div class="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center">
         <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
@@ -183,7 +183,7 @@
       <button
         v-if="canAddResultat"
         @click="showForm = true"
-        class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all"
+        class="inline-flex items-center px-6 py-3 text-white rounded-3 font-medium transition-all"
       >
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -193,7 +193,7 @@
     </div>
 
     <!-- Résultats filtrés vides -->
-    <div v-else-if="filteredResultats.length === 0" class="text-center py-12 bg-gray-50 dark:bg-gray-900 rounded-xl">
+    <div v-else-if="filteredResultats.length === 0" class="text-center py-12 bg-gray-50 dark:bg-gray-900 rounded-3">
       <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
       </svg>
@@ -206,7 +206,7 @@
     <!-- Liste des résultats avec timeline -->
     <div v-else class="relative">
       <!-- Timeline line -->
-      <div class="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500 via-purple-500 to-green-500 hidden md:block"></div>
+      <div class="absolute left-8 top-0 bottom-0 w-0.5 hidden md:block"></div>
       
       <div class="space-y-6">
         <ResultatCard

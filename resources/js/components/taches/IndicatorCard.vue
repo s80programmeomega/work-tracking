@@ -1,6 +1,6 @@
 <!-- resources/js/components/taches/IndicatorCard.vue -->
 <template>
-  <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-lg transition-shadow">
+  <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-4 transition-shadow">
     <div class="flex items-center justify-between">
       <div>
         <p class="text-xs font-medium uppercase tracking-wider" :class="textColorClass">

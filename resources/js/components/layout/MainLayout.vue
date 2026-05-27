@@ -41,14 +41,14 @@ setTimeout(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f8fafc;
+    background: var(--color-gray-50, #F4F6F9);
 }
 
 .layout-spinner {
     width: 40px;
     height: 40px;
-    border: 3px solid #e2e8f0;
-    border-top: 3px solid #3b82f6;
+    border: 3px solid var(--color-gray-200, #D0DAE8);
+    border-top: 3px solid var(--color-brand-500, #2D7DD2);
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -59,8 +59,8 @@ setTimeout(() => {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: #fef2f2;
-    color: #dc2626;
+    background: var(--color-error-50, #FDEDEC);
+    color: var(--color-error-500, #C0392B);
     padding: 20px;
     text-align: center;
 }
@@ -74,22 +74,22 @@ setTimeout(() => {
 .layout-error p {
     font-size: 14px;
     margin-bottom: 20px;
-    color: #7f1d1d;
+    color: var(--color-error-600, #a33124);
 }
 
 .retry-btn {
     padding: 8px 16px;
-    background: #3b82f6;
+    background: var(--color-brand-500, #2D7DD2);
     color: white;
     border: none;
-    border-radius: 6px;
+    border-radius: 4px;
     cursor: pointer;
     font-weight: 500;
     transition: background 0.2s;
 }
 
 .retry-btn:hover {
-    background: #2563eb;
+    background: var(--color-brand-600, #2469b8);
 }
 
 @keyframes spin {

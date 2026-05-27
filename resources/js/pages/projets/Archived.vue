@@ -24,7 +24,7 @@
               <!-- Workspace Selector -->
               <div v-if="hasWorkspaces" class="relative">
                 <select v-model="selectedWorkspaceId" @change="onWorkspaceChange"
-                  class="pl-10 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer">
+                  class="pl-10 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer">
                   <option v-for="workspace in workspaces" :key="workspace.id" :value="workspace.id"
                     class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
                     {{ workspace.nom }}
@@ -37,7 +37,7 @@
 
               <!-- Display Mode Toggle for Super Admin -->
               <button v-if="isSuperAdmin" @click="toggleDisplayMode" :class="[
-                'inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+                'inline-flex items-center gap-2 px-4 py-2 rounded-3 text-sm font-medium transition-colors',
                 displayMode === 'all-archived'
                   ? 'bg-blue-600 text-white hover:bg-blue-700'
                   : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
@@ -49,7 +49,7 @@
               <!-- Bulk Actions -->
               <div class="relative" v-if="selectedProjets.length > 0">
                 <button @click="showBulkActions = !showBulkActions"
-                  class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                  class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-3 hover:bg-blue-700 transition-colors font-medium">
                   <ArchiveIcon class="w-4 h-4" />
                   Actions groupées ({{ selectedProjets.length }})
                   <ChevronDownIcon class="w-4 h-4" />
@@ -57,7 +57,7 @@
 
                 <!-- Bulk Actions Dropdown -->
                 <div v-if="showBulkActions" v-click-outside="() => showBulkActions = false"
-                  class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-10">
+                  class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-3 border border-gray-200 dark:border-gray-600 z-10">
                   <button @click="bulkUnarchive"
                     class="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-t-lg transition-colors">
                     <ArchiveBoxArrowUpIcon class="w-4 h-4" />
@@ -80,7 +80,7 @@
         <div class="max-w-full mx-auto">
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <!-- Total Archives -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-4">
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-2xl font-bold text-gray-900 dark:text-white">
@@ -90,7 +90,7 @@
                     Projets archivés
                   </p>
                 </div>
-                <div class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                <div class="p-2 bg-gray-100 dark:bg-gray-700 rounded-3">
                   <ArchiveIcon class="w-6 h-6 text-gray-600 dark:text-gray-400" />
                 </div>
               </div>
@@ -105,7 +105,7 @@
             </div>
 
             <!-- Durée moyenne d'archivage -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-4">
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-2xl font-bold text-gray-900 dark:text-white">
@@ -115,7 +115,7 @@
                     Jours d'archivage
                   </p>
                 </div>
-                <div class="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                <div class="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-3">
                   <ClockIcon class="w-6 h-6 text-purple-600 dark:text-purple-400" />
                 </div>
               </div>
@@ -127,7 +127,7 @@
             </div>
 
             <!-- Taux de complétion -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-4">
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-2xl font-bold text-gray-900 dark:text-white">
@@ -137,7 +137,7 @@
                     Complétion moyenne
                   </p>
                 </div>
-                <div class="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                <div class="p-2 bg-green-100 dark:bg-green-900/30 rounded-3">
                   <CheckCircleIcon class="w-6 h-6 text-green-600 dark:text-green-400" />
                 </div>
               </div>
@@ -152,7 +152,7 @@
             </div>
 
             <!-- Ancienneté -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-4">
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-2xl font-bold text-gray-900 dark:text-white">
@@ -162,7 +162,7 @@
                     Archivés récemment
                   </p>
                 </div>
-                <div class="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                <div class="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-3">
                   <CalendarIcon class="w-6 h-6 text-orange-600 dark:text-orange-400" />
                 </div>
               </div>
@@ -182,19 +182,19 @@
       <div class="px-4 py-4">
         <div class="max-w-full mx-auto">
           <!-- Filters and Search - Spécial Archives -->
-          <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 mb-4">
+          <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-4 mb-4">
             <!-- Search Bar -->
             <div class="relative mb-4">
               <SearchIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input v-model="searchTerm" type="text" placeholder="Rechercher dans les archives..."
-                class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+                class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
             </div>
 
             <!-- Filter Buttons -->
             <div class="flex flex-wrap gap-2">
               <!-- Date d'archivage Filter -->
               <select v-model="filters.archived_period"
-                class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-all">
+                class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-all">
                 <option value="all">Toutes périodes</option>
                 <option value="today">Aujourd'hui</option>
                 <option value="week">Cette semaine</option>
@@ -205,7 +205,7 @@
 
               <!-- Statut avant archivage -->
               <select v-model="filters.pre_archive_status"
-                class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-all">
+                class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-all">
                 <option value="all">Tous les statuts</option>
                 <option value="completed">Terminés avant archivage</option>
                 <option value="active">Actifs avant archivage</option>
@@ -213,7 +213,7 @@
 
               <!-- Complétion Filter -->
               <select v-model="filters.completion"
-                class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-all">
+                class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-all">
                 <option value="all">Tous les taux</option>
                 <option value="100">100% complétés</option>
                 <option value="75-99">75-99% complétés</option>
@@ -231,7 +231,7 @@
           </div>
 
           <!-- Selection Info -->
-          <div v-if="selectedProjets.length > 0" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
+          <div v-if="selectedProjets.length > 0" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-3 p-4 mb-4">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
                 <CheckCircleIcon class="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -257,7 +257,7 @@
 
           <!-- Empty State -->
           <div v-else-if="filteredProjets.length === 0"
-            class="text-center py-16 bg-white dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
+            class="text-center py-16 bg-white dark:bg-gray-800 rounded-3 border-2 border-dashed border-gray-300 dark:border-gray-700">
             <div
               class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 mb-4">
               <ArchiveBoxIcon class="w-8 h-8 text-gray-400" />
@@ -272,7 +272,7 @@
               }}
             </p>
             <button v-if="!searchTerm && !hasActiveFilters" @click="goToActiveProjects"
-              class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+              class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-3 hover:bg-blue-700 transition-colors font-medium">
               <ArrowLeftIcon class="w-5 h-5" />
               Voir les projets actifs
             </button>
@@ -281,7 +281,7 @@
           <!-- Archived Projects Grid -->
           <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <div v-for="projet in filteredProjets" :key="projet.id"
-              class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow overflow-hidden"
+              class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 transition-shadow overflow-hidden"
               :class="{
                 'ring-2 ring-blue-500': isSelected(projet.id),
                 'opacity-75': projet.status === 'archived'
@@ -331,7 +331,7 @@
 
                       <!-- Dropdown Menu -->
                       <div v-if="activeMenuId === projet.id" v-click-outside="() => activeMenuId = null"
-                        class="absolute right-0 mt-1 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-10">
+                        class="absolute right-0 mt-1 w-48 bg-white dark:bg-gray-700 rounded-3 border border-gray-200 dark:border-gray-600 z-10">
                         <button @click.stop="viewProjet(projet.id)"
                           class="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-t-lg transition-colors">
                           <EyeIcon class="w-4 h-4" />
@@ -440,7 +440,7 @@
 
           <!-- Pagination -->
           <div v-if="pagination.last_page > 1"
-            class="flex items-center justify-between bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 mt-4">
+            class="flex items-center justify-between bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-4 mt-4">
             <div class="text-sm text-gray-700 dark:text-gray-400">
               Affichage de <span class="font-medium">{{ (pagination.current_page - 1) * pagination.per_page + 1
                 }}</span> à

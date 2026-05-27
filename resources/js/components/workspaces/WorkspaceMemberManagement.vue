@@ -3,7 +3,7 @@
   <div class="space-y-6">
     <!-- Header avec statistiques -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-6">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Membres</p>
@@ -11,13 +11,13 @@
               {{ stats.total_members || 0 }}
             </p>
           </div>
-          <div class="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+          <div class="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-3">
             <UsersIcon class="w-8 h-8 text-blue-600 dark:text-blue-400" />
           </div>
         </div>
       </div>
 
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-6">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Actifs</p>
@@ -25,13 +25,13 @@
               {{ stats.active_members || 0 }}
             </p>
           </div>
-          <div class="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
+          <div class="p-3 bg-green-100 dark:bg-green-900/30 rounded-3">
             <CheckCircleIcon class="w-8 h-8 text-green-600 dark:text-green-400" />
           </div>
         </div>
       </div>
 
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-6">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Invitations</p>
@@ -39,13 +39,13 @@
               {{ stats.pending_invitations || 0 }}
             </p>
           </div>
-          <div class="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
+          <div class="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-3">
             <MailIcon class="w-8 h-8 text-yellow-600 dark:text-yellow-400" />
           </div>
         </div>
       </div>
 
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-6">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Administrateurs</p>
@@ -53,7 +53,7 @@
               {{ stats.admin_count || 0 }}
             </p>
           </div>
-          <div class="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+          <div class="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-3">
             <ShieldIcon class="w-8 h-8 text-purple-600 dark:text-purple-400" />
           </div>
         </div>
@@ -61,7 +61,7 @@
     </div>
 
     <!-- Tabs Navigation -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+    <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700">
       <div class="border-b border-gray-200 dark:border-gray-700">
         <nav class="flex space-x-8 px-6" aria-label="Tabs">
           <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id" :class="[
@@ -95,12 +95,12 @@
               <div class="relative flex-1 max-w-md">
                 <SearchIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input v-model="searchTerm" type="text" placeholder="Rechercher un membre..."
-                  class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
+                  class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
               </div>
 
               <!-- Filter by Role -->
               <select v-model="filterRole"
-                class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500">
+                class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500">
                 <option value="all">Tous les rôles</option>
                 <option value="owner">Propriétaire</option>
                 <option value="manager">Manager</option>
@@ -112,7 +112,7 @@
             </div>
 
             <button v-if="canManageMembers" dusk="invite-member-btn" @click="showInviteModal = true"
-              class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors">
+              class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700 transition-colors">
               <UserPlusIcon class="w-5 h-5" />
               Inviter un membre
             </button>
@@ -125,7 +125,7 @@
 
           <!-- Members List -->
           <div v-else
-            class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+            class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3 overflow-hidden">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead class="bg-gray-50 dark:bg-gray-700">
                 <tr>
@@ -230,13 +230,13 @@
               Invitations en attente
             </h3>
             <button @click="showInviteModal = true"
-              class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors">
+              class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700 transition-colors">
               <UserPlusIcon class="w-5 h-5" />
               Nouvelle invitation
             </button>
           </div>
 
-          <div v-if="invitations.length === 0" class="text-center py-12 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+          <div v-if="invitations.length === 0" class="text-center py-12 bg-gray-50 dark:bg-gray-700/50 rounded-3">
             <MailIcon class="mx-auto h-12 w-12 text-gray-400" />
             <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
               Aucune invitation en attente
@@ -245,9 +245,9 @@
 
           <div v-else class="space-y-3">
             <div v-for="invitation in invitations" :key="invitation.id"
-              class="flex items-center justify-between p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+              class="flex items-center justify-between p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3">
               <div class="flex items-center gap-4">
-                <div class="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
+                <div class="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-3">
                   <MailIcon class="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
                 </div>
                 <div>
@@ -282,7 +282,7 @@
 
           <div class="space-y-4">
             <div v-for="activity in recentActivities" :key="activity.id"
-              class="flex items-start gap-4 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+              class="flex items-start gap-4 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3">
               <div v-if="activity.user?.avatar" class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
                 <img :src="activity.user.avatar" :alt="activity.user.nom" class="w-full h-full object-cover" />
               </div>

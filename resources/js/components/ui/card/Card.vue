@@ -1,7 +1,7 @@
 <!-- resources/js/components/ui/card/Card.vue -->
 <template>
   <div 
-    class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm"
+    class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 "
     :class="[paddingClass, additionalClasses]"
   >
     <slot />

@@ -20,9 +20,9 @@
     </nav>
 
     <!-- Project Info Card -->
-    <div v-if="projet" class="rounded-2xl border border-gray-200 bg-gradient-to-br from-blue-50 to-purple-50 p-6 dark:border-gray-800 dark:from-blue-900/20 dark:to-purple-900/20">
-      <div class="flex items-start gap-4">
-        <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-600 text-white">
+    <div v-if="projet" class="rounded-3 border border-gray-200 p-6 dark:border-gray-800">
+          <div class="flex items-start gap-4">
+        <div class="flex h-14 w-14 items-center justify-center rounded-3 bg-blue-600 text-white">
           <FolderIcon class="h-7 w-7" />
         </div>
         <div class="flex-1">

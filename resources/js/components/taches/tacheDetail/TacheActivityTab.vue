@@ -4,35 +4,35 @@
     <div class="flex gap-2 flex-wrap">
       <button 
         @click="filterType = 'all'"
-        class="px-3 py-1 rounded-lg text-sm transition-colors"
+        class="px-3 py-1 rounded-3 text-sm transition-colors"
         :class="filterType === 'all' ? 'bg-brand-600 text-white' : 'bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300'"
       >
         Tout
       </button>
       <button 
         @click="filterType = 'status'"
-        class="px-3 py-1 rounded-lg text-sm transition-colors"
+        class="px-3 py-1 rounded-3 text-sm transition-colors"
         :class="filterType === 'status' ? 'bg-brand-600 text-white' : 'bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300'"
       >
         Statuts
       </button>
       <button 
         @click="filterType = 'assignment'"
-        class="px-3 py-1 rounded-lg text-sm transition-colors"
+        class="px-3 py-1 rounded-3 text-sm transition-colors"
         :class="filterType === 'assignment' ? 'bg-brand-600 text-white' : 'bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300'"
       >
         Assignations
       </button>
       <button 
         @click="filterType = 'files'"
-        class="px-3 py-1 rounded-lg text-sm transition-colors"
+        class="px-3 py-1 rounded-3 text-sm transition-colors"
         :class="filterType === 'files' ? 'bg-brand-600 text-white' : 'bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300'"
       >
         Fichiers
       </button>
       <button 
         @click="filterType = 'comments'"
-        class="px-3 py-1 rounded-lg text-sm transition-colors"
+        class="px-3 py-1 rounded-3 text-sm transition-colors"
         :class="filterType === 'comments' ? 'bg-brand-600 text-white' : 'bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300'"
       >
         Commentaires
@@ -51,7 +51,7 @@
         <!-- Icon -->
         <div class="relative z-10 flex-shrink-0">
           <div 
-            class="w-12 h-12 rounded-full flex items-center justify-center shadow-lg"
+            class="w-12 h-12 rounded-full flex items-center justify-center "
             :class="getActivityColor(activity.type)"
           >
             <i :class="['fas', getActivityIcon(activity.type), 'text-white']"></i>
@@ -59,7 +59,7 @@
         </div>
 
         <!-- Content -->
-        <div class="flex-1 bg-white dark:bg-gray-800 rounded-xl p-4 border-2 border-gray-200 dark:border-gray-700 shadow-sm hover:border-brand-500 transition-colors">
+        <div class="flex-1 bg-white dark:bg-gray-800 rounded-3 p-4 border-2 border-gray-200 dark:border-gray-700 hover:border-brand-500 transition-colors">
           <div class="flex items-start justify-between gap-4 mb-2">
             <div class="flex items-center gap-2">
               <img 
@@ -82,7 +82,7 @@
           </p>
 
           <!-- Détails supplémentaires -->
-          <div v-if="activity.details" class="mt-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg text-sm">
+          <div v-if="activity.details" class="mt-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-3 text-sm">
             <!-- Changement de statut -->
             <div v-if="activity.type === 'status_changed'" class="flex items-center gap-2">
               <span class="px-2 py-1 rounded text-xs font-semibold" :class="getStatutClass(activity.details.from)">

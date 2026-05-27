@@ -2,7 +2,7 @@
   <AdminLayout>
     <PageBreadcrumb :pageTitle="'Gestion des Utilisateurs'" />
 
-    <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
+    <div class="rounded-3 border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
       <!-- Header -->
       <div class="flex items-center justify-between mb-6">
         <div>
@@ -17,7 +17,7 @@
         <button
           v-if="canCreate"
           @click="openCreateModal"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+          class="px-4 py-2 bg-blue-600 text-white rounded-3 hover:bg-blue-700 transition flex items-center gap-2"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
@@ -33,13 +33,13 @@
           @input="applyFilters"
           type="text"
           placeholder="Rechercher..."
-          class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+          class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
         />
 
         <select
           v-model="filters.role"
           @change="applyFilters"
-          class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+          class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
         >
           <option :value="null">Tous les rôles</option>
           <option value="super_admin">Super Admin</option>
@@ -53,7 +53,7 @@
         <select
           v-model="filters.is_active"
           @change="applyFilters"
-          class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+          class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
         >
           <option :value="null">Tous les statuts</option>
           <option :value="true">Actif</option>
@@ -62,7 +62,7 @@
 
         <button
           @click="resetFilters"
-          class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+          class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
         >
           Réinitialiser
         </button>
@@ -70,25 +70,25 @@
 
       <!-- Stats Cards -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-3 p-4 border border-gray-200 dark:border-gray-700">
           <div class="text-sm text-gray-500 dark:text-gray-400">Total</div>
           <div class="text-2xl font-bold text-gray-900 dark:text-white mt-1">
             {{ totalUsers }}
           </div>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-3 p-4 border border-gray-200 dark:border-gray-700">
           <div class="text-sm text-gray-500 dark:text-gray-400">Actifs</div>
           <div class="text-2xl font-bold text-green-600 mt-1">
             {{ activeUsers.length }}
           </div>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-3 p-4 border border-gray-200 dark:border-gray-700">
           <div class="text-sm text-gray-500 dark:text-gray-400">Managers</div>
           <div class="text-2xl font-bold text-blue-600 mt-1">
             {{ usersByRole('manager').length }}
           </div>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-3 p-4 border border-gray-200 dark:border-gray-700">
           <div class="text-sm text-gray-500 dark:text-gray-400">Inactifs</div>
           <div class="text-2xl font-bold text-red-600 mt-1">
             {{ totalUsers - activeUsers.length }}

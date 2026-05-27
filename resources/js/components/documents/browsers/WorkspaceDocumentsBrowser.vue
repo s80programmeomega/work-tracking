@@ -8,13 +8,13 @@
         v-model="searchQuery"
         type="text"
         placeholder="Rechercher un workspace..."
-        class="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+        class="w-full rounded-3 border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
       />
     </div>
 
     <!-- Loading State -->
     <div v-if="loading" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-      <div v-for="i in 6" :key="i" class="h-48 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-800"></div>
+      <div v-for="i in 6" :key="i" class="h-48 animate-pulse rounded-3 bg-gray-200 dark:bg-gray-800"></div>
     </div>
 
     <!-- Workspaces Grid -->
@@ -23,7 +23,7 @@
         v-for="workspace in filteredWorkspaces"
         :key="workspace.id"
         @click="$emit('select', workspace)"
-        class="group relative cursor-pointer overflow-hidden rounded-lg border border-gray-200 bg-white p-5 transition-all hover:border-blue-500 hover:shadow-lg dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-blue-400"
+        class="group relative cursor-pointer overflow-hidden rounded-3 border border-gray-200 bg-white p-5 transition-all hover:border-blue-500 dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-blue-400"
       >
         <!-- Badge Role -->
         <div class="absolute right-4 top-4">
@@ -41,13 +41,13 @@
         <div class="mb-4 flex items-center gap-3">
           <div
             v-if="workspace.logo"
-            class="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg"
+            class="h-12 w-12 flex-shrink-0 overflow-hidden rounded-3"
           >
             <img :src="workspace.logo" :alt="workspace.nom" class="h-full w-full object-cover" />
           </div>
           <div
             v-else
-            class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white"
+            class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-3 text-white"
           >
             <FolderIcon class="h-6 w-6" />
           </div>
@@ -98,12 +98,12 @@
         </div>
 
         <!-- Hover Effect -->
-        <div class="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-blue-500 to-blue-600 opacity-0 transition-opacity group-hover:opacity-100"></div>
+        <div class="absolute inset-x-0 bottom-0 h-1 opacity-0 transition-opacity group-hover:opacity-100"></div>
       </div>
     </div>
 
     <!-- Empty State -->
-    <div v-else class="rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-12 text-center dark:border-gray-700 dark:bg-gray-800/50">
+    <div v-else class="rounded-3 border-2 border-dashed border-gray-300 bg-gray-50 p-12 text-center dark:border-gray-700 dark:bg-gray-800/50">
       <FolderIcon class="mx-auto h-12 w-12 text-gray-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">
         Aucun workspace trouvé

@@ -24,7 +24,7 @@
             leave-from="opacity-100 translate-y-0 sm:scale-100"
             leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
-            <DialogPanel class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all dark:bg-gray-900 sm:my-8 sm:w-full sm:max-w-lg">
+            <DialogPanel class="relative transform overflow-hidden rounded-3 bg-white text-left transition-all dark:bg-gray-900 sm:my-8 sm:w-full sm:max-w-lg">
               <!-- Header -->
               <div class="border-b border-gray-200 bg-white px-6 py-4 dark:border-gray-800 dark:bg-gray-900">
                 <div class="flex items-center justify-between">
@@ -33,7 +33,7 @@
                   </DialogTitle>
                   <button
                     @click="$emit('close')"
-                    class="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500 dark:hover:bg-gray-800"
+                    class="rounded-3 p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500 dark:hover:bg-gray-800"
                   >
                     <XMarkIcon class="h-6 w-6" />
                   </button>
@@ -43,7 +43,7 @@
               <!-- Body -->
               <div class="bg-white px-6 py-5 dark:bg-gray-900">
                 <!-- Current Document Info -->
-                <div class="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/50">
+                <div class="rounded-3 border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/50">
                   <div class="flex items-center gap-4">
                     <component
                       :is="getFileIcon(document)"
@@ -75,7 +75,7 @@
                     @dragover.prevent="isDragging = true"
                     @dragleave.prevent="isDragging = false"
                     :class="[
-                      'mt-2 cursor-pointer rounded-lg border-2 border-dashed transition-all',
+                      'mt-2 cursor-pointer rounded-3 border-2 border-dashed transition-all',
                       isDragging
                         ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/20'
                         : 'border-gray-300 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50'
@@ -131,7 +131,7 @@
                     <div
                       v-for="version in versions"
                       :key="version.id"
-                      class="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-3 text-sm dark:border-gray-700 dark:bg-gray-800"
+                      class="flex items-center justify-between rounded-3 border border-gray-200 bg-white p-3 text-sm dark:border-gray-700 dark:bg-gray-800"
                     >
                       <div class="flex items-center gap-3">
                         <div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-xs font-medium text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
@@ -171,7 +171,7 @@
                 </div>
 
                 <!-- Error Message -->
-                <div v-if="error" class="mt-4 rounded-lg bg-red-50 p-4 dark:bg-red-900/20">
+                <div v-if="error" class="mt-4 rounded-3 bg-red-50 p-4 dark:bg-red-900/20">
                   <div class="flex items-start gap-3">
                     <ExclamationTriangleIcon class="h-5 w-5 flex-shrink-0 text-red-600 dark:text-red-400" />
                     <p class="text-sm text-red-800 dark:text-red-300">{{ error }}</p>
@@ -185,14 +185,14 @@
                   <button
                     @click="$emit('close')"
                     :disabled="uploading"
-                    class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                    class="rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                   >
                     Annuler
                   </button>
                   <button
                     @click="handleCreateVersion"
                     :disabled="!selectedFile || uploading"
-                    class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    class="inline-flex items-center gap-2 rounded-3 bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <div v-if="uploading" class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                     <DocumentDuplicateIcon v-else class="h-5 w-5" />

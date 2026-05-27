@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+  <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-4">
     <h4 class="font-semibold text-gray-900 dark:text-white mb-3">
       Labels ({{ labels?.length || 0 }})
     </h4>
@@ -8,7 +8,7 @@
       <span
         v-for="label in labels"
         :key="label.id"
-        class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium transition-all hover:scale-105"
+        class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium transition-all "
         :style="{
           backgroundColor: label.couleur + '20',
           color: label.couleur,

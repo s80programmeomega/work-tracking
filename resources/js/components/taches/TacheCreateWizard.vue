@@ -1,12 +1,12 @@
 <template>
   <div
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
     @click.self="$emit('close')"
   >
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[95vh] overflow-hidden flex flex-col animate-fade-in">
+    <div class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-2xl max-h-[95vh] overflow-hidden flex flex-col animate-fade-in">
 
       <!-- Header -->
-      <div class="px-6 py-5 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-brand-600 to-indigo-600 text-white">
+      <div class="px-6 py-5 border-b border-gray-200 dark:border-gray-700 text-white">
         <div class="flex items-center justify-between">
           <div>
             <h2 class="text-xl font-bold" dusk="wizard-title">Nouvelle tâche</h2>
@@ -14,7 +14,7 @@
               {{ activiteContext?.nom ? `Activité : ${activiteContext.nom}` : 'Créer une tâche' }}
             </p>
           </div>
-          <button @click="$emit('close')" class="text-white/70 hover:text-white p-1 rounded-lg hover:bg-white/10">
+          <button @click="$emit('close')" class="text-white/70 hover:text-white p-1 rounded-3 hover:bg-white/10">
             <i class="fas fa-times text-lg"></i>
           </button>
         </div>
@@ -48,7 +48,7 @@
       <!-- Error banner -->
       <div
         v-if="stepError"
-        class="mx-6 mt-4 px-4 py-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 rounded-lg text-sm"
+        class="mx-6 mt-4 px-4 py-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 rounded-3 text-sm"
         dusk="wizard-error"
       >
         {{ stepError }}
@@ -67,7 +67,7 @@
             <select
               v-model="form.activite_id"
               dusk="wizard-activite"
-              class="w-full px-3 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+              class="w-full px-3 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
             >
               <option value="">Sélectionner une activité</option>
               <option v-for="a in activites" :key="a.id" :value="a.id">
@@ -85,7 +85,7 @@
               type="text"
               placeholder="Ex : Implémenter l'authentification"
               dusk="wizard-titre"
-              class="w-full px-3 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+              class="w-full px-3 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
             />
           </div>
 
@@ -95,7 +95,7 @@
               v-model="form.description"
               rows="3"
               placeholder="Décrivez la tâche…"
-              class="w-full px-3 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 resize-none"
+              class="w-full px-3 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 resize-none"
             ></textarea>
           </div>
 
@@ -105,7 +105,7 @@
               v-model="form.objectif"
               rows="2"
               placeholder="Quel est l'objectif ?"
-              class="w-full px-3 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 resize-none"
+              class="w-full px-3 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 resize-none"
             ></textarea>
           </div>
 
@@ -115,7 +115,7 @@
               <select
                 v-model="form.priorite"
                 dusk="wizard-priorite"
-                class="w-full px-3 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                class="w-full px-3 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
               >
                 <option value="faible">🟢 Faible</option>
                 <option value="moyenne">🟡 Moyenne</option>
@@ -129,7 +129,7 @@
                 v-model="form.echeance"
                 type="date"
                 dusk="wizard-echeance"
-                class="w-full px-3 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                class="w-full px-3 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
               />
             </div>
           </div>
@@ -144,7 +144,7 @@
             <select
               v-model="form.responsable_id"
               dusk="wizard-responsable"
-              class="w-full px-3 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+              class="w-full px-3 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
               @change="onResponsableChange"
             >
               <option :value="null">-- Sélectionner un responsable --</option>
@@ -177,7 +177,7 @@
           <div class="space-y-2">
             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Fichiers</label>
             <div
-              class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 text-center hover:border-brand-400 transition-colors"
+              class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-3 p-6 text-center hover:border-brand-400 transition-colors"
               @dragover.prevent
               @drop.prevent="onDrop"
             >
@@ -194,7 +194,7 @@
               <p class="text-xs text-gray-400 mt-1">PDF, DOC, XLS, JPG, PNG, ZIP — 10 Mo max</p>
             </div>
 
-            <div v-for="(f, i) in uploadedFiles" :key="i" class="flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg text-sm">
+            <div v-for="(f, i) in uploadedFiles" :key="i" class="flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-gray-700 rounded-3 text-sm">
               <span class="text-gray-700 dark:text-gray-300 truncate">{{ f.name }}</span>
               <button type="button" class="text-red-500 ml-2" @click="uploadedFiles.splice(i, 1)">
                 <i class="fas fa-times"></i>
@@ -210,24 +210,24 @@
                 v-model="newLink.url"
                 type="url"
                 placeholder="https://…"
-                class="flex-1 px-3 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm"
+                class="flex-1 px-3 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm"
               />
               <input
                 v-model="newLink.title"
                 type="text"
                 placeholder="Titre"
-                class="w-32 px-3 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm"
+                class="w-32 px-3 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm"
               />
               <button
                 type="button"
-                class="px-4 py-2 bg-green-600 text-white rounded-xl text-sm hover:bg-green-700"
+                class="px-4 py-2 bg-green-600 text-white rounded-3 text-sm hover:bg-green-700"
                 @click="addLink"
               >
                 <i class="fas fa-plus"></i>
               </button>
             </div>
 
-            <div v-for="(link, i) in externalLinks" :key="i" class="flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg text-sm">
+            <div v-for="(link, i) in externalLinks" :key="i" class="flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-gray-700 rounded-3 text-sm">
               <a :href="link.url" target="_blank" class="text-brand-600 dark:text-brand-400 truncate">
                 {{ link.title || link.url }}
               </a>
@@ -242,7 +242,7 @@
         <div v-if="currentStep === 3" dusk="wizard-step-validation">
           <div class="grid grid-cols-1 gap-4">
             <label
-              class="flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all"
+              class="flex items-start gap-3 p-4 border-2 rounded-3 cursor-pointer transition-all"
               :class="form.validation_n1_required ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-gray-300 dark:border-gray-600'"
             >
               <input v-model="form.validation_n1_required" type="checkbox" class="mt-1" dusk="wizard-n1" />
@@ -253,7 +253,7 @@
             </label>
 
             <label
-              class="flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all"
+              class="flex items-start gap-3 p-4 border-2 rounded-3 cursor-pointer transition-all"
               :class="form.validation_n2_required ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-300 dark:border-gray-600'"
             >
               <input v-model="form.validation_n2_required" type="checkbox" class="mt-1" dusk="wizard-n2" />
@@ -265,7 +265,7 @@
           </div>
 
           <!-- Summary -->
-          <div class="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-xl space-y-2 text-sm" dusk="wizard-summary">
+          <div class="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-3 space-y-2 text-sm" dusk="wizard-summary">
             <p class="font-semibold text-gray-900 dark:text-white mb-2">Récapitulatif</p>
             <p class="text-gray-600 dark:text-gray-300"><span class="font-medium">Titre :</span> {{ form.titre }}</p>
             <p class="text-gray-600 dark:text-gray-300"><span class="font-medium">Priorité :</span> {{ form.priorite }}</p>
@@ -287,7 +287,7 @@
           v-if="currentStep > 0"
           type="button"
           dusk="wizard-prev"
-          class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+          class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
           @click="currentStep--"
         >
           <i class="fas fa-arrow-left mr-2"></i>Précédent
@@ -298,7 +298,7 @@
           <button
             type="button"
             dusk="wizard-cancel"
-            class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+            class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
             @click="$emit('close')"
           >
             Annuler
@@ -308,7 +308,7 @@
             v-if="currentStep < steps.length - 1"
             type="button"
             dusk="wizard-next"
-            class="px-5 py-2.5 bg-brand-600 text-white rounded-xl text-sm font-semibold hover:bg-brand-700 transition-all"
+            class="px-5 py-2.5 bg-brand-600 text-white rounded-3 text-sm font-semibold hover:bg-brand-700 transition-all"
             @click="nextStep"
           >
             Suivant <i class="fas fa-arrow-right ml-2"></i>
@@ -319,7 +319,7 @@
             type="button"
             dusk="wizard-submit"
             :disabled="loading"
-            class="px-5 py-2.5 bg-brand-600 text-white rounded-xl text-sm font-semibold hover:bg-brand-700 disabled:opacity-50 transition-all flex items-center gap-2"
+            class="px-5 py-2.5 bg-brand-600 text-white rounded-3 text-sm font-semibold hover:bg-brand-700 disabled:opacity-50 transition-all flex items-center gap-2"
             @click="handleSubmit"
           >
             <i v-if="loading" class="fas fa-circle-notch fa-spin"></i>

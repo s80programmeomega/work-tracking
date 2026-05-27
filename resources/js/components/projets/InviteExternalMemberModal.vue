@@ -1,8 +1,8 @@
 <!-- resources\js\components\projets\InviteExternalMemberModal.vue -->
 <template>
   <Teleport to="body">
-    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden"
+    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white dark:bg-gray-800 rounded-3 max-w-3xl w-full max-h-[90vh] overflow-hidden"
         @click.stop>
         <!-- Header -->
         <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
@@ -10,7 +10,7 @@
             Ajouter des membres au projet
           </h2>
           <button @click="handleClose"
-            class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+            class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
             <XIcon class="w-5 h-5" />
           </button>
         </div>
@@ -23,7 +23,7 @@
             <div v-if="invitationResult" class="space-y-3">
               <!-- Message principal -->
               <div v-if="invitationResult.message" :class="[
-                'p-4 rounded-lg border',
+                'p-4 rounded-3 border',
                 invitationResult.success_count > 0
                   ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
                   : invitationResult.warning_count > 0 && invitationResult.error_count === 0
@@ -61,7 +61,7 @@
 
               <!-- Succès détaillés -->
               <div v-if="invitationResult.success_count > 0"
-                class="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                class="p-4 rounded-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
                 <div class="flex items-start gap-3">
                   <svg class="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" fill="none"
                     stroke="currentColor" viewBox="0 0 24 24">
@@ -99,7 +99,7 @@
 
               <!-- Warnings: Invitations déjà en attente -->
               <div v-if="invitationResult.warnings && invitationResult.warnings.length > 0"
-                class="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                class="p-4 rounded-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
                 <div class="flex items-start gap-3">
                   <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" fill="none"
                     stroke="currentColor" viewBox="0 0 24 24">
@@ -161,7 +161,7 @@
 
               <!-- Erreurs détaillées -->
               <div v-if="invitationResult.errors && invitationResult.errors.length > 0"
-                class="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                class="p-4 rounded-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
                 <div class="flex items-start gap-3">
                   <svg class="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" fill="none"
                     stroke="currentColor" viewBox="0 0 24 24">
@@ -196,7 +196,7 @@
               </div>
 
               <div v-if="invitationResult && invitationResult.added_members?.length > 0"
-                class="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                class="p-4 rounded-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
                 <div class="flex items-start gap-3">
                   <svg class="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5" fill="none" stroke="currentColor"
                     viewBox="0 0 24 24">
@@ -233,7 +233,7 @@
 
               <!-- Suggestions -->
               <div v-if="hasActionableItems"
-                class="p-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+                class="p-4 rounded-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
                 <div class="flex items-start gap-3">
                   <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" fill="none"
                     stroke="currentColor" viewBox="0 0 24 24">
@@ -265,7 +265,7 @@
 
             <!-- Message d'erreur général -->
             <div v-if="error"
-              class="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+              class="p-4 rounded-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
               <div class="flex items-start gap-3">
                 <svg class="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" fill="none"
                   stroke="currentColor" viewBox="0 0 24 24">
@@ -315,11 +315,11 @@
               <div class="relative mb-4">
                 <SearchIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input v-model="searchTerm" type="text" placeholder="Rechercher par nom ou email..."
-                  class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
+                  class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
               </div>
 
               <!-- Members List -->
-              <div class="border border-gray-300 dark:border-gray-600 rounded-lg max-h-80 overflow-y-auto">
+              <div class="border border-gray-300 dark:border-gray-600 rounded-3 max-h-80 overflow-y-auto">
                 <div v-if="loadingMembers" class="flex justify-center py-8">
                   <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
                 </div>
@@ -367,7 +367,7 @@
               </label>
               <textarea v-model="emailsInput" rows="4"
                 placeholder="Entrez une ou plusieurs adresses email (séparées par des virgules ou des retours à la ligne)&#10;Exemple: jean@example.com, marie@example.com"
-                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent"></textarea>
+                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent"></textarea>
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 Les utilisateurs externes recevront un email pour créer un compte
               </p>
@@ -391,7 +391,7 @@
                 Rôle <span class="text-red-500">*</span>
               </label>
               <select v-model="form.role" required @change="handleRoleChange"
-                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent">
                 <option value="">Sélectionner un rôle</option>
                 <option value="manager">Manager - Gestion complète du projet</option>
                 <option value="cadre">Cadre - Peut créer et gérer les activités</option>
@@ -514,7 +514,7 @@
 
                 <!-- Avertissement pour les membres -->
                 <div v-if="form.role === 'member'"
-                  class="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  class="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-3">
                   <p class="text-xs text-blue-800 dark:text-blue-300">
                     ℹ️ Les membres peuvent créer et modifier des activités, mais seuls les admins peuvent les supprimer
                   </p>
@@ -522,7 +522,7 @@
               </div>
               <!-- Avertissement pour le rôle membre -->
               <div v-if="form.role === 'member'"
-                class="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                class="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-3">
                 <p class="text-xs text-yellow-800 dark:text-yellow-300">
                   ⚠️ Les membres ne peuvent pas avoir les permissions de suppression ou d'invitation
                 </p>
@@ -535,7 +535,7 @@
                 Message personnel (optionnel)
               </label>
               <textarea v-model="form.message" rows="3" placeholder="Ajouter un message pour les invités..."
-                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent"></textarea>
+                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent"></textarea>
             </div>
 
 
@@ -546,12 +546,12 @@
         <div
           class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
           <button type="button" @click="handleClose"
-            class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+            class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
             Annuler  
           </button>
                
           <button @click="handleSubmit" :disabled="submitting || !canSubmit"
-            class="px-6 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
+            class="px-6 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
             <span v-if="submitting" class="animate-spin">⏳</span>
             Ajouter {{ totalInvitations }} membre(s)
           </button>

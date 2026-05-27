@@ -8,16 +8,16 @@
 
     <PageBreadcrumb :pageTitle="'Mes Activités'" />
 
-    <div class="rounded-2xl border border-gray-200 bg-white dark:bg-gray-800 p-7.5 shadow-default">
+    <div class="rounded-3 border border-gray-200 bg-white dark:bg-gray-800 p-7.5 shadow-default">
       <!-- Stats Cards -->
       <div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
-        <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+        <div class="bg-blue-50 dark:bg-blue-900/20 rounded-3 p-4">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm text-gray-600 dark:text-gray-400">Total</p>
               <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.total }}</p>
             </div>
-            <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
+            <div class="w-12 h-12 bg-blue-500 rounded-3 flex items-center justify-center">
               <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -26,13 +26,13 @@
           </div>
         </div>
 
-        <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
+        <div class="bg-green-50 dark:bg-green-900/20 rounded-3 p-4">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm text-gray-600 dark:text-gray-400">Actives</p>
               <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.active }}</p>
             </div>
-            <div class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
+            <div class="w-12 h-12 bg-green-500 rounded-3 flex items-center justify-center">
               <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
@@ -40,13 +40,13 @@
           </div>
         </div>
 
-        <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
+        <div class="bg-red-50 dark:bg-red-900/20 rounded-3 p-4">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm text-gray-600 dark:text-gray-400">En retard</p>
               <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.overdue }}</p>
             </div>
-            <div class="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center">
+            <div class="w-12 h-12 bg-red-500 rounded-3 flex items-center justify-center">
               <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -55,13 +55,13 @@
           </div>
         </div>
 
-        <div class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
+        <div class="bg-purple-50 dark:bg-purple-900/20 rounded-3 p-4">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm text-gray-600 dark:text-gray-400">Progression moy.</p>
               <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.avgProgress }}%</p>
             </div>
-            <div class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center">
+            <div class="w-12 h-12 bg-purple-500 rounded-3 flex items-center justify-center">
               <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -72,17 +72,17 @@
       </div>
 
       <!-- Filters -->
-      <div class="mb-6 bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+      <div class="mb-6 bg-gray-50 dark:bg-gray-900 rounded-3 p-4">
         <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div class="flex-1">
             <input v-model="filters.search" type="text" placeholder="Rechercher une activité..."
-              class="w-full max-w-md rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm"
+              class="w-full max-w-md rounded-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm"
               @input="debouncedSearch" />
           </div>
 
           <div class="flex gap-2">
             <select v-model="filters.projet_id"
-              class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm"
+              class="rounded-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm"
               @change="loadActivites">
               <option value="">Tous les projets</option>
               <option v-for="projet in accessibleProjets" :key="projet.id" :value="projet.id">
@@ -91,7 +91,7 @@
             </select>
 
             <select v-model="filters.status"
-              class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm"
+              class="rounded-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm"
               @change="loadActivites">
               <option value="">Tous les statuts</option>
               <option value="active">Actives</option>
@@ -99,14 +99,14 @@
             </select>
 
             <button @click="resetFilters"
-              class="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700">
+              class="rounded-3 border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700">
               Réinitialiser
             </button>
 
              <button
                 v-if="canCreateActivity"
                 @click="showCreateForm = true"
-                class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors" >
+                class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700 transition-colors" >
                 + Nouvelle activité
               </button>
 
@@ -130,7 +130,7 @@
       </div>
 
       <!-- Activities Table -->
-      <div v-else class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+      <div v-else class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700">
         <div class="overflow-x-auto">
           <table class="w-full text-sm text-left">
             <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700">
@@ -179,7 +179,7 @@
                 <!-- Équipe -->
                 <td class="px-6 py-4">
                   <button v-if="getPermissions(activite).canManageMembers" @click="openMembersModal(activite)"
-                    class="flex items-center gap-2 px-3 py-1.5 text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors">
+                    class="flex items-center gap-2 px-3 py-1.5 text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 rounded-3 hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -223,7 +223,7 @@
                 <td class="px-6 py-4">
                   <div class="flex items-center gap-2">
                     <button @click="viewActivityDetail(activite)"
-                      class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg" title="Voir">
+                      class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-3" title="Voir">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -233,7 +233,7 @@
                     </button>
 
                     <button v-if="getPermissions(activite).canEdit" @click="editActivite(activite)"
-                      class="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg"
+                      class="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-3"
                       title="Modifier">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -243,7 +243,7 @@
 
                     <!-- Bouton Supprimer - Seulement si permission -->
                     <button v-if="getPermissions(activite).canDelete" @click="deleteActivite(activite)"
-                      class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg" title="Supprimer">
+                      class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-3" title="Supprimer">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -271,12 +271,12 @@
           </div>
           <div class="flex gap-1">
             <button @click="changePage(pagination.current_page - 1)" :disabled="pagination.current_page === 1"
-              class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
+              class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
               Précédent
             </button>
             <button @click="changePage(pagination.current_page + 1)"
               :disabled="pagination.current_page === pagination.last_page"
-              class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
+              class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
               Suivant
             </button>
           </div>

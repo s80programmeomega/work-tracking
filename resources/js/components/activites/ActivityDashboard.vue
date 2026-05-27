@@ -59,7 +59,7 @@
           </h3>
           <div class="h-80">
             <!-- TODO: Replace with actual chart component -->
-            <div class="flex items-center justify-center h-full bg-muted/20 rounded-lg">
+            <div class="flex items-center justify-center h-full bg-muted/20 rounded-3">
               <div class="text-center">
                 <PieChart class="w-12 h-12 mx-auto mb-2 text-muted-foreground" />
                 <p class="text-muted-foreground">Graphique en secteurs</p>
@@ -134,7 +134,7 @@
           </h3>
           <div class="h-80">
             <!-- TODO: Replace with actual timeline/Gantt chart -->
-            <div class="flex items-center justify-center h-full bg-muted/20 rounded-lg">
+            <div class="flex items-center justify-center h-full bg-muted/20 rounded-3">
               <div class="text-center">
                 <Calendar class="w-12 h-12 mx-auto mb-2 text-muted-foreground" />
                 <p class="text-muted-foreground">Timeline des activités</p>
@@ -163,7 +163,7 @@
           <div
             v-for="activite in recentActivites"
             :key="activite.id"
-            class="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 cursor-pointer"
+            class="flex items-center justify-between p-4 border rounded-3 hover:bg-muted/50 cursor-pointer"
             @click="$emit('view-activite', activite.id)"
           >
             <div class="space-y-1">
@@ -204,7 +204,7 @@
           <div
             v-for="member in teamPerformance"
             :key="member.id"
-            class="p-4 border rounded-lg"
+            class="p-4 border rounded-3"
           >
             <div class="flex items-center space-x-3 mb-3">
               <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">

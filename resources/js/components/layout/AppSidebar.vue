@@ -1,7 +1,7 @@
 <!-- resources\js\components\layout\AppSidebar.vue -->
 <template>
     <aside :class="[
-        'fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-40  border-r border-gray-100 dark:border-gray-800 shadow-sm',
+        'fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 text-gray-900 h-screen transition-all duration-300 ease-in-out z-40 border-r border-gray-200 dark:border-gray-800',
         {
             'lg:w-[290px]': isExpanded || isMobileOpen || isHovered,
             'lg:w-[90px]': !isExpanded && !isHovered,
@@ -32,7 +32,7 @@
             <button @click="showWorkspaceSelector = !showWorkspaceSelector"
                 class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                 <div
-                    class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center text-white font-semibold text-sm">
+                    class="w-8 h-8 rounded-lg bg-[#1E3A5F] flex items-center justify-center text-white font-semibold text-sm">
                     {{ currentWorkspaceInitials }}
                 </div>
                 <div class="flex-1 text-left overflow-hidden">
@@ -52,7 +52,7 @@
             <!-- Workspace Dropdown avec Filtre Dashboard -->
             <transition name="fade-slide">
                 <div v-if="showWorkspaceSelector"
-                    class="mt-2 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+                    class="mt-2 py-2 bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700">
                     <!-- Section Filtre Dashboard -->
                     <div class="px-3 pb-2 mb-2 border-b border-gray-200 dark:border-gray-700">
                         <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">
@@ -83,7 +83,7 @@
                             @click="handleSelectWorkspace(workspace)"
                             class="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors group">
                             <div
-                                class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white font-semibold text-sm">
+                                class="w-8 h-8 rounded-lg bg-[#1E3A5F] flex items-center justify-center text-white font-semibold text-sm">
                                 {{ getWorkspaceInitials(workspace?.nom) }}
                             </div>
                             <div class="flex-1 text-left">
@@ -138,7 +138,7 @@
         </div>
 
         <!-- Navigation Menu avec gestion des permissions -->
-        <div class="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
+        <div class="flex flex-col flex-1 overflow-y-auto duration-300 ease-linear no-scrollbar">
             <nav class="mb-6">
                 <div class="flex flex-col gap-4">
                     <div v-for="(menuGroup, groupIndex) in filteredMenuGroups" :key="groupIndex">
@@ -258,13 +258,22 @@
 
         <!-- Bottom Actions -->
         <div v-if="isExpanded || isHovered || isMobileOpen"
-            class="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+            class="mt-auto pt-4 pb-6 border-t border-gray-200 dark:border-gray-700 space-y-2">
             <router-link
                 v-if="canManageSettings || isSuperAdmin"
                 :to="currentWorkspace?.id ? { name: 'workspaces.settings', params: { id: currentWorkspace.id } } : '/workspaces'"
                 class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                 <SettingsIcon class="w-5 h-5" />
                 <span>Paramètres</span>
+            </router-link>
+            <router-link
+                v-if="(canManageSubscription || isSuperAdmin) && currentWorkspace?.id"
+                :to="{ name: 'workspaces.subscription', params: { id: currentWorkspace.id } }"
+                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+                <span>Abonnement</span>
             </router-link>
         </div>
     </aside>
@@ -318,12 +327,14 @@ const {
     loading: workspaceLoading,
     selectWorkspace,
     fetchWorkspaces,
+    fetchWorkspace,
     onWorkspaceChanged,
     initializeCurrentWorkspace
 } = useWorkspace();
 
 const {
     canManageSettings,
+    canManageSubscription,
     canViewPendingValidations,
     canViewEvaluationScore,
     canViewFicheEvaluation,
@@ -636,25 +647,20 @@ const menuGroups = computed(() => [
     {
         title: 'Collaboration',
         items: [
-            // {
-            //     icon: ChatIcon,
-            //     name: 'Équipes',
-            //     subItems: [
-            //         { name: 'Mes équipes', path: '/teams' },
-            //         { name: 'Messages', path: '/teams/messages', count: 24 },
-            //         { name: 'Annonces', path: '/teams/announcements' },
-            //         { name: 'Ressources', path: '/teams/resources' },
-            //     ],
-            // },
-            // {
-            //     icon: UsersIcon,
-            //     name: 'Utilisateurs',
-            //     subItems: [
-            //         { name: 'Tous les utilisateurs', path: '/users', superAdminOnly: true },
-            //         { name: 'Invitations', path: '/users/invitations', count: 2 },
-            //         { name: 'Permissions', path: '/users/permissions', superAdminOnly: true },
-            //     ],
-            // },
+            {
+                icon: ChatIcon,
+                name: 'Équipes',
+                subItems: [
+                    { name: 'Mes équipes', path: '/teams' },
+                ],
+            },
+            {
+                icon: UsersIcon,
+                name: 'Utilisateurs',
+                subItems: [
+                    { name: 'Invitations', path: '/users/invitations' },
+                ],
+            },
             {
                 icon: MailIcon,
                 name: 'Notifications',
@@ -822,6 +828,16 @@ onMounted(async () => {
 
         // Initialiser le workspace courant
         await initializeCurrentWorkspace();
+
+        // Rafraîchir le détail complet du workspace courant pour avoir les permissions à jour
+        if (currentWorkspace.value?.id) {
+            try {
+                const fresh = await fetchWorkspace(currentWorkspace.value.id);
+                if (fresh) authStore.currentWorkspace = fresh;
+            } catch {
+                // Pas bloquant — on garde les données existantes
+            }
+        }
 
         // Écouter les changements
         unsubscribeWorkspaceListener = onWorkspaceChanged(handleWorkspaceChange);

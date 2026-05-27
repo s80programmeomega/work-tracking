@@ -2,18 +2,17 @@
 <template>
   <AdminLayout>
     <div
-      class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-6 transition-all duration-300">
+      class="min-h-screen bg-gray-100 dark:bg-gray-900 p-6 transition-colors duration-300">
       <!-- Header avec navigation workspace et membre -->
       <div class="mb-8">
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div class="flex items-center gap-4">
             <div
-              class="p-3 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 shadow-sm">
-              <FolderKanbanIcon class="w-8 h-8 text-brand-600 dark:text-brand-400" />
+              class="p-3 rounded-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+              <FolderKanbanIcon class="w-8 h-8 text-brand-500 dark:text-brand-400" />
             </div>
             <div>
-              <h1
-                class="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+              <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
                 Tableau de Bord
               </h1>
               <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
@@ -26,7 +25,7 @@
             <!-- Filtre Workspace -->
             <div class="relative group">
               <select v-model="selectedWorkspace" @change="onWorkspaceChange"
-                class="appearance-none rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 pl-10 pr-8 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all duration-200 cursor-pointer">
+                class="appearance-none rounded-[4px] border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 pl-10 pr-8 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-colors duration-200 cursor-pointer">
                 <option value="all">Tous les workspaces</option>
                 <option v-for="workspace in workspaces" :key="workspace.id" :value="workspace.id">
                   {{ workspace.nom }}
@@ -39,7 +38,7 @@
             <!-- Filtre Membre -->
             <!-- <div class="relative group" v-if="workspaceMembers.length > 0 && selectedWorkspace !== 'all'">
               <select v-model="selectedMember" @change="loadDashboardData"
-                class="appearance-none rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 pl-10 pr-8 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all duration-200 cursor-pointer">
+                class="appearance-none rounded-[4px] border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 pl-10 pr-8 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-colors duration-200 cursor-pointer">
                 <option value="all">Tous les membres</option>
                 <option v-for="member in workspaceMembers" :key="member.id" :value="member.id">
                   {{ member.prenom }} {{ member.nom }}
@@ -52,7 +51,7 @@
             <!-- Filtre Période -->
             <div class="relative">
               <select v-model="selectedPeriod" @change="loadDashboardData"
-                class="rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 pr-8 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all duration-200 cursor-pointer">
+                class="rounded-[4px] border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 pr-8 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-colors duration-200 cursor-pointer">
                 <option value="week">Cette semaine</option>
                 <option value="month">Ce mois</option>
                 <option value="quarter">Ce trimestre</option>
@@ -62,7 +61,7 @@
 
             <!-- Bouton Actualiser -->
             <button @click="loadDashboardData"
-              class="rounded-xl bg-gradient-to-r from-brand-600 to-brand-700 px-4 py-2.5 text-sm font-medium text-white hover:from-brand-700 hover:to-brand-800 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105">
+              class="rounded-[4px] bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-all duration-200 flex items-center gap-2">
               <RefreshIcon class="w-4 h-4" :class="{ 'animate-spin': loading }" />
               Actualiser
             </button>
@@ -73,7 +72,7 @@
         <div class="mt-4 flex flex-wrap gap-2">
           <div class="relative">
             <select v-model="filters.projectStatus" @change="loadDashboardData"
-              class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all duration-200 cursor-pointer">
+              class="rounded-[4px] border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-colors duration-200 cursor-pointer">
               <option value="all">Tous les statuts</option>
               <option value="active">Projets actifs</option>
               <option value="completed">Projets terminés</option>
@@ -83,7 +82,7 @@
 
           <div class="relative">
             <select v-model="filters.priority" @change="loadDashboardData"
-              class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all duration-200 cursor-pointer">
+              class="rounded-[4px] border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-colors duration-200 cursor-pointer">
               <option value="all">Toutes priorités</option>
               <option value="high">Priorité élevée</option>
               <option value="medium">Priorité moyenne</option>
@@ -92,7 +91,7 @@
           </div>
 
           <button v-if="hasActiveFilters" @click="resetFilters"
-            class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 flex items-center gap-1">
+            class="rounded-[4px] border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 flex items-center gap-1">
             <XIcon class="w-3 h-3" />
             Réinitialiser
           </button>
@@ -117,17 +116,9 @@
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           <div v-for="(stat, index) in statsCards" :key="index"
-            class="group relative overflow-hidden rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-6 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-200/50 dark:border-gray-700/50 hover:border-brand-300/30 dark:hover:border-brand-600/30"
-            :style="`--hover-color: ${stat.hoverColor}`">
+            class="group bg-white dark:bg-gray-800 rounded-3 p-5 border border-gray-200 dark:border-gray-700 hover:border-brand-300 dark:hover:border-brand-600 transition-colors duration-200">
 
-            <div
-              class="absolute inset-0 bg-gradient-to-br from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-            </div>
-            <div
-              class="absolute -inset-1 bg-gradient-to-r from-transparent via-[var(--hover-color)]/10 to-transparent opacity-0 group-hover:opacity-100 blur-lg transition-all duration-500">
-            </div>
-
-            <div class="relative flex items-start justify-between">
+            <div class="flex items-start justify-between">
               <div class="flex-1">
                 <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
                   {{ stat.title }}
@@ -137,10 +128,10 @@
                 </p>
                 <div class="mt-3 flex items-center">
                   <span :class="[
-                    'flex items-center text-sm font-semibold px-2 py-1 rounded-full transition-all duration-300',
+                    'flex items-center text-[10px] font-medium px-1.5 py-0.5 rounded-1 border',
                     stat.trend === 'up'
-                      ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                      : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                      ? 'bg-success-50 text-success-500 border-success-300 dark:bg-success-500/15 dark:text-success-300 dark:border-success-500/30'
+                      : 'bg-error-50 text-error-500 border-error-300 dark:bg-error-500/15 dark:text-error-300 dark:border-error-500/30'
                   ]">
                     <TrendingUpIcon v-if="stat.trend === 'up'" class="mr-1 h-4 w-4" />
                     <TrendingDownIcon v-else class="mr-1 h-4 w-4" />
@@ -149,9 +140,8 @@
                   <span class="ml-2 text-xs text-gray-500 dark:text-gray-400">vs mois dernier</span>
                 </div>
               </div>
-              <div :class="['rounded-xl p-3 transition-all duration-300 group-hover:scale-110', stat.lightColor]">
-                <component :is="stat.icon"
-                  :class="['h-7 w-7 transition-transform duration-300 group-hover:scale-110', stat.textColor]" />
+              <div :class="['rounded-3 p-2.5', stat.lightColor]">
+                <component :is="stat.icon" :class="['h-6 w-6', stat.textColor]" />
               </div>
             </div>
           </div>
@@ -163,7 +153,7 @@
           <div class="space-y-8 lg:col-span-2">
             <!-- Vue Kanban des Projets -->
             <div
-              class="rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
+              class="rounded-3 bg-white dark:bg-gray-800 p-6 border border-gray-200 dark:border-gray-700">
               <div class="flex items-center justify-between mb-6">
                 <div>
                   <h2 class="text-xl font-bold text-gray-900 dark:text-white">Vue Kanban des Projets</h2>
@@ -188,7 +178,7 @@
 
             <!-- Progression Mensuelle -->
             <div
-              class="rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
+              class="rounded-3 bg-white dark:bg-gray-800 p-6 border border-gray-200 dark:border-gray-700">
               <div class="flex items-center justify-between mb-6">
                 <div>
                   <h2 class="text-xl font-bold text-gray-900 dark:text-white">Progression Mensuelle</h2>
@@ -211,25 +201,25 @@
           <div class="space-y-8">
             <!-- Mes Tâches Assignées -->
             <div
-              class="rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
+              class="rounded-3 bg-white dark:bg-gray-800 p-6 border border-gray-200 dark:border-gray-700">
               <div class="flex items-center justify-between mb-6">
                 <h2 class="text-xl font-bold text-gray-900 dark:text-white">Mes Tâches</h2>
                 <span
-                  class="rounded-full bg-brand-100 dark:bg-brand-900/30 px-3 py-1 text-sm font-semibold text-brand-700 dark:text-brand-400">
+                  class="rounded-1 bg-brand-50 dark:bg-brand-500/15 px-2 py-0.5 text-[11px] font-semibold text-brand-500 dark:text-brand-400 border border-brand-200 dark:border-brand-500/30">
                   {{ myTasks.length }}
                 </span>
               </div>
 
               <div class="space-y-3">
                 <div v-for="task in myTasks" :key="task.id"
-                  class="group bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all duration-300 cursor-pointer"
+                  class="group bg-white dark:bg-gray-800 rounded-3 p-3 border border-gray-200 dark:border-gray-700 hover:border-brand-300 dark:hover:border-brand-600 transition-colors duration-200 cursor-pointer"
                   :class="taskBorderClass(task)" @click="goToTask(task.id)">
                   <div class="flex items-start justify-between mb-2">
                     <h4
                       class="font-medium text-gray-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors line-clamp-2 flex-1">
                       {{ task.title }}
                     </h4>
-                    <span class="text-xs font-medium px-2 py-1 rounded-full ml-2" :class="priorityClass(task)">
+                    <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-1 border ml-2" :class="priorityClass(task)">
                       {{ task.priority }}
                     </span>
                   </div>
@@ -257,18 +247,18 @@
 
             <!-- Membres de l'équipe -->
             <div
-              class="rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
+              class="rounded-3 bg-white dark:bg-gray-800 p-6 border border-gray-200 dark:border-gray-700">
               <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Membres de l'équipe</h2>
               <div class="space-y-3">
                 <div v-for="member in teamMembers" :key="member.id"
-                  class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 group">
-                  <div class="flex-shrink-0">
+                  class="flex items-center gap-3 p-3 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 group">
+                  <div class="shrink-0">
                     <div v-if="member.avatar"
                       class="w-10 h-10 rounded-full overflow-hidden ring-2 ring-white dark:ring-gray-700">
                       <img :src="member.avatar" :alt="memberName(member)" class="w-full h-full object-cover">
                     </div>
                     <div v-else
-                      class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm ring-2 ring-white dark:ring-gray-700">
+                      class="w-10 h-10 rounded-full bg-brand-500 flex items-center justify-center text-white font-semibold text-sm ring-2 ring-white dark:ring-gray-700">
                       {{ memberInitials(member) }}
                     </div>
                   </div>
@@ -282,7 +272,7 @@
                     </p>
                   </div>
 
-                  <div class="flex-shrink-0 text-right">
+                  <div class="shrink-0 text-right">
                     <div class="text-sm font-bold text-gray-900 dark:text-white">
                       {{ member.taches_count || 0 }}
                     </div>

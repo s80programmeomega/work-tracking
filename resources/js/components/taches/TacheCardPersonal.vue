@@ -1,7 +1,7 @@
 <!-- resources/js/components/taches/TacheCardPersonal.vue - VERSION AVEC RESPONSABLE -->
 <template>
   <div 
-    class="relative group bg-white dark:bg-gray-800 rounded-lg border transition-all hover:shadow-lg"
+    class="relative group bg-white dark:bg-gray-800 rounded-3 border transition-all "
     :class="[
       cardBorderClass,
       compact ? 'p-2' : 'p-4',
@@ -133,13 +133,13 @@
         :value="myProgression"
         @input="handleProgressionChange"
         @click.stop
-        class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+        class="w-full h-2 bg-gray-200 rounded-3 appearance-none cursor-pointer dark:bg-gray-700"
         :style="progressionSliderStyle"
       />
     </div>
 
     <!-- Statistiques équipe (si collaborative) -->
-    <div v-if="!compact && isCollaborative && teamStats" class="mb-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+    <div v-if="!compact && isCollaborative && teamStats" class="mb-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-3">
       <div class="flex items-center gap-2 text-xs">
         <div class="flex -space-x-2">
           <div
@@ -176,7 +176,7 @@
     </div>
 
     <!-- Mon résultat -->
-    <div v-if="hasMyResult" class="mb-3 p-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+    <div v-if="hasMyResult" class="mb-3 p-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-3">
       <div class="flex items-center justify-between text-xs">
         <div class="flex items-center gap-2 text-green-700 dark:text-green-300">
           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -198,7 +198,7 @@
         <button
           v-if="myStatus !== 'en_cours'"
           @click.stop="quickMove('en_cours', 50)"
-          class="flex-1 px-3 py-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+          class="flex-1 px-3 py-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-3 transition-colors"
         >
           ▶ Démarrer
         </button>
@@ -206,7 +206,7 @@
         <button
           v-if="myStatus !== 'termine'"
           @click.stop="quickMove('termine', 100)"
-          class="flex-1 px-3 py-1.5 text-xs font-medium text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors"
+          class="flex-1 px-3 py-1.5 text-xs font-medium text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-3 transition-colors"
         >
           ✓ Terminer
         </button>
@@ -216,7 +216,7 @@
           dusk="submit-result-btn"
           v-if="canSubmitResult"
           @click.stop="$emit('submit-result', tache)"
-          class="flex-1 px-3 py-1.5 text-xs font-medium text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-lg transition-colors flex items-center justify-center gap-1"
+          class="flex-1 px-3 py-1.5 text-xs font-medium text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-3 transition-colors flex items-center justify-center gap-1"
         >
           <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -230,7 +230,7 @@
         dusk="edit-task-responsable-btn"
         v-if="isResponsable"
         @click.stop="$emit('edit', tache)"
-        class="px-3 py-1.5 text-xs font-medium text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-lg transition-colors flex items-center gap-1"
+        class="px-3 py-1.5 text-xs font-medium text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-3 transition-colors flex items-center gap-1"
         title="Éditer la tâche (en tant que responsable)"
       >
         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -270,7 +270,7 @@
     <!-- Menu contextuel amélioré -->
     <div
       v-if="showMenu"
-      class="absolute right-2 top-12 z-50 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1"
+      class="absolute right-2 top-12 z-50 w-48 bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 py-1"
       @click.stop
     >
       <button

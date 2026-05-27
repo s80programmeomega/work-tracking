@@ -4,7 +4,7 @@
     <Dialog as="div" class="relative z-[70]" @close="handleClose">
       <TransitionChild as="div" enter="ease-out duration-300" enter-from="opacity-0" enter-to="opacity-100"
         leave="ease-in duration-200" leave-from="opacity-100" leave-to="opacity-0">
-        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" />
+        <div class="fixed inset-0 bg-black/50 " />
       </TransitionChild>
 
       <div class="fixed inset-0 overflow-y-auto">
@@ -13,7 +13,7 @@
             enter-to="opacity-100 scale-100" leave="ease-in duration-200" leave-from="opacity-100 scale-100"
             leave-to="opacity-0 scale-95">
             <DialogPanel
-              class="w-full max-w-3xl transform overflow-hidden rounded-xl bg-white dark:bg-gray-800 shadow-xl transition-all">
+              class="w-full max-w-3xl transform overflow-hidden rounded-3 bg-white dark:bg-gray-800 transition-all">
               <!-- Header -->
               <div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-6 py-4">
                 <DialogTitle class="text-lg font-semibold text-gray-900 dark:text-white">
@@ -37,7 +37,7 @@
                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                     <input v-model="searchTerm" type="text" placeholder="Rechercher par nom ou email..."
-                      class="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                      class="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                       @click.stop />
                   </div>
                 </div>
@@ -62,14 +62,14 @@
                 <!-- Liste des membres disponibles -->
                 <div v-else class="space-y-2">
                   <div v-for="member in filteredMembers" :key="member.id" @click.stop="toggleMemberSelection(member)"
-                    class="flex items-center justify-between p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md"
+                    class="flex items-center justify-between p-4 border-2 rounded-3 cursor-pointer transition-all "
                     :class="isSelected(member.id)
                       ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20'
                       : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'">
                     <div class="flex items-center gap-3 flex-1 min-w-0">
                       <!-- Avatar -->
                       <div
-                        class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                        class="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
                         {{ getInitials(member.nom) }}
                       </div>
 
@@ -106,12 +106,12 @@
 
                   <div class="space-y-4">
                     <div v-for="member in selectedMembers" :key="member.id"
-                      class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                      class="bg-gray-50 dark:bg-gray-700/50 rounded-3 p-4">
                       <!-- En-tête membre -->
                       <div class="flex items-center justify-between mb-3">
                         <div class="flex items-center gap-2">
                           <div
-                            class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold">
+                            class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold">
                             {{ getInitials(member.nom) }}
                           </div>
                           <span class="font-medium text-gray-900 dark:text-white">{{ member.nom }}</span>
@@ -132,7 +132,7 @@
                         </label>
                         <select v-model="memberPermissions[member.id].role" @change="handleRoleChange(member.id)"
                           @click.stop
-                          class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500">
+                          class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500">
                           <option value="collaborator">Collaborateur</option>
                           <option value="viewer">Observateur</option>
                         </select>
@@ -202,7 +202,7 @@
 
                 <!-- Erreur -->
                 <div v-if="error"
-                  class="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                  class="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-3">
                   <p class="text-sm text-red-700 dark:text-red-400">{{ error }}</p>
                 </div>
               </div>
@@ -221,7 +221,7 @@
                     </svg>
                   </button>
                   <button @click="handleSubmit" :disabled="submitting || selectedMembers.length === 0"
-                    class="px-6 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                    class="px-6 py-2 bg-brand-600 text-white rounded-3 text-sm font-medium hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                     <span v-if="submitting">Ajout en cours...</span>
                     <span v-else>Ajouter {{ selectedMembers.length }} membre(s)</span>
                   </button>

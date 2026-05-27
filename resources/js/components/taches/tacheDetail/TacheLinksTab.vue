@@ -2,25 +2,25 @@
 <template>
   <div class="space-y-4">
     <!-- Add link form -->
-    <div v-if="permissions.can_add_links" class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+    <div v-if="permissions.can_add_links" class="bg-gray-50 dark:bg-gray-800 rounded-3 p-4">
       <form @submit.prevent="addLink" class="flex gap-3">
         <input 
           v-model="newLink.url"
           type="url" 
           placeholder="URL du lien (https://...)"
           required
-          class="flex-1 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+          class="flex-1 px-4 py-2 rounded-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
         />
         <input 
           v-model="newLink.title"
           type="text" 
           placeholder="Titre (optionnel)"
-          class="flex-1 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+          class="flex-1 px-4 py-2 rounded-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
         />
         <button 
           type="submit"
           :disabled="!newLink.url"
-          class="px-6 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          class="px-6 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           <i class="fas fa-plus mr-2"></i>Ajouter
         </button>
@@ -33,12 +33,12 @@
         v-for="link in tache.external_links" 
         :key="link.id"
         :id="`link-${link.id}`"
-        class="bg-white dark:bg-gray-800 rounded-xl p-4 border-2 border-gray-200 dark:border-gray-700 hover:border-brand-500 transition-colors"
+        class="bg-white dark:bg-gray-800 rounded-3 p-4 border-2 border-gray-200 dark:border-gray-700 hover:border-brand-500 transition-colors"
         :class="{ 'ring-2 ring-brand-500': highlightedLink === link.id }"
       >
         <div class="flex items-start gap-4">
           <!-- Icon -->
-          <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center">
+          <div class="flex-shrink-0 w-12 h-12 rounded-3 flex items-center justify-center">
             <i :class="['fab', getLinkIcon(link.url), 'text-white text-xl']"></i>
           </div>
 
@@ -68,7 +68,7 @@
             <a 
               :href="link.url" 
               target="_blank"
-              class="p-2 text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-lg transition-colors"
+              class="p-2 text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-3 transition-colors"
               title="Ouvrir"
             >
               <i class="fas fa-external-link-alt"></i>
@@ -76,7 +76,7 @@
             <button 
               v-if="permissions.can_update"
               @click="deleteLink(link)"
-              class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+              class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-3 transition-colors"
               title="Supprimer"
             >
               <i class="fas fa-trash-alt"></i>

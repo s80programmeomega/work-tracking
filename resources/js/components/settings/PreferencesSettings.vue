@@ -19,7 +19,7 @@
     <!-- Preferences Content -->
     <div v-else class="space-y-6">
       <!-- Theme Settings -->
-      <div class="p-5 border border-gray-200 rounded-xl dark:border-gray-800">
+      <div class="p-5 border border-gray-200 rounded-3 dark:border-gray-800">
         <h5 class="mb-4 font-medium text-gray-800 dark:text-white/90">Thème</h5>
         
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -31,7 +31,7 @@
               @change="updatePreferences"
               class="sr-only peer"
             >
-            <div class="flex flex-col items-center p-4 border-2 rounded-lg peer-checked:border-blue-500 dark:peer-checked:border-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800">
+            <div class="flex flex-col items-center p-4 border-2 rounded-3 peer-checked:border-blue-500 dark:peer-checked:border-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800">
               <div class="w-full h-24 mb-3 overflow-hidden bg-white border border-gray-200 rounded-md dark:bg-gray-700 dark:border-gray-600">
                 <!-- Light theme preview -->
                 <div class="h-3 bg-gray-200"></div>
@@ -52,7 +52,7 @@
               @change="updatePreferences"
               class="sr-only peer"
             >
-            <div class="flex flex-col items-center p-4 border-2 rounded-lg peer-checked:border-blue-500 dark:peer-checked:border-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800">
+            <div class="flex flex-col items-center p-4 border-2 rounded-3 peer-checked:border-blue-500 dark:peer-checked:border-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800">
               <div class="w-full h-24 mb-3 overflow-hidden bg-gray-900 border border-gray-700 rounded-md">
                 <!-- Dark theme preview -->
                 <div class="h-3 bg-gray-800"></div>
@@ -73,7 +73,7 @@
               @change="updatePreferences"
               class="sr-only peer"
             >
-            <div class="flex flex-col items-center p-4 border-2 rounded-lg peer-checked:border-blue-500 dark:peer-checked:border-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800">
+            <div class="flex flex-col items-center p-4 border-2 rounded-3 peer-checked:border-blue-500 dark:peer-checked:border-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800">
               <div class="relative w-full h-24 mb-3 overflow-hidden border rounded-md dark:border-gray-600">
                 <!-- System theme preview -->
                 <div class="absolute top-0 left-0 w-1/2 h-full bg-white border-r border-gray-200">
@@ -96,7 +96,7 @@
       </div>
 
       <!-- Language Settings -->
-      <div class="p-5 border border-gray-200 rounded-xl dark:border-gray-800">
+      <div class="p-5 border border-gray-200 rounded-3 dark:border-gray-800">
         <div class="flex items-center justify-between mb-4">
           <div>
             <h5 class="font-medium text-gray-800 dark:text-white/90">Langue</h5>
@@ -107,7 +107,7 @@
         <select
           v-model="preferences.language"
           @change="updatePreferences"
-          class="bg-gray-50 border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          class="bg-gray-50 border border-gray-300 text-gray-700 text-sm rounded-3 focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
         >
           <option value="fr">Français</option>
           <option value="en">English</option>
@@ -118,7 +118,7 @@
       </div>
 
       <!-- Timezone Settings -->
-      <div class="p-5 border border-gray-200 rounded-xl dark:border-gray-800">
+      <div class="p-5 border border-gray-200 rounded-3 dark:border-gray-800">
         <div class="flex items-center justify-between mb-4">
           <div>
             <h5 class="font-medium text-gray-800 dark:text-white/90">Fuseau horaire</h5>
@@ -129,7 +129,7 @@
         <select
           v-model="preferences.timezone"
           @change="updatePreferences"
-          class="bg-gray-50 border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          class="bg-gray-50 border border-gray-300 text-gray-700 text-sm rounded-3 focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
         >
           <option value="Europe/Paris">Europe/Paris (UTC+1)</option>
           <option value="UTC">UTC</option>
@@ -140,7 +140,7 @@
       </div>
 
       <!-- Date Format -->
-      <div class="p-5 border border-gray-200 rounded-xl dark:border-gray-800">
+      <div class="p-5 border border-gray-200 rounded-3 dark:border-gray-800">
         <div class="flex items-center justify-between mb-4">
           <div>
             <h5 class="font-medium text-gray-800 dark:text-white/90">Format de date</h5>
@@ -149,7 +149,7 @@
         </div>
         
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+          <label class="flex items-center p-3 border rounded-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
             <input
               type="radio"
               v-model="preferences.dateFormat"
@@ -160,7 +160,7 @@
             <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">DD/MM/YYYY (31/12/2023)</span>
           </label>
           
-          <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+          <label class="flex items-center p-3 border rounded-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
             <input
               type="radio"
               v-model="preferences.dateFormat"
@@ -171,7 +171,7 @@
             <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">MM/DD/YYYY (12/31/2023)</span>
           </label>
           
-          <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+          <label class="flex items-center p-3 border rounded-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
             <input
               type="radio"
               v-model="preferences.dateFormat"
@@ -182,7 +182,7 @@
             <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">YYYY-MM-DD (2023-12-31)</span>
           </label>
           
-          <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+          <label class="flex items-center p-3 border rounded-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
             <input
               type="radio"
               v-model="preferences.dateFormat"
@@ -196,7 +196,7 @@
       </div>
 
       <!-- Display Density -->
-      <div class="p-5 border border-gray-200 rounded-xl dark:border-gray-800">
+      <div class="p-5 border border-gray-200 rounded-3 dark:border-gray-800">
         <div class="flex items-center justify-between mb-4">
           <div>
             <h5 class="font-medium text-gray-800 dark:text-white/90">Densité d'affichage</h5>
@@ -241,7 +241,7 @@
       </div>
 
       <!-- Auto-save -->
-      <div class="p-5 border border-gray-200 rounded-xl dark:border-gray-800">
+      <div class="p-5 border border-gray-200 rounded-3 dark:border-gray-800">
         <div class="flex items-center justify-between">
           <div>
             <h5 class="font-medium text-gray-800 dark:text-white/90">Sauvegarde automatique</h5>
@@ -272,7 +272,7 @@
             max="60"
             step="5"
             @change="updatePreferences"
-            class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+            class="w-full h-2 bg-gray-200 rounded-3 appearance-none cursor-pointer dark:bg-gray-700"
           >
           <div class="flex justify-between mt-1 text-xs text-gray-500">
             <span>5s</span>
@@ -286,7 +286,7 @@
       <div class="flex flex-col gap-4 pt-4 border-t border-gray-200 sm:flex-row sm:justify-end dark:border-gray-800">
         <button
           @click="resetPreferences"
-          class="px-6 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-hidden focus:ring-4 focus:ring-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600"
+          class="px-6 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-3 hover:bg-gray-50 focus:outline-hidden focus:ring-4 focus:ring-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600"
         >
           Réinitialiser
         </button>
@@ -294,7 +294,7 @@
         <button
           @click="savePreferences"
           :disabled="saving"
-          class="px-6 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-hidden focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-6 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-3 hover:bg-blue-700 focus:outline-hidden focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <span v-if="saving">
             <svg class="inline w-4 h-4 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">

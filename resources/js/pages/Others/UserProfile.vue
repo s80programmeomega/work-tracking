@@ -4,7 +4,7 @@
     <PageBreadcrumb :pageTitle="currentPageTitle" />
 
     <div
-      class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6"
+      class="rounded-3 border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6"
     >
       <!-- Loading State -->
       <div v-if="loading" class="p-8 text-center">
@@ -50,14 +50,14 @@
             <session-settings />
 
             <!-- Danger Zone: account deletion -->
-            <div class="p-5 border border-red-200 dark:border-red-800/50 rounded-xl bg-red-50/50 dark:bg-red-900/10">
+            <div class="p-5 border border-red-200 dark:border-red-800/50 rounded-3 bg-red-50/50 dark:bg-red-900/10">
               <h5 class="font-semibold text-red-700 dark:text-red-400 mb-1">Zone dangereuse</h5>
               <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
                 La suppression de votre compte est irréversible. Toutes vos données seront effacées.
               </p>
               <button
                 @click="showDeleteAccountModal = true"
-                class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
+                class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-3 hover:bg-red-700 transition-colors"
               >
                 Supprimer mon compte
               </button>
@@ -70,7 +70,7 @@
             class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
             @click.self="showDeleteAccountModal = false"
           >
-            <div class="bg-white dark:bg-gray-900 rounded-2xl p-6 w-full max-w-md shadow-xl">
+            <div class="bg-white dark:bg-gray-900 rounded-3 p-6 w-full max-w-md ">
               <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Supprimer votre compte ?</h3>
               <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
                 Cette action est irréversible. Confirmez votre mot de passe pour continuer.
@@ -79,7 +79,7 @@
                 v-model="deleteAccountPassword"
                 type="password"
                 placeholder="Mot de passe actuel"
-                class="w-full px-4 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white mb-3 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                class="w-full px-4 py-2 text-sm rounded-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white mb-3 focus:ring-2 focus:ring-red-500 focus:border-transparent"
                 @keyup.enter="confirmDeleteAccount"
               />
               <p v-if="deleteAccountError" class="text-xs text-red-600 mb-3">{{ deleteAccountError }}</p>
@@ -93,7 +93,7 @@
                 <button
                   @click="confirmDeleteAccount"
                   :disabled="deletingAccount || !deleteAccountPassword"
-                  class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-3 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   <i v-if="deletingAccount" class="fas fa-spinner fa-spin mr-1"></i>
                   Confirmer la suppression

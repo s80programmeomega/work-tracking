@@ -3,10 +3,10 @@
   <AdminLayout>
     <div class="space-y-6">
       <!-- Header -->
-      <div class="rounded-2xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 dark:border-gray-800 p-6 shadow-sm">
+      <div class="rounded-3 border border-gray-200 dark:border-gray-800 p-6 ">
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-4">
-            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg">
+            <div class="w-14 h-14 rounded-3 flex items-center justify-center ">
               <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
@@ -21,14 +21,14 @@
 
           <div class="flex items-center gap-3">
             <!-- Sélecteur d'activité -->
-            <select v-model="selectedActiviteId" @change="handleActiviteChange" class="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+            <select v-model="selectedActiviteId" @change="handleActiviteChange" class="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
               <option value="">Sélectionner une activité</option>
               <option v-for="act in activites" :key="act.id" :value="act.id">
                 {{ act.nom }} ({{ act.projet?.nom }})
               </option>
             </select>
 
-            <button @click="loadData" :disabled="loading || !selectedActiviteId" class="p-2 rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50" title="Actualiser">
+            <button @click="loadData" :disabled="loading || !selectedActiviteId" class="p-2 rounded-3 border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50" title="Actualiser">
               <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" :class="{ 'animate-spin': loading }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
@@ -41,7 +41,7 @@
           <!-- Filtre par membre -->
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filtrer par membre</label>
-            <select v-model="filters.user_id" @change="loadData" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+            <select v-model="filters.user_id" @change="loadData" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
               <option value="">Tous les membres</option>
               <option v-for="member in activityMembers" :key="member.id" :value="member.id">
                 {{ member.nom }} ({{ member.email }})
@@ -52,7 +52,7 @@
           <!-- Filtre par période -->
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Période</label>
-            <select v-model="filters.period" @change="handlePeriodChange" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+            <select v-model="filters.period" @change="handlePeriodChange" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
               <option value="current_week">Semaine en cours</option>
               <option value="last_week">Semaine dernière</option>
               <option value="current_month">Mois en cours</option>
@@ -103,19 +103,19 @@
 
         <!-- Statistiques globales -->
         <div v-if="usersData.length > 0" class="grid grid-cols-4 gap-4">
-          <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+          <div class="bg-white dark:bg-gray-800 p-4 rounded-3 border border-gray-200 dark:border-gray-700">
             <p class="text-sm text-gray-500 dark:text-gray-400">Membres</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ totalUsers }}</p>
           </div>
-          <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+          <div class="bg-white dark:bg-gray-800 p-4 rounded-3 border border-gray-200 dark:border-gray-700">
             <p class="text-sm text-gray-500 dark:text-gray-400">Tâches totales</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ totalTasks }}</p>
           </div>
-          <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+          <div class="bg-white dark:bg-gray-800 p-4 rounded-3 border border-gray-200 dark:border-gray-700">
             <p class="text-sm text-gray-500 dark:text-gray-400">Progression moyenne</p>
             <p class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">{{ averageProgress }}%</p>
           </div>
-          <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+          <div class="bg-white dark:bg-gray-800 p-4 rounded-3 border border-gray-200 dark:border-gray-700">
             <p class="text-sm text-gray-500 dark:text-gray-400">En attente validation</p>
             <p class="text-2xl font-bold text-orange-600 dark:text-orange-400 mt-1">{{ totalPendingValidation }}</p>
           </div>
@@ -127,7 +127,7 @@
             <button
               @click="generateReport"
               :disabled="!selectedActiviteId"
-              class="px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors flex items-center gap-2"
+              class="px-4 py-2 bg-green-600 text-white font-medium rounded-3 hover:bg-green-700 disabled:opacity-50 transition-colors flex items-center gap-2"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -138,7 +138,7 @@
             <button
               @click="exportToExcel"
               :disabled="!selectedActiviteId || usersData.length === 0"
-              class="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center gap-2"
+              class="px-4 py-2 bg-blue-600 text-white font-medium rounded-3 hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center gap-2"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -162,24 +162,24 @@
       </div>
 
       <!-- Error -->
-      <div v-else-if="error" class="rounded-2xl border border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800 p-6">
+      <div v-else-if="error" class="rounded-3 border border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800 p-6">
         <p class="text-red-700 dark:text-red-300">{{ error }}</p>
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="!selectedActiviteId" class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] p-12 text-center">
+      <div v-else-if="!selectedActiviteId" class="rounded-3 border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] p-12 text-center">
         <p class="text-gray-500 dark:text-gray-400">Sélectionnez une activité pour voir la répartition des tâches</p>
       </div>
 
-      <div v-else-if="filteredUsersData.length === 0" class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] p-12 text-center">
+      <div v-else-if="filteredUsersData.length === 0" class="rounded-3 border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] p-12 text-center">
         <p class="text-gray-500 dark:text-gray-400">Aucune tâche ne correspond aux critères sélectionnés</p>
       </div>
 
       <!-- Grille des utilisateurs -->
       <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div v-for="userData in filteredUsersData" :key="userData.user.id" class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] overflow-hidden">
+        <div v-for="userData in filteredUsersData" :key="userData.user.id" class="rounded-3 border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] overflow-hidden">
           <!-- User Header -->
-          <div class="p-6 bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 border-b border-gray-200 dark:border-gray-700">
+          <div class="p-6 border-b border-gray-200 dark:border-gray-700">
             <div class="flex items-center gap-4">
               <img v-if="userData.user.avatar" :src="getImageUrl(userData.user.avatar)" :alt="userData.user.nom" class="w-16 h-16 rounded-full" />
               <div v-else class="w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold text-white" :style="{ backgroundColor: stringToColor(userData.user.nom) }">
@@ -251,7 +251,7 @@
 
           <!-- Liste des tâches -->
           <div class="p-4 space-y-2 max-h-96 overflow-y-auto">
-            <div v-for="tache in userData.taches" :key="tache.tache_id" class="p-3 rounded-lg border transition-all hover:shadow-md cursor-pointer" :class="getTacheCardClass(tache)" @click="viewTacheDetails(tache.tache_id)">
+            <div v-for="tache in userData.taches" :key="tache.tache_id" class="p-3 rounded-3 border transition-all cursor-pointer" :class="getTacheCardClass(tache)" @click="viewTacheDetails(tache.tache_id)">
               <div class="flex items-start justify-between gap-2">
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-2 mb-1">

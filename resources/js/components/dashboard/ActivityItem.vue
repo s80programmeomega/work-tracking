@@ -1,8 +1,8 @@
 <!-- resources/js/components/dashboard/ActivityItem.vue -->
 <template>
-  <div class="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 group">
+  <div class="flex items-start gap-3 p-3 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 group">
     <div
-      class="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center">
+      class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center">
       <component :is="activity.icon" class="w-4 h-4 text-white" />
     </div>
     <div class="flex-1 min-w-0">

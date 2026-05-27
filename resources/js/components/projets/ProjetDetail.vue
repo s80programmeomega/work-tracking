@@ -11,7 +11,7 @@
       <div>
         <!-- Header existant du projet -->
         <div
-          class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+          class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 overflow-hidden">
           <!-- Banner avec couleur du projet -->
           <div class="h-32" :style="{ backgroundColor: projet.couleur || '#3B82F6' }"></div>
 
@@ -20,7 +20,7 @@
               <div class="flex-1">
                 <div class="flex items-center gap-3 mb-2">
                   <button @click="$emit('back')"
-                    class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    class="p-2 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                     <ChevronLeftIcon class="w-5 h-5" />
                   </button>
                   <span class="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -44,7 +44,7 @@
                 </button>
 
                 <button
-                  class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors">
+                  class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700 transition-colors">
                   <SettingsIcon class="w-4 h-4" />
                   Paramètres
                 </button>
@@ -62,7 +62,7 @@
             <!-- Metadata -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
               <div class="flex items-center gap-3">
-                <div class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                <div class="p-2 bg-gray-100 dark:bg-gray-700 rounded-3">
                   <CalendarIcon class="w-5 h-5 text-gray-600 dark:text-gray-400" />
                 </div>
                 <div>
@@ -73,7 +73,7 @@
                 </div>
               </div>
               <div class="flex items-center gap-3">
-                <div class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                <div class="p-2 bg-gray-100 dark:bg-gray-700 rounded-3">
                   <CalendarIcon class="w-5 h-5 text-gray-600 dark:text-gray-400" />
                 </div>
                 <div>
@@ -84,7 +84,7 @@
                 </div>
               </div>
               <div class="flex items-center gap-3">
-                <div class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                <div class="p-2 bg-gray-100 dark:bg-gray-700 rounded-3">
                   <UsersIcon class="w-5 h-5 text-gray-600 dark:text-gray-400" />
                 </div>
                 <div>
@@ -95,7 +95,7 @@
                 </div>
               </div>
               <div class="flex items-center gap-3">
-                <div class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                <div class="p-2 bg-gray-100 dark:bg-gray-700 rounded-3">
                   <component :is="getStatusIcon(projet.status)" class="w-5 h-5 text-gray-600 dark:text-gray-400" />
                 </div>
                 <div>
@@ -115,7 +115,7 @@
         </div>
 
         <!-- Tabs -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700">
           <div class="border-b border-gray-200 dark:border-gray-700">
             <nav class="flex space-x-8 px-6" aria-label="Tabs">
               <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id" :class="[
@@ -145,7 +145,7 @@
             <div v-if="activeTab === 'overview'" class="space-y-6">
               <!-- Stats -->
               <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-3 p-4">
                   <div class="text-2xl font-bold text-gray-900 dark:text-white">
                     {{ projectStats.activites_count || 0 }}
                   </div>
@@ -153,7 +153,7 @@
                     Activités totales
                   </div>
                 </div>
-                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-3 p-4">
                   <div class="text-2xl font-bold text-gray-900 dark:text-white">
                     {{ displayedActivities.length }}
                   </div>
@@ -161,7 +161,7 @@
                     Mes activités
                   </div>
                 </div>
-                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-3 p-4">
                   <div class="text-2xl font-bold text-gray-900 dark:text-white">
                     {{ projectStats.taches_terminees || 0 }}
                   </div>
@@ -169,7 +169,7 @@
                     Complétées
                   </div>
                 </div>
-                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-3 p-4">
                   <div class="text-2xl font-bold text-gray-900 dark:text-white">
                     {{ projet.member_count || 0 }}
                   </div>
@@ -207,7 +207,7 @@
 
               <!-- Budget -->
               <div v-if="projet.budget"
-                class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-3 p-4">
                 <div class="flex items-center justify-between">
                   <span class="text-sm font-medium text-blue-900 dark:text-blue-300">
                     Budget alloué
@@ -234,7 +234,7 @@
 
                 <!-- Bouton Nouvelle Activité -->
                 <button v-if="canCreateActivities" @click="showCreateActivityModal = true"
-                  class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors shadow-sm">
+                  class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700 transition-colors ">
                   <PlusIcon class="w-4 h-4" />
                   Nouvelle activité
                 </button>
@@ -242,7 +242,7 @@
 
               <!-- Filtre d'accès -->
               <div v-if="showAccessFilter"
-                class="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                class="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-3 border border-blue-200 dark:border-blue-800">
                 <div class="flex items-center justify-between">
                   <div class="flex items-center gap-3">
                     <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor"
@@ -268,7 +268,7 @@
 
               <!-- État vide -->
               <div v-if="displayedActivities.length === 0"
-                class="text-center py-12 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+                class="text-center py-12 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-3">
                 <ListIcon class="mx-auto h-12 w-12 text-gray-400" />
                 <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">
                   {{ showAllActivities ? 'Aucune activité dans ce projet' : 'Aucune activité accessible' }}
@@ -280,18 +280,18 @@
                   }}
                 </p>
                 <button v-if="!showAllActivities && canViewAllActivities" @click="toggleViewAllActivities"
-                  class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                  class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-3 hover:bg-blue-700 transition-colors">
                   Voir toutes les activités du projet
                 </button>
                 <button v-else-if="canCreateActivities" @click="showCreateActivityModal = true"
-                  class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors">
+                  class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700 transition-colors">
                   <PlusIcon class="w-4 h-4" />
                   Créer une activité
                 </button>
               </div>
 
               <!-- Liste des activités - STYLE SIMILAIRE À MES ACTIVITÉS -->
-              <div v-else class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+              <div v-else class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700">
                 <div class="overflow-x-auto">
                   <table class="w-full text-sm text-left">
                     <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700">
@@ -334,7 +334,7 @@
                         <td class="px-6 py-4">
                           <button v-if="getActivityPermissions(activity).canManageMembers"
                             @click.stop="openActivityMembersModal(activity)"
-                            class="flex items-center gap-2 px-3 py-1.5 text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors">
+                            class="flex items-center gap-2 px-3 py-1.5 text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 rounded-3 hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors">
                             <UsersIcon class="w-4 h-4" />
                             {{ activity.membres_count || 0 }} membre(s)
                           </button>
@@ -379,7 +379,7 @@
                         <td class="px-6 py-4">
                           <div class="flex items-center gap-2">
                             <button @click="navigateToActivityDetail(activity)"
-                              class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg"
+                              class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-3"
                               title="Voir">
                               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -390,14 +390,14 @@
                             </button>
 
                             <button v-if="getActivityPermissions(activity).canEdit" @click.stop="editActivity(activity)"
-                              class="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg"
+                              class="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-3"
                               title="Modifier">
                               <EditIcon class="w-4 h-4" />
                             </button>
 
                             <button v-if="getActivityPermissions(activity).canDelete"
                               @click.stop="deleteActivity(activity)"
-                              class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
+                              class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-3"
                               title="Supprimer">
                               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -433,18 +433,18 @@
                 </div>
 
                 <button v-if="canManageMembers" @click="showInviteModal = true"
-                  class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors">
+                  class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700 transition-colors">
                   <PlusIcon class="w-4 h-4" /> Inviter des membres
                 </button>
               </div>
 
               <!-- Debug des permissions -->
-              <!-- <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <!-- <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-3">
                 <h4 class="font-medium text-blue-800">Structure des données membres:</h4>
                 <pre class="text-xs mt-2">{{ JSON.stringify(members, null, 2) }}</pre>
               </div> -->
 
-              <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+              <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700">
                 <div class="overflow-x-auto">
                   <table class="w-full text-sm text-left">
                     <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700">
@@ -589,7 +589,7 @@
 
               <!-- État vide -->
               <div v-else-if="pendingInvitations.length === 0"
-                class="text-center py-12 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+                class="text-center py-12 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-3">
                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -603,7 +603,7 @@
               </div>
 
               <!-- Liste des invitations -->
-              <div v-else class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+              <div v-else class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700">
                 <div class="overflow-x-auto">
                   <table class="w-full text-sm text-left">
                     <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700">

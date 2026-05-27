@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6">
     <!-- Formulaire d'ajout de commentaire -->
-    <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+    <div class="bg-gray-50 dark:bg-gray-800 rounded-3 p-4">
       <form @submit.prevent="addComment">
         <div class="flex gap-3">
           <div class="flex-shrink-0">
@@ -14,20 +14,20 @@
               v-model="newComment"
               placeholder="Ajouter un commentaire..."
               rows="3"
-              class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none"
+              class="w-full px-4 py-2 rounded-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none"
             ></textarea>
             <div class="flex items-center justify-between mt-2">
               <div class="flex gap-2">
                 <button 
                   type="button"
-                  class="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                  class="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-3 transition-colors"
                   title="Ajouter une pièce jointe"
                 >
                   <i class="fas fa-paperclip"></i>
                 </button>
                 <button 
                   type="button"
-                  class="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                  class="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-3 transition-colors"
                   title="Mentionner"
                 >
                   <i class="fas fa-at"></i>
@@ -36,7 +36,7 @@
               <button 
                 type="submit"
                 :disabled="!newComment.trim() || submitting"
-                class="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                class="px-4 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <i v-if="submitting" class="fas fa-spinner fa-spin mr-2"></i>
                 <i v-else class="fas fa-paper-plane mr-2"></i>
@@ -54,7 +54,7 @@
         v-for="comment in comments" 
         :key="comment.id"
         :id="`comment-${comment.id}`"
-        class="bg-white dark:bg-gray-800 rounded-xl p-4 border-2 border-gray-200 dark:border-gray-700 transition-colors"
+        class="bg-white dark:bg-gray-800 rounded-3 p-4 border-2 border-gray-200 dark:border-gray-700 transition-colors"
         :class="{ 'ring-2 ring-brand-500 border-brand-500': highlightedComment === comment.id }"
       >
         <div class="flex gap-3">
@@ -88,7 +88,7 @@
             <div v-else>
               <textarea 
                 v-model="editedContent"
-                class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 resize-none"
+                class="w-full px-3 py-2 rounded-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 resize-none"
                 rows="3"
               ></textarea>
               <div class="flex gap-2 mt-2">

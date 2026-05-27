@@ -10,7 +10,7 @@
       </div>
 
       <!-- Error State -->
-      <div v-else-if="error" class="max-w-md w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+      <div v-else-if="error" class="max-w-md w-full bg-white dark:bg-gray-800 rounded-3 p-6">
         <div class="text-center">
           <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/30">
             <svg class="h-6 w-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -21,7 +21,7 @@
           <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ error }}</p>
           <router-link
             to="/workspaces"
-            class="mt-6 inline-block px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700"
+            class="mt-6 inline-block px-4 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700"
           >
             Retour a l'espace de travail
           </router-link>
@@ -29,14 +29,14 @@
       </div>
 
       <!-- Invitation Details -->
-      <div v-else-if="invitation" class="max-w-2xl w-full bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden">
+      <div v-else-if="invitation" class="max-w-2xl w-full bg-white dark:bg-gray-800 rounded-3 overflow-hidden">
         <!-- Header avec logo du workspace -->
-        <div class="bg-gradient-to-r from-brand-600 to-brand-700 px-6 py-8 text-center">
+        <div class="px-6 py-8 text-center">
           <div v-if="invitation.workspace.logo_url" class="mb-4">
-            <img :src="invitation.workspace.logo_url" alt="Logo" class="h-20 w-20 rounded-lg mx-auto" />
+            <img :src="invitation.workspace.logo_url" alt="Logo" class="h-20 w-20 rounded-3 mx-auto" />
           </div>
           <div v-else class="mb-4">
-            <div class="h-20 w-20 rounded-lg bg-white/20 flex items-center justify-center mx-auto">
+            <div class="h-20 w-20 rounded-3 bg-white/20 flex items-center justify-center mx-auto">
               <span class="text-3xl text-white font-bold">{{ getInitials(invitation.workspace.nom) }}</span>
             </div>
           </div>
@@ -49,7 +49,7 @@
           <!-- Invitation Info -->
           <div class="space-y-4 mb-6">
             <div class="flex items-start gap-3">
-              <div class="p-2 bg-brand-100 dark:bg-brand-900/30 rounded-lg">
+              <div class="p-2 bg-brand-100 dark:bg-brand-900/30 rounded-3">
                 <svg class="w-5 h-5 text-brand-600 dark:text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
@@ -62,7 +62,7 @@
             </div>
 
             <div class="flex items-start gap-3">
-              <div class="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+              <div class="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-3">
                 <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
@@ -73,7 +73,7 @@
               </div>
             </div>
 
-            <div v-if="invitation.message" class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+            <div v-if="invitation.message" class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-3">
               <p class="text-sm text-gray-700 dark:text-gray-300">{{ invitation.message }}</p>
             </div>
 
@@ -87,7 +87,7 @@
 
           <!-- Pour utilisateur existant -->
           <div v-if="userExists">
-            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-3 p-4 mb-6">
               <div class="flex items-start gap-3">
                 <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -105,14 +105,14 @@
               <button
                 @click="acceptInvitation"
                 :disabled="accepting"
-                class="flex-1 px-4 py-3 bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                class="flex-1 px-4 py-3 bg-brand-600 text-white rounded-3 hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 <span v-if="accepting" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
                 {{ accepting ? 'Acceptation...' : 'Accepter l\'invitation' }}
               </button>
               <button
                 @click="declineInvitation"
-                class="px-4 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                class="px-4 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700"
               >
                 Refuser
               </button>
@@ -137,7 +137,7 @@
                     v-model="form.prenom"
                     type="text"
                     required
-                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500"
+                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500"
                   />
                 </div>
                 <div>
@@ -148,7 +148,7 @@
                     v-model="form.nom"
                     type="text"
                     required
-                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500"
+                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500"
                   />
                 </div>
               </div>
@@ -161,7 +161,7 @@
                   :value="invitation.email"
                   type="email"
                   disabled
-                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400"
+                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400"
                 />
               </div>
 
@@ -174,7 +174,7 @@
                   type="password"
                   required
                   minlength="8"
-                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500"
+                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500"
                 />
               </div>
 
@@ -187,18 +187,18 @@
                   type="password"
                   required
                   minlength="8"
-                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500"
+                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500"
                 />
               </div>
 
-              <div v-if="formError" class="rounded-lg bg-red-50 dark:bg-red-900/20 p-4">
+              <div v-if="formError" class="rounded-3 bg-red-50 dark:bg-red-900/20 p-4">
                 <p class="text-sm text-red-700 dark:text-red-400">{{ formError }}</p>
               </div>
 
               <button
                 type="submit"
                 :disabled="accepting"
-                class="w-full px-4 py-3 bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                class="w-full px-4 py-3 bg-brand-600 text-white rounded-3 hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 <span v-if="accepting" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
                 {{ accepting ? 'Création du compte...' : 'Créer mon compte et rejoindre' }}

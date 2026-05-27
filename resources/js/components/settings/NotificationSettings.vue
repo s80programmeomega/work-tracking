@@ -19,7 +19,7 @@
     <!-- Settings Content -->
     <div v-else class="space-y-6">
       <!-- Email Notifications -->
-      <div class="p-5 border border-gray-200 rounded-xl dark:border-gray-800">
+      <div class="p-5 border border-gray-200 rounded-3 dark:border-gray-800">
         <div class="flex items-center justify-between mb-4">
           <div>
             <h5 class="font-medium text-gray-800 dark:text-white/90">Notifications par email</h5>
@@ -80,7 +80,7 @@
       </div>
 
       <!-- Push Notifications -->
-      <div class="p-5 border border-gray-200 rounded-xl dark:border-gray-800">
+      <div class="p-5 border border-gray-200 rounded-3 dark:border-gray-800">
         <div class="flex items-center justify-between mb-4">
           <div>
             <h5 class="font-medium text-gray-800 dark:text-white/90">Notifications push</h5>
@@ -99,7 +99,7 @@
       </div>
 
       <!-- In-App Notifications -->
-      <div class="p-5 border border-gray-200 rounded-xl dark:border-gray-800">
+      <div class="p-5 border border-gray-200 rounded-3 dark:border-gray-800">
         <div class="flex items-center justify-between mb-4">
           <div>
             <h5 class="font-medium text-gray-800 dark:text-white/90">Notifications dans l'app</h5>
@@ -125,7 +125,7 @@
             <select
               v-model="settings.notificationFrequency"
               @change="updateSettings"
-              class="bg-gray-50 border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              class="bg-gray-50 border border-gray-300 text-gray-700 text-sm rounded-3 focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             >
               <option value="realtime">En temps réel</option>
               <option value="hourly">Toutes les heures</option>
@@ -143,14 +143,14 @@
                 type="time"
                 v-model="settings.notificationStartTime"
                 @change="updateSettings"
-                class="bg-gray-50 border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                class="bg-gray-50 border border-gray-300 text-gray-700 text-sm rounded-3 focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               >
               <span class="text-gray-500">à</span>
               <input
                 type="time"
                 v-model="settings.notificationEndTime"
                 @change="updateSettings"
-                class="bg-gray-50 border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                class="bg-gray-50 border border-gray-300 text-gray-700 text-sm rounded-3 focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               >
             </div>
           </div>
@@ -158,7 +158,7 @@
       </div>
 
       <!-- Notification Sounds -->
-      <div class="p-5 border border-gray-200 rounded-xl dark:border-gray-800">
+      <div class="p-5 border border-gray-200 rounded-3 dark:border-gray-800">
         <div class="flex items-center justify-between mb-4">
           <div>
             <h5 class="font-medium text-gray-800 dark:text-white/90">Sons de notification</h5>
@@ -181,7 +181,7 @@
         <button
           @click="saveSettings"
           :disabled="saving"
-          class="px-6 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-hidden focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-6 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-3 hover:bg-blue-700 focus:outline-hidden focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <span v-if="saving">
             <svg class="inline w-4 h-4 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">

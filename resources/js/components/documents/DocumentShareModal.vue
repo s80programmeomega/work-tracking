@@ -24,7 +24,7 @@
             leave-from="opacity-100 translate-y-0 sm:scale-100"
             leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
-            <DialogPanel class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all dark:bg-gray-900 sm:my-8 sm:w-full sm:max-w-2xl">
+            <DialogPanel class="relative transform overflow-hidden rounded-3 bg-white text-left transition-all dark:bg-gray-900 sm:my-8 sm:w-full sm:max-w-2xl">
               <!-- Header -->
               <div class="border-b border-gray-200 bg-white px-6 py-4 dark:border-gray-800 dark:bg-gray-900">
                 <div class="flex items-center justify-between">
@@ -33,7 +33,7 @@
                   </DialogTitle>
                   <button
                     @click="$emit('close')"
-                    class="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500 dark:hover:bg-gray-800"
+                    class="rounded-3 p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500 dark:hover:bg-gray-800"
                   >
                     <XMarkIcon class="h-6 w-6" />
                   </button>
@@ -56,13 +56,13 @@
                           @input="searchUsers"
                           type="text"
                           placeholder="Rechercher un utilisateur..."
-                          class="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
+                          class="w-full rounded-3 border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
                         />
                         
                         <!-- Search Results Dropdown -->
                         <div
                           v-if="showSearchResults && searchResults.length > 0"
-                          class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800"
+                          class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-3 border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
                         >
                           <button
                             v-for="user in searchResults"
@@ -88,7 +88,7 @@
                   </div>
 
                   <!-- Selected User & Permissions -->
-                  <div v-if="selectedUser" class="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/50">
+                  <div v-if="selectedUser" class="rounded-3 border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/50">
                     <div class="flex items-start justify-between">
                       <div class="flex items-center gap-3">
                         <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-sm font-medium text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
@@ -163,14 +163,14 @@
                       <input
                         v-model="expiresAt"
                         type="datetime-local"
-                        class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                        class="mt-1 block w-full rounded-3 border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                       />
                     </div>
 
                     <button
                       @click="handleGrantPermission"
                       :disabled="loading"
-                      class="mt-4 w-full inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                      class="mt-4 w-full inline-flex items-center justify-center gap-2 rounded-3 bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                     >
                       <ShareIcon class="h-5 w-5" />
                       Accorder les permissions
@@ -199,7 +199,7 @@
                     <div
                       v-for="permission in currentPermissions"
                       :key="permission.id"
-                      class="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800"
+                      class="flex items-center justify-between rounded-3 border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800"
                     >
                       <div class="flex items-center gap-3">
                         <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-xs font-medium text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
@@ -237,7 +237,7 @@
                 </div>
 
                 <!-- Error Message -->
-                <div v-if="error" class="mt-4 rounded-lg bg-red-50 p-4 dark:bg-red-900/20">
+                <div v-if="error" class="mt-4 rounded-3 bg-red-50 p-4 dark:bg-red-900/20">
                   <div class="flex items-start gap-3">
                     <ExclamationTriangleIcon class="h-5 w-5 flex-shrink-0 text-red-600 dark:text-red-400" />
                     <p class="text-sm text-red-800 dark:text-red-300">{{ error }}</p>
@@ -250,7 +250,7 @@
                 <div class="flex justify-end">
                   <button
                     @click="$emit('close')"
-                    class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                    class="rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                   >
                     Fermer
                   </button>

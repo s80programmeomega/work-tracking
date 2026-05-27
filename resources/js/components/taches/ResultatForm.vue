@@ -25,13 +25,13 @@
             leave-from="opacity-100 scale-100"
             leave-to="opacity-0 scale-95"
           >
-            <DialogPanel class="relative w-full max-w-3xl transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-xl transition-all">
+            <DialogPanel class="relative w-full max-w-3xl transform overflow-hidden rounded-3 bg-white dark:bg-gray-800 transition-all">
               <!-- Header -->
               <div class="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
                 <div class="flex items-center justify-between">
                   <div>
                     <DialogTitle class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-                      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+                      <div class="w-10 h-10 rounded-3 flex items-center justify-center">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
@@ -44,7 +44,7 @@
                   </div>
                   <button
                     @click="$emit('close')"
-                    class="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    class="rounded-3 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                   >
                     <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -65,7 +65,7 @@
                     v-model="form.resultats_attendus"
                     rows="3"
                     required
-                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 resize-none"
+                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 resize-none"
                     placeholder="Décrivez ce qui était attendu de cette tâche..."
                   ></textarea>
                 </div>
@@ -79,7 +79,7 @@
                     v-model="form.resultats_obtenus"
                     rows="4"
                     required
-                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 resize-none"
+                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 resize-none"
                     placeholder="Décrivez en détail ce que vous avez accompli..."
                   ></textarea>
                 </div>
@@ -96,7 +96,7 @@
                       min="0"
                       max="100"
                       step="5"
-                      class="flex-1 h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                      class="flex-1 h-3 bg-gray-200 rounded-3 appearance-none cursor-pointer dark:bg-gray-700"
                     />
                     <div class="flex items-center gap-2">
                       <input
@@ -104,7 +104,7 @@
                         type="number"
                         min="0"
                         max="100"
-                        class="w-20 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-center font-bold"
+                        class="w-20 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-center font-bold"
                       />
                       <span class="text-lg font-bold text-gray-700 dark:text-gray-300">%</span>
                     </div>
@@ -119,7 +119,7 @@
                   <textarea
                     v-model="form.difficultes_rencontrees"
                     rows="3"
-                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 resize-none"
+                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 resize-none"
                     placeholder="Décrivez les obstacles rencontrés (optionnel)..."
                   ></textarea>
                 </div>
@@ -132,7 +132,7 @@
                   <textarea
                     v-model="form.solutions_envisagees"
                     rows="3"
-                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 resize-none"
+                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 resize-none"
                     placeholder="Comment avez-vous résolu ces difficultés ? (optionnel)..."
                   ></textarea>
                 </div>
@@ -145,7 +145,7 @@
                   <textarea
                     v-model="form.observations"
                     rows="2"
-                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 resize-none"
+                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 resize-none"
                     placeholder="Autres remarques (optionnel)..."
                   ></textarea>
                 </div>
@@ -168,7 +168,7 @@
                       <div
                         v-for="document in existingDocuments"
                         :key="document.id"
-                        class="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg group hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                        class="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-3 group hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
                       >
                         <div class="flex items-center gap-3 flex-1 min-w-0">
                           <div class="w-8 h-8 rounded bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
@@ -214,7 +214,7 @@
                     @drop.prevent="handleDrop"
                     @dragover.prevent="isDragging = true"
                     @dragleave="isDragging = false"
-                    class="border-2 border-dashed rounded-lg p-6 text-center transition-colors"
+                    class="border-2 border-dashed rounded-3 p-6 text-center transition-colors"
                     :class="isDragging ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-300 dark:border-gray-700'"
                   >
                     <input
@@ -254,7 +254,7 @@
                     <div
                       v-for="(file, index) in form.documents"
                       :key="index"
-                      class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg group hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                      class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-3 group hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                     >
                       <div class="flex items-center gap-3 flex-1 min-w-0">
                         <div class="w-8 h-8 rounded bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
@@ -281,7 +281,7 @@
                 </div>
 
                 <!-- Info validation -->
-                <div class="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <div class="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-3">
                   <div class="flex gap-3">
                     <svg class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                       <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
@@ -305,14 +305,14 @@
                   <button
                     type="button"
                     @click="$emit('close')"
-                    class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                    class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-3 transition-colors"
                   >
                     Annuler
                   </button>
                   <button
                     @click="handleSubmit"
                     :disabled="!isFormValid || submitting"
-                    class="px-6 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-medium rounded-lg hover:from-purple-600 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl flex items-center gap-2"
+                    class="px-6 py-2 text-white font-medium rounded-3 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
                   >
                     <svg v-if="submitting" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
                       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

@@ -4,13 +4,13 @@
     <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
       
       <!-- Header -->
-      <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30 shadow-sm">
+      <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30 ">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
             <!-- Titre et info semaine -->
             <div>
               <h1 class="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                <div class="w-12 h-12 rounded-3 flex items-center justify-center">
                   <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                   </svg>
@@ -32,7 +32,7 @@
               <div class="flex items-center gap-2">
                 <button
                   @click="previousWeek"
-                  class="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                  class="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                   </svg>
@@ -41,7 +41,7 @@
                 <select
                   v-model="selectedWeek"
                   @change="loadWeekData"
-                  class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
+                  class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
                   <option v-for="week in 53" :key="week" :value="week">
                     Semaine {{ week }}
                   </option>
@@ -50,7 +50,7 @@
                 <select
                   v-model="selectedYear"
                   @change="loadWeekData"
-                  class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
+                  class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
                   <option v-for="year in years" :key="year" :value="year">
                     {{ year }}
                   </option>
@@ -58,7 +58,7 @@
 
                 <button
                   @click="nextWeek"
-                  class="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                  class="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                   </svg>
@@ -66,7 +66,7 @@
 
                 <button
                   @click="goToCurrentWeek"
-                  class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium">
+                  class="px-4 py-2 bg-blue-500 text-white rounded-3 hover:bg-blue-600 transition-colors font-medium">
                   Aujourd'hui
                 </button>
               </div>
@@ -75,7 +75,7 @@
               <select
                 v-model="selectedActivite"
                 @change="filterByActivite"
-                class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
+                class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
                 <option :value="null">Toutes les activités</option>
                 <option v-for="activite in activites" :key="activite.id" :value="activite.id">
                   {{ activite.nom }}
@@ -85,7 +85,7 @@
               <!-- Export -->
               <button
                 @click="exportToPDF"
-                class="px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all flex items-center gap-2">
+                class="px-4 py-2 text-white rounded-3 font-medium transition-all flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
@@ -144,7 +144,7 @@
 
         <!-- Empty state -->
         <div v-else-if="filteredTasks.length === 0" class="text-center py-16">
-          <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 rounded-full flex items-center justify-center">
+          <div class="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center">
             <svg class="w-12 h-12 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
@@ -159,7 +159,7 @@
           </p>
           <button
             @click="goToCurrentWeek"
-            class="inline-flex items-center px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+            class="inline-flex items-center px-6 py-3 bg-blue-500 text-white rounded-3 hover:bg-blue-600 transition-colors">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
@@ -168,7 +168,7 @@
         </div>
 
         <!-- Table d'évaluation -->
-        <div v-else class="bg-white dark:bg-gray-800 rounded-xl shadow-xl overflow-hidden">
+        <div v-else class="bg-white dark:bg-gray-800 rounded-3 overflow-hidden">
           
           <!-- Message informatif -->
           <div class="bg-blue-50 dark:bg-blue-900/20 border-b border-blue-200 dark:border-blue-800 px-6 py-3">
@@ -183,7 +183,7 @@
           <!-- Table header -->
           <div class="overflow-x-auto">
             <table class="w-full">
-              <thead class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 border-b-2 border-gray-200 dark:border-gray-700">
+              <thead class="border-b-2 border-gray-200 dark:border-gray-700">
                 <tr>
                   <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     N°
@@ -234,7 +234,7 @@
         </div>
 
         <!-- Résumé de la semaine -->
-        <div v-if="filteredTasks.length > 0" class="mt-8 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl border border-blue-200 dark:border-blue-800 p-6">
+        <div v-if="filteredTasks.length > 0" class="mt-8 rounded-3 border border-blue-200 dark:border-blue-800 p-6">
           <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
             <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -242,7 +242,7 @@
             Résumé de ma semaine
           </h3>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-3 p-4">
               <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Mon taux de complétion</p>
               <div class="flex items-end gap-2">
                 <p class="text-3xl font-bold text-blue-600">{{ stats.completionRate }}%</p>
@@ -253,7 +253,7 @@
               </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-3 p-4">
               <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Résultats validés</p>
               <div class="flex items-end gap-2">
                 <p class="text-3xl font-bold text-purple-600">{{ stats.validationRate }}%</p>
@@ -264,7 +264,7 @@
               </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-3 p-4">
               <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Heures travaillées</p>
               <div class="flex items-end gap-2">
                 <p class="text-3xl font-bold text-green-600">{{ stats.actual_hours }}h</p>

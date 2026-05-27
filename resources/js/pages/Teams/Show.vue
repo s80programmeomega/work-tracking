@@ -9,11 +9,11 @@
 
     <div v-else-if="team" class="space-y-5">
       <!-- Team Header Card -->
-      <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] p-6">
+      <div class="rounded-3 border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] p-6">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-4">
             <button @click="$router.back()"
-              class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+              class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-3 transition-colors">
               <svg class="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor"
                 viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -22,11 +22,11 @@
 
             <!-- Team Avatar -->
             <div v-if="team.avatar"
-              class="w-16 h-16 rounded-xl overflow-hidden ring-4 ring-gray-100 dark:ring-gray-700">
+              class="w-16 h-16 rounded-3 overflow-hidden ring-4 ring-gray-100 dark:ring-gray-700">
               <img :src="team.avatar" class="w-full h-full object-cover" alt="Team avatar" />
             </div>
             <div v-else
-              class="w-16 h-16 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center text-white text-2xl font-bold ring-4 ring-gray-100 dark:ring-gray-700">
+              class="w-16 h-16 rounded-3 flex items-center justify-center text-white text-2xl font-bold ring-4 ring-gray-100 dark:ring-gray-700">
               {{ getInitials(team.name) }}
             </div>
 
@@ -56,7 +56,7 @@
           <!-- Actions -->
           <div class="flex gap-3">
             <button @click="showEditModal = true"
-              class="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-2">
+              class="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-2">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -64,7 +64,7 @@
               Modifier
             </button>
             <button @click="deleteTeamConfirm"
-              class="px-4 py-2 border border-red-300 dark:border-red-700 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 transition-colors flex items-center gap-2">
+              class="px-4 py-2 border border-red-300 dark:border-red-700 rounded-3 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 transition-colors flex items-center gap-2">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -76,12 +76,12 @@
       </div>
 
       <!-- Tabs Navigation -->
-      <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+      <div class="rounded-3 border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
         <div class="border-b border-gray-200 dark:border-gray-800">
           <nav class="flex gap-1 p-2">
             <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
-              class="flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all" :class="activeTab === tab.id
-                ? 'bg-brand-500 text-white shadow-lg'
+              class="flex items-center gap-2 px-4 py-2.5 rounded-3 font-medium transition-all" :class="activeTab === tab.id
+                ? 'bg-brand-500 text-white '
                 : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'">
               <component :is="tab.icon" class="w-5 h-5" />
               {{ tab.label }}
@@ -98,14 +98,14 @@
           <!-- Chat Tab -->
           <div v-if="activeTab === 'chat'" class="space-y-4">
             <div
-              class="bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 rounded-xl p-6 h-[600px] flex flex-col border border-gray-200 dark:border-gray-700">
+              class="rounded-3 p-6 h-[600px] flex flex-col border border-gray-200 dark:border-gray-700">
               <!-- Messages Container -->
               <div ref="chatContainer" class="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
                 <div v-for="message in messages" :key="message.id" class="flex gap-3">
                   <!-- Avatar -->
                   <div class="flex-shrink-0">
                     <div
-                      class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm">
+                      class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm">
                       {{ getUserInitials(message.user) }}
                     </div>
                   </div>
@@ -118,7 +118,7 @@
                       <span class="text-xs text-gray-500 dark:text-gray-400">{{ formatDate(message.created_at) }}</span>
                     </div>
                     <div
-                      class="bg-white dark:bg-gray-800 rounded-lg px-4 py-2.5 shadow-sm border border-gray-200 dark:border-gray-700">
+                      class="bg-white dark:bg-gray-800 rounded-3 px-4 py-2.5 border border-gray-200 dark:border-gray-700">
                       <p class="text-gray-700 dark:text-gray-300">{{ message.content }}</p>
                     </div>
 
@@ -151,9 +151,9 @@
               <!-- Message Input -->
               <form @submit.prevent="sendMessage" class="mt-4 flex gap-2">
                 <input v-model="newMessage" type="text" placeholder="Tapez votre message..."
-                  class="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" />
+                  class="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" />
                 <button type="submit" :disabled="!newMessage.trim()"
-                  class="px-6 py-3 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+                  class="px-6 py-3 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -169,7 +169,7 @@
             <div class="flex justify-between items-center mb-6">
               <h3 class="text-xl font-bold text-gray-900 dark:text-white">Membres de l'équipe</h3>
               <button @click="showAddMemberModal = true"
-                class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
+                class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-3 font-medium transition-colors flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
@@ -180,11 +180,11 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div v-for="member in team.members" :key="member.id"
-                class="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-xl p-5 border border-gray-200 dark:border-gray-700 hover:border-brand-500 dark:hover:border-brand-500 hover:shadow-lg transition-all">
+                class="rounded-3 p-5 border border-gray-200 dark:border-gray-700 hover:border-brand-500 dark:hover:border-brand-500 transition-all">
                 <div class="flex items-center gap-4">
                   <div class="relative">
                     <div
-                      class="w-14 h-14 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold text-lg">
+                      class="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg">
                       {{ getUserInitials(member) }}
                     </div>
                     <!-- Presence indicator -->
@@ -218,7 +218,7 @@
                     </div>
                   </div>
                   <button v-if="member.pivot?.role !== 'owner'" @click="removeMemberConfirm(member)"
-                    class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                    class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-3 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -234,7 +234,7 @@
             <div class="flex justify-between items-center mb-6">
               <h3 class="text-xl font-bold text-gray-900 dark:text-white">Annonces de l'équipe</h3>
               <button @click="showAnnouncementModal = true"
-                class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
+                class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-3 font-medium transition-colors flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
@@ -246,11 +246,11 @@
             <!-- Announcements List -->
             <div class="space-y-4">
               <div v-for="announcement in announcements" :key="announcement.id"
-                class="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:border-brand-500 dark:hover:border-brand-500 transition-all">
+                class="rounded-3 p-6 border border-gray-200 dark:border-gray-700 hover:border-brand-500 dark:hover:border-brand-500 transition-all">
                 <div class="flex items-start gap-4">
                   <div class="flex-shrink-0">
                     <div
-                      class="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white text-xl">
+                      class="w-12 h-12 rounded-full flex items-center justify-center text-white text-xl">
                       📢
                     </div>
                   </div>
@@ -270,7 +270,7 @@
                     </div>
                   </div>
                   <button @click="deleteAnnouncementConfirm(announcement)"
-                    class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                    class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-3 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -300,7 +300,7 @@
             <div class="flex justify-between items-center mb-6">
               <h3 class="text-xl font-bold text-gray-900 dark:text-white">Ressources partagées</h3>
               <button @click="showResourceModal = true"
-                class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
+                class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-3 font-medium transition-colors flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
@@ -311,11 +311,11 @@
             <!-- Resources Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div v-for="resource in resources" :key="resource.id"
-                class="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-xl p-5 border border-gray-200 dark:border-gray-700 hover:border-brand-500 dark:hover:border-brand-500 hover:shadow-lg transition-all">
+                class="rounded-3 p-5 border border-gray-200 dark:border-gray-700 hover:border-brand-500 dark:hover:border-brand-500 transition-all">
                 <div class="flex items-start gap-3 mb-3">
                   <div class="flex-shrink-0">
                     <div
-                      class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-lg">
+                      class="w-10 h-10 rounded-3 flex items-center justify-center text-white text-lg">
                       {{ getResourceIcon(resource.type) }}
                     </div>
                   </div>
@@ -360,7 +360,7 @@
             <div class="flex justify-between items-center mb-6">
               <h3 class="text-xl font-bold text-gray-900 dark:text-white">Calendrier de l'équipe</h3>
               <button @click="showEventModal = true"
-                class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
+                class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-3 font-medium transition-colors flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
@@ -371,11 +371,11 @@
             <!-- Events List -->
             <div class="space-y-4">
               <div v-for="event in events" :key="event.id"
-                class="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-xl p-5 border-l-4 hover:shadow-lg transition-all"
+                class="rounded-3 p-5 border-l-4 transition-all"
                 :class="getEventTypeStyle(event.type).borderClass">
                 <div class="flex items-start gap-4">
                   <div class="flex-shrink-0">
-                    <div class="w-12 h-12 rounded-lg flex items-center justify-center text-2xl"
+                    <div class="w-12 h-12 rounded-3 flex items-center justify-center text-2xl"
                       :class="getEventTypeStyle(event.type).bgClass">
                       {{ getEventTypeStyle(event.type).icon }}
                     </div>
@@ -390,7 +390,7 @@
                         </span>
                       </div>
                       <button @click="deleteEventConfirm(event)"
-                        class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                        class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-3 transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -439,7 +439,7 @@
                       </svg>
                       <div class="flex -space-x-2">
                         <div v-for="(attendee, index) in event.attendees.slice(0, 5)" :key="attendee.id"
-                          class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold text-xs border-2 border-white dark:border-gray-800"
+                          class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs border-2 border-white dark:border-gray-800"
                           :title="attendee.nom">
                           {{ getUserInitials(attendee) }}
                         </div>
@@ -514,16 +514,16 @@
 
     <!-- Edit Team Modal -->
     <div v-if="showEditModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 "
       @click.self="showEditModal = false">
-      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl transform transition-all">
+      <div class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-2xl transform transition-all">
         <!-- Modal Header -->
         <div
-          class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+          class="px-8 py-6 border-b border-gray-200 dark:border-gray-700">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div
-                class="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center shadow-lg">
+                class="w-12 h-12 rounded-3 flex items-center justify-center ">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -552,7 +552,7 @@
                 Nom de l'équipe <span class="text-red-500">*</span>
               </label>
               <input v-model="editForm.name" type="text" required placeholder="Ex: Équipe Marketing, Développement..."
-                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" />
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" />
             </div>
 
             <!-- Description -->
@@ -561,7 +561,7 @@
                 Description
               </label>
               <textarea v-model="editForm.description" rows="3" placeholder="Décrivez l'objectif de cette équipe..."
-                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all resize-none"></textarea>
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all resize-none"></textarea>
             </div>
 
             <!-- Visibility -->
@@ -571,7 +571,7 @@
               </label>
               <div class="grid grid-cols-3 gap-3">
                 <label v-for="option in visibilityOptions" :key="option.value"
-                  class="relative flex flex-col items-center p-4 border-2 rounded-xl cursor-pointer transition-all"
+                  class="relative flex flex-col items-center p-4 border-2 rounded-3 cursor-pointer transition-all"
                   :class="editForm.visibility === option.value
                     ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20'
                     : 'border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600'">
@@ -595,11 +595,11 @@
         <div
           class="px-8 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end gap-3">
           <button type="button" @click="showEditModal = false"
-            class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all">
+            class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all">
             Annuler
           </button>
           <button type="button" @click="updateTeam" :disabled="updating || !editForm.name"
-            class="px-5 py-2.5 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+            class="px-5 py-2.5 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
             <svg v-if="updating" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor"
@@ -614,16 +614,16 @@
 
     <!-- Add Member Modal -->
     <div v-if="showAddMemberModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 "
       @click.self="showAddMemberModal = false">
-      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg transform transition-all">
+      <div class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-lg transform transition-all">
         <!-- Modal Header -->
         <div
-          class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+          class="px-8 py-6 border-b border-gray-200 dark:border-gray-700">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div
-                class="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center shadow-lg">
+                class="w-12 h-12 rounded-3 flex items-center justify-center ">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
@@ -652,7 +652,7 @@
                 Utilisateur <span class="text-red-500">*</span>
               </label>
               <select v-model="newMemberForm.user_id" required
-                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all">
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all">
                 <option value="">Sélectionnez un utilisateur</option>
                 <option v-for="user in availableUsers" :key="user.id" :value="user.id">
                   {{ user.nom }} ({{ user.email }})
@@ -667,7 +667,7 @@
               </label>
               <div class="grid grid-cols-2 gap-3">
                 <label v-for="role in memberRoles" :key="role.value"
-                  class="relative flex flex-col items-center p-4 border-2 rounded-xl cursor-pointer transition-all"
+                  class="relative flex flex-col items-center p-4 border-2 rounded-3 cursor-pointer transition-all"
                   :class="newMemberForm.role === role.value
                     ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20'
                     : 'border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600'">
@@ -691,11 +691,11 @@
         <div
           class="px-8 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end gap-3">
           <button type="button" @click="showAddMemberModal = false"
-            class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all">
+            class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all">
             Annuler
           </button>
           <button type="button" @click="addMember" :disabled="addingMember || !newMemberForm.user_id"
-            class="px-5 py-2.5 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+            class="px-5 py-2.5 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
             <svg v-if="addingMember" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor"
@@ -710,16 +710,16 @@
 
     <!-- Edit Team Modal -->
     <div v-if="showEditModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 "
       @click.self="showEditModal = false">
-      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl transform transition-all">
+      <div class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-2xl transform transition-all">
         <!-- Modal Header -->
         <div
-          class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+          class="px-8 py-6 border-b border-gray-200 dark:border-gray-700">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div
-                class="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center shadow-lg">
+                class="w-12 h-12 rounded-3 flex items-center justify-center ">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -748,7 +748,7 @@
                 Nom de l'équipe <span class="text-red-500">*</span>
               </label>
               <input v-model="editForm.name" type="text" required placeholder="Ex: Équipe Marketing, Développement..."
-                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" />
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" />
             </div>
 
             <!-- Description -->
@@ -757,7 +757,7 @@
                 Description
               </label>
               <textarea v-model="editForm.description" rows="3" placeholder="Décrivez l'objectif de cette équipe..."
-                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all resize-none"></textarea>
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all resize-none"></textarea>
             </div>
 
             <!-- Visibility -->
@@ -767,7 +767,7 @@
               </label>
               <div class="grid grid-cols-3 gap-3">
                 <label v-for="option in visibilityOptions" :key="option.value"
-                  class="relative flex flex-col items-center p-4 border-2 rounded-xl cursor-pointer transition-all"
+                  class="relative flex flex-col items-center p-4 border-2 rounded-3 cursor-pointer transition-all"
                   :class="editForm.visibility === option.value
                     ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20'
                     : 'border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600'">
@@ -791,11 +791,11 @@
         <div
           class="px-8 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end gap-3">
           <button type="button" @click="showEditModal = false"
-            class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all">
+            class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all">
             Annuler
           </button>
           <button type="button" @click="updateTeam" :disabled="updating || !editForm.name"
-            class="px-5 py-2.5 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+            class="px-5 py-2.5 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
             <svg v-if="updating" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor"
@@ -810,16 +810,16 @@
 
     <!-- Add Member Modal -->
     <div v-if="showAddMemberModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 "
       @click.self="showAddMemberModal = false">
-      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg transform transition-all">
+      <div class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-lg transform transition-all">
         <!-- Modal Header -->
         <div
-          class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+          class="px-8 py-6 border-b border-gray-200 dark:border-gray-700">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div
-                class="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center shadow-lg">
+                class="w-12 h-12 rounded-3 flex items-center justify-center ">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
@@ -848,7 +848,7 @@
                 Utilisateur <span class="text-red-500">*</span>
               </label>
               <select v-model="newMemberForm.user_id" required
-                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all">
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all">
                 <option value="">Sélectionnez un utilisateur</option>
                 <option v-for="user in availableUsers" :key="user.id" :value="user.id">
                   {{ user.nom }} ({{ user.email }})
@@ -863,7 +863,7 @@
               </label>
               <div class="grid grid-cols-2 gap-3">
                 <label v-for="role in memberRoles" :key="role.value"
-                  class="relative flex flex-col items-center p-4 border-2 rounded-xl cursor-pointer transition-all"
+                  class="relative flex flex-col items-center p-4 border-2 rounded-3 cursor-pointer transition-all"
                   :class="newMemberForm.role === role.value
                     ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20'
                     : 'border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600'">
@@ -887,11 +887,11 @@
         <div
           class="px-8 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end gap-3">
           <button type="button" @click="showAddMemberModal = false"
-            class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all">
+            class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all">
             Annuler
           </button>
           <button type="button" @click="addMember" :disabled="addingMember || !newMemberForm.user_id"
-            class="px-5 py-2.5 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+            class="px-5 py-2.5 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
             <svg v-if="addingMember" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor"
@@ -906,16 +906,16 @@
 
     <!-- Create Announcement Modal -->
     <div v-if="showAnnouncementModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 "
       @click.self="showAnnouncementModal = false">
-      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl transform transition-all">
+      <div class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-2xl transform transition-all">
         <!-- Modal Header -->
         <div
-          class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-amber-50 to-white dark:from-gray-900 dark:to-gray-800">
+          class="px-8 py-6 border-b border-gray-200 dark:border-gray-700">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div
-                class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg text-white text-2xl">
+                class="w-12 h-12 rounded-3 flex items-center justify-center text-white text-2xl">
                 📢
               </div>
               <div>
@@ -942,7 +942,7 @@
               </label>
               <input v-model="announcementForm.title" type="text" required
                 placeholder="Ex: Nouvelle procédure, Mise à jour importante..."
-                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all" />
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all" />
             </div>
 
             <!-- Content -->
@@ -952,7 +952,7 @@
               </label>
               <textarea v-model="announcementForm.content" rows="6" required
                 placeholder="Décrivez votre annonce en détail..."
-                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all resize-none"></textarea>
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all resize-none"></textarea>
             </div>
 
             <!-- Priority -->
@@ -961,7 +961,7 @@
                 Priorité
               </label>
               <div class="grid grid-cols-2 gap-3">
-                <label class="relative flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all"
+                <label class="relative flex items-center gap-3 p-4 border-2 rounded-3 cursor-pointer transition-all"
                   :class="announcementForm.priority === 'normal'
                     ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                     : 'border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600'">
@@ -978,7 +978,7 @@
                       clip-rule="evenodd" />
                   </svg>
                 </label>
-                <label class="relative flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all"
+                <label class="relative flex items-center gap-3 p-4 border-2 rounded-3 cursor-pointer transition-all"
                   :class="announcementForm.priority === 'high'
                     ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
                     : 'border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600'">
@@ -1004,12 +1004,12 @@
         <div
           class="px-8 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end gap-3">
           <button type="button" @click="showAnnouncementModal = false"
-            class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all">
+            class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all">
             Annuler
           </button>
           <button type="button" @click="createNewAnnouncement"
             :disabled="creatingAnnouncement || !announcementForm.title || !announcementForm.content"
-            class="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+            class="px-5 py-2.5 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
             <svg v-if="creatingAnnouncement" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor"
@@ -1024,16 +1024,16 @@
 
     <!-- Create Resource Modal -->
     <div v-if="showResourceModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 "
       @click.self="showResourceModal = false">
-      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl transform transition-all">
+      <div class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-2xl transform transition-all">
         <!-- Modal Header -->
         <div
-          class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
+          class="px-8 py-6 border-b border-gray-200 dark:border-gray-700">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div
-                class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center shadow-lg text-white text-2xl">
+                class="w-12 h-12 rounded-3 flex items-center justify-center text-white text-2xl">
                 📎
               </div>
               <div>
@@ -1060,7 +1060,7 @@
               </label>
               <div class="grid grid-cols-4 gap-3">
                 <label v-for="type in resourceTypes" :key="type.value"
-                  class="relative flex flex-col items-center p-4 border-2 rounded-xl cursor-pointer transition-all"
+                  class="relative flex flex-col items-center p-4 border-2 rounded-3 cursor-pointer transition-all"
                   :class="resourceForm.type === type.value
                     ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20'
                     : 'border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600'">
@@ -1084,7 +1084,7 @@
               </label>
               <input v-model="resourceForm.title" type="text" required
                 placeholder="Ex: Guide utilisateur, Lien API documentation..."
-                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" />
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" />
             </div>
 
             <!-- URL -->
@@ -1094,7 +1094,7 @@
               </label>
               <input v-model="resourceForm.url" type="text" required
                 placeholder="https://example.com/document.pdf ou /chemin/vers/fichier"
-                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" />
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" />
             </div>
 
             <!-- Description -->
@@ -1103,7 +1103,7 @@
                 Description
               </label>
               <textarea v-model="resourceForm.description" rows="3" placeholder="Décrivez brièvement cette ressource..."
-                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all resize-none"></textarea>
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all resize-none"></textarea>
             </div>
           </div>
         </form>
@@ -1112,12 +1112,12 @@
         <div
           class="px-8 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end gap-3">
           <button type="button" @click="showResourceModal = false"
-            class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all">
+            class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all">
             Annuler
           </button>
           <button type="button" @click="createNewResource"
             :disabled="creatingResource || !resourceForm.title || !resourceForm.url"
-            class="px-5 py-2.5 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+            class="px-5 py-2.5 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
             <svg v-if="creatingResource" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor"
@@ -1132,16 +1132,16 @@
 
     <!-- Create Event Modal -->
     <div v-if="showEventModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 "
       @click.self="showEventModal = false">
-      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl transform transition-all">
+      <div class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-2xl transform transition-all">
         <!-- Modal Header -->
         <div
-          class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-indigo-50 to-white dark:from-gray-900 dark:to-gray-800">
+          class="px-8 py-6 border-b border-gray-200 dark:border-gray-700">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div
-                class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center shadow-lg text-white text-2xl">
+                class="w-12 h-12 rounded-3 flex items-center justify-center text-white text-2xl">
                 📅
               </div>
               <div>
@@ -1168,7 +1168,7 @@
               </label>
               <div class="grid grid-cols-3 gap-3">
                 <label v-for="type in eventTypes" :key="type.value"
-                  class="relative flex flex-col items-center p-3 border-2 rounded-xl cursor-pointer transition-all"
+                  class="relative flex flex-col items-center p-3 border-2 rounded-3 cursor-pointer transition-all"
                   :class="eventForm.type === type.value
                     ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20'
                     : 'border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600'">
@@ -1192,7 +1192,7 @@
               </label>
               <input v-model="eventForm.title" type="text" required
                 placeholder="Ex: Réunion d'équipe, Sprint planning..."
-                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" />
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" />
             </div>
 
             <!-- Description -->
@@ -1201,7 +1201,7 @@
                 Description
               </label>
               <textarea v-model="eventForm.description" rows="3" placeholder="Ajoutez des détails sur l'événement..."
-                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all resize-none"></textarea>
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all resize-none"></textarea>
             </div>
 
             <!-- Date & Time -->
@@ -1211,14 +1211,14 @@
                   Date de début <span class="text-red-500">*</span>
                 </label>
                 <input v-model="eventForm.start_date" type="datetime-local" required
-                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" />
+                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" />
               </div>
               <div>
                 <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Date de fin
                 </label>
                 <input v-model="eventForm.end_date" type="datetime-local"
-                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" />
+                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" />
               </div>
             </div>
 
@@ -1228,7 +1228,7 @@
                 Lieu
               </label>
               <input v-model="eventForm.location" type="text" placeholder="Ex: Salle de réunion A, Zoom, Bureau..."
-                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" />
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" />
             </div>
           </div>
         </form>
@@ -1237,12 +1237,12 @@
         <div
           class="px-8 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end gap-3">
           <button type="button" @click="showEventModal = false"
-            class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all">
+            class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all">
             Annuler
           </button>
           <button type="button" @click="createNewEvent"
             :disabled="creatingEvent || !eventForm.title || !eventForm.start_date"
-            class="px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+            class="px-5 py-2.5 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
             <svg v-if="creatingEvent" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor"

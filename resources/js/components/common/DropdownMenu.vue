@@ -66,7 +66,7 @@ const props = defineProps({
   menuClass: {
     type: String,
     default:
-      'absolute right-0 z-40 w-40 p-2 space-y-1 bg-white border border-gray-200 top-full rounded-2xl shadow-lg dark:border-gray-800 dark:bg-gray-dark',
+      'absolute right-0 z-40 w-40 p-2 space-y-1 bg-white border border-gray-200 top-full rounded-3 dark:border-gray-800 dark:bg-gray-dark',
   },
   itemClass: {
     type: String,
