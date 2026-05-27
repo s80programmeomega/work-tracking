@@ -743,7 +743,7 @@ const getFilteredSubItems = (subItems) => {
         if (!subItem) return false;
         if (subItem.superAdminOnly && !isSuperAdmin.value) return false;
         if (subItem.requiresPermission) {
-            return permissionMap.value[subItem.requiresPermission] ?? true;
+            return permissionMap.value[subItem.requiresPermission] ?? false;
         }
         return true;
     });

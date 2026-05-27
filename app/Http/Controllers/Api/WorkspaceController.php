@@ -83,6 +83,7 @@ class WorkspaceController extends Controller
                 'can_inline_edit_tache' => $gate->userCan($user, Permission::TACHES_INLINE_EDIT, $workspace),
                 'can_manage_workspace_documents' => $gate->userCan($user, Permission::DOCUMENTS_MANAGE_WORKSPACE, $workspace),
                 'can_manage_subscription' => $user->isSuperAdmin(),
+                'can_submit_result' => $gate->userCan($user, Permission::TACHES_SUBMIT_RESULT, $workspace),
             ];
 
             return $workspace;
@@ -730,6 +731,7 @@ class WorkspaceController extends Controller
                         'can_inline_edit_tache' => $gate->userCan($user, Permission::TACHES_INLINE_EDIT, $workspace),
                         'can_manage_workspace_documents' => $gate->userCan($user, Permission::DOCUMENTS_MANAGE_WORKSPACE, $workspace),
                         'can_manage_subscription' => $user->isSuperAdmin(),
+                        'can_submit_result' => $gate->userCan($user, Permission::TACHES_SUBMIT_RESULT, $workspace),
                     ],
                 ];
             })
@@ -957,10 +959,9 @@ class WorkspaceController extends Controller
             'expires_at' => now()->addDays(7),
         ]);
 
-        // Resend email
-        // TODO: Send invitation email
-        // Notification::route('mail', $invitation->email)
-        //     ->notify(new WorkspaceInvitationNotification($invitation));
+        // Renvoi de l'email d'invitation
+        Notification::route('mail', $invitation->email)
+            ->notify(new WorkspaceInvitationNotification($invitation));
 
         return response()->json([
             'message' => 'Invitation renvoyée avec succès',
@@ -1500,6 +1501,7 @@ class WorkspaceController extends Controller
                     'can_inline_edit_tache' => $gate->userCan($user, Permission::TACHES_INLINE_EDIT, $workspace),
                     'can_manage_workspace_documents' => $gate->userCan($user, Permission::DOCUMENTS_MANAGE_WORKSPACE, $workspace),
                     'can_manage_subscription' => $user->isSuperAdmin(),
+                    'can_submit_result' => $gate->userCan($user, Permission::TACHES_SUBMIT_RESULT, $workspace),
                 ],
                 'subscription_summary' => app(SubscriptionService::class)->summary($workspace),
             ]),

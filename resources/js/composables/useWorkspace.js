@@ -141,9 +141,17 @@ export function useWorkspace() {
             toast.warning('Erreur lors du switch workspace côté serveur');
         }
 
+        // Rafraîchir les données complètes (permissions + subscription_summary) depuis le serveur
+        try {
+            const { data } = await api.get(`/workspaces/${newWorkspaceId}`);
+            authStore.currentWorkspace = data.data ?? data;
+        } catch (err) {
+            // On garde l'objet de la liste en cas d'erreur réseau
+        }
+
         // Broadcast change to all listeners
         const event = new CustomEvent('workspace-changed', {
-            detail: { workspace, oldWorkspaceId, newWorkspaceId },
+            detail: { workspace: authStore.currentWorkspace, oldWorkspaceId, newWorkspaceId },
         });
         window.dispatchEvent(event);
 

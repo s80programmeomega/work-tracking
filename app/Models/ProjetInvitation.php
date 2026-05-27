@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Permission\Models\Role;
 
 class ProjetInvitation extends Model
 {
@@ -17,6 +18,10 @@ class ProjetInvitation extends Model
         'can_edit',
         'can_delete',
         'can_invite',
+        'can_delete_member',
+        'can_create_activity',
+        'can_edit_activity',
+        'can_delete_activity',
         'token',
         'invited_by',
         'message',
@@ -29,6 +34,10 @@ class ProjetInvitation extends Model
         'can_edit' => 'boolean',
         'can_delete' => 'boolean',
         'can_invite' => 'boolean',
+        'can_delete_member' => 'boolean',
+        'can_create_activity' => 'boolean',
+        'can_edit_activity' => 'boolean',
+        'can_delete_activity' => 'boolean',
         'expires_at' => 'datetime',
         'accepted_at' => 'datetime',
     ];
@@ -66,7 +75,7 @@ class ProjetInvitation extends Model
      */
     public function isValid(): bool
     {
-        return $this->status === 'pending' && 
+        return $this->status === 'pending' &&
                $this->expires_at > now();
     }
 
@@ -75,7 +84,7 @@ class ProjetInvitation extends Model
      */
     public function accept(User $user): void
     {
-        if (!$this->isValid()) {
+        if (! $this->isValid()) {
             throw new \Exception('Cette invitation n\'est plus valide');
         }
 
@@ -86,17 +95,30 @@ class ProjetInvitation extends Model
             throw new \Exception('Vous êtes déjà membre de ce projet');
         }
 
-        // Ajouter au projet
+        // Résoudre le role_id Spatie (admin/member/viewer → cadre/collaborateur/observateur)
+        $spatieRole = match ($this->role) {
+            'admin' => 'cadre',
+            'member' => 'collaborateur',
+            'viewer' => 'observateur',
+            default => $this->role,
+        };
+        $roleId = Role::findByName($spatieRole, 'web')->id;
+
+        // Ajouter au projet avec toutes les permissions de l'invitation
         $projet->members()->attach($user->id, [
-            'role' => $this->role,
+            'role_id' => $roleId,
             'can_edit' => $this->can_edit,
             'can_delete' => $this->can_delete,
             'can_invite' => $this->can_invite,
+            'can_delete_member' => $this->can_delete_member,
+            'can_create_activity' => $this->can_create_activity,
+            'can_edit_activity' => $this->can_edit_activity,
+            'can_delete_activity' => $this->can_delete_activity,
         ]);
 
         // ✅ Ajouter au workspace s'il n'est pas déjà membre
         $workspace = $projet->workspace;
-        if ($workspace && !$workspace->members()->where('user_id', $user->id)->exists()) {
+        if ($workspace && ! $workspace->members()->where('user_id', $user->id)->exists()) {
             $workspace->members()->attach($user->id, [
                 'role' => 'viewer', // Rôle par défaut dans le workspace
                 'permissions' => json_encode([]),
@@ -117,7 +139,7 @@ class ProjetInvitation extends Model
             ->performedOn($projet)
             ->withProperties([
                 'role' => $this->role,
-                'invited_by' => $this->invited_by
+                'invited_by' => $this->invited_by,
             ])
             ->log('User accepted projet invitation');
     }

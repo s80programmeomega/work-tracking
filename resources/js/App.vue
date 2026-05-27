@@ -15,7 +15,16 @@
                     <p class="loading-text">Chargement de l'application...</p>
                 </div>
             </div>
-            
+
+            <!-- Erreur d'initialisation -->
+            <div v-else-if="error" class="error-overlay">
+                <div class="error-container">
+                    <p class="error-title">Une erreur est survenue</p>
+                    <p class="error-message">Veuillez recharger la page. Si le problème persiste, contactez le support.</p>
+                    <button class="error-reload-btn" @click="() => window.location.reload()">Recharger</button>
+                </div>
+            </div>
+
             <RouterView v-else />
         </SidebarProvider>
     </ThemeProvider>
@@ -147,5 +156,46 @@ onMounted(async () => {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+.error-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #f8f9fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.error-container {
+    text-align: center;
+    max-width: 400px;
+    padding: 2rem;
+}
+
+.error-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #dc3545;
+    margin-bottom: 0.5rem;
+}
+
+.error-message {
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+}
+
+.error-reload-btn {
+    padding: 0.5rem 1.5rem;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
 }
 </style>

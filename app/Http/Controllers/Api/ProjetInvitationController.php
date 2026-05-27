@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 
 class ProjetInvitationController extends Controller
 {
@@ -110,8 +111,15 @@ class ProjetInvitationController extends Controller
                     if ($isWorkspaceMember) {
                         // ✅ MEMBRE DU WORKSPACE : Ajout direct sans invitation
                         DB::transaction(function () use ($projet, $user, $permissions, $sendEmail, &$addedMembers) {
-                            // Ajouter au projet
-                            $projet->members()->attach($user->id, $permissions);
+                            // Résoudre le role_id Spatie (admin/member/viewer → cadre/collaborateur/observateur)
+                            $roleId = Role::findByName($this->spatieRoleName($permissions['role']), 'web')->id;
+                            $pivotData = array_merge(
+                                array_diff_key($permissions, ['role' => null]),
+                                ['role_id' => $roleId]
+                            );
+
+                            // Ajouter au projet avec toutes les permissions
+                            $projet->members()->attach($user->id, $pivotData);
 
                             // Envoyer notification (email + système)
                             if ($sendEmail) {
@@ -515,5 +523,19 @@ class ProjetInvitationController extends Controller
         return response()->json([
             'message' => 'Invitation annulée avec succès',
         ]);
+    }
+
+    /**
+     * Traduit le rôle projet (admin|member|viewer) vers le nom de rôle Spatie équivalent.
+     * Nécessaire car projet_invitations stocke des rôles projet simplifiés.
+     */
+    private function spatieRoleName(string $projetRole): string
+    {
+        return match ($projetRole) {
+            'admin' => 'cadre',
+            'member' => 'collaborateur',
+            'viewer' => 'observateur',
+            default => $projetRole, // rôles Spatie directs passés en clair
+        };
     }
 }

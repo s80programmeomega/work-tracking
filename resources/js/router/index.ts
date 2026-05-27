@@ -770,6 +770,18 @@ router.beforeEach(async (to, from, next) => {
         return next({ name: '404 Error' })
       }
 
+      // Routes avec permissions requises
+      if (Array.isArray(to.meta.permissions) && (to.meta.permissions as string[]).length > 0) {
+        const userRoles: string[] = authStore.user?.roles ?? []
+        const allowed =
+          authStore.isSuperAdmin ||
+          (to.meta.permissions as string[]).some((r: string) => userRoles.includes(r))
+        if (!allowed) {
+          isLoading.value = false
+          return next({ name: 'Unauthorized' })
+        }
+      }
+
       // Redirect utilisateur (no workspace yet) to workspace creation,
       // unless they're already heading there
       const noWorkspace = !authStore.user?.current_workspace_id

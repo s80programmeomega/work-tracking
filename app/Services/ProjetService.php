@@ -276,6 +276,9 @@ class ProjetService
                     'can_delete' => true,
                     'can_invite' => true,
                     'can_delete_member' => true,
+                    'can_create_activity' => true,
+                    'can_edit_activity' => true,
+                    'can_delete_activity' => true,
                 ]);
             }
 
@@ -291,6 +294,9 @@ class ProjetService
                             'can_delete' => $member['can_delete'] ?? false,
                             'can_invite' => $member['can_invite'] ?? false,
                             'can_delete_member' => $member['can_delete_member'] ?? false,
+                            'can_create_activity' => $member['can_create_activity'] ?? false,
+                            'can_edit_activity' => $member['can_edit_activity'] ?? false,
+                            'can_delete_activity' => $member['can_delete_activity'] ?? false,
                         ]);
                     }
                 }
@@ -422,6 +428,9 @@ class ProjetService
                     'can_delete' => $member->pivot->can_delete,
                     'can_invite' => $member->pivot->can_invite,
                     'can_delete_member' => $member->pivot->can_delete_member,
+                    'can_create_activity' => $member->pivot->can_create_activity,
+                    'can_edit_activity' => $member->pivot->can_edit_activity,
+                    'can_delete_activity' => $member->pivot->can_delete_activity,
                 ]);
             }
 
@@ -446,6 +455,9 @@ class ProjetService
             'can_delete' => $permissions['can_delete'] ?? false,
             'can_invite' => $permissions['can_invite'] ?? false,
             'can_delete_member' => $permissions['can_delete_member'] ?? false,
+            'can_create_activity' => $permissions['can_create_activity'] ?? false,
+            'can_edit_activity' => $permissions['can_edit_activity'] ?? false,
+            'can_delete_activity' => $permissions['can_delete_activity'] ?? false,
         ]);
     }
 
