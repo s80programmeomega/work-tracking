@@ -22,7 +22,7 @@ Then say: _"Read SESSION_STATE, WORKING_GUIDELINES, PROGRESSION. Resuming from [
 These rules apply on every machine and every session. They do not change task to task.
 
 - **Commits:** Never commit without explicit user instruction. Never push unless explicitly asked. No AI references in commit messages. Run `vendor/bin/pint --dirty --format agent` before every commit.
-- **Git remotes:** Two remotes — `origin` (Jonas, `s80programmeomega`) and `client` (frozen). Always push to `origin` only. Never `git push client`. Never `git checkout main`.
+- **Git remotes:** Two remotes — `origin` (Jonas, `s80programmeomega`) and `client` (Team-TDR-Consulting). **Client has paid (2026-05-27) — push to both `origin` and `client` on every push.** Never `git checkout main`.
 - **Code deletions:** Never delete code without a full impact check and explicit approval, even in auto-edit mode.
 - **Language:** Docs in English. Code comments and log messages in French.
 - **Testing docs:** Write `docs/testing/TASK_{N}_TESTING.md` for every completed task.
