@@ -30,11 +30,27 @@
             <!-- Vue Toggle -->
             <div class="flex gap-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
               <button
+                dusk="view-table-btn"
+                @click="currentView = 'table'"
+                :class="[
+                  'px-3 py-2 rounded-md transition-all flex items-center gap-2 text-sm',
+                  currentView === 'table'
+                    ? 'bg-white dark:bg-gray-700 shadow-sm text-brand-600 dark:text-brand-400'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                ]"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18M10 3v18M6 3h12a3 3 0 013 3v12a3 3 0 01-3 3H6a3 3 0 01-3-3V6a3 3 0 013-3z" />
+                </svg>
+                Tableau
+              </button>
+              <button
+                dusk="view-kanban-btn"
                 @click="currentView = 'kanban'"
                 :class="[
-                  'px-4 py-2 rounded-md transition-all flex items-center gap-2',
-                  currentView === 'kanban' 
-                    ? 'bg-white dark:bg-gray-700 shadow-sm text-brand-600 dark:text-brand-400' 
+                  'px-3 py-2 rounded-md transition-all flex items-center gap-2 text-sm',
+                  currentView === 'kanban'
+                    ? 'bg-white dark:bg-gray-700 shadow-sm text-brand-600 dark:text-brand-400'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                 ]"
               >
@@ -44,11 +60,12 @@
                 Kanban
               </button>
               <button
+                dusk="view-list-btn"
                 @click="currentView = 'list'"
                 :class="[
-                  'px-4 py-2 rounded-md transition-all flex items-center gap-2',
-                  currentView === 'list' 
-                    ? 'bg-white dark:bg-gray-700 shadow-sm text-brand-600 dark:text-brand-400' 
+                  'px-3 py-2 rounded-md transition-all flex items-center gap-2 text-sm',
+                  currentView === 'list'
+                    ? 'bg-white dark:bg-gray-700 shadow-sm text-brand-600 dark:text-brand-400'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                 ]"
               >
@@ -58,6 +75,16 @@
                 Liste
               </button>
             </div>
+
+            <!-- Filtre assigné -->
+            <select
+              v-model="filterAssignee"
+              dusk="filter-assignee"
+              class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+            >
+              <option value="me">Mes tâches</option>
+              <option value="all">Toutes les tâches</option>
+            </select>
           </div>
 
           <!-- Actions -->
@@ -97,7 +124,7 @@
             <button
               v-if="canCreateTask"
               @click="openCreateForm"
-              class="px-4 py-2 bg-gradient-to-r from-brand-500 to-brand-600 text-white rounded-lg hover:from-brand-600 hover:to-brand-700 flex items-center gap-2 shadow-lg hover:shadow-xl transition-all"
+              class="px-4 py-2 bg-linear-to-r from-brand-500 to-brand-600 text-white rounded-lg hover:from-brand-600 hover:to-brand-700 flex items-center gap-2 shadow-lg hover:shadow-xl transition-all"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -108,7 +135,7 @@
         </div>
 
         <!-- Ligne 2: Statistiques (si activité sélectionnée) -->
-        <div v-if="selectedActiviteId && !showArchived && stats.total > 0" class="flex items-center gap-6 p-4 bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <div v-if="selectedActiviteId && !showArchived && stats.total > 0" class="flex items-center gap-6 p-4 bg-linear-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
           <!-- À faire -->
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
@@ -257,6 +284,17 @@
           </div>
         </div>
 
+        <!-- Active Tasks - Table View (default) -->
+        <div v-else-if="currentView === 'table'">
+          <TacheTable
+            dusk="tache-table"
+            :taches="filteredTasks"
+            @view="handleViewTask"
+            @edit="handleEditTask"
+            @updated="() => fetchKanbanForActivite(selectedActiviteId)"
+          />
+        </div>
+
         <!-- Active Tasks - Kanban View -->
         <div v-else-if="currentView === 'kanban'">
           <KanbanBoard
@@ -276,14 +314,14 @@
 
         <!-- Active Tasks - List View -->
         <div v-else-if="currentView === 'list'" class="space-y-2">
-          <div v-if="allActiveTasks.length === 0" class="text-center py-12 text-gray-500">
+          <div v-if="filteredTasks.length === 0" class="text-center py-12 text-gray-500">
             <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
             <p>Aucune tâche pour cette activité</p>
           </div>
           
-          <div v-else v-for="tache in allActiveTasks" :key="tache.id">
+          <div v-else v-for="tache in filteredTasks" :key="tache.id">
             <TacheCard
               :tache="tache"
               @view="handleViewTask"
@@ -321,7 +359,7 @@
     <TacheDetailModal
       v-if="showViewModal"
       :tache="currentTache"
-      @close="showViewModal = false"
+      @close="closeDetailModal"
       @edit="handleEditFromDetail"
       @validate-n1="handleValidateN1"
       @validate-n2="handleValidateN2"
@@ -338,6 +376,7 @@
 
 <script setup>
 import { ref, onMounted, watch, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { useTaches } from '@/composables/useTaches'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
@@ -345,9 +384,12 @@ import KanbanBoard from '@/components/taches/KanbanBoardSimple.vue'
 import TacheForm from '@/components/taches/TacheForm.vue'
 import TacheCreateWizard from '@/components/taches/TacheCreateWizard.vue'
 import TacheCard from '@/components/taches/TacheCard.vue'
+import TacheTable from '@/components/taches/TacheTable.vue'
 import TacheDetailModal from '@/components/taches/TacheDetailModal.vue'
 import PendingValidationsModal from '@/components/taches/PendingValidationsModal.vue'
 import api from '@/api/axios'
+
+const route = useRoute()
 
 const {
   kanban: storeKanban,
@@ -392,9 +434,10 @@ const showArchived = ref(false)
 const showPendingValidations = ref(false)
 const currentTache = ref(null)
 const currentStatut = ref('a_faire')
-const currentView = ref('kanban')
+const currentView = ref('table')
 const archivedTasks = ref([])
 const pendingValidationsCount = ref(0)
+const filterAssignee = ref('me')
 
 // Computed
 const currentUser = computed(() => {
@@ -438,6 +481,17 @@ const allActiveTasks = computed(() => {
   ]
 })
 
+const filteredTasks = computed(() => {
+  const tasks = allActiveTasks.value
+  if (filterAssignee.value === 'me' && currentUser.value) {
+    return tasks.filter(t =>
+      t.assignees?.some(a => a.id === currentUser.value.id) ||
+      t.responsable_id === currentUser.value.id
+    )
+  }
+  return tasks
+})
+
 // Methods  
 const loadActivites = async () => {
   try {
@@ -447,10 +501,11 @@ const loadActivites = async () => {
     
     console.log('✅ Activités chargées:', activites.value.length)
 
-    // Auto-select first activity if available
+    // Auto-select first activity if none already set (e.g. from query param)
     if (activites.value.length > 0 && !selectedActiviteId.value) {
       selectedActiviteId.value = activites.value[0].id
-      console.log('📍 Auto-sélection activité:', selectedActiviteId.value)
+    }
+    if (selectedActiviteId.value) {
       await handleActiviteChange()
     }
   } catch (err) {
@@ -503,18 +558,22 @@ const openCreateForm = () => {
     alert('Veuillez sélectionner une activité')
     return
   }
+  showViewModal.value = false
   currentTache.value = null
   currentStatut.value = 'a_faire'
   showForm.value = true
 }
 
 const handleAddTask = (statut) => {
+  showViewModal.value = false
   currentTache.value = null
   currentStatut.value = statut
   showForm.value = true
 }
 
 const handleViewTask = async (tache) => {
+  showForm.value = false
+  currentTache.value = null
   try {
     const { data } = await api.get(`/taches/${tache.id}`)
     currentTache.value = data.data
@@ -526,6 +585,7 @@ const handleViewTask = async (tache) => {
 }
 
 const handleEditTask = (tache) => {
+  showViewModal.value = false
   currentTache.value = tache
   showForm.value = true
 }
@@ -654,6 +714,11 @@ const closeForm = () => {
   currentTache.value = null
 }
 
+const closeDetailModal = () => {
+  showViewModal.value = false
+  currentTache.value = null
+}
+
 // Watchers
 watch(showArchived, async (newValue) => {
   if (newValue && selectedActiviteId.value) {
@@ -663,6 +728,9 @@ watch(showArchived, async (newValue) => {
 
 // Lifecycle
 onMounted(async () => {
+  if (route.query.activite) {
+    selectedActiviteId.value = Number(route.query.activite)
+  }
   await loadActivites()
   await loadPendingValidations()
 })

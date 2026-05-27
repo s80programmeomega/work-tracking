@@ -46,22 +46,77 @@
       <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-6 mb-6">
         <div class="flex items-start justify-between gap-4 mb-4">
           <div class="flex-1">
-            <div class="flex items-center gap-3 mb-2">
-              <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ tache.titre }}</h1>
-              <span class="px-3 py-1 rounded-full text-xs font-bold" :class="getStatutClass(tache.statut)">
+            <div class="flex items-center gap-3 mb-2 flex-wrap">
+              <!-- Titre inline editable -->
+              <input
+                v-if="headerEditing.field === 'titre'"
+                v-model="headerEditing.value"
+                @blur="saveHeaderEdit"
+                @keydown.enter="saveHeaderEdit"
+                @keydown.escape="cancelHeaderEdit"
+                autofocus
+                class="text-3xl font-bold text-gray-900 dark:text-white bg-transparent border-b-2 border-brand-500 focus:outline-none flex-1 min-w-0"
+              />
+              <h1
+                v-else
+                @click="startHeaderEdit('titre', tache.titre)"
+                class="text-3xl font-bold text-gray-900 dark:text-white"
+                :class="permissions.can_update ? 'cursor-pointer hover:text-brand-600 dark:hover:text-brand-400' : ''"
+                :title="permissions.can_update ? 'Cliquer pour modifier' : ''"
+              >{{ tache.titre }}</h1>
+
+              <!-- Statut inline editable -->
+              <select
+                v-if="headerEditing.field === 'statut'"
+                v-model="headerEditing.value"
+                @change="saveHeaderEdit"
+                @blur="cancelHeaderEdit"
+                @keydown.escape="cancelHeaderEdit"
+                autofocus
+                class="px-3 py-1 text-xs font-bold rounded-full border border-brand-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+              >
+                <option value="a_faire">À faire</option>
+                <option value="en_cours">En cours</option>
+                <option value="termine">Terminé</option>
+              </select>
+              <span
+                v-else
+                @click="startHeaderEdit('statut', tache.statut)"
+                class="px-3 py-1 rounded-full text-xs font-bold"
+                :class="[getStatutClass(tache.statut), permissions.can_update ? 'cursor-pointer hover:opacity-80' : '']"
+                :title="permissions.can_update ? 'Cliquer pour modifier' : ''"
+              >
                 {{ getStatutLabel(tache.statut) }}
               </span>
-              <span v-if="tache.priorite" class="px-3 py-1 rounded-full text-xs font-bold" :class="getPrioriteClass(tache.priorite)">
-                {{ tache.priorite }}
+
+              <!-- Priorité inline editable -->
+              <select
+                v-if="headerEditing.field === 'priorite'"
+                v-model="headerEditing.value"
+                @change="saveHeaderEdit"
+                @blur="cancelHeaderEdit"
+                @keydown.escape="cancelHeaderEdit"
+                autofocus
+                class="px-3 py-1 text-xs font-bold rounded-full border border-brand-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+              >
+                <option value="faible">Faible</option>
+                <option value="moyenne">Moyenne</option>
+                <option value="elevee">Élevée</option>
+                <option value="critique">Critique</option>
+              </select>
+              <span
+                v-else-if="tache.priorite"
+                @click="startHeaderEdit('priorite', tache.priorite)"
+                class="px-3 py-1 rounded-full text-xs font-bold"
+                :class="[getPrioriteClass(tache.priorite), permissions.can_update ? 'cursor-pointer hover:opacity-80' : '']"
+                :title="permissions.can_update ? 'Cliquer pour modifier' : ''"
+              >
+                {{ tache.priorite_label || tache.priorite }}
               </span>
             </div>
-            
-            <p v-if="tache.description" class="text-gray-600 dark:text-gray-400 mb-4">
-              {{ tache.description }}
-            </p>
 
             <!-- Quick Stats -->
-            <div class="flex items-center gap-6 text-sm">
+            <div class="flex items-center gap-6 text-sm flex-wrap">
               <div class="flex items-center gap-2">
                 <i class="fas fa-users text-gray-400"></i>
                 <span class="text-gray-600 dark:text-gray-400">{{ stats.assignees_count }} assigné(s)</span>
@@ -78,20 +133,40 @@
                 <i class="fas fa-comment text-gray-400"></i>
                 <span class="text-gray-600 dark:text-gray-400">{{ stats.comments_count }} commentaire(s)</span>
               </div>
-              <div v-if="tache.echeance" class="flex items-center gap-2" :class="{ 'text-red-600': stats.is_overdue }">
+              <!-- Écheance inline editable -->
+              <div class="flex items-center gap-2" :class="{ 'text-red-600': stats.is_overdue }">
                 <i class="fas fa-calendar-alt"></i>
-                <span>{{ formatDate(tache.echeance) }}</span>
+                <DatePicker
+                  v-if="headerEditing.field === 'echeance'"
+                  v-model="headerEditing.value"
+                  :enable-time-picker="false"
+                  auto-apply
+                  :format="'dd-MM-yyyy'"
+                  :locale="'fr'"
+                  :dark="isDark"
+                  placeholder="Sélectionner une date"
+                  @update:model-value="saveHeaderEdit"
+                  @keydown.escape="cancelHeaderEdit"
+                  inline
+                />
+                <span
+                  v-else-if="tache.echeance"
+                  @click="startHeaderEdit('echeance', tache.echeance)"
+                  :class="permissions.can_update ? 'cursor-pointer hover:opacity-80' : ''"
+                  :title="permissions.can_update ? 'Cliquer pour modifier' : ''"
+                >{{ formatDate(tache.echeance) }}</span>
+                <span
+                  v-else-if="permissions.can_update"
+                  @click="startHeaderEdit('echeance', null)"
+                  class="cursor-pointer text-gray-400 hover:text-brand-600 dark:hover:text-brand-400"
+                >+ Échéance</span>
               </div>
             </div>
           </div>
 
           <!-- Actions -->
           <div class="flex items-center gap-2">
-            <!-- <button v-if="permissions.can_update" @click="openEditModal" 
-              class="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors">
-              <i class="fas fa-edit mr-2"></i>Modifier
-            </button> -->
-            <button @click="$router.back()" 
+            <button @click="$router.back()"
               class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">
               <i class="fas fa-arrow-left mr-2"></i>Retour
             </button>
@@ -122,7 +197,7 @@
         <div class="p-6">
           <!-- Tab: Détails -->
           <div v-show="activeTab === 'details'">
-            <TacheDetailsTab :tache="tache" />
+            <TacheDetailsTab :tache="tache" :permissions="permissions" @refresh="fetchTache" />
           </div>
 
           <!-- Tab: Sous-tâches -->
@@ -174,9 +249,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, reactive, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/api/axios';
+import DatePicker from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css';
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 
@@ -197,6 +274,45 @@ const activeTab = ref('details');
 const stats = ref({});
 const permissions = ref({});
 const breadcrumb = ref({});
+
+const headerEditing = reactive({ field: null, value: null })
+const isDark = computed(() => document.documentElement.classList.contains('dark'))
+
+const formatDateForApi = (date) => {
+  if (!date) return null
+  const d = date instanceof Date ? date : new Date(date)
+  if (isNaN(d.getTime())) return null
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+const startHeaderEdit = (field, value) => {
+  if (!permissions.value.can_update) return
+  headerEditing.field = field
+  headerEditing.value = field === 'echeance' ? (value ? new Date(value) : null) : value
+}
+
+const cancelHeaderEdit = () => {
+  headerEditing.field = null
+  headerEditing.value = null
+}
+
+const saveHeaderEdit = async () => {
+  const { field, value } = headerEditing
+  if (!field) return
+  const apiValue = field === 'echeance' ? formatDateForApi(value) : value
+  const oldValue = tache.value[field]
+  if ((apiValue ?? '') === (oldValue ?? '')) { cancelHeaderEdit(); return }
+  cancelHeaderEdit()
+  try {
+    await api.patch(`/taches/${route.params.id}`, { [field]: apiValue })
+    await fetchTache()
+  } catch (err) {
+    console.error('Erreur mise à jour:', err)
+  }
+}
 
 const tabs = computed(() => [
   { id: 'details', label: 'Détails', icon: 'fa-info-circle' },
@@ -248,9 +364,10 @@ const getStatutLabel = (statut) => {
 
 const getPrioriteClass = (priorite) => {
   const classes = {
-    'haute': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+    'faible': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
     'moyenne': 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-    'basse': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+    'elevee': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+    'critique': 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
   };
   return classes[priorite] || '';
 };
@@ -265,11 +382,6 @@ const formatDate = (dateString) => {
   });
 };
 
-const openEditModal = () => {
-  // À implémenter
-  console.log('Open edit modal');
-};
-
 // Gestion de l'onglet depuis l'URL
 watch(() => route.query.tab, (newTab) => {
   if (newTab && tabs.value.some(t => t.id === newTab)) {
@@ -277,7 +389,16 @@ watch(() => route.query.tab, (newTab) => {
   }
 }, { immediate: true });
 
+const handleKeydown = (e) => {
+  if (e.key === 'Escape' && headerEditing.field) cancelHeaderEdit()
+}
+
 onMounted(() => {
   fetchTache();
-});
+  window.addEventListener('keydown', handleKeydown)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', handleKeydown)
+})
 </script>

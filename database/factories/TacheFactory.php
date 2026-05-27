@@ -112,4 +112,16 @@ class TacheFactory extends Factory
     {
         return $this->state(['priorite' => TachePriorite::CRITIQUE->value]);
     }
+
+    /** Task archived after full N2 validation — immutable per R6. */
+    public function archived(): static
+    {
+        return $this->state([
+            'statut' => TacheStatut::TERMINE->value,
+            'taux_realisation' => 100,
+            'date_debut' => now()->subDays(fake()->numberBetween(20, 40)),
+            'date_fin_reelle' => now()->subDays(fake()->numberBetween(5, 15)),
+            'verrou_reevaluation' => true,
+        ]);
+    }
 }

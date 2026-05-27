@@ -642,6 +642,44 @@ const router = createRouter({
     //     requiresAuth: true,
     //   },
     // },
+    // ==========================================
+    // PLATFORM ADMIN (super_admin only)
+    // ==========================================
+    {
+      path: '/admin',
+      redirect: '/admin/dashboard',
+    },
+    {
+      path: '/admin/dashboard',
+      name: 'admin.dashboard',
+      component: () => import('../pages/admin/AdminDashboard.vue'),
+      meta: {
+        title: 'Platform Dashboard',
+        requiresAuth: true,
+        requiresSuperAdmin: true,
+      },
+    },
+    {
+      path: '/admin/workspaces',
+      name: 'admin.workspaces',
+      component: () => import('../pages/admin/AdminWorkspaces.vue'),
+      meta: {
+        title: 'Workspace Management',
+        requiresAuth: true,
+        requiresSuperAdmin: true,
+      },
+    },
+    {
+      path: '/admin/users',
+      name: 'admin.users',
+      component: () => import('../pages/admin/AdminUsers.vue'),
+      meta: {
+        title: 'User Management',
+        requiresAuth: true,
+        requiresSuperAdmin: true,
+      },
+    },
+
     {
       path: '/error-404',
       name: '404 Error',
@@ -724,6 +762,12 @@ router.beforeEach(async (to, from, next) => {
           isLoading.value = false
           return next({ name: 'Signin' })
         }
+      }
+
+      // Super-admin only routes
+      if (to.meta.requiresSuperAdmin && !authStore.user?.is_super_admin) {
+        isLoading.value = false
+        return next({ name: '404 Error' })
       }
 
       // Redirect utilisateur (no workspace yet) to workspace creation,

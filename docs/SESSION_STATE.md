@@ -17,24 +17,74 @@
 ## Current Session
 
 **Date:** 2026-05-26
-**Session goal:** CDC compliance review + CDC hotfixes (R7 guard, audit-log endpoint, agent sheet §5)
-**Status:** CDC review complete. Docs updated. `fix/cdc-hotfixes` branch cut from `feature/v2-task-12-document-management`. Hotfix implementation in progress.
+**Session goal:** UX polish — inline editing on task detail views + subtasks
+**Status:** Complete. No new backend changes. Ready to commit.
 
 ---
 
 ## Current Task
 
-**Task:** CDC Hotfixes
-**Branch:** `fix/cdc-hotfixes`
-**Status:** Complete — all 4 hotfixes shipped, 232 tests green. Awaiting merge into `jonas`.
+**Task:** UX Polish — Inline editing (task detail + subtasks)
+**Branch:** `feature/v2-task-16-export`
+**Status:** Complete — awaiting commit + push.
+
+**What was done this session:**
+- Fixed modal state machine in `Taches.vue` (showForm / showViewModal mutual exclusion)
+- `TacheDetailModal.vue` (view 1): inline editing for titre, statut, priorite, echeance (DatePicker), description, objectif, indicateurs_resultats, taux_realisation; removed "Modifier" footer button
+- `QuickActionsPanel.vue`: removed "Modifier" button
+- `DetailedTaskView.vue` (view 2 — hamburger → tabbed): same inline fields; Escape global handler; Tailwind v4 fixes (`flex-shrink-0` → `shrink-0`)
+- `TacheDetailsTab.vue` + `TacheDetail.vue` (view 3 — full page `/taches/:id`): inline editing for all fields using `permissions.can_update`; header inline editing for titre/statut/priorite/echeance; DatePicker for echeance
+- All 4 views: global `keydown` Escape listener to cancel active edit (works for DatePicker inline calendar too)
+- `SousTacheList.vue`: per-field inline editing for titre, statut, description, progression (slider+number), date_echeance (DatePicker); replaced expand-panel approach; ⋮ menu reduced to delete only; Escape handler
 
 **What to do next:**
-1. Merge `fix/cdc-hotfixes` into `jonas` (`git merge --no-ff`)
-2. Push `jonas` to `origin`
-3. Cut `feature/v2-task-13-subscription` from `jonas`
-4. Implement Task 13 — Subscription Modes + Trial Duration
+1. Commit `feature/v2-task-16-export` (user will say "ready")
+2. Push `feature/v2-task-16-export` to `origin`
 
 ## Last Completed Task
+
+**Task 15** — Task List UX (2026-05-26)
+- `TacheTable.vue` component: table with statut/priorité/échéance inline edit via `PATCH /api/taches/{id}`
+- `Taches.vue`: `currentView` defaults to `'table'`; `filterAssignee` ref defaults to `'me'`; `filteredTasks` computed; `route.query.activite` read in `onMounted`; view toggle shows Tableau/Kanban/Liste
+- `ActiviteDetail.vue`: "Voir toutes les tâches" `router-link` added to header → `/taches?activite={id}`
+- `PATCH /api/taches/{id}` route added (same controller as PUT)
+- `statut` validation in `TacheController::update()` extended with `en_retard` and `a_refaire`
+- PHPUnit: 5 tests in `tests/Feature/Task15/TaskListUxTest.php`
+- **269 PHPUnit tests, all passing.**
+
+**Task 14** — Platform Super Admin Dashboard (2026-05-26)
+- `AdminController` with 6 methods: `stats`, `workspaces`, `users`, `extendTrial`, `suspendWorkspace`, `reactivateWorkspace`
+- All `/api/admin/*` routes protected by `super_admin` middleware (prefix group in `routes/api.php`)
+- `TrialExtendedNotification` + `WorkspaceSuspendedNotification` (ShouldQueue, channelsFor-routed as high-signal events)
+- `NotificationService::wantsEmail()` + `wantsWebPush()` extended with `trial_extended` + `workspace_suspended`
+- Translation files `lang/fr/admin.php` + `lang/en/admin.php` (5 sections: dashboard, workspaces, users, actions, notifications)
+- `AdminDashboard.vue` — 6 workspace stat cards + 2 user stat cards, recent workspaces table, quick links
+- `AdminWorkspaces.vue` — paginated table with search/mode/status filters, extend-trial modal, suspend modal, reactivate button
+- `AdminUsers.vue` — paginated table with search filter
+- `SubscriptionBadge.vue` component (color-coded by subscription mode)
+- Vue router: 4 admin routes with `requiresSuperAdmin` meta + `beforeEach` guard → redirects non-super-admins to 404
+- AppSidebar: Administration section (3 items, `superAdminOnly: true`), auto-hidden from non-admins
+- PHPUnit: 11 tests in `tests/Feature/Admin/PlatformDashboardTest.php`
+- **264 PHPUnit tests, all passing.**
+
+**Task 13** — Subscription Modes + Trial Duration (2026-05-26)
+- Migration: `subscription_mode` (default `trial`), `trial_started_at`, `trial_duration_days` (default 30) on workspaces
+- `config/subscription.php` with env-driven defaults for all limits and warning window
+- `Workspace` model updated: 3 fillable fields, casts, `trial_started_at` auto-seeded in `boot()::creating()`
+- `SubscriptionService`: `isPaid`, `isTrialExpired`, `getRemainingTrialDays`, `isExpiringSoon`, `canAddMember`, `canUploadFile`, `canUploadStorage`, `summary`
+- `CheckSubscriptionLimits` middleware (`subscription.limits`): bypasses super_admin, checks trial expiry first, then limit-specific check via `$limitType` param
+- Routes gated: `subscription.limits:add_member` on invite route, `subscription.limits:upload_file` on document store route
+- `Permission::SUBSCRIPTION_MANAGE` constant + all() + Permission.js + useWorkspacePermissions.js
+- `WorkspaceController::show()`: `can_manage_subscription` in user_permissions (3 locations) + `subscription_summary` in response
+- `GET /api/workspaces/{id}/subscription` + `PATCH /api/workspaces/{id}/subscription` (super_admin only)
+- 3 notifications: `TrialExpiringNotification`, `TrialExpiredNotification`, `SubscriptionLimitReachedNotification` (all ShouldQueue, channelsFor-routed as high-signal)
+- `NotificationService::wantsEmail()` + `wantsWebPush()`: 3 new subscription event types added as high-signal
+- Translation files: `lang/fr/subscription.php` + `lang/en/subscription.php`
+- `TrialBanner.vue`: amber/red dismissible banner, shown when expiring soon or expired
+- `AdminLayout.vue`: TrialBanner mounted above content, workspace-reactive
+- `WorkspaceFactory`: `paid()`, `trialExpired()`, `trialExpiringSoon()` states
+- PHPUnit: 13 tests (`SubscriptionServiceTest`) + 8 tests (`SubscriptionMiddlewareTest`) = 21 new tests
+- **253 PHPUnit tests, all passing.**
 
 **Task 12** — Document Management per Project + Workspace (2026-05-26)
 - `DOCUMENTS_MANAGE_WORKSPACE` permission added to Permission.php + forRole() + `all()` (owner only)
@@ -194,7 +244,11 @@ Tests: 11 feature in `NotificationServiceTest` + 8 feature in `SendDailyDigestCo
 | `feature/v2-task-10-dashboard` | Task 10 | Merged ✅ (into `jonas` 2026-05-26) |
 | `feature/v2-task-11-task-creation-ux` | Task 11 | Merged ✅ (into `jonas` 2026-05-26) |
 | `feature/v2-task-12-document-management` | Task 12 | Merged ✅ (into `jonas` 2026-05-26) |
-| `fix/cdc-hotfixes` | CDC Hotfixes | In progress 🔄 |
+| `fix/cdc-hotfixes` | CDC Hotfixes | Merged ✅ (into `jonas` 2026-05-26) |
+| `feature/v2-task-13-subscription` | Task 13 | Complete — awaiting push 🔄 |
+| `feature/v2-task-14-platform-dashboard` | Task 14 | Complete — awaiting push 🔄 |
+| `feature/v2-task-15-task-list-ux` | Task 15 | Complete — awaiting push 🔄 |
+| `feature/v2-task-16-export` | Task 16 | Complete — awaiting push 🔄 |
 
 ---
 
@@ -241,3 +295,7 @@ Tests: 11 feature in `NotificationServiceTest` + 8 feature in `SendDailyDigestCo
 | 2026-05-26 | Task 12 | Document Management. DOCUMENTS_MANAGE_WORKSPACE permission (owner only), WorkspaceDocuments.vue, workspace docs endpoint gated, share-by-email endpoint + DocumentSharedNotification, DocumentUploaded/DeletedNotification wired, document permission keys in ProjetResource + composables, lang/fr+en/documents.php. 5 PHPUnit tests. 226 tests green. Merged into jonas. |
 | 2026-05-26 | CDC Review | Cross-referenced CDC_WorkTracking_v2.pdf Rev.3 against all completed and planned tasks (T0–T14). Found 10+ gaps: A.1 (design assets), A.10–A.13 (task list UX), R7 (backend guard missing), CDC-API (audit-log endpoint missing), ST.7/E.2 (agent sheet §5 + export), B.1–B.5 (export, SMS, search, billing, rate limiting). Rate limiting verified ✅ already in place. Two new tasks added: T15 (task list UX), T16 (export). CDC hotfix batch created on `fix/cdc-hotfixes`. IMPLEMENTATION_PLAN.md + PROGRESSION.md + SESSION_STATE.md updated. |
 | 2026-05-26 | CDC Hotfixes | R7 guard (`enforceMandatorySousTaches` in TacheResultatService::soumettre), `GET /api/audit-logs/validation/{tache}` endpoint, agent sheet §5 (`submitted_results` section in agentSheetSections + AgentSheet.vue 5th tab). 6 new PHPUnit tests. 232 total, all green. Committed on `fix/cdc-hotfixes`. |
+| 2026-05-26 | Task 13 + Task 14 | Task 13: SubscriptionService, CheckSubscriptionLimits middleware, 3 notifications, TrialBanner.vue, WorkspaceFactory states, 21 PHPUnit tests. Task 14: AdminController (6 endpoints), 2 notifications, lang/fr+en/admin.php, AdminDashboard/Workspaces/Users pages, SubscriptionBadge, router guard, sidebar admin section, 11 PHPUnit tests. 264 total, all green. |
+| 2026-05-26 | Task 15 | TacheTable.vue (table view + inline edit), Taches.vue (table default, assignee filter, deep-link), ActiviteDetail.vue shortcut, PATCH route, statut validation fix, 5 PHPUnit tests. 269 total, all green. |
+| 2026-05-26 | Task 16 | PDF export (GET /api/evaluations/personnel/{user}/export-pdf, Blade+DomPDF, A4 portrait, criteria bars), Excel export (GET /api/workspace/taches/export-excel, WorkspaceTachesExport, 10-col, blue header, filter-aware). AgentSheet.vue + WorkspaceTaches.vue buttons wired. 5 PHPUnit tests. 274 total, all green. |
+| 2026-05-26 | UX Polish | Inline editing on all 3 task detail views + SousTacheList. Modal state machine fix. DatePicker for echeance everywhere. Escape cancels any active edit (global keydown). No new backend changes. |

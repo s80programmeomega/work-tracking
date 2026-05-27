@@ -18,6 +18,9 @@ class DatabaseSeeder extends Seeder
             // (Tasks 8 / 8b). Doit s'exécuter après WorkspaceSeeder qui
             // crée les comptes de démo.
             NotificationDemoSeeder::class,
+            // Étiquettes globales de démonstration (Task 0).
+            // Doit s'exécuter après RolePermissionSeeder.
+            LabelSeeder::class,
         ]);
     }
 }

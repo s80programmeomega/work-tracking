@@ -174,6 +174,7 @@
       v-if="showViewModal"
       :tache="currentTache"
       @close="showViewModal = false"
+      @edit="handleEditTask"
       @move-my-card="handleMoveMyCard"
       @submit-result="handleSubmitResult"
     />
@@ -190,6 +191,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import StatCard from '@/components/common/StatCard.vue'
 import KanbanColumnPersonal from '@/components/taches/KanbanColumnPersonal.vue'
@@ -205,6 +207,7 @@ const activites = ref([])
 const loading = ref(false)
 const error = ref(null)
 const currentView = ref('kanban')
+const router = useRouter()
 const showViewModal = ref(false)
 const showSubmitResultModal = ref(false)
 const currentTache = ref(null)
@@ -354,6 +357,11 @@ function resetFilters() {
 }
 
 // ✅ NOUVEAU : Déplacer ma carte (statut individuel)
+function handleEditTask(tache) {
+  showViewModal.value = false
+  router.push(`/taches/${tache.id}`)
+}
+
 async function handleMoveMyCard({ tache, newStatut, progression, notes }) {
   try {
     const payload = {

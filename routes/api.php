@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\Api\ActiviteController;
+use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DocumentController;
@@ -83,6 +84,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('/language', [AuthController::class, 'updateLanguage']);
     });
 
+    // ========================================  PLATFORM ADMIN  ========================================
+    Route::prefix('admin')->middleware('super_admin')->group(function () {
+        Route::get('/stats', [AdminController::class, 'stats'])->name('admin.stats');
+        Route::get('/workspaces', [AdminController::class, 'workspaces'])->name('admin.workspaces');
+        Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
+        Route::post('/workspaces/{workspace}/extend-trial', [AdminController::class, 'extendTrial'])->name('admin.workspaces.extend-trial');
+        Route::post('/workspaces/{workspace}/suspend', [AdminController::class, 'suspendWorkspace'])->name('admin.workspaces.suspend');
+        Route::post('/workspaces/{workspace}/reactivate', [AdminController::class, 'reactivateWorkspace'])->name('admin.workspaces.reactivate');
+    });
+
     // Dashboard routes
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::get('/dashboard/personal', [DashboardController::class, 'personalStats']);
@@ -105,7 +116,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('/', [WorkspaceController::class, 'addMember']);
 
             // Static routes MUST come before /{user} to avoid being swallowed by the wildcard
-            Route::post('/invite', [WorkspaceController::class, 'inviteMembers']);
+            Route::post('/invite', [WorkspaceController::class, 'inviteMembers'])->middleware('subscription.limits:add_member');
             Route::get('/invitations', [WorkspaceController::class, 'invitations']);
             Route::post('/invitations/{invitation}/resend', [WorkspaceController::class, 'resendInvitation']);
             Route::delete('/invitations/{invitation}', [WorkspaceController::class, 'cancelInvitation']);
@@ -121,6 +132,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         // Workspace Statistics
         Route::get('/{workspace}/statistics', [WorkspaceController::class, 'statistics']);
+
+        // Subscription summary (used by the trial banner)
+        Route::get('/{workspace}/subscription', [WorkspaceController::class, 'subscriptionSummary'])->name('workspaces.subscription');
+
+        // Super-admin: configure trial duration per workspace
+        Route::patch('/{workspace}/subscription', [WorkspaceController::class, 'updateSubscription'])->name('workspaces.subscription.update');
 
         // ========================================  MEMBRE REMOVAL WITH TRANSFER  ========================================
         Route::prefix('/{workspace}')->group(function () {
@@ -149,6 +166,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Task 10: Vue globale des tâches du workspace (owner/directeur uniquement)
     Route::get('/workspace/taches', [TacheController::class, 'workspaceTaches'])->name('workspace.taches');
+    // Task 16: Export Excel des tâches du workspace
+    Route::get('/workspace/taches/export-excel', [TacheController::class, 'exportWorkspaceTachesExcel'])->name('workspace.taches.export-excel');
 
     // ======================================== PROJETS ========================================
     Route::prefix('projets')->group(function () {
@@ -297,6 +316,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // CRUD basique
         Route::get('/{tache}', [TacheController::class, 'show'])->name('taches.show');
         Route::put('/{tache}', [TacheController::class, 'update']);
+        Route::patch('/{tache}', [TacheController::class, 'update']);
         Route::delete('/{tache}', [TacheController::class, 'destroy']);
 
         // ✅ Actions principales
@@ -431,6 +451,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // subtasks, assignee tasks, assignee subtasks) pour la même page.
         Route::get('/personnel/{user}/historique', [EvaluationController::class, 'agentSheetSections']);
 
+        // Task 16: Export PDF de la fiche d'évaluation
+        Route::get('/personnel/{user}/export-pdf', [EvaluationController::class, 'exportAgentSheetPdf'])->name('evaluations.export-pdf');
+
         // 📊 Mes responsabilités (tous les résultats que je peux consulter)
         Route::get('/mes-responsabilites', [EvaluationController::class, 'myResponsibilities']);
 
@@ -494,7 +517,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
          * Upload un ou plusieurs documents
          * Body: files[], documentable_type, documentable_id, description, visibility, disk
          */
-        Route::post('/', [DocumentController::class, 'store'])->name('documents.store');
+        Route::post('/', [DocumentController::class, 'store'])->name('documents.store')->middleware('subscription.limits:upload_file');
 
         /**
          * GET /api/documents/{document}

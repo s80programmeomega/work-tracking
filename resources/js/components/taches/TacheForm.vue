@@ -420,7 +420,7 @@
         </div>
       </div>
 
-      <!-- ✅ SÉPARATEUR VISUEL -->
+      <!-- SÉPARATEUR VISUEL -->
       <div class="relative">
         <div class="absolute inset-0 flex items-center">
           <div class="w-full border-t-2 border-gray-200 dark:border-gray-700"></div>
@@ -438,7 +438,7 @@
           <UserGroupIcon class="w-4 h-4 text-blue-500" />
           Autres intervenants
         </label>
-        
+
         <div v-if="loadingMembers" class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
           <div class="flex items-center gap-3">
             <svg class="animate-spin w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24">
@@ -451,60 +451,104 @@
           </div>
         </div>
 
-        <select 
-          v-else 
-          v-model="formData.assignee_ids" 
-          multiple
-          :disabled="!canAssignUsers || availableUsers.length === 0"
-          class="w-full px-4 py-3 border-2 rounded-xl transition-all"
-          :class="!canAssignUsers || availableUsers.length === 0
-            ? 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 opacity-60 cursor-not-allowed'
-            : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 hover:border-blue-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'" 
-          size="6"
-        >
-          <option 
-            v-for="user in availableUsers" 
-            :key="user.id" 
-            :value="user.id"
-            :disabled="user.id === formData.responsable_id"
-            :class="user.id === formData.responsable_id ? 'bg-purple-100 dark:bg-purple-900 font-bold' : ''"
-          >
-            {{ user.id === formData.responsable_id ? '👑 ' : '' }}{{ user.nom }} ({{ user.email }}){{ user.id === formData.responsable_id ? ' - Responsable' : '' }}
-          </option>
-        </select>
-
-        <div v-if="!loadingMembers && availableUsers.length === 0"
-          class="mt-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <div v-else-if="availableUsers.length === 0"
+          class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
           <p class="text-sm text-gray-600 dark:text-gray-400 text-center">Aucun membre disponible</p>
         </div>
 
-                <div class="mt-3 space-y-2">
-                  <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                    <InformationCircleIcon class="w-4 h-4" />
-                    Maintenez Ctrl/Cmd pour sélectionner plusieurs utilisateurs
-                  </p>
-                  
-                  <!-- ✅ Affichage du responsable dans la liste -->
-                  <div v-if="formData.responsable_id" class="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
-                    <p class="text-xs text-purple-700 dark:text-purple-300 flex items-center gap-1">
-                      <CheckBadgeIcon class="w-4 h-4" />
-                      Le responsable est automatiquement inclus dans les intervenants
-                    </p>
-                  </div>
+        <div v-else class="space-y-2">
+          <!-- Tags des intervenants sélectionnés -->
+          <div v-if="selectedAssignees.length > 0" class="flex flex-wrap gap-2 p-3 bg-blue-50 dark:bg-blue-900/10 rounded-xl border border-blue-200 dark:border-blue-800">
+            <span
+              v-for="user in selectedAssignees"
+              :key="user.id"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium"
+              :class="user.id === formData.responsable_id
+                ? 'bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-200 ring-1 ring-purple-400'
+                : 'bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 ring-1 ring-gray-300 dark:ring-gray-600'"
+            >
+              <span
+                class="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
+                :style="{ backgroundColor: stringToColor(user.nom) }"
+              >{{ user.nom.charAt(0).toUpperCase() }}</span>
+              {{ user.nom }}
+              <CheckBadgeIcon v-if="user.id === formData.responsable_id" class="w-3.5 h-3.5 text-purple-500" />
+              <button
+                v-else
+                type="button"
+                @click="toggleAssignee(user.id)"
+                class="ml-0.5 hover:text-red-500 transition-colors"
+                :title="`Retirer ${user.nom}`"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </span>
+          </div>
 
-                  <!-- ✅ Compteur d'intervenants -->
-                  <div v-if="formData.assignee_ids.length > 0" class="flex items-center gap-2 text-sm">
-                    <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full font-semibold">
-                      {{ formData.assignee_ids.length }} intervenant(s) sélectionné(s)
-                    </span>
-                    <span v-if="formData.responsable_id && formData.assignee_ids.includes(formData.responsable_id)" 
-                      class="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-full font-semibold flex items-center gap-1">
-                      <UserIcon class="w-3 h-3" />
-                      dont 1 responsable
-                    </span>
-                  </div>
-                </div>
+          <!-- Champ de recherche -->
+          <div class="relative">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              v-model="assigneeSearch"
+              type="text"
+              placeholder="Rechercher un membre..."
+              :disabled="!canAssignUsers"
+              class="w-full pl-9 pr-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
+            />
+          </div>
+
+          <!-- Liste avec cases à cocher -->
+          <div class="max-h-52 overflow-y-auto border-2 border-gray-200 dark:border-gray-700 rounded-xl divide-y divide-gray-100 dark:divide-gray-700">
+            <label
+              v-for="user in filteredAssigneeUsers"
+              :key="user.id"
+              class="flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-colors"
+              :class="[
+                user.id === formData.responsable_id
+                  ? 'bg-purple-50 dark:bg-purple-900/20 cursor-default'
+                  : 'hover:bg-gray-50 dark:hover:bg-gray-800',
+                formData.assignee_ids.includes(user.id) && user.id !== formData.responsable_id
+                  ? 'bg-blue-50 dark:bg-blue-900/10'
+                  : ''
+              ]"
+            >
+              <input
+                type="checkbox"
+                :checked="formData.assignee_ids.includes(user.id)"
+                :disabled="user.id === formData.responsable_id || !canAssignUsers"
+                @change="toggleAssignee(user.id)"
+                class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0"
+              />
+              <span
+                class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
+                :style="{ backgroundColor: stringToColor(user.nom) }"
+              >{{ user.nom.charAt(0).toUpperCase() }}</span>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ user.nom }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ user.email }}</p>
               </div>
+              <span v-if="user.id === formData.responsable_id"
+                class="text-xs px-2 py-0.5 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-full font-medium flex-shrink-0">
+                Responsable
+              </span>
+            </label>
+            <div v-if="filteredAssigneeUsers.length === 0" class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+              Aucun résultat pour "{{ assigneeSearch }}"
+            </div>
+          </div>
+
+          <div v-if="formData.responsable_id" class="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+            <p class="text-xs text-purple-700 dark:text-purple-300 flex items-center gap-1">
+              <CheckBadgeIcon class="w-4 h-4" />
+              Le responsable est automatiquement inclus dans les intervenants
+            </p>
+          </div>
+        </div>
+      </div>
 
               <!-- Labels -->
               <!-- <div>
@@ -613,13 +657,13 @@
                   <p class="text-sm text-gray-500 dark:text-gray-500 mb-4">
                     ou
                   </p>
-                  <input type="file" ref="fileInput" multiple @change="handleFileUpload" class="hidden" />
-                  <button type="button" @click="$refs.fileInput.click()"
+                  <input type="file" :ref="el => fileInputRef = el" multiple @change="handleFileUpload" class="hidden" />
+                  <button type="button" @click="fileInputRef?.click()"
                     class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
                     Parcourir les fichiers
                   </button>
                   <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">
-                    Formats supportés: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, JPG, PNG, GIF, ZIP
+                    Formats supportés: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, JPG, PNG, GIF, ZIP, TXT
                   </p>
                   <p class="text-xs text-gray-400 dark:text-gray-500">
                     Taille maximale: 10 Mo par fichier
@@ -718,7 +762,7 @@
                 <div>
                   <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Image de
                     couverture</label>
-                  <input ref="coverImageInput" type="file" accept="image/*" @change="handleCoverImageUpload"
+                  <input :ref="el => coverImageInputRef = el" type="file" accept="image/*" @change="handleCoverImageUpload"
                     class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
                   <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">PNG, JPG, GIF jusqu'à 2 Mo</p>
                 </div>
@@ -739,12 +783,18 @@
         class="px-8 py-5 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex items-center justify-between gap-4">
         <div class="flex items-center gap-4">
           <!-- Navigation entre les onglets -->
-          <div class="flex gap-2">
+          <div class="flex gap-1">
             <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
-              class="p-2 rounded-lg transition-colors" :class="activeTab === tab.id
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors text-xs font-medium"
+              :class="activeTab === tab.id
                 ? 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400'
-                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'" :title="tab.name">
-              <component :is="tab.icon" class="w-4 h-4" />
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-800'">
+              <component :is="tab.icon" class="w-4 h-4 flex-shrink-0" />
+              <span>{{ tab.name }}</span>
+              <span v-if="tab.badge && tab.badge.value"
+                class="ml-0.5 py-0.5 px-1.5 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                {{ tab.badge.value }}
+              </span>
             </button>
           </div>
 
@@ -920,6 +970,30 @@ const availableUsers = computed(() => {
   return availableMembers.value
 })
 
+const assigneeSearch = ref('')
+
+const filteredAssigneeUsers = computed(() => {
+  const q = assigneeSearch.value.toLowerCase().trim()
+  if (!q) return availableUsers.value
+  return availableUsers.value.filter(u =>
+    u.nom.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
+  )
+})
+
+const selectedAssignees = computed(() =>
+  availableUsers.value.filter(u => formData.value.assignee_ids.includes(u.id))
+)
+
+const toggleAssignee = (userId) => {
+  if (userId === formData.value.responsable_id) return
+  const idx = formData.value.assignee_ids.indexOf(userId)
+  if (idx === -1) {
+    formData.value.assignee_ids.push(userId)
+  } else {
+    formData.value.assignee_ids.splice(idx, 1)
+  }
+}
+
 // ==================== FORMULAIRE ====================
 const formData = ref({
   activite_id: props.activiteContext?.id || props.activiteId || '',
@@ -988,11 +1062,11 @@ const handleFiles = (files) => {
     'application/vnd.ms-powerpoint',
     'application/vnd.openxmlformats-officedocument.presentationml.presentation',
     'image/jpeg',
-    'image/jpg',
     'image/png',
     'image/gif',
     'application/zip',
-    'application/x-zip-compressed'
+    'application/x-zip-compressed',
+    'text/plain',
   ]
 
   const validFiles = []

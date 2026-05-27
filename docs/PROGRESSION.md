@@ -32,11 +32,11 @@
 | 10 | Evaluation Dashboard + Global Task View | `feature/v2-task-10-dashboard` | ✅ | 2026-05-26 | 2026-05-26 | 216 PHPUnit + 2 Dusk tests green. Merged into `jonas` 2026-05-26. |
 | 11 | Task Creation UX (wizard + intervenant picker) | `feature/v2-task-11-task-creation-ux` | ✅ | 2026-05-26 | 2026-05-26 | 221 PHPUnit + 3 Dusk tests green. Merged into `jonas` 2026-05-26. |
 | 12 | Document Management per Project + Workspace | `feature/v2-task-12-document-management` | ✅ | 2026-05-26 | 2026-05-26 | 226 PHPUnit tests green. Merged into `jonas` 2026-05-26. |
-| 13 | Subscription Modes + Trial Duration | `feature/v2-task-13-subscription` | ⬜ | — | — | — |
-| 14 | Platform Super Admin Dashboard | `feature/v2-task-14-platform-dashboard` | ⬜ | — | — | — |
-| 15 | Task List UX (table mode + activity shortcut) | `feature/v2-task-15-task-list-ux` | ⬜ | — | — | CDC gaps A.10–A.13 |
-| 16 | PDF/Excel Export (evaluation sheet + project/task) | `feature/v2-task-16-export` | ⬜ | — | — | CDC gaps B.1 + ST.7/E.2 |
-| — | CDC Hotfixes (R7 guard + audit-log endpoint + rate limiting + agent sheet §5) | `fix/cdc-hotfixes` | 🔄 | 2026-05-26 | — | Slots between T12 and T13 |
+| 13 | Subscription Modes + Trial Duration | `feature/v2-task-13-subscription` | ✅ | 2026-05-26 | 2026-05-26 | 253 PHPUnit tests green. |
+| 14 | Platform Super Admin Dashboard | `feature/v2-task-14-platform-dashboard` | ✅ | 2026-05-26 | 2026-05-26 | 264 PHPUnit tests green. |
+| 15 | Task List UX (table mode + activity shortcut) | `feature/v2-task-15-task-list-ux` | ✅ | 2026-05-26 | 2026-05-26 | 269 PHPUnit tests green. |
+| 16 | PDF/Excel Export (evaluation sheet + project/task) | `feature/v2-task-16-export` | ✅ | 2026-05-26 | 2026-05-26 | CDC gaps B.1 + ST.7/E.2. 274 PHPUnit tests green. |
+| — | CDC Hotfixes (R7 guard + audit-log endpoint + rate limiting + agent sheet §5) | `fix/cdc-hotfixes` | ✅ | 2026-05-26 | 2026-05-26 | Merged into `jonas` 2026-05-26. |
 
 ---
 
@@ -219,6 +219,7 @@
 - [x] ActiviteDetail.vue + Taches.vue wired (wizard for create, TacheForm for edit)
 - [x] PHPUnit: 5 tests in `tests/Feature/Task11/WizardValidationTest.php`
 - [x] Dusk: 3 tests in `tests/Browser/Tasks/WizardTest.php`
+- [x] Manual test guide: `docs/testing/TASK_11_TESTING.md`
 - [x] 221 tests green. Merged into `jonas` 2026-05-26.
 
 ### Task 12
@@ -248,43 +249,70 @@ Gaps identified in CDC compliance review 2026-05-26 against `CDC_WorkTracking_v2
 
 CDC gaps A.10–A.13.
 
-- [ ] "Voir toutes les tâches" shortcut from activity header (A.10)
-- [ ] Default filter set to current user's tasks on task list page (A.11)
-- [ ] Table mode as default view, `TacheTable.vue` component (A.12)
-- [ ] Inline editing in table mode (A.13)
-- [ ] Tests passing
+- [x] "Voir toutes les tâches" router-link in `ActiviteDetail.vue` header → `/taches?activite={id}` (A.10)
+- [x] `filterAssignee` ref defaults to `'me'`; `filteredTasks` computed filters by assignee/responsable_id (A.11)
+- [x] `TacheTable.vue` component created; `currentView` defaults to `'table'` in `Taches.vue` (A.12)
+- [x] Inline edit on statut/priorité/échéance cells: click → select/input → `PATCH /api/taches/{id}` → row updates (A.13)
+- [x] `PATCH /api/taches/{id}` route added (mirrors PUT, uses same `update()` controller method)
+- [x] `statut` validation extended to include `en_retard` and `a_refaire` (was missing from update validation)
+- [x] `route.query.activite` read in `onMounted` to pre-select activity from deep-link
+- [x] Manual test guide: `docs/testing/TASK_15_TESTING.md`
+- [x] PHPUnit: 5 tests in `tests/Feature/Task15/TaskListUxTest.php`
+- [x] **269 PHPUnit tests, all passing.**
 - [ ] PR opened into `jonas`
 
 ### Task 16 (feature/v2-task-16-export)
 
 CDC gaps B.1 + ST.7/E.2.
 
-- [ ] PDF export of evaluation sheet (per agent, per period)
-- [ ] Excel export of project/task list (with sous-taches when filter active)
-- [ ] Agent sheet §5: résultats soumis avec statut validation (deferred from CDC Hotfixes if medium effort)
-- [ ] Tests passing
+- [x] PDF export of evaluation sheet — `GET /api/evaluations/personnel/{user}/export-pdf` (CDC B.1)
+- [x] Excel export of workspace task list — `GET /api/workspace/taches/export-excel` (CDC ST.7 / E.2)
+- [x] `WorkspaceTachesExport` class (10-column, blue header, auto-size, filter-aware)
+- [x] Blade template `resources/views/exports/agent-sheet.blade.php` (score_global, 8 criteria bars, task tables)
+- [x] "Exporter PDF" button wired in `AgentSheet.vue`; "Exporter Excel" button wired in `WorkspaceTaches.vue`
+- [x] Permission gates: `canExportFicheEvaluation` for PDF; owner-only for Excel
+- [x] PHPUnit: 5 tests in `tests/Feature/Task16/ExportTest.php`
+- [x] Manual test guide: `docs/testing/TASK_16_TESTING.md`
+- [x] **274 PHPUnit tests, all passing.**
 - [ ] PR opened into `jonas`
 
 ### Task 13
-- [ ] `subscription_mode` and trial columns added to `workspaces`
-- [ ] `config/subscription.php` created with defaults
-- [ ] `SubscriptionService` created
-- [ ] `CheckSubscriptionLimits` middleware created
-- [ ] Trial expiry banner added to frontend
-- [ ] `canManageSubscription` permission added
-- [ ] Translation files `lang/fr/subscription.php` and `lang/en/subscription.php` created
-- [ ] Tests passing
+- [x] Migration: `subscription_mode`, `trial_started_at`, `trial_duration_days` added to `workspaces`
+- [x] `config/subscription.php` created with env-driven defaults (duration, member limit, file size, storage, warning days)
+- [x] `Workspace` model: 3 fillable fields + casts + auto-init `trial_started_at` in `boot()::creating()`
+- [x] `SubscriptionService` created: `isPaid`, `isTrialExpired`, `getRemainingTrialDays`, `isExpiringSoon`, `canAddMember`, `canUploadFile`, `canUploadStorage`, `summary`
+- [x] `CheckSubscriptionLimits` middleware registered as `subscription.limits`, takes `$limitType` param, bypasses super_admin
+- [x] `subscription.limits:add_member` applied to invite route; `subscription.limits:upload_file` applied to document store route
+- [x] `Permission::SUBSCRIPTION_MANAGE` constant + `all()` + `Permission.js` + `useWorkspacePermissions.js` (canManageSubscription)
+- [x] `WorkspaceController::show()`: `can_manage_subscription` key in user_permissions (3 locations) + `subscription_summary` in response
+- [x] `GET /api/workspaces/{id}/subscription` endpoint (lightweight summary for banner)
+- [x] `PATCH /api/workspaces/{id}/subscription` endpoint (super_admin only — configure trial duration/mode)
+- [x] `TrialExpiringNotification`, `TrialExpiredNotification`, `SubscriptionLimitReachedNotification` (all ShouldQueue, channelsFor-routed)
+- [x] `NotificationService::wantsEmail()` + `wantsWebPush()` updated with 3 new high-signal subscription events
+- [x] Translation files `lang/fr/subscription.php` + `lang/en/subscription.php` (trial, limits, errors, notifications sections)
+- [x] `TrialBanner.vue` component — amber/red banner, dismissible, shown when trial expiring or expired
+- [x] `AdminLayout.vue`: TrialBanner mounted above content area, changes workspace-reactively
+- [x] `WorkspaceFactory`: 3 states added — `paid()`, `trialExpired()`, `trialExpiringSoon(daysLeft)`
+- [x] PHPUnit: 13 tests in `SubscriptionServiceTest` (unit logic) + 8 tests in `SubscriptionMiddlewareTest` (HTTP middleware + API endpoints)
+- [x] Manual test guide: `docs/testing/TASK_13_TESTING.md`
+- [x] **253 PHPUnit tests, all passing.**
 - [ ] PR opened into `jonas`
 
 ### Task 14
-- [ ] `/admin/dashboard` page created
-- [ ] `/admin/workspaces` page created
-- [ ] `/admin/users` page created
-- [ ] `GET /admin/stats` endpoint created
-- [ ] All `/admin/*` routes protected by `super_admin` middleware
-- [ ] `canAccessPlatformDashboard` permission added
-- [ ] Translation files `lang/fr/admin.php` and `lang/en/admin.php` created
-- [ ] Tests passing
+- [x] `AdminController` created: `stats`, `workspaces`, `users`, `extendTrial`, `suspendWorkspace`, `reactivateWorkspace`
+- [x] All `/api/admin/*` routes protected by `super_admin` middleware (prefix group in `api.php`)
+- [x] `TrialExtendedNotification` + `WorkspaceSuspendedNotification` (both ShouldQueue, channelsFor-routed)
+- [x] `NotificationService::wantsEmail()` + `wantsWebPush()` updated with `trial_extended` + `workspace_suspended` high-signal events
+- [x] Translation files `lang/fr/admin.php` + `lang/en/admin.php` (dashboard, workspaces, users, actions, notifications sections)
+- [x] `AdminDashboard.vue` — 6 workspace + 2 user stat cards, recent workspaces table, quick links
+- [x] `AdminWorkspaces.vue` — paginated table with search/mode/status filters, extend-trial modal, suspend modal, reactivate button
+- [x] `AdminUsers.vue` — paginated table with search filter
+- [x] `SubscriptionBadge.vue` component (trial=amber, paid=green, free=gray)
+- [x] Vue router: 4 admin routes with `requiresSuperAdmin` meta + `beforeEach` guard → redirects non-super-admins to 404
+- [x] AppSidebar: Administration section (3 items) gated by `superAdminOnly`, auto-hidden for non-admins
+- [x] PHPUnit: 11 tests in `PlatformDashboardTest` (403/200 by role, stats structure, notification assertions via `Notification::fake()`)
+- [x] Manual test guide: `docs/testing/TASK_14_TESTING.md`
+- [x] **264 PHPUnit tests, all passing.**
 - [ ] PR opened into `jonas`
 
 ---

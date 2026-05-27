@@ -101,7 +101,9 @@ class NotificationService
             'soumis_n1', 'en_validation_n2',
             'valide_n1', 'valide_n2',
             'rejete_n1', 'rejete_n2',
-            'validation_complete' => true,
+            'validation_complete',
+            'trial_expiring', 'trial_expired', 'subscription_limit_reached',
+            'trial_extended', 'workspace_suspended' => true,
 
             // Low-signal — uniquement in-app
             'evaluation_sheet_ready', 'approuve_n0', 'score_updated' => false,
@@ -237,7 +239,9 @@ class NotificationService
             'soumis_n1', 'en_validation_n2',
             'valide_n1', 'valide_n2',
             'rejete_n1', 'rejete_n2',
-            'validation_complete' => true,
+            'validation_complete',
+            'trial_expiring', 'trial_expired', 'subscription_limit_reached',
+            'trial_extended', 'workspace_suspended' => true,
             'approuve_n0', 'score_updated' => false,
             // Unknown event type — opt out of email by default to be safe.
             default => false,

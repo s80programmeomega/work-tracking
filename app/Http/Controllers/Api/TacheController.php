@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\TacheStatut;
+use App\Exports\WorkspaceTachesExport;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\SousTacheResource;
 use App\Http\Resources\TacheAttachmentResource;
@@ -30,7 +31,9 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Maatwebsite\Excel\Facades\Excel;
 use Spatie\Permission\Models\Role;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 class TacheController extends Controller
@@ -548,12 +551,12 @@ class TacheController extends Controller
             'validation_n1_required' => 'nullable|boolean',
             'validation_n2_required' => 'nullable|boolean',
 
-            // ✅ CORRECTION 1: Validation des fichiers uploadés
+            // Validation des fichiers uploadés
             'uploaded_files' => 'nullable|array',
             'uploaded_files.*' => [
                 'file',
                 'max:10240', // 10MB
-                'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,zip',
+                'mimetypes:application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,image/jpeg,image/jpg,image/png,image/gif,application/zip,application/x-zip-compressed,text/plain',
             ],
 
             // ✅ CORRECTION 2: Validation de l'image de couverture
@@ -847,7 +850,7 @@ class TacheController extends Controller
             'description' => 'nullable|string',
             'objectif' => 'nullable|string',
             'indicateurs_resultats' => 'nullable|string',
-            'statut' => 'sometimes|required|in:a_faire,en_cours,termine',
+            'statut' => 'sometimes|required|in:a_faire,en_cours,termine,en_retard,a_refaire',
             'priorite' => 'sometimes|required|in:faible,moyenne,elevee,critique',
             // Dates
             'echeance' => 'nullable|date_format:Y-m-d',
@@ -865,12 +868,12 @@ class TacheController extends Controller
             'validation_n1_required' => 'nullable|boolean',
             'validation_n2_required' => 'nullable|boolean',
 
-            // ✅ CORRECTION: Même validation des fichiers que pour store
+            // Validation des fichiers uploadés
             'uploaded_files' => 'nullable|array',
             'uploaded_files.*' => [
                 'file',
                 'max:10240',
-                'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,zip',
+                'mimetypes:application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,image/jpeg,image/jpg,image/png,image/gif,application/zip,application/x-zip-compressed,text/plain',
             ],
 
             // ✅ CORRECTION: Même validation de l'image
@@ -2292,5 +2295,58 @@ class TacheController extends Controller
                 'per_page' => $taches->perPage(),
             ],
         ]);
+    }
+
+    /**
+     * Task 16: Export workspace tasks as Excel (.xlsx).
+     *
+     * Endpoint: GET /api/workspace/taches/export-excel
+     * Accepts the same filters as workspaceTaches().
+     */
+    public function exportWorkspaceTachesExcel(Request $request): BinaryFileResponse
+    {
+        $user = $request->user();
+        $gate = app(ContextualPermissionGate::class);
+        $workspace = $user->currentWorkspace;
+
+        abort_unless(
+            $user->isSuperAdmin() || ($workspace && $gate->userCan($user, Permission::EVALUATIONS_VIEW_WORKSPACE_TACHES, $workspace)),
+            403
+        );
+
+        $query = Tache::query()
+            ->whereHas('activite.projet', fn ($q) => $q->where('workspace_id', $workspace?->id))
+            ->with([
+                'activite:id,nom,projet_id',
+                'activite.projet:id,nom,workspace_id',
+                'assignees:id,nom,prenom',
+                'responsable:id,nom',
+            ])
+            ->withCount('sousTaches');
+
+        if ($request->filled('projet_id')) {
+            $query->whereHas('activite', fn ($q) => $q->where('projet_id', $request->integer('projet_id')));
+        }
+        if ($request->filled('activite_id')) {
+            $query->where('activite_id', $request->integer('activite_id'));
+        }
+        if ($request->filled('statut')) {
+            $query->where('statut', $request->string('statut'));
+        }
+        if ($request->filled('assignee_id')) {
+            $query->whereHas('assignees', fn ($q) => $q->where('users.id', $request->integer('assignee_id')));
+        }
+
+        $taches = $query->orderBy('echeance', 'asc')->get();
+
+        Log::info('Export Excel tâches workspace', [
+            'user_id' => $user->id,
+            'workspace_id' => $workspace?->id,
+            'count' => $taches->count(),
+        ]);
+
+        $filename = 'taches-workspace-'.now()->format('Y-m-d').'.xlsx';
+
+        return Excel::download(new WorkspaceTachesExport($taches), $filename);
     }
 }

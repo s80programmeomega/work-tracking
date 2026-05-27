@@ -243,6 +243,7 @@
       v-if="showViewModal"
       :tache="currentTache"
       @close="showViewModal = false"
+      @edit="handleEditTask"
       @move-my-card="handleMoveMyCard"
       @submit-result="handleSubmitResult"
       @task-updated="handleTaskUpdated"
