@@ -115,8 +115,8 @@
 
     <!-- Resultat Detail Modal -->
     <ResultatDetailModal
-      :is-open="showResultatModal"
-      :resultat-id="selectedResultatId"
+      v-if="showResultatModal && selectedResultat"
+      :resultat="selectedResultat"
       @close="closeResultatModal"
     />
   </div>
@@ -131,6 +131,7 @@ import NotificationItem from './NotificationItem.vue'
 import NotificationDetailModal from './NotificationDetailModal.vue'
 import ResultatDetailModal from '@/components/taches/resultats/ResultatDetailModal.vue'
 import { useRealtimeRefresh } from '@/composables/useRealtimeRefresh'
+import api from '@/api/axios'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -140,7 +141,7 @@ const maxDisplayed = 5
 const showDetailModal = ref(false)
 const selectedNotification = ref(null)
 const showResultatModal = ref(false)
-const selectedResultatId = ref(null)
+const selectedResultat = ref(null)
 
 const {
   notifications,
@@ -200,15 +201,20 @@ const closeDetailModal = () => {
   selectedNotification.value = null
 }
 
-const handleOpenResultatModal = (resultatId) => {
-  selectedResultatId.value = resultatId
-  showResultatModal.value = true
+const handleOpenResultatModal = async (resultatId) => {
   closeDropdown()
+  try {
+    const { data } = await api.get(`/tache-resultats/${resultatId}`)
+    selectedResultat.value = data.data ?? data
+    showResultatModal.value = true
+  } catch (error) {
+    console.error('Erreur lors du chargement du résultat :', error)
+  }
 }
 
 const closeResultatModal = () => {
   showResultatModal.value = false
-  selectedResultatId.value = null
+  selectedResultat.value = null
 }
 
 const handleMarkAsRead = async (notificationId) => {

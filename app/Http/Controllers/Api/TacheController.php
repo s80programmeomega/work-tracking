@@ -551,12 +551,12 @@ class TacheController extends Controller
             'validation_n1_required' => 'nullable|boolean',
             'validation_n2_required' => 'nullable|boolean',
 
-            // ✅ CORRECTION 1: Validation des fichiers uploadés
+            // Validation des fichiers uploadés
             'uploaded_files' => 'nullable|array',
             'uploaded_files.*' => [
                 'file',
                 'max:10240', // 10MB
-                'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,zip',
+                'mimetypes:application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,image/jpeg,image/jpg,image/png,image/gif,application/zip,application/x-zip-compressed,text/plain',
             ],
 
             // ✅ CORRECTION 2: Validation de l'image de couverture
@@ -868,12 +868,12 @@ class TacheController extends Controller
             'validation_n1_required' => 'nullable|boolean',
             'validation_n2_required' => 'nullable|boolean',
 
-            // ✅ CORRECTION: Même validation des fichiers que pour store
+            // Validation des fichiers uploadés
             'uploaded_files' => 'nullable|array',
             'uploaded_files.*' => [
                 'file',
                 'max:10240',
-                'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,zip',
+                'mimetypes:application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,image/jpeg,image/jpg,image/png,image/gif,application/zip,application/x-zip-compressed,text/plain',
             ],
 
             // ✅ CORRECTION: Même validation de l'image

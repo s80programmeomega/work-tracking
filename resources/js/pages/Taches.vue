@@ -359,7 +359,7 @@
     <TacheDetailModal
       v-if="showViewModal"
       :tache="currentTache"
-      @close="showViewModal = false"
+      @close="closeDetailModal"
       @edit="handleEditFromDetail"
       @validate-n1="handleValidateN1"
       @validate-n2="handleValidateN2"
@@ -558,18 +558,22 @@ const openCreateForm = () => {
     alert('Veuillez sélectionner une activité')
     return
   }
+  showViewModal.value = false
   currentTache.value = null
   currentStatut.value = 'a_faire'
   showForm.value = true
 }
 
 const handleAddTask = (statut) => {
+  showViewModal.value = false
   currentTache.value = null
   currentStatut.value = statut
   showForm.value = true
 }
 
 const handleViewTask = async (tache) => {
+  showForm.value = false
+  currentTache.value = null
   try {
     const { data } = await api.get(`/taches/${tache.id}`)
     currentTache.value = data.data
@@ -581,6 +585,7 @@ const handleViewTask = async (tache) => {
 }
 
 const handleEditTask = (tache) => {
+  showViewModal.value = false
   currentTache.value = tache
   showForm.value = true
 }
@@ -706,6 +711,11 @@ const handleTaskSaved = async () => {
 
 const closeForm = () => {
   showForm.value = false
+  currentTache.value = null
+}
+
+const closeDetailModal = () => {
+  showViewModal.value = false
   currentTache.value = null
 }
 

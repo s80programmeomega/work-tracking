@@ -75,39 +75,72 @@
           }"
         >
           <div class="flex items-start justify-between gap-3">
-            <!-- Left: checkbox-style status toggle + title -->
+            <!-- Left: checkbox + title -->
             <div class="flex items-start gap-3 flex-1 min-w-0">
               <!-- Quick complete toggle -->
               <button
                 v-if="canEdit"
                 @click="toggleComplete(st)"
                 :title="st.statut === 'termine' ? 'Marquer comme en cours' : 'Marquer comme terminé'"
-                class="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full border-2 transition-colors flex items-center justify-center"
+                class="mt-0.5 shrink-0 w-5 h-5 rounded-full border-2 transition-colors flex items-center justify-center"
                 :class="st.statut === 'termine'
                   ? 'bg-green-500 border-green-500 text-white'
                   : 'border-gray-400 dark:border-gray-600 hover:border-brand-500'"
               >
                 <i v-if="st.statut === 'termine'" class="fas fa-check text-xs"></i>
               </button>
-              <div v-else class="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center">
+              <div v-else class="mt-0.5 shrink-0 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center">
                 <i v-if="st.statut === 'termine'" class="fas fa-check text-xs text-green-500"></i>
               </div>
 
               <div class="flex-1 min-w-0">
-                <!-- Title + statut badge -->
-                <div class="flex items-center gap-2 flex-wrap">
+                <!-- Titre inline editable -->
+                <div class="flex items-center gap-2 flex-wrap mb-1">
+                  <input
+                    v-if="editing.id === st.id && editing.field === 'titre'"
+                    v-model="editing.value"
+                    @blur="saveInlineEdit(st)"
+                    @keydown.enter.prevent="saveInlineEdit(st)"
+                    @keydown.escape="cancelInlineEdit"
+                    autofocus
+                    class="flex-1 text-sm font-medium px-2 py-0.5 border border-brand-500 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 min-w-0"
+                  />
                   <span
+                    v-else
+                    @click="startInlineEdit(st, 'titre', st.titre)"
                     class="text-sm font-medium text-gray-900 dark:text-white"
-                    :class="{ 'line-through text-gray-400 dark:text-gray-500': st.statut === 'termine' }"
+                    :class="[
+                      { 'line-through text-gray-400 dark:text-gray-500': st.statut === 'termine' },
+                      canEdit ? 'cursor-pointer hover:text-brand-600 dark:hover:text-brand-400' : '',
+                    ]"
+                    :title="canEdit ? 'Cliquer pour modifier' : ''"
+                  >{{ st.titre }}</span>
+
+                  <!-- Statut inline editable -->
+                  <select
+                    v-if="editing.id === st.id && editing.field === 'statut'"
+                    v-model="editing.value"
+                    @change="saveInlineEdit(st)"
+                    @blur="cancelInlineEdit"
+                    @keydown.escape="cancelInlineEdit"
+                    autofocus
+                    class="px-2 py-0.5 text-xs font-medium rounded-full border border-brand-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
                   >
-                    {{ st.titre }}
-                  </span>
+                    <option value="a_faire">À faire</option>
+                    <option value="en_cours">En cours</option>
+                    <option value="en_retard">En retard</option>
+                    <option value="termine">Terminé</option>
+                    <option value="a_refaire">À refaire</option>
+                    <option value="annule">Annulé</option>
+                  </select>
                   <span
+                    v-else
+                    @click="startInlineEdit(st, 'statut', st.statut)"
                     class="px-2 py-0.5 rounded-full text-xs font-medium"
-                    :class="getStatutClass(st.statut)"
-                  >
-                    {{ getStatutLabel(st.statut) }}
-                  </span>
+                    :class="[getStatutClass(st.statut), canEdit ? 'cursor-pointer hover:opacity-75' : '']"
+                    :title="canEdit ? 'Cliquer pour modifier' : ''"
+                  >{{ getStatutLabel(st.statut) }}</span>
+
                   <!-- Overdue indicator -->
                   <span
                     v-if="st.is_overdue"
@@ -117,25 +150,58 @@
                   </span>
                 </div>
 
-                <!-- Description -->
-                <p v-if="st.description" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-1">
-                  {{ st.description }}
-                </p>
+                <!-- Description inline editable -->
+                <div v-if="editing.id === st.id && editing.field === 'description'" class="mb-1">
+                  <textarea
+                    v-model="editing.value"
+                    @blur="saveInlineEdit(st)"
+                    @keydown.escape="cancelInlineEdit"
+                    autofocus
+                    rows="2"
+                    class="w-full text-xs px-2 py-1 border border-brand-500 rounded-md bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"
+                  ></textarea>
+                </div>
+                <p
+                  v-else-if="st.description || canEdit"
+                  @click="startInlineEdit(st, 'description', st.description)"
+                  class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-1"
+                  :class="canEdit ? 'cursor-pointer hover:text-brand-600 dark:hover:text-brand-400' : ''"
+                  :title="canEdit ? 'Cliquer pour modifier la description' : ''"
+                >{{ st.description || (canEdit ? '+ Ajouter une description…' : '') }}</p>
 
-                <!-- Meta row -->
+                <!-- Meta row: progression + date_echeance + blocking -->
                 <div class="flex items-center gap-3 mt-1.5 flex-wrap">
-                  <!-- Progression -->
-                  <div v-if="st.poids > 0" class="flex items-center gap-1.5">
-                    <div class="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-                      <div
-                        class="bg-brand-500 h-1.5 rounded-full transition-all"
-                        :style="{ width: `${st.progression}%` }"
-                      ></div>
-                    </div>
-                    <span class="text-xs text-gray-500 dark:text-gray-400">{{ st.progression }}%</span>
-                    <span class="text-xs text-gray-400">· {{ st.poids }}%</span>
+                  <!-- Progression inline editable -->
+                  <div v-if="editing.id === st.id && editing.field === 'progression'" class="flex items-center gap-1.5">
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      v-model.number="editing.value"
+                      class="w-20 accent-brand-600"
+                    />
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      v-model.number="editing.value"
+                      @blur="saveInlineEdit(st)"
+                      @keydown.enter.prevent="saveInlineEdit(st)"
+                      @keydown.escape="cancelInlineEdit"
+                      autofocus
+                      class="w-12 text-xs text-center border border-brand-500 rounded px-1 py-0.5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none"
+                    />
+                    <span class="text-xs text-gray-400">%</span>
+                    <button @click="saveInlineEdit(st)" class="text-xs px-1.5 py-0.5 bg-brand-600 text-white rounded hover:bg-brand-700">✓</button>
+                    <button @click="cancelInlineEdit" class="text-xs px-1.5 py-0.5 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-300">✕</button>
                   </div>
-                  <div v-else-if="st.progression > 0" class="flex items-center gap-1.5">
+                  <div
+                    v-else-if="st.poids > 0 || st.progression > 0"
+                    @click="startInlineEdit(st, 'progression', st.progression)"
+                    class="flex items-center gap-1.5"
+                    :class="canEdit ? 'cursor-pointer' : ''"
+                    :title="canEdit ? 'Cliquer pour modifier la progression' : ''"
+                  >
                     <div class="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
                       <div
                         class="bg-brand-500 h-1.5 rounded-full transition-all"
@@ -143,14 +209,36 @@
                       ></div>
                     </div>
                     <span class="text-xs text-gray-500 dark:text-gray-400">{{ st.progression }}%</span>
+                    <span v-if="st.poids > 0" class="text-xs text-gray-400">· {{ st.poids }}%</span>
                   </div>
 
-                  <!-- Deadline -->
-                  <div v-if="st.date_echeance" class="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                  <!-- Date échéance inline editable -->
+                  <div v-if="editing.id === st.id && editing.field === 'date_echeance'" class="flex items-center gap-1">
+                    <DatePicker
+                      v-model="editing.value"
+                      :enable-time-picker="false"
+                      auto-apply
+                      :format="'dd-MM-yyyy'"
+                      :locale="'fr'"
+                      :dark="isDark"
+                      placeholder="Sélectionner une date"
+                      @update:model-value="saveInlineEdit(st)"
+                      @keydown.escape="cancelInlineEdit"
+                      inline
+                    />
+                  </div>
+                  <div
+                    v-else
+                    @click="startInlineEdit(st, 'date_echeance', st.date_echeance)"
+                    class="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400"
+                    :class="canEdit ? 'cursor-pointer hover:text-brand-600 dark:hover:text-brand-400' : ''"
+                    :title="canEdit ? 'Cliquer pour modifier l\'échéance' : ''"
+                  >
                     <i class="fas fa-calendar-alt text-gray-400"></i>
-                    <span :class="{ 'text-red-600 font-medium': st.is_overdue }">
+                    <span v-if="st.date_echeance" :class="{ 'text-red-600 font-medium': st.is_overdue }">
                       {{ formatDate(st.date_echeance) }}
                     </span>
+                    <span v-else-if="canEdit" class="italic text-gray-400">+ Échéance</span>
                   </div>
 
                   <!-- Blocking badge -->
@@ -162,8 +250,8 @@
               </div>
             </div>
 
-            <!-- Right: edit/delete actions -->
-            <div v-if="canEdit || canDelete" class="relative flex-shrink-0">
+            <!-- Right: delete action only (edit is now inline) -->
+            <div v-if="canDelete" class="relative shrink-0">
               <button
                 @click.stop="toggleMenu(st.id)"
                 class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1"
@@ -177,15 +265,6 @@
                 class="absolute right-0 mt-1 w-36 bg-white dark:bg-gray-700 rounded-lg shadow-lg z-20 py-1 text-sm"
               >
                 <button
-                  v-if="canEdit"
-                  @click="startEdit(st)"
-                  class="w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2"
-                >
-                  <i class="fas fa-edit w-4 text-gray-500"></i>
-                  Modifier
-                </button>
-                <button
-                  v-if="canDelete"
                   @click="confirmDelete(st)"
                   class="w-full px-3 py-2 text-left text-red-600 hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2"
                 >
@@ -196,58 +275,11 @@
             </div>
           </div>
 
-          <!-- Inline progress editor (when editing) -->
-          <div v-if="editingId === st.id" class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-            <div class="grid grid-cols-2 gap-3 mb-3">
-              <div>
-                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Statut</label>
-                <select
-                  v-model="editForm.statut"
-                  class="w-full px-2 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
-                >
-                  <option value="a_faire">À faire</option>
-                  <option value="en_cours">En cours</option>
-                  <option value="en_retard">En retard</option>
-                  <option value="termine">Terminé</option>
-                  <option value="a_refaire">À refaire</option>
-                  <option value="annule">Annulé</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Progression (%)</label>
-                <input
-                  v-model.number="editForm.progression"
-                  type="number"
-                  min="0"
-                  max="100"
-                  class="w-full px-2 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
-                />
-              </div>
-            </div>
-            <div class="flex justify-end gap-2">
-              <button
-                @click="cancelEdit"
-                class="px-3 py-1.5 text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900"
-              >
-                Annuler
-              </button>
-              <button
-                @click="saveEdit(st)"
-                :disabled="saving"
-                class="px-3 py-1.5 text-xs bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50"
-              >
-                <i v-if="saving" class="fas fa-spinner fa-spin mr-1"></i>
-                Enregistrer
-              </button>
-            </div>
-          </div>
-
           <!-- Intervenants row -->
           <div
             v-if="canAssign || (st.intervenants && st.intervenants.length > 0)"
             class="mt-2 pt-2 border-t border-gray-100 dark:border-gray-800 flex items-center gap-2 flex-wrap"
           >
-            <!-- Existing intervenant chips -->
             <span
               v-for="iv in (st.intervenants ?? [])"
               :key="iv.id"
@@ -262,7 +294,6 @@
               >&times;</button>
             </span>
 
-            <!-- Add intervenant dropdown -->
             <div v-if="canAssign" class="relative">
               <button
                 @click.stop="toggleIntervenantMenu(st.id)"
@@ -326,7 +357,9 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
+import DatePicker from '@vuepic/vue-datepicker'
+import '@vuepic/vue-datepicker/dist/main.css'
 import SousTacheForm from './SousTacheForm.vue'
 import { useSousTaches } from '@/composables/useSousTaches'
 import { useAuthStore } from '@/stores/authStore'
@@ -362,15 +395,68 @@ fetchSousTaches()
 
 const showForm = ref(false)
 const creating = ref(false)
-const saving = ref(false)
 const openMenuId = ref(null)
-const editingId = ref(null)
 const formRef = ref(null)
-const editForm = ref({ statut: '', progression: 0 })
 
 const intervenantMenuId = ref(null)
 const assigningId = ref(null)
 const memberSearch = ref('')
+
+const isDark = computed(() => document.documentElement.classList.contains('dark'))
+
+// Inline edit state — tracks which subtask+field is being edited
+const editing = reactive({ id: null, field: null, value: null })
+
+const startInlineEdit = (st, field, value) => {
+    if (!props.canEdit) return
+    editing.id = st.id
+    editing.field = field
+    editing.value = field === 'date_echeance' ? (value ? new Date(value) : null) : value
+}
+
+const cancelInlineEdit = () => {
+    editing.id = null
+    editing.field = null
+    editing.value = null
+}
+
+const formatDateForApi = (date) => {
+    if (!date) return null
+    const d = date instanceof Date ? date : new Date(date)
+    if (isNaN(d.getTime())) return null
+    const year = d.getFullYear()
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+}
+
+const saveInlineEdit = async (st) => {
+    const { field, value } = editing
+    if (!field) return
+
+    const apiValue = field === 'date_echeance' ? formatDateForApi(value) : value
+    const oldValue = st[field]
+
+    if ((apiValue ?? '') === (oldValue ?? '')) {
+        cancelInlineEdit()
+        return
+    }
+
+    cancelInlineEdit()
+    try {
+        await updateSousTache(st.id, { [field]: apiValue })
+        emit('updated')
+    } catch (err) {
+        console.error('Erreur mise à jour sous-tâche:', err)
+    }
+}
+
+const handleKeydown = (e) => {
+    if (e.key === 'Escape' && editing.id) cancelInlineEdit()
+}
+
+onMounted(() => { window.addEventListener('keydown', handleKeydown) })
+onBeforeUnmount(() => { window.removeEventListener('keydown', handleKeydown) })
 
 const filteredMembers = computed(() => {
     const q = memberSearch.value.toLowerCase().trim()
@@ -437,31 +523,8 @@ const closeMenus = () => {
     openMenuId.value = null
 }
 
-const startEdit = (st) => {
-    openMenuId.value = null
-    editingId.value = st.id
-    editForm.value = { statut: st.statut, progression: st.progression }
-}
-
-const cancelEdit = () => {
-    editingId.value = null
-}
-
-const saveEdit = async (st) => {
-    saving.value = true
-    try {
-        await updateSousTache(st.id, { ...editForm.value })
-        editingId.value = null
-        emit('updated')
-    } finally {
-        saving.value = false
-    }
-}
-
 const toggleComplete = async (st) => {
     const newStatut = st.statut === 'termine' ? 'en_cours' : 'termine'
-    // Forward: jump to 100. Backward (un-toggling from a 100 % completed sous-tâche): reset to 0
-    // so the parent task's weighted progression recalculates downward. Otherwise keep current progression.
     const newProgression = newStatut === 'termine'
         ? 100
         : (st.progression >= 100 ? 0 : st.progression)

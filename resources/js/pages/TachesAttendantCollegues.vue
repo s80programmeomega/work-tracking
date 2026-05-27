@@ -221,12 +221,14 @@
       v-if="showDetailModal"
       :tache="selectedTache"
       @close="showDetailModal = false"
+      @edit="handleEditTask"
     />
   </AdminLayout>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import TacheDetailModal from '@/components/taches/TacheDetailModal.vue'
 import api from '@/api/axios'
@@ -235,6 +237,7 @@ import api from '@/api/axios'
 const taches = ref([])
 const loading = ref(false)
 const error = ref(null)
+const router = useRouter()
 const showDetailModal = ref(false)
 const selectedTache = ref(null)
 
@@ -333,6 +336,11 @@ function formatDateTime(dateTime) {
 
 function isOverdue(date) {
   return new Date(date) < new Date()
+}
+
+function handleEditTask(tache) {
+  showDetailModal.value = false
+  router.push(`/taches/${tache.id}`)
 }
 
 // Lifecycle

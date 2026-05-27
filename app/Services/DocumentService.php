@@ -15,25 +15,25 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Intervention\Image\Laravel\Facades\Image;
-
-use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Laravel\Facades\Image;
 
 /**
  * Service de gestion des documents
- * 
+ *
  * Gère l'upload, le téléchargement, les versions et les permissions des documents
  */
-
 class DocumentService
 {
     protected DocumentAccessResolver $accessResolver;
+
     protected ImageManager $imageManager;
+
     public function __construct(DocumentAccessResolver $accessResolver)
     {
         $this->accessResolver = $accessResolver;
-        $this->imageManager = new ImageManager(new Driver());
+        $this->imageManager = new ImageManager(new Driver);
     }
 
     /**
@@ -53,26 +53,26 @@ class DocumentService
         array $options = []
     ): Document {
         // Vérifier que l'user peut uploader sur cette entité
-        if (!$this->accessResolver->canUpload($user, $entityType, $entityId)) {
+        if (! $this->accessResolver->canUpload($user, $entityType, $entityId)) {
             throw new \Exception("Vous n'avez pas la permission d'uploader des documents ici");
         }
 
         // Vérifier l'entité
         $entity = $this->getEntity($entityType, $entityId);
 
-        if (!$entity) {
-            throw new \Exception("Entité non trouvée");
+        if (! $entity) {
+            throw new \Exception('Entité non trouvée');
         }
 
         // Vérifier le workspace
         $workspace = $this->getWorkspaceFromEntity($entity, $entityType);
 
-        if (!$workspace) {
-            throw new \Exception("Workspace non trouvé");
+        if (! $workspace) {
+            throw new \Exception('Workspace non trouvé');
         }
 
         // Vérifier les doublons si non autorisés
-        if (!($options['allow_duplicates'] ?? false)) {
+        if (! ($options['allow_duplicates'] ?? false)) {
             $hash = hash_file('sha256', $file->getRealPath());
 
             $existing = Document::where('documentable_type', $entityType)
@@ -81,7 +81,7 @@ class DocumentService
                 ->first();
 
             if ($existing) {
-                throw new \Exception("Ce fichier existe déjà");
+                throw new \Exception('Ce fichier existe déjà');
             }
         }
 
@@ -89,22 +89,23 @@ class DocumentService
             // Générer les noms de fichier
             $originalName = $file->getClientOriginalName();
             $extension = $file->getClientOriginalExtension();
-            $storageName = Str::uuid() . '.' . $extension;
+            $storageName = Str::uuid().'.'.$extension;
 
             // Définir le chemin de stockage (organisé par workspace et type)
             $disk = $options['disk'] ?? config('documents.default_disk', 'private');
             $basePath = $this->getStoragePath($workspace, $entityType, $entityId);
-            $storagePath = $basePath . '/' . $storageName;
+            $storagePath = $basePath.'/'.$storageName;
 
             // Uploader le fichier
             $path = $file->storeAs($basePath, $storageName, $disk);
 
-            if (!$path) {
+            if (! $path) {
                 throw new \Exception("Erreur lors de l'upload du fichier");
             }
 
             // Créer le document
             $document = Document::create([
+                'workspace_id' => $workspace->id,
                 'documentable_type' => $entityType,
                 'documentable_id' => $entityId,
                 'nom' => $originalName,
@@ -167,8 +168,8 @@ class DocumentService
             }
         }
 
-        if (!empty($errors)) {
-            throw new \Exception("Certains fichiers n'ont pas pu être uploadés : " . json_encode($errors));
+        if (! empty($errors)) {
+            throw new \Exception("Certains fichiers n'ont pas pu être uploadés : ".json_encode($errors));
         }
 
         return $documents;
@@ -183,7 +184,7 @@ class DocumentService
         User $user
     ): Document {
         // Vérifier les permissions
-        if (!$this->accessResolver->canEdit($user, $document)) {
+        if (! $this->accessResolver->canEdit($user, $document)) {
             throw new \Exception("Vous n'avez pas la permission de créer une nouvelle version");
         }
 
@@ -257,8 +258,6 @@ class DocumentService
         ]);
     }
 
-
-
     /**
      * ===================================================================
      * SUPPRESSION
@@ -305,7 +304,7 @@ class DocumentService
             // Log
             activity()
                 ->causedBy(auth()->user())
-                ->log('Document supprimé définitivement : ' . $document->nom);
+                ->log('Document supprimé définitivement : '.$document->nom);
 
             return true;
         });
@@ -357,8 +356,6 @@ class DocumentService
         $document->shareWithUsers($userIds, $permissions, $expiresAt);
     }
 
-
-
     /**
      * Get download statistics for a document
      */
@@ -390,7 +387,7 @@ class DocumentService
      */
     protected function generateThumbnail(Document $document): void
     {
-        if (!$document->is_image) {
+        if (! $document->is_image) {
             return;
         }
 
@@ -407,7 +404,7 @@ class DocumentService
 
             $document->update(['thumbnail_path' => $thumbnailPath]);
         } catch (\Exception $e) {
-            logger()->error('Thumbnail generation failed: ' . $e->getMessage());
+            logger()->error('Thumbnail generation failed: '.$e->getMessage());
         }
     }
 
@@ -422,7 +419,6 @@ class DocumentService
         return "documents/{$typeSlug}/{$id}/{$date}/{$filename}";
     }
 
-
     /**
      * Build thumbnail path from original path
      */
@@ -434,9 +430,8 @@ class DocumentService
         $extension = $pathInfo['extension'];
 
         // Structure : documents/workspace_1/projet/123/2024/12/thumbs/uuid.jpg
-        return $directory . '/thumbs/' . $filename . '.' . $extension;
+        return $directory.'/thumbs/'.$filename.'.'.$extension;
     }
-
 
     /**
      * ===================================================================
@@ -457,18 +452,18 @@ class DocumentService
         // Vérifier que l'entité existe et que l'user a accès
         $entity = $this->getEntity($entityType, $entityId);
 
-        if (!$entity) {
-            throw new \Exception("Entité non trouvée");
+        if (! $entity) {
+            throw new \Exception('Entité non trouvée');
         }
 
         // Vérifier l'accès au workspace parent
         $workspace = $this->getWorkspaceFromEntity($entity, $entityType);
 
-        if (!$workspace) {
-            throw new \Exception("Workspace non trouvé pour cette entité");
+        if (! $workspace) {
+            throw new \Exception('Workspace non trouvé pour cette entité');
         }
 
-        if (!$this->userCanAccessWorkspace($user, $workspace)) {
+        if (! $this->userCanAccessWorkspace($user, $workspace)) {
             throw new \Exception("Vous n'avez pas accès à ce workspace");
         }
 
@@ -491,7 +486,6 @@ class DocumentService
         return $query->get();
     }
 
-
     /**
      * Recherche de documents
      */
@@ -504,19 +498,19 @@ class DocumentService
             ->search($query);
 
         // Filtres optionnels
-        if (!empty($filters['type'])) {
+        if (! empty($filters['type'])) {
             $documentsQuery->byType($filters['type']);
         }
 
-        if (!empty($filters['mime_type'])) {
-            $documentsQuery->where('mime_type', 'like', $filters['mime_type'] . '%');
+        if (! empty($filters['mime_type'])) {
+            $documentsQuery->where('mime_type', 'like', $filters['mime_type'].'%');
         }
 
-        if (!empty($filters['user_id'])) {
+        if (! empty($filters['user_id'])) {
             $documentsQuery->where('user_id', $filters['user_id']);
         }
 
-        if (!empty($filters['documentable_type']) && !empty($filters['documentable_id'])) {
+        if (! empty($filters['documentable_type']) && ! empty($filters['documentable_id'])) {
             $documentsQuery->where('documentable_type', $filters['documentable_type'])
                 ->where('documentable_id', $filters['documentable_id']);
         }
@@ -529,8 +523,6 @@ class DocumentService
 
         return $documentsQuery->paginate($perPage);
     }
-
-
 
     /**
      * ===================================================================
@@ -558,7 +550,7 @@ class DocumentService
      */
     protected function getWorkspaceFromEntity($entity, string $entityType): ?Workspace
     {
-        if (!$entity) {
+        if (! $entity) {
             return null;
         }
 
@@ -636,7 +628,7 @@ class DocumentService
         }
 
         // Métadonnées personnalisées
-        if (!empty($options['custom_metadata'])) {
+        if (! empty($options['custom_metadata'])) {
             $metadata = array_merge($metadata, $options['custom_metadata']);
         }
 
@@ -654,7 +646,7 @@ class DocumentService
      */
     public function getWorkspaceDocuments(Workspace $workspace, User $user, array $filters = [])
     {
-        if (!$this->userCanAccessWorkspace($user, $workspace)) {
+        if (! $this->userCanAccessWorkspace($user, $workspace)) {
             throw new \Exception("Vous n'avez pas accès à ce workspace");
         }
 
@@ -694,11 +686,11 @@ class DocumentService
             });
 
         // Filtres
-        if (!empty($filters['type'])) {
+        if (! empty($filters['type'])) {
             $query->byType($filters['type']);
         }
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $query->search($filters['search']);
         }
 
@@ -713,7 +705,7 @@ class DocumentService
      */
     public function getWorkspaceStats(Workspace $workspace, User $user): array
     {
-        if (!$this->userCanAccessWorkspace($user, $workspace)) {
+        if (! $this->userCanAccessWorkspace($user, $workspace)) {
             throw new \Exception("Vous n'avez pas accès à ce workspace");
         }
 

@@ -1,36 +1,100 @@
 <!-- resources/js/components/taches/TacheDetailModal.vue -->
 <template>
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm" 
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm"
        @click.self="$emit('close')">
-    
+
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full overflow-hidden flex flex-col transition-all duration-300"
          :class="modalSizeClass">
-      
+
       <!-- Header unifié -->
       <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
         <div class="flex justify-between items-start">
           <!-- Titre et badges -->
-          <div class="flex-1">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ tache.titre }}</h2>
+          <div class="flex-1 mr-4">
+            <!-- Titre inline-editable -->
+            <div class="mb-2">
+              <input
+                v-if="editing.field === 'titre'"
+                v-model="editing.value"
+                @blur="saveEdit"
+                @keydown.enter.prevent="saveEdit"
+                @keydown.escape="cancelEdit"
+                autofocus
+                class="w-full text-2xl font-bold text-gray-900 dark:text-white bg-white dark:bg-gray-700 border-b-2 border-brand-500 focus:outline-none px-1 py-0.5 rounded"
+              />
+              <h2
+                v-else
+                class="text-2xl font-bold text-gray-900 dark:text-white"
+                :class="localTache.permissions?.can_edit ? 'cursor-pointer hover:text-brand-600 dark:hover:text-brand-400 group' : ''"
+                :title="localTache.permissions?.can_edit ? 'Cliquer pour modifier' : ''"
+                @click="startEdit('titre', localTache.titre)"
+              >
+                {{ localTache.titre }}
+                <svg v-if="localTache.permissions?.can_edit" class="inline w-4 h-4 ml-1 opacity-0 group-hover:opacity-50 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </h2>
+            </div>
+
             <div class="flex items-center gap-3 flex-wrap">
-              <!-- Badges statut et priorité -->
-              <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full shadow-sm"
-                    :class="getStatusClass(tache.statut)">
-                <span class="w-2 h-2 rounded-full mr-2" :class="getStatusDotClass(tache.statut)"></span>
-                {{ tache.statut_label }}
+              <!-- Badge statut inline-editable -->
+              <div v-if="editing.field === 'statut'">
+                <select
+                  v-model="editing.value"
+                  @change="saveEdit"
+                  @blur="cancelEdit"
+                  @keydown.escape="cancelEdit"
+                  autofocus
+                  class="text-xs font-semibold rounded-full px-3 py-1 border border-brand-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                >
+                  <option value="a_faire">À faire</option>
+                  <option value="en_cours">En cours</option>
+                  <option value="termine">Terminé</option>
+                </select>
+              </div>
+              <span
+                v-else
+                class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full shadow-sm"
+                :class="[getStatusClass(localTache.statut), localTache.permissions?.can_edit ? 'cursor-pointer hover:ring-2 hover:ring-brand-400' : '']"
+                :title="localTache.permissions?.can_edit ? 'Cliquer pour modifier le statut' : ''"
+                @click="startEdit('statut', localTache.statut)"
+              >
+                <span class="w-2 h-2 rounded-full mr-2" :class="getStatusDotClass(localTache.statut)"></span>
+                {{ localTache.statut_label }}
               </span>
-              
-              <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full shadow-sm"
-                    :class="getPriorityClass(tache.priorite)">
-                {{ getPriorityIcon(tache.priorite) }} {{ tache.priorite_label }}
+
+              <!-- Badge priorité inline-editable -->
+              <div v-if="editing.field === 'priorite'">
+                <select
+                  v-model="editing.value"
+                  @change="saveEdit"
+                  @blur="cancelEdit"
+                  @keydown.escape="cancelEdit"
+                  autofocus
+                  class="text-xs font-semibold rounded-full px-3 py-1 border border-brand-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                >
+                  <option value="faible">🟢 Faible</option>
+                  <option value="moyenne">🟡 Moyenne</option>
+                  <option value="elevee">🟠 Élevée</option>
+                  <option value="critique">🔴 Critique</option>
+                </select>
+              </div>
+              <span
+                v-else
+                class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full shadow-sm"
+                :class="[getPriorityClass(localTache.priorite), localTache.permissions?.can_edit ? 'cursor-pointer hover:ring-2 hover:ring-brand-400' : '']"
+                :title="localTache.permissions?.can_edit ? 'Cliquer pour modifier la priorité' : ''"
+                @click="startEdit('priorite', localTache.priorite)"
+              >
+                {{ getPriorityIcon(localTache.priorite) }} {{ localTache.priorite_label }}
               </span>
 
               <!-- Badges validation -->
-              <span v-if="tache.validation?.n2_validated_at" 
+              <span v-if="localTache.validation?.n2_validated_at"
                     class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300">
                 ✓✓ Validé N2
               </span>
-              <span v-else-if="tache.validation?.n1_validated_at" 
+              <span v-else-if="localTache.validation?.n1_validated_at"
                     class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
                 ✓ Validé N1
               </span>
@@ -38,10 +102,10 @@
           </div>
 
           <!-- Actions header -->
-          <div class="flex items-center gap-2 ml-4">
+          <div class="flex items-center gap-2 shrink-0">
             <!-- Lien vers la page complète -->
             <router-link
-              :to="`/taches/${tache.id}`"
+              :to="`/taches/${localTache.id}`"
               class="p-2 text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
               title="Ouvrir la page complète"
               @click="$emit('close')"
@@ -63,7 +127,7 @@
             </button>
 
             <!-- Bouton refresh -->
-            <button 
+            <button
               @click="refreshTask"
               :disabled="isRefreshing"
               class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors disabled:opacity-50"
@@ -73,7 +137,7 @@
               </svg>
             </button>
 
-            <button @click="$emit('close')" 
+            <button @click="$emit('close')"
                     class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-2">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -96,8 +160,8 @@
             <span class="flex items-center gap-2">
               {{ tab.label }}
               <span v-if="tab.count" class="px-2 py-0.5 text-xs rounded-full"
-                    :class="activeTab === tab.id 
-                      ? 'bg-brand-200 dark:bg-brand-800 text-brand-800 dark:text-brand-200' 
+                    :class="activeTab === tab.id
+                      ? 'bg-brand-200 dark:bg-brand-800 text-brand-800 dark:text-brand-200'
                       : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'">
                 {{ tab.count }}
               </span>
@@ -108,32 +172,101 @@
 
       <!-- Contenu principal -->
       <div class="flex-1 overflow-y-auto">
-        
+
         <!-- MODE RAPIDE -->
         <div v-if="!isDetailedView" class="px-8 py-6">
           <div class="grid grid-cols-3 gap-8">
             <!-- Colonne principale -->
             <div class="col-span-2 space-y-6">
               <!-- Description -->
-              <SectionCollapsible title="Description" :default-open="!!tache.description">
-                <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">{{ tache.description || 'Aucune description' }}</p>
+              <SectionCollapsible title="Description" :default-open="!!localTache.description">
+                <div v-if="editing.field === 'description'">
+                  <textarea
+                    v-model="editing.value"
+                    @blur="saveEdit"
+                    @keydown.escape="cancelEdit"
+                    autofocus
+                    rows="4"
+                    class="w-full text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 border border-brand-400 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-y"
+                  />
+                  <p class="text-xs text-gray-400 mt-1">Cliquer ailleurs pour enregistrer · Echap pour annuler</p>
+                </div>
+                <p
+                  v-else
+                  class="text-gray-700 dark:text-gray-300 whitespace-pre-line"
+                  :class="localTache.permissions?.can_edit ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 rounded-lg p-2 -m-2 transition-colors group' : ''"
+                  :title="localTache.permissions?.can_edit ? 'Cliquer pour modifier' : ''"
+                  @click="startEdit('description', localTache.description || '')"
+                >
+                  <span v-if="localTache.description">{{ localTache.description }}</span>
+                  <span v-else class="text-gray-400 italic">
+                    Aucune description
+                    <span v-if="localTache.permissions?.can_edit" class="text-brand-400 not-italic"> — cliquer pour ajouter</span>
+                  </span>
+                </p>
               </SectionCollapsible>
 
               <!-- Objectif -->
-              <SectionCollapsible title="Objectif" :default-open="!!tache.objectif">
-                <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">{{ tache.objectif || 'Aucun objectif défini' }}</p>
+              <SectionCollapsible title="Objectif" :default-open="!!localTache.objectif">
+                <div v-if="editing.field === 'objectif'">
+                  <textarea
+                    v-model="editing.value"
+                    @blur="saveEdit"
+                    @keydown.escape="cancelEdit"
+                    autofocus
+                    rows="4"
+                    class="w-full text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 border border-brand-400 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-y"
+                  />
+                  <p class="text-xs text-gray-400 mt-1">Cliquer ailleurs pour enregistrer · Echap pour annuler</p>
+                </div>
+                <p
+                  v-else
+                  class="text-gray-700 dark:text-gray-300 whitespace-pre-line"
+                  :class="localTache.permissions?.can_edit ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 rounded-lg p-2 -m-2 transition-colors' : ''"
+                  :title="localTache.permissions?.can_edit ? 'Cliquer pour modifier' : ''"
+                  @click="startEdit('objectif', localTache.objectif || '')"
+                >
+                  <span v-if="localTache.objectif">{{ localTache.objectif }}</span>
+                  <span v-else class="text-gray-400 italic">
+                    Aucun objectif défini
+                    <span v-if="localTache.permissions?.can_edit" class="text-brand-400 not-italic"> — cliquer pour ajouter</span>
+                  </span>
+                </p>
               </SectionCollapsible>
 
               <!-- Indicateurs -->
-              <SectionCollapsible title="Indicateurs de résultats" :default-open="!!tache.indicateurs_resultats">
-                <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">{{ tache.indicateurs_resultats || 'Aucun indicateur défini' }}</p>
+              <SectionCollapsible title="Indicateurs de résultats" :default-open="!!localTache.indicateurs_resultats">
+                <div v-if="editing.field === 'indicateurs_resultats'">
+                  <textarea
+                    v-model="editing.value"
+                    @blur="saveEdit"
+                    @keydown.escape="cancelEdit"
+                    autofocus
+                    rows="4"
+                    class="w-full text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 border border-brand-400 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-y"
+                  />
+                  <p class="text-xs text-gray-400 mt-1">Cliquer ailleurs pour enregistrer · Echap pour annuler</p>
+                </div>
+                <p
+                  v-else
+                  class="text-gray-700 dark:text-gray-300 whitespace-pre-line"
+                  :class="localTache.permissions?.can_edit ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 rounded-lg p-2 -m-2 transition-colors' : ''"
+                  :title="localTache.permissions?.can_edit ? 'Cliquer pour modifier' : ''"
+                  @click="startEdit('indicateurs_resultats', localTache.indicateurs_resultats || '')"
+                >
+                  <span v-if="localTache.indicateurs_resultats">{{ localTache.indicateurs_resultats }}</span>
+                  <span v-else class="text-gray-400 italic">
+                    Aucun indicateur défini
+                    <span v-if="localTache.permissions?.can_edit" class="text-brand-400 not-italic"> — cliquer pour ajouter</span>
+                  </span>
+                </p>
               </SectionCollapsible>
 
               <!-- Sous-tâches -->
               <SectionCollapsible title="Sous-tâches" :default-open="true">
                 <SousTacheList
-                  :tache-id="tache.id"
-                  :parent-echeance="tache.echeance"
+                  :tache-id="localTache.id"
+                  :parent-echeance="localTache.echeance"
                   :can-create="true"
                   :can-edit="true"
                   :can-delete="true"
@@ -149,7 +282,7 @@
                     Par {{ latestComment.user?.name }} • {{ formatRelativeTime(latestComment.created_at) }}
                   </p>
                 </div>
-                <button 
+                <button
                   @click="enableDetailedView('commentaires')"
                   class="mt-2 text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400">
                   Voir tous les commentaires →
@@ -159,40 +292,159 @@
 
             <!-- Sidebar -->
             <div class="space-y-6">
-              <!-- Actions rapides -->
-              <QuickActionsPanel 
-                :tache="tache"
-                @edit="$emit('edit', tache)"
-                @validate-n1="$emit('validate-n1', tache)"
-                @validate-n2="$emit('validate-n2', tache)"
+              <!-- Actions rapides (sans bouton Modifier) -->
+              <QuickActionsPanel
+                :tache="localTache"
+                @validate-n1="$emit('validate-n1', localTache)"
+                @validate-n2="$emit('validate-n2', localTache)"
                 @complete="handleCompleteTask"
               />
 
+              <!-- Échéance inline-editable -->
+              <div class="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                <div class="flex items-center gap-2 mb-3">
+                  <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Échéance</h4>
+                </div>
+                <div v-if="editing.field === 'echeance'">
+                  <DatePicker
+                    v-model="editing.value"
+                    :enable-time-picker="false"
+                    auto-apply
+                    :format="'dd-MM-yyyy'"
+                    :locale="'fr'"
+                    :dark="isDark"
+                    placeholder="Sélectionner une date"
+                    @update:model-value="saveEdit"
+                    @keydown.escape="cancelEdit"
+                    inline
+                    class="w-full"
+                  />
+                </div>
+                <p
+                  v-else
+                  class="text-sm"
+                  :class="[
+                    localTache.is_overdue ? 'text-red-600 dark:text-red-400 font-medium' : 'text-gray-600 dark:text-gray-400',
+                    localTache.permissions?.can_edit ? 'cursor-pointer hover:text-brand-600 dark:hover:text-brand-400' : ''
+                  ]"
+                  :title="localTache.permissions?.can_edit ? 'Cliquer pour modifier l\'échéance' : ''"
+                  @click="startEdit('echeance', localTache.echeance)"
+                >
+                  <span v-if="localTache.echeance">
+                    {{ localTache.is_overdue ? '⚠ ' : '' }}{{ formatDate(localTache.echeance) }}
+                  </span>
+                  <span v-else class="text-gray-400 italic">
+                    Non définie
+                    <span v-if="localTache.permissions?.can_edit" class="text-brand-400 not-italic"> — cliquer pour ajouter</span>
+                  </span>
+                </p>
+              </div>
+
+              <!-- Taux de réalisation inline-editable -->
+              <div class="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center shrink-0">
+                      <svg class="w-4 h-4 text-brand-600 dark:text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                    </div>
+                    <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Avancement</h4>
+                  </div>
+                  <span class="text-sm font-bold" :class="progressColorClass(localTache.taux_realisation)">
+                    {{ localTache.taux_realisation ?? 0 }}%
+                  </span>
+                </div>
+
+                <!-- Barre de progression cliquable -->
+                <div
+                  v-if="editing.field !== 'taux_realisation'"
+                  class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mb-3"
+                  :class="localTache.permissions?.can_edit ? 'cursor-pointer' : ''"
+                  :title="localTache.permissions?.can_edit ? 'Cliquer pour modifier l\'avancement' : ''"
+                  @click="startEdit('taux_realisation', localTache.taux_realisation ?? 0)"
+                >
+                  <div
+                    class="h-2.5 rounded-full transition-all"
+                    :class="progressBarClass(localTache.taux_realisation)"
+                    :style="{ width: (localTache.taux_realisation ?? 0) + '%' }"
+                  />
+                </div>
+
+                <!-- Contrôles d'édition: slider + number -->
+                <div v-if="editing.field === 'taux_realisation'" class="space-y-2">
+                  <div class="flex items-center gap-3">
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="5"
+                      v-model.number="editing.value"
+                      class="flex-1 accent-brand-500"
+                    />
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      v-model.number="editing.value"
+                      class="w-16 text-sm text-center border border-brand-400 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    />
+                    <span class="text-sm text-gray-500">%</span>
+                  </div>
+                  <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                    <div
+                      class="h-2.5 rounded-full transition-all"
+                      :class="progressBarClass(editing.value)"
+                      :style="{ width: editing.value + '%' }"
+                    />
+                  </div>
+                  <div class="flex gap-2 justify-end">
+                    <button
+                      @click="cancelEdit"
+                      class="px-3 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      @click="saveEdit"
+                      class="px-3 py-1 text-xs bg-brand-500 hover:bg-brand-600 text-white rounded-lg transition-colors"
+                    >
+                      Enregistrer
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               <!-- Informations essentielles -->
-              <EssentialInfoPanel :tache="tache" />
+              <EssentialInfoPanel :tache="localTache" />
 
               <!-- Assignés -->
-              <AssigneesPanel :assignees="tache.assignees" />
+              <AssigneesPanel :assignees="localTache.assignees" />
 
               <!-- Labels -->
-              <LabelsPanel v-if="tache.labels?.length > 0" :labels="tache.labels" />
+              <LabelsPanel v-if="localTache.labels?.length > 0" :labels="localTache.labels" />
             </div>
           </div>
         </div>
 
         <!-- MODE DÉTAILLÉ -->
         <div v-else class="px-8 py-6">
-          
+
           <!-- Onglet Détails -->
           <div v-show="activeTab === 'details'">
-            <DetailedTaskView :tache="tache" @refresh="refreshTask" />
+            <DetailedTaskView :tache="localTache" @refresh="refreshTask" />
           </div>
 
           <!-- Onglet Sous-tâches -->
           <div v-show="activeTab === 'sous-taches'">
             <SousTacheList
-              :tache-id="tache.id"
-              :parent-echeance="tache.echeance"
+              :tache-id="localTache.id"
+              :parent-echeance="localTache.echeance"
               :can-create="true"
               :can-edit="true"
               :can-delete="true"
@@ -203,28 +455,18 @@
           <!-- Onglet Résultats -->
           <div v-show="activeTab === 'resultats'">
             <ResultatsSection
-              :tache="tache"
+              :tache="localTache"
               @resultat-added="handleResultatAdded"
               @refresh="refreshTask"
             />
           </div>
 
-          <!-- Onglet Commentaires -->
-          <!-- <div v-show="activeTab === 'commentaires'">
-            <CommentSection
-              v-if="tache?.id"
-              commentable-type="App\Models\Tache"
-              :commentable-id="tache.id"
-              :current-user-id="currentUser?.id"
-            />
-          </div> -->
-
           <!-- Onglet Documents -->
           <div v-show="activeTab === 'documents'">
             <DocumentSection
-              v-if="tache?.id"
+              v-if="localTache?.id"
               documentable-type="App\Models\Tache"
-              :documentable-id="tache.id"
+              :documentable-id="localTache.id"
               :current-user-id="currentUser?.id"
             />
           </div>
@@ -232,32 +474,31 @@
         </div>
       </div>
 
-      <!-- Footer adaptatif -->
+      <!-- Footer -->
       <div class="px-8 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-between items-center">
         <div class="text-sm text-gray-500 dark:text-gray-400">
-          <span>Créée le {{ formatDate(tache.created_at) }}</span>
-          <span v-if="tache.updated_at !== tache.created_at" class="ml-3">
-            • Modifiée le {{ formatDate(tache.updated_at) }}
+          <span>Créée le {{ formatDate(localTache.created_at) }}</span>
+          <span v-if="localTache.updated_at !== localTache.created_at" class="ml-3">
+            • Modifiée le {{ formatDate(localTache.updated_at) }}
           </span>
         </div>
-        
-        <div class="flex gap-3">
+
+        <div class="flex gap-3 items-center">
+          <!-- Indicateur de sauvegarde en cours -->
+          <span v-if="isSaving" class="text-xs text-brand-500 flex items-center gap-1">
+            <svg class="animate-spin w-3 h-3" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+            </svg>
+            Enregistrement…
+          </span>
+          <span v-else-if="lastSaved" class="text-xs text-green-500">✓ Enregistré</span>
+
           <button
             @click="$emit('close')"
             class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all"
           >
             Fermer
-          </button>
-          
-          <button
-            v-if="tache.permissions?.can_edit"
-            @click="$emit('edit', tache)"
-            class="px-5 py-2.5 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-            Modifier
           </button>
         </div>
       </div>
@@ -267,9 +508,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useTaches } from '@/composables/useTaches'
 import api from '@/api/axios'
+import DatePicker from '@vuepic/vue-datepicker'
+import '@vuepic/vue-datepicker/dist/main.css'
 
 import QuickActionsPanel from './panels/QuickActionsPanel.vue'
 import EssentialInfoPanel from './panels/EssentialInfoPanel.vue'
@@ -298,18 +541,22 @@ const isDetailedView = ref(false)
 const activeTab = ref('details')
 const latestComment = ref(null)
 const isRefreshing = ref(false)
-const localTache = ref(props.tache)
+const localTache = ref({ ...props.tache })
+const isSaving = ref(false)
+const lastSaved = ref(false)
+
+// Inline edit state
+const editing = reactive({ field: null, value: null })
+const isDark = computed(() => document.documentElement.classList.contains('dark'))
 
 // Computed
-const modalSizeClass = computed(() => 
+const modalSizeClass = computed(() =>
   isDetailedView.value ? 'max-w-7xl max-h-[95vh]' : 'max-w-4xl max-h-[90vh]'
 )
 
 const tabs = computed(() => [
   { id: 'details', label: 'Détails' },
   { id: 'sous-taches', label: 'Sous-tâches' },
-  // { id: 'resultats', label: 'Résultats', count: localTache.value.resultats_count || 0 },
-  // { id: 'commentaires', label: 'Commentaires', count: localTache.value.comments_count || 0 },
   { id: 'documents', label: 'Documents de resultat', count: localTache.value.documents_count || 0 },
 ])
 
@@ -318,7 +565,6 @@ const currentUser = computed(() => {
   return userStr ? JSON.parse(userStr) : null
 })
 
-// Détection automatique du mode détaillé
 const shouldUseDetailedView = computed(() => {
   const t = localTache.value
   return (
@@ -329,6 +575,67 @@ const shouldUseDetailedView = computed(() => {
     (t.assignees?.length > 5)
   )
 })
+
+const formatDateForApi = (date) => {
+  if (!date) return null
+  const d = date instanceof Date ? date : new Date(date)
+  if (isNaN(d.getTime())) return null
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+// Inline edit methods
+const startEdit = (field, value) => {
+  if (!localTache.value.permissions?.can_edit) return
+  editing.field = field
+  editing.value = field === 'echeance' ? (value ? new Date(value) : null) : value
+}
+
+const cancelEdit = () => {
+  editing.field = null
+  editing.value = null
+}
+
+const saveEdit = async () => {
+  const { field, value } = editing
+  if (!field) return
+
+  const apiValue = field === 'echeance' ? formatDateForApi(value) : value
+
+  // Pour les champs texte, on considère null == ''
+  const oldValue = localTache.value[field]
+  const normalizedOld = oldValue ?? ''
+  const normalizedNew = apiValue ?? ''
+  if (normalizedNew === normalizedOld) {
+    cancelEdit()
+    return
+  }
+
+  isSaving.value = true
+  cancelEdit()
+
+  try {
+    await api.patch(`/taches/${localTache.value.id}`, { [field]: apiValue })
+    localTache.value[field] = apiValue
+
+    // Rafraîchir les champs dérivés (statut_label, priorite_label, etc.) si besoin
+    if (field === 'statut' || field === 'priorite') {
+      await refreshTask()
+    }
+
+    lastSaved.value = true
+    setTimeout(() => { lastSaved.value = false }, 2000)
+    emit('refresh', localTache.value)
+  } catch (err) {
+    console.error('Erreur mise à jour:', err)
+    // Revenir à l'ancienne valeur en cas d'erreur
+    localTache.value[field] = oldValue
+  } finally {
+    isSaving.value = false
+  }
+}
 
 // Méthodes
 const enableDetailedView = (tab = 'details') => {
@@ -356,10 +663,9 @@ const handleResultatAdded = () => {
   refreshTask()
 }
 
-// ✅ AMÉLIORATION : Méthode pour recharger complètement la tâche
 const refreshTask = async () => {
   if (isRefreshing.value) return
-  
+
   isRefreshing.value = true
   try {
     const { data } = await api.get(`/taches/${localTache.value.id}`)
@@ -411,6 +717,22 @@ const getPriorityIcon = (priorite) => {
   return icons[priorite] || '🟡'
 }
 
+const progressColorClass = (val) => {
+  const v = val ?? 0
+  if (v >= 75) return 'text-green-600 dark:text-green-400'
+  if (v >= 50) return 'text-blue-600 dark:text-blue-400'
+  if (v >= 25) return 'text-amber-600 dark:text-amber-400'
+  return 'text-red-600 dark:text-red-400'
+}
+
+const progressBarClass = (val) => {
+  const v = val ?? 0
+  if (v >= 75) return 'bg-green-500'
+  if (v >= 50) return 'bg-blue-500'
+  if (v >= 25) return 'bg-amber-500'
+  return 'bg-red-500'
+}
+
 const formatDate = (date) => {
   if (!date) return ''
   return new Date(date).toLocaleDateString('fr-FR', {
@@ -434,9 +756,18 @@ const formatRelativeTime = (date) => {
 }
 
 // Lifecycle
+const handleKeydown = (e) => {
+  if (e.key === 'Escape' && editing.field) cancelEdit()
+}
+
 onMounted(() => {
   if (shouldUseDetailedView.value) {
     isDetailedView.value = true
   }
+  window.addEventListener('keydown', handleKeydown)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', handleKeydown)
 })
 </script>

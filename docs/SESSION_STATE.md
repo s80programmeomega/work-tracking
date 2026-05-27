@@ -17,16 +17,25 @@
 ## Current Session
 
 **Date:** 2026-05-26
-**Session goal:** Task 16 — PDF/Excel Export
-**Status:** Complete. 274 tests green. Ready to commit.
+**Session goal:** UX polish — inline editing on task detail views + subtasks
+**Status:** Complete. No new backend changes. Ready to commit.
 
 ---
 
 ## Current Task
 
-**Task:** Task 16 — PDF/Excel Export
+**Task:** UX Polish — Inline editing (task detail + subtasks)
 **Branch:** `feature/v2-task-16-export`
 **Status:** Complete — awaiting commit + push.
+
+**What was done this session:**
+- Fixed modal state machine in `Taches.vue` (showForm / showViewModal mutual exclusion)
+- `TacheDetailModal.vue` (view 1): inline editing for titre, statut, priorite, echeance (DatePicker), description, objectif, indicateurs_resultats, taux_realisation; removed "Modifier" footer button
+- `QuickActionsPanel.vue`: removed "Modifier" button
+- `DetailedTaskView.vue` (view 2 — hamburger → tabbed): same inline fields; Escape global handler; Tailwind v4 fixes (`flex-shrink-0` → `shrink-0`)
+- `TacheDetailsTab.vue` + `TacheDetail.vue` (view 3 — full page `/taches/:id`): inline editing for all fields using `permissions.can_update`; header inline editing for titre/statut/priorite/echeance; DatePicker for echeance
+- All 4 views: global `keydown` Escape listener to cancel active edit (works for DatePicker inline calendar too)
+- `SousTacheList.vue`: per-field inline editing for titre, statut, description, progression (slider+number), date_echeance (DatePicker); replaced expand-panel approach; ⋮ menu reduced to delete only; Escape handler
 
 **What to do next:**
 1. Commit `feature/v2-task-16-export` (user will say "ready")
@@ -289,3 +298,4 @@ Tests: 11 feature in `NotificationServiceTest` + 8 feature in `SendDailyDigestCo
 | 2026-05-26 | Task 13 + Task 14 | Task 13: SubscriptionService, CheckSubscriptionLimits middleware, 3 notifications, TrialBanner.vue, WorkspaceFactory states, 21 PHPUnit tests. Task 14: AdminController (6 endpoints), 2 notifications, lang/fr+en/admin.php, AdminDashboard/Workspaces/Users pages, SubscriptionBadge, router guard, sidebar admin section, 11 PHPUnit tests. 264 total, all green. |
 | 2026-05-26 | Task 15 | TacheTable.vue (table view + inline edit), Taches.vue (table default, assignee filter, deep-link), ActiviteDetail.vue shortcut, PATCH route, statut validation fix, 5 PHPUnit tests. 269 total, all green. |
 | 2026-05-26 | Task 16 | PDF export (GET /api/evaluations/personnel/{user}/export-pdf, Blade+DomPDF, A4 portrait, criteria bars), Excel export (GET /api/workspace/taches/export-excel, WorkspaceTachesExport, 10-col, blue header, filter-aware). AgentSheet.vue + WorkspaceTaches.vue buttons wired. 5 PHPUnit tests. 274 total, all green. |
+| 2026-05-26 | UX Polish | Inline editing on all 3 task detail views + SousTacheList. Modal state machine fix. DatePicker for echeance everywhere. Escape cancels any active edit (global keydown). No new backend changes. |

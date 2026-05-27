@@ -188,6 +188,7 @@
       v-if="showViewModal"
       :tache="currentTache"
       @close="showViewModal = false"
+      @edit="handleEditTask"
       @task-updated="loadResponsableTasks"
     />
 

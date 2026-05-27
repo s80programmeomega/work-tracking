@@ -316,7 +316,7 @@
     </div>
 
     <!-- Modal détails tâche -->
-    <TacheDetailModal v-if="showDetailModal" :tache="currentTache" @close="showDetailModal=false" />
+    <TacheDetailModal v-if="showDetailModal" :tache="currentTache" @close="showDetailModal=false" @edit="handleEditTask" />
 
     <!-- Modal validation -->
     <ValidationModal v-if="showValidationModal" :tache="currentTacheForValidation" :user="currentUserForValidation" :action="validationAction" @close="showValidationModal=false" @validated="handleValidationComplete" />
@@ -329,6 +329,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { CalendarIcon } from '@heroicons/vue/24/outline'
 import DatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
@@ -346,6 +347,7 @@ const activityMembers = ref([])
 const activite = ref(null)
 const loading = ref(false)
 const error = ref(null)
+const router = useRouter()
 const showDetailModal = ref(false)
 const showValidationModal = ref(false)
 const showReportModal = ref(false)
@@ -444,6 +446,11 @@ async function loadData() {
   } finally {
     loading.value = false
   }
+}
+
+function handleEditTask(tache) {
+  showDetailModal.value = false
+  router.push(`/taches/${tache.id}`)
 }
 
 function handleActiviteChange() {
