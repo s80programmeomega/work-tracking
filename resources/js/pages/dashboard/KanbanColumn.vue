@@ -1,7 +1,7 @@
 <!-- resources/js/pages/dashboard/KanbanColumn.vue -->
 <template>
   <div 
-    class="flex-shrink-0 w-80 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+    class="flex-shrink-0 w-80 bg-gray-50 dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700"
     @drop="handleDrop"
     @dragover="handleDragOver"
     @dragenter="handleDragEnter"
@@ -19,7 +19,7 @@
         </div>
         <button
           @click="$emit('add-task', column.status)"
-          class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+          class="p-1 text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300 transition-colors"
           title="Ajouter une tâche"
         >
           <PlusIcon class="w-4 h-4" />

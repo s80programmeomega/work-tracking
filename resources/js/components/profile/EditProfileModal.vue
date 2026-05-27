@@ -2,7 +2,7 @@
 <template>
   <Modal @close="$emit('close')">
     <template #body>
-      <div class="relative w-full max-w-2xl overflow-y-auto bg-white rounded-3xl dark:bg-gray-900">
+      <div class="relative w-full max-w-2xl overflow-y-auto bg-white rounded-3 dark:bg-gray-900">
         <!-- Header -->
         <div class="sticky top-0 z-10 flex items-center justify-between p-6 bg-white border-b dark:bg-gray-900 dark:border-gray-800">
           <div>
@@ -15,7 +15,7 @@
           </div>
           <button
             @click="$emit('close')"
-            class="p-2 text-gray-400 transition-colors rounded-lg hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+            class="p-2 text-gray-400 transition-colors rounded-3 hover:bg-gray-100 hover:text-gray-600 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-300"
           >
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -67,7 +67,7 @@
               </div>
             </div>
 
-            <div v-if="globalError" class="text-sm text-red-600 bg-red-50 dark:bg-red-900/20 rounded-lg px-3 py-2">
+            <div v-if="globalError" class="text-sm text-red-600 bg-red-50 dark:bg-red-900/20 rounded-3 px-3 py-2">
               {{ globalError }}
             </div>
 
@@ -79,7 +79,7 @@
                 <input
                   v-model="form.nom"
                   type="text"
-                  class="w-full px-4 py-3 text-gray-800 bg-gray-50 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  class="w-full px-4 py-3 text-gray-800 bg-gray-50 border border-gray-300 rounded-3 dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   :class="{ 'border-red-500': errors.nom }"
                 />
                 <p v-if="errors.nom" class="mt-1 text-sm text-red-600">
@@ -94,7 +94,7 @@
                 <input
                   v-model="form.prenom"
                   type="text"
-                  class="w-full px-4 py-3 text-gray-800 bg-gray-50 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  class="w-full px-4 py-3 text-gray-800 bg-gray-50 border border-gray-300 rounded-3 dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   :class="{ 'border-red-500': errors.prenom }"
                 />
                 <p v-if="errors.prenom" class="mt-1 text-sm text-red-600">
@@ -109,7 +109,7 @@
                 <input
                   v-model="form.email"
                   type="email"
-                  class="w-full px-4 py-3 text-gray-800 bg-gray-50 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  class="w-full px-4 py-3 text-gray-800 bg-gray-50 border border-gray-300 rounded-3 dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   :class="{ 'border-red-500': errors.email }"
                 />
                 <p v-if="errors.email" class="mt-1 text-sm text-red-600">
@@ -124,7 +124,7 @@
                 <input
                   v-model="form.phone"
                   type="tel"
-                  class="w-full px-4 py-3 text-gray-800 bg-gray-50 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  class="w-full px-4 py-3 text-gray-800 bg-gray-50 border border-gray-300 rounded-3 dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
             </div>
@@ -136,10 +136,10 @@
               <textarea
                 v-model="form.bio"
                 rows="3"
-                class="w-full px-4 py-3 text-gray-800 bg-gray-50 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="w-full px-4 py-3 text-gray-800 bg-gray-50 border border-gray-300 rounded-3 dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Décrivez-vous en quelques mots..."
               ></textarea>
-              <p class="mt-1 text-xs text-gray-500">
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 {{ form.bio.length }}/200 caractères
               </p>
             </div>
@@ -154,7 +154,7 @@
               <textarea
                 v-model="form.address"
                 rows="3"
-                class="w-full px-4 py-3 text-gray-800 bg-gray-50 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="w-full px-4 py-3 text-gray-800 bg-gray-50 border border-gray-300 rounded-3 dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               ></textarea>
             </div>
 
@@ -165,7 +165,7 @@
                 </label>
                 <select
                   v-model="form.language"
-                  class="w-full px-4 py-3 text-gray-800 bg-gray-50 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  class="w-full px-4 py-3 text-gray-800 bg-gray-50 border border-gray-300 rounded-3 dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="fr">Français</option>
                   <option value="en">English</option>
@@ -179,7 +179,7 @@
                 </label>
                 <select
                   v-model="form.timezone"
-                  class="w-full px-4 py-3 text-gray-800 bg-gray-50 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  class="w-full px-4 py-3 text-gray-800 bg-gray-50 border border-gray-300 rounded-3 dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="Europe/Paris">Europe/Paris (UTC+1)</option>
                   <option value="UTC">UTC</option>
@@ -239,7 +239,7 @@
             <button
               type="button"
               @click="resetForm"
-              class="px-4 py-2 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600"
+              class="px-4 py-2 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-300 rounded-3 hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600"
             >
               Réinitialiser
             </button>
@@ -248,7 +248,7 @@
             <button
               type="button"
               @click="$emit('close')"
-              class="px-4 py-2 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600"
+              class="px-4 py-2 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-300 rounded-3 hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600"
             >
               Annuler
             </button>
@@ -256,7 +256,7 @@
               type="button"
               @click="handleSave"
               :disabled="saving"
-              class="px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 rounded-3 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span v-if="saving">
                 <svg class="inline w-4 h-4 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">

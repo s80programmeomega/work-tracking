@@ -23,13 +23,13 @@
         <div class="flex flex-col gap-3">
           <button 
             @click="$router.back()"
-            class="px-5 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+            class="px-5 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-3 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
           >
             Retour
           </button>
           <router-link 
             to="/"
-            class="px-5 py-2.5 text-white bg-brand-600 rounded-lg hover:bg-brand-700 text-center"
+            class="px-5 py-2.5 text-white bg-brand-600 rounded-3 hover:bg-brand-700 text-center"
           >
             Page d'accueil
           </router-link>

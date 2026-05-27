@@ -2,16 +2,16 @@
 <template>
   <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <!-- Backdrop -->
-    <div class="fixed inset-0 bg-gray-900/75 backdrop-blur-sm transition-opacity" @click="$emit('close')"></div>
+    <div class="fixed inset-0 bg-gray-900/75 transition-opacity" @click="$emit('close')"></div>
 
     <!-- Modal -->
     <div class="flex min-h-screen items-center justify-center p-4">
-      <div class="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-2xl transform transition-all">
+      <div class="relative bg-white dark:bg-gray-900 rounded-3 w-full max-w-2xl transform transition-all">
         <!-- Header -->
         <div class="p-6 border-b border-gray-200 dark:border-gray-700" :class="getHeaderClass()">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="w-12 h-12 rounded-xl flex items-center justify-center" :class="getIconContainerClass()">
+              <div class="w-12 h-12 rounded-3 flex items-center justify-center" :class="getIconContainerClass()">
                 <svg v-if="action === 'validate'" class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                 </svg>
@@ -31,7 +31,7 @@
 
             <button 
               @click="$emit('close')"
-              class="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              class="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-3 transition-colors"
             >
               <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -43,7 +43,7 @@
         <!-- Body -->
         <div class="p-6 space-y-4">
           <!-- Résumé du résultat -->
-          <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-3">
             <h4 class="font-medium text-gray-900 dark:text-white mb-3">📋 Résumé</h4>
             <div class="space-y-2 text-sm">
               <div class="flex items-start gap-2">
@@ -67,18 +67,18 @@
 
           <!-- Résultats -->
           <div class="grid grid-cols-2 gap-4">
-            <div class="p-4 bg-blue-50 dark:bg-blue-900/10 rounded-lg">
+            <div class="p-4 bg-blue-50 dark:bg-blue-900/10 rounded-3">
               <p class="text-xs font-medium text-blue-600 dark:text-blue-400 mb-2">Résultats attendus</p>
               <p class="text-sm text-gray-900 dark:text-white">{{ resultat?.resultats_attendus }}</p>
             </div>
-            <div class="p-4 bg-green-50 dark:bg-green-900/10 rounded-lg">
+            <div class="p-4 bg-green-50 dark:bg-green-900/10 rounded-3">
               <p class="text-xs font-medium text-green-600 dark:text-green-400 mb-2">Résultats obtenus</p>
               <p class="text-sm text-gray-900 dark:text-white">{{ resultat?.resultats_obtenus }}</p>
             </div>
           </div>
 
           <!-- Warning en cas de rejet -->
-          <div v-if="action === 'reject'" class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+          <div v-if="action === 'reject'" class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-3">
             <div class="flex gap-3">
               <svg class="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
@@ -94,7 +94,7 @@
           </div>
 
           <!-- Info validation N2 -->
-          <div v-if="action === 'validate' && level === 'n2'" class="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+          <div v-if="action === 'validate' && level === 'n2'" class="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-3">
             <div class="flex gap-3">
               <svg class="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
@@ -121,7 +121,7 @@
                 ? 'Ajoutez un commentaire sur ce résultat...' 
                 : 'Expliquez les raisons du rejet et les améliorations attendues...'"
               rows="4"
-              class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-offset-0 transition-all"
+              class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-offset-0 transition-all"
               :class="action === 'validate' ? 'focus:ring-green-500' : 'focus:ring-red-500'"
             ></textarea>
             <p v-if="action === 'reject' && !commentaire" class="text-xs text-red-600 dark:text-red-400 mt-1">
@@ -137,7 +137,7 @@
                 v-for="template in rejectTemplates"
                 :key="template"
                 @click="commentaire = template"
-                class="px-3 py-1 text-xs bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors text-gray-700 dark:text-gray-300"
+                class="px-3 py-1 text-xs bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-3 transition-colors text-gray-700 dark:text-gray-300"
               >
                 {{ template }}
               </button>
@@ -149,7 +149,7 @@
         <div class="p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex items-center justify-between gap-3">
           <button
             @click="$emit('close')"
-            class="px-6 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            class="px-6 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-3 transition-colors"
           >
             Annuler
           </button>
@@ -157,7 +157,7 @@
           <button
             @click="confirm"
             :disabled="processing || (action === 'reject' && !commentaire)"
-            class="px-6 py-2.5 text-sm font-medium text-white rounded-lg transition-all flex items-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-6 py-2.5 text-sm font-medium text-white rounded-3 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             :class="action === 'validate' 
               ? 'bg-green-600 hover:bg-green-700 shadow-green-500/30' 
               : 'bg-red-600 hover:bg-red-700 shadow-red-500/30'"
@@ -217,9 +217,9 @@ const rejectTemplates = [
 
 function getHeaderClass() {
   if (props.action === 'validate') {
-    return 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20'
+    return 'bg-success-50 dark:bg-success-500/10'
   }
-  return 'bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20'
+  return 'bg-error-50 dark:bg-error-500/10'
 }
 
 function getIconContainerClass() {

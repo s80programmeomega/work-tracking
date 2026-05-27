@@ -26,14 +26,14 @@
               </div>
 
               <!-- Success Message -->
-              <div v-if="success" class="mb-5 rounded-lg bg-success-50 p-4 dark:bg-success-500/10">
+              <div v-if="success" class="mb-5 rounded-3 bg-success-50 p-4 dark:bg-success-500/10">
                 <p class="text-sm text-success-700 dark:text-success-400">
                   Password reset link sent! Check your email.
                 </p>
               </div>
 
               <!-- Error Alert -->
-              <div v-if="error" class="mb-5 rounded-lg bg-error-50 p-4 dark:bg-error-500/10">
+              <div v-if="error" class="mb-5 rounded-3 bg-error-50 p-4 dark:bg-error-500/10">
                 <p class="text-sm text-error-700 dark:text-error-400">{{ error }}</p>
               </div>
 
@@ -46,7 +46,7 @@
                     </label>
                     <input v-model="email" type="email" id="email" name="email" placeholder="info@gmail.com"
                       :class="validationErrors.email ? 'border-error-500' : 'border-gray-300'"
-                      class="dark:bg-dark-900 h-11 w-full rounded-lg border bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                      class="dark:bg-dark-900 h-11 w-full rounded-3 border bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
                     <p v-if="validationErrors.email" class="mt-1 text-sm text-error-500">
                       {{ validationErrors.email[0] }}
                     </p>
@@ -55,7 +55,7 @@
                   <!-- Button -->
                   <div>
                     <button type="submit" :disabled="loading || success"
-                      class="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                      class="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-3 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed">
                       <svg v-if="loading" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
                         xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
@@ -85,7 +85,7 @@
             <common-grid-shape />
             <div class="flex flex-col items-center max-w-xs">
               <router-link to="/" class="block mb-4">
-                <img width="200" height="180" :src="LogoDark" alt="Uptiimum Work Tracking" class="mx-auto rounded-lg" />
+                <img width="200" height="180" :src="LogoDark" alt="Uptiimum Work Tracking" class="mx-auto rounded-3" />
               </router-link>
               <p class="text-center text-gray-400 dark:text-white/60">
                 Free and Open-Source Tailwind CSS Admin Dashboard Template

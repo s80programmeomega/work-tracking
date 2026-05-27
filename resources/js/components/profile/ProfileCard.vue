@@ -2,7 +2,7 @@
 <template>
   <div>
     <!-- Profile Header -->
-    <div class="p-5 mb-6 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+    <div class="p-5 mb-6 border border-gray-200 rounded-3 dark:border-gray-800 lg:p-6">
       <div class="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
         <div class="flex flex-col items-center w-full gap-6 xl:flex-row">
           <!-- Avatar Section -->
@@ -12,11 +12,11 @@
                 v-if="avatarUrl" 
                 :src="avatarUrl" 
                 :alt="user.nom" 
-                class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                class="w-full h-full object-cover transition-transform duration-300 "
               />
               <div
                 v-else
-                class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 text-white text-3xl font-bold"
+                class="w-full h-full flex items-center justify-center text-white text-3xl font-bold"
               >
                 {{ user.initials }}
               </div>
@@ -32,7 +32,7 @@
             
             <!-- Upload Button -->
             <label
-              class="absolute bottom-1 right-1 flex items-center justify-center w-10 h-10 bg-blue-600 hover:bg-blue-700 rounded-full cursor-pointer transition-all duration-300 shadow-lg hover:shadow-xl group-hover:scale-110"
+              class="absolute bottom-1 right-1 flex items-center justify-center w-10 h-10 bg-blue-600 hover:bg-blue-700 rounded-full cursor-pointer transition-all duration-300 "
               title="Changer l'avatar"
             >
               <input
@@ -49,7 +49,7 @@
             </label>
             
             <!-- Avatar Preview -->
-            <div v-if="avatarPreview" class="absolute top-0 left-0 w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg">
+            <div v-if="avatarPreview" class="absolute top-0 left-0 w-24 h-24 rounded-full overflow-hidden border-4 border-white ">
               <img :src="avatarPreview" class="w-full h-full object-cover" />
             </div>
           </div>
@@ -95,7 +95,7 @@
     <div class="grid grid-cols-1 gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-4">
       <button 
         @click="openEditModal"
-        class="flex items-center justify-center gap-2 p-4 bg-white border border-gray-200 rounded-xl dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+        class="flex items-center justify-center gap-2 p-4 bg-white border border-gray-200 rounded-3 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
       >
         <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -105,7 +105,7 @@
       
       <button 
         @click="downloadProfile"
-        class="flex items-center justify-center gap-2 p-4 bg-white border border-gray-200 rounded-xl dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+        class="flex items-center justify-center gap-2 p-4 bg-white border border-gray-200 rounded-3 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
       >
         <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -115,7 +115,7 @@
       
       <button 
         @click="shareProfile"
-        class="flex items-center justify-center gap-2 p-4 bg-white border border-gray-200 rounded-xl dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+        class="flex items-center justify-center gap-2 p-4 bg-white border border-gray-200 rounded-3 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
       >
         <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
@@ -125,7 +125,7 @@
       
       <button 
         @click="printProfile"
-        class="flex items-center justify-center gap-2 p-4 bg-white border border-gray-200 rounded-xl dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+        class="flex items-center justify-center gap-2 p-4 bg-white border border-gray-200 rounded-3 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
       >
         <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
@@ -147,7 +147,7 @@
 
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue'
-// import EditProfileModal from './EditProfileModal.vue'
+import EditProfileModal from './EditProfileModal.vue'
 import { useUsers } from '@/composables/useUsers'
 import { useNotifications } from '@/composables/useNotifications'
  

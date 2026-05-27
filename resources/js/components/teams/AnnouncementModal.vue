@@ -1,10 +1,10 @@
 <template>
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" @click.self="$emit('close')">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 " @click.self="$emit('close')">
+    <div class="bg-white dark:bg-gray-800 rounded-3 max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
       <!-- Header -->
-      <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-amber-50 to-white dark:from-gray-900 dark:to-gray-800">
-        <div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg">
+      <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700">
+          <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-3 flex items-center justify-center ">
             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
             </svg>
@@ -19,7 +19,7 @@
           </div>
           <button
             @click="$emit('close')"
-            class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            class="p-2 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -29,7 +29,7 @@
       </div>
 
       <!-- Error Alert -->
-      <div v-if="errorMessage" class="mx-8 mt-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+      <div v-if="errorMessage" class="mx-8 mt-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-3">
         <div class="flex items-start gap-3">
           <svg class="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -62,7 +62,7 @@
                 id="title"
                 required
                 placeholder="Ex: Réunion d'équipe importante"
-                class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 transition-all"
+                class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 transition-all"
               />
             </div>
 
@@ -76,7 +76,7 @@
                 rows="4"
                 required
                 placeholder="Décrivez votre annonce en détail..."
-                class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 transition-all resize-none"
+                class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 transition-all resize-none"
               ></textarea>
             </div>
           </div>
@@ -98,7 +98,7 @@
                 <label
                   v-for="priority in priorityOptions"
                   :key="priority.value"
-                  class="relative flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all hover:shadow-md"
+                  class="relative flex items-center gap-3 p-4 border-2 rounded-3 cursor-pointer transition-all "
                   :class="formData.priority === priority.value
                     ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20'
                     : 'border-gray-300 dark:border-gray-600 hover:border-amber-300 dark:hover:border-amber-700'"
@@ -138,7 +138,7 @@
                 v-model="formData.published_at"
                 type="datetime-local"
                 id="published_at"
-                class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 transition-all"
+                class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 transition-all"
               />
               <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
                 Laissez vide pour publier immédiatement
@@ -154,7 +154,7 @@
           <button
             type="button"
             @click="$emit('close')"
-            class="px-6 py-2.5 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+            class="px-6 py-2.5 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-3 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
           >
             Annuler
           </button>
@@ -162,7 +162,7 @@
             type="submit"
             @click="handleSubmit"
             :disabled="loading"
-            class="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold rounded-xl hover:from-amber-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transition-all"
+            class="px-6 py-2.5 text-white font-semibold rounded-3 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             <span v-if="loading" class="flex items-center gap-2">
               <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">

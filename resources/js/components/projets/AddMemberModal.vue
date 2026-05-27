@@ -1,9 +1,9 @@
 <!-- resources/js/components/projets/AddMemberModal.vue -->
 <template>
   <Teleport to="body">
-    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div
-        class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden"
+        class="bg-white dark:bg-gray-800 rounded-3 max-w-2xl w-full max-h-[90vh] overflow-hidden"
         @click.stop
       >
         <!-- Header -->
@@ -13,7 +13,7 @@
           </h2>
           <button
             @click="$emit('close')"
-            class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            class="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
             <XIcon class="w-5 h-5" />
           </button>
@@ -35,12 +35,12 @@
                   v-model="searchTerm"
                   type="text"
                   placeholder="Rechercher par nom ou email..."
-                  class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                  class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                 />
               </div>
 
               <!-- Users List -->
-              <div class="border border-gray-300 dark:border-gray-600 rounded-lg max-h-64 overflow-y-auto">
+              <div class="border border-gray-300 dark:border-gray-600 rounded-3 max-h-64 overflow-y-auto">
                 <div v-if="loading" class="flex justify-center py-8">
                   <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
                 </div>
@@ -100,7 +100,7 @@
               <select
                 v-model="form.role"
                 required
-                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               >
                 <option value="">Sélectionner un rôle</option>
                 <option value="manager">Manager - Gestion complète du projet</option>
@@ -190,7 +190,7 @@
             </div>
 
             <!-- Note -->
-            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-3 p-4">
               <div class="flex gap-3">
                 <AlertCircleIcon class="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                 <div>
@@ -207,7 +207,7 @@
             <!-- Error Message -->
             <div
               v-if="error"
-              class="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800"
+              class="p-4 rounded-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800"
             >
               <p class="text-sm text-red-800 dark:text-red-400">
                 {{ error }}
@@ -221,14 +221,14 @@
           <button
             type="button"
             @click="$emit('close')"
-            class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+            class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
           >
             Annuler
           </button>
           <button
             @click="handleSubmit"
             :disabled="submitting || !form.user_id || !form.role"
-            class="px-6 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+            class="px-6 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
           >
             <span v-if="submitting" class="animate-spin">⏳</span>
             Ajouter le membre

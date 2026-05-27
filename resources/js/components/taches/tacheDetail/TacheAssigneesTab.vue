@@ -2,12 +2,12 @@
 <template>
   <div class="space-y-6">
     <!-- Ajouter un assigné -->
-    <div v-if="permissions.can_update" class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+    <div v-if="permissions.can_update" class="bg-gray-50 dark:bg-gray-800 rounded-3 p-4">
       <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Ajouter un membre</h3>
       <form @submit.prevent="assignUser" class="flex gap-3">
         <select 
           v-model="selectedUserId"
-          class="flex-1 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+          class="flex-1 px-4 py-2 rounded-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
         >
           <option value="">Sélectionner un utilisateur...</option>
           <option v-for="user in availableUsers" :key="user.id" :value="user.id">
@@ -17,7 +17,7 @@
         <button 
           type="submit"
           :disabled="!selectedUserId || loading"
-          class="px-6 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          class="px-6 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           <i v-if="loading" class="fas fa-spinner fa-spin mr-2"></i>
           <i v-else class="fas fa-plus mr-2"></i>
@@ -27,7 +27,7 @@
     </div>
 
     <!-- Statistiques d'équipe -->
-    <div v-if="tache.team_stats" class="bg-gradient-to-br from-brand-50 to-blue-50 dark:from-brand-900/20 dark:to-blue-900/20 rounded-xl p-6">
+    <div v-if="tache.team_stats" class="rounded-3 p-6">
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
         <i class="fas fa-chart-pie text-brand-600"></i>
         Progression de l'équipe
@@ -52,7 +52,7 @@
       </div>
       <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
         <div 
-          class="bg-gradient-to-r from-brand-500 to-brand-600 h-3 rounded-full transition-all duration-300"
+          class="h-3 rounded-full transition-all duration-300"
           :style="{ width: tache.team_stats.completion_percentage + '%' }"
         ></div>
       </div>
@@ -70,7 +70,7 @@
       <div 
         v-for="assignee in tache.assignees" 
         :key="assignee.id"
-        class="bg-white dark:bg-gray-800 rounded-xl p-4 border-2 border-gray-200 dark:border-gray-700 hover:border-brand-500 transition-colors"
+        class="bg-white dark:bg-gray-800 rounded-3 p-4 border-2 border-gray-200 dark:border-gray-700 hover:border-brand-500 transition-colors"
       >
         <div class="flex items-center gap-4">
           <!-- Avatar -->
@@ -146,7 +146,7 @@
             <button 
               @click="unassignUser(assignee)"
               :disabled="loading"
-              class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50"
+              class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-3 transition-colors disabled:opacity-50"
               title="Retirer"
             >
               <i class="fas fa-user-minus"></i>

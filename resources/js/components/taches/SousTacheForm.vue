@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border border-dashed border-gray-300 dark:border-gray-600">
+  <div class="bg-gray-50 dark:bg-gray-800 rounded-3 p-4 border border-dashed border-gray-300 dark:border-gray-600">
     <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
       <i class="fas fa-plus-circle text-brand-600"></i>
       Nouvelle sous-tâche
@@ -14,7 +14,7 @@
           required
           dusk="soustache-form-titre"
           placeholder="Titre de la sous-tâche…"
-          class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+          class="w-full px-3 py-2 text-sm rounded-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
         />
         <p v-if="errors.titre" class="mt-1 text-xs text-red-600">{{ errors.titre[0] }}</p>
       </div>
@@ -25,7 +25,7 @@
           v-model="form.description"
           rows="2"
           placeholder="Description (optionnel)…"
-          class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none"
+          class="w-full px-3 py-2 text-sm rounded-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none"
         ></textarea>
       </div>
 
@@ -34,7 +34,7 @@
         <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Responsable (optionnel)</label>
         <select
           v-model="form.responsable_id"
-          class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+          class="w-full px-3 py-2 text-sm rounded-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
         >
           <option :value="null">— Aucun —</option>
           <option v-for="m in members" :key="m.id" :value="m.id">{{ m.nom || m.name }}</option>
@@ -53,7 +53,7 @@
             min="0"
             max="100"
             placeholder="0"
-            class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+            class="w-full px-3 py-2 text-sm rounded-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
           />
           <p v-if="errors.poids" class="mt-1 text-xs text-red-600">{{ errors.poids[0] }}</p>
         </div>
@@ -67,7 +67,7 @@
             v-model="form.date_echeance"
             type="date"
             :max="parentEcheance"
-            class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+            class="w-full px-3 py-2 text-sm rounded-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
           />
           <p v-if="errors.date_echeance" class="mt-1 text-xs text-red-600">{{ errors.date_echeance[0] }}</p>
         </div>
@@ -86,7 +86,7 @@
       </div>
 
       <!-- Error banner -->
-      <div v-if="globalError" class="text-xs text-red-600 bg-red-50 dark:bg-red-900/20 rounded-lg px-3 py-2">
+      <div v-if="globalError" class="text-xs text-red-600 bg-red-50 dark:bg-red-900/20 rounded-3 px-3 py-2">
         {{ globalError }}
       </div>
 
@@ -103,7 +103,7 @@
           type="submit"
           :disabled="loading"
           dusk="soustache-form-submit"
-          class="px-4 py-2 text-sm bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          class="px-4 py-2 text-sm bg-brand-600 text-white rounded-3 hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           <i v-if="loading" class="fas fa-spinner fa-spin mr-1"></i>
           <i v-else class="fas fa-plus mr-1"></i>

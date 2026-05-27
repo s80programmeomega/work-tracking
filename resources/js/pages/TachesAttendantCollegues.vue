@@ -2,10 +2,10 @@
   <AdminLayout>
     <div class="space-y-6">
       <!-- Header -->
-      <div class="rounded-2xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 dark:border-gray-800 p-6 shadow-sm">
+      <div class="rounded-3 border border-gray-200 dark:border-gray-800 p-6 ">
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-4">
-            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg">
+            <div class="w-14 h-14 rounded-3 flex items-center justify-center ">
               <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -23,7 +23,7 @@
           <button
             @click="loadTaches"
             :disabled="loading"
-            class="p-2 rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            class="p-2 rounded-3 border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             title="Actualiser"
           >
             <svg 
@@ -40,17 +40,17 @@
 
         <!-- Stats -->
         <div class="grid grid-cols-3 gap-4">
-          <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+          <div class="bg-white dark:bg-gray-800 rounded-3 p-4 border border-gray-200 dark:border-gray-700">
             <p class="text-sm text-gray-500 dark:text-gray-400">Total en attente</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.total }}</p>
           </div>
-          <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+          <div class="bg-white dark:bg-gray-800 rounded-3 p-4 border border-gray-200 dark:border-gray-700">
             <p class="text-sm text-gray-500 dark:text-gray-400">Collègues en cours</p>
             <p class="text-2xl font-bold text-blue-600">{{ stats.colleagues_working }}</p>
           </div>
-          <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+          <div class="bg-white dark:bg-gray-800 rounded-3 p-4 border border-gray-200 dark:border-gray-700">
             <p class="text-sm text-gray-500 dark:text-gray-400">Non démarrées</p>
-            <p class="text-2xl font-bold text-gray-600">{{ stats.not_started }}</p>
+            <p class="text-2xl font-bold text-gray-600 dark:text-gray-300">{{ stats.not_started }}</p>
           </div>
         </div>
       </div>
@@ -64,7 +64,7 @@
       </div>
 
       <!-- Error -->
-      <div v-else-if="error" class="rounded-2xl border border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800 p-6">
+      <div v-else-if="error" class="rounded-3 border border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800 p-6">
         <div class="flex items-center gap-3 text-red-700 dark:text-red-300">
           <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
@@ -74,8 +74,8 @@
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="taches.length === 0" class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] p-12 text-center">
-        <div class="w-20 h-20 mx-auto mb-6 bg-green-100 dark:bg-green-900/30 rounded-2xl flex items-center justify-center">
+      <div v-else-if="taches.length === 0" class="rounded-3 border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] p-12 text-center">
+        <div class="w-20 h-20 mx-auto mb-6 bg-green-100 dark:bg-green-900/30 rounded-3 flex items-center justify-center">
           <svg class="w-10 h-10 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
@@ -93,10 +93,10 @@
         <div
           v-for="group in tachesByActivite"
           :key="group.activite.id"
-          class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] overflow-hidden"
+          class="rounded-3 border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] overflow-hidden"
         >
           <!-- Header du groupe -->
-          <div class="px-6 py-4 bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 border-b border-gray-200 dark:border-gray-700">
+          <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
               <div>
                 <h3 class="font-semibold text-gray-900 dark:text-white">{{ group.activite.nom }}</h3>
@@ -113,12 +113,12 @@
             <div
               v-for="tache in group.taches"
               :key="tache.id"
-              class="border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:shadow-md transition-all"
+              class="border border-gray-200 dark:border-gray-700 rounded-3 p-4 transition-all"
             >
               <div class="flex items-start justify-between mb-3">
                 <div class="flex-1">
                   <div class="flex items-center gap-2 mb-2">
-                    <span class="text-xs font-mono text-gray-500">{{ tache.code }}</span>
+                    <span class="text-xs font-mono text-gray-500 dark:text-gray-400">{{ tache.code }}</span>
                     <span 
                       class="px-2 py-0.5 text-xs rounded-full"
                       :style="{ 
@@ -139,7 +139,7 @@
               </div>
 
               <!-- Ma complétion -->
-              <div class="mb-3 p-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
+              <div class="mb-3 p-2 bg-green-50 dark:bg-green-900/20 rounded-3">
                 <div class="flex items-center gap-2 text-sm">
                   <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -162,7 +162,7 @@
                   <div
                     v-for="assignee in getIncompleteAssignees(tache)"
                     :key="assignee.id"
-                    class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                    class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded-3"
                   >
                     <div class="flex items-center gap-3">
                       <img
@@ -174,7 +174,7 @@
                         <p class="text-sm font-medium text-gray-900 dark:text-white">
                           {{ assignee.nom }}
                         </p>
-                        <p class="text-xs text-gray-500">
+                        <p class="text-xs text-gray-500 dark:text-gray-400">
                           {{ assignee.email }}
                         </p>
                       </div>
@@ -186,7 +186,7 @@
                       >
                         {{ assignee.statut_label }}
                       </span>
-                      <span class="text-sm text-gray-600">
+                      <span class="text-sm text-gray-600 dark:text-gray-300">
                         {{ assignee.progression }}%
                       </span>
                     </div>
@@ -198,13 +198,13 @@
               <div class="mt-4 flex items-center gap-2">
                 <button
                   @click="viewTask(tache)"
-                  class="px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors text-sm"
+                  class="px-4 py-2 bg-brand-500 text-white rounded-3 hover:bg-brand-600 transition-colors text-sm"
                 >
                   Voir détails
                 </button>
                 <button
                   v-if="tache.echeance"
-                  class="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm"
+                  class="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm"
                   :class="{ 'text-red-600 border-red-300': isOverdue(tache.echeance) }"
                 >
                   Échéance : {{ formatDate(tache.echeance) }}

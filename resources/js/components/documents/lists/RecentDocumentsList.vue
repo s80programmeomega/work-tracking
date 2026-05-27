@@ -7,7 +7,7 @@
       </h3>
       <select
         v-model="timeRange"
-        class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+        class="rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
       >
         <option value="today">Aujourd'hui</option>
         <option value="week">Cette semaine</option>
@@ -18,7 +18,7 @@
 
     <!-- Loading State -->
     <div v-if="loading" class="space-y-3">
-      <div v-for="i in 8" :key="i" class="h-20 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-800"></div>
+      <div v-for="i in 8" :key="i" class="h-20 animate-pulse rounded-3 bg-gray-200 dark:bg-gray-800"></div>
     </div>
 
     <!-- Documents Grouped by Date -->
@@ -45,10 +45,10 @@
             v-for="document in group.documents"
             :key="document.id"
             @click="handleView(document)"
-            class="group flex cursor-pointer items-center gap-4 rounded-lg border border-gray-200 bg-white p-3 transition-all hover:border-blue-500 hover:shadow-md dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-blue-400"
+            class="group flex cursor-pointer items-center gap-4 rounded-3 border border-gray-200 bg-white p-3 transition-all hover:border-blue-500 dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-blue-400"
           >
             <!-- File Icon -->
-            <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
+            <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-3 bg-gray-100 dark:bg-gray-800">
               <component :is="getFileIcon(document)" class="h-6 w-6 text-gray-600 dark:text-gray-400" />
             </div>
 
@@ -72,14 +72,14 @@
                 <div class="flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
                   <button
                     @click.stop="handleDownload(document)"
-                    class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-blue-600 dark:hover:bg-gray-800"
+                    class="rounded-3 p-1.5 text-gray-400 hover:bg-gray-100 hover:text-blue-600 dark:hover:bg-gray-800"
                     title="Télécharger"
                   >
                     <ArrowDownTrayIcon class="h-4 w-4" />
                   </button>
                   <button
                     @click.stop="handleShare(document)"
-                    class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-blue-600 dark:hover:bg-gray-800"
+                    class="rounded-3 p-1.5 text-gray-400 hover:bg-gray-100 hover:text-blue-600 dark:hover:bg-gray-800"
                     title="Partager"
                   >
                     <ShareIcon class="h-4 w-4" />
@@ -103,7 +103,7 @@
     </div>
 
     <!-- Empty State -->
-    <div v-else class="rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-12 text-center dark:border-gray-700 dark:bg-gray-800/50">
+    <div v-else class="rounded-3 border-2 border-dashed border-gray-300 bg-gray-50 p-12 text-center dark:border-gray-700 dark:bg-gray-800/50">
       <ClockIcon class="mx-auto h-12 w-12 text-gray-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">
         Aucun document récent

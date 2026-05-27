@@ -13,7 +13,7 @@
       </div>
       
       <button
-        @click="openCreateModal" class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors" >
+        @click="openCreateModal" class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700 transition-colors" >
         <PlusIcon class="w-5 h-5" />
         Nouveau projet 
       </button>
@@ -21,7 +21,7 @@
     </div> -->
 
    <!-- Filtres et recherche - Conditionnel -->
-    <div v-if="showFilters" class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 space-y-4">
+    <div v-if="showFilters" class="bg-gray-50 dark:bg-gray-800/50 rounded-3 p-4 space-y-4">
       <!-- Barre de recherche -->
       <div class="relative">
         <SearchIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -29,7 +29,7 @@
           v-model="searchTerm"
           type="text"
           placeholder="Rechercher un projet par nom, code ou description..."
-          class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+          class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
         />
       </div>
 
@@ -38,7 +38,7 @@
         <!-- Filtre Status -->
         <select
           v-model="filters.status"
-          class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-brand-500"
+          class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-brand-500"
         >
           <option value="all">Tous les statuts</option>
           <option value="active">Actifs</option>
@@ -49,7 +49,7 @@
         <!-- Filtre Visibilité -->
         <select
           v-model="filters.visibility"
-          class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-brand-500"
+          class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-brand-500"
         >
           <option value="all">Toutes visibilités</option>
           <option value="public">Public</option>
@@ -61,7 +61,7 @@
         <button
           @click="filters.favorites = !filters.favorites"
           :class="[
-            'inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+            'inline-flex items-center gap-2 px-3 py-2 rounded-3 text-sm font-medium transition-colors',
             filters.favorites
               ? 'bg-brand-600 text-white'
               : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600'
@@ -75,7 +75,7 @@
         <button
           @click="filters.overdue = !filters.overdue"
           :class="[
-            'inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+            'inline-flex items-center gap-2 px-3 py-2 rounded-3 text-sm font-medium transition-colors',
             filters.overdue
               ? 'bg-red-600 text-white'
               : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600'
@@ -102,10 +102,10 @@
         <button
           @click="viewMode = 'grid'"
           :class="[
-            'p-2 rounded-lg transition-colors',
+            'p-2 rounded-3 transition-colors',
             viewMode === 'grid'
               ? 'bg-brand-100 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400'
-              : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700'
+              : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
           ]"
         >
           <GridIcon class="w-5 h-5" />
@@ -113,10 +113,10 @@
         <button
           @click="viewMode = 'list'"
           :class="[
-            'p-2 rounded-lg transition-colors',
+            'p-2 rounded-3 transition-colors',
             viewMode === 'list'
               ? 'bg-brand-100 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400'
-              : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700'
+              : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
           ]"
         >
           <ListIcon class="w-5 h-5" />
@@ -131,7 +131,7 @@
 
     <!-- Empty state -->
     <div v-else-if="filteredProjets.length === 0"
-      class="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700" >
+      class="text-center py-12 bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700" >
       <FolderOpenIcon class="mx-auto h-12 w-12 text-gray-400" />
       <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">
         Aucun projet trouvé
@@ -141,7 +141,7 @@
       </p>
       <button v-if="!searchTerm && !hasActiveFilters"
         @click="openCreateModal"
-        class="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors" >
+        class="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700 transition-colors" >
         <PlusIcon class="w-5 h-5" />
         Créer un projet
       </button>
@@ -152,7 +152,7 @@
       <div
         v-for="projet in filteredProjets"
         :key="projet.id"
-        class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all cursor-pointer group"
+        class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 transition-all cursor-pointer group"
       >
         <!-- Card Header -->
         <div class="p-6 border-b border-gray-200 dark:border-gray-700">
@@ -190,14 +190,14 @@
                 <button
                   @click.stop="toggleMenu(projet.id)"
                   class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700" >
-                  <MoreVerticalIcon class="w-5 h-5 text-gray-500" />
+                  <MoreVerticalIcon class="w-5 h-5 text-gray-500 dark:text-gray-400" />
                 </button>
                 
                 <!-- Dropdown Menu -->
                 <div
                   v-if="activeMenuId === projet.id"
                   v-click-outside="() => activeMenuId = null"
-                  class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-10" >
+                  class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-3 border border-gray-200 dark:border-gray-600 z-10" >
                   <button
                     @click.stop="editProjet(projet)"
                     class="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-t-lg" >
@@ -347,9 +347,9 @@
     </div>
 
     <!-- List View -->
-    <div v-else class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div v-else class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 overflow-hidden">
       <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-        <thead class="bg-gray-50 dark:bg-gray-700">
+        <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
           <tr>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
               Projet
@@ -621,7 +621,7 @@ const fetchProjetsList = async () => {
   await fetchProjets(filters)
 }
 
-// Watch workspaceId changes
+// Watch workspaceId prop changes (when passed explicitly)
 watch(() => props.workspaceId, (newWorkspaceId) => {
   if (newWorkspaceId) {
     fetchProjetsList()

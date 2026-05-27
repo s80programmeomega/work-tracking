@@ -2,8 +2,8 @@
   <AdminLayout>
     <div class="space-y-6">
       <!-- ── Header: identité de l'agent + score global + indicateurs ───── -->
-      <div class="bg-white dark:bg-gray-900 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-800">
-        <div v-if="loading && !sheet" class="text-center py-8 text-gray-500">
+      <div class="bg-white dark:bg-gray-900 rounded-3 p-6 border border-gray-200 dark:border-gray-800">
+        <div v-if="loading && !sheet" class="text-center py-8 text-gray-500 dark:text-gray-400">
           <i class="fas fa-spinner fa-spin mr-2"></i>Chargement de la fiche…
         </div>
 
@@ -33,14 +33,14 @@
               <div dusk="sheet-score-global" class="text-4xl font-bold" :class="scoreColor(sheet.score_global)">
                 {{ Math.round(sheet.score_global * 100) }}%
               </div>
-              <p class="text-xs text-gray-500 uppercase tracking-wider mt-1">Score global</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-1">Score global</p>
             </div>
 
             <!-- Badge escalades abusives -->
             <div
               v-if="sheet.indicators.escalades_abusives"
               dusk="sheet-escalades-badge"
-              class="px-3 py-2 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm font-medium"
+              class="px-3 py-2 rounded-3 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm font-medium"
             >
               <i class="fas fa-exclamation-triangle mr-1"></i>
               Escalades abusives
@@ -50,7 +50,7 @@
             <div
               v-if="sheet.indicators.unjustified_alert"
               dusk="sheet-unjustified-alert"
-              class="px-3 py-2 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-sm font-medium"
+              class="px-3 py-2 rounded-3 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-sm font-medium"
             >
               <i class="fas fa-flag mr-1"></i>
               Renvois injustifiés: {{ Math.round(sheet.indicators.unjustified_return_rate * 100) }}%
@@ -60,7 +60,7 @@
               v-if="sheet.meta.can_export"
               dusk="sheet-export-btn"
               @click="exportSheet"
-              class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 text-sm"
+              class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-3 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm"
             >
               <i class="fas fa-download mr-2"></i>Exporter
             </button>
@@ -69,7 +69,7 @@
       </div>
 
       <!-- ── Filtres période ──────────────────────────────────────────── -->
-      <div v-if="sheet" class="bg-white dark:bg-gray-900 rounded-xl shadow-sm p-4 border border-gray-200 dark:border-gray-800">
+      <div v-if="sheet" class="bg-white dark:bg-gray-900 rounded-3 p-4 border border-gray-200 dark:border-gray-800">
         <div class="flex items-end gap-4 flex-wrap">
           <div>
             <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Du</label>
@@ -77,7 +77,7 @@
               v-model="filters.start"
               type="date"
               dusk="sheet-filter-start"
-              class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm"
+              class="px-3 py-2 rounded-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm"
             />
           </div>
           <div>
@@ -86,7 +86,7 @@
               v-model="filters.end"
               type="date"
               dusk="sheet-filter-end"
-              class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm"
+              class="px-3 py-2 rounded-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm"
             />
           </div>
           <div>
@@ -94,7 +94,7 @@
             <select
               v-model="filters.statut"
               dusk="sheet-filter-statut"
-              class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm"
+              class="px-3 py-2 rounded-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm"
             >
               <option value="">Tous</option>
               <option value="a_faire">À faire</option>
@@ -105,13 +105,13 @@
           <button
             @click="applyFilters"
             dusk="sheet-apply-filters"
-            class="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 text-sm"
+            class="px-4 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700 text-sm"
           >
             <i class="fas fa-filter mr-2"></i>Appliquer
           </button>
           <button
             @click="resetFilters"
-            class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg text-sm"
+            class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-3 text-sm"
           >
             Réinitialiser
           </button>
@@ -119,7 +119,7 @@
       </div>
 
       <!-- ── Indicateur qualité des renvois (donut justifié vs injustifié) ─ -->
-      <div v-if="sheet" class="bg-white dark:bg-gray-900 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-800">
+      <div v-if="sheet" class="bg-white dark:bg-gray-900 rounded-3 p-6 border border-gray-200 dark:border-gray-800">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Qualité des renvois</h2>
           <span
@@ -188,18 +188,18 @@
       </div>
 
       <!-- ── 8 critères ───────────────────────────────────────────────── -->
-      <div v-if="sheet" class="bg-white dark:bg-gray-900 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-800">
+      <div v-if="sheet" class="bg-white dark:bg-gray-900 rounded-3 p-6 border border-gray-200 dark:border-gray-800">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Détail des 8 critères</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div
             v-for="(payload, key) in sheet.criteria"
             :key="key"
             :dusk="`criterion-${key}`"
-            class="border border-gray-200 dark:border-gray-800 rounded-lg p-4"
+            class="border border-gray-200 dark:border-gray-800 rounded-3 p-4"
           >
             <div class="flex items-center justify-between mb-2">
               <span class="text-sm font-medium text-gray-900 dark:text-white">{{ criterionLabel(key) }}</span>
-              <span class="text-xs text-gray-500">Poids: {{ Math.round(payload.weight * 100) }}%</span>
+              <span class="text-xs text-gray-500 dark:text-gray-400">Poids: {{ Math.round(payload.weight * 100) }}%</span>
             </div>
             <div class="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-2 mb-2">
               <div
@@ -217,7 +217,7 @@
       </div>
 
       <!-- ── 4 sections paginées ──────────────────────────────────────── -->
-      <div v-if="sheet" class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800">
+      <div v-if="sheet" class="bg-white dark:bg-gray-900 rounded-3 border border-gray-200 dark:border-gray-800">
         <div class="border-b border-gray-200 dark:border-gray-800 flex gap-1 px-4">
           <button
             v-for="s in sections"
@@ -233,10 +233,10 @@
         </div>
 
         <div class="p-4">
-          <div v-if="sectionLoading" class="text-center py-8 text-gray-500">
+          <div v-if="sectionLoading" class="text-center py-8 text-gray-500 dark:text-gray-400">
             <i class="fas fa-spinner fa-spin mr-2"></i>Chargement…
           </div>
-          <div v-else-if="!sectionItems.length" dusk="section-empty" class="text-center py-8 text-gray-500">
+          <div v-else-if="!sectionItems.length" dusk="section-empty" class="text-center py-8 text-gray-500 dark:text-gray-400">
             <i class="fas fa-clipboard text-4xl mb-2 opacity-30"></i>
             <p class="text-sm">Aucun élément dans cette section sur la période.</p>
           </div>
@@ -250,7 +250,7 @@
                 <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
                   {{ activeSection === 'submitted_results' ? item.tache_titre : item.titre }}
                 </p>
-                <p class="text-xs text-gray-500 truncate">
+                <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
                   <template v-if="activeSection === 'submitted_results'">
                     {{ item.projet?.nom || '—' }} · {{ item.activite?.nom || '—' }}
                     <span class="ml-2 text-gray-400">Soumis le {{ item.soumis_le ? new Date(item.soumis_le).toLocaleDateString() : '—' }}</span>
@@ -313,32 +313,32 @@
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
       @click.self="drillItem = null"
     >
-      <div class="bg-white dark:bg-gray-900 rounded-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto shadow-2xl">
+      <div class="bg-white dark:bg-gray-900 rounded-3 max-w-2xl w-full max-h-[80vh] overflow-y-auto ">
         <div class="p-6 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ drillItem.titre }}</h3>
           <button
             @click="drillItem = null"
             dusk="drilldown-close"
-            class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+            class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-200 dark:hover:text-gray-300"
           >
             <i class="fas fa-times"></i>
           </button>
         </div>
         <div class="p-6 space-y-4 text-sm">
           <div>
-            <span class="text-gray-500">Statut:</span>
+            <span class="text-gray-500 dark:text-gray-400">Statut:</span>
             <strong class="ml-2 text-gray-900 dark:text-white">{{ drillItem.statut }}</strong>
           </div>
           <div v-if="drillItem.taux_realisation !== undefined">
-            <span class="text-gray-500">Taux de réalisation:</span>
+            <span class="text-gray-500 dark:text-gray-400">Taux de réalisation:</span>
             <strong class="ml-2">{{ drillItem.taux_realisation }}%</strong>
           </div>
           <div v-if="drillItem.echeance">
-            <span class="text-gray-500">Échéance:</span>
+            <span class="text-gray-500 dark:text-gray-400">Échéance:</span>
             <strong class="ml-2">{{ drillItem.echeance }}</strong>
           </div>
           <!-- Note coefficient 0.5 sur sous-tâches: rappel UX. -->
-          <p v-if="isSubtaskSection" class="text-xs text-gray-500 italic">
+          <p v-if="isSubtaskSection" class="text-xs text-gray-500 dark:text-gray-400 italic">
             <i class="fas fa-info-circle mr-1"></i>
             Les sous-tâches contribuent au score à coefficient 0.5.
           </p>
@@ -441,7 +441,7 @@ function statutBadge(statut) {
     en_cours: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
     termine: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
   }
-  return map[statut] || 'bg-gray-100 text-gray-700'
+  return map[statut] || 'bg-gray-100 text-gray-700 dark:text-gray-200'
 }
 
 async function loadSheet() {

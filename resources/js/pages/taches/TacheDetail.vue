@@ -13,7 +13,7 @@
         <i class="fas fa-exclamation-triangle text-6xl text-red-500 mb-4"></i>
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Erreur</h2>
         <p class="text-gray-600 dark:text-gray-400 mb-4">{{ error }}</p>
-        <button @click="$router.back()" class="px-6 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700">
+        <button @click="$router.back()" class="px-6 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700">
           Retour
         </button>
       </div>
@@ -43,7 +43,7 @@
       </nav>
 
       <!-- Header -->
-      <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-6 mb-6">
+      <div class="bg-white dark:bg-gray-900 rounded-3 p-6 mb-6">
         <div class="flex items-start justify-between gap-4 mb-4">
           <div class="flex-1">
             <div class="flex items-center gap-3 mb-2 flex-wrap">
@@ -167,7 +167,7 @@
           <!-- Actions -->
           <div class="flex items-center gap-2">
             <button @click="$router.back()"
-              class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">
+              class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-3 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">
               <i class="fas fa-arrow-left mr-2"></i>Retour
             </button>
           </div>
@@ -175,7 +175,7 @@
       </div>
 
       <!-- Tabs -->
-      <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-lg mb-6">
+      <div class="bg-white dark:bg-gray-900 rounded-3 mb-6">
         <div class="border-b border-gray-200 dark:border-gray-800">
           <nav class="flex gap-1 px-6">
             <button v-for="tab in tabs" :key="tab.id"

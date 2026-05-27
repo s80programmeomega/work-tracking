@@ -3,7 +3,7 @@
     <div class="flex items-center justify-center min-h-screen px-4">
       <div class="fixed inset-0 bg-black opacity-50"></div>
 
-      <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-3xl w-full p-6">
+      <div class="relative bg-white dark:bg-gray-800 rounded-3 max-w-3xl w-full p-6">
         <!-- Header -->
         <div class="flex items-center justify-between mb-6">
           <h3 class="text-xl font-bold text-gray-900 dark:text-white">
@@ -11,7 +11,7 @@
           </h3>
           <button
             @click="$emit('close')"
-            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            class="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300"
           >
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -30,7 +30,7 @@
             />
             <div
               v-else
-              class="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-3xl font-bold border-4 border-gray-200 dark:border-gray-700"
+              class="w-24 h-24 rounded-full flex items-center justify-center text-white text-3xl font-bold border-4 border-gray-200 dark:border-gray-700"
             >
               {{ user.initials }}
             </div>
@@ -191,7 +191,7 @@
         <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 flex justify-end">
           <button
             @click="$emit('close')"
-            class="px-6 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+            class="px-6 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-3 hover:bg-gray-200 dark:hover:bg-gray-600 transition"
           >
             Fermer
           </button>
@@ -232,7 +232,7 @@ const getRoleBadgeClass = (role) => {
     cadre: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
     stagiaire: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
   }
-  return classes[role] || 'bg-gray-100 text-gray-800'
+  return classes[role] || 'bg-gray-100 text-gray-800 dark:text-gray-100'
 }
 
 const formatDate = (date) => {

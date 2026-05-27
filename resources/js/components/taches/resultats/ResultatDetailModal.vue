@@ -1,27 +1,27 @@
 <template>
   <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <!-- Backdrop -->
-    <div class="fixed inset-0 bg-gray-900/75 backdrop-blur-sm transition-opacity" @click="$emit('close')"></div>
+    <div class="fixed inset-0 bg-gray-900/75 transition-opacity" @click="$emit('close')"></div>
 
     <!-- Modal -->
     <div class="flex min-h-screen items-center justify-center p-4">
       <div
-        class="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden transform transition-all">
+        class="relative bg-white dark:bg-gray-900 rounded-3 w-full max-w-5xl max-h-[90vh] overflow-hidden transform transition-all">
         <!-- Header amélioré -->
         <div
-          class="sticky top-0 z-20 p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 backdrop-blur-sm">
+          class="sticky top-0 z-20 p-6 border-b border-gray-200 dark:border-gray-700 ">
           <div class="flex items-start justify-between">
             <div class="flex-1">
               <div class="flex items-center gap-2 mb-2">
                 <span
-                  class="text-xs font-mono px-2.5 py-1 bg-white/60 dark:bg-black/30 rounded-lg border border-gray-300/30 dark:border-gray-700/30">
+                  class="text-xs font-mono px-2.5 py-1 bg-white/60 dark:bg-black/30 rounded-3 border border-gray-300/30 dark:border-gray-700/30">
                   {{ resultat.tache?.code }}
                 </span>
-                <span class="text-xs font-medium px-3 py-1 rounded-full shadow-sm" :class="validationStatusClass">
+                <span class="text-xs font-medium px-3 py-1 rounded-full " :class="validationStatusClass">
                   {{ validationStatusLabel }}
                 </span>
                 <span v-if="isUrgent"
-                  class="text-xs font-medium px-2.5 py-1 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-full animate-pulse flex items-center gap-1">
+                  class="text-xs font-medium px-2.5 py-1 text-white rounded-full animate-pulse flex items-center gap-1">
                   <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd"
                       d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
@@ -53,7 +53,7 @@
             </div>
 
             <button @click="$emit('close')"
-              class="p-2 hover:bg-white/50 dark:hover:bg-black/20 rounded-lg transition-all duration-200 hover:scale-105">
+              class="p-2 hover:bg-white/50 dark:hover:bg-black/20 rounded-3 transition-all duration-200 ">
               <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -68,9 +68,9 @@
             class="w-64 border-r border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/30 overflow-y-auto">
             <nav class="p-4 space-y-2">
               <a v-for="section in sections" :key="section.id" :href="`#${section.id}`"
-                class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200"
+                class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-3 transition-all duration-200"
                 :class="activeSection === section.id
-                  ? 'bg-white dark:bg-gray-800 shadow-sm text-blue-600 dark:text-blue-400'
+                  ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400'
                   : 'text-gray-600 dark:text-gray-400 hover:bg-white/50 dark:hover:bg-gray-800/50'"
                 @click.prevent="scrollToSection(section.id)">
                 <component :is="section.icon" class="w-4 h-4" />
@@ -99,7 +99,7 @@
                   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <!-- Carte Collaborateur -->
                     <div
-                      class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 rounded-xl p-5 border border-blue-200 dark:border-blue-800">
+                      class="rounded-3 p-5 border border-blue-200 dark:border-blue-800">
                       <h5 class="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-3 flex items-center gap-2">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                           <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
@@ -111,9 +111,9 @@
                         <div class="relative">
                           <img v-if="resultat.user?.avatar" :src="getImageUrl(resultat.user.avatar)"
                             :alt="resultat.user.nom"
-                            class="w-14 h-14 rounded-full border-3 border-white dark:border-gray-700 shadow-md" />
+                            class="w-14 h-14 rounded-full border-3 border-white dark:border-gray-700 " />
                           <div v-else
-                            class="w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold text-white border-3 border-white dark:border-gray-700 shadow-md"
+                            class="w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold text-white border-3 border-white dark:border-gray-700 "
                             :style="{ backgroundColor: stringToColor(resultat.user?.nom) }">
                             {{ getInitials(resultat.user?.nom) }}
                           </div>
@@ -133,7 +133,7 @@
 
                     <!-- Carte Chronologie -->
                     <div
-                      class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/10 dark:to-gray-900/10 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+                      class="rounded-3 p-5 border border-gray-200 dark:border-gray-700">
                       <h5 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -164,12 +164,12 @@
 
                 <!-- Taux de réalisation amélioré -->
                 <div
-                  class="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/10 dark:to-green-900/10 rounded-xl p-6 border border-emerald-200 dark:border-emerald-800">
+                  class="rounded-3 p-6 border border-emerald-200 dark:border-emerald-800">
                   <div class="flex items-center justify-between">
                     <div>
                       <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Taux de réalisation</p>
                       <p
-                        class="text-5xl font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
+                        class="text-5xl font-bold bg-clip-text text-transparent">
                         {{ resultat.taux_realisation }}%
                       </p>
                       <div class="flex items-center gap-2 mt-3">
@@ -216,10 +216,10 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <!-- Résultats attendus -->
                   <div
-                    class="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/10 dark:to-cyan-900/10 rounded-xl p-5 border border-blue-200 dark:border-blue-800">
+                    class="rounded-3 p-5 border border-blue-200 dark:border-blue-800">
                     <div class="flex items-center gap-3 mb-4">
                       <div
-                        class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                        class="w-10 h-10 rounded-3 bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
                         <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor"
                           viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -238,10 +238,10 @@
 
                   <!-- Résultats obtenus -->
                   <div
-                    class="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10 rounded-xl p-5 border border-green-200 dark:border-green-800">
+                    class="rounded-3 p-5 border border-green-200 dark:border-green-800">
                     <div class="flex items-center gap-3 mb-4">
                       <div
-                        class="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                        class="w-10 h-10 rounded-3 bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
                         <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor"
                           viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -272,12 +272,12 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div v-for="doc in resultat.documents" :key="doc.id"
-                    class="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-700 transition-all duration-300 hover:shadow-lg overflow-hidden">
+                    class="group relative bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-700 transition-all duration-300 overflow-hidden">
                     <div class="p-4">
                       <div class="flex items-start gap-3">
                         <!-- Icône de fichier -->
                         <div :class="getFileIconClass(doc)"
-                          class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
+                          class="w-12 h-12 rounded-3 flex items-center justify-center flex-shrink-0 ">
                           <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -308,7 +308,7 @@
                           <div class="flex items-center gap-2 mt-3">
                             <!-- Prévisualisation pour les images et PDF -->
                             <button v-if="canPreview(doc)" @click="previewDocument(doc)"
-                              class="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 hover:bg-purple-100 dark:hover:bg-purple-900/50 rounded-lg transition-colors">
+                              class="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 hover:bg-purple-100 dark:hover:bg-purple-900/50 rounded-3 transition-colors">
                               <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -320,7 +320,7 @@
 
                             <!-- Téléchargement -->
                             <a :href="doc.url" download target="_blank"
-                              class="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors">
+                              class="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-3 transition-colors">
                               <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -333,9 +333,9 @@
 
                       <!-- Miniature pour les images -->
                       <div v-if="isImage(doc)"
-                        class="mt-4 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                        class="mt-4 rounded-3 overflow-hidden border border-gray-200 dark:border-gray-700">
                         <img :src="doc.url" :alt="doc.nom"
-                          class="w-full h-32 object-cover hover:scale-105 transition-transform duration-300" />
+                          class="w-full h-32 object-cover transition-transform duration-300" />
                       </div>
                     </div>
                   </div>
@@ -357,10 +357,10 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <!-- Difficultés -->
                   <div v-if="resultat.difficultes_rencontrees"
-                    class="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/10 dark:to-amber-900/10 rounded-xl p-5 border border-orange-200 dark:border-orange-800">
+                    class="rounded-3 p-5 border border-orange-200 dark:border-orange-800">
                     <div class="flex items-center gap-3 mb-4">
                       <div
-                        class="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                        class="w-10 h-10 rounded-3 bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
                         <svg class="w-5 h-5 text-orange-600 dark:text-orange-400" fill="currentColor"
                           viewBox="0 0 20 20">
                           <path fill-rule="evenodd"
@@ -380,10 +380,10 @@
 
                   <!-- Solutions -->
                   <div v-if="resultat.solutions_envisagees"
-                    class="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/10 dark:to-pink-900/10 rounded-xl p-5 border border-purple-200 dark:border-purple-800">
+                    class="rounded-3 p-5 border border-purple-200 dark:border-purple-800">
                     <div class="flex items-center gap-3 mb-4">
                       <div
-                        class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                        class="w-10 h-10 rounded-3 bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
                         <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="currentColor"
                           viewBox="0 0 20 20">
                           <path fill-rule="evenodd"
@@ -420,7 +420,7 @@
                     <div class="flex gap-4">
                       <!-- Timeline dot -->
                       <div class="relative z-10">
-                        <div class="w-10 h-10 rounded-full flex items-center justify-center shadow-lg"
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center "
                           :class="resultat.validation_n1?.valide ? 'bg-green-500' : 'bg-gray-400'">
                           <svg v-if="resultat.validation_n1?.valide" class="w-5 h-5 text-white" fill="currentColor"
                             viewBox="0 0 20 20">
@@ -438,7 +438,7 @@
 
                       <!-- Contenu -->
                       <div class="flex-1 pb-8">
-                        <div class="bg-white dark:bg-gray-800 rounded-xl border"
+                        <div class="bg-white dark:bg-gray-800 rounded-3 border"
                           :class="resultat.validation_n1?.valide ? 'border-green-200 dark:border-green-800' : 'border-gray-200 dark:border-gray-700'">
                           <div class="p-5">
                             <div class="flex items-center justify-between mb-3">
@@ -479,7 +479,7 @@
 
                               <!-- Commentaire N1 - TOUJOURS visible pour le N2 -->
                               <div v-if="resultat.validation_n1?.commentaire"
-                                class="mt-3 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700">
+                                class="mt-3 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-3 border border-gray-200 dark:border-gray-700">
                                 <div class="flex items-start gap-2">
                                   <svg class="w-4 h-4 text-gray-500 dark:text-gray-400 flex-shrink-0 mt-0.5"
                                     fill="currentColor" viewBox="0 0 20 20">
@@ -516,7 +516,7 @@
                     <div class="flex gap-4">
                       <!-- Timeline dot -->
                       <div class="relative z-10">
-                        <div class="w-10 h-10 rounded-full flex items-center justify-center shadow-lg"
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center "
                           :class="resultat.validation_n2?.valide ? 'bg-blue-500' : 'bg-gray-400'">
                           <svg v-if="resultat.validation_n2?.valide" class="w-5 h-5 text-white" fill="currentColor"
                             viewBox="0 0 20 20">
@@ -530,7 +530,7 @@
 
                       <!-- Contenu -->
                       <div class="flex-1">
-                        <div class="bg-white dark:bg-gray-800 rounded-xl border"
+                        <div class="bg-white dark:bg-gray-800 rounded-3 border"
                           :class="resultat.validation_n2?.valide ? 'border-blue-200 dark:border-blue-800' : 'border-gray-200 dark:border-gray-700'">
                           <div class="p-5">
                             <div class="flex items-center justify-between mb-3">
@@ -571,7 +571,7 @@
 
                               <!-- Commentaire N2 -->
                               <div v-if="resultat.validation_n2?.commentaire"
-                                class="mt-3 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700">
+                                class="mt-3 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-3 border border-gray-200 dark:border-gray-700">
                                 <div class="flex items-start gap-2">
                                   <svg class="w-4 h-4 text-gray-500 dark:text-gray-400 flex-shrink-0 mt-0.5"
                                     fill="currentColor" viewBox="0 0 20 20">
@@ -590,7 +590,7 @@
                             </div>
 
                             <div v-else-if="!resultat.validation_n1?.valide"
-                              class="text-center py-6 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
+                              class="text-center py-6 bg-gray-50 dark:bg-gray-900/30 rounded-3">
                               <svg class="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -622,7 +622,7 @@
 
         <!-- Footer amélioré -->
         <div
-          class="sticky bottom-0 p-6 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 backdrop-blur-sm flex justify-between items-center">
+          class="sticky bottom-0 p-6 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex justify-between items-center">
           <div class="flex items-center gap-3">
             <span class="text-sm text-gray-500 dark:text-gray-400">
               ID: <span class="font-mono text-gray-900 dark:text-white">{{ resultat.id }}</span>
@@ -634,11 +634,11 @@
           </div>
           <div class="flex items-center gap-3">
             <button @click="$emit('close')"
-              class="px-6 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 hover:shadow-md">
+              class="px-6 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-3 transition-all duration-200 ">
               Fermer
             </button>
             <button v-if="canDownloadAll" @click="downloadAllDocuments"
-              class="px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 rounded-lg transition-all duration-200 shadow-lg shadow-purple-500/30 hover:shadow-xl">
+              class="px-6 py-2.5 text-sm font-medium text-white rounded-3 transition-all duration-200 shadow-purple-500/30 ">
               <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -652,13 +652,13 @@
 
     <!-- Modal de prévisualisation -->
     <div v-if="showPreviewModal"
-      class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm">
+      class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 ">
       <div
-        class="relative bg-white dark:bg-gray-900 rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
+        class="relative bg-white dark:bg-gray-900 rounded-3 max-w-5xl w-full max-h-[90vh] overflow-hidden ">
         <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <div class="flex items-center gap-4">
             <div :class="getFileIconClass(previewDocument)"
-              class="w-10 h-10 rounded-xl flex items-center justify-center">
+              class="w-10 h-10 rounded-3 flex items-center justify-center">
               <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -675,7 +675,7 @@
           </div>
           <div class="flex items-center gap-2">
             <button @click="downloadDocument(previewDocument)"
-              class="p-2 hover:bg-green-100 dark:hover:bg-green-900/30 rounded-lg transition-colors"
+              class="p-2 hover:bg-green-100 dark:hover:bg-green-900/30 rounded-3 transition-colors"
               title="Télécharger">
               <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -683,7 +683,7 @@
               </svg>
             </button>
             <button @click="closePreviewModal"
-              class="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors">
+              class="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-3 transition-colors">
               <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -693,12 +693,12 @@
         <div class="p-4 max-h-[calc(90vh-80px)] overflow-auto">
           <div v-if="previewDocument">
             <img v-if="isImage(previewDocument)" :src="previewDocument.url" :alt="previewDocument.nom"
-              class="max-w-full max-h-[70vh] mx-auto rounded-lg shadow-lg" />
+              class="max-w-full max-h-[70vh] mx-auto rounded-3 " />
             <iframe v-else-if="isPDF(previewDocument)" :src="previewDocument.url"
-              class="w-full h-[70vh] rounded-lg border-0" frameborder="0"></iframe>
+              class="w-full h-[70vh] rounded-3 border-0" frameborder="0"></iframe>
             <div v-else class="text-center py-16">
               <div
-                class="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center">
+                class="w-20 h-20 mx-auto mb-6 rounded-3 flex items-center justify-center">
                 <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -706,7 +706,7 @@
               </div>
               <p class="text-gray-500 dark:text-gray-400 mb-6">Ce fichier ne peut pas être prévisualisé</p>
               <button @click="downloadDocument(previewDocument)"
-                class="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:shadow-lg transition-all duration-200">
+                class="px-6 py-3 text-white rounded-3 transition-all duration-200">
                 Télécharger le fichier
               </button>
             </div>
@@ -761,10 +761,10 @@ const validationStatusLabel = computed(() => {
 
 const validationStatusClass = computed(() => {
   const status = validationStatusLabel.value
-  if (status.includes('Entièrement')) return 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-green-500/30'
-  if (status.includes('N1')) return 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-orange-500/30'
-  if (status.includes('N2')) return 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-blue-500/30'
-  return 'bg-gradient-to-r from-gray-500 to-gray-600 text-white'
+  if (status.includes('Entièrement')) return 'bg-success-500 text-white'
+  if (status.includes('N1')) return 'bg-warning-500 text-white'
+  if (status.includes('N2')) return 'bg-brand-500 text-white'
+  return 'bg-gray-500 text-white'
 })
 
 const progressColor = computed(() => {
@@ -828,14 +828,14 @@ function getProgressLabel(taux) {
 function getFileIconClass(doc) {
   const ext = doc.extension?.toLowerCase()
 
-  if (isImage(doc)) return 'bg-gradient-to-br from-green-500 to-emerald-600'
-  if (isPDF(doc)) return 'bg-gradient-to-br from-red-500 to-pink-600'
-  if (['doc', 'docx'].includes(ext)) return 'bg-gradient-to-br from-blue-500 to-cyan-600'
-  if (['xls', 'xlsx'].includes(ext)) return 'bg-gradient-to-br from-green-600 to-emerald-700'
-  if (['zip', 'rar'].includes(ext)) return 'bg-gradient-to-br from-orange-500 to-amber-600'
-  if (['mp4', 'avi', 'mov'].includes(ext)) return 'bg-gradient-to-br from-purple-500 to-pink-600'
+  if (isImage(doc)) return 'bg-success-500'
+  if (isPDF(doc)) return 'bg-error-500'
+  if (['doc', 'docx'].includes(ext)) return 'bg-brand-500'
+  if (['xls', 'xlsx'].includes(ext)) return 'bg-success-500'
+  if (['zip', 'rar'].includes(ext)) return 'bg-warning-500'
+  if (['mp4', 'avi', 'mov'].includes(ext)) return 'bg-purple-500'
 
-  return 'bg-gradient-to-br from-gray-600 to-gray-700'
+  return 'bg-gray-500'
 }
 
 function isImage(doc) {

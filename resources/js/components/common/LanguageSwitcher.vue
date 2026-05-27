@@ -3,7 +3,7 @@
     <!-- Bouton du sélecteur -->
     <button
       @click="toggleDropdown"
-      class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 focus:outline-hidden focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+      class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-300 rounded-3 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 focus:outline-hidden focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
     >
       <!-- Drapeau de la langue actuelle -->
       <span class="text-base">{{ currentLanguage.flag }}</span>
@@ -26,7 +26,7 @@
     <!-- Menu déroulant -->
     <div
       v-if="isOpen"
-      class="absolute right-0 z-50 w-48 mt-2 origin-top-right bg-white rounded-lg shadow-lg dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-hidden"
+      class="absolute right-0 z-50 w-48 mt-2 origin-top-right bg-white rounded-3 dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-hidden"
     >
       <div class="py-1">
         <button

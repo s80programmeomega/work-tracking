@@ -1,7 +1,7 @@
 <template>
   <div
     :class="[
-      'rounded-lg border bg-white dark:bg-gray-800 dark:border-gray-700',
+      'rounded-3 border border-gray-200 bg-white shadow-none dark:bg-gray-800 dark:border-gray-700',
       className
     ]"
   >

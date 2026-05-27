@@ -1,12 +1,12 @@
 <!-- resources/js/components/dashboard/TeamMember.vue -->
 <template>
-  <div class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 group">
+  <div class="flex items-center gap-3 p-3 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 group">
     <!-- Avatar -->
     <div class="flex-shrink-0">
       <div v-if="member.avatar" class="w-10 h-10 rounded-full overflow-hidden ring-2 ring-white dark:ring-gray-700">
         <img :src="member.avatar" :alt="memberName" class="w-full h-full object-cover">
       </div>
-      <div v-else class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm ring-2 ring-white dark:ring-gray-700">
+      <div v-else class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm ring-2 ring-white dark:ring-gray-700">
         {{ memberInitials }}
       </div>
     </div>

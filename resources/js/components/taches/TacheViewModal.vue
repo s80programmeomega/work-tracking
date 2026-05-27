@@ -1,20 +1,20 @@
 <!-- resources\js\components\taches\TacheViewModal.vue --------->
 <template>
-  <div class="fixed inset-0 z-990 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm" @click.self="$emit('close')">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-hidden flex flex-col">
+  <div class="fixed inset-0 z-990 flex items-center justify-center bg-black bg-opacity-50 p-4 " @click.self="$emit('close')">
+    <div class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-4xl max-h-[95vh] overflow-hidden flex flex-col">
 
       <!-- Header -->
-      <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-        <div class="flex justify-between items-start">
+      <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700">
+          <div class="flex justify-between items-start">
           <div class="flex-1">
             <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ tache.titre }}</h2>
             <div class="flex items-center gap-3 flex-wrap">
-              <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full shadow-sm"
+              <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full "
                 :class="getStatusClass(tache.statut)">
                 <span class="w-2 h-2 rounded-full mr-2" :class="getStatusDotClass(tache.statut)"></span>
                 {{ tache.statut_label }}
               </span>
-              <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full shadow-sm"
+              <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full "
                 :class="getPriorityClass(tache.priorite)">
                 {{ tache.priorite_icon }} {{ tache.priorite_label }}
               </span>
@@ -27,7 +27,7 @@
               </span>
             </div>
           </div>
-          <button @click="$emit('close')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors ml-4">
+          <button @click="$emit('close')" class="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300 transition-colors ml-4">
             <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -44,9 +44,9 @@
             v-for="tab in tabs"
             :key="tab.id"
             @click="activeTab = tab.id"
-            class="px-4 py-2 font-medium rounded-lg transition-all"
+            class="px-4 py-2 font-medium rounded-3 transition-all"
             :class="activeTab === tab.id
-              ? 'bg-brand-500 text-white shadow-lg'
+              ? 'bg-brand-500 text-white '
               : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'"
           >
             {{ tab.label }}
@@ -104,14 +104,14 @@
         <div class="flex gap-3">
           <button
             @click="$emit('close')"
-            class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all"
+            class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all"
           >
             Fermer
           </button>
           <button
             v-if="tache.permissions?.can_edit"
             @click="$emit('edit', tache)"
-            class="px-5 py-2.5 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all"
+            class="px-5 py-2.5 text-white rounded-3 font-medium transition-all"
           >
             <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />

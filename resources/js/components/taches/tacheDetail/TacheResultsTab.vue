@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6">
     <!-- Mon résultat -->
-    <div v-if="canSubmitResult || tache.my_result" class="bg-gradient-to-br from-brand-50 to-blue-50 dark:from-brand-900/20 dark:to-blue-900/20 rounded-xl p-6">
+    <div v-if="canSubmitResult || tache.my_result" class="rounded-3 p-6">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
           <i class="fas fa-clipboard-check text-brand-600"></i>
@@ -12,14 +12,14 @@
             v-if="!tache.my_result && canSubmitResult"
             dusk="open-submit-result-btn"
             @click="openSubmitModal"
-            class="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
+            class="px-4 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700 transition-colors"
           >
             <i class="fas fa-plus mr-2"></i>Soumettre
           </button>
           <button 
             v-if="tache.my_result && !tache.my_result.valide_par_n1"
             @click="openEditModal"
-            class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+            class="px-4 py-2 bg-gray-600 text-white rounded-3 hover:bg-gray-700 transition-colors"
           >
             <i class="fas fa-edit mr-2"></i>Modifier
           </button>
@@ -27,7 +27,7 @@
       </div>
 
       <!-- Résultat existant -->
-      <div v-if="tache.my_result" dusk="my-result-card" class="bg-white dark:bg-gray-800 rounded-lg p-4 border-2 border-gray-200 dark:border-gray-700">
+      <div v-if="tache.my_result" dusk="my-result-card" class="bg-white dark:bg-gray-800 rounded-3 p-4 border-2 border-gray-200 dark:border-gray-700">
         <div class="space-y-4">
           <!-- Statut de validation -->
           <div class="flex items-center gap-3 flex-wrap">
@@ -95,13 +95,13 @@
                 v-model="bypassMotif"
                 :placeholder="$t ? $t('circuit_validation.bypass.motif_placeholder') : 'Motif du bypass (min. 50 caractères)…'"
                 rows="3"
-                class="w-full text-sm border border-amber-300 dark:border-amber-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-white resize-none focus:outline-none focus:ring-2 focus:ring-amber-400"
+                class="w-full text-sm border border-amber-300 dark:border-amber-600 rounded-3 px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-white resize-none focus:outline-none focus:ring-2 focus:ring-amber-400"
               />
               <button
                 dusk="bypass-submit-btn"
                 @click="submitBypass"
                 :disabled="bypassMotif.trim().length < 50 || bypassLoading"
-                class="px-4 py-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors"
+                class="px-4 py-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-3 text-sm font-medium transition-colors"
               >
                 <i class="fas fa-share mr-1"></i>
                 {{ bypassLoading ? '…' : $t ? $t('circuit_validation.bypass.submit_label') : 'Soumettre directement au N1' }}
@@ -166,7 +166,7 @@
         <div 
           v-for="result in tache.all_results" 
           :key="result.id"
-          class="bg-white dark:bg-gray-800 rounded-xl p-4 border-2 border-gray-200 dark:border-gray-700"
+          class="bg-white dark:bg-gray-800 rounded-3 p-4 border-2 border-gray-200 dark:border-gray-700"
         >
           <div class="flex items-start gap-4">
             <!-- Avatar -->
@@ -218,7 +218,7 @@
             <div class="flex gap-2">
               <button 
                 @click="viewResult(result)"
-                class="p-2 text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-lg"
+                class="p-2 text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-3"
                 title="Voir détails"
               >
                 <i class="fas fa-eye"></i>
@@ -226,7 +226,7 @@
               <button 
                 v-if="permissions.can_validate_n1 && !result.valide_par_n1"
                 @click="validateN1(result)"
-                class="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg"
+                class="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-3"
                 title="Valider N+1"
               >
                 <i class="fas fa-check"></i>

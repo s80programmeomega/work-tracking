@@ -55,7 +55,7 @@
         </div>
 
         <!-- Filters and Search -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+        <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-6 mb-6">
           <div class="flex items-center gap-4">
             <!-- Search -->
             <div class="relative flex-1 max-w-md">
@@ -64,14 +64,14 @@
                 v-model="filters.search"
                 type="text"
                 placeholder="Rechercher par email, workspace..."
-                class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               />
             </div>
 
             <!-- Status Filter -->
             <select
               v-model="filters.status"
-              class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500"
+              class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500"
             >
               <option value="all">Tous les statuts</option>
               <option value="pending">En attente</option>
@@ -83,7 +83,7 @@
             <!-- Workspace Filter -->
             <select
               v-model="filters.workspace_id"
-              class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500"
+              class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500"
             >
               <option value="all">Tous les workspaces</option>
               <option 
@@ -99,7 +99,7 @@
             <button
               @click="loadData"
               :disabled="loading"
-              class="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              class="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-3 transition-colors"
             >
               <RefreshIcon class="w-5 h-5" />
             </button>
@@ -112,7 +112,7 @@
         </div>
 
         <!-- Empty State -->
-        <div v-else-if="filteredInvitations.length === 0" class="text-center py-16 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <div v-else-if="filteredInvitations.length === 0" class="text-center py-16 bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700">
           <MailIcon class="mx-auto h-16 w-16 text-gray-400" />
           <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">
             Aucune invitation trouvée
@@ -129,7 +129,7 @@
           <div
             v-for="invitation in filteredInvitations"
             :key="invitation.id"
-            class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow"
+            class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-6 transition-shadow"
           >
             <div class="flex items-start justify-between">
               <!-- Left Section -->
@@ -137,7 +137,7 @@
                 <!-- Status Icon -->
                 <div 
                   :class="[
-                    'p-3 rounded-lg flex-shrink-0',
+                    'p-3 rounded-3 flex-shrink-0',
                     getStatusColor(invitation.status)
                   ]"
                 >
@@ -190,7 +190,7 @@
                   </div>
 
                   <!-- Message -->
-                  <div v-if="invitation.message" class="mt-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <div v-if="invitation.message" class="mt-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-3">
                     <p class="text-sm text-gray-600 dark:text-gray-400 italic">
                       "{{ invitation.message }}"
                     </p>
@@ -222,7 +222,7 @@
                 <button
                   v-if="canManageWorkspace(invitation.workspace_id)"
                   @click="viewWorkspace(invitation.workspace_id)"
-                  class="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                  class="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-3 transition-colors"
                   title="Voir le workspace"
                 >
                   <EyeIcon class="w-4 h-4" />
@@ -233,7 +233,7 @@
                   v-if="invitation.status === 'pending' && canManageWorkspace(invitation.workspace_id)"
                   @click="resendInvitation(invitation)"
                   :disabled="resending === invitation.id"
-                  class="p-2 text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-lg transition-colors"
+                  class="p-2 text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-3 transition-colors"
                   title="Renvoyer l'invitation"
                 >
                   <RefreshIcon v-if="resending === invitation.id" class="w-4 h-4 animate-spin" />
@@ -245,7 +245,7 @@
                   v-if="invitation.status === 'pending' && canManageWorkspace(invitation.workspace_id)"
                   @click="cancelInvitation(invitation)"
                   :disabled="cancelling === invitation.id"
-                  class="p-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                  class="p-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-3 transition-colors"
                   title="Annuler l'invitation"
                 >
                   <XIcon v-if="cancelling === invitation.id" class="w-4 h-4 animate-spin" />
@@ -256,7 +256,7 @@
                 <button
                   v-if="invitation.status === 'pending'"
                   @click="copyInvitationLink(invitation)"
-                  class="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                  class="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-3 transition-colors"
                   title="Copier le lien d'invitation"
                 > 
                 </button>
@@ -274,14 +274,14 @@
             <button
               @click="changePage(pagination.current_page - 1)"
               :disabled="!pagination.prev_page_url"
-              class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Précédent
             </button>
             <button
               @click="changePage(pagination.current_page + 1)"
               :disabled="!pagination.next_page_url"
-              class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Suivant
             </button>

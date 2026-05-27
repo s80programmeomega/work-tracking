@@ -33,42 +33,33 @@
 
     <div
       v-if="dropdownOpen"
-      class="absolute -right-[240px] mt-[17px] flex h-[480px] w-[350px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark sm:w-[361px] lg:right-0"
+      class="absolute -right-[240px] mt-[17px] flex h-[480px] w-[350px] flex-col rounded-3 border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-gray-900 sm:w-90.25 lg:right-0"
     >
-      <div
-        class="flex items-center justify-between pb-3 mb-3 border-b border-gray-100 dark:border-gray-800"
-      >
-        <h5 class="text-lg font-semibold text-gray-800 dark:text-white/90">
+      <div class="flex items-center justify-between pb-3 mb-3 border-b border-gray-200 dark:border-gray-800">
+        <h5 class="text-base font-semibold text-gray-900 dark:text-white">
           Notifications
-          <span v-if="unreadCount > 0" class="ml-2 text-sm font-medium text-blue-600 dark:text-blue-400">
+          <span v-if="unreadCount > 0" class="ml-1.5 text-sm font-medium text-brand-600 dark:text-brand-400">
             ({{ unreadCount }})
           </span>
         </h5>
- 
+
         <div class="flex items-center gap-2">
           <button
             v-if="unreadCount > 0"
             @click="handleMarkAllAsRead"
-            class="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+            class="p-1.5 rounded-3 text-success-600 hover:bg-success-50 dark:text-success-400 dark:hover:bg-success-500/10 transition-colors"
             title="Tout marquer comme lu"
           >
-            <i class="fas fa-check-double"></i>
+            <i class="fas fa-check-double text-sm"></i>
           </button>
-          <button @click="closeDropdown" class="text-gray-500 dark:text-gray-400">
-            <svg
-              class="fill-current"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fill-rule="evenodd"
-                clip-rule="evenodd"
+          <button
+            @click="closeDropdown"
+            class="p-1.5 rounded-3 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors"
+          >
+            <svg class="fill-current w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" clip-rule="evenodd"
                 d="M6.21967 7.28131C5.92678 6.98841 5.92678 6.51354 6.21967 6.22065C6.51256 5.92775 6.98744 5.92775 7.28033 6.22065L11.999 10.9393L16.7176 6.22078C17.0105 5.92789 17.4854 5.92788 17.7782 6.22078C18.0711 6.51367 18.0711 6.98855 17.7782 7.28144L13.0597 12L17.7782 16.7186C18.0711 17.0115 18.0711 17.4863 17.7782 17.7792C17.4854 18.0721 17.0105 18.0721 16.7176 17.7792L11.999 13.0607L7.28033 17.7794C6.98744 18.0722 6.51256 18.0722 6.21967 17.7794C5.92678 17.4865 5.92678 17.0116 6.21967 16.7187L10.9384 12L6.21967 7.28131Z"
-                fill=""
-              />
+                fill="" />
             </svg>
           </button>
         </div>
@@ -78,12 +69,12 @@
         <i class="fas fa-spinner fa-spin text-2xl text-gray-400"></i>
       </div>
 
-      <div v-else-if="displayedNotifications.length === 0" class="flex flex-col items-center justify-center py-8">
-        <i class="fas fa-bell-slash text-4xl text-gray-400 mb-3"></i>
-        <p class="text-gray-600 dark:text-gray-400">Aucune notification</p>
+      <div v-else-if="displayedNotifications.length === 0" class="flex flex-col items-center justify-center py-8 gap-2">
+        <i class="fas fa-bell-slash text-4xl text-gray-300 dark:text-gray-700"></i>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Aucune notification</p>
       </div>
 
-      <div v-else class="flex flex-col h-auto overflow-y-auto custom-scrollbar">
+      <div v-else class="flex flex-col overflow-y-auto">
         <NotificationItem
           v-for="notification in displayedNotifications"
           :key="notification.id"
@@ -97,10 +88,10 @@
 
       <router-link
         to="/notifications"
-        class="mt-3 flex justify-center rounded-lg border border-gray-300 bg-white p-3 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+        class="mt-3 flex justify-center rounded-3 border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white transition-colors"
         @click="closeDropdown"
       >
-        Voir toutes les notifications 
+        Voir toutes les notifications
       </router-link>
     </div>
 

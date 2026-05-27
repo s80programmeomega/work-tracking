@@ -12,7 +12,7 @@
       
       <label 
         v-if="canEdit && !uploading"
-        class="px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 cursor-pointer flex items-center gap-2 transition-all shadow-md hover:shadow-lg"
+        class="px-4 py-2 bg-brand-500 text-white rounded-3 hover:bg-brand-600 cursor-pointer flex items-center gap-2 transition-all "
       >
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -29,7 +29,7 @@
     </div>
 
     <!-- Informations sur les types acceptés -->
-    <div v-if="canEdit" class="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900 p-3 rounded-lg">
+    <div v-if="canEdit" class="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900 p-3 rounded-3">
       <strong>Types acceptés:</strong> PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, Images (JPG, PNG, GIF), ZIP
       <br>
       <strong>Taille max:</strong> 10 Mo par fichier
@@ -37,7 +37,7 @@
 
     <!-- Progress upload -->
     <div v-if="uploading" class="space-y-2">
-      <div class="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+      <div class="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-3 border border-blue-200 dark:border-blue-800">
         <div class="animate-spin rounded-full h-6 w-6 border-3 border-blue-500 border-t-transparent"></div>
         <div class="flex-1">
           <p class="text-sm font-medium text-blue-700 dark:text-blue-400">Upload en cours...</p>
@@ -53,7 +53,7 @@
     </div>
 
     <!-- Messages d'erreur -->
-    <div v-if="errorMessage" class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+    <div v-if="errorMessage" class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-3">
       <div class="flex items-start gap-3">
         <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -74,12 +74,12 @@
       <div
         v-for="attachment in attachments"
         :key="attachment.id"
-        class="relative flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all group"
+        class="relative flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all group"
         :class="{ 'ring-2 ring-blue-500': selectedFile === attachment.id }"
       >
         <!-- Preview / Icône -->
         <div 
-          class="flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center overflow-hidden cursor-pointer"
+          class="flex-shrink-0 w-12 h-12 rounded-3 flex items-center justify-center overflow-hidden cursor-pointer"
           :class="getFileIconClass(attachment.mime_type)"
           @click="previewFile(attachment)"
         >
@@ -122,7 +122,7 @@
           <button
             v-if="isImage(attachment.mime_type)"
             @click="previewFile(attachment)"
-            class="p-2 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
+            class="p-2 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-3 transition-colors"
             title="Prévisualiser"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -134,7 +134,7 @@
           <!-- Télécharger -->
           <button
             @click="downloadFile(attachment)"
-            class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+            class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-3 transition-colors"
             title="Télécharger"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -147,7 +147,7 @@
             v-if="canEdit"
             @click="deleteFile(attachment)"
             :disabled="deleting"
-            class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50"
+            class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-3 transition-colors disabled:opacity-50"
             title="Supprimer"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -159,14 +159,14 @@
     </div>
 
     <!-- Empty state -->
-    <div v-else-if="!uploading" class="text-center py-12 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700">
+    <div v-else-if="!uploading" class="text-center py-12 rounded-3 border-2 border-dashed border-gray-300 dark:border-gray-700">
       <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
       </svg>
       <p class="text-gray-600 dark:text-gray-400 mb-4">Aucun fichier attaché</p>
       <label 
         v-if="canEdit"
-        class="inline-flex items-center px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 cursor-pointer transition-all shadow-md hover:shadow-lg"
+        class="inline-flex items-center px-4 py-2 bg-brand-500 text-white rounded-3 hover:bg-brand-600 cursor-pointer transition-all "
       >
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -191,7 +191,7 @@
       >
         <button 
           @click="closePreview"
-          class="absolute top-4 right-4 p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
+          class="absolute top-4 right-4 p-2 text-white hover:bg-white/20 rounded-3 transition-colors"
         >
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -203,7 +203,7 @@
           class="max-w-full max-h-full object-contain"
           @click.stop
         />
-        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-75 text-white px-4 py-2 rounded-lg">
+        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-75 text-white px-4 py-2 rounded-3">
           {{ previewFileName }}
         </div>
       </div>

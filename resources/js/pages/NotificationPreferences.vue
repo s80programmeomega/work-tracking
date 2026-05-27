@@ -11,7 +11,7 @@
     <!-- Preferences Form -->
     <div v-else class="space-y-6">
       <!-- Global Channel Settings -->
-      <div class="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900 p-6">
+      <div class="rounded-3 border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 p-6">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           <i class="fas fa-toggle-on text-blue-600 dark:text-blue-400 mr-2"></i>
           Canaux de notification
@@ -96,7 +96,7 @@
                 @click="onWebPushSubscribe"
                 :disabled="webPushLoading"
                 dusk="webpush-subscribe"
-                class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+                class="px-4 py-2 bg-blue-600 text-white rounded-3 text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
               >
                 {{ webPushLoading ? 'En cours…' : 'Activer' }}
               </button>
@@ -105,7 +105,7 @@
                 @click="onWebPushUnsubscribe"
                 :disabled="webPushLoading"
                 dusk="webpush-unsubscribe"
-                class="px-4 py-2 bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium hover:bg-gray-300 disabled:opacity-50"
+                class="px-4 py-2 bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200 rounded-3 text-sm font-medium hover:bg-gray-300 disabled:opacity-50"
               >
                 {{ webPushLoading ? 'En cours…' : 'Désactiver' }}
               </button>
@@ -115,7 +115,7 @@
       </div>
 
       <!-- Notification Types -->
-      <div class="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900 p-6">
+      <div class="rounded-3 border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 p-6">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           <i class="fas fa-bell text-blue-600 dark:text-blue-400 mr-2"></i>
           Types de notifications
@@ -182,7 +182,7 @@
       </div>
 
       <!-- Quiet Hours -->
-      <div class="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900 p-6">
+      <div class="rounded-3 border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 p-6">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           <i class="fas fa-moon text-blue-600 dark:text-blue-400 mr-2"></i>
           Heures silencieuses
@@ -207,7 +207,7 @@
               <input
                 type="time"
                 v-model="preferences.quiet_hours_start"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                class="w-full px-3 py-2 border border-gray-300 rounded-3 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               />
             </div>
             <div>
@@ -215,7 +215,7 @@
               <input
                 type="time"
                 v-model="preferences.quiet_hours_end"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                class="w-full px-3 py-2 border border-gray-300 rounded-3 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               />
             </div>
           </div>
@@ -226,14 +226,14 @@
       <div class="flex justify-end gap-3">
         <router-link
           to="/notifications"
-          class="px-6 py-3 rounded-lg text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+          class="px-6 py-3 rounded-3 text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
         >
           Annuler
         </router-link>
         <button
           @click="savePreferences"
           :disabled="saving"
-          class="px-6 py-3 rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-6 py-3 rounded-3 text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <i v-if="saving" class="fas fa-spinner fa-spin mr-2"></i>
           <i v-else class="fas fa-save mr-2"></i>

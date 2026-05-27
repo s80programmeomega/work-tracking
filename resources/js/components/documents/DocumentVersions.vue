@@ -13,7 +13,7 @@
 
       <button
         @click="showUploadModal = true"
-        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+        class="inline-flex items-center gap-2 rounded-3 bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
       >
         <DocumentPlusIcon class="h-5 w-5" />
         Nouvelle version
@@ -50,7 +50,7 @@
           </div>
 
           <!-- Version Card -->
-          <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
+          <div class="rounded-3 border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
             <div class="flex items-start justify-between">
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-3">
@@ -107,14 +107,14 @@
               <div class="flex items-center gap-2 ml-4">
                 <button
                   @click="viewVersion(version)"
-                  class="rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                  class="rounded-3 p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
                   title="Voir"
                 >
                   <EyeIcon class="h-5 w-5" />
                 </button>
                 <button
                   @click="downloadVersion(version)"
-                  class="rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                  class="rounded-3 p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
                   title="Télécharger"
                 >
                   <ArrowDownTrayIcon class="h-5 w-5" />
@@ -122,7 +122,7 @@
                 <button
                   v-if="!version.is_latest_version"
                   @click="restoreVersion(version)"
-                  class="rounded-lg p-2 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20"
+                  class="rounded-3 p-2 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20"
                   title="Restaurer"
                 >
                   <ArrowPathIcon class="h-5 w-5" />
@@ -135,7 +135,7 @@
     </div>
 
     <!-- Empty State -->
-    <div v-else class="rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-12 text-center dark:border-gray-700 dark:bg-gray-900/50">
+    <div v-else class="rounded-3 border-2 border-dashed border-gray-300 bg-gray-50 p-12 text-center dark:border-gray-700 dark:bg-gray-900/50">
       <DocumentDuplicateIcon class="mx-auto h-12 w-12 text-gray-400" />
       <p class="mt-3 text-sm font-medium text-gray-900 dark:text-white">
         Aucune version
@@ -157,7 +157,7 @@
           leave-from="opacity-100"
           leave-to="opacity-0"
         >
-          <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" />
+          <div class="fixed inset-0 bg-black/50 " />
         </TransitionChild>
 
         <div class="fixed inset-0 overflow-y-auto">
@@ -171,7 +171,7 @@
               leave-from="opacity-100 scale-100"
               leave-to="opacity-0 scale-95"
             >
-              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 shadow-xl transition-all dark:bg-gray-900">
+              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-3 bg-white p-6 transition-all dark:bg-gray-900">
                 <DialogTitle class="text-lg font-semibold text-gray-900 dark:text-white">
                   Créer une nouvelle version
                 </DialogTitle>
@@ -188,7 +188,7 @@
                         type="file"
                         @change="handleFileSelect"
                         required
-                        class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-white focus:outline-none dark:text-gray-400 dark:bg-gray-800 dark:border-gray-700"
+                        class="block w-full text-sm text-gray-900 border border-gray-300 rounded-3 cursor-pointer bg-white focus:outline-none dark:text-gray-400 dark:bg-gray-800 dark:border-gray-700"
                       />
                     </div>
                     <p v-if="selectedFile" class="mt-2 text-sm text-gray-500 dark:text-gray-400">
@@ -205,7 +205,7 @@
                       v-model="versionDescription"
                       rows="3"
                       placeholder="Décrivez les modifications apportées..."
-                      class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
+                      class="mt-1 w-full rounded-3 border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
                     ></textarea>
                   </div>
 
@@ -215,14 +215,14 @@
                       type="button"
                       @click="showUploadModal = false"
                       :disabled="uploading"
-                      class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                      class="rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                     >
                       Annuler
                     </button>
                     <button
                       type="submit"
                       :disabled="uploading || !selectedFile"
-                      class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                      class="inline-flex items-center gap-2 rounded-3 bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                     >
                       <div v-if="uploading" class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                       {{ uploading ? 'Upload...' : 'Créer la version' }}

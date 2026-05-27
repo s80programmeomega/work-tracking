@@ -24,7 +24,7 @@
             leave-from="opacity-100 scale-100"
             leave-to="opacity-0 scale-95"
           >
-            <DialogPanel class="relative w-full max-w-6xl transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all dark:bg-gray-900">
+            <DialogPanel class="relative w-full max-w-6xl transform overflow-hidden rounded-3 bg-white transition-all dark:bg-gray-900">
               <!-- Header -->
               <div class="border-b border-gray-200 bg-white px-6 py-4 dark:border-gray-800 dark:bg-gray-900">
                 <div class="flex items-center justify-between">
@@ -39,14 +39,14 @@
                   <div class="flex items-center gap-2">
                     <button
                       @click="$emit('download')"
-                      class="rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                      class="rounded-3 p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
                       title="Télécharger"
                     >
                       <ArrowDownTrayIcon class="h-6 w-6" />
                     </button>
                     <button
                       @click="$emit('close')"
-                      class="rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                      class="rounded-3 p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
                     >
                       <XMarkIcon class="h-6 w-6" />
                     </button>
@@ -61,7 +61,7 @@
                   <img
                     :src="document.url"
                     :alt="document.nom"
-                    class="max-h-[70vh] w-auto rounded-lg shadow-lg"
+                    class="max-h-[70vh] w-auto rounded-3 "
                   />
                 </div>
 
@@ -79,7 +79,7 @@
                   <video
                     :src="document.url"
                     controls
-                    class="max-h-[70vh] w-auto rounded-lg shadow-lg"
+                    class="max-h-[70vh] w-auto rounded-3 "
                   ></video>
                 </div>
 
@@ -106,7 +106,7 @@
                     </p>
                     <button
                       @click="$emit('download')"
-                      class="mt-6 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                      class="mt-6 inline-flex items-center gap-2 rounded-3 bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
                     >
                       <ArrowDownTrayIcon class="h-5 w-5" />
                       Télécharger le fichier

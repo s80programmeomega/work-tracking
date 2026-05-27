@@ -15,7 +15,7 @@
         <button
           @click="fetchStats"
           :disabled="loading"
-          class="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm hover:bg-brand-700 disabled:opacity-50 flex items-center gap-2"
+          class="px-4 py-2 bg-brand-600 text-white rounded-3 text-sm hover:bg-brand-700 disabled:opacity-50 flex items-center gap-2"
         >
           <i class="fas fa-sync-alt" :class="{ 'animate-spin': loading }"></i>
           Refresh
@@ -23,13 +23,13 @@
       </div>
 
       <!-- Error -->
-      <div v-if="error" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg">
+      <div v-if="error" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-3">
         {{ error }}
       </div>
 
       <!-- Loading skeleton -->
       <div v-if="loading && !stats" class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div v-for="i in 6" :key="i" class="h-24 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-xl"></div>
+        <div v-for="i in 6" :key="i" class="h-24 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-3"></div>
       </div>
 
       <template v-if="stats">
@@ -61,7 +61,7 @@
             <i class="fas fa-clock text-gray-400 mr-2"></i>
             Recent Workspaces
           </h2>
-          <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 overflow-hidden">
             <table class="w-full text-sm">
               <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500 dark:text-gray-400 uppercase">
                 <tr>
@@ -99,7 +99,7 @@
                       <span v-else-if="ws.subscription.expiring_soon" class="text-amber-600 dark:text-amber-400 font-medium">
                         {{ ws.subscription.remaining_trial_days }}d left
                       </span>
-                      <span v-else class="text-gray-500">{{ ws.subscription.remaining_trial_days }}d left</span>
+                      <span v-else class="text-gray-500 dark:text-gray-400">{{ ws.subscription.remaining_trial_days }}d left</span>
                     </template>
                     <span v-else class="text-gray-400">—</span>
                   </td>
@@ -114,13 +114,13 @@
         <div class="flex gap-3">
           <router-link
             to="/admin/workspaces"
-            class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+            class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-3 text-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
           >
             <i class="fas fa-building mr-2"></i>All Workspaces
           </router-link>
           <router-link
             to="/admin/users"
-            class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+            class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-3 text-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
           >
             <i class="fas fa-users mr-2"></i>All Users
           </router-link>

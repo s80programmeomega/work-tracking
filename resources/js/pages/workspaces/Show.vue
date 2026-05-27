@@ -9,22 +9,22 @@
 
       <template v-else-if="workspace">
         <!-- Header Trello-like -->
-        <div class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
           <div class="container mx-auto px-6 py-4">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-4">
                 <router-link to="/workspaces"
-                  class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                  class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-3 transition-colors">
                   <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                   </svg>
                 </router-link>
 
                 <div class="flex items-center gap-3">
-                  <div v-if="workspace.logo_url" class="w-10 h-10 rounded-lg overflow-hidden">
+                  <div v-if="workspace.logo_url" class="w-10 h-10 rounded-3 overflow-hidden">
                     <img :src="workspace.logo_url" :alt="workspace.nom" class="w-full h-full object-cover"/>
                   </div>
-                  <div v-else class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                  <div v-else class="w-10 h-10 rounded-3 flex items-center justify-center">
                     <span class="text-white font-bold text-lg">
                       {{ getInitials(workspace.nom) }}
                     </span>
@@ -56,7 +56,7 @@
                 <!-- Bouton Paramètres avec vérification de permission -->
                 <button v-if="canManageSettings"
                   @click="navigateToSettings"
-                  class="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  class="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-3 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                   :title="canManageSettings ? 'Gérer les paramètres' : 'Permission requise'">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
@@ -68,7 +68,7 @@
                 <!-- Menu déroulant pour plus d'options -->
                 <div class="relative">
                   <button @click="showWorkspaceMenu = !showWorkspaceMenu"
-                    class="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                    class="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-3 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"/>
                     </svg>
@@ -76,7 +76,7 @@
                   </button>
 
                   <!-- Menu déroulant -->
-                  <div v-if="showWorkspaceMenu" class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
+                  <div v-if="showWorkspaceMenu" class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3 z-10">
                     <div class="py-1">
                       <!-- Option pour créer un projet -->
                       <button v-if="canCreateProjects"
@@ -135,13 +135,13 @@
         <div class="container mx-auto px-6 py-6">
           <!-- Statistics Cards -->
           <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="bg-white dark:bg-gray-800 rounded-3 p-4 border border-gray-200 dark:border-gray-700">
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Projets</p>
                   <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ statistics.total_projets || 0 }}</p>
                 </div>
-                <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-3 flex items-center justify-center">
                   <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
                   </svg>
@@ -154,13 +154,13 @@
               </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="bg-white dark:bg-gray-800 rounded-3 p-4 border border-gray-200 dark:border-gray-700">
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Tâches</p>
                   <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ statistics.total_taches || 0 }}</p>
                 </div>
-                <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+                <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-3 flex items-center justify-center">
                   <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                   </svg>
@@ -173,13 +173,13 @@
               </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="bg-white dark:bg-gray-800 rounded-3 p-4 border border-gray-200 dark:border-gray-700">
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Activités</p>
                   <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ statistics.total_activites || 0 }}</p>
                 </div>
-                <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
+                <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-3 flex items-center justify-center">
                   <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                   </svg>
@@ -187,13 +187,13 @@
               </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="bg-white dark:bg-gray-800 rounded-3 p-4 border border-gray-200 dark:border-gray-700">
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Membres</p>
                   <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ workspace.member_count || 0 }}</p>
                 </div>
-                <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center">
+                <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900 rounded-3 flex items-center justify-center">
                   <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
                   </svg>
@@ -203,7 +203,7 @@
           </div>
 
           <!-- Content Tabs -->
-          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
+          <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 mb-6">
             <!-- Tab Navigation -->
             <div class="border-b border-gray-200 dark:border-gray-700">
               <nav class="flex space-x-8 px-6">
@@ -229,7 +229,7 @@
                     <div class="flex gap-2">
                       <button v-if="canCreateProjects"
                         @click="showCreateProjectModal = true"
-                        class="inline-flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        class="inline-flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-3 hover:bg-blue-700 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
@@ -252,7 +252,7 @@
                   <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Tous les projets</h3>
                   <button v-if="canCreateProjects"
                     @click="showCreateProjectModal = true"
-                    class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-3 hover:bg-blue-700 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
@@ -284,7 +284,7 @@
             Le workspace demandé n'existe pas ou vous n'y avez pas accès.
           </p>
           <router-link to="/workspaces"
-            class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+            class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-3 hover:bg-blue-700 transition-colors font-medium">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
@@ -317,7 +317,7 @@
 
     <!-- Notification Toast -->
     <div v-if="notification.show" :class="[
-      'fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300',
+      'fixed top-4 right-4 z-50 p-4 rounded-3 transition-all duration-300',
       notification.type === 'success' ? 'bg-green-50 border border-green-200 dark:bg-green-900/20 dark:border-green-800' :
       notification.type === 'error' ? 'bg-red-50 border border-red-200 dark:bg-red-900/20 dark:border-red-800' :
       notification.type === 'info' ? 'bg-blue-50 border border-blue-200 dark:bg-blue-900/20 dark:border-blue-800' :
@@ -347,7 +347,7 @@
           <h3 class="font-medium text-gray-900 dark:text-white">{{ notification.title }}</h3>
           <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">{{ notification.message }}</p>
         </div>
-        <button @click="notification.show = false" class="ml-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+        <button @click="notification.show = false" class="ml-4 text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
           </svg>

@@ -1,14 +1,14 @@
 <!-- resources/js/components/taches/TacheDetailModal.vue -->
 <template>
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm"
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 "
        @click.self="$emit('close')">
 
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full overflow-hidden flex flex-col transition-all duration-300"
+    <div class="bg-white dark:bg-gray-800 rounded-3 w-full overflow-hidden flex flex-col transition-all duration-300"
          :class="modalSizeClass">
 
       <!-- Header unifié -->
-      <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-        <div class="flex justify-between items-start">
+      <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700">
+          <div class="flex justify-between items-start">
           <!-- Titre et badges -->
           <div class="flex-1 mr-4">
             <!-- Titre inline-editable -->
@@ -54,7 +54,7 @@
               </div>
               <span
                 v-else
-                class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full shadow-sm"
+                class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full "
                 :class="[getStatusClass(localTache.statut), localTache.permissions?.can_edit ? 'cursor-pointer hover:ring-2 hover:ring-brand-400' : '']"
                 :title="localTache.permissions?.can_edit ? 'Cliquer pour modifier le statut' : ''"
                 @click="startEdit('statut', localTache.statut)"
@@ -81,7 +81,7 @@
               </div>
               <span
                 v-else
-                class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full shadow-sm"
+                class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full "
                 :class="[getPriorityClass(localTache.priorite), localTache.permissions?.can_edit ? 'cursor-pointer hover:ring-2 hover:ring-brand-400' : '']"
                 :title="localTache.permissions?.can_edit ? 'Cliquer pour modifier la priorité' : ''"
                 @click="startEdit('priorite', localTache.priorite)"
@@ -119,7 +119,7 @@
             <button
               v-if="!isDetailedView"
               @click="enableDetailedView('details')"
-              class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              class="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300 transition-colors"
               title="Vue détaillée">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
@@ -130,7 +130,7 @@
             <button
               @click="refreshTask"
               :disabled="isRefreshing"
-              class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors disabled:opacity-50"
+              class="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300 transition-colors disabled:opacity-50"
               title="Actualiser">
               <svg class="w-5 h-5" :class="{ 'animate-spin': isRefreshing }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -138,7 +138,7 @@
             </button>
 
             <button @click="$emit('close')"
-                    class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-2">
+                    class="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300 transition-colors p-2">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -187,14 +187,14 @@
                     @keydown.escape="cancelEdit"
                     autofocus
                     rows="4"
-                    class="w-full text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 border border-brand-400 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-y"
+                    class="w-full text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 border border-brand-400 rounded-3 p-3 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-y"
                   />
                   <p class="text-xs text-gray-400 mt-1">Cliquer ailleurs pour enregistrer · Echap pour annuler</p>
                 </div>
                 <p
                   v-else
                   class="text-gray-700 dark:text-gray-300 whitespace-pre-line"
-                  :class="localTache.permissions?.can_edit ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 rounded-lg p-2 -m-2 transition-colors group' : ''"
+                  :class="localTache.permissions?.can_edit ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 rounded-3 p-2 -m-2 transition-colors group' : ''"
                   :title="localTache.permissions?.can_edit ? 'Cliquer pour modifier' : ''"
                   @click="startEdit('description', localTache.description || '')"
                 >
@@ -215,14 +215,14 @@
                     @keydown.escape="cancelEdit"
                     autofocus
                     rows="4"
-                    class="w-full text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 border border-brand-400 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-y"
+                    class="w-full text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 border border-brand-400 rounded-3 p-3 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-y"
                   />
                   <p class="text-xs text-gray-400 mt-1">Cliquer ailleurs pour enregistrer · Echap pour annuler</p>
                 </div>
                 <p
                   v-else
                   class="text-gray-700 dark:text-gray-300 whitespace-pre-line"
-                  :class="localTache.permissions?.can_edit ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 rounded-lg p-2 -m-2 transition-colors' : ''"
+                  :class="localTache.permissions?.can_edit ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 rounded-3 p-2 -m-2 transition-colors' : ''"
                   :title="localTache.permissions?.can_edit ? 'Cliquer pour modifier' : ''"
                   @click="startEdit('objectif', localTache.objectif || '')"
                 >
@@ -243,14 +243,14 @@
                     @keydown.escape="cancelEdit"
                     autofocus
                     rows="4"
-                    class="w-full text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 border border-brand-400 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-y"
+                    class="w-full text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 border border-brand-400 rounded-3 p-3 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-y"
                   />
                   <p class="text-xs text-gray-400 mt-1">Cliquer ailleurs pour enregistrer · Echap pour annuler</p>
                 </div>
                 <p
                   v-else
                   class="text-gray-700 dark:text-gray-300 whitespace-pre-line"
-                  :class="localTache.permissions?.can_edit ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 rounded-lg p-2 -m-2 transition-colors' : ''"
+                  :class="localTache.permissions?.can_edit ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 rounded-3 p-2 -m-2 transition-colors' : ''"
                   :title="localTache.permissions?.can_edit ? 'Cliquer pour modifier' : ''"
                   @click="startEdit('indicateurs_resultats', localTache.indicateurs_resultats || '')"
                 >
@@ -276,9 +276,9 @@
 
               <!-- Commentaire récent -->
               <SectionCollapsible v-if="latestComment" title="Dernier commentaire" :default-open="true">
-                <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+                <div class="bg-gray-50 dark:bg-gray-900 rounded-3 p-4">
                   <p class="text-gray-700 dark:text-gray-300">{{ latestComment.content }}</p>
-                  <p class="text-xs text-gray-500 mt-2">
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
                     Par {{ latestComment.user?.name }} • {{ formatRelativeTime(latestComment.created_at) }}
                   </p>
                 </div>
@@ -301,9 +301,9 @@
               />
 
               <!-- Échéance inline-editable -->
-              <div class="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+              <div class="rounded-3 border border-gray-200 dark:border-gray-700 p-4">
                 <div class="flex items-center gap-2 mb-3">
-                  <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
+                  <div class="w-8 h-8 rounded-3 bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
                     <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
@@ -346,10 +346,10 @@
               </div>
 
               <!-- Taux de réalisation inline-editable -->
-              <div class="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+              <div class="rounded-3 border border-gray-200 dark:border-gray-700 p-4">
                 <div class="flex items-center justify-between mb-3">
                   <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-lg bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center shrink-0">
+                    <div class="w-8 h-8 rounded-3 bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center shrink-0">
                       <svg class="w-4 h-4 text-brand-600 dark:text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                       </svg>
@@ -392,9 +392,9 @@
                       min="0"
                       max="100"
                       v-model.number="editing.value"
-                      class="w-16 text-sm text-center border border-brand-400 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      class="w-16 text-sm text-center border border-brand-400 rounded-3 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     />
-                    <span class="text-sm text-gray-500">%</span>
+                    <span class="text-sm text-gray-500 dark:text-gray-400">%</span>
                   </div>
                   <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
                     <div
@@ -406,13 +406,13 @@
                   <div class="flex gap-2 justify-end">
                     <button
                       @click="cancelEdit"
-                      class="px-3 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors"
+                      class="px-3 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors"
                     >
                       Annuler
                     </button>
                     <button
                       @click="saveEdit"
-                      class="px-3 py-1 text-xs bg-brand-500 hover:bg-brand-600 text-white rounded-lg transition-colors"
+                      class="px-3 py-1 text-xs bg-brand-500 hover:bg-brand-600 text-white rounded-3 transition-colors"
                     >
                       Enregistrer
                     </button>
@@ -424,7 +424,12 @@
               <EssentialInfoPanel :tache="localTache" />
 
               <!-- Assignés -->
-              <AssigneesPanel :assignees="localTache.assignees" />
+              <AssigneesPanel
+                :tache="localTache"
+                :assignees="localTache.assignees"
+                :permissions="localTache.permissions"
+                @updated="(fresh) => { localTache = fresh }"
+              />
 
               <!-- Labels -->
               <LabelsPanel v-if="localTache.labels?.length > 0" :labels="localTache.labels" />
@@ -496,7 +501,7 @@
 
           <button
             @click="$emit('close')"
-            class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all"
+            class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all"
           >
             Fermer
           </button>

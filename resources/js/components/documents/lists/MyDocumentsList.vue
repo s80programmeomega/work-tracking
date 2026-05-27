@@ -2,7 +2,7 @@
   <div class="space-y-4">
     <!-- Header with Stats -->
     <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
-      <div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
+      <div class="rounded-3 border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm text-gray-500 dark:text-gray-400">Total</p>
@@ -14,7 +14,7 @@
         </div>
       </div>
 
-      <div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
+      <div class="rounded-3 border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm text-gray-500 dark:text-gray-400">Partagés</p>
@@ -26,7 +26,7 @@
         </div>
       </div>
 
-      <div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
+      <div class="rounded-3 border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm text-gray-500 dark:text-gray-400">Téléchargements</p>
@@ -38,7 +38,7 @@
         </div>
       </div>
 
-      <div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
+      <div class="rounded-3 border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm text-gray-500 dark:text-gray-400">Espace</p>
@@ -60,7 +60,7 @@
           v-model="searchQuery"
           type="text"
           placeholder="Rechercher dans mes documents..."
-          class="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+          class="w-full rounded-3 border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
         />
       </div>
 
@@ -69,7 +69,7 @@
         <!-- Type Filter -->
         <select
           v-model="typeFilter"
-          class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+          class="rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
         >
           <option value="">Tous les types</option>
           <option value="image">Images</option>
@@ -83,7 +83,7 @@
         <!-- Entity Filter -->
         <select
           v-model="entityFilter"
-          class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+          class="rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
         >
           <option value="">Tous les niveaux</option>
           <option value="App\Models\Workspace">Workspaces</option>
@@ -94,7 +94,7 @@
         </select>
 
         <!-- View Mode -->
-        <div class="flex rounded-lg border border-gray-300 dark:border-gray-700">
+        <div class="flex rounded-3 border border-gray-300 dark:border-gray-700">
           <button
             @click="viewMode = 'grid'"
             :class="[
@@ -123,7 +123,7 @@
 
     <!-- Loading State -->
     <div v-if="loading" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-      <div v-for="i in 9" :key="i" class="h-48 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-800"></div>
+      <div v-for="i in 9" :key="i" class="h-48 animate-pulse rounded-3 bg-gray-200 dark:bg-gray-800"></div>
     </div>
 
     <!-- Documents -->

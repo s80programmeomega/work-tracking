@@ -1,19 +1,19 @@
 <!-- resources/js/components/taches/TacheForm.vue -->
 <template>
   <!-- ✅ z-index très élevé pour passer au-dessus de sidebar et header -->
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-20"
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-20"
     @click.self="$emit('close')" >
     <div
-      class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[95vh] overflow-hidden flex flex-col animate-fade-in"
+      class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-3xl max-h-[95vh] overflow-hidden flex flex-col animate-fade-in"
     >
       <!-- Header avec gradient moderne -->
       <div
-        class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white"
+        class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 text-white"
       >
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-4">
             <div
-              class="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg ring-2 ring-white/30"
+              class="w-14 h-14 rounded-3 bg-white/20 flex items-center justify-center ring-2 ring-white/30"
             >
               <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -31,7 +31,7 @@
           </div>
           <button 
             @click="$emit('close')"
-            class="text-white/80 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
+            class="text-white/80 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-3"
           >
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -89,7 +89,7 @@
             <!-- Section Informations Générales -->
             <div class="space-y-5">
               <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
-                <div class="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg">
+                <div class="p-2 rounded-3">
                   <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -101,9 +101,9 @@
               </div>
 
               <!-- Activité Context Card -->
-              <div v-if="activiteContext" class="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border-2 border-blue-200 dark:border-blue-800">
+              <div v-if="activiteContext" class="p-4 rounded-3 border-2 border-blue-200 dark:border-blue-800">
                 <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
+                  <div class="w-10 h-10 rounded-3 bg-blue-600 flex items-center justify-center">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                     </svg>
@@ -128,7 +128,7 @@
                 <select 
                   v-model="formData.activite_id" 
                   required
-                  class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                 >
                   <option value="">Sélectionner une activité</option>
                   <option v-for="activite in activites" :key="activite.id" :value="activite.id">
@@ -148,7 +148,7 @@
                   type="text" 
                   required
                   placeholder="Ex: Implémenter l'authentification utilisateur"
-                  class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                 />
               </div>
 
@@ -161,7 +161,7 @@
                   v-model="formData.description" 
                   rows="4" 
                   placeholder="Décrivez la tâche en détail..."
-                  class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
+                  class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
                 ></textarea>
               </div>
 
@@ -175,7 +175,7 @@
                     v-model="formData.objectif" 
                     rows="3" 
                     placeholder="Quel est l'objectif de cette tâche ?"
-                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
+                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
                   ></textarea>
                 </div>
                 <div>
@@ -186,7 +186,7 @@
                     v-model="formData.indicateurs_resultats" 
                     rows="3" 
                     placeholder="Comment mesurer le succès ?"
-                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
+                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
                   ></textarea>
                 </div>
               </div>
@@ -195,7 +195,7 @@
             <!-- Section Validation -->
             <div class="space-y-5">
               <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
-                <div class="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg">
+                <div class="p-2 rounded-3">
                   <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -206,7 +206,7 @@
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <label class="relative flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all"
+                <label class="relative flex items-start gap-3 p-4 border-2 rounded-3 cursor-pointer transition-all"
                   :class="formData.validation_n1_required ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'"
                 >
                   <input 
@@ -227,7 +227,7 @@
                   </svg>
                 </label>
 
-                <label class="relative flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all"
+                <label class="relative flex items-start gap-3 p-4 border-2 rounded-3 cursor-pointer transition-all"
                   :class="formData.validation_n2_required ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'"
                 >
                   <input 
@@ -251,7 +251,7 @@
               
               <!-- Info validation -->
               <div v-if="formData.validation_n1_required || formData.validation_n2_required" 
-                class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800"
+                class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-3 border border-blue-200 dark:border-blue-800"
               >
                 <div class="flex items-start gap-3">
                   <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -279,7 +279,7 @@
             <!-- Section Planification -->
             <div class="space-y-5">
               <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
-                <div class="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg">
+                <div class="p-2 rounded-3">
                   <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -299,13 +299,13 @@
                   </label>
                   <div class="space-y-2">
                     <label v-for="statut in statutOptions" :key="statut.value"
-                      class="relative flex items-center gap-3 p-3.5 border-2 rounded-xl cursor-pointer transition-all group"
+                      class="relative flex items-center gap-3 p-3.5 border-2 rounded-3 cursor-pointer transition-all group"
                       :class="formData.statut === statut.value
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 shadow-sm'
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 '
                         : 'border-gray-300 dark:border-gray-600 hover:border-blue-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'"
                     >
                       <input type="radio" v-model="formData.statut" :value="statut.value" class="sr-only" />
-                      <span :class="statut.color" class="w-4 h-4 rounded-full ring-2 ring-white dark:ring-gray-800 shadow-sm"></span>
+                      <span :class="statut.color" class="w-4 h-4 rounded-full ring-2 ring-white dark:ring-gray-800 "></span>
                       <span class="flex-1 text-sm font-semibold text-gray-900 dark:text-white">{{ statut.label }}</span>
                       <svg v-if="formData.statut === statut.value" class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
@@ -321,9 +321,9 @@
                   </label>
                   <div class="space-y-2">
                     <label v-for="priorite in prioriteOptions" :key="priorite.value"
-                      class="relative flex items-center gap-3 p-3.5 border-2 rounded-xl cursor-pointer transition-all group"
+                      class="relative flex items-center gap-3 p-3.5 border-2 rounded-3 cursor-pointer transition-all group"
                       :class="formData.priorite === priorite.value
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 shadow-sm'
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 '
                         : 'border-gray-300 dark:border-gray-600 hover:border-blue-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'"
                     >
                       <input type="radio" v-model="formData.priorite" :value="priorite.value" class="sr-only" />
@@ -346,7 +346,7 @@
                   <input 
                     v-model="formData.date_debut" 
                     type="date"
-                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                   />
                 </div>
                 <div>
@@ -356,7 +356,7 @@
                   <input 
                     v-model="formData.echeance" 
                     type="date"
-                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                   />
                 </div>
                 <div>
@@ -366,7 +366,7 @@
                   <input 
                     v-model="formData.date_fin_reelle" 
                     type="date"
-                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                   />
                 </div>
               </div>
@@ -382,7 +382,7 @@
                     type="number" 
                     min="0" 
                     max="100"
-                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                   />
                   <div class="mt-3 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
                     <div 
@@ -402,7 +402,7 @@
                     min="0" 
                     step="0.5" 
                     placeholder="0"
-                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                   />
                 </div>
                 <div>
@@ -415,7 +415,7 @@
                     min="0" 
                     step="0.5" 
                     placeholder="0"
-                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                   />
                 </div>
               </div>
@@ -424,7 +424,7 @@
             <!-- Section Équipe & Organisation -->
             <div class="space-y-5">
                 <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
-                  <div class="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg">
+                  <div class="p-2 rounded-3">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -441,7 +441,7 @@
                   Assigner à
                 </label>
                 <!-- Chargement des membres -->
-                <div v-if="loadingMembers" class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl mb-4">
+                <div v-if="loadingMembers" class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-3 mb-4">
                   <div class="flex items-center gap-3">
                     <svg class="animate-spin w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24">
                       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -454,7 +454,7 @@
                 </div>
                 
                 <!-- Message si pas de permission -->
-               <div v-else-if="!canAssignUsers" class="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl border-l-4 border-amber-500 mb-4">
+               <div v-else-if="!canAssignUsers" class="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-3 border-l-4 border-amber-500 mb-4">
                   <div class="flex items-start gap-3">
                     <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -477,7 +477,7 @@
                       v-model="formData.assignee_ids" 
                       multiple
                       :disabled="!canAssignUsers || availableUsers.length === 0 || loadingMembers"
-                      class="w-full px-4 py-3 border-2 rounded-xl transition-all"
+                      class="w-full px-4 py-3 border-2 rounded-3 transition-all"
                       :class="[
                         !canAssignUsers || availableUsers.length === 0 || loadingMembers
                           ? 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 opacity-60 cursor-not-allowed' 
@@ -500,7 +500,7 @@
                 </div>
                 
                 <!-- Info ou message -->
-                  <div v-if="!loadingMembers && availableUsers.length === 0" class="mt-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <div v-if="!loadingMembers && availableUsers.length === 0" class="mt-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700">
                     <p class="text-sm text-gray-600 dark:text-gray-400 text-center">
                       Aucun membre disponible dans cette activité
                     </p>
@@ -520,7 +520,7 @@
                   <span 
                     v-for="userId in formData.assignee_ids" 
                     :key="userId"
-                    class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded-lg text-sm font-medium"
+                    class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded-3 text-sm font-medium"
                   >
                     <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold">
                       {{ getInitials(getUserById(userId)?.nom) }}
@@ -551,13 +551,13 @@
                     :key="label.id"
                     type="button"
                     @click="toggleLabel(label.id)"
-                    class="px-4 py-2 text-sm font-medium rounded-xl transition-all border-2"
+                    class="px-4 py-2 text-sm font-medium rounded-3 transition-all border-2"
                     :style="{
                       backgroundColor: formData.label_ids.includes(label.id) ? label.couleur + '20' : 'transparent',
                       color: label.couleur,
                       borderColor: formData.label_ids.includes(label.id) ? label.couleur : 'transparent'
                     }"
-                    :class="formData.label_ids.includes(label.id) ? 'shadow-sm scale-105' : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'"
+                    :class="formData.label_ids.includes(label.id) ? 'scale-105' : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'"
                   >
                     <span class="flex items-center gap-2">
                       <span 
@@ -580,7 +580,7 @@
             <!-- Section Visibilité -->
             <div class="space-y-5">
               <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
-                <div class="p-2 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg">
+                <div class="p-2 rounded-3">
                   <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -597,9 +597,9 @@
                 <label 
                   v-for="visibility in visibilityOptions" 
                   :key="visibility.value"
-                  class="relative flex flex-col items-center gap-3 p-5 border-2 rounded-xl cursor-pointer transition-all text-center group"
+                  class="relative flex flex-col items-center gap-3 p-5 border-2 rounded-3 cursor-pointer transition-all text-center group"
                   :class="formData.visibility === visibility.value
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 shadow-md scale-105'
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 scale-105'
                     : 'border-gray-300 dark:border-gray-600 hover:border-blue-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'"
                 >
                   <input type="radio" v-model="formData.visibility" :value="visibility.value" class="sr-only" />
@@ -622,7 +622,7 @@
             <!-- Section Commentaire -->
             <div class="space-y-5">
               <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
-                <div class="p-2 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-lg">
+                <div class="p-2 rounded-3">
                   <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
@@ -637,7 +637,7 @@
                 v-model="formData.commentaire" 
                 rows="3" 
                 placeholder="Ajoutez un commentaire ou une note..."
-                class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
+                class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
               ></textarea>
             </div>
 
@@ -662,7 +662,7 @@
           <button 
             type="button" 
             @click="$emit('close')"
-            class="px-6 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 font-semibold text-gray-700 dark:text-gray-300 transition-all hover:scale-105"
+            class="px-6 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 font-semibold text-gray-700 dark:text-gray-300 transition-all "
           >
             Annuler
           </button>
@@ -670,10 +670,10 @@
             type="button" 
             @click="handleSubmit" 
             :disabled="loading || !hasPermission"
-            class="px-6 py-3 rounded-xl font-semibold shadow-lg transition-all flex items-center gap-2 hover:scale-105 disabled:scale-100"
+            class="px-6 py-3 rounded-3 font-semibold transition-all flex items-center gap-2 disabled:scale-100"
             :class="loading || !hasPermission 
-              ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 cursor-not-allowed' 
-              : 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-white shadow-blue-500/50'"
+              ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed' 
+              : 'text-white shadow-blue-500/50'"
           >
             <svg v-if="loading" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

@@ -8,7 +8,7 @@
             <div class="flex items-center gap-5">
               <div class="relative">
                 <div
-                  class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
+                  class="w-16 h-16 rounded-3 flex items-center justify-center shadow-blue-500/25">
                   <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -16,7 +16,7 @@
                 </div>
                 <div
                   v-if="counts.total > 0"
-                  class="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center shadow-lg">
+                  class="absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center ">
                   <span class="text-xs font-bold text-white">{{ counts.total }}</span>
                 </div>
               </div>
@@ -29,7 +29,7 @@
             </div>
 
             <button @click="loadData" :disabled="loading"
-              class="p-3 rounded-xl border border-gray-300/80 dark:border-gray-700/80 bg-white/80 dark:bg-gray-800/80 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 disabled:opacity-50 shadow-sm"
+              class="p-3 rounded-3 border border-gray-300/80 dark:border-gray-700/80 bg-white/80 dark:bg-gray-800/80 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 disabled:opacity-50 "
               title="Actualiser">
               <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" :class="{ 'animate-spin': loading }"
                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -40,14 +40,14 @@
           </div>
 
           <!-- Tabs -->
-          <div class="flex gap-1 mt-8 bg-gray-100/80 dark:bg-gray-800/80 rounded-2xl p-1.5">
+          <div class="flex gap-1 mt-8 bg-gray-100/80 dark:bg-gray-800/80 rounded-3 p-1.5">
             <button
               v-for="tab in tabs"
               :key="tab.id"
               @click="activeTab = tab.id"
-              class="flex items-center gap-2.5 px-6 py-3 text-sm font-semibold transition-all duration-200 rounded-xl"
+              class="flex items-center gap-2.5 px-6 py-3 text-sm font-semibold transition-all duration-200 rounded-3"
               :class="activeTab === tab.id
-                ? 'text-white shadow-lg ' + tab.activeClass
+                ? 'text-white ' + tab.activeClass
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-gray-700/50'">
               <span>{{ tab.label }}</span>
               <span v-if="tab.count > 0"
@@ -70,7 +70,7 @@
 
         <!-- Error -->
         <div v-else-if="error"
-          class="rounded-2xl border border-red-200 bg-red-50/80 dark:bg-red-900/20 dark:border-red-800/50 p-8">
+          class="rounded-3 border border-red-200 bg-red-50/80 dark:bg-red-900/20 dark:border-red-800/50 p-8">
           <p class="text-red-700 dark:text-red-300">{{ error }}</p>
         </div>
 
@@ -90,7 +90,7 @@
           <div
             v-for="resultat in currentResultats"
             :key="resultat.id"
-            class="bg-white/80 dark:bg-gray-800/80 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 p-6 shadow-sm">
+            class="bg-white/80 dark:bg-gray-800/80 rounded-3 border border-gray-200/50 dark:border-gray-700/50 p-6 ">
             <div class="flex items-start justify-between gap-4">
               <div class="flex-1 min-w-0">
                 <h3 class="font-semibold text-gray-900 dark:text-white truncate">
@@ -152,13 +152,13 @@ const tabs = computed(() => [
     id: 'n1',
     label: 'En attente N1',
     count: counts.value.en_validation_n1,
-    activeClass: 'bg-gradient-to-r from-orange-500 to-amber-500',
+    activeClass: 'bg-warning-500',
   },
   {
     id: 'n2',
     label: 'En attente N2',
     count: counts.value.en_validation_n2,
-    activeClass: 'bg-gradient-to-r from-blue-500 to-cyan-500',
+    activeClass: 'bg-brand-500',
   },
 ])
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+  <div class="border border-gray-200 dark:border-gray-700 rounded-3 overflow-hidden">
     <!-- Header cliquable -->
     <button
       @click="isOpen = !isOpen"
@@ -8,7 +8,7 @@
       <h4 class="font-semibold text-gray-900 dark:text-white">{{ title }}</h4>
       
       <svg 
-        class="w-5 h-5 text-gray-500 transition-transform duration-200"
+        class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200"
         :class="{ 'rotate-180': isOpen }"
         fill="none" 
         stroke="currentColor" 

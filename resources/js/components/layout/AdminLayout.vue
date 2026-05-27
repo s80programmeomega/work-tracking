@@ -8,7 +8,7 @@
     >
       <app-header />
       <TrialBanner />
-      <div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">
+      <div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 bg-gray-100 dark:bg-gray-900 min-h-[calc(100vh-64px)]">
         <slot></slot>
       </div>
     </div>

@@ -13,14 +13,14 @@
             enter-to="opacity-100 scale-100" leave="ease-in duration-200" leave-from="opacity-100 scale-100"
             leave-to="opacity-0 scale-95">
             <DialogPanel
-              class="relative w-full max-w-3xl transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-xl transition-all">
+              class="relative w-full max-w-3xl transform overflow-hidden rounded-3 bg-white dark:bg-gray-800 transition-all">
               <!-- Header -->
               <div class="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
                 <div class="flex items-center justify-between">
                   <div>
                     <DialogTitle class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
                       <div
-                        class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+                        class="w-10 h-10 rounded-3 flex items-center justify-center">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -33,8 +33,8 @@
                     </p>
                   </div>
                   <button @click="$emit('close')"
-                    class="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="rounded-3 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
@@ -46,7 +46,7 @@
 
                 <!-- Documents existants (en mode édition) -->
                 <div v-if="isEditing && existingDocuments.length > 0"
-                  class="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  class="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-3">
                   <h4 class="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-3 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -56,7 +56,7 @@
                   </h4>
                   <div class="space-y-2">
                     <div v-for="doc in existingDocuments" :key="doc.id"
-                      class="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
+                      class="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
                       <div class="flex items-center gap-3 flex-1 min-w-0">
                         <!-- Icône du type de fichier -->
                         <div :class="getFileIconClass(doc)"
@@ -135,7 +135,7 @@
                   </label>
                   <textarea v-model="form.resultats_attendus" rows="3" required
                     dusk="submit-result-attendus"
-                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 resize-none"
+                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 resize-none"
                     placeholder="Décrivez ce qui était attendu de cette tâche..."></textarea>
                   <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                     Minimum 10 caractères • {{ form.resultats_attendus.length }}/1000
@@ -149,7 +149,7 @@
                   </label>
                   <textarea v-model="form.resultats_obtenus" rows="4" required
                     dusk="submit-result-textarea"
-                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 resize-none"
+                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 resize-none"
                     placeholder="Décrivez en détail ce que vous avez accompli..."></textarea>
                   <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                     Minimum 10 caractères • {{ form.resultats_obtenus.length }}/2000
@@ -163,11 +163,11 @@
                   </label>
                   <div class="flex items-center gap-4">
                     <input v-model.number="form.taux_realisation" type="range" min="0" max="100" step="5"
-                      class="flex-1 h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                      class="flex-1 h-3 bg-gray-200 rounded-3 appearance-none cursor-pointer dark:bg-gray-700"
                       :style="tauxSliderStyle" />
                     <div class="flex items-center gap-2">
                       <input v-model.number="form.taux_realisation" type="number" min="0" max="100"
-                        class="w-20 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-center font-bold text-lg" />
+                        class="w-20 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-center font-bold text-lg" />
                       <span class="text-lg font-bold text-gray-700 dark:text-gray-300">%</span>
                     </div>
                   </div>
@@ -182,7 +182,7 @@
                     Difficultés rencontrées
                   </label>
                   <textarea v-model="form.difficultes_rencontrees" rows="3"
-                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 resize-none"
+                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 resize-none"
                     placeholder="Décrivez les obstacles ou challenges rencontrés (optionnel)..."></textarea>
                 </div>
 
@@ -192,7 +192,7 @@
                     Solutions envisagées
                   </label>
                   <textarea v-model="form.solutions_envisagees" rows="3"
-                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 resize-none"
+                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 resize-none"
                     placeholder="Comment avez-vous résolu ou comptez résoudre ces difficultés ? (optionnel)..."></textarea>
                 </div>
 
@@ -202,7 +202,7 @@
                     Observations / Commentaires
                   </label>
                   <textarea v-model="form.observations" rows="2"
-                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 resize-none"
+                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 resize-none"
                     placeholder="Autres remarques ou suggestions (optionnel)..."></textarea>
                 </div>
 
@@ -212,7 +212,7 @@
                     Documents justificatifs {{ isEditing ? '(nouveaux)' : '' }}
                   </label>
                   <div @drop.prevent="handleDrop" @dragover.prevent="isDragging = true" @dragleave="isDragging = false"
-                    class="border-2 border-dashed rounded-lg p-6 text-center transition-colors"
+                    class="border-2 border-dashed rounded-3 p-6 text-center transition-colors"
                     :class="isDragging ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-300 dark:border-gray-700'">
                     <input ref="fileInput" type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
                       @change="handleFileSelect" class="hidden" />
@@ -236,7 +236,7 @@
                   <!-- Liste des nouveaux fichiers -->
                   <div v-if="form.documents.length > 0" class="mt-3 space-y-2">
                     <div v-for="(file, index) in form.documents" :key="index"
-                      class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                      class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-3">
                       <div class="flex items-center gap-3 flex-1 min-w-0">
                         <div
                           class="w-8 h-8 rounded bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
@@ -268,12 +268,12 @@
               <div class="border-t border-gray-200 dark:border-gray-700 px-6 py-4 bg-gray-50 dark:bg-gray-900">
                 <div class="flex items-center justify-between">
                   <button type="button" @click="$emit('close')"
-                    class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                    class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-3 transition-colors">
                     Annuler
                   </button>
                   <button @click="handleSubmit" :disabled="!isFormValid || submitting"
                     dusk="submit-result-submit-btn"
-                    class="px-6 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-medium rounded-lg hover:from-purple-600 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl flex items-center gap-2">
+                    class="px-6 py-2 text-white font-medium rounded-3 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2">
                     <svg v-if="submitting" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
                       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                       <path class="opacity-75" fill="currentColor"
@@ -290,7 +290,7 @@
               <transition name="fade">
                 <div v-if="showPreviewModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
                   <div
-                    class="bg-white dark:bg-gray-800 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
+                    class="bg-white dark:bg-gray-800 rounded-3 max-w-4xl w-full max-h-[90vh] overflow-hidden ">
                     <!-- Header du modal de prévisualisation -->
                     <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
                       <div class="flex items-center gap-3">
@@ -320,7 +320,7 @@
                         </button>
                         <button @click="closePreviewModal"
                           class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors">
-                          <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M6 18L18 6M6 6l12 12" />
                           </svg>
@@ -362,11 +362,11 @@
                       <div v-else-if="previewDoc && !previewLoading">
                         <!-- Image -->
                         <img v-if="previewDoc.is_image" :src="previewDoc.url" :alt="previewDoc.nom"
-                          class="max-w-full max-h-[70vh] mx-auto rounded-lg shadow-lg" />
+                          class="max-w-full max-h-[70vh] mx-auto rounded-3 " />
 
                         <!-- PDF -->
                         <iframe v-else-if="previewDoc.is_pdf" :src="previewDoc.url"
-                          class="w-full h-[70vh] rounded-lg border-0" frameborder="0">
+                          class="w-full h-[70vh] rounded-3 border-0" frameborder="0">
                         </iframe>
 
                         <!-- Fichier non prévisualisable -->
@@ -385,7 +385,7 @@
                             Ce type de fichier ne peut pas être prévisualisé dans le navigateur.
                           </p>
                           <button @click="downloadDocument(previewDoc)"
-                            class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2 mx-auto">
+                            class="px-4 py-2 bg-blue-500 text-white rounded-3 hover:bg-blue-600 transition-colors flex items-center gap-2 mx-auto">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />

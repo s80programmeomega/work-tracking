@@ -6,11 +6,11 @@
       <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
         Labels de la tâche
       </label>
-      <div class="flex flex-wrap gap-2 min-h-[2.5rem] p-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900/50">
+      <div class="flex flex-wrap gap-2 min-h-[2.5rem] p-3 border-2 border-gray-200 dark:border-gray-700 rounded-3 bg-gray-50 dark:bg-gray-900/50">
         <span
           v-for="label in selectedLabelsObjects"
           :key="label.id"
-          class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium shadow-sm transition-all hover:shadow-md"
+          class="inline-flex items-center gap-2 px-3 py-1.5 rounded-3 text-sm font-medium transition-all "
           :style="{
             backgroundColor: label.couleur,
             color: label.text_color
@@ -20,7 +20,7 @@
           <button
             type="button"
             @click="removeLabel(label.id)"
-            class="hover:scale-110 transition-transform"
+            class="transition-transform"
           >
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -61,7 +61,7 @@
           v-model="searchQuery"
           type="text"
           placeholder="Rechercher un label..."
-          class="w-full pl-10 pr-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
+          class="w-full pl-10 pr-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
         />
       </div>
 
@@ -72,7 +72,7 @@
           :key="label.id"
           type="button"
           @click="toggleLabel(label.id)"
-          class="flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-all hover:scale-105 shadow-sm hover:shadow-md"
+          class="flex items-center justify-between px-3 py-2 rounded-3 text-sm font-medium transition-all "
           :style="{
             backgroundColor: label.couleur,
             color: label.text_color,
@@ -114,7 +114,7 @@
           :key="scope.value"
           type="button"
           @click="currentScope = scope.value"
-          class="flex-1 px-3 py-2 text-xs font-medium rounded-lg transition-colors"
+          class="flex-1 px-3 py-2 text-xs font-medium rounded-3 transition-colors"
           :class="currentScope === scope.value
             ? 'bg-indigo-500 text-white'
             : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'"

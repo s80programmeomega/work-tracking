@@ -1,5 +1,5 @@
 <template>
-  <div :class="['rounded-xl border p-4', variantClasses[variant].container]">
+  <div :class="['rounded-3 border p-4 shadow-none', variantClasses[variant].container]">
     <div class="flex items-start gap-3">
       <div :class="['-mt-0.5', variantClasses[variant].icon]">
         <component :is="icons[variant]" />

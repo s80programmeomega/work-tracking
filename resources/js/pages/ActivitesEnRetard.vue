@@ -13,7 +13,7 @@
       <button
         v-if="viewType === 'all'"
         @click="showCreateForm = true"
-        class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
+        class="inline-flex items-center justify-center gap-2 rounded-3 bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
       >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -23,14 +23,14 @@
     </div>
 
     <!-- Filters -->
-    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+    <div class="bg-white dark:bg-gray-800 p-4 rounded-3 border border-gray-200 dark:border-gray-700">
       <div class="flex flex-col space-y-4 md:flex-row md:items-center md:space-y-0 md:space-x-4">
         <div class="flex-1">
           <input
             v-model="filters.search"
             type="text"
             placeholder="Rechercher par nom ou code..."
-            class="w-full max-w-sm px-4 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+            class="w-full max-w-sm px-4 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
             @input="debouncedSearch"
           />
         </div>
@@ -38,7 +38,7 @@
         <select
           v-if="viewType === 'all'"
           v-model="filters.status"
-          class="px-4 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+          class="px-4 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
           @change="loadActivites"
         >
           <option value="">Tous les statuts</option>
@@ -48,7 +48,7 @@
 
         <button
           @click="resetFilters"
-          class="inline-flex items-center gap-2 px-4 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+          class="inline-flex items-center gap-2 px-4 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -65,10 +65,10 @@
     </div>
 
     <!-- Activities Table -->
-    <div v-else class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+    <div v-else class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700">
       <div class="overflow-x-auto">
         <table class="w-full text-sm text-left">
-          <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700">
+          <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
             <tr>
               <th class="px-6 py-3">Activité</th>
               <th class="px-6 py-3">Projet</th>
@@ -367,7 +367,7 @@ const getStatusClass = (status) => {
     active: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
     archived: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
   }
-  return classes[status] || 'bg-gray-100 text-gray-800'
+  return classes[status] || 'bg-gray-100 text-gray-800 dark:text-gray-100'
 }
 
 const getStatusLabel = (status) => {

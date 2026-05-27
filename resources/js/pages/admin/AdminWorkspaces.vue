@@ -27,12 +27,12 @@
           @input="debouncedFetch"
           type="text"
           placeholder="Search workspace..."
-          class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 w-56"
+          class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 w-56"
         />
         <select
           v-model="filters.subscription_mode"
           @change="fetchWorkspaces"
-          class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+          class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
         >
           <option value="">All modes</option>
           <option value="trial">Trial</option>
@@ -41,7 +41,7 @@
         <select
           v-model="filters.is_active"
           @change="fetchWorkspaces"
-          class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+          class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
         >
           <option value="">All statuses</option>
           <option value="1">Active</option>
@@ -50,12 +50,12 @@
       </div>
 
       <!-- Error -->
-      <div v-if="error" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg">
+      <div v-if="error" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-3">
         {{ error }}
       </div>
 
       <!-- Table -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div v-if="loading" class="flex justify-center py-12">
           <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
         </div>
@@ -140,7 +140,7 @@
 
         <!-- Pagination -->
         <div v-if="pagination && pagination.last_page > 1" class="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-700">
-          <p class="text-sm text-gray-500">Page {{ pagination.current_page }} / {{ pagination.last_page }}</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Page {{ pagination.current_page }} / {{ pagination.last_page }}</p>
           <div class="flex gap-2">
             <button
               @click="page--; fetchWorkspaces()"
@@ -158,7 +158,7 @@
 
       <!-- Extend trial modal -->
       <div v-if="extendModal.open" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-sm mx-4">
+        <div class="bg-white dark:bg-gray-800 rounded-3 p-6 w-full max-w-sm mx-4">
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Extend Trial — {{ extendModal.workspace?.nom }}
           </h3>
@@ -168,14 +168,14 @@
             type="number"
             min="1"
             max="365"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           />
           <div class="flex justify-end gap-3 mt-4">
             <button @click="extendModal.open = false" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900">Cancel</button>
             <button
               @click="confirmExtend"
               :disabled="extendModal.loading"
-              class="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm hover:bg-brand-700 disabled:opacity-50"
+              class="px-4 py-2 bg-brand-600 text-white rounded-3 text-sm hover:bg-brand-700 disabled:opacity-50"
             >
               <i class="fas fa-save mr-1"></i>Save
             </button>
@@ -185,7 +185,7 @@
 
       <!-- Suspend modal -->
       <div v-if="suspendModal.open" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-sm mx-4">
+        <div class="bg-white dark:bg-gray-800 rounded-3 p-6 w-full max-w-sm mx-4">
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Suspend — {{ suspendModal.workspace?.nom }}
           </h3>
@@ -193,14 +193,14 @@
           <textarea
             v-model="suspendModal.reason"
             rows="3"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 resize-none"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 resize-none"
           ></textarea>
           <div class="flex justify-end gap-3 mt-4">
             <button @click="suspendModal.open = false" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900">Cancel</button>
             <button
               @click="confirmSuspend"
               :disabled="suspendModal.loading"
-              class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 disabled:opacity-50"
+              class="px-4 py-2 bg-red-600 text-white rounded-3 text-sm hover:bg-red-700 disabled:opacity-50"
             >
               <i class="fas fa-ban mr-1"></i>Suspend
             </button>

@@ -24,20 +24,20 @@
               <!-- Workspace Selector -->
               <div v-if="hasWorkspaces" class="relative">
                 <select v-model="selectedWorkspaceId" @change="onWorkspaceChange"
-                  class="pl-10 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer">
+                  class="pl-10 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer">
                   <option v-for="workspace in workspaces" :key="workspace.id" :value="workspace.id"
                     class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
                     {{ workspace.nom }}
                   </option>
                 </select>
-                <BuildingOfficeIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                <BuildingOfficeIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-gray-400" />
                 <ChevronDownIcon
-                  class="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                  class="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-gray-400 pointer-events-none" />
               </div>
 
               <!-- Display Mode Toggle for Super Admin -->
               <button v-if="isSuperAdmin" @click="toggleDisplayMode" :class="[
-                'inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+                'inline-flex items-center gap-2 px-4 py-2 rounded-3 text-sm font-medium transition-colors',
                 displayMode === 'all-projects'
                   ? 'bg-blue-600 text-white hover:bg-blue-700'
                   : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
@@ -48,7 +48,7 @@
 
               <!-- Create Project Button -->
               <button @click="openCreateModal"
-                class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-3 hover:bg-blue-700 transition-colors font-medium">
                 <PlusIcon class="w-4 h-4" />
                 Nouveau projet
               </button>
@@ -62,7 +62,7 @@
         <div class="max-w-full mx-auto">
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <!-- Total Projects -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-4">
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-2xl font-bold text-gray-900 dark:text-white">
@@ -72,7 +72,7 @@
                     Projets total
                   </p>
                 </div>
-                <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-3">
                   <FolderIcon class="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </div>
               </div>
@@ -87,7 +87,7 @@
             </div>
 
             <!-- Activities -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-4">
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-2xl font-bold text-gray-900 dark:text-white">
@@ -97,7 +97,7 @@
                     Activités
                   </p>
                 </div>
-                <div class="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                <div class="p-2 bg-green-100 dark:bg-green-900/30 rounded-3">
                   <ListIcon class="w-6 h-6 text-green-600 dark:text-green-400" />
                 </div>
               </div>
@@ -109,7 +109,7 @@
             </div>
 
             <!-- Tasks -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-4">
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-2xl font-bold text-gray-900 dark:text-white">
@@ -119,7 +119,7 @@
                     Tâches
                   </p>
                 </div>
-                <div class="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                <div class="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-3">
                   <CheckCircleIcon class="w-6 h-6 text-purple-600 dark:text-purple-400" />
                 </div>
               </div>
@@ -134,7 +134,7 @@
             </div>
 
             <!-- Overdue -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-4">
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-2xl font-bold text-gray-900 dark:text-white">
@@ -144,7 +144,7 @@
                     En retard
                   </p>
                 </div>
-                <div class="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                <div class="p-2 bg-red-100 dark:bg-red-900/30 rounded-3">
                   <AlertCircleIcon class="w-6 h-6 text-red-600 dark:text-red-400" />
                 </div>
               </div>
@@ -163,19 +163,19 @@
       <div class="px-4 py-4">
         <div class="max-w-full mx-auto">
           <!-- Filters and Search - Trello Style -->
-          <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 mb-4">
+          <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-4 mb-4">
             <!-- Search Bar -->
             <div class="relative mb-4">
               <SearchIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input v-model="searchTerm" type="text" placeholder="Rechercher par nom, code ou description..."
-                class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+                class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
             </div>
 
             <!-- Filter Buttons -->
             <div class="flex flex-wrap gap-2">
               <!-- Status Filter -->
               <select v-model="filters.status"
-                class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-all">
+                class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-all">
                 <option value="all">Tous les statuts</option>
                 <option value="active">Actifs</option>
                 <option value="completed">Terminés</option>
@@ -184,9 +184,9 @@
 
               <!-- Favorites Button -->
               <button @click="filters.favorites = !filters.favorites" :class="[
-                'inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                'inline-flex items-center gap-2 px-3 py-2 rounded-3 text-sm font-medium transition-colors',
                 filters.favorites
-                  ? 'bg-yellow-100 text-yellow-800 border border-yellow-300'
+                  ? 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300 border border-yellow-300 dark:border-yellow-700'
                   : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
               ]">
                 <StarIcon :class="filters.favorites ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400'"
@@ -196,9 +196,9 @@
 
               <!-- Overdue Button -->
               <button @click="filters.overdue = !filters.overdue" :class="[
-                'inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                'inline-flex items-center gap-2 px-3 py-2 rounded-3 text-sm font-medium transition-colors',
                 filters.overdue
-                  ? 'bg-red-100 text-red-800 border border-red-300'
+                  ? 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 border border-red-300 dark:border-red-700'
                   : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
               ]">
                 <AlertCircleIcon class="w-4 h-4" />
@@ -226,7 +226,7 @@
 
           <!-- Empty State -->
           <div v-else-if="filteredProjets.length === 0"
-            class="text-center py-16 bg-white dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
+            class="text-center py-16 bg-white dark:bg-gray-800 rounded-3 border-2 border-dashed border-gray-300 dark:border-gray-700">
             <div
               class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 mb-4">
               <FolderOpenIcon class="w-8 h-8 text-gray-400" />
@@ -241,7 +241,7 @@
               }}
             </p>
             <button v-if="!searchTerm && !hasActiveFilters" @click="openCreateModal"
-              class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+              class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-3 hover:bg-blue-700 transition-colors font-medium">
               <PlusIcon class="w-5 h-5" />
               Créer mon premier projet
             </button>
@@ -250,7 +250,7 @@
           <!-- Projects Grid - Trello Style Cards -->
           <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <div v-for="projet in filteredProjets" :key="projet.id"
-              class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow overflow-hidden cursor-pointer"
+              class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 transition-shadow overflow-hidden cursor-pointer"
               @click="viewProjet(projet.id)">
               <!-- Card Header with Color Band -->
               <div class="h-2" :style="{ backgroundColor: projet.couleur || '#3B82F6' }"></div>
@@ -284,12 +284,12 @@
                     <div class="relative">
                       <button @click.stop="toggleMenu(projet.id)"
                         class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                        <HorizontalDots class="w-4 h-4 text-gray-500" />
+                        <HorizontalDots class="w-4 h-4 text-gray-500 dark:text-gray-400" />
                       </button>
 
                       <!-- Dropdown Menu -->
                       <div v-if="activeMenuId === projet.id" v-click-outside="() => activeMenuId = null"
-                        class="absolute right-0 mt-1 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-10">
+                        class="absolute right-0 mt-1 w-48 bg-white dark:bg-gray-700 rounded-3 border border-gray-200 dark:border-gray-600 z-10">
                         <button @click.stop="viewProjet(projet.id)"
                           class="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-t-lg transition-colors">
                           <EyeIcon class="w-4 h-4" />
@@ -404,7 +404,7 @@
                         class="w-full h-full object-cover" />
                     </div>
                     <div v-else
-                      class="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-xs font-semibold ring-1 ring-gray-200 dark:ring-gray-700">
+                      class="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-semibold ring-1 ring-gray-200 dark:ring-gray-700">
                       {{ getInitials(projet.responsable?.nom) }}
                     </div>
                   </div>
@@ -415,7 +415,7 @@
 
           <!-- Pagination -->
           <div v-if="pagination.last_page > 1"
-            class="flex items-center justify-between bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 mt-4">
+            class="flex items-center justify-between bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-4 mt-4">
             <div class="text-sm text-gray-700 dark:text-gray-400">
               Affichage de <span class="font-medium">{{ (pagination.current_page - 1) * pagination.per_page + 1
                 }}</span> à

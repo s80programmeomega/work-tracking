@@ -23,7 +23,7 @@
           </div>
           <button
             @click="$emit('add-task', 'a_faire')"
-            class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
+            class="p-1 text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
             title="Ajouter une tâche"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -192,7 +192,7 @@
     <!-- ✅ CORRECTION : Overlay subtil au lieu de complètement opaque -->
     <div
       v-if="isDragging"
-      class="fixed inset-0 bg-blue-500/5 backdrop-blur-[2px] pointer-events-none z-10"
+      class="fixed inset-0 bg-brand-500/5 pointer-events-none z-10"
     ></div>
   </div>
 </template>
@@ -409,7 +409,8 @@ const checkMove = (event) => {
 }
 
 .dragging-card {
-  @apply transform rotate-3 scale-105 shadow-2xl opacity-80 cursor-grabbing;
+  @apply transform rotate-3 scale-105 opacity-80 cursor-grabbing;
+  border: 2px solid var(--color-brand-300);
 }
 
 /* Animation lors du drop */

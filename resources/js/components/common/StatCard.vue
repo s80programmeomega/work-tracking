@@ -1,9 +1,9 @@
 <!-- resources/js/components/common/StatCard.vue -->
 <template>
   <div 
-    class="relative overflow-hidden rounded-xl p-4 border transition-all duration-300 hover:shadow-lg group"
+    class="relative overflow-hidden rounded-3 p-4 border transition-colors duration-200 group"
     :class="[
-      alert ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
+      alert ? 'border-error-300 dark:border-error-500/30 bg-error-50 dark:bg-error-500/10' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
     ]"
   >
     <div class="flex items-center justify-between">
@@ -18,7 +18,7 @@
       </div>
       
       <div 
-        class="w-12 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110"
+        class="w-10 h-10 rounded-3 flex items-center justify-center"
         :class="getIconBgClass"
       >
         <!-- Clipboard List -->
@@ -62,9 +62,9 @@
     
     <!-- Progress bar optionnelle -->
     <div v-if="progress !== undefined" class="mt-3">
-      <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-        <div 
-          class="h-2 rounded-full transition-all duration-500"
+      <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-1 h-1.5 overflow-hidden">
+        <div
+          class="h-1.5 rounded-1 transition-all duration-500"
           :class="getProgressBarColor"
           :style="{ width: `${Math.min(progress, 100)}%` }"
         ></div>
@@ -112,59 +112,59 @@ const props = defineProps({
 
 const colorClasses = {
   gray: {
-    icon: 'text-gray-500',
+    icon: 'text-gray-500 dark:text-gray-400',
     iconBg: 'bg-gray-100 dark:bg-gray-700',
     value: 'text-gray-900 dark:text-white',
-    bar: 'bg-gradient-to-r from-gray-400 to-gray-500',
-    progress: 'bg-gray-500'
+    bar: 'bg-gray-400',
+    progress: 'bg-gray-400'
   },
   slate: {
-    icon: 'text-slate-500',
-    iconBg: 'bg-slate-100 dark:bg-slate-900/30',
-    value: 'text-slate-600 dark:text-slate-400',
-    bar: 'bg-gradient-to-r from-slate-400 to-slate-500',
-    progress: 'bg-slate-500'
+    icon: 'text-gray-500 dark:text-gray-400',
+    iconBg: 'bg-gray-100 dark:bg-gray-700',
+    value: 'text-gray-700 dark:text-gray-300',
+    bar: 'bg-gray-400',
+    progress: 'bg-gray-400'
   },
   blue: {
-    icon: 'text-blue-500',
-    iconBg: 'bg-blue-100 dark:bg-blue-900/30',
-    value: 'text-blue-600 dark:text-blue-400',
-    bar: 'bg-gradient-to-r from-blue-400 to-blue-500',
-    progress: 'bg-blue-500'
+    icon: 'text-brand-500 dark:text-brand-400',
+    iconBg: 'bg-brand-50 dark:bg-brand-500/15',
+    value: 'text-brand-500 dark:text-brand-400',
+    bar: 'bg-brand-500',
+    progress: 'bg-brand-500'
   },
   green: {
-    icon: 'text-green-500',
-    iconBg: 'bg-green-100 dark:bg-green-900/30',
-    value: 'text-green-600 dark:text-green-400',
-    bar: 'bg-gradient-to-r from-green-400 to-green-500',
-    progress: 'bg-green-500'
+    icon: 'text-success-500 dark:text-success-300',
+    iconBg: 'bg-success-50 dark:bg-success-500/15',
+    value: 'text-success-500 dark:text-success-300',
+    bar: 'bg-success-500',
+    progress: 'bg-success-500'
   },
   red: {
-    icon: 'text-red-500',
-    iconBg: 'bg-red-100 dark:bg-red-900/30',
-    value: 'text-red-600 dark:text-red-400',
-    bar: 'bg-gradient-to-r from-red-400 to-red-500',
-    progress: 'bg-red-500'
+    icon: 'text-error-500 dark:text-error-300',
+    iconBg: 'bg-error-50 dark:bg-error-500/15',
+    value: 'text-error-500 dark:text-error-300',
+    bar: 'bg-error-500',
+    progress: 'bg-error-500'
   },
   brand: {
-    icon: 'text-brand-500',
-    iconBg: 'bg-brand-100 dark:bg-brand-900/30',
-    value: 'text-brand-600 dark:text-brand-400',
-    bar: 'bg-gradient-to-r from-brand-400 to-brand-500',
+    icon: 'text-brand-500 dark:text-brand-400',
+    iconBg: 'bg-brand-50 dark:bg-brand-500/15',
+    value: 'text-brand-500 dark:text-brand-400',
+    bar: 'bg-brand-500',
     progress: 'bg-brand-500'
   },
   amber: {
-    icon: 'text-amber-500',
-    iconBg: 'bg-amber-100 dark:bg-amber-900/30',
-    value: 'text-amber-600 dark:text-amber-400',
-    bar: 'bg-gradient-to-r from-amber-400 to-amber-500',
-    progress: 'bg-amber-500'
+    icon: 'text-warning-500 dark:text-warning-300',
+    iconBg: 'bg-warning-50 dark:bg-warning-500/15',
+    value: 'text-warning-500 dark:text-warning-300',
+    bar: 'bg-warning-500',
+    progress: 'bg-warning-500'
   },
   purple: {
-    icon: 'text-purple-500',
-    iconBg: 'bg-purple-100 dark:bg-purple-900/30',
-    value: 'text-purple-600 dark:text-purple-400',
-    bar: 'bg-gradient-to-r from-purple-400 to-purple-500',
+    icon: 'text-purple-500 dark:text-purple-400',
+    iconBg: 'bg-purple-50 dark:bg-purple-500/15',
+    value: 'text-purple-500 dark:text-purple-400',
+    bar: 'bg-purple-500',
     progress: 'bg-purple-500'
   }
 }

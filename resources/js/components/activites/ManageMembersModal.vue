@@ -4,7 +4,7 @@
     <Dialog as="div" class="relative z-50" @close="$emit('close')">
       <TransitionChild as="template" enter="ease-out duration-300" enter-from="opacity-0" enter-to="opacity-100"
         leave="ease-in duration-200" leave-from="opacity-100" leave-to="opacity-0">
-        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" />
+        <div class="fixed inset-0 bg-black/50 " />
       </TransitionChild>
 
       <div class="fixed inset-0 overflow-y-auto">
@@ -13,7 +13,7 @@
             enter-to="opacity-100 scale-100" leave="ease-in duration-200" leave-from="opacity-100 scale-100"
             leave-to="opacity-0 scale-95">
             <DialogPanel
-              class="w-full max-w-4xl transform overflow-hidden rounded-xl bg-white dark:bg-gray-800 shadow-xl transition-all">
+              class="w-full max-w-4xl transform overflow-hidden rounded-3 bg-white dark:bg-gray-800 transition-all">
               <!-- Header -->
               <div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-6 py-4">
                 <div class="flex items-center space-x-3">
@@ -24,7 +24,7 @@
                     (Vous pouvez {{ getUserPermissionSummary(currentUserPermissions) }})
                   </span>
                 </div>
-                <button @click="$emit('close')" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                <button @click="$emit('close')" class="text-gray-400 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-300">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
@@ -35,7 +35,7 @@
               <div class="p-6 max-h-[70vh] overflow-y-auto">
                 <!-- En-tête des permissions -->
                 <div
-                  class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-3 border border-blue-200 dark:border-blue-800">
                   <div class="flex items-center justify-between">
                     <div>
                       <h3 class="font-medium text-gray-900 dark:text-white mb-1">Légende des permissions </h3>
@@ -70,7 +70,7 @@
                 <!-- Liste des membres -->
                 <div class="space-y-4">
                   <div v-for="member in sortedMembers" :key="member.id"
-                    class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
+                    class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
                     :class="getMemberCardClasses(member)">
 
                     <!-- Avatar et info -->
@@ -199,12 +199,12 @@
                 </div>
                 <div class="flex items-center space-x-3">
                   <button @click="$emit('close')"
-                    class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     Fermer
                   </button>
                   <button v-if="!loading && (isWorkspaceOwner || currentUserPermissions?.can_assign_users)"
                     @click="openAddMemberModal" :disabled="isProcessing"
-                    class="px-4 py-2 bg-blue-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                    class="px-4 py-2 bg-blue-600 border border-transparent rounded-3 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                     <span class="flex items-center">
                       <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />

@@ -1,6 +1,6 @@
 <!-- resources\js\components\taches\KanbanColumn.vue -->
 <template>
-  <div class="flex flex-col h-full bg-gray-50 dark:bg-gray-900 rounded-lg p-4" :dusk="`kanban-column-${statut}`">
+  <div class="flex flex-col h-full bg-gray-50 dark:bg-gray-900 rounded-3 p-4" :dusk="`kanban-column-${statut}`">
     <!-- Column header -->
     <div class="flex items-center justify-between mb-4">
       <div class="flex items-center gap-2">
@@ -14,7 +14,7 @@
       <button
         v-if="canAdd"
         @click="$emit('add-task')"
-        class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+        class="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300"
         title="Ajouter une tâche"
       >
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

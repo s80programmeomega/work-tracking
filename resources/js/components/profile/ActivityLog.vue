@@ -13,20 +13,20 @@
     <!-- Loading State -->
     <div v-if="loading" class="p-8 text-center">
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      <p class="mt-2 text-gray-500">Chargement des activités...</p>
+      <p class="mt-2 text-gray-500 dark:text-gray-400">Chargement des activités...</p>
     </div>
 
     <!-- Activity Content -->
     <div v-else class="space-y-6">
       <!-- Filters -->
-      <div class="flex flex-col gap-4 p-4 bg-gray-50 border border-gray-200 rounded-xl dark:bg-gray-800 dark:border-gray-700 sm:flex-row sm:items-center">
+      <div class="flex flex-col gap-4 p-4 bg-gray-50 border border-gray-200 rounded-3 dark:bg-gray-800 dark:border-gray-700 sm:flex-row sm:items-center">
         <div class="flex items-center space-x-4">
           <button
             v-for="filter in timeFilters"
             :key="filter.value"
             @click="selectedTimeFilter = filter.value"
             :class="[
-              'px-3 py-1.5 text-sm font-medium rounded-lg transition-colors',
+              'px-3 py-1.5 text-sm font-medium rounded-3 transition-colors',
               selectedTimeFilter === filter.value
                 ? 'bg-blue-600 text-white'
                 : 'bg-white text-gray-700 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
@@ -39,7 +39,7 @@
         <div class="flex items-center space-x-4">
           <select
             v-model="selectedType"
-            class="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            class="bg-white border border-gray-300 text-gray-700 text-sm rounded-3 focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           >
             <option value="all">Tous les types</option>
             <option value="task">Tâches</option>
@@ -55,7 +55,7 @@
           </span>
           <button
             @click="refreshActivities"
-            class="p-2 text-gray-500 transition-colors rounded-lg hover:bg-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+            class="p-2 text-gray-500 transition-colors rounded-3 hover:bg-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300"
             title="Actualiser"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -64,7 +64,7 @@
           </button>
           <button
             @click="exportActivities"
-            class="p-2 text-gray-500 transition-colors rounded-lg hover:bg-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+            class="p-2 text-gray-500 transition-colors rounded-3 hover:bg-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300"
             title="Exporter"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -100,7 +100,7 @@
 
             <!-- Activity content -->
             <div class="flex-1 pb-6">
-              <div class="p-4 bg-white border border-gray-200 rounded-xl dark:bg-gray-800 dark:border-gray-700">
+              <div class="p-4 bg-white border border-gray-200 rounded-3 dark:bg-gray-800 dark:border-gray-700">
                 <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <h5 class="font-medium text-gray-800 dark:text-white/90">
@@ -127,7 +127,7 @@
                 
                 <!-- Activity details -->
                 <div v-if="activity.details" class="mt-3">
-                  <div class="p-3 text-sm bg-gray-50 rounded-lg dark:bg-gray-700">
+                  <div class="p-3 text-sm bg-gray-50 rounded-3 dark:bg-gray-700">
                     <pre class="whitespace-pre-wrap text-gray-600 dark:text-gray-300">{{ activity.details }}</pre>
                   </div>
                 </div>
@@ -138,7 +138,7 @@
                     v-for="action in activity.actions"
                     :key="action.label"
                     @click="handleAction(action, activity)"
-                    class="px-3 py-1.5 text-sm font-medium text-blue-600 transition-colors bg-blue-50 rounded-lg hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                    class="px-3 py-1.5 text-sm font-medium text-blue-600 transition-colors bg-blue-50 rounded-3 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
                   >
                     {{ action.label }}
                   </button>
@@ -176,7 +176,7 @@
           <button
             @click="currentPage--"
             :disabled="currentPage === 1"
-            class="px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
+            class="px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-300 rounded-3 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
           >
             Précédent
           </button>
@@ -186,7 +186,7 @@
               :key="page"
               @click="currentPage = page"
               :class="[
-                'px-3 py-1.5 text-sm font-medium rounded-lg',
+                'px-3 py-1.5 text-sm font-medium rounded-3',
                 currentPage === page
                   ? 'bg-blue-600 text-white'
                   : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
@@ -198,7 +198,7 @@
           <button
             @click="currentPage++"
             :disabled="currentPage === totalPages"
-            class="px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
+            class="px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-300 rounded-3 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
           >
             Suivant
           </button>

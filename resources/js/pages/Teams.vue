@@ -2,7 +2,7 @@
   <AdminLayout>
     <PageBreadcrumb :pageTitle="'Équipes de Collaboration'" />
 
-    <div class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
+    <div class="rounded-3 border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
       <!-- Header with Actions -->
       <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-4">
@@ -12,7 +12,7 @@
               v-model="searchQuery"
               type="text"
               placeholder="Rechercher une équipe..."
-              class="pl-10 pr-4 py-2.5 w-80 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
+              class="pl-10 pr-4 py-2.5 w-80 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
             />
             <svg class="absolute left-3 top-3 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -22,7 +22,7 @@
           <!-- Visibility Filter -->
           <select
             v-model="visibilityFilter"
-            class="px-4 py-2.5 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500"
+            class="px-4 py-2.5 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500"
           >
             <option value="">Toutes les visibilités</option>
             <option value="public">🌍 Public</option>
@@ -32,7 +32,7 @@
 
           <!-- Stats -->
           <div v-if="teams.length > 0" class="flex items-center gap-3 ml-4">
-            <div class="px-4 py-2 bg-brand-50 dark:bg-brand-900/20 rounded-lg">
+            <div class="px-4 py-2 bg-brand-50 dark:bg-brand-900/20 rounded-3">
               <span class="text-sm font-semibold text-brand-600 dark:text-brand-400">{{ filteredTeams.length }} équipe(s)</span>
             </div>
           </div>
@@ -43,7 +43,7 @@
           <button
             @click="showCreateModal = true"
             dusk="open-create-team-btn"
-            class="px-5 py-2.5 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all transform hover:scale-105 flex items-center gap-2"
+            class="px-5 py-2.5 text-white rounded-3 font-medium transition-all transform flex items-center gap-2"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -60,7 +60,7 @@
 
       <!-- Error State -->
       <div v-else-if="error" class="text-center py-20">
-        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900/30 dark:to-red-800/30 mb-6">
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full mb-6">
           <svg class="w-10 h-10 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
@@ -73,7 +73,7 @@
         </p>
         <button
           @click="fetchMyTeams()"
-          class="px-6 py-3 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all inline-flex items-center gap-2"
+          class="px-6 py-3 text-white rounded-3 font-medium transition-all inline-flex items-center gap-2"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -84,7 +84,7 @@
 
       <!-- Empty State - No Teams -->
       <div v-else-if="filteredTeams.length === 0 && !searchQuery" class="text-center py-20">
-        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-brand-100 to-brand-200 dark:from-brand-900/30 dark:to-brand-800/30 mb-6">
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full mb-6">
           <svg class="w-10 h-10 text-brand-600 dark:text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
@@ -97,7 +97,7 @@
         </p>
         <button
           @click="showCreateModal = true"
-          class="px-6 py-3 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all inline-flex items-center gap-2"
+          class="px-6 py-3 text-white rounded-3 font-medium transition-all inline-flex items-center gap-2"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -126,7 +126,7 @@
           :key="team.uuid"
           :dusk="`team-card-${team.uuid}`"
           @click="goToTeam(team.uuid)"
-          class="group relative bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 hover:border-brand-500 dark:hover:border-brand-500 hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
+          class="group relative rounded-3 p-6 border border-gray-200 dark:border-gray-700 hover:border-brand-500 dark:hover:border-brand-500 transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
         >
           <!-- Visibility Badge -->
           <div class="absolute top-4 right-4">
@@ -151,10 +151,10 @@
           <!-- Team Avatar & Info -->
           <div class="flex items-start gap-4 mb-4">
             <div class="flex-shrink-0">
-              <div v-if="team.avatar" class="w-16 h-16 rounded-xl overflow-hidden ring-4 ring-gray-100 dark:ring-gray-700 group-hover:ring-brand-500/30 transition-all">
+              <div v-if="team.avatar" class="w-16 h-16 rounded-3 overflow-hidden ring-4 ring-gray-100 dark:ring-gray-700 group-hover:ring-brand-500/30 transition-all">
                 <img :src="team.avatar" class="w-full h-full object-cover" alt="Team avatar" />
               </div>
-              <div v-else class="w-16 h-16 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center text-white text-xl font-bold ring-4 ring-gray-100 dark:ring-gray-700 group-hover:ring-brand-500/30 transition-all">
+              <div v-else class="w-16 h-16 rounded-3 flex items-center justify-center text-white text-xl font-bold ring-4 ring-gray-100 dark:ring-gray-700 group-hover:ring-brand-500/30 transition-all">
                 {{ getInitials(team.name) }}
               </div>
             </div>
@@ -174,7 +174,7 @@
               <!-- Members Count -->
               <div class="flex items-center gap-2">
                 <div class="flex -space-x-2">
-                  <div v-for="i in Math.min(3, team.members_count || 0)" :key="i" class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 ring-2 ring-white dark:ring-gray-800 flex items-center justify-center text-white text-xs font-bold">
+                  <div v-for="i in Math.min(3, team.members_count || 0)" :key="i" class="w-8 h-8 rounded-full ring-2 ring-white dark:ring-gray-800 flex items-center justify-center text-white text-xs font-bold">
                     {{ String.fromCharCode(64 + i) }}
                   </div>
                   <div v-if="(team.members_count || 0) > 3" class="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 ring-2 ring-white dark:ring-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300 text-xs font-bold">
@@ -188,7 +188,7 @@
             </div>
 
             <!-- Arrow Icon -->
-            <div class="w-8 h-8 rounded-lg bg-brand-50 dark:bg-brand-900/30 flex items-center justify-center group-hover:bg-brand-500 transition-colors">
+            <div class="w-8 h-8 rounded-3 bg-brand-50 dark:bg-brand-900/30 flex items-center justify-center group-hover:bg-brand-500 transition-colors">
               <svg class="w-5 h-5 text-brand-600 dark:text-brand-400 group-hover:text-white transition-colors transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
               </svg>
@@ -207,13 +207,13 @@
     </div>
 
     <!-- Create Team Modal -->
-    <div v-if="showCreateModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm" @click.self="showCreateModal = false">
-      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl transform transition-all">
+    <div v-if="showCreateModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 " @click.self="showCreateModal = false">
+      <div class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-2xl transform transition-all">
         <!-- Modal Header -->
-        <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+        <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center shadow-lg">
+              <div class="w-12 h-12 rounded-3 flex items-center justify-center ">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
@@ -223,7 +223,7 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">Commencez à collaborer avec vos collègues</p>
               </div>
             </div>
-            <button type="button" @click="showCreateModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+            <button type="button" @click="showCreateModal = false" class="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300 transition-colors">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -245,7 +245,7 @@
                 required
                 dusk="team-form-name"
                 placeholder="Ex: Équipe Marketing, Développement..."
-                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
               />
             </div>
 
@@ -258,7 +258,7 @@
                 v-model="newTeam.description"
                 rows="3"
                 placeholder="Décrivez l'objectif de cette équipe..."
-                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all resize-none"
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all resize-none"
               ></textarea>
             </div>
 
@@ -271,7 +271,7 @@
                 <label
                   v-for="option in visibilityOptions"
                   :key="option.value"
-                  class="relative flex flex-col items-center p-4 border-2 rounded-xl cursor-pointer transition-all"
+                  class="relative flex flex-col items-center p-4 border-2 rounded-3 cursor-pointer transition-all"
                   :class="newTeam.visibility === option.value
                     ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20'
                     : 'border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600'"
@@ -300,7 +300,7 @@
           <button
             type="button"
             @click="showCreateModal = false"
-            class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all"
+            class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all"
           >
             Annuler
           </button>
@@ -309,7 +309,7 @@
             @click="createTeam"
             :disabled="creating || !newTeam.name"
             dusk="team-form-submit"
-            class="px-5 py-2.5 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            class="px-5 py-2.5 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             <svg v-if="creating" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

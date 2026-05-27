@@ -1,11 +1,11 @@
 <!-- resources\js\components\labels\LabelModal.vue -->
 <template>
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" @click.self="$emit('close')">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 " @click.self="$emit('close')">
+    <div class="bg-white dark:bg-gray-800 rounded-3 max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
       <!-- Header -->
-      <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-indigo-50 to-white dark:from-gray-900 dark:to-gray-800">
-        <div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+      <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700">
+          <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-3 flex items-center justify-center ">
             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
             </svg>
@@ -20,7 +20,7 @@
           </div>
           <button
             @click="$emit('close')"
-            class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            class="p-2 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -30,7 +30,7 @@
       </div>
 
       <!-- Error Alert -->
-      <div v-if="errorMessage" class="mx-8 mt-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+      <div v-if="errorMessage" class="mx-8 mt-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-3">
         <div class="flex items-start gap-3">
           <svg class="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -64,7 +64,7 @@
                 required
                 dusk="label-form-nom"
                 placeholder="Ex: Urgent, En attente, Bug"
-                class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
+                class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
               />
             </div>
 
@@ -77,7 +77,7 @@
                 id="description"
                 rows="2"
                 placeholder="Description optionnelle du label..."
-                class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all resize-none"
+                class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all resize-none"
               ></textarea>
             </div>
           </div>
@@ -101,7 +101,7 @@
                   type="color"
                   id="couleur"
                   required
-                  class="h-12 w-20 rounded-lg border-2 border-gray-300 dark:border-gray-600 cursor-pointer"
+                  class="h-12 w-20 rounded-3 border-2 border-gray-300 dark:border-gray-600 cursor-pointer"
                 />
                 <div class="flex-1">
                   <input
@@ -109,12 +109,12 @@
                     type="text"
                     placeholder="#3B82F6"
                     pattern="^#[0-9A-Fa-f]{6}$"
-                    class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
+                    class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
                   />
                 </div>
                 <!-- Preview -->
                 <div
-                  class="px-6 py-3 rounded-xl font-semibold text-sm shadow-md"
+                  class="px-6 py-3 rounded-3 font-semibold text-sm "
                   :style="{
                     backgroundColor: formData.couleur,
                     color: textColor
@@ -136,7 +136,7 @@
                   :key="color"
                   type="button"
                   @click="formData.couleur = color"
-                  class="w-10 h-10 rounded-lg border-2 hover:scale-110 transition-transform"
+                  class="w-10 h-10 rounded-3 border-2 transition-transform"
                   :class="formData.couleur === color ? 'border-indigo-500 ring-2 ring-indigo-500/20' : 'border-gray-200 dark:border-gray-600'"
                   :style="{ backgroundColor: color }"
                   :title="color"
@@ -156,7 +156,7 @@
 
             <div class="grid grid-cols-2 gap-3">
               <label
-                class="relative flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all hover:shadow-md"
+                class="relative flex items-start gap-3 p-4 border-2 rounded-3 cursor-pointer transition-all "
                 :class="!formData.projet_id
                   ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
                   : 'border-gray-300 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-700'"
@@ -187,7 +187,7 @@
               </label>
 
               <label
-                class="relative flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all hover:shadow-md"
+                class="relative flex items-start gap-3 p-4 border-2 rounded-3 cursor-pointer transition-all "
                 :class="formData.projet_id
                   ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
                   : 'border-gray-300 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-700'"
@@ -227,7 +227,7 @@
           <button
             type="button"
             @click="$emit('close')"
-            class="px-6 py-2.5 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+            class="px-6 py-2.5 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-3 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
           >
             Annuler
           </button>
@@ -236,7 +236,7 @@
             @click="handleSubmit"
             :disabled="loading"
             dusk="label-form-submit"
-            class="px-6 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-xl hover:from-indigo-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transition-all"
+            class="px-6 py-2.5 text-white font-semibold rounded-3 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             <span v-if="loading" class="flex items-center gap-2">
               <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">

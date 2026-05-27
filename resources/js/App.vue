@@ -25,7 +25,7 @@
                 </div>
             </div>
 
-            <RouterView v-else />
+            <RouterView v-else :key="authStore.currentWorkspaceId ?? 'default'" />
         </SidebarProvider>
     </ThemeProvider>
 </template>

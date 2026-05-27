@@ -2,7 +2,7 @@
 <template>
   <div class="space-y-4">
     <!-- Upload section -->
-    <div v-if="permissions.can_add_attachments" class="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-6">
+    <div v-if="permissions.can_add_attachments" class="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-3 p-6">
       <input 
         ref="fileInput"
         type="file" 
@@ -26,12 +26,12 @@
         v-for="attachment in tache.attachments" 
         :key="attachment.id"
         :id="`attachment-${attachment.id}`"
-        class="bg-white dark:bg-gray-800 rounded-xl p-4 border-2 border-gray-200 dark:border-gray-700 hover:border-brand-500 transition-colors"
+        class="bg-white dark:bg-gray-800 rounded-3 p-4 border-2 border-gray-200 dark:border-gray-700 hover:border-brand-500 transition-colors"
         :class="{ 'ring-2 ring-brand-500': highlightedAttachment === attachment.id }"
       >
         <div class="flex items-start gap-4">
           <!-- Icon -->
-          <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+          <div class="flex-shrink-0 w-12 h-12 rounded-3 flex items-center justify-center">
             <i :class="['fas', getFileIcon(attachment.mime_type), 'text-white text-xl']"></i>
           </div>
 
@@ -62,7 +62,7 @@
           <div class="flex flex-col gap-2">
             <button 
               @click="downloadFile(attachment)"
-              class="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+              class="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-3 transition-colors"
               title="Télécharger"
             >
               <i class="fas fa-download"></i>
@@ -70,7 +70,7 @@
             <button 
               v-if="permissions.can_update"
               @click="deleteFile(attachment)"
-              class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+              class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-3 transition-colors"
               title="Supprimer"
             >
               <i class="fas fa-trash-alt"></i>

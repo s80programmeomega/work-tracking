@@ -13,7 +13,7 @@
       <button
         v-if="canEdit && !showAddForm"
         @click="showAddForm = true"
-        class="px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 flex items-center gap-2 transition-all shadow-md hover:shadow-lg"
+        class="px-4 py-2 bg-brand-500 text-white rounded-3 hover:bg-brand-600 flex items-center gap-2 transition-all "
       >
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -23,7 +23,7 @@
     </div>
 
     <!-- Messages d'erreur -->
-    <div v-if="errorMessage" class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+    <div v-if="errorMessage" class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-3">
       <div class="flex items-start gap-3">
         <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -40,10 +40,10 @@
     </div>
 
     <!-- Formulaire d'ajout -->
-    <div v-if="showAddForm" class="p-4 border-2 border-brand-500 rounded-lg bg-brand-50 dark:bg-brand-900/10 space-y-4">
+    <div v-if="showAddForm" class="p-4 border-2 border-brand-500 rounded-3 bg-brand-50 dark:bg-brand-900/10 space-y-4">
       <div class="flex items-center justify-between">
         <h4 class="font-semibold text-gray-900 dark:text-white">Nouveau lien</h4>
-        <button @click="cancelAdd" class="text-gray-400 hover:text-gray-600">
+        <button @click="cancelAdd" class="text-gray-400 hover:text-gray-600 dark:text-gray-300">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -63,7 +63,7 @@
               @blur="autoFillTitle"
               type="url"
               placeholder="https://example.com"
-              class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500 dark:bg-gray-800 dark:text-white pr-10"
+              class="w-full px-3 py-2 border rounded-3 focus:ring-2 focus:ring-brand-500 dark:bg-gray-800 dark:text-white pr-10"
               :class="urlError ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'"
               required
             />
@@ -78,7 +78,7 @@
             </div>
           </div>
           <p v-if="urlError" class="mt-1 text-xs text-red-600">{{ urlError }}</p>
-          <p v-else class="mt-1 text-xs text-gray-500">L'URL doit commencer par http:// ou https://</p>
+          <p v-else class="mt-1 text-xs text-gray-500 dark:text-gray-400">L'URL doit commencer par http:// ou https://</p>
         </div>
 
         <!-- Title input -->
@@ -90,18 +90,18 @@
             v-model="newLink.title"
             type="text"
             placeholder="Ex: Documentation API (généré automatiquement si vide)"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 dark:bg-gray-800 dark:text-white"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-brand-500 dark:bg-gray-800 dark:text-white"
           />
-          <p class="mt-1 text-xs text-gray-500">
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
             Laissez vide pour utiliser le nom de domaine
           </p>
         </div>
 
         <!-- Preview -->
-        <div v-if="newLink.url && isValidUrl" class="p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
-          <p class="text-xs text-gray-500 mb-2">Aperçu:</p>
+        <div v-if="newLink.url && isValidUrl" class="p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3">
+          <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Aperçu:</p>
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-3 flex items-center justify-center">
               <img 
                 v-if="faviconUrl"
                 :src="faviconUrl" 
@@ -128,14 +128,14 @@
         <div class="flex justify-end gap-2 pt-2">
           <button
             @click="cancelAdd"
-            class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-all"
+            class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-all"
           >
             Annuler
           </button>
           <button
             @click="addLink"
             :disabled="!canSubmit || saving"
-            class="px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+            class="px-4 py-2 bg-brand-500 text-white rounded-3 hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
           >
             <svg v-if="saving" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -155,10 +155,10 @@
         :href="link.url"
         target="_blank"
         rel="noopener noreferrer"
-        class="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-brand-500 dark:hover:border-brand-400 transition-all group"
+        class="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-brand-500 dark:hover:border-brand-400 transition-all group"
       >
         <!-- Favicon / Icône -->
-        <div class="flex-shrink-0 w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+        <div class="flex-shrink-0 w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-3 flex items-center justify-center">
           <img 
             :src="getFaviconUrl(link.url)" 
             @error="handleFaviconError"
@@ -192,7 +192,7 @@
             v-if="canEdit"
             @click.prevent="deleteLink(link)"
             :disabled="deleting"
-            class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50"
+            class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-3 transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50"
             title="Supprimer"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -204,7 +204,7 @@
     </div>
 
     <!-- Empty state -->
-    <div v-else-if="!showAddForm" class="text-center py-12 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700">
+    <div v-else-if="!showAddForm" class="text-center py-12 rounded-3 border-2 border-dashed border-gray-300 dark:border-gray-700">
       <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
       </svg>
@@ -212,7 +212,7 @@
       <button
         v-if="canEdit"
         @click="showAddForm = true"
-        class="inline-flex items-center px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-all shadow-md hover:shadow-lg"
+        class="inline-flex items-center px-4 py-2 bg-brand-500 text-white rounded-3 hover:bg-brand-600 transition-all "
       >
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />

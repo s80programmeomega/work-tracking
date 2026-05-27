@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white dark:bg-gray-800 border-2 rounded-xl p-6 space-y-4"
+  <div class="bg-white dark:bg-gray-800 border-2 rounded-3 p-6 space-y-4"
        :class="getBorderClass()">
     
     <!-- Header -->
@@ -32,7 +32,7 @@
         <button
           v-if="canEdit && !isSubmitted"
           @click="$emit('edit', resultat)"
-          class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+          class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-3 transition-colors"
           title="Modifier"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -43,7 +43,7 @@
         <button
           v-if="canDelete && !isSubmitted"
           @click="$emit('delete', resultat)"
-          class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+          class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-3 transition-colors"
           title="Supprimer"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,7 +109,7 @@
     <!-- Validations -->
     <div v-if="isSubmitted" class="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
       <!-- Validation N1 -->
-      <div v-if="resultat.valide_par_n1" class="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+      <div v-if="resultat.valide_par_n1" class="p-3 bg-green-50 dark:bg-green-900/20 rounded-3">
         <div class="flex items-center gap-2 mb-1">
           <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -124,7 +124,7 @@
       </div>
 
       <!-- Validation N2 -->
-      <div v-if="resultat.valide_par_n2" class="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+      <div v-if="resultat.valide_par_n2" class="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-3">
         <div class="flex items-center gap-2 mb-1">
           <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -144,7 +144,7 @@
       <button
         v-if="canValidateN1"
         @click="$emit('validate-n1', resultat)"
-        class="flex-1 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition-all"
+        class="flex-1 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-3 font-medium transition-all"
       >
         Valider N1
       </button>
@@ -152,7 +152,7 @@
       <button
         v-if="canValidateN2"
         @click="$emit('validate-n2', resultat)"
-        class="flex-1 px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-medium transition-all"
+        class="flex-1 px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-3 font-medium transition-all"
       >
         Valider N2
       </button>
@@ -160,7 +160,7 @@
       <button
         v-if="canReject"
         @click="$emit('reject', resultat, canValidateN2 ? 'n2' : 'n1')"
-        class="px-4 py-2 border-2 border-red-500 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg font-medium transition-all"
+        class="px-4 py-2 border-2 border-red-500 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-3 font-medium transition-all"
       >
         Rejeter
       </button>
@@ -170,7 +170,7 @@
     <div v-if="!isSubmitted && canSubmit" class="pt-4 border-t border-gray-200 dark:border-gray-700">
       <button
         @click="$emit('submit', resultat)"
-        class="w-full px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-lg font-medium transition-all"
+        class="w-full px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-3 font-medium transition-all"
       >
         Soumettre pour validation
       </button>

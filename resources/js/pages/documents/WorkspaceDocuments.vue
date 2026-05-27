@@ -16,10 +16,10 @@
       <!-- Workspace Info Card -->
       <div
         v-if="workspace"
-        class="rounded-2xl border border-gray-200 bg-gradient-to-br from-indigo-50 to-purple-50 p-6 dark:border-gray-800 dark:from-indigo-900/20 dark:to-purple-900/20"
-      >
-        <div class="flex items-start gap-4">
-          <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-indigo-600 text-white">
+        class="rounded-3 border border-gray-200 p-6 dark:border-gray-800 >
+       ">
+          <div class="flex items-start gap-4">
+          <div class="flex h-14 w-14 items-center justify-center rounded-3 bg-indigo-600 text-white">
             <BuildingOffice2Icon class="h-7 w-7" />
           </div>
           <div class="flex-1">
@@ -36,7 +36,7 @@
       <!-- Access denied -->
       <div
         v-if="accessDenied"
-        class="rounded-2xl border border-red-200 bg-red-50 p-6 text-center dark:border-red-800 dark:bg-red-900/20"
+        class="rounded-3 border border-red-200 bg-red-50 p-6 text-center dark:border-red-800 dark:bg-red-900/20"
       >
         <LockClosedIcon class="mx-auto h-10 w-10 text-red-500" />
         <p class="mt-3 text-sm font-medium text-red-700 dark:text-red-400">

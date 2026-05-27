@@ -15,7 +15,7 @@
                         <div class="flex items-center gap-4">
                             <router-link
                                 :to="{ name: 'workspaces.show', params: { id: workspace.id } }"
-                                class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-3 transition-colors"
                             >
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -60,7 +60,7 @@
                 <div class="max-w-4xl mx-auto space-y-6">
                     <!-- General Settings -->
                     <div v-if="activeTab === 'general'" class="space-y-6">
-                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                        <div class="bg-white dark:bg-gray-800 rounded-3 shadow p-6">
                             <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">
                                 Paramètres généraux
                             </h2>
@@ -73,13 +73,13 @@
                                     </label>
                                     <select
                                         v-model="settings.visibility"
-                                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 dark:bg-gray-700 dark:text-white"
+                                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-brand-500 dark:bg-gray-700 dark:text-white"
                                     >
                                         <option value="private">Privé - Uniquement les membres invités</option>
                                         <option value="internal">Interne - Tous les utilisateurs de l'organisation</option>
                                         <option value="public">Public - Visible par tous</option>
                                     </select>
-                                    <p class="mt-2 text-sm text-gray-500">
+                                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
                                         Contrôlez qui peut voir et accéder à ce workspace
                                     </p>
                                 </div>
@@ -91,7 +91,7 @@
                                     </label>
                                     <select
                                         v-model="settings.default_project_visibility"
-                                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 dark:bg-gray-700 dark:text-white"
+                                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-brand-500 dark:bg-gray-700 dark:text-white"
                                     >
                                         <option value="public">Public</option>
                                         <option value="team">Équipe</option>
@@ -106,7 +106,7 @@
                                     </label>
                                     <select
                                         v-model="settings.timezone"
-                                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 dark:bg-gray-700 dark:text-white"
+                                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-brand-500 dark:bg-gray-700 dark:text-white"
                                     >
                                         <option value="Africa/Douala">Afrique/Douala (GMT+1)</option>
                                         <option value="Europe/Paris">Europe/Paris (GMT+1)</option>
@@ -121,7 +121,7 @@
                                     </label>
                                     <select
                                         v-model="settings.language"
-                                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 dark:bg-gray-700 dark:text-white"
+                                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-brand-500 dark:bg-gray-700 dark:text-white"
                                     >
                                         <option value="fr">Français</option>
                                         <option value="en">English</option>
@@ -133,7 +133,7 @@
                                 <button
                                     @click="saveSettings"
                                     :disabled="saving"
-                                    class="px-6 py-3 bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50 transition-colors"
+                                    class="px-6 py-3 bg-brand-600 text-white rounded-3 hover:bg-brand-700 disabled:opacity-50 transition-colors"
                                 >
                                     {{ saving ? 'Enregistrement...' : 'Enregistrer' }}
                                 </button>
@@ -143,13 +143,13 @@
 
                     <!-- Permissions -->
                     <div v-if="activeTab === 'permissions'" class="space-y-6">
-                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                        <div class="bg-white dark:bg-gray-800 rounded-3 shadow p-6">
                             <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">
                                 Permissions des membres
                             </h2>
 
                             <div class="space-y-4">
-                                <label class="flex items-start gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
+                                <label class="flex items-start gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
                                     <input
                                         v-model="settings.members_can_create_projects"
                                         type="checkbox"
@@ -157,13 +157,13 @@
                                     />
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900 dark:text-white">Créer des projets</p>
-                                        <p class="text-sm text-gray-500 mt-1">
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                             Permet aux membres de créer de nouveaux projets dans ce workspace
                                         </p>
                                     </div>
                                 </label>
 
-                                <label class="flex items-start gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
+                                <label class="flex items-start gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
                                     <input
                                         v-model="settings.members_can_invite"
                                         type="checkbox"
@@ -171,13 +171,13 @@
                                     />
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900 dark:text-white">Inviter des membres</p>
-                                        <p class="text-sm text-gray-500 mt-1">
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                             Permet aux membres d'inviter d'autres utilisateurs au workspace
                                         </p>
                                     </div>
                                 </label>
 
-                                <label class="flex items-start gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
+                                <label class="flex items-start gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
                                     <input
                                         v-model="settings.members_can_delete_projects"
                                         type="checkbox"
@@ -185,13 +185,13 @@
                                     />
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900 dark:text-white">Supprimer des projets</p>
-                                        <p class="text-sm text-gray-500 mt-1">
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                             Permet aux membres de supprimer des projets
                                         </p>
                                     </div>
                                 </label>
 
-                                <label class="flex items-start gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
+                                <label class="flex items-start gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
                                     <input
                                         v-model="settings.require_task_validation"
                                         type="checkbox"
@@ -199,13 +199,13 @@
                                     />
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900 dark:text-white">Validation des tâches requise</p>
-                                        <p class="text-sm text-gray-500 mt-1">
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                             Les tâches créées nécessitent une validation avant d'être actives
                                         </p>
                                     </div>
                                 </label>
 
-                                <label class="flex items-start gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
+                                <label class="flex items-start gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
                                     <input
                                         v-model="settings.require_approval_for_time_off"
                                         type="checkbox"
@@ -213,7 +213,7 @@
                                     />
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900 dark:text-white">Approbation des congés</p>
-                                        <p class="text-sm text-gray-500 mt-1">
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                             Les demandes de congés nécessitent une approbation
                                         </p>
                                     </div>
@@ -224,7 +224,7 @@
                                 <button
                                     @click="saveSettings"
                                     :disabled="saving"
-                                    class="px-6 py-3 bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50 transition-colors"
+                                    class="px-6 py-3 bg-brand-600 text-white rounded-3 hover:bg-brand-700 disabled:opacity-50 transition-colors"
                                 >
                                     {{ saving ? 'Enregistrement...' : 'Enregistrer' }}
                                 </button>
@@ -234,13 +234,13 @@
 
                     <!-- Notifications -->
                     <div v-if="activeTab === 'notifications'" class="space-y-6">
-                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                        <div class="bg-white dark:bg-gray-800 rounded-3 shadow p-6">
                             <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">
                                 Paramètres de notification
                             </h2>
 
                             <div class="space-y-4">
-                                <label class="flex items-start gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
+                                <label class="flex items-start gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
                                     <input
                                         v-model="settings.notify_on_new_member"
                                         type="checkbox"
@@ -248,13 +248,13 @@
                                     />
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900 dark:text-white">Nouveau membre</p>
-                                        <p class="text-sm text-gray-500 mt-1">
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                             Notifier tous les membres quand quelqu'un rejoint le workspace
                                         </p>
                                     </div>
                                 </label>
 
-                                <label class="flex items-start gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
+                                <label class="flex items-start gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
                                     <input
                                         v-model="settings.notify_on_new_project"
                                         type="checkbox"
@@ -262,13 +262,13 @@
                                     />
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900 dark:text-white">Nouveau projet</p>
-                                        <p class="text-sm text-gray-500 mt-1">
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                             Notifier les membres quand un nouveau projet est créé
                                         </p>
                                     </div>
                                 </label>
 
-                                <label class="flex items-start gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
+                                <label class="flex items-start gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
                                     <input
                                         v-model="settings.notify_on_task_assigned"
                                         type="checkbox"
@@ -276,13 +276,13 @@
                                     />
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900 dark:text-white">Tâche assignée</p>
-                                        <p class="text-sm text-gray-500 mt-1">
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                             Notifier quand une tâche est assignée
                                         </p>
                                     </div>
                                 </label>
 
-                                <label class="flex items-start gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
+                                <label class="flex items-start gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
                                     <input
                                         v-model="settings.notify_on_deadline_approaching"
                                         type="checkbox"
@@ -290,13 +290,13 @@
                                     />
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900 dark:text-white">Échéance proche</p>
-                                        <p class="text-sm text-gray-500 mt-1">
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                             Notifier quand une échéance approche (24h avant)
                                         </p>
                                     </div>
                                 </label>
 
-                                <label class="flex items-start gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
+                                <label class="flex items-start gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
                                     <input
                                         v-model="settings.weekly_digest"
                                         type="checkbox"
@@ -304,7 +304,7 @@
                                     />
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900 dark:text-white">Résumé hebdomadaire</p>
-                                        <p class="text-sm text-gray-500 mt-1">
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                             Envoyer un résumé hebdomadaire de l'activité du workspace
                                         </p>
                                     </div>
@@ -315,7 +315,7 @@
                                 <button
                                     @click="saveSettings"
                                     :disabled="saving"
-                                    class="px-6 py-3 bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50 transition-colors"
+                                    class="px-6 py-3 bg-brand-600 text-white rounded-3 hover:bg-brand-700 disabled:opacity-50 transition-colors"
                                 >
                                     {{ saving ? 'Enregistrement...' : 'Enregistrer' }}
                                 </button>
@@ -325,50 +325,50 @@
 
                     <!-- Danger Zone -->
                     <div v-if="activeTab === 'danger'" class="space-y-6">
-                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow border-2 border-red-200 dark:border-red-800 p-6">
+                        <div class="bg-white dark:bg-gray-800 rounded-3 shadow border-2 border-red-200 dark:border-red-800 p-6">
                             <h2 class="text-xl font-semibold text-red-600 dark:text-red-400 mb-6">
                                 Zone dangereuse
                             </h2>
 
                             <div class="space-y-6">
                                 <!-- Archive Workspace -->
-                                <div class="flex items-start justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                <div class="flex items-start justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-3">
                                     <div class="flex-1">
                                         <h3 class="font-medium text-gray-900 dark:text-white">
                                             Archiver le workspace
                                         </h3>
-                                        <p class="text-sm text-gray-500 mt-1">
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                             Le workspace ne sera plus accessible mais les données seront conservées
                                         </p>
                                     </div>
                                     <button
                                         @click="showArchiveModal = true"
-                                        class="px-4 py-2 bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400 rounded-lg hover:bg-yellow-200 dark:hover:bg-yellow-900/40 transition-colors"
+                                        class="px-4 py-2 bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400 rounded-3 hover:bg-yellow-200 dark:hover:bg-yellow-900/40 transition-colors"
                                     >
                                         Archiver
                                     </button>
                                 </div>
 
                                 <!-- Transfer Ownership -->
-                                <div class="flex items-start justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                <div class="flex items-start justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-3">
                                     <div class="flex-1">
                                         <h3 class="font-medium text-gray-900 dark:text-white">
                                             Transférer la propriété
                                         </h3>
-                                        <p class="text-sm text-gray-500 mt-1">
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                             Transférer la propriété du workspace à un autre membre
                                         </p>
                                     </div>
                                     <button
                                         @click="showTransferModal = true"
-                                        class="px-4 py-2 bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/40 transition-colors"
+                                        class="px-4 py-2 bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 rounded-3 hover:bg-blue-200 dark:hover:bg-blue-900/40 transition-colors"
                                     >
                                         Transférer
                                     </button>
                                 </div>
 
                                 <!-- Delete Workspace -->
-                                <div class="flex items-start justify-between p-4 border border-red-200 dark:border-red-800 rounded-lg bg-red-50 dark:bg-red-900/10">
+                                <div class="flex items-start justify-between p-4 border border-red-200 dark:border-red-800 rounded-3 bg-red-50 dark:bg-red-900/10">
                                     <div class="flex-1">
                                         <h3 class="font-medium text-red-600 dark:text-red-400">
                                             Supprimer le workspace
@@ -379,7 +379,7 @@
                                     </div>
                                     <button
                                         @click="showDeleteModal = true"
-                                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                                        class="px-4 py-2 bg-red-600 text-white rounded-3 hover:bg-red-700 transition-colors"
                                     >
                                         Supprimer
                                     </button>
@@ -398,7 +398,7 @@
                 class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
                 @click.self="showDeleteModal = false"
             >
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+                <div class="bg-white dark:bg-gray-800 rounded-3 max-w-md w-full mx-4 p-6">
                     <div class="flex items-center gap-3 mb-4">
                         <div class="p-3 bg-red-100 dark:bg-red-900/20 rounded-full">
                             <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -421,21 +421,21 @@
                         <input
                             v-model="deleteConfirmation"
                             type="text"
-                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white"
+                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white"
                             placeholder="Nom du workspace"
                         />
                     </div>
                     <div class="flex justify-end gap-3">
                         <button
                             @click="showDeleteModal = false"
-                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700"
                         >
                             Annuler
                         </button>
                         <button
                             @click="handleDelete"
                             :disabled="deleteConfirmation !== workspace?.nom || deleting"
-                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            class="px-4 py-2 bg-red-600 text-white rounded-3 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                         >
                             <svg v-if="deleting" class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -454,7 +454,7 @@
                 class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
                 @click.self="showArchiveModal = false"
             >
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+                <div class="bg-white dark:bg-gray-800 rounded-3 max-w-md w-full mx-4 p-6">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                         Archiver le workspace
                     </h3>
@@ -464,13 +464,13 @@
                     <div class="flex justify-end gap-3">
                         <button
                             @click="showArchiveModal = false"
-                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700"
                         >
                             Annuler
                         </button>
                         <button
                             @click="handleArchive"
-                            class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700"
+                            class="px-4 py-2 bg-yellow-600 text-white rounded-3 hover:bg-yellow-700"
                         >
                             Archiver
                         </button>
@@ -484,7 +484,7 @@
                 class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
                 @click.self="showTransferModal = false"
             >
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+                <div class="bg-white dark:bg-gray-800 rounded-3 max-w-md w-full mx-4 p-6">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                         Transférer la propriété
                     </h3>
@@ -494,7 +494,7 @@
                     <div class="flex justify-end gap-3">
                         <button
                             @click="showTransferModal = false"
-                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700"
                         >
                             Annuler
                         </button>

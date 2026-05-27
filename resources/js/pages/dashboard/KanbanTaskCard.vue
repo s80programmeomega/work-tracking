@@ -5,7 +5,7 @@
     @dragstart="handleDragStart"
     @dragend="handleDragEnd"
     @click="$emit('click', task)"
-    class="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-4 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group hover:border-brand-300 dark:hover:border-brand-500"
+    class="bg-white dark:bg-gray-700 rounded-3 border border-gray-200 dark:border-gray-600 p-4 transition-all duration-200 cursor-pointer group hover:border-brand-300 dark:hover:border-brand-500"
     :class="{
       'border-l-4 border-l-red-500': task.priority === 'Élevée' || task.priorite === 'ELEVEE',
       'border-l-4 border-l-yellow-500': task.priority === 'Moyenne' || task.priorite === 'MOYENNE',

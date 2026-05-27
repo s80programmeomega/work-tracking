@@ -14,7 +14,7 @@
           v-for="toast in toasts"
           :key="toast.id"
           :class="[
-            'flex items-center gap-3 p-4 rounded-lg shadow-lg border',
+            'flex items-center gap-3 p-4 rounded-3 border',
             getToastClasses(toast.type)
           ]"
           role="alert"

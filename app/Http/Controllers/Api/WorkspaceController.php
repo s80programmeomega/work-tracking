@@ -82,7 +82,7 @@ class WorkspaceController extends Controller
                 'can_view_workspace_taches' => $gate->userCan($user, Permission::EVALUATIONS_VIEW_WORKSPACE_TACHES, $workspace),
                 'can_inline_edit_tache' => $gate->userCan($user, Permission::TACHES_INLINE_EDIT, $workspace),
                 'can_manage_workspace_documents' => $gate->userCan($user, Permission::DOCUMENTS_MANAGE_WORKSPACE, $workspace),
-                'can_manage_subscription' => $user->isSuperAdmin(),
+                'can_manage_subscription' => $workspace->isOwnerOrAdmin($user),
                 'can_submit_result' => $gate->userCan($user, Permission::TACHES_SUBMIT_RESULT, $workspace),
             ];
 
@@ -221,7 +221,7 @@ class WorkspaceController extends Controller
      */
     public function inviteMembers(Request $request, Workspace $workspace)
     {
-        $this->authorize('manage', $workspace);
+        $this->authorize('inviteMember', $workspace);
 
         $request->validate([
             'emails' => 'required|array|min:1',
@@ -730,7 +730,7 @@ class WorkspaceController extends Controller
                         'can_view_workspace_taches' => $gate->userCan($user, Permission::EVALUATIONS_VIEW_WORKSPACE_TACHES, $workspace),
                         'can_inline_edit_tache' => $gate->userCan($user, Permission::TACHES_INLINE_EDIT, $workspace),
                         'can_manage_workspace_documents' => $gate->userCan($user, Permission::DOCUMENTS_MANAGE_WORKSPACE, $workspace),
-                        'can_manage_subscription' => $user->isSuperAdmin(),
+                        'can_manage_subscription' => $workspace->isOwnerOrAdmin($user),
                         'can_submit_result' => $gate->userCan($user, Permission::TACHES_SUBMIT_RESULT, $workspace),
                     ],
                 ];
@@ -819,7 +819,7 @@ class WorkspaceController extends Controller
             ]);
 
             // Assigner le rôle par défaut
-            $user->assignRole('member');
+            $user->assignRole('collaborateur');
 
             // Ajouter au workspace invité
             $invitedRole = \Spatie\Permission\Models\Role::findByName($invitation->role ?? 'collaborateur', 'web');
@@ -1500,7 +1500,7 @@ class WorkspaceController extends Controller
                     'can_view_workspace_taches' => $gate->userCan($user, Permission::EVALUATIONS_VIEW_WORKSPACE_TACHES, $workspace),
                     'can_inline_edit_tache' => $gate->userCan($user, Permission::TACHES_INLINE_EDIT, $workspace),
                     'can_manage_workspace_documents' => $gate->userCan($user, Permission::DOCUMENTS_MANAGE_WORKSPACE, $workspace),
-                    'can_manage_subscription' => $user->isSuperAdmin(),
+                    'can_manage_subscription' => $workspace->isOwnerOrAdmin($user),
                     'can_submit_result' => $gate->userCan($user, Permission::TACHES_SUBMIT_RESULT, $workspace),
                 ],
                 'subscription_summary' => app(SubscriptionService::class)->summary($workspace),

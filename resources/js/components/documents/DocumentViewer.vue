@@ -11,7 +11,7 @@
         leave-from="opacity-100"
         leave-to="opacity-0"
       >
-        <div class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm transition-opacity" />
+        <div class="fixed inset-0 bg-gray-900/80 transition-opacity" />
       </TransitionChild>
 
       <div class="fixed inset-0 z-50 overflow-y-auto">
@@ -25,7 +25,7 @@
             leave-from="opacity-100 scale-100"
             leave-to="opacity-0 scale-95"
           >
-            <DialogPanel class="relative w-full max-w-6xl transform overflow-hidden rounded-2xl bg-white shadow-2xl transition-all dark:bg-gray-900">
+            <DialogPanel class="relative w-full max-w-6xl transform overflow-hidden rounded-3 bg-white transition-all dark:bg-gray-900">
               <!-- Header -->
               <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-800">
                 <div class="min-w-0 flex-1">
@@ -41,7 +41,7 @@
                   <!-- Download Button -->
                   <button
                     @click="$emit('download', document)"
-                    class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                    class="inline-flex items-center gap-2 rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                   >
                     <ArrowDownTrayIcon class="h-5 w-5" />
                     Télécharger
@@ -50,7 +50,7 @@
                   <!-- Close Button -->
                   <button
                     @click="$emit('close')"
-                    class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 dark:hover:bg-gray-800"
+                    class="rounded-3 p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 dark:text-gray-400 dark:hover:bg-gray-800"
                   >
                     <XMarkIcon class="h-6 w-6" />
                   </button>
@@ -64,7 +64,7 @@
                   <img
                     :src="document.url"
                     :alt="document.nom"
-                    class="max-h-[70vh] rounded-lg shadow-lg"
+                    class="max-h-[70vh] rounded-3 "
                   />
                 </div>
 
@@ -72,7 +72,7 @@
                 <div v-else-if="document.is_pdf" class="h-[70vh]">
                   <iframe
                     :src="document.url"
-                    class="h-full w-full rounded-lg border border-gray-200 dark:border-gray-800"
+                    class="h-full w-full rounded-3 border border-gray-200 dark:border-gray-800"
                   />
                 </div>
 
@@ -80,7 +80,7 @@
                 <div v-else-if="document.is_video" class="flex justify-center">
                   <video
                     controls
-                    class="max-h-[70vh] rounded-lg shadow-lg"
+                    class="max-h-[70vh] rounded-3 "
                   >
                     <source :src="document.url" :type="document.mime_type" />
                     Votre navigateur ne supporte pas la lecture de vidéos.
@@ -106,7 +106,7 @@
                   </p>
                   <button
                     @click="$emit('download', document)"
-                    class="mt-6 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-sm font-medium text-white hover:bg-blue-700"
+                    class="mt-6 inline-flex items-center gap-2 rounded-3 bg-blue-600 px-6 py-3 text-sm font-medium text-white hover:bg-blue-700"
                   >
                     <ArrowDownTrayIcon class="h-5 w-5" />
                     Télécharger le fichier

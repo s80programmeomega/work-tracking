@@ -75,6 +75,15 @@ const router = createRouter({
       },
     },
     {
+      path: '/workspaces/:id/subscription',
+      name: 'workspaces.subscription',
+      component: () => import('../pages/workspaces/Subscription.vue'),
+      meta: {
+        title: 'Abonnement',
+        requiresAuth: true,
+      },
+    },
+    {
       path: '/accept-invitation/:token',
       name: 'accept-invitation',
       component: () => import('../pages/AcceptInvitation.vue'),

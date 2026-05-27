@@ -24,7 +24,7 @@
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-4">
                                 <router-link :to="{ name: 'workspaces.show', params: { id: workspace.id } }"
-                                    class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                    class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-3 transition-colors">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M15 19l-7-7 7-7" />
@@ -42,7 +42,7 @@
 
                             <!-- Delete Button -->
                             <button v-if="canDelete" @click="showDeleteModal = true"
-                                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2">
+                                class="px-4 py-2 bg-red-600 text-white rounded-3 hover:bg-red-700 transition-colors flex items-center gap-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -58,7 +58,7 @@
                     <div class="max-w-4xl mx-auto">
                         <form @submit.prevent="handleSubmit" class="space-y-6">
                             <!-- Informations de base -->
-                            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                            <div class="bg-white dark:bg-gray-800 rounded-3 p-6">
                                 <h2
                                     class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                                     <svg class="w-6 h-6 text-brand-600" fill="none" stroke="currentColor"
@@ -76,8 +76,8 @@
                                             Code du workspace
                                         </label>
                                         <input :value="workspace.code" type="text" disabled
-                                            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 cursor-not-allowed" />
-                                        <p class="mt-1 text-sm text-gray-500">Le code ne peut pas être modifié</p>
+                                            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-3 bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 cursor-not-allowed" />
+                                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Le code ne peut pas être modifié</p>
                                     </div>
 
                                     <!-- Nom du workspace -->
@@ -87,7 +87,7 @@
                                         </label>
                                         <input v-model="form.nom" type="text" required
                                             placeholder="Ex: Entreprise XYZ - Projets 2024"
-                                            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                                            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                                             :class="{ 'border-red-500': errors.nom }" />
                                         <p v-if="errors.nom" class="mt-1 text-sm text-red-500">{{ errors.nom }}</p>
                                     </div>
@@ -99,7 +99,7 @@
                                         </label>
                                         <textarea v-model="form.description" rows="4"
                                             placeholder="Décrivez l'objectif de ce workspace..."
-                                            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:text-white resize-none"
+                                            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:text-white resize-none"
                                             :class="{ 'border-red-500': errors.description }"></textarea>
                                         <p v-if="errors.description" class="mt-1 text-sm text-red-500">{{
                                             errors.description }}</p>
@@ -112,27 +112,27 @@
                                         </label>
                                         <div class="flex items-center gap-4">
                                             <div v-if="logoPreview || workspace.logo_url"
-                                                class="w-24 h-24 rounded-lg overflow-hidden border-2 border-gray-300 dark:border-gray-600">
+                                                class="w-24 h-24 rounded-3 overflow-hidden border-2 border-gray-300 dark:border-gray-600">
                                                 <img :src="logoPreview || workspace.logo_url" alt="Logo preview"
                                                     class="w-full h-full object-cover" />
                                             </div>
                                             <div v-else
-                                                class="w-24 h-24 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white text-3xl font-bold">
+                                                class="w-24 h-24 rounded-3 flex items-center justify-center text-white text-3xl font-bold">
                                                 {{ workspaceInitials }}
                                             </div>
                                             <div class="flex-1">
                                                 <input ref="logoInput" type="file" accept="image/*" class="hidden"
                                                     @change="handleLogoChange" />
                                                 <button type="button" @click="$refs.logoInput.click()"
-                                                    class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                                                    class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-3 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                                                     {{ workspace.logo_url ? 'Changer le logo' : 'Ajouter un logo' }}
                                                 </button>
                                                 <button v-if="logoPreview || workspace.logo_url" type="button"
                                                     @click="removeLogo"
-                                                    class="ml-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors">
+                                                    class="ml-2 px-4 py-2 bg-red-100 text-red-700 rounded-3 hover:bg-red-200 transition-colors">
                                                     Supprimer
                                                 </button>
-                                                <p class="mt-2 text-sm text-gray-500">
+                                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
                                                     Format recommandé: PNG ou JPG, max 2 MB
                                                 </p>
                                             </div>
@@ -157,7 +157,7 @@
                                                 <span class="text-gray-900 dark:text-white">Archivé</span>
                                             </label>
                                         </div>
-                                        <p class="mt-1 text-sm text-gray-500">
+                                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                             Les workspaces archivés ne sont plus accessibles aux membres
                                         </p>
                                     </div>
@@ -165,7 +165,7 @@
                             </div>
 
                             <!-- Paramètres -->
-                            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                            <div class="bg-white dark:bg-gray-800 rounded-3 p-6">
                                 <h2
                                     class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                                     <svg class="w-6 h-6 text-brand-600" fill="none" stroke="currentColor"
@@ -185,7 +185,7 @@
                                             Visibilité par défaut des projets
                                         </label>
                                         <select v-model="form.settings.default_project_visibility"
-                                            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                                            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
                                             <option value="public">Public - Visible par tous les membres</option>
                                             <option value="team">Équipe - Visible par les membres du workspace</option>
                                             <option value="private">Privé - Visible uniquement par les membres du projet
@@ -201,38 +201,38 @@
 
                                         <div class="space-y-3">
                                             <label
-                                                class="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
+                                                class="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
                                                 <input v-model="form.settings.members_can_create_projects"
                                                     type="checkbox"
                                                     class="w-5 h-5 text-brand-600 border-gray-300 rounded focus:ring-brand-500" />
                                                 <div class="flex-1">
                                                     <p class="font-medium text-gray-900 dark:text-white">Créer des
                                                         projets</p>
-                                                    <p class="text-sm text-gray-500">Les membres peuvent créer de
+                                                    <p class="text-sm text-gray-500 dark:text-gray-400">Les membres peuvent créer de
                                                         nouveaux projets</p>
                                                 </div>
                                             </label>
 
                                             <label
-                                                class="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
+                                                class="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
                                                 <input v-model="form.settings.members_can_invite" type="checkbox"
                                                     class="w-5 h-5 text-brand-600 border-gray-300 rounded focus:ring-brand-500" />
                                                 <div class="flex-1">
                                                     <p class="font-medium text-gray-900 dark:text-white">Inviter des
                                                         membres</p>
-                                                    <p class="text-sm text-gray-500">Les membres peuvent inviter
+                                                    <p class="text-sm text-gray-500 dark:text-gray-400">Les membres peuvent inviter
                                                         d'autres utilisateurs</p>
                                                 </div>
                                             </label>
 
                                             <label
-                                                class="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
+                                                class="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
                                                 <input v-model="form.settings.require_task_validation" type="checkbox"
                                                     class="w-5 h-5 text-brand-600 border-gray-300 rounded focus:ring-brand-500" />
                                                 <div class="flex-1">
                                                     <p class="font-medium text-gray-900 dark:text-white">Validation des
                                                         tâches requise</p>
-                                                    <p class="text-sm text-gray-500">Les nouvelles tâches nécessitent
+                                                    <p class="text-sm text-gray-500 dark:text-gray-400">Les nouvelles tâches nécessitent
                                                         une validation</p>
                                                 </div>
                                             </label>
@@ -242,7 +242,7 @@
                             </div>
 
                             <!-- Info supplémentaires -->
-                            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                            <div class="bg-white dark:bg-gray-800 rounded-3 p-6">
                                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">
                                     Informations
                                 </h2>
@@ -277,13 +277,13 @@
 
                             <!-- Actions -->
                             <div
-                                class="flex items-center justify-end gap-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                                class="flex items-center justify-end gap-4 bg-white dark:bg-gray-800 rounded-3 p-6">
                                 <router-link :to="{ name: 'workspaces.show', params: { id: workspace.id } }"
-                                    class="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                    class="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                     Annuler
                                 </router-link>
                                 <button type="submit" :disabled="loading"
-                                    class="px-6 py-3 bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
+                                    class="px-6 py-3 bg-brand-600 text-white rounded-3 hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
                                     <svg v-if="loading" class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
                                             stroke-width="4"></circle>
@@ -305,7 +305,7 @@
                 <div v-if="showDeleteModal"
                     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
                     @click.self="showDeleteModal = false">
-                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
+                    <div class="bg-white dark:bg-gray-800 rounded-3 max-w-md w-full p-6">
                         <div class="flex items-center gap-4 mb-4">
                             <div
                                 class="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
@@ -331,11 +331,11 @@
 
                         <div class="flex items-center justify-end gap-3">
                             <button @click="showDeleteModal = false"
-                                class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                 Annuler
                             </button>
                             <button @click="handleDelete" :disabled="deleting"
-                                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                class="px-4 py-2 bg-red-600 text-white rounded-3 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                                 {{ deleting ? 'Suppression...' : 'Supprimer définitivement' }}
                             </button>
                         </div>

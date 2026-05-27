@@ -1,16 +1,16 @@
 <!-- resources/js/components/taches/TacheForm.vue - VERSION AVEC ONGLETS -->
 <template>
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 sm:p-6 lg:p-20"
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 sm:p-6 lg:p-20"
     @click.self="$emit('close')">
     <div
-      class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[95vh] overflow-hidden flex flex-col animate-fade-in">
+      class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-3xl max-h-[95vh] overflow-hidden flex flex-col animate-fade-in">
       <!-- Header -->
       <div
-        class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white">
+        class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 text-white">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-4">
             <div
-              class="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg ring-2 ring-white/30">
+              class="w-14 h-14 rounded-3 bg-white/20 flex items-center justify-center ring-2 ring-white/30">
               <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -26,7 +26,7 @@
             </div>
           </div>
           <button @click="$emit('close')"
-            class="text-white/80 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg">
+            class="text-white/80 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-3">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -36,7 +36,7 @@
 
       <!-- Permission Check - Loading State -->
       <div v-if="isCheckingPermissions"
-        class="mx-8 mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border-l-4 border-blue-500">
+        class="mx-8 mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-3 border-l-4 border-blue-500">
         <div class="flex items-center gap-3">
           <svg class="animate-spin w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -120,7 +120,7 @@
             <!-- Section Informations Générales -->
             <div class="space-y-5">
               <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
-                <div class="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg">
+                <div class="p-2 rounded-3">
                   <InformationCircleIcon class="w-5 h-5 text-white" />
                 </div>
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white">Informations générales</h3>
@@ -128,9 +128,9 @@
 
               <!-- Activité Context Card -->
               <div v-if="activiteContext"
-                class="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border-2 border-blue-200 dark:border-blue-800">
+                class="p-4 rounded-3 border-2 border-blue-200 dark:border-blue-800">
                 <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
+                  <div class="w-10 h-10 rounded-3 bg-blue-600 flex items-center justify-center">
                     <FolderIcon class="w-5 h-5 text-white" />
                   </div>
                   <div class="flex-1">
@@ -151,7 +151,7 @@
                   <span class="text-red-500">*</span> Activité
                 </label>
                 <select v-model="formData.activite_id" required
-                  class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                  class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
                   <option value="">Sélectionner une activité</option>
                   <option v-for="activite in activites" :key="activite.id" :value="activite.id">
                     {{ activite.nom }} - {{ activite.projet?.nom }}
@@ -167,14 +167,14 @@
                 <input v-model="formData.titre" type="text" required
                   dusk="tache-form-titre"
                   placeholder="Ex: Implémenter l'authentification utilisateur"
-                  class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
+                  class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
               </div>
 
               <!-- Description -->
               <div>
                 <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Description</label>
                 <textarea v-model="formData.description" rows="4" placeholder="Décrivez la tâche en détail..."
-                  class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"></textarea>
+                  class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"></textarea>
               </div>
 
               <!-- Objectif & Indicateurs -->
@@ -182,13 +182,13 @@
                 <div>
                   <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Objectif</label>
                   <textarea v-model="formData.objectif" rows="3" placeholder="Quel est l'objectif de cette tâche ?"
-                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"></textarea>
+                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"></textarea>
                 </div>
                 <div>
                   <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Indicateurs de
                     résultats</label>
                   <textarea v-model="formData.indicateurs_resultats" rows="3" placeholder="Comment mesurer le succès ?"
-                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"></textarea>
+                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"></textarea>
                 </div>
               </div>
             </div>
@@ -196,7 +196,7 @@
             <!-- Section Planification -->
             <div class="space-y-5">
               <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
-                <div class="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg">
+                <div class="p-2 rounded-3">
                   <CalendarIcon class="w-5 h-5 text-white" />
                 </div>
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white">Planification</h3>
@@ -209,9 +209,9 @@
                   <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Statut</label>
                   <div class="space-y-2">
                     <label v-for="statut in statutOptions" :key="statut.value"
-                      class="relative flex items-center gap-3 p-3.5 border-2 rounded-xl cursor-pointer transition-all"
+                      class="relative flex items-center gap-3 p-3.5 border-2 rounded-3 cursor-pointer transition-all"
                       :class="formData.statut === statut.value
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 shadow-sm'
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 '
                         : 'border-gray-300 dark:border-gray-600 hover:border-blue-300'">
                       <input type="radio" v-model="formData.statut" :value="statut.value" class="sr-only" />
                       <span :class="statut.color"
@@ -226,9 +226,9 @@
                   <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Priorité</label>
                   <div class="space-y-2">
                     <label v-for="priorite in prioriteOptions" :key="priorite.value"
-                      class="relative flex items-center gap-3 p-3.5 border-2 rounded-xl cursor-pointer transition-all"
+                      class="relative flex items-center gap-3 p-3.5 border-2 rounded-3 cursor-pointer transition-all"
                       :class="formData.priorite === priorite.value
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 shadow-sm'
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 '
                         : 'border-gray-300 dark:border-gray-600 hover:border-blue-300'">
                       <input type="radio" v-model="formData.priorite" :value="priorite.value" class="sr-only" />
                       <span class="text-xl">{{ priorite.icon }}</span>
@@ -296,7 +296,7 @@
                 <div>
                   <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Progression (%)</label>
                   <input v-model.number="formData.taux_realisation" type="number" min="0" max="100"
-                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
+                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
                   <div class="mt-3 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
                     <div class="h-2.5 rounded-full transition-all duration-500"
                       :class="getProgressColorClass(formData.taux_realisation)"
@@ -307,12 +307,12 @@
                 <div>
                   <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Heures estimées</label>
                   <input v-model.number="formData.estimated_hours" type="number" min="0" step="0.5" placeholder="0"
-                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
+                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
                 </div>
                 <div>
                   <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Heures réelles</label>
                   <input v-model.number="formData.actual_hours" type="number" min="0" step="0.5" placeholder="0"
-                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
+                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
                 </div>
               </div>
             </div>
@@ -320,14 +320,14 @@
             <!-- Section Commentaire -->
             <div class="space-y-5">
               <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
-                <div class="p-2 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-lg">
+                <div class="p-2 rounded-3">
                   <ChatBubbleLeftRightIcon class="w-5 h-5 text-white" />
                 </div>
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white">Commentaire</h3>
               </div>
 
               <textarea v-model="formData.commentaire" rows="3" placeholder="Ajoutez un commentaire ou une note..."
-                class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"></textarea>
+                class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"></textarea>
             </div>
           </div>
 
@@ -336,7 +336,7 @@
     <!-- Section Équipe & Organisation -->
     <div class="space-y-5">
       <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
-        <div class="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg">
+        <div class="p-2 rounded-3">
           <UserGroupIcon class="w-5 h-5 text-white" />
         </div>
         <h3 class="text-xl font-bold text-gray-900 dark:text-white">Équipe & Organisation</h3>
@@ -351,7 +351,7 @@
           Responsable de la tâche
         </label>
         
-        <div v-if="loadingMembers" class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+        <div v-if="loadingMembers" class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-3">
           <div class="flex items-center gap-3">
             <svg class="animate-spin w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -369,7 +369,7 @@
           required
           dusk="tache-form-responsable"
           :disabled="availableUsers.length === 0"
-          class="w-full px-4 py-3.5 border-2 rounded-xl transition-all"
+          class="w-full px-4 py-3.5 border-2 rounded-3 transition-all"
           :class="availableUsers.length === 0
             ? 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 opacity-60 cursor-not-allowed'
             : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 hover:border-purple-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500'"
@@ -381,7 +381,7 @@
         </select>
 
         <!-- ✅ Message informatif -->
-        <!-- <div class="mt-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+        <!-- <div class="mt-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-3 border border-purple-200 dark:border-purple-800">
           <div class="flex items-start gap-2">
             <InformationCircleIcon class="w-5 h-5 text-purple-600 dark:text-purple-400 flex-shrink-0 mt-0.5" />
             <div class="text-sm text-purple-700 dark:text-purple-300">
@@ -397,7 +397,7 @@
 
         <!-- Affichage du responsable actuel si tâche existante -->
         <div v-if="tache && tache.responsable && formData.responsable_id === tache.responsable.id"
-          class="mt-3 p-3 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-lg border-2 border-purple-200 dark:border-purple-800">
+          class="mt-3 p-3 rounded-3 border-2 border-purple-200 dark:border-purple-800">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-full overflow-hidden bg-purple-100 dark:bg-purple-900 ring-2 ring-purple-500">
               <img v-if="tache.responsable.avatar" :src="tache.responsable.avatar" :alt="tache.responsable.nom" 
@@ -439,7 +439,7 @@
           Autres intervenants
         </label>
 
-        <div v-if="loadingMembers" class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+        <div v-if="loadingMembers" class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-3">
           <div class="flex items-center gap-3">
             <svg class="animate-spin w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -452,13 +452,13 @@
         </div>
 
         <div v-else-if="availableUsers.length === 0"
-          class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+          class="p-3 bg-gray-50 dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700">
           <p class="text-sm text-gray-600 dark:text-gray-400 text-center">Aucun membre disponible</p>
         </div>
 
         <div v-else class="space-y-2">
           <!-- Tags des intervenants sélectionnés -->
-          <div v-if="selectedAssignees.length > 0" class="flex flex-wrap gap-2 p-3 bg-blue-50 dark:bg-blue-900/10 rounded-xl border border-blue-200 dark:border-blue-800">
+          <div v-if="selectedAssignees.length > 0" class="flex flex-wrap gap-2 p-3 bg-blue-50 dark:bg-blue-900/10 rounded-3 border border-blue-200 dark:border-blue-800">
             <span
               v-for="user in selectedAssignees"
               :key="user.id"
@@ -497,12 +497,12 @@
               type="text"
               placeholder="Rechercher un membre..."
               :disabled="!canAssignUsers"
-              class="w-full pl-9 pr-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
+              class="w-full pl-9 pr-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
             />
           </div>
 
           <!-- Liste avec cases à cocher -->
-          <div class="max-h-52 overflow-y-auto border-2 border-gray-200 dark:border-gray-700 rounded-xl divide-y divide-gray-100 dark:divide-gray-700">
+          <div class="max-h-52 overflow-y-auto border-2 border-gray-200 dark:border-gray-700 rounded-3 divide-y divide-gray-100 dark:divide-gray-700">
             <label
               v-for="user in filteredAssigneeUsers"
               :key="user.id"
@@ -541,7 +541,7 @@
             </div>
           </div>
 
-          <div v-if="formData.responsable_id" class="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+          <div v-if="formData.responsable_id" class="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-3 border border-purple-200 dark:border-purple-800">
             <p class="text-xs text-purple-700 dark:text-purple-300 flex items-center gap-1">
               <CheckBadgeIcon class="w-4 h-4" />
               Le responsable est automatiquement inclus dans les intervenants
@@ -561,14 +561,14 @@
             <!-- Section Validation -->
             <!-- <div class="space-y-5">
               <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
-                <div class="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg">
+                <div class="p-2 rounded-3">
                   <CheckBadgeIcon class="w-5 h-5 text-white" />
                 </div>
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white">Validation</h3>
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <label class="relative flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all"
+                <label class="relative flex items-start gap-3 p-4 border-2 rounded-3 cursor-pointer transition-all"
                   :class="formData.validation_n1_required ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
                     : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'">
                   <input v-model="formData.validation_n1_required" type="checkbox"
@@ -579,7 +579,7 @@
                   </div>
                 </label>
 
-                <label class="relative flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all"
+                <label class="relative flex items-start gap-3 p-4 border-2 rounded-3 cursor-pointer transition-all"
                   :class="formData.validation_n2_required ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
                     : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'">
                   <input v-model="formData.validation_n2_required" type="checkbox"
@@ -592,7 +592,7 @@
               </div>
  
               <div v-if="formData.validation_n1_required || formData.validation_n2_required"
-                class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-3">
                 <p class="text-sm text-blue-700 dark:text-blue-300">
                   <InformationCircleIcon class="w-4 h-4 inline mr-2" />
                   Les validateurs seront automatiquement assignés en fonction des rôles dans l'activité et le projet.
@@ -603,7 +603,7 @@
             <!-- Section Visibilité -->
             <div class="space-y-5">
               <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
-                <div class="p-2 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg">
+                <div class="p-2 rounded-3">
                   <EyeIcon class="w-5 h-5 text-white" />
                 </div>
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white">Visibilité</h3>
@@ -611,9 +611,9 @@
 
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <label v-for="visibility in visibilityOptions" :key="visibility.value"
-                  class="relative flex flex-col items-center gap-3 p-5 border-2 rounded-xl cursor-pointer transition-all text-center"
+                  class="relative flex flex-col items-center gap-3 p-5 border-2 rounded-3 cursor-pointer transition-all text-center"
                   :class="formData.visibility === visibility.value
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 shadow-md'
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 '
                     : 'border-gray-300 dark:border-gray-600 hover:border-blue-300'">
                   <input type="radio" v-model="formData.visibility" :value="visibility.value" class="sr-only" />
                   <span class="text-3xl">{{ visibility.icon }}</span>
@@ -632,7 +632,7 @@
             <!-- Section Fichiers attachés -->
             <div class="space-y-5">
               <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
-                <div class="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg">
+                <div class="p-2 rounded-3">
                   <PaperClipIcon class="w-5 h-5 text-white" />
                 </div>
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white">Fichiers & Ressources</h3>
@@ -647,7 +647,7 @@
                 <!-- Zone de dépôt de fichiers -->
                 <div @drop.prevent="handleFileDrop" @dragover.prevent="isDragOver = true"
                   @dragleave="isDragOver = false"
-                  class="border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200" :class="isDragOver
+                  class="border-2 border-dashed rounded-3 p-8 text-center transition-all duration-200" :class="isDragOver
                     ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                     : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'">
                   <PaperClipIcon class="w-12 h-12 mx-auto text-gray-400 mb-4" />
@@ -659,7 +659,7 @@
                   </p>
                   <input type="file" :ref="el => fileInputRef = el" multiple @change="handleFileUpload" class="hidden" />
                   <button type="button" @click="fileInputRef?.click()"
-                    class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                    class="px-6 py-3 bg-blue-600 text-white rounded-3 hover:bg-blue-700 transition-colors font-medium">
                     Parcourir les fichiers
                   </button>
                   <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">
@@ -678,7 +678,7 @@
                 </h4>
                 <div class="space-y-2">
                   <div v-for="(file, index) in uploadedFiles" :key="index"
-                    class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                    class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700">
                     <div class="flex items-center gap-3">
                       <DocumentIcon class="w-5 h-5 text-gray-400" />
                       <div>
@@ -689,7 +689,7 @@
                       </div>
                     </div>
                     <button type="button" @click="removeFile(index)"
-                      class="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                      class="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-3 transition-colors">
                       <TrashIcon class="w-4 h-4" />
                     </button>
                   </div>
@@ -705,11 +705,11 @@
                 <!-- Ajout de lien -->
                 <div class="flex gap-3">
                   <input v-model="newLink.url" type="url" placeholder="https://example.com"
-                    class="flex-1 px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
+                    class="flex-1 px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
                   <input v-model="newLink.title" type="text" placeholder="Titre du lien"
-                    class="flex-1 px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
+                    class="flex-1 px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
                   <button type="button" @click="addLink"
-                    class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+                    class="px-6 py-3 bg-green-600 text-white rounded-3 hover:bg-green-700 transition-colors font-medium">
                     Ajouter
                   </button>
                 </div>
@@ -717,7 +717,7 @@
                 <!-- Liste des liens -->
                 <div v-if="externalLinks.length > 0" class="space-y-2">
                   <div v-for="(link, index) in externalLinks" :key="index"
-                    class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                    class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700">
                     <div class="flex items-center gap-3">
                       <LinkIcon class="w-5 h-5 text-blue-500" />
                       <div>
@@ -729,7 +729,7 @@
                       </div>
                     </div>
                     <button type="button" @click="removeLink(index)"
-                      class="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                      class="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-3 transition-colors">
                       <TrashIcon class="w-4 h-4" />
                     </button>
                   </div>
@@ -740,7 +740,7 @@
             <!-- Section Apparence -->
             <div class="space-y-5">
               <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
-                <div class="p-2 bg-gradient-to-br from-pink-500 to-rose-600 rounded-lg">
+                <div class="p-2 rounded-3">
                   <PaintBrushIcon class="w-5 h-5 text-white" />
                 </div>
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white">Apparence</h3>
@@ -752,9 +752,9 @@
                   <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Couleur</label>
                   <div class="flex gap-3 items-center">
                     <input v-model="formData.couleur" type="color"
-                      class="h-12 w-20 border-2 border-gray-300 dark:border-gray-700 rounded-lg cursor-pointer" />
+                      class="h-12 w-20 border-2 border-gray-300 dark:border-gray-700 rounded-3 cursor-pointer" />
                     <input v-model="formData.couleur" type="text" placeholder="#3B82F6" pattern="^#[0-9A-Fa-f]{6}$"
-                      class="flex-1 px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
+                      class="flex-1 px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
                   </div>
                 </div>
 
@@ -763,14 +763,14 @@
                   <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Image de
                     couverture</label>
                   <input :ref="el => coverImageInputRef = el" type="file" accept="image/*" @change="handleCoverImageUpload"
-                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+                    class="w-full px-4 py-3.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all file:mr-4 file:py-2 file:px-4 file:rounded-3 file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
                   <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">PNG, JPG, GIF jusqu'à 2 Mo</p>
                 </div>
               </div>
 
               <!-- Preview Image -->
               <div v-if="coverImagePreview" class="mt-3">
-                <img :src="coverImagePreview" alt="Preview" class="h-40 w-full rounded-xl object-cover shadow-lg" />
+                <img :src="coverImagePreview" alt="Preview" class="h-40 w-full rounded-3 object-cover " />
               </div>
             </div>
           </div>
@@ -785,7 +785,7 @@
           <!-- Navigation entre les onglets -->
           <div class="flex gap-1">
             <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
-              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors text-xs font-medium"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-3 transition-colors text-xs font-medium"
               :class="activeTab === tab.id
                 ? 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400'
                 : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-800'">
@@ -824,15 +824,15 @@
 
         <div class="flex items-center gap-3">
           <button type="button" @click="$emit('close')" dusk="tache-form-cancel"
-            class="px-6 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 font-semibold text-gray-700 dark:text-gray-300 transition-all hover:scale-105">
+            class="px-6 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 font-semibold text-gray-700 dark:text-gray-300 transition-all ">
             Annuler
           </button>
           <button type="button" @click="handleSubmit" :disabled="loading || !hasPermission || isCheckingPermissions"
             dusk="tache-form-submit"
-            class="px-6 py-3 rounded-xl font-semibold shadow-lg transition-all flex items-center gap-2 hover:scale-105 disabled:scale-100"
+            class="px-6 py-3 rounded-3 font-semibold transition-all flex items-center gap-2 disabled:scale-100"
             :class="loading || !hasPermission || isCheckingPermissions
-              ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 cursor-not-allowed'
-              : 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-white shadow-blue-500/50'">
+              ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+              : 'text-white shadow-blue-500/50'">
             <svg v-if="loading" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor"

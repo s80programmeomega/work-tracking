@@ -9,7 +9,7 @@
           <div class="space-y-6">
             <nav class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
               <button @click="$router.back()"
-                class="flex items-center space-x-1 hover:text-gray-700 dark:hover:text-gray-300">
+                class="flex items-center space-x-1 hover:text-gray-700 dark:text-gray-200 dark:hover:text-gray-300">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -19,7 +19,7 @@
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
               </svg>
-              <router-link :to="`/projets/${activite.projet?.id}`" class="hover:text-gray-700 dark:hover:text-gray-300">
+              <router-link :to="`/projets/${activite.projet?.id}`" class="hover:text-gray-700 dark:text-gray-200 dark:hover:text-gray-300">
                 {{ activite.projet?.nom }}
               </router-link>
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -60,7 +60,7 @@
                 <router-link
                   dusk="voir-toutes-taches-btn"
                   :to="{ path: '/taches', query: { activite: activite.id } }"
-                  class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
                   <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -71,7 +71,7 @@
                 <button
                   v-if="canEdit"
                   @click="editActivite(activite)"
-                  class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
                   <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -82,7 +82,7 @@
                
                 <button v-if="canManageMembers" 
                   @click="openMembersModal"
-                  class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                  class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-3 text-sm font-medium hover:bg-blue-700 transition-colors"
                 >
                   <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -96,13 +96,13 @@
 
           <!-- Stats Cards -->
           <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="bg-white dark:bg-gray-800 rounded-3 p-6 border border-gray-200 dark:border-gray-700">
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Tâches totales</p>
                   <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ stats.totalTaches }}</p>
                 </div>
-                <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-3">
                   <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -111,13 +111,13 @@
               </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="bg-white dark:bg-gray-800 rounded-3 p-6 border border-gray-200 dark:border-gray-700">
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Terminées</p>
                   <p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">{{ stats.tachesTerminees }}</p>
                 </div>
-                <div class="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div class="p-3 bg-green-50 dark:bg-green-900/20 rounded-3">
                   <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                   </svg>
@@ -125,7 +125,7 @@
               </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="bg-white dark:bg-gray-800 rounded-3 p-6 border border-gray-200 dark:border-gray-700">
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Progression</p>
@@ -133,7 +133,7 @@
                     {{ stats.progression }}%
                   </p>
                 </div>
-                <div class="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                <div class="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-3">
                   <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
@@ -142,7 +142,7 @@
               </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="bg-white dark:bg-gray-800 rounded-3 p-6 border border-gray-200 dark:border-gray-700">
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Membres</p>
@@ -150,7 +150,7 @@
                     {{ activite.membres?.length || 0 }}
                   </p>
                 </div>
-                <div class="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                <div class="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-3">
                   <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -164,9 +164,9 @@
             <!-- Contenu principal -->
             <div class="lg:col-span-2 space-y-8">
               <!-- Description -->
-              <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+              <div class="bg-white dark:bg-gray-800 rounded-3 p-6 border border-gray-200 dark:border-gray-700">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                  <svg class="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-5 h-5 mr-2 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
@@ -178,9 +178,9 @@
               </div>
 
               <!-- Progression détaillée -->
-              <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+              <div class="bg-white dark:bg-gray-800 rounded-3 p-6 border border-gray-200 dark:border-gray-700">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
-                  <svg class="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-5 h-5 mr-2 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
@@ -196,7 +196,7 @@
                     </div>
                     <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4">
                       <div
-                        class="bg-gradient-to-r from-blue-500 to-blue-600 h-4 rounded-full transition-all duration-500 flex items-center justify-end pr-2"
+                        class="h-4 rounded-full transition-all duration-500 flex items-center justify-end pr-2"
                         :style="{ width: `${stats.progression}%` }">
                         <span v-if="stats.progression > 10" class="text-xs font-medium text-white">
                           {{ stats.progression }}%
@@ -208,26 +208,26 @@
                   <!-- Statistiques détaillées -->
                   <div class="grid gap-4 sm:grid-cols-3">
                     <div
-                      class="text-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-red-50 dark:bg-red-900/10">
+                      class="text-center p-4 border border-gray-200 dark:border-gray-700 rounded-3 bg-red-50 dark:bg-red-900/10">
                       <div class="text-3xl font-bold text-red-600">{{ stats.tachesAFaire }}</div>
                       <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">À faire</div>
                     </div>
 
                     <div
-                      class="text-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-blue-50 dark:bg-blue-900/10">
+                      class="text-center p-4 border border-gray-200 dark:border-gray-700 rounded-3 bg-blue-50 dark:bg-blue-900/10">
                       <div class="text-3xl font-bold text-blue-600">{{ stats.tachesEnCours }}</div>
                       <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">En cours</div>
                     </div>
 
                     <div
-                      class="text-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-green-50 dark:bg-green-900/10">
+                      class="text-center p-4 border border-gray-200 dark:border-gray-700 rounded-3 bg-green-50 dark:bg-green-900/10">
                       <div class="text-3xl font-bold text-green-600">{{ stats.tachesTerminees }}</div>
                       <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Terminées</div>
                     </div>
                   </div>
 
                   <!-- Taux de complétion -->
-                  <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-3">
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Taux de complétion
                     </span>
@@ -242,10 +242,10 @@
              <!-- Dans le template, remplacez la section "Tâches récentes" par : -->
 
 <!-- Tâches récentes avec bouton de création -->
-<div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+<div class="bg-white dark:bg-gray-800 rounded-3 p-6 border border-gray-200 dark:border-gray-700">
   <div class="flex items-center justify-between mb-6">
     <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-      <svg class="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg class="w-5 h-5 mr-2 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
           d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
       </svg>
@@ -256,7 +256,7 @@
       <button
         dusk="toggle-kanban-btn"
         @click="toggleKanbanView"
-        class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+        class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
       >
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
@@ -268,7 +268,7 @@
         v-if="canCreateTasks"
         dusk="create-task-btn"
         @click="openCreateTaskForm"
-        class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+        class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-3 text-sm font-medium hover:bg-blue-700 transition-colors"
       >
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -298,7 +298,7 @@
         v-for="tache in recentTaches"
         :key="tache.id"
         :dusk="`task-row-${tache.id}`"
-        class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group"
+        class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group"
         @click="viewTaskDetails(tache)"
       >
         <div class="space-y-1 flex-1">
@@ -328,7 +328,7 @@
                 :style="{ width: `${tache.taux_realisation}%` }"
               ></div>
             </div>
-            <span class="text-xs text-gray-500">{{ tache.taux_realisation }}%</span>
+            <span class="text-xs text-gray-500 dark:text-gray-400">{{ tache.taux_realisation }}%</span>
           </div>
 
           <!-- Badge de compteur de sous-tâches (rendu inline ici, plutôt que via TacheCard) -->
@@ -345,7 +345,7 @@
         <div class="flex items-center gap-3">
           <!-- Date d'échéance -->
           <div v-if="tache.echeance" class="text-right">
-            <div class="text-xs text-gray-500">Échéance</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400">Échéance</div>
             <div 
               class="text-sm font-medium"
               :class="tache.is_overdue ? 'text-red-600' : 'text-gray-900 dark:text-white'"
@@ -386,7 +386,7 @@
       <p class="text-sm mt-1">Créez votre première tâche pour commencer</p>
       
       <!-- Message si viewer -->
-      <div v-if="userRole === 'viewer'" class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg max-w-md mx-auto">
+      <div v-if="userRole === 'viewer'" class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-3 max-w-md mx-auto">
         <p class="text-sm text-blue-700 dark:text-blue-300 flex items-center justify-center">
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -398,7 +398,7 @@
       <button 
         v-if="canCreateTasks" 
         @click="openCreateTaskForm" 
-        class="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        class="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-3 hover:bg-blue-700 transition-colors"
       >
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -414,9 +414,9 @@
             <!-- Sidebar -->
             <div class="space-y-8">
               <!-- Informations -->
-              <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+              <div class="bg-white dark:bg-gray-800 rounded-3 p-6 border border-gray-200 dark:border-gray-700">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
-                  <svg class="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-5 h-5 mr-2 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -435,7 +435,7 @@
                     <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Responsable</span>
                     <div class="flex items-center space-x-2">
                       <div
-                        class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-xs font-bold">
+                        class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold">
                         {{ getInitials(activite.responsable?.nom) }}
                       </div>
                       <span class="text-sm font-medium text-gray-900 dark:text-white">
@@ -460,7 +460,7 @@
                   </div>
 
                   <div v-if="isOverdue"
-                    class="flex items-center space-x-2 text-red-600 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">
+                    class="flex items-center space-x-2 text-red-600 bg-red-50 dark:bg-red-900/20 p-3 rounded-3">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
@@ -471,10 +471,10 @@
               </div>
 
               <!-- Équipe AMÉLIORÉE -->
-              <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+              <div class="bg-white dark:bg-gray-800 rounded-3 p-6 border border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between mb-6">
                   <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 mr-2 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
@@ -483,7 +483,7 @@
                   <button 
                     v-if="canManageMembers" 
                     @click="openMembersModal"
-                    class="inline-flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    class="inline-flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-3 hover:bg-blue-700 transition-colors"
                   >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -498,9 +498,9 @@
                 <div v-if="activite.membres && activite.membres.length > 0" class="space-y-3">
                   <!-- Responsable -->
                   <div
-                    class="flex items-center space-x-3 p-3 rounded-lg bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-orange-900/10 dark:to-yellow-900/10 border border-orange-200 dark:border-orange-800">
+                    class="flex items-center space-x-3 p-3 rounded-3 border border-orange-200 dark:border-orange-800">
                     <div
-                      class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-yellow-500 flex items-center justify-center text-white text-sm font-bold">
+                      class="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold">
                       <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path
                           d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -518,10 +518,10 @@
 
                   <!-- Membres avec permissions détaillées -->
                   <div v-for="member in otherMembers" :key="member.id"
-                    class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group">
+                    class="flex items-center justify-between p-3 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group">
                     <div class="flex items-center space-x-3 flex-1">
                       <div
-                        class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
+                        class="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold">
                         {{ getInitials(member.nom) }}
                       </div>
                       <div class="flex-1 min-w-0">
@@ -579,7 +579,7 @@
                   <button 
                     v-if="canManageMembers" 
                     @click="openMembersModal"
-                    class="inline-flex items-center px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    class="inline-flex items-center px-3 py-1.5 text-sm bg-blue-600 text-white rounded-3 hover:bg-blue-700 transition-colors"
                   >
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -590,17 +590,17 @@
               </div>
 
               <!-- Actions rapides -->
-              <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+              <div class="bg-white dark:bg-gray-800 rounded-3 p-6 border border-gray-200 dark:border-gray-700">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Actions rapides</h3>
 
                 <div class="space-y-3">
                   <button 
                     v-if="canCreateTasks"
                     @click="openCreateTaskForm"
-                    class="w-full flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group"
+                    class="w-full flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group"
                   >
                     <div class="flex items-center">
-                      <div class="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg mr-3 group-hover:bg-green-200 dark:group-hover:bg-green-900/30">
+                      <div class="p-2 bg-green-100 dark:bg-green-900/20 rounded-3 mr-3 group-hover:bg-green-200 dark:group-hover:bg-green-900/30">
                         <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
@@ -614,10 +614,10 @@
 
                   <button 
                     @click="viewAllTasks"
-                    class="w-full flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group"
+                    class="w-full flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group"
                   >
                     <div class="flex items-center">
-                      <div class="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg mr-3 group-hover:bg-blue-200 dark:group-hover:bg-blue-900/30">
+                      <div class="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-3 mr-3 group-hover:bg-blue-200 dark:group-hover:bg-blue-900/30">
                         <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
@@ -632,11 +632,11 @@
                   <button 
                     v-if="canManageMembers" 
                     @click="openMembersModal"
-                    class="w-full flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group"
+                    class="w-full flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group"
                   >
                     <div class="flex items-center">
                       <div
-                        class="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg mr-3 group-hover:bg-purple-200 dark:group-hover:bg-purple-900/30">
+                        class="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-3 mr-3 group-hover:bg-purple-200 dark:group-hover:bg-purple-900/30">
                         <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -650,7 +650,7 @@
                   </button>
 
                   <!-- Message si viewer -->
-                  <div v-if="userRole === 'viewer'" class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <div v-if="userRole === 'viewer'" class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-3">
                     <p class="text-sm text-blue-700 dark:text-blue-300 flex items-center">
                       <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -680,7 +680,7 @@
                 d="M12 8v4m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
             <p class="text-gray-900 dark:text-white font-medium text-lg">Activité introuvable</p>
-            <button @click="$router.back()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            <button @click="$router.back()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-3 hover:bg-blue-700">
               Retour
             </button>
           </div>
@@ -886,7 +886,7 @@ const getStatusClasses = (status) => {
     'en_cours': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300',
     'terminee': 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300'
   }
-  return classes[status] || 'bg-gray-100 text-gray-800'
+  return classes[status] || 'bg-gray-100 text-gray-800 dark:text-gray-100'
 }
 
 const getStatusDotClass = (status) => {
@@ -918,7 +918,7 @@ const getTaskStatusClasses = (status) => {
     'en_cours': 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300',
     'termine': 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
   }
-  return classes[status] || 'bg-gray-100 text-gray-800'
+  return classes[status] || 'bg-gray-100 text-gray-800 dark:text-gray-100'
 }
 
 const getTaskStatusLabel = (status) => {
@@ -937,7 +937,7 @@ const getRoleBadgeClass = (role) => {
     'collaborator': 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300',
     'viewer': 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
   }
-  return classes[role] || 'bg-gray-100 text-gray-800'
+  return classes[role] || 'bg-gray-100 text-gray-800 dark:text-gray-100'
 }
 
 const getRoleLabel = (role) => {

@@ -9,14 +9,14 @@
           v-model="searchQuery"
           type="text"
           placeholder="Rechercher une activité..."
-          class="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+          class="w-full rounded-3 border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
         />
       </div>
 
       <!-- Project Filter -->
       <select
         v-model="selectedProjectId"
-        class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+        class="rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
       >
         <option value="">Tous les projets</option>
         <option
@@ -31,7 +31,7 @@
       <!-- Status Filter -->
       <select
         v-model="statusFilter"
-        class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+        class="rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
       >
         <option value="">Tous les statuts</option>
         <option value="active">Actives</option>
@@ -41,7 +41,7 @@
 
     <!-- Loading State -->
     <div v-if="loading" class="space-y-3">
-      <div v-for="i in 8" :key="i" class="h-24 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-800"></div>
+      <div v-for="i in 8" :key="i" class="h-24 animate-pulse rounded-3 bg-gray-200 dark:bg-gray-800"></div>
     </div>
 
     <!-- Activities List -->
@@ -50,12 +50,12 @@
         v-for="activity in filteredActivities"
         :key="activity.id"
         @click="$emit('select', activity)"
-        class="group cursor-pointer overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:border-purple-500 hover:shadow-md dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-purple-400"
+        class="group cursor-pointer overflow-hidden rounded-3 border border-gray-200 bg-white transition-all hover:border-purple-500 dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-purple-400"
       >
         <div class="flex items-center gap-4 p-4">
           <!-- Activity Icon with Color -->
           <div
-            class="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg"
+            class="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-3"
             :style="{ backgroundColor: activity.couleur || '#8B5CF6' + '20' }"
           >
             <RectangleStackIcon
@@ -127,7 +127,7 @@
               <div class="ml-auto flex items-center gap-2">
                 <div class="h-2 w-24 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
                   <div
-                    class="h-full bg-gradient-to-r from-purple-500 to-purple-600 transition-all"
+                    class="h-full transition-all"
                     :style="{ width: (activity.progression || 0) + '%' }"
                   ></div>
                 </div>
@@ -145,7 +145,7 @@
     </div>
 
     <!-- Empty State -->
-    <div v-else class="rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-12 text-center dark:border-gray-700 dark:bg-gray-800/50">
+    <div v-else class="rounded-3 border-2 border-dashed border-gray-300 bg-gray-50 p-12 text-center dark:border-gray-700 dark:bg-gray-800/50">
       <RectangleStackIcon class="mx-auto h-12 w-12 text-gray-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">
         Aucune activité trouvée

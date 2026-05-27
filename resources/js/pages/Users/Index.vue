@@ -2,7 +2,7 @@
   <AdminLayout>
     <PageBreadcrumb :pageTitle="'Gestion des Utilisateurs'" />
 
-    <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
+    <div class="rounded-3 border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
       <!-- Header -->
       <div class="flex items-center justify-between mb-6">
         <div>
@@ -17,7 +17,7 @@
         <button
           v-if="canCreate"
           @click="openCreateModal"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+          class="px-4 py-2 bg-blue-600 text-white rounded-3 hover:bg-blue-700 transition flex items-center gap-2"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
@@ -33,13 +33,13 @@
           @input="applyFilters"
           type="text"
           placeholder="Rechercher..."
-          class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+          class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
         />
 
         <select
           v-model="filters.role"
           @change="applyFilters"
-          class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+          class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
         >
           <option :value="null">Tous les rôles</option>
           <option value="super_admin">Super Admin</option>
@@ -53,7 +53,7 @@
         <select
           v-model="filters.is_active"
           @change="applyFilters"
-          class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+          class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
         >
           <option :value="null">Tous les statuts</option>
           <option :value="true">Actif</option>
@@ -62,7 +62,7 @@
 
         <button
           @click="resetFilters"
-          class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+          class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
         >
           Réinitialiser
         </button>
@@ -70,25 +70,25 @@
 
       <!-- Stats Cards -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-3 p-4 border border-gray-200 dark:border-gray-700">
           <div class="text-sm text-gray-500 dark:text-gray-400">Total</div>
           <div class="text-2xl font-bold text-gray-900 dark:text-white mt-1">
             {{ totalUsers }}
           </div>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-3 p-4 border border-gray-200 dark:border-gray-700">
           <div class="text-sm text-gray-500 dark:text-gray-400">Actifs</div>
           <div class="text-2xl font-bold text-green-600 mt-1">
             {{ activeUsers.length }}
           </div>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-3 p-4 border border-gray-200 dark:border-gray-700">
           <div class="text-sm text-gray-500 dark:text-gray-400">Managers</div>
           <div class="text-2xl font-bold text-blue-600 mt-1">
             {{ usersByRole('manager').length }}
           </div>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-3 p-4 border border-gray-200 dark:border-gray-700">
           <div class="text-sm text-gray-500 dark:text-gray-400">Inactifs</div>
           <div class="text-2xl font-bold text-red-600 mt-1">
             {{ totalUsers - activeUsers.length }}
@@ -99,7 +99,7 @@
       <!-- Loading State -->
       <div v-if="loading" class="p-8 text-center">
         <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <p class="mt-2 text-gray-500">Chargement...</p>
+        <p class="mt-2 text-gray-500 dark:text-gray-400">Chargement...</p>
       </div>
 
       <!-- Error State -->
@@ -110,7 +110,7 @@
       <!-- Users Table -->
       <div v-else-if="users.length > 0" class="overflow-x-auto">
         <table class="w-full">
-          <thead class="bg-gray-50 dark:bg-gray-700">
+          <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                 Utilisateur
@@ -182,7 +182,7 @@
               <!-- Status -->
               <td class="px-6 py-4 whitespace-nowrap">
                 <span
-                  :class="user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                  :class="user.is_active ? 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300' : 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300'"
                   class="px-2 py-1 text-xs font-medium rounded-full"
                 >
                   {{ user.is_active ? 'Actif' : 'Inactif' }}
@@ -415,14 +415,14 @@ const getRoleLabel = (role) => {
 
 const getRoleBadgeClass = (role) => {
   const classes = {
-    super_admin: 'bg-purple-100 text-purple-800',
-    manager: 'bg-blue-100 text-blue-800',
-    responsable_n1: 'bg-indigo-100 text-indigo-800',
-    responsable_n2: 'bg-cyan-100 text-cyan-800',
-    cadre: 'bg-gray-100 text-gray-800',
-    stagiaire: 'bg-yellow-100 text-yellow-800',
+    super_admin: 'bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300',
+    manager: 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300',
+    responsable_n1: 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-800 dark:text-indigo-300',
+    responsable_n2: 'bg-cyan-100 dark:bg-cyan-900/40 text-cyan-800 dark:text-cyan-300',
+    cadre: 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200',
+    stagiaire: 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300',
   }
-  return classes[role] || 'bg-gray-100 text-gray-800'
+  return classes[role] || 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
 }
 
 const formatDate = (date) => {

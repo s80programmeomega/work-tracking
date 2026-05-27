@@ -1,13 +1,13 @@
 <!-- resources/js/components/taches/PendingValidationsModal.vue -->
 <template>
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm" @click.self="$emit('close')">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-6xl max-h-[95vh] overflow-hidden flex flex-col">
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 " @click.self="$emit('close')">
+    <div class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-6xl max-h-[95vh] overflow-hidden flex flex-col">
       
       <!-- Header -->
-      <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-amber-50 to-white dark:from-amber-900/20 dark:to-gray-800">
-        <div class="flex items-center justify-between">
+      <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700">
+          <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center shadow-lg">
+            <div class="w-12 h-12 rounded-3 flex items-center justify-center ">
               <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -21,7 +21,7 @@
               </p>
             </div>
           </div>
-          <button @click="$emit('close')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+          <button @click="$emit('close')" class="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300 transition-colors">
             <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -69,7 +69,7 @@
 
           <!-- Empty State -->
           <div v-else-if="getCurrentTabTasks().length === 0" class="text-center py-12">
-            <div class="w-24 h-24 mx-auto mb-6 bg-amber-100 dark:bg-amber-900/20 rounded-2xl flex items-center justify-center">
+            <div class="w-24 h-24 mx-auto mb-6 bg-amber-100 dark:bg-amber-900/20 rounded-3 flex items-center justify-center">
               <svg class="w-12 h-12 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -90,7 +90,7 @@
             <div
               v-for="tache in getCurrentTabTasks()"
               :key="tache.id"
-              class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow"
+              class="border border-gray-200 dark:border-gray-700 rounded-3 p-4 transition-shadow"
             >
               <div class="flex items-start justify-between">
                 <div class="flex-1 min-w-0">
@@ -223,7 +223,7 @@
         </div>
         <button
           @click="$emit('close')"
-          class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all"
+          class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all"
         >
           Fermer
         </button>

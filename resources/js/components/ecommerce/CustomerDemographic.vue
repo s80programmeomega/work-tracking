@@ -1,6 +1,6 @@
 <template>
   <div
-    class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6"
+    class="rounded-3 border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6"
   >
     <div class="flex justify-between">
       <div>
@@ -13,7 +13,7 @@
       </div>
     </div>
     <div
-      class="px-4 py-6 my-6 overflow-hidden border border-gary-200 rounded-2xl bg-gray-50 dark:border-gray-800 dark:bg-gray-900 sm:px-6"
+      class="px-4 py-6 my-6 overflow-hidden border border-gary-200 rounded-3 bg-gray-50 dark:border-gray-800 dark:bg-gray-900 sm:px-6"
     >
       <div
         ref="mapOneRef"

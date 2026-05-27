@@ -14,7 +14,7 @@
       <!-- Filter by Permission -->
       <select
         v-model="permissionFilter"
-        class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+        class="rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
       >
         <option value="">Toutes les permissions</option>
         <option value="view">Lecture seule</option>
@@ -25,7 +25,7 @@
 
     <!-- Loading State -->
     <div v-if="loading" class="space-y-3">
-      <div v-for="i in 6" :key="i" class="h-24 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-800"></div>
+      <div v-for="i in 6" :key="i" class="h-24 animate-pulse rounded-3 bg-gray-200 dark:bg-gray-800"></div>
     </div>
 
     <!-- Documents List -->
@@ -34,11 +34,11 @@
         v-for="document in filteredDocuments"
         :key="document.id"
         @click="handleView(document)"
-        class="group cursor-pointer overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:border-purple-500 hover:shadow-md dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-purple-400"
+        class="group cursor-pointer overflow-hidden rounded-3 border border-gray-200 bg-white transition-all hover:border-purple-500 dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-purple-400"
       >
         <div class="flex items-center gap-4 p-4">
           <!-- File Icon -->
-          <div class="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
+          <div class="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-3 bg-gray-100 dark:bg-gray-800">
             <component :is="getFileIcon(document)" class="h-7 w-7 text-gray-600 dark:text-gray-400" />
           </div>
 
@@ -115,7 +115,7 @@
             <button
               v-if="document.permission?.can_download"
               @click.stop="handleDownload(document)"
-              class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-blue-600 dark:hover:bg-gray-800"
+              class="rounded-3 p-2 text-gray-400 hover:bg-gray-100 hover:text-blue-600 dark:hover:bg-gray-800"
               title="Télécharger"
             >
               <ArrowDownTrayIcon class="h-5 w-5" />
@@ -123,7 +123,7 @@
             <button
               v-if="document.permission?.can_share"
               @click.stop="handleShare(document)"
-              class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-purple-600 dark:hover:bg-gray-800"
+              class="rounded-3 p-2 text-gray-400 hover:bg-gray-100 hover:text-purple-600 dark:hover:bg-gray-800"
               title="Partager"
             >
               <ShareIcon class="h-5 w-5" />
@@ -134,7 +134,7 @@
     </div>
 
     <!-- Empty State -->
-    <div v-else class="rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-12 text-center dark:border-gray-700 dark:bg-gray-800/50">
+    <div v-else class="rounded-3 border-2 border-dashed border-gray-300 bg-gray-50 p-12 text-center dark:border-gray-700 dark:bg-gray-800/50">
       <UserGroupIcon class="mx-auto h-12 w-12 text-gray-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">
         Aucun document partagé

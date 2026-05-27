@@ -9,7 +9,7 @@
 
       <!-- Error State -->
       <div v-else-if="error" class="container mx-auto px-4 py-8">
-        <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
+        <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-3 p-6">
           <div class="flex items-center gap-3">
             <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -21,7 +21,7 @@
           </div>
           <button 
             @click="goBack"
-            class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            class="mt-4 px-4 py-2 bg-red-600 text-white rounded-3 hover:bg-red-700 transition-colors"
           >
             Retour
           </button>
@@ -40,7 +40,7 @@
 
       <!-- Not Found State -->
       <div v-else class="container mx-auto px-4 py-8">
-        <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 text-center">
+        <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3 p-6 text-center">
           <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
@@ -48,7 +48,7 @@
           <p class="mt-2 text-gray-600 dark:text-gray-400">Le projet que vous recherchez n'existe pas ou a été supprimé.</p>
           <button 
             @click="goBack"
-            class="mt-4 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
+            class="mt-4 px-4 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700 transition-colors"
           >
             Retour aux projets
           </button>

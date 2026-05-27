@@ -9,7 +9,7 @@
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-4">
               <router-link to="/workspaces"
-                class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-3 transition-colors">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
@@ -32,7 +32,7 @@
         <div class="max-w-4xl mx-auto">
           <form @submit.prevent="handleSubmit" class="space-y-6">
             <!-- Informations de base -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-3 p-6">
               <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                 <svg class="w-6 h-6 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -48,7 +48,7 @@
                     Nom du workspace <span class="text-red-500">*</span>
                   </label>
                   <input v-model="form.nom" type="text" required placeholder="Ex: Entreprise XYZ - Projets 2024"
-                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                     :class="{ 'border-red-500': errors.nom }" />
                   <p v-if="errors.nom" class="mt-1 text-sm text-red-500">{{ errors.nom }}</p>
                 </div>
@@ -59,10 +59,10 @@
                     Description
                   </label>
                   <textarea v-model="form.description" rows="4" placeholder="Décrivez l'objectif de ce workspace..."
-                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:text-white resize-none"
+                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:text-white resize-none"
                     :class="{ 'border-red-500': errors.description }"></textarea>
                   <p v-if="errors.description" class="mt-1 text-sm text-red-500">{{ errors.description }}</p>
-                  <p class="mt-1 text-sm text-gray-500">Optionnel - Expliquez à quoi servira ce workspace</p>
+                  <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Optionnel - Expliquez à quoi servira ce workspace</p>
                 </div>
 
                 <!-- Logo Upload -->
@@ -72,24 +72,24 @@
                   </label>
                   <div class="flex items-center gap-4">
                     <div v-if="logoPreview"
-                      class="w-24 h-24 rounded-lg overflow-hidden border-2 border-gray-300 dark:border-gray-600">
+                      class="w-24 h-24 rounded-3 overflow-hidden border-2 border-gray-300 dark:border-gray-600">
                       <img :src="logoPreview" alt="Logo preview" class="w-full h-full object-cover" />
                     </div>
                     <div v-else
-                      class="w-24 h-24 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white text-3xl font-bold">
+                      class="w-24 h-24 rounded-3 flex items-center justify-center text-white text-3xl font-bold">
                       {{ workspaceInitials }}
                     </div>
                     <div class="flex-1">
                       <input ref="logoInput" type="file" accept="image/*" class="hidden" @change="handleLogoChange" />
                       <button type="button" @click="$refs.logoInput.click()"
-                        class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                        class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-3 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                         Choisir un logo
                       </button>
                       <button v-if="logoPreview" type="button" @click="removeLogo"
-                        class="ml-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors">
+                        class="ml-2 px-4 py-2 bg-red-100 text-red-700 rounded-3 hover:bg-red-200 transition-colors">
                         Supprimer
                       </button>
-                      <p class="mt-2 text-sm text-gray-500">
+                      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
                         Format recommandé: PNG ou JPG, max 2 MB
                       </p>
                     </div>
@@ -100,7 +100,7 @@
             </div>
 
             <!-- Paramètres -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-3 p-6">
               <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                 <svg class="w-6 h-6 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -118,7 +118,7 @@
                     Visibilité par défaut des projets
                   </label>
                   <select v-model="form.settings.default_project_visibility"
-                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
                     <option value="public">Public - Visible par tous les membres</option>
                     <option value="team">Équipe - Visible par les membres du workspace</option>
                     <option value="private">Privé - Visible uniquement par les membres du projet</option>
@@ -133,32 +133,32 @@
 
                   <div class="space-y-3">
                     <label
-                      class="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
+                      class="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
                       <input v-model="form.settings.members_can_create_projects" type="checkbox"
                         class="w-5 h-5 text-brand-600 border-gray-300 rounded focus:ring-brand-500" />
                       <div class="flex-1">
                         <p class="font-medium text-gray-900 dark:text-white">Créer des projets</p>
-                        <p class="text-sm text-gray-500">Les membres peuvent créer de nouveaux projets</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Les membres peuvent créer de nouveaux projets</p>
                       </div>
                     </label>
 
                     <label
-                      class="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
+                      class="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
                       <input v-model="form.settings.members_can_invite" type="checkbox"
                         class="w-5 h-5 text-brand-600 border-gray-300 rounded focus:ring-brand-500" />
                       <div class="flex-1">
                         <p class="font-medium text-gray-900 dark:text-white">Inviter des membres</p>
-                        <p class="text-sm text-gray-500">Les membres peuvent inviter d'autres utilisateurs</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Les membres peuvent inviter d'autres utilisateurs</p>
                       </div>
                     </label>
 
                     <label
-                      class="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
+                      class="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
                       <input v-model="form.settings.require_task_validation" type="checkbox"
                         class="w-5 h-5 text-brand-600 border-gray-300 rounded focus:ring-brand-500" />
                       <div class="flex-1">
                         <p class="font-medium text-gray-900 dark:text-white">Validation des tâches requise</p>
-                        <p class="text-sm text-gray-500">Les nouvelles tâches nécessitent une validation</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Les nouvelles tâches nécessitent une validation</p>
                       </div>
                     </label>
                   </div>
@@ -167,13 +167,13 @@
             </div>
 
             <!-- Actions -->
-            <div class="flex items-center justify-end gap-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+            <div class="flex items-center justify-end gap-4 bg-white dark:bg-gray-800 rounded-3 p-6">
               <router-link to="/workspaces"
-                class="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                class="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                 Annuler
               </router-link>
               <button type="submit" :disabled="loading"
-                class="px-6 py-3 bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
+                class="px-6 py-3 bg-brand-600 text-white rounded-3 hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
                 <svg v-if="loading" class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor"

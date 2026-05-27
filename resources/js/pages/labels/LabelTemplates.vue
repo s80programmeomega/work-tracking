@@ -6,7 +6,7 @@
         <div class="flex items-center justify-between">
           <div>
             <h1 class="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg">
+              <div class="w-12 h-12 rounded-3 flex items-center justify-center ">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
@@ -21,7 +21,7 @@
           <div class="flex gap-3">
             <button
               @click="$router.back()"
-              class="px-4 py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 transition-all shadow-md hover:shadow-lg flex items-center gap-2 font-medium"
+              class="px-4 py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-3 hover:bg-gray-300 dark:hover:bg-gray-600 transition-all flex items-center gap-2 font-medium"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -30,7 +30,7 @@
             </button>
             <button
               @click="openCreateTemplateModal"
-              class="px-4 py-2.5 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl hover:from-purple-600 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl flex items-center gap-2 font-medium"
+              class="px-4 py-2.5 text-white rounded-3 transition-all flex items-center gap-2 font-medium"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -43,13 +43,13 @@
 
       <!-- Stats Cards -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border-2 border-purple-100 dark:border-purple-900">
+        <div class="bg-white dark:bg-gray-800 rounded-3 p-6 border-2 border-purple-100 dark:border-purple-900">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Templates</p>
               <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ templates.length }}</p>
             </div>
-            <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-xl flex items-center justify-center">
+            <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-3 flex items-center justify-center">
               <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
               </svg>
@@ -57,13 +57,13 @@
           </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border-2 border-green-100 dark:border-green-900">
+        <div class="bg-white dark:bg-gray-800 rounded-3 p-6 border-2 border-green-100 dark:border-green-900">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Templates Prédéfinis</p>
               <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ predefinedTemplates.length }}</p>
             </div>
-            <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-xl flex items-center justify-center">
+            <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-3 flex items-center justify-center">
               <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
               </svg>
@@ -71,13 +71,13 @@
           </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border-2 border-amber-100 dark:border-amber-900">
+        <div class="bg-white dark:bg-gray-800 rounded-3 p-6 border-2 border-amber-100 dark:border-amber-900">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Templates Personnalisés</p>
               <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ customTemplatesCount }}</p>
             </div>
-            <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900 rounded-xl flex items-center justify-center">
+            <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900 rounded-3 flex items-center justify-center">
               <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
               </svg>
@@ -87,7 +87,7 @@
       </div>
 
       <!-- Predefined Templates Section -->
-      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 mb-6">
+      <div class="bg-white dark:bg-gray-800 rounded-3 p-6 mb-6">
         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
           <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
@@ -99,10 +99,10 @@
           <div
             v-for="template in predefinedTemplates"
             :key="template.nom"
-            class="group relative p-5 border-2 border-gray-200 dark:border-gray-700 rounded-xl hover:border-green-300 dark:hover:border-green-700 hover:shadow-lg transition-all"
+            class="group relative p-5 border-2 border-gray-200 dark:border-gray-700 rounded-3 hover:border-green-300 dark:hover:border-green-700 transition-all"
           >
             <!-- Type Badge -->
-            <span class="inline-block px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-semibold rounded-lg mb-3">
+            <span class="inline-block px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-semibold rounded-3 mb-3">
               {{ template.type_workflow.toUpperCase() }}
             </span>
 
@@ -114,7 +114,7 @@
               <span
                 v-for="(item, index) in template.items.slice(0, 3)"
                 :key="index"
-                class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium shadow-sm"
+                class="inline-flex items-center px-3 py-1 rounded-3 text-xs font-medium "
                 :style="{
                   backgroundColor: item.couleur,
                   color: getTextColor(item.couleur)
@@ -122,7 +122,7 @@
               >
                 {{ item.nom }}
               </span>
-              <span v-if="template.items.length > 3" class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+              <span v-if="template.items.length > 3" class="inline-flex items-center px-3 py-1 rounded-3 text-xs font-medium bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
                 +{{ template.items.length - 3 }}
               </span>
             </div>
@@ -140,7 +140,7 @@
             <!-- Actions -->
             <button
               @click="applyPredefinedTemplate(template)"
-              class="w-full px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all shadow-md hover:shadow-lg font-medium"
+              class="w-full px-4 py-2 text-white rounded-3 transition-all font-medium"
             >
               Utiliser ce template
             </button>
@@ -149,7 +149,7 @@
       </div>
 
       <!-- Custom Templates Section -->
-      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-3 p-6">
         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
           <svg class="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
@@ -170,15 +170,15 @@
           <div
             v-for="template in templates"
             :key="template.id"
-            class="group relative p-5 border-2 border-gray-200 dark:border-gray-700 rounded-xl hover:border-purple-300 dark:hover:border-purple-700 hover:shadow-lg transition-all cursor-pointer"
+            class="group relative p-5 border-2 border-gray-200 dark:border-gray-700 rounded-3 hover:border-purple-300 dark:hover:border-purple-700 transition-all cursor-pointer"
             @click="openEditTemplateModal(template)"
           >
             <!-- Type Badge & Default Badge -->
             <div class="flex items-center justify-between mb-3">
-              <span class="inline-block px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs font-semibold rounded-lg">
+              <span class="inline-block px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs font-semibold rounded-3">
                 {{ template.type_workflow.toUpperCase() }}
               </span>
-              <span v-if="template.is_default" class="inline-block px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-semibold rounded-lg">
+              <span v-if="template.is_default" class="inline-block px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-semibold rounded-3">
                 ⭐ Par défaut
               </span>
             </div>
@@ -191,7 +191,7 @@
               <span
                 v-for="(item, index) in template.items.slice(0, 3)"
                 :key="item.id"
-                class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium shadow-sm"
+                class="inline-flex items-center px-3 py-1 rounded-3 text-xs font-medium "
                 :style="{
                   backgroundColor: item.couleur,
                   color: getTextColor(item.couleur)
@@ -199,7 +199,7 @@
               >
                 {{ item.nom }}
               </span>
-              <span v-if="template.items.length > 3" class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+              <span v-if="template.items.length > 3" class="inline-flex items-center px-3 py-1 rounded-3 text-xs font-medium bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
                 +{{ template.items.length - 3 }}
               </span>
             </div>
@@ -218,13 +218,13 @@
             <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
                 @click.stop="applyTemplate(template)"
-                class="flex-1 px-3 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors text-sm font-medium"
+                class="flex-1 px-3 py-2 bg-purple-500 text-white rounded-3 hover:bg-purple-600 transition-colors text-sm font-medium"
               >
                 Appliquer
               </button>
               <button
                 @click.stop="duplicateTemplate(template)"
-                class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-3 transition-colors"
                 title="Dupliquer"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -233,7 +233,7 @@
               </button>
               <button
                 @click.stop="confirmDeleteTemplate(template)"
-                class="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 rounded-lg transition-colors"
+                class="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 rounded-3 transition-colors"
                 title="Supprimer"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -255,7 +255,7 @@
           </p>
           <button
             @click="openCreateTemplateModal"
-            class="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl hover:from-purple-600 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl font-medium"
+            class="px-6 py-3 text-white rounded-3 transition-all font-medium"
           >
             Créer un template
           </button>
@@ -274,10 +274,10 @@
     <!-- Apply Template Modal -->
     <div
       v-if="showApplyModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 "
       @click.self="showApplyModal = false"
     >
-      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full mx-4">
+      <div class="bg-white dark:bg-gray-800 rounded-3 max-w-md w-full mx-4">
         <div class="px-6 py-5 border-b border-gray-200 dark:border-gray-700">
           <h3 class="text-xl font-bold text-gray-900 dark:text-white">
             Appliquer le template "{{ templateToApply?.nom }}"
@@ -289,7 +289,7 @@
             {{ templateToApply?.items?.length }} label(s) seront créés comme labels globaux.
           </p>
 
-          <div class="max-h-48 overflow-y-auto space-y-2 bg-gray-50 dark:bg-gray-900 p-4 rounded-xl">
+          <div class="max-h-48 overflow-y-auto space-y-2 bg-gray-50 dark:bg-gray-900 p-4 rounded-3">
             <div
               v-for="item in templateToApply?.items"
               :key="item.nom"
@@ -307,14 +307,14 @@
         <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
           <button
             @click="showApplyModal = false"
-            class="px-4 py-2 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all font-medium"
+            class="px-4 py-2 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all font-medium"
           >
             Annuler
           </button>
           <button
             @click="confirmApplyTemplate"
             :disabled="applyingTemplate"
-            class="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg hover:from-purple-600 hover:to-pink-700 transition-all font-medium disabled:opacity-50"
+            class="px-4 py-2 text-white rounded-3 transition-all font-medium disabled:opacity-50"
           >
             {{ applyingTemplate ? 'Application...' : 'Appliquer' }}
           </button>

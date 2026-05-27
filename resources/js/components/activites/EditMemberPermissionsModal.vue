@@ -11,7 +11,7 @@
         leave-from="opacity-100"
         leave-to="opacity-0"
       >
-        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" />
+        <div class="fixed inset-0 bg-black/50 " />
       </TransitionChild>
 
       <div class="fixed inset-0 overflow-y-auto">
@@ -26,7 +26,7 @@
             leave-to="opacity-0 scale-95"
           >
             <DialogPanel 
-              class="w-full max-w-md transform overflow-hidden rounded-xl bg-white dark:bg-gray-800 shadow-xl transition-all"
+              class="w-full max-w-md transform overflow-hidden rounded-3 bg-white dark:bg-gray-800 transition-all"
               @click.stop
             >
               <!-- Header -->
@@ -36,7 +36,7 @@
                 </DialogTitle>
                 <button
                   @click="$emit('close')"
-                  class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                  class="text-gray-400 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-300"
                 >
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -47,8 +47,8 @@
               <!-- Body -->
               <div class="p-6 space-y-6" @click.stop>
                 <!-- Membre info -->
-                <div class="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                  <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
+                <div class="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-3">
+                  <div class="w-12 h-12 rounded-full flex items-center justify-center text-white text-sm font-bold">
                     {{ getInitials(member.nom) }}
                   </div>
                   <div>
@@ -70,7 +70,7 @@
                     v-model="form.role"
                     @change="handleRoleChange"
                     @click.stop
-                    class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 py-2.5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full rounded-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 py-2.5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="collaborator">Collaborateur</option>
                     <option value="viewer">Observateur</option>
@@ -190,7 +190,7 @@
                 </div>
 
                 <!-- Message d'erreur -->
-                <div v-if="error" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <div v-if="error" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-3">
                   <p class="text-sm text-red-700 dark:text-red-400">{{ error }}</p>
                 </div>
               </div>
@@ -199,14 +199,14 @@
               <div class="flex items-center justify-end space-x-3 border-t border-gray-200 dark:border-gray-700 px-6 py-4">
                 <button
                   @click="$emit('close')"
-                  class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
                   Annuler
                 </button>
                 <button
                   @click="handleSubmit"
                   :disabled="loading"
-                  class="px-4 py-2 bg-blue-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="px-4 py-2 bg-blue-600 border border-transparent rounded-3 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span v-if="loading">Enregistrement...</span>
                   <span v-else>Enregistrer</span>

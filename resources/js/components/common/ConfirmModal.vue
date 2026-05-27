@@ -1,9 +1,9 @@
 <!-- resources/js/components/common/ConfirmModal.vue -->
 <template>
   <Teleport to="body">
-    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div
-        class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full"
+        class="bg-white dark:bg-gray-800 rounded-3 max-w-md w-full"
         @click.stop
       >
         <!-- Header -->
@@ -11,7 +11,7 @@
           <div class="flex items-center gap-3">
             <div
               :class="[
-                'p-3 rounded-lg',
+                'p-3 rounded-3',
                 type === 'danger' ? 'bg-red-100 dark:bg-red-900/30' : 'bg-yellow-100 dark:bg-yellow-900/30'
               ]"
             >
@@ -39,14 +39,14 @@
         <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
           <button
             @click="$emit('cancel')"
-            class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+            class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
           >
             {{ cancelText }}
           </button>
           <button
             @click="$emit('confirm')"
             :class="[
-              'px-4 py-2 rounded-lg text-white transition-colors',
+              'px-4 py-2 rounded-3 text-white transition-colors',
               confirmClass || 'bg-brand-600 hover:bg-brand-700'
             ]"
           >

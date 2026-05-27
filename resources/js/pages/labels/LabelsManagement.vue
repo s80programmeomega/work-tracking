@@ -6,7 +6,7 @@
         <div class="flex items-center justify-between">
           <div>
             <h1 class="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+              <div class="w-12 h-12 rounded-3 flex items-center justify-center ">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                 </svg>
@@ -21,7 +21,7 @@
           <div class="flex gap-3">
             <button
               @click="showTemplateModal = true"
-              class="px-4 py-2.5 bg-purple-500 text-white rounded-xl hover:bg-purple-600 transition-all shadow-md hover:shadow-lg flex items-center gap-2 font-medium"
+              class="px-4 py-2.5 bg-purple-500 text-white rounded-3 hover:bg-purple-600 transition-all flex items-center gap-2 font-medium"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -31,7 +31,7 @@
             <button
               @click="openCreateLabelModal"
               dusk="open-create-label-btn"
-              class="px-4 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl hover:from-indigo-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl flex items-center gap-2 font-medium"
+              class="px-4 py-2.5 text-white rounded-3 transition-all flex items-center gap-2 font-medium"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -44,13 +44,13 @@
 
       <!-- Stats Cards -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border-2 border-indigo-100 dark:border-indigo-900">
+        <div class="bg-white dark:bg-gray-800 rounded-3 p-6 border-2 border-indigo-100 dark:border-indigo-900">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Labels</p>
               <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ labels.length }}</p>
             </div>
-            <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900 rounded-xl flex items-center justify-center">
+            <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900 rounded-3 flex items-center justify-center">
               <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
               </svg>
@@ -58,13 +58,13 @@
           </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border-2 border-green-100 dark:border-green-900">
+        <div class="bg-white dark:bg-gray-800 rounded-3 p-6 border-2 border-green-100 dark:border-green-900">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Labels Globaux</p>
               <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ globalLabelsCount }}</p>
             </div>
-            <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-xl flex items-center justify-center">
+            <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-3 flex items-center justify-center">
               <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -72,13 +72,13 @@
           </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border-2 border-purple-100 dark:border-purple-900">
+        <div class="bg-white dark:bg-gray-800 rounded-3 p-6 border-2 border-purple-100 dark:border-purple-900">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Labels Projet</p>
               <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ projectLabelsCount }}</p>
             </div>
-            <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-xl flex items-center justify-center">
+            <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-3 flex items-center justify-center">
               <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
               </svg>
@@ -86,13 +86,13 @@
           </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border-2 border-amber-100 dark:border-amber-900">
+        <div class="bg-white dark:bg-gray-800 rounded-3 p-6 border-2 border-amber-100 dark:border-amber-900">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Utilisations</p>
               <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ totalUsageCount }}</p>
             </div>
-            <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900 rounded-xl flex items-center justify-center">
+            <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900 rounded-3 flex items-center justify-center">
               <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
@@ -102,7 +102,7 @@
       </div>
 
       <!-- Filters -->
-      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 mb-6">
+      <div class="bg-white dark:bg-gray-800 rounded-3 p-6 mb-6">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <!-- Search -->
           <div class="relative">
@@ -113,14 +113,14 @@
               v-model="searchQuery"
               type="text"
               placeholder="Rechercher un label..."
-              class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
+              class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
             />
           </div>
 
           <!-- Scope Filter -->
           <select
             v-model="scopeFilter"
-            class="px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
+            class="px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
           >
             <option value="all">Tous les labels</option>
             <option value="global">Labels globaux</option>
@@ -130,7 +130,7 @@
           <!-- Sort -->
           <select
             v-model="sortBy"
-            class="px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
+            class="px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
           >
             <option value="name">Trier par nom</option>
             <option value="usage">Trier par utilisation</option>
@@ -140,7 +140,7 @@
       </div>
 
       <!-- Labels Grid -->
-      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-3 p-6">
         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
           <svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
@@ -162,13 +162,13 @@
             v-for="label in filteredLabels"
             :key="label.id"
             :dusk="`label-card-${label.id}`"
-            class="group relative p-5 border-2 border-gray-200 dark:border-gray-700 rounded-xl hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-lg transition-all cursor-pointer"
+            class="group relative p-5 border-2 border-gray-200 dark:border-gray-700 rounded-3 hover:border-indigo-300 dark:hover:border-indigo-700 transition-all cursor-pointer"
             @click="openEditLabelModal(label)"
           >
             <!-- Label Badge -->
             <div class="flex items-start justify-between mb-4">
               <span
-                class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold shadow-md"
+                class="inline-flex items-center px-4 py-2 rounded-3 text-sm font-semibold "
                 :style="{
                   backgroundColor: label.couleur,
                   color: label.text_color
@@ -208,7 +208,7 @@
               <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
                   @click.stop="duplicateLabel(label)"
-                  class="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                  class="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-3 transition-colors"
                   title="Dupliquer"
                 >
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -217,7 +217,7 @@
                 </button>
                 <button
                   @click.stop="confirmDeleteLabel(label)"
-                  class="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 rounded-lg transition-colors"
+                  class="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 rounded-3 transition-colors"
                   title="Supprimer"
                 >
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -240,7 +240,7 @@
           </p>
           <button
             @click="openCreateLabelModal"
-            class="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl hover:from-indigo-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl font-medium"
+            class="px-6 py-3 text-white rounded-3 transition-all font-medium"
           >
             Créer un label
           </button>

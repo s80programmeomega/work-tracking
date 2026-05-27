@@ -1,25 +1,24 @@
 <template>
   <div
-    class="group relative rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all hover:shadow-md dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-gray-700"
+    class="group relative rounded-3 border border-gray-200 bg-white p-5 transition-all dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-gray-700"
   >
     <!-- Preview Area -->
     <div
       @click="$emit('view')"
-      class="relative mb-4 aspect-square cursor-pointer overflow-hidden rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900"
-    >
+      class="relative mb-4 aspect-square cursor-pointer overflow-hidden rounded-3 bg-gray-50 dark:bg-gray-800/50">
       <!-- Image Preview -->
       <img
         v-if="document.is_image && document.thumbnail_url"
         :src="document.thumbnail_url"
         :alt="document.nom"
-        class="h-full w-full object-cover transition-transform group-hover:scale-105"
+        class="h-full w-full object-cover transition-transform "
       />
 
       <!-- File Icon -->
       <div v-else class="flex h-full w-full items-center justify-center">
         <component
           :is="fileIcon"
-          class="h-20 w-20 text-gray-400 transition-transform group-hover:scale-110"
+          class="h-20 w-20 text-gray-400 transition-transform "
         />
       </div>
 
@@ -30,14 +29,14 @@
       <div class="absolute inset-0 flex items-center justify-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
         <button
           @click.stop="$emit('view')"
-          class="rounded-lg bg-white/90 p-2 shadow-lg backdrop-blur-sm transition-transform hover:scale-110 dark:bg-gray-800/90"
+          class="rounded-3 bg-white/90 p-2 transition-transform dark:bg-gray-800/90"
           title="Voir"
         >
           <EyeIcon class="h-5 w-5 text-gray-700 dark:text-gray-300" />
         </button>
         <button
           @click.stop="$emit('download')"
-          class="rounded-lg bg-white/90 p-2 shadow-lg backdrop-blur-sm transition-transform hover:scale-110 dark:bg-gray-800/90"
+          class="rounded-3 bg-white/90 p-2 transition-transform dark:bg-gray-800/90"
           title="Télécharger"
         >
           <ArrowDownTrayIcon class="h-5 w-5 text-gray-700 dark:text-gray-300" />
@@ -47,7 +46,7 @@
       <!-- Version Badge -->
       <div
         v-if="document.version > 1"
-        class="absolute right-2 top-2 rounded-full bg-blue-600 px-2 py-1 text-xs font-medium text-white shadow-lg"
+        class="absolute right-2 top-2 rounded-full bg-blue-600 px-2 py-1 text-xs font-medium text-white "
       >
         v{{ document.version }}
       </div>
@@ -55,13 +54,13 @@
       <!-- Visibility Badge -->
       <div
         v-if="document.visibility === 'public'"
-        class="absolute left-2 top-2 rounded-full bg-green-600 px-2 py-1 text-xs font-medium text-white shadow-lg"
+        class="absolute left-2 top-2 rounded-full bg-green-600 px-2 py-1 text-xs font-medium text-white "
       >
         <GlobeAltIcon class="inline h-3 w-3" />
       </div>
       <div
         v-else-if="document.visibility === 'team'"
-        class="absolute left-2 top-2 rounded-full bg-orange-600 px-2 py-1 text-xs font-medium text-white shadow-lg"
+        class="absolute left-2 top-2 rounded-full bg-orange-600 px-2 py-1 text-xs font-medium text-white "
       >
         <UserGroupIcon class="inline h-3 w-3" />
       </div>
@@ -117,19 +116,19 @@
       <div class="flex gap-2 border-t border-gray-200 pt-3 dark:border-gray-800">
         <button
           @click="$emit('edit')"
-          class="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+          class="flex-1 rounded-3 border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
         >
           Modifier
         </button>
         <button
           @click="$emit('share')"
-          class="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+          class="flex-1 rounded-3 border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
         >
           Partager
         </button>
         <button
           @click="showMenu = !showMenu"
-          class="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+          class="rounded-3 border border-gray-300 bg-white px-2 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
         >
           <EllipsisVerticalIcon class="h-4 w-4" />
         </button>
@@ -147,7 +146,7 @@
         <div
           v-if="showMenu"
           v-click-outside="() => showMenu = false"
-          class="absolute right-5 bottom-20 z-10 mt-2 w-48 origin-bottom-right rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-800 dark:ring-gray-700"
+          class="absolute right-5 bottom-20 z-10 mt-2 w-48 origin-bottom-right rounded-3 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-800 dark:ring-gray-700"
         >
           <div class="py-1">
             <button

@@ -1,6 +1,6 @@
 <!-- resources\js\components\dashboard\ProjectCard.vue -->
 <template>
-  <div class="group bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all duration-300 cursor-pointer">
+  <div class="group bg-white dark:bg-gray-800 rounded-3 p-4 border border-gray-200 dark:border-gray-700 transition-all duration-300 cursor-pointer">
     <div class="flex items-start justify-between mb-3">
       <div class="flex-1">
         <h4 class="font-semibold text-gray-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors line-clamp-1">
@@ -31,7 +31,7 @@
     <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 dark:border-gray-600">
       <div class="flex -space-x-2">
         <div v-for="member in project.preview_members" :key="member.id" 
-             class="w-6 h-6 rounded-full border-2 border-white dark:border-gray-800 bg-gray-300 flex items-center justify-center text-xs font-semibold text-gray-700">
+             class="w-6 h-6 rounded-full border-2 border-white dark:border-gray-800 bg-gray-300 flex items-center justify-center text-xs font-semibold text-gray-700 dark:text-gray-200">
           {{ member.initials }}
         </div>
       </div>

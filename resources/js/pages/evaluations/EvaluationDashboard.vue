@@ -21,20 +21,20 @@
             v-model="filters.periodeStart"
             type="date"
             dusk="periode-start"
-            class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
           />
           <span class="text-gray-500 dark:text-gray-400 text-sm">→</span>
           <input
             v-model="filters.periodeEnd"
             type="date"
             dusk="periode-end"
-            class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
           />
           <button
             @click="fetchDashboard"
             :disabled="loading"
             dusk="refresh-dashboard-btn"
-            class="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm hover:bg-brand-700 disabled:opacity-50"
+            class="px-4 py-2 bg-brand-600 text-white rounded-3 text-sm hover:bg-brand-700 disabled:opacity-50"
           >
             <i class="fas fa-sync-alt mr-1" :class="{ 'animate-spin': loading }"></i>
             Actualiser
@@ -45,7 +45,7 @@
       <!-- Erreur -->
       <div
         v-if="error"
-        class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg"
+        class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-3"
       >
         {{ error }}
       </div>
@@ -57,7 +57,7 @@
             <i class="fas fa-trophy text-yellow-500 mr-2"></i>
             Meilleurs performers
           </h2>
-          <div v-if="!data.top_performers.length" class="text-center py-6 text-gray-500 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <div v-if="!data.top_performers.length" class="text-center py-6 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-3">
             Aucun score enregistré pour cette période.
           </div>
           <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
@@ -65,7 +65,7 @@
               v-for="(entry, idx) in data.top_performers"
               :key="entry.user_id"
               dusk="top-performer-card"
-              class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 flex flex-col items-center text-center shadow-sm"
+              class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3 p-4 flex flex-col items-center text-center "
             >
               <!-- Rang -->
               <div
@@ -105,12 +105,12 @@
             <i class="fas fa-chart-bar text-blue-500 mr-2"></i>
             Scores de l'équipe
           </h2>
-          <div v-if="!data.scores.length" class="text-center py-6 text-gray-500 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <div v-if="!data.scores.length" class="text-center py-6 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-3">
             Aucun score enregistré pour cette période.
           </div>
-          <div v-else class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+          <div v-else class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3 overflow-hidden">
             <table class="min-w-full text-sm">
-              <thead class="bg-gray-50 dark:bg-gray-700">
+              <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
                 <tr>
                   <th class="px-4 py-3 text-left font-medium text-gray-700 dark:text-gray-300">Membre</th>
                   <th class="px-4 py-3 text-right font-medium text-gray-700 dark:text-gray-300">Score total</th>
@@ -148,7 +148,7 @@
 
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <!-- Escalades abusives -->
-            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3 p-4">
               <h3 class="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-red-500"></span>
                 Escalades abusives
@@ -176,7 +176,7 @@
             </div>
 
             <!-- Taux d'inaction élevé -->
-            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3 p-4">
               <h3 class="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-orange-500"></span>
                 Taux d'inaction N0 élevé (> 33 %)

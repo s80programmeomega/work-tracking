@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Team;
 use App\Models\User;
 use App\Services\TeamService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class TeamMemberController extends Controller
@@ -16,6 +17,14 @@ class TeamMemberController extends Controller
     {
         $this->middleware('auth:sanctum');
         $this->teamService = $teamService;
+    }
+
+    /**
+     * Vérifie si l'utilisateur peut gérer les membres de cette équipe
+     */
+    private function canManageTeam(User $user, Team $team): bool
+    {
+        return $user->isSuperAdmin() || $team->owner_id === $user->id;
     }
 
     /**
@@ -37,6 +46,14 @@ class TeamMemberController extends Controller
 
         try {
             $team = $this->teamService->getTeamByUuid($teamUuid);
+
+            if (! $this->canManageTeam($request->user(), $team)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Accès non autorisé. Seul le propriétaire peut ajouter des membres.',
+                ], 403);
+            }
+
             $user = User::findOrFail($request->input('user_id'));
             $role = $request->input('role', 'member');
 
@@ -73,6 +90,14 @@ class TeamMemberController extends Controller
 
         try {
             $team = $this->teamService->getTeamByUuid($teamUuid);
+
+            if (! $this->canManageTeam($request->user(), $team)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Accès non autorisé. Seul le propriétaire peut modifier les rôles.',
+                ], 403);
+            }
+
             $user = User::findOrFail($userId);
 
             $this->teamService->updateMemberRole($team, $user, $request->input('role'), $request->user());
@@ -107,6 +132,14 @@ class TeamMemberController extends Controller
 
         try {
             $team = $this->teamService->getTeamByUuid($teamUuid);
+
+            if (! $this->canManageTeam($request->user(), $team)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Accès non autorisé. Seul le propriétaire peut modifier les permissions.',
+                ], 403);
+            }
+
             $user = User::findOrFail($userId);
 
             $this->teamService->updateMemberPermissions($team, $user, $request->input('permissions'));
@@ -130,6 +163,14 @@ class TeamMemberController extends Controller
     {
         try {
             $team = $this->teamService->getTeamByUuid($teamUuid);
+
+            if (! $this->canManageTeam(request()->user(), $team)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Accès non autorisé. Seul le propriétaire peut retirer des membres.',
+                ], 403);
+            }
+
             $user = User::findOrFail($userId);
 
             $this->teamService->removeMember($team, $user, request()->user());
@@ -164,6 +205,14 @@ class TeamMemberController extends Controller
 
         try {
             $team = $this->teamService->getTeamByUuid($teamUuid);
+
+            if (! $this->canManageTeam($request->user(), $team)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Accès non autorisé. Seul le propriétaire peut transférer la propriété.',
+                ], 403);
+            }
+
             $newOwner = User::findOrFail($request->input('new_owner_id'));
 
             $this->teamService->transferOwnership($team, $newOwner, $request->user());

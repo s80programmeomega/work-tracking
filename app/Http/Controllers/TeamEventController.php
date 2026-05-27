@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Team;
-use App\Models\TeamEvent;
+use App\Models\TeamActivity;
 use App\Notifications\TeamEventNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -24,7 +24,7 @@ class TeamEventController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $events
+            'events' => $events,
         ]);
     }
 
@@ -43,14 +43,14 @@ class TeamEventController extends Controller
             'end_date' => 'nullable|date|after:start_date',
             'location' => 'nullable|string|max:255',
             'attendee_ids' => 'nullable|array',
-            'attendee_ids.*' => 'exists:users,id'
+            'attendee_ids.*' => 'exists:users,id',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -73,15 +73,10 @@ class TeamEventController extends Controller
         }
 
         // Create activity
-        $team->activities()->create([
-            'user_id' => auth()->id(),
-            'type' => 'event_created',
-            'description' => auth()->user()->nom . ' a créé l\'événement "' . $event->title . '"',
-            'metadata' => [
-                'event_id' => $event->id,
-                'event_title' => $event->title,
-                'event_type' => $event->type
-            ]
+        TeamActivity::log($team, auth()->user(), 'event_created', $event, [
+            'event_id' => $event->id,
+            'event_title' => $event->title,
+            'event_type' => $event->type,
         ]);
 
         // Send notifications to all attendees (except creator)
@@ -93,7 +88,7 @@ class TeamEventController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Événement créé avec succès',
-            'data' => $event->load(['user', 'attendees'])
+            'event' => $event->load(['user', 'attendees']),
         ], 201);
     }
 
@@ -107,7 +102,7 @@ class TeamEventController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $event
+            'event' => $event,
         ]);
     }
 
@@ -127,14 +122,14 @@ class TeamEventController extends Controller
             'end_date' => 'nullable|date|after:start_date',
             'location' => 'nullable|string|max:255',
             'attendee_ids' => 'nullable|array',
-            'attendee_ids.*' => 'exists:users,id'
+            'attendee_ids.*' => 'exists:users,id',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -144,7 +139,7 @@ class TeamEventController extends Controller
             'type',
             'start_date',
             'end_date',
-            'location'
+            'location',
         ]));
 
         // Update attendees if provided
@@ -153,14 +148,9 @@ class TeamEventController extends Controller
         }
 
         // Create activity
-        $team->activities()->create([
-            'user_id' => auth()->id(),
-            'type' => 'event_updated',
-            'description' => auth()->user()->nom . ' a modifié l\'événement "' . $event->title . '"',
-            'metadata' => [
-                'event_id' => $event->id,
-                'event_title' => $event->title
-            ]
+        TeamActivity::log($team, auth()->user(), 'event_updated', $event, [
+            'event_id' => $event->id,
+            'event_title' => $event->title,
         ]);
 
         // Send notifications to all attendees (except updater)
@@ -172,7 +162,7 @@ class TeamEventController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Événement mis à jour avec succès',
-            'data' => $event->load(['user', 'attendees'])
+            'event' => $event->load(['user', 'attendees']),
         ]);
     }
 
@@ -193,18 +183,13 @@ class TeamEventController extends Controller
         $event->delete();
 
         // Create activity
-        $team->activities()->create([
-            'user_id' => auth()->id(),
-            'type' => 'event_deleted',
-            'description' => auth()->user()->nom . ' a supprimé l\'événement "' . $eventTitle . '"',
-            'metadata' => [
-                'event_title' => $eventTitle
-            ]
+        TeamActivity::log($team, auth()->user(), 'event_deleted', null, [
+            'event_title' => $eventTitle,
         ]);
 
         return response()->json([
             'success' => true,
-            'message' => 'Événement supprimé avec succès'
+            'message' => 'Événement supprimé avec succès',
         ]);
     }
 }

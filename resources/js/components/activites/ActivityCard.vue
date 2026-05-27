@@ -1,6 +1,6 @@
 <!-- resources\js\components\activites\ActivityCard.vue -->
 <template>
-  <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow">
+  <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-6 transition-shadow">
     <div class="flex items-start justify-between">
       <div class="flex-1">
         <div class="flex items-center gap-3 mb-2">
@@ -92,7 +92,7 @@
         <button
           v-if="activite.user_permissions?.can_manage_members"
           @click="$emit('manage-members', activite)"
-          class="p-2 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
+          class="p-2 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-3 transition-colors"
           title="Gérer les membres"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,7 +103,7 @@
         <button
           v-if="activite.user_permissions?.can_edit"
           @click="$emit('edit', activite)"
-          class="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
+          class="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-3 transition-colors"
           title="Modifier"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -114,7 +114,7 @@
         <button
           v-if="activite.user_permissions?.can_delete"
           @click="$emit('delete', activite)"
-          class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+          class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-3 transition-colors"
           title="Supprimer"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -155,7 +155,7 @@ const getStatusClass = (status) => {
     active: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300',
     archived: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300'
   }
-  return classes[status] || 'bg-gray-100 text-gray-800'
+  return classes[status] || 'bg-gray-100 text-gray-800 dark:text-gray-100'
 }
 
 const getStatusLabel = (status) => {

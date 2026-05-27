@@ -1,11 +1,11 @@
 <!-- resources/js/components/taches/KanbanColumnPremium.vue -->
 <template>
   <div class="kanban-column-premium">
-    <div class="flex flex-col h-full bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 rounded-2xl p-6 border-2 border-gray-200 dark:border-gray-700 shadow-sm">
+    <div class="flex flex-col h-full rounded-3 p-6 border-2 border-gray-200 dark:border-gray-700 ">
       <!-- Column header -->
       <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-xl flex items-center justify-center text-white text-lg font-bold shadow-lg" :style="{ backgroundColor: statusColor }">
+          <div class="w-12 h-12 rounded-3 flex items-center justify-center text-white text-lg font-bold " :style="{ backgroundColor: statusColor }">
             {{ statusIcon }}
           </div>
           <div>
@@ -17,7 +17,7 @@
         <button
           v-if="canAdd"
           @click="$emit('add-task')"
-          class="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 border-2 border-dashed border-gray-300 dark:border-gray-600 text-gray-400 hover:text-brand-500 hover:border-brand-300 dark:hover:border-brand-600 flex items-center justify-center transition-all hover:scale-110 shadow-sm"
+          class="w-10 h-10 rounded-3 bg-white dark:bg-gray-800 border-2 border-dashed border-gray-300 dark:border-gray-600 text-gray-400 hover:text-brand-500 hover:border-brand-300 dark:hover:border-brand-600 flex items-center justify-center transition-all "
           title="Ajouter une tâche"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -30,7 +30,7 @@
       <div class="flex-1 overflow-y-auto space-y-4 min-h-[500px] max-h-[70vh] custom-scrollbar">
         <div v-if="taches.length === 0" class="flex items-center justify-center h-full text-gray-400 dark:text-gray-600">
           <div class="text-center py-12">
-            <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center">
+            <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-3 flex items-center justify-center">
               <svg class="w-8 h-8 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>

@@ -27,17 +27,17 @@
           @input="debouncedFetch"
           type="text"
           placeholder="Search by name or email..."
-          class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 w-72"
+          class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 w-72"
         />
       </div>
 
       <!-- Error -->
-      <div v-if="error" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg">
+      <div v-if="error" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-3">
         {{ error }}
       </div>
 
       <!-- Table -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div v-if="loading" class="flex justify-center py-12">
           <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
         </div>
@@ -70,7 +70,7 @@
                 >
                   Super Admin
                 </span>
-                <span v-else class="text-gray-500 text-xs">User</span>
+                <span v-else class="text-gray-500 dark:text-gray-400 text-xs">User</span>
               </td>
               <td class="px-4 py-3 text-gray-600 dark:text-gray-400">
                 {{ user.current_workspace?.nom ?? '—' }}
@@ -85,7 +85,7 @@
 
         <!-- Pagination -->
         <div v-if="pagination && pagination.last_page > 1" class="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-700">
-          <p class="text-sm text-gray-500">Page {{ pagination.current_page }} / {{ pagination.last_page }}</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Page {{ pagination.current_page }} / {{ pagination.last_page }}</p>
           <div class="flex gap-2">
             <button
               @click="page--; fetchUsers()"

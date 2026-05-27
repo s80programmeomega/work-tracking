@@ -119,13 +119,13 @@
             </div>
 
             <div class="grid gap-4 mt-4 sm:grid-cols-2">
-              <div class="text-center p-4 border rounded-lg">
+              <div class="text-center p-4 border rounded-3">
                 <div class="text-2xl font-bold text-red-600">
                   {{ taches.filter(t => t.status === 'a_faire').length }}
                 </div>
                 <div class="text-sm text-muted-foreground">À faire</div>
               </div>
-              <div class="text-center p-4 border rounded-lg">
+              <div class="text-center p-4 border rounded-3">
                 <div class="text-2xl font-bold text-blue-600">
                   {{ taches.filter(t => t.status === 'en_cours').length }}
                 </div>
@@ -152,7 +152,7 @@
               <div
                 v-for="tache in recentTaches"
                 :key="tache.id"
-                class="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50"
+                class="flex items-center justify-between p-3 border rounded-3 hover:bg-muted/50"
               >
                 <div class="space-y-1">
                   <div class="font-medium">{{ tache.titre }}</div>
@@ -240,8 +240,8 @@
 
             <div class="space-y-3">
               <!-- Responsable -->
-              <div class="flex items-center space-x-3 p-2 rounded-lg bg-orange-50 dark:bg-orange-900/20">
-                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-yellow-500 flex items-center justify-center">
+              <div class="flex items-center space-x-3 p-2 rounded-3 bg-orange-50 dark:bg-orange-900/20">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center">
                   <Crown class="w-4 h-4 text-white" />
                 </div>
                 <div class="flex-1">
@@ -254,9 +254,9 @@
               <div 
                 v-for="member in members" 
                 :key="member.id"
-                class="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
+                class="flex items-center space-x-3 p-2 rounded-3 hover:bg-muted/50 transition-colors"
               >
-                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-xs font-medium">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-medium">
                   {{ getInitials(member.nom) }}
                 </div>
                 <div class="flex-1 min-w-0">
@@ -319,7 +319,7 @@
              <button
           v-if="canCreateTask"
           @click="openCreateTaskForm"
-          class="px-4 py-2 bg-gradient-to-r from-brand-500 to-brand-600 text-white rounded-lg hover:from-brand-600 hover:to-brand-700 flex items-center gap-2 shadow-lg hover:shadow-xl transition-all"
+          class="px-4 py-2 text-white rounded-3 flex items-center gap-2 transition-all"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />

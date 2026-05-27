@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Team;
+use App\Models\TeamActivity;
 use App\Models\TeamAnnouncement;
 use App\Notifications\TeamAnnouncementNotification;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class TeamAnnouncementController extends Controller
 {
@@ -17,10 +19,10 @@ class TeamAnnouncementController extends Controller
     public function index(string $teamUuid): JsonResponse
     {
         try {
-            $announcements = TeamAnnouncement::whereHas('team', function($q) use ($teamUuid) {
+            $announcements = TeamAnnouncement::whereHas('team', function ($q) use ($teamUuid) {
                 $q->where('uuid', $teamUuid);
             })->with('user')->published()->active()->orderBy('created_at', 'desc')->get();
-            
+
             return response()->json(['success' => true, 'announcements' => $announcements]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
@@ -36,7 +38,7 @@ class TeamAnnouncementController extends Controller
         ]);
 
         try {
-            $team = \App\Models\Team::where('uuid', $teamUuid)->firstOrFail();
+            $team = Team::where('uuid', $teamUuid)->firstOrFail();
             $announcement = TeamAnnouncement::create([
                 'team_id' => $team->id,
                 'user_id' => $request->user()->id,
@@ -47,14 +49,9 @@ class TeamAnnouncementController extends Controller
             ]);
 
             // Create activity
-            $team->activities()->create([
-                'user_id' => $request->user()->id,
-                'type' => 'announcement_created',
-                'description' => $request->user()->nom . ' a créé une annonce : "' . $announcement->title . '"',
-                'metadata' => [
-                    'announcement_id' => $announcement->id,
-                    'announcement_title' => $announcement->title
-                ]
+            TeamActivity::log($team, $request->user(), 'announcement_created', $announcement, [
+                'announcement_id' => $announcement->id,
+                'announcement_title' => $announcement->title,
             ]);
 
             // Send notifications to all team members + project members (except creator)
@@ -79,7 +76,7 @@ class TeamAnnouncementController extends Controller
         ]);
 
         try {
-            $team = \App\Models\Team::where('uuid', $teamUuid)->firstOrFail();
+            $team = Team::where('uuid', $teamUuid)->firstOrFail();
             $announcement = TeamAnnouncement::where('team_id', $team->id)
                 ->where('id', $announcementId)
                 ->firstOrFail();
@@ -87,14 +84,9 @@ class TeamAnnouncementController extends Controller
             $announcement->update($request->only(['title', 'content', 'priority', 'published_at']));
 
             // Create activity
-            $team->activities()->create([
-                'user_id' => $request->user()->id,
-                'type' => 'announcement_updated',
-                'description' => $request->user()->nom . ' a modifié l\'annonce : "' . $announcement->title . '"',
-                'metadata' => [
-                    'announcement_id' => $announcement->id,
-                    'announcement_title' => $announcement->title
-                ]
+            TeamActivity::log($team, $request->user(), 'announcement_updated', $announcement, [
+                'announcement_id' => $announcement->id,
+                'announcement_title' => $announcement->title,
             ]);
 
             return response()->json(['success' => true, 'announcement' => $announcement->fresh()]);
@@ -106,7 +98,7 @@ class TeamAnnouncementController extends Controller
     public function destroy(string $teamUuid, int $announcementId): JsonResponse
     {
         try {
-            $team = \App\Models\Team::where('uuid', $teamUuid)->firstOrFail();
+            $team = Team::where('uuid', $teamUuid)->firstOrFail();
             $announcement = TeamAnnouncement::where('team_id', $team->id)
                 ->where('id', $announcementId)
                 ->firstOrFail();
@@ -115,13 +107,8 @@ class TeamAnnouncementController extends Controller
             $announcement->delete();
 
             // Create activity
-            $team->activities()->create([
-                'user_id' => auth()->id(),
-                'type' => 'announcement_deleted',
-                'description' => auth()->user()->nom . ' a supprimé l\'annonce : "' . $announcementTitle . '"',
-                'metadata' => [
-                    'announcement_title' => $announcementTitle
-                ]
+            TeamActivity::log($team, auth()->user(), 'announcement_deleted', null, [
+                'announcement_title' => $announcementTitle,
             ]);
 
             return response()->json(['success' => true, 'message' => 'Annonce supprimée avec succès']);

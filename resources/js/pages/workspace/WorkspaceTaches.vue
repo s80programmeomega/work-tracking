@@ -23,7 +23,7 @@
           <button
             dusk="export-excel-btn"
             @click="exportExcel"
-            class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           >
             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -35,14 +35,14 @@
 
       <!-- Filtres -->
       <div
-        class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 flex flex-wrap gap-3"
+        class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3 p-4 flex flex-wrap gap-3"
         dusk="workspace-taches-filters"
       >
         <select
           v-model="filters.statut"
           @change="fetchTaches(1)"
           dusk="filter-statut"
-          class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+          class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
         >
           <option value="">Tous les statuts</option>
           <option value="a_faire">À faire</option>
@@ -56,7 +56,7 @@
           v-model="filters.projetId"
           @change="filters.activiteId = ''; fetchTaches(1)"
           dusk="filter-projet"
-          class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+          class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
         >
           <option value="">Tous les projets</option>
           <option v-for="p in projets" :key="p.id" :value="p.id">{{ p.nom }}</option>
@@ -75,13 +75,13 @@
       <!-- Erreur -->
       <div
         v-if="error"
-        class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg"
+        class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-3"
       >
         {{ error }}
       </div>
 
       <!-- Table -->
-      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3 overflow-hidden">
         <div v-if="loading" class="text-center py-12 text-gray-500 dark:text-gray-400">
           <i class="fas fa-circle-notch fa-spin text-2xl mb-2"></i>
           <p class="text-sm">Chargement…</p>
@@ -96,7 +96,7 @@
         </div>
 
         <table v-else class="min-w-full text-sm" dusk="workspace-taches-table">
-          <thead class="bg-gray-50 dark:bg-gray-700">
+          <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
             <tr>
               <th class="px-4 py-3 text-left font-medium text-gray-700 dark:text-gray-300">Titre</th>
               <th class="px-4 py-3 text-left font-medium text-gray-700 dark:text-gray-300">Projet / Activité</th>
@@ -174,7 +174,7 @@
             :disabled="meta.current_page <= 1"
             @click="fetchTaches(meta.current_page - 1)"
             dusk="prev-page-btn"
-            class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-700"
+            class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-3 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
             Précédent
           </button>
@@ -182,7 +182,7 @@
             :disabled="meta.current_page >= meta.last_page"
             @click="fetchTaches(meta.current_page + 1)"
             dusk="next-page-btn"
-            class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-700"
+            class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-3 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
             Suivant
           </button>
@@ -279,7 +279,7 @@ function statutBadge(statut) {
     en_retard: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
     a_refaire: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
   }
-  return map[statut] ?? 'bg-gray-100 text-gray-700'
+  return map[statut] ?? 'bg-gray-100 text-gray-700 dark:text-gray-200'
 }
 
 function prioriteBadge(priorite) {
@@ -289,8 +289,9 @@ function prioriteBadge(priorite) {
     elevee: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
     critique: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
   }
-  return map[priorite] ?? 'bg-gray-100 text-gray-600'
+  return map[priorite] ?? 'bg-gray-100 text-gray-600 dark:text-gray-300'
 }
 
 onMounted(fetchTaches)
+
 </script>

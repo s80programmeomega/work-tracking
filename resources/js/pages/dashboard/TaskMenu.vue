@@ -3,7 +3,7 @@
   <div class="relative">
     <button
       @click="toggleMenu"
-      class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded hover:bg-gray-100 dark:hover:bg-gray-600"
+      class="p-1 text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300 transition-colors rounded hover:bg-gray-100 dark:hover:bg-gray-600"
     >
       <HorizontalDots class="w-4 h-4" />
     </button>
@@ -12,7 +12,7 @@
     <div
       v-if="isOpen"
       v-click-outside="closeMenu"
-      class="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 py-1"
+      class="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 z-50 py-1"
     >
       <!-- View Details -->
       <button
