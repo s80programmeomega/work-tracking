@@ -13,7 +13,7 @@
     <!-- Loading State -->
     <div v-if="loading" class="p-8 text-center">
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      <p class="mt-2 text-gray-500">Chargement des préférences...</p>
+      <p class="mt-2 text-gray-500 dark:text-gray-400">Chargement des préférences...</p>
     </div>
 
     <!-- Preferences Content -->
@@ -274,7 +274,7 @@
             @change="updatePreferences"
             class="w-full h-2 bg-gray-200 rounded-3 appearance-none cursor-pointer dark:bg-gray-700"
           >
-          <div class="flex justify-between mt-1 text-xs text-gray-500">
+          <div class="flex justify-between mt-1 text-xs text-gray-500 dark:text-gray-400">
             <span>5s</span>
             <span>30s</span>
             <span>60s</span>

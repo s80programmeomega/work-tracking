@@ -62,7 +62,7 @@
                     class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:text-white resize-none"
                     :class="{ 'border-red-500': errors.description }"></textarea>
                   <p v-if="errors.description" class="mt-1 text-sm text-red-500">{{ errors.description }}</p>
-                  <p class="mt-1 text-sm text-gray-500">Optionnel - Expliquez à quoi servira ce workspace</p>
+                  <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Optionnel - Expliquez à quoi servira ce workspace</p>
                 </div>
 
                 <!-- Logo Upload -->
@@ -89,7 +89,7 @@
                         class="ml-2 px-4 py-2 bg-red-100 text-red-700 rounded-3 hover:bg-red-200 transition-colors">
                         Supprimer
                       </button>
-                      <p class="mt-2 text-sm text-gray-500">
+                      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
                         Format recommandé: PNG ou JPG, max 2 MB
                       </p>
                     </div>
@@ -138,7 +138,7 @@
                         class="w-5 h-5 text-brand-600 border-gray-300 rounded focus:ring-brand-500" />
                       <div class="flex-1">
                         <p class="font-medium text-gray-900 dark:text-white">Créer des projets</p>
-                        <p class="text-sm text-gray-500">Les membres peuvent créer de nouveaux projets</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Les membres peuvent créer de nouveaux projets</p>
                       </div>
                     </label>
 
@@ -148,7 +148,7 @@
                         class="w-5 h-5 text-brand-600 border-gray-300 rounded focus:ring-brand-500" />
                       <div class="flex-1">
                         <p class="font-medium text-gray-900 dark:text-white">Inviter des membres</p>
-                        <p class="text-sm text-gray-500">Les membres peuvent inviter d'autres utilisateurs</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Les membres peuvent inviter d'autres utilisateurs</p>
                       </div>
                     </label>
 
@@ -158,7 +158,7 @@
                         class="w-5 h-5 text-brand-600 border-gray-300 rounded focus:ring-brand-500" />
                       <div class="flex-1">
                         <p class="font-medium text-gray-900 dark:text-white">Validation des tâches requise</p>
-                        <p class="text-sm text-gray-500">Les nouvelles tâches nécessitent une validation</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Les nouvelles tâches nécessitent une validation</p>
                       </div>
                     </label>
                   </div>

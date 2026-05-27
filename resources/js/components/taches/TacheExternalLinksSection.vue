@@ -43,7 +43,7 @@
     <div v-if="showAddForm" class="p-4 border-2 border-brand-500 rounded-3 bg-brand-50 dark:bg-brand-900/10 space-y-4">
       <div class="flex items-center justify-between">
         <h4 class="font-semibold text-gray-900 dark:text-white">Nouveau lien</h4>
-        <button @click="cancelAdd" class="text-gray-400 hover:text-gray-600">
+        <button @click="cancelAdd" class="text-gray-400 hover:text-gray-600 dark:text-gray-300">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -78,7 +78,7 @@
             </div>
           </div>
           <p v-if="urlError" class="mt-1 text-xs text-red-600">{{ urlError }}</p>
-          <p v-else class="mt-1 text-xs text-gray-500">L'URL doit commencer par http:// ou https://</p>
+          <p v-else class="mt-1 text-xs text-gray-500 dark:text-gray-400">L'URL doit commencer par http:// ou https://</p>
         </div>
 
         <!-- Title input -->
@@ -92,14 +92,14 @@
             placeholder="Ex: Documentation API (généré automatiquement si vide)"
             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-brand-500 dark:bg-gray-800 dark:text-white"
           />
-          <p class="mt-1 text-xs text-gray-500">
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
             Laissez vide pour utiliser le nom de domaine
           </p>
         </div>
 
         <!-- Preview -->
         <div v-if="newLink.url && isValidUrl" class="p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3">
-          <p class="text-xs text-gray-500 mb-2">Aperçu:</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Aperçu:</p>
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-3 flex items-center justify-center">
               <img 

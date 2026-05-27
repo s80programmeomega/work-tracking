@@ -88,7 +88,7 @@
     <!-- Progress -->
     <div v-if="tache.taux_realisation != null" class="px-3 pb-3">
       <div class="flex justify-between text-xs mb-1">
-        <span class="text-gray-600">Progression</span>
+        <span class="text-gray-600 dark:text-gray-400">Progression</span>
         <span class="font-semibold">{{ tache.taux_realisation }}%</span>
       </div>
       <div class="w-full bg-gray-200 rounded-full h-1.5">
@@ -122,10 +122,10 @@ function getStatusLabel(assignee) {
 function getStatusClass(assignee) {
   const s = assignee.pivot?.statut_individuel || 'a_faire'
   return {
-    a_faire: 'bg-gray-100 text-gray-700',
-    en_cours: 'bg-blue-100 text-blue-700',
-    termine: 'bg-green-100 text-green-700'
-  }[s] || 'bg-gray-100'
+    a_faire: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200',
+    en_cours: 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300',
+    termine: 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300'
+  }[s] || 'bg-gray-100 dark:bg-gray-700'
 }
 
 function getPriorityIcon(p) {

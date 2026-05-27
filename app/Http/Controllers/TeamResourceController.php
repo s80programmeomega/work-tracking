@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Team;
+use App\Models\TeamActivity;
 use App\Models\TeamResource;
 use App\Notifications\TeamResourceNotification;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class TeamResourceController extends Controller
 {
@@ -17,10 +19,10 @@ class TeamResourceController extends Controller
     public function index(string $teamUuid): JsonResponse
     {
         try {
-            $resources = TeamResource::whereHas('team', function($q) use ($teamUuid) {
+            $resources = TeamResource::whereHas('team', function ($q) use ($teamUuid) {
                 $q->where('uuid', $teamUuid);
             })->with('user')->orderBy('created_at', 'desc')->get();
-            
+
             return response()->json(['success' => true, 'resources' => $resources]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
@@ -37,7 +39,7 @@ class TeamResourceController extends Controller
         ]);
 
         try {
-            $team = \App\Models\Team::where('uuid', $teamUuid)->firstOrFail();
+            $team = Team::where('uuid', $teamUuid)->firstOrFail();
             $resource = TeamResource::create([
                 'team_id' => $team->id,
                 'user_id' => $request->user()->id,
@@ -48,15 +50,10 @@ class TeamResourceController extends Controller
             ]);
 
             // Create activity
-            $team->activities()->create([
-                'user_id' => $request->user()->id,
-                'type' => 'resource_added',
-                'description' => $request->user()->nom . ' a ajouté une ressource : "' . $resource->title . '"',
-                'metadata' => [
-                    'resource_id' => $resource->id,
-                    'resource_title' => $resource->title,
-                    'resource_type' => $resource->type
-                ]
+            TeamActivity::log($team, $request->user(), 'resource_added', $resource, [
+                'resource_id' => $resource->id,
+                'resource_title' => $resource->title,
+                'resource_type' => $resource->type,
             ]);
 
             // Send notifications to all team members + project members (except creator)
@@ -82,7 +79,7 @@ class TeamResourceController extends Controller
         ]);
 
         try {
-            $team = \App\Models\Team::where('uuid', $teamUuid)->firstOrFail();
+            $team = Team::where('uuid', $teamUuid)->firstOrFail();
             $resource = TeamResource::where('team_id', $team->id)
                 ->where('id', $resourceId)
                 ->firstOrFail();
@@ -90,14 +87,9 @@ class TeamResourceController extends Controller
             $resource->update($request->only(['title', 'type', 'url', 'description']));
 
             // Create activity
-            $team->activities()->create([
-                'user_id' => $request->user()->id,
-                'type' => 'resource_updated',
-                'description' => $request->user()->nom . ' a modifié la ressource : "' . $resource->title . '"',
-                'metadata' => [
-                    'resource_id' => $resource->id,
-                    'resource_title' => $resource->title
-                ]
+            TeamActivity::log($team, $request->user(), 'resource_updated', $resource, [
+                'resource_id' => $resource->id,
+                'resource_title' => $resource->title,
             ]);
 
             return response()->json(['success' => true, 'resource' => $resource->fresh()]);
@@ -109,7 +101,7 @@ class TeamResourceController extends Controller
     public function destroy(string $teamUuid, int $resourceId): JsonResponse
     {
         try {
-            $team = \App\Models\Team::where('uuid', $teamUuid)->firstOrFail();
+            $team = Team::where('uuid', $teamUuid)->firstOrFail();
             $resource = TeamResource::where('team_id', $team->id)
                 ->where('id', $resourceId)
                 ->firstOrFail();
@@ -118,13 +110,8 @@ class TeamResourceController extends Controller
             $resource->delete();
 
             // Create activity
-            $team->activities()->create([
-                'user_id' => auth()->id(),
-                'type' => 'resource_deleted',
-                'description' => auth()->user()->nom . ' a supprimé la ressource : "' . $resourceTitle . '"',
-                'metadata' => [
-                    'resource_title' => $resourceTitle
-                ]
+            TeamActivity::log($team, auth()->user(), 'resource_deleted', null, [
+                'resource_title' => $resourceTitle,
             ]);
 
             return response()->json(['success' => true, 'message' => 'Ressource supprimée avec succès']);

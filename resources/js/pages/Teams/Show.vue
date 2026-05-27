@@ -53,8 +53,8 @@
             </div>
           </div>
 
-          <!-- Actions -->
-          <div class="flex gap-3">
+          <!-- Actions (visible only to team owner or super admin) -->
+          <div v-if="isTeamOwner" class="flex gap-3">
             <button @click="showEditModal = true"
               class="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-2">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -168,7 +168,7 @@
           <div v-else-if="activeTab === 'members'" class="space-y-4">
             <div class="flex justify-between items-center mb-6">
               <h3 class="text-xl font-bold text-gray-900 dark:text-white">Membres de l'équipe</h3>
-              <button @click="showAddMemberModal = true"
+              <button v-if="isTeamOwner" @click="showAddMemberModal = true"
                 class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-3 font-medium transition-colors flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -217,7 +217,7 @@
                       </span>
                     </div>
                   </div>
-                  <button v-if="member.pivot?.role !== 'owner'" @click="removeMemberConfirm(member)"
+                  <button v-if="isTeamOwner && member.pivot?.role !== 'owner'" @click="removeMemberConfirm(member)"
                     class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-3 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -433,12 +433,12 @@
                       </span>
                     </div>
                     <div v-if="event.attendees && event.attendees.length > 0" class="mt-3 flex items-center gap-2">
-                      <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                       </svg>
                       <div class="flex -space-x-2">
-                        <div v-for="(attendee, index) in event.attendees.slice(0, 5)" :key="attendee.id"
+                        <div v-for="(attendee, index) in event.attendees.filter(a => a).slice(0, 5)" :key="attendee.id"
                           class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs border-2 border-white dark:border-gray-800"
                           :title="attendee.nom">
                           {{ getUserInitials(attendee) }}
@@ -535,7 +535,7 @@
               </div>
             </div>
             <button type="button" @click="showEditModal = false"
-              class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+              class="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300 transition-colors">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -635,7 +635,7 @@
               </div>
             </div>
             <button type="button" @click="showAddMemberModal = false"
-              class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+              class="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300 transition-colors">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -731,7 +731,7 @@
               </div>
             </div>
             <button type="button" @click="showEditModal = false"
-              class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+              class="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300 transition-colors">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -831,7 +831,7 @@
               </div>
             </div>
             <button type="button" @click="showAddMemberModal = false"
-              class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+              class="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300 transition-colors">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -924,7 +924,7 @@
               </div>
             </div>
             <button type="button" @click="showAnnouncementModal = false"
-              class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+              class="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300 transition-colors">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -1042,7 +1042,7 @@
               </div>
             </div>
             <button type="button" @click="showResourceModal = false"
-              class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+              class="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300 transition-colors">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -1150,7 +1150,7 @@
               </div>
             </div>
             <button type="button" @click="showEventModal = false"
-              class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+              class="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300 transition-colors">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -1267,7 +1267,8 @@ import { useTeamResources } from '@/composables/useTeamResources'
 import { useTeamActivities } from '@/composables/useTeamActivities'
 import { useTeamPresence } from '@/composables/useTeamPresence'
 import { useTeamCalendar } from '@/composables/useTeamCalendar'
-import { useUsers } from '@/composables/useUsers'
+import { useAuthStore } from '@/stores/authStore'
+import api from '@/api/axios'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 
@@ -1280,7 +1281,24 @@ const { resources, fetchResources, createResource, deleteResource } = useTeamRes
 const { activities, fetchActivities, getActivityIcon, getActivityLabel } = useTeamActivities()
 const { presences, fetchPresences, startPresenceTracking, stopPresenceTracking, getStatusBadge, isOnline, formatLastSeen } = useTeamPresence()
 const { events, fetchEvents, createEvent, deleteEvent, getEventTypeStyle, formatEventDate, getEventDuration, isToday, isPast } = useTeamCalendar()
-const { users, fetchUsers } = useUsers()
+const authStore = useAuthStore()
+
+const isTeamOwner = computed(() => {
+  if (!team.value || !authStore.user) return false
+  return authStore.user.is_super_admin || team.value.owner_id === authStore.user.id
+})
+
+const users = ref([])
+const fetchUsers = async () => {
+  const workspaceId = authStore.currentWorkspaceId
+  if (!workspaceId) return
+  try {
+    const { data } = await api.get(`/workspaces/${workspaceId}/members`)
+    users.value = data.data ?? data
+  } catch (err) {
+    console.error('Erreur lors du chargement des membres:', err)
+  }
+}
 
 const activeTab = ref('chat')
 const newMessage = ref('')

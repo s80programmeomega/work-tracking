@@ -86,7 +86,7 @@
                   v-model.number="editing.value"
                   class="w-16 px-2 py-1 text-sm border border-brand-500 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
                 />
-                <span class="text-sm text-gray-500">%</span>
+                <span class="text-sm text-gray-500 dark:text-gray-400">%</span>
               </div>
               <div class="flex gap-2">
                 <button @click="saveEdit" class="px-3 py-1 text-xs bg-brand-600 text-white rounded-md hover:bg-brand-700">OK</button>

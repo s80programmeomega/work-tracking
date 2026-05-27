@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Models\Workspace;
 use App\Services\SubscriptionService;
 use Closure;
 use Illuminate\Http\Request;
@@ -31,7 +32,10 @@ class CheckSubscriptionLimits
             return $next($request);
         }
 
-        $workspace = $user->currentWorkspace;
+        // Prefer the workspace bound by the route; fall back to the user's current workspace.
+        $workspace = $request->route('workspace') instanceof Workspace
+            ? $request->route('workspace')
+            : $user->currentWorkspace;
 
         if (! $workspace) {
             return $next($request);

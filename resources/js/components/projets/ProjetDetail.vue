@@ -294,7 +294,7 @@
               <div v-else class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700">
                 <div class="overflow-x-auto">
                   <table class="w-full text-sm text-left">
-                    <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700">
+                    <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
                       <tr>
                         <th class="px-6 py-3">Activité</th>
                         <th class="px-6 py-3">Responsable</th>
@@ -327,7 +327,7 @@
                             </div>
                             <span class="text-gray-700 dark:text-gray-300">{{ activity.responsable.nom }}</span>
                           </div>
-                          <span v-else class="text-gray-500 text-sm">Non assigné</span>
+                          <span v-else class="text-gray-500 dark:text-gray-400 text-sm">Non assigné</span>
                         </td>
 
                         <!-- Équipe -->
@@ -338,7 +338,7 @@
                             <UsersIcon class="w-4 h-4" />
                             {{ activity.membres_count || 0 }} membre(s)
                           </button>
-                          <div v-else class="flex items-center gap-2 px-3 py-1.5 text-xs text-gray-500">
+                          <div v-else class="flex items-center gap-2 px-3 py-1.5 text-xs text-gray-500 dark:text-gray-400">
                             <UsersIcon class="w-4 h-4" />
                             {{ activity.membres_count || 0 }} membre(s)
                           </div>
@@ -367,7 +367,7 @@
 
                         <!-- Date fin -->
                         <td class="px-6 py-4">
-                          <span :class="activity.is_overdue ? 'text-red-600 font-medium' : 'text-gray-600'">
+                          <span :class="activity.is_overdue ? 'text-red-600 font-medium' : 'text-gray-600 dark:text-gray-400'">
                             {{ activity.date_fin ? formatDate(activity.date_fin) : '-' }}
                           </span>
                           <div v-if="activity.is_overdue" class="text-xs text-red-500 mt-1">
@@ -447,7 +447,7 @@
               <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700">
                 <div class="overflow-x-auto">
                   <table class="w-full text-sm text-left">
-                    <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700">
+                    <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
                       <tr>
                         <th class="px-6 py-3">Membre</th>
                         <th class="px-6 py-3">Rôle</th>
@@ -606,7 +606,7 @@
               <div v-else class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700">
                 <div class="overflow-x-auto">
                   <table class="w-full text-sm text-left">
-                    <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700">
+                    <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
                       <tr>
                         <th class="px-6 py-3">Invité</th>
                         <th class="px-6 py-3">Rôle</th>

@@ -30,9 +30,9 @@
                     {{ workspace.nom }}
                   </option>
                 </select>
-                <BuildingOfficeIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                <BuildingOfficeIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-gray-400" />
                 <ChevronDownIcon
-                  class="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                  class="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-gray-400 pointer-events-none" />
               </div>
 
               <!-- Display Mode Toggle for Super Admin -->
@@ -186,7 +186,7 @@
               <button @click="filters.favorites = !filters.favorites" :class="[
                 'inline-flex items-center gap-2 px-3 py-2 rounded-3 text-sm font-medium transition-colors',
                 filters.favorites
-                  ? 'bg-yellow-100 text-yellow-800 border border-yellow-300'
+                  ? 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300 border border-yellow-300 dark:border-yellow-700'
                   : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
               ]">
                 <StarIcon :class="filters.favorites ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400'"
@@ -198,7 +198,7 @@
               <button @click="filters.overdue = !filters.overdue" :class="[
                 'inline-flex items-center gap-2 px-3 py-2 rounded-3 text-sm font-medium transition-colors',
                 filters.overdue
-                  ? 'bg-red-100 text-red-800 border border-red-300'
+                  ? 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 border border-red-300 dark:border-red-700'
                   : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
               ]">
                 <AlertCircleIcon class="w-4 h-4" />
@@ -284,7 +284,7 @@
                     <div class="relative">
                       <button @click.stop="toggleMenu(projet.id)"
                         class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                        <HorizontalDots class="w-4 h-4 text-gray-500" />
+                        <HorizontalDots class="w-4 h-4 text-gray-500 dark:text-gray-400" />
                       </button>
 
                       <!-- Dropdown Menu -->

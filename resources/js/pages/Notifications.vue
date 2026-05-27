@@ -16,144 +16,123 @@
       <div v-else>
         <!-- Page Header -->
         <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+          <h2 class="text-xl font-bold text-gray-900 dark:text-white">
             Notifications
           </h2>
 
-          <div class="flex items-center gap-3">
-            <!-- Filter buttons -->
+          <div class="flex items-center gap-2">
             <button @click="filterType = 'all'"
-              :class="filterType === 'all' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'"
-              class="px-4 py-2 rounded-3 text-sm font-medium border border-gray-300 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-gray-700">
+              :class="filterType === 'all' ? 'bg-brand-500 text-white border-brand-500' : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'"
+              class="px-4 py-2 rounded-3 text-sm font-medium border transition-colors">
               Toutes ({{ statistics.total || 0 }})
             </button>
             <button @click="filterType = 'unread'"
-              :class="filterType === 'unread' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'"
-              class="px-4 py-2 rounded-3 text-sm font-medium border border-gray-300 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-gray-700">
+              :class="filterType === 'unread' ? 'bg-brand-500 text-white border-brand-500' : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'"
+              class="px-4 py-2 rounded-3 text-sm font-medium border transition-colors">
               Non lues ({{ unreadCount }})
             </button>
-
-            <!-- Actions -->
             <button v-if="unreadCount > 0" @click="handleMarkAllAsRead"
-              class="px-4 py-2 rounded-3 text-sm font-medium bg-green-600 text-white hover:bg-green-700">
-              <i class="fas fa-check-double mr-2"></i>
+              class="px-4 py-2 rounded-3 text-sm font-medium bg-success-500 hover:bg-success-600 text-white transition-colors flex items-center gap-2">
+              <i class="fas fa-check-double"></i>
               Tout marquer comme lu
             </button>
           </div>
         </div>
 
-        <!-- Statistics Cards with Gradient Backgrounds -->
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-4 md:gap-6 mb-6">
-          <!-- Total Card -->
-          <div
-            class="rounded-3 border border-blue-200 dark:border-blue-500/30 p-6 transition-all duration-300">
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+          <div class="rounded-3 border border-brand-200 dark:border-brand-800/50 bg-white dark:bg-gray-900 p-5">
             <div class="flex items-center gap-3">
-              <div class="flex h-14 w-14 items-center justify-center rounded-3 bg-blue-500 dark:bg-blue-600 ">
-                <i class="fas fa-bell text-2xl text-white"></i>
+              <div class="flex h-11 w-11 items-center justify-center rounded-3 bg-brand-500">
+                <i class="fas fa-bell text-white text-lg"></i>
               </div>
               <div>
-                <p class="text-sm font-medium text-blue-700 dark:text-blue-300">Total</p>
-                <p class="text-3xl font-bold text-blue-900 dark:text-blue-100">{{ statistics.total || 0 }}</p>
+                <p class="text-xs font-medium text-brand-600 dark:text-brand-400">Total</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ statistics.total || 0 }}</p>
               </div>
             </div>
           </div>
 
-          <!-- Unread Card -->
-          <div
-            class="rounded-3 border border-orange-200 dark:border-orange-500/30 p-6 transition-all duration-300">
+          <div class="rounded-3 border border-warning-200 dark:border-warning-800/50 bg-white dark:bg-gray-900 p-5">
             <div class="flex items-center gap-3">
-              <div
-                class="flex h-14 w-14 items-center justify-center rounded-3 bg-orange-500 dark:bg-orange-600 ">
-                <i class="fas fa-envelope text-2xl text-white"></i>
+              <div class="flex h-11 w-11 items-center justify-center rounded-3 bg-warning-500">
+                <i class="fas fa-envelope text-white text-lg"></i>
               </div>
               <div>
-                <p class="text-sm font-medium text-orange-700 dark:text-orange-300">Non lues</p>
-                <p class="text-3xl font-bold text-orange-900 dark:text-orange-100">{{ statistics.unread || 0 }}</p>
+                <p class="text-xs font-medium text-warning-600 dark:text-warning-400">Non lues</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ statistics.unread || 0 }}</p>
               </div>
             </div>
           </div>
 
-          <!-- Read Today Card -->
-          <div
-            class="rounded-3 border border-green-200 dark:border-green-500/30 p-6 transition-all duration-300">
+          <div class="rounded-3 border border-success-200 dark:border-success-800/50 bg-white dark:bg-gray-900 p-5">
             <div class="flex items-center gap-3">
-              <div
-                class="flex h-14 w-14 items-center justify-center rounded-3 bg-green-500 dark:bg-green-600 ">
-                <i class="fas fa-check-circle text-2xl text-white"></i>
+              <div class="flex h-11 w-11 items-center justify-center rounded-3 bg-success-500">
+                <i class="fas fa-check-circle text-white text-lg"></i>
               </div>
               <div>
-                <p class="text-sm font-medium text-green-700 dark:text-green-300">Lues aujourd'hui</p>
-                <p class="text-3xl font-bold text-green-900 dark:text-green-100">{{ statistics.read_today || 0 }}</p>
+                <p class="text-xs font-medium text-success-600 dark:text-success-400">Lues aujourd'hui</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ statistics.read_today || 0 }}</p>
               </div>
             </div>
           </div>
 
-          <!-- Preferences Card -->
           <div
-            class="rounded-3 border border-purple-200 dark:border-purple-500/30 p-6 transition-all duration-300 cursor-pointer group"
+            class="rounded-3 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             @click="$router.push('/notification-preferences')">
             <div class="flex items-center gap-3">
-              <div
-                class="flex h-14 w-14 items-center justify-center rounded-3 bg-purple-500 dark:bg-purple-600 transition-transform">
-                <i class="fas fa-cog text-2xl text-white"></i>
+              <div class="flex h-11 w-11 items-center justify-center rounded-3 bg-gray-500">
+                <i class="fas fa-sliders-h text-white text-lg"></i>
               </div>
               <div>
-                <p class="text-sm font-medium text-purple-700 dark:text-purple-300">Personnaliser</p>
-                <p class="text-lg font-bold text-purple-900 dark:text-purple-100 group-hover:underline">Préférences →
-                </p>
+                <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Personnaliser</p>
+                <p class="text-base font-semibold text-gray-900 dark:text-white">Préférences →</p>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Notifications List -->
-        <div class="rounded-3 border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-          <!-- Loading State -->
-          <div v-if="loading" class="flex items-center justify-center py-20">
-            <i class="fas fa-spinner fa-spin text-4xl text-gray-400"></i>
+        <div class="rounded-3 border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+          <div v-if="loading" class="flex items-center justify-center py-16">
+            <i class="fas fa-spinner fa-spin text-3xl text-gray-400"></i>
           </div>
 
-          <!-- Empty State -->
-          <div v-else-if="displayedNotifications.length === 0" class="flex flex-col items-center justify-center py-20">
-            <i class="fas fa-bell-slash text-6xl text-gray-300 dark:text-gray-700 mb-4"></i>
-            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+          <div v-else-if="displayedNotifications.length === 0" class="flex flex-col items-center justify-center py-16 gap-3">
+            <i class="fas fa-bell-slash text-5xl text-gray-300 dark:text-gray-700"></i>
+            <h3 class="text-base font-semibold text-gray-900 dark:text-white">
               {{ filterType === 'unread' ? 'Aucune notification non lue' : 'Aucune notification' }}
             </h3>
-            <p class="text-gray-600 dark:text-gray-400">
+            <p class="text-sm text-gray-500 dark:text-gray-400">
               {{ filterType === 'unread' ? 'Toutes vos notifications ont été lues' : 'Vous n\'avez reçu aucune notification' }}
             </p>
           </div>
 
-          <!-- Notifications -->
-          <div v-else class="divide-y divide-gray-200 dark:divide-gray-800">
+          <div v-else>
             <NotificationItem v-for="notification in displayedNotifications" :key="notification.id"
               :notification="notification" @click="handleNotificationClick" @mark-read="handleMarkAsRead"
-              @delete="handleDelete" class="group" />
+              @delete="handleDelete" @open-resultat-modal="handleOpenResultatModal" />
           </div>
 
           <!-- Pagination -->
-          <div v-if="pagination.total > pagination.per_page" class="border-t border-gray-200 dark:border-gray-800 p-4">
-            <div class="flex items-center justify-between">
-              <div class="text-sm text-gray-600 dark:text-gray-400">
-                Page {{ pagination.current_page }} sur {{ pagination.last_page }}
-                <span class="ml-2">({{ pagination.total }} au total)</span>
-              </div>
+          <div v-if="pagination.total > pagination.per_page" class="border-t border-gray-200 dark:border-gray-800 p-4 flex items-center justify-between">
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              Page {{ pagination.current_page }} / {{ pagination.last_page }}
+              <span class="ml-1">({{ pagination.total }})</span>
+            </p>
 
-              <div class="flex gap-2">
-                <button @click="loadPage(pagination.current_page - 1)" :disabled="pagination.current_page === 1"
-                  :class="pagination.current_page === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-800'"
-                  class="px-4 py-2 rounded-3 text-sm font-medium bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-700">
-                  <i class="fas fa-chevron-left"></i>
-                  Précédent
-                </button>
-                <button @click="loadPage(pagination.current_page + 1)"
-                  :disabled="pagination.current_page === pagination.last_page"
-                  :class="pagination.current_page === pagination.last_page ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-800'"
-                  class="px-4 py-2 rounded-3 text-sm font-medium bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-700">
-                  Suivant
-                  <i class="fas fa-chevron-right ml-2"></i>
-                </button>
-              </div>
+            <div class="flex gap-2">
+              <button @click="loadPage(pagination.current_page - 1)" :disabled="pagination.current_page === 1"
+                class="px-3 py-1.5 rounded-3 text-sm font-medium border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:enabled:bg-gray-50 dark:hover:enabled:bg-gray-800 flex items-center gap-1.5">
+                <i class="fas fa-chevron-left text-xs"></i>
+                Précédent
+              </button>
+              <button @click="loadPage(pagination.current_page + 1)"
+                :disabled="pagination.current_page === pagination.last_page"
+                class="px-3 py-1.5 rounded-3 text-sm font-medium border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:enabled:bg-gray-50 dark:hover:enabled:bg-gray-800 flex items-center gap-1.5">
+                Suivant
+                <i class="fas fa-chevron-right text-xs"></i>
+              </button>
             </div>
           </div>
         </div>
@@ -161,6 +140,10 @@
         <!-- Notification Detail Modal -->
         <NotificationDetailModal :is-open="showDetailModal" :notification="selectedNotification"
           @close="closeDetailModal" @mark-read="handleMarkAsRead" @delete="handleDelete" />
+
+        <!-- Resultat Detail Modal -->
+        <ResultatDetailModal v-if="showResultatModal && selectedResultat" :resultat="selectedResultat"
+          @close="closeResultatModal" />
       </div>
       <!-- End Page Content -->
     </div>
@@ -173,13 +156,17 @@ import { useRouter } from 'vue-router';
 import { useNotifications } from '@/composables/useNotifications';
 import NotificationItem from '@/components/layout/header/NotificationItem.vue';
 import NotificationDetailModal from '@/components/layout/header/NotificationDetailModal.vue';
+import ResultatDetailModal from '@/components/taches/resultats/ResultatDetailModal.vue';
 import AdminLayout from '@/components/layout/AdminLayout.vue';
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue';
+import api from '@/api/axios';
 
 const router = useRouter();
 const filterType = ref('all');
 const showDetailModal = ref(false);
 const selectedNotification = ref(null);
+const showResultatModal = ref(false);
+const selectedResultat = ref(null);
 const initialLoading = ref(true);
 
 const {
@@ -276,6 +263,21 @@ const loadStatistics = async () => {
   } catch (error) {
     console.error('Error loading statistics:', error);
   }
+};
+
+const handleOpenResultatModal = async (resultatId) => {
+  try {
+    const { data } = await api.get(`/tache-resultats/${resultatId}`);
+    selectedResultat.value = data.data ?? data;
+    showResultatModal.value = true;
+  } catch (error) {
+    console.error('Erreur lors du chargement du résultat :', error);
+  }
+};
+
+const closeResultatModal = () => {
+  showResultatModal.value = false;
+  selectedResultat.value = null;
 };
 
 onMounted(async () => {

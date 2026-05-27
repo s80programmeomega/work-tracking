@@ -275,4 +275,5 @@ function goToValidations(level) {
 onMounted(() => {
   loadDashboard()
 })
+
 </script>

@@ -68,7 +68,7 @@
 
         <div class="overflow-x-auto">
           <table class="w-full">
-            <thead class="bg-gray-50 dark:bg-gray-900">
+            <thead class="bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400">
               <tr>
                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">
                   Membre
@@ -114,7 +114,7 @@
                       <p class="font-medium text-gray-900 dark:text-white">
                         {{ member.user.nom }}
                       </p>
-                      <p class="text-xs text-gray-500">{{ member.user.email }}</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">{{ member.user.email }}</p>
                     </div>
                   </div>
                 </td>

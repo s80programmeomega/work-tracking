@@ -13,7 +13,7 @@
     <!-- Loading State -->
     <div v-if="loading" class="p-8 text-center">
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      <p class="mt-2 text-gray-500">Chargement des paramètres...</p>
+      <p class="mt-2 text-gray-500 dark:text-gray-400">Chargement des paramètres...</p>
     </div>
 
     <!-- Settings Content -->
@@ -145,7 +145,7 @@
                 @change="updateSettings"
                 class="bg-gray-50 border border-gray-300 text-gray-700 text-sm rounded-3 focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               >
-              <span class="text-gray-500">à</span>
+              <span class="text-gray-500 dark:text-gray-400">à</span>
               <input
                 type="time"
                 v-model="settings.notificationEndTime"

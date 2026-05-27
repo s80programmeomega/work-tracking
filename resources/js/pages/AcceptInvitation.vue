@@ -216,7 +216,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import FullScreenLayout from '@/components/layout/FullScreenLayout.vue'
-import axios from 'axios'
+import api from '@/api/axios'
 
 const route = useRoute()
 const router = useRouter()
@@ -271,7 +271,7 @@ const checkInvitation = async () => {
     loading.value = true
     const token = route.params.token
 
-    const response = await axios.get(`/api/workspace-invitations/${token}`)
+    const response = await api.get(`/workspace-invitations/${token}`)
     invitation.value = response.data.data.invitation
     userExists.value = response.data.data.user_exists
 
@@ -297,7 +297,7 @@ const acceptInvitation = async () => {
     accepting.value = true
     const token = route.params.token
 
-    const response = await axios.post(`/api/workspace-invitations/${token}/accept`)
+    const response = await api.post(`/workspace-invitations/${token}/accept`)
 
     // Redirection vers le workspace
     router.push(response.data.data.redirect_to)
@@ -322,7 +322,7 @@ const registerAndAccept = async () => {
     accepting.value = true
     const token = route.params.token
 
-    const response = await axios.post(`/api/workspace-invitations/${token}/accept`, form.value)
+    const response = await api.post(`/workspace-invitations/${token}/accept`, form.value)
 
     // Sauvegarder le token et l'utilisateur
     authStore.setUser(response.data.data.user)

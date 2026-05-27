@@ -99,7 +99,7 @@
                       <span v-else-if="ws.subscription.expiring_soon" class="text-amber-600 dark:text-amber-400 font-medium">
                         {{ ws.subscription.remaining_trial_days }}d left
                       </span>
-                      <span v-else class="text-gray-500">{{ ws.subscription.remaining_trial_days }}d left</span>
+                      <span v-else class="text-gray-500 dark:text-gray-400">{{ ws.subscription.remaining_trial_days }}d left</span>
                     </template>
                     <span v-else class="text-gray-400">—</span>
                   </td>

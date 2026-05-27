@@ -63,7 +63,7 @@
                 <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-brand-500"></div>
               </div>
 
-              <div v-if="!loading && workspaces.length === 0" class="text-center py-8 text-gray-500 text-sm">
+              <div v-if="!loading && workspaces.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400 text-sm">
                 Aucun workspace disponible
               </div>
             </div>

@@ -221,7 +221,7 @@ class WorkspaceController extends Controller
      */
     public function inviteMembers(Request $request, Workspace $workspace)
     {
-        $this->authorize('manage', $workspace);
+        $this->authorize('inviteMember', $workspace);
 
         $request->validate([
             'emails' => 'required|array|min:1',
@@ -819,7 +819,7 @@ class WorkspaceController extends Controller
             ]);
 
             // Assigner le rôle par défaut
-            $user->assignRole('member');
+            $user->assignRole('collaborateur');
 
             // Ajouter au workspace invité
             $invitedRole = \Spatie\Permission\Models\Role::findByName($invitation->role ?? 'collaborateur', 'web');

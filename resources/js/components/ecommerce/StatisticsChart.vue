@@ -20,7 +20,7 @@
               selected === option.value
                 ? 'text-gray-900 dark:text-white bg-white dark:bg-gray-800'
                 : 'text-gray-500 dark:text-gray-400',
-              'px-3 py-2 font-medium rounded-md text-theme-sm hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white',
+              'px-3 py-2 font-medium rounded-md text-theme-sm hover:text-gray-900 dark:text-white dark:hover:bg-gray-800 dark:hover:text-white',
             ]"
           >
             {{ option.label }}

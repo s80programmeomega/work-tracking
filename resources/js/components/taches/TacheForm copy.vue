@@ -672,7 +672,7 @@
             :disabled="loading || !hasPermission"
             class="px-6 py-3 rounded-3 font-semibold transition-all flex items-center gap-2 disabled:scale-100"
             :class="loading || !hasPermission 
-              ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 cursor-not-allowed' 
+              ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed' 
               : 'text-white shadow-blue-500/50'"
           >
             <svg v-if="loading" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">

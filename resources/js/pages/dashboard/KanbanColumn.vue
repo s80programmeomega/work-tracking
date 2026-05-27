@@ -19,7 +19,7 @@
         </div>
         <button
           @click="$emit('add-task', column.status)"
-          class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+          class="p-1 text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300 transition-colors"
           title="Ajouter une tâche"
         >
           <PlusIcon class="w-4 h-4" />

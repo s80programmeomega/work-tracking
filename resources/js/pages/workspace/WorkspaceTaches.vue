@@ -96,7 +96,7 @@
         </div>
 
         <table v-else class="min-w-full text-sm" dusk="workspace-taches-table">
-          <thead class="bg-gray-50 dark:bg-gray-700">
+          <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
             <tr>
               <th class="px-4 py-3 text-left font-medium text-gray-700 dark:text-gray-300">Titre</th>
               <th class="px-4 py-3 text-left font-medium text-gray-700 dark:text-gray-300">Projet / Activité</th>
@@ -279,7 +279,7 @@ function statutBadge(statut) {
     en_retard: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
     a_refaire: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
   }
-  return map[statut] ?? 'bg-gray-100 text-gray-700'
+  return map[statut] ?? 'bg-gray-100 text-gray-700 dark:text-gray-200'
 }
 
 function prioriteBadge(priorite) {
@@ -289,8 +289,9 @@ function prioriteBadge(priorite) {
     elevee: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
     critique: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
   }
-  return map[priorite] ?? 'bg-gray-100 text-gray-600'
+  return map[priorite] ?? 'bg-gray-100 text-gray-600 dark:text-gray-300'
 }
 
 onMounted(fetchTaches)
+
 </script>

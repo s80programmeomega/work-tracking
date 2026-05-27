@@ -831,7 +831,7 @@
             dusk="tache-form-submit"
             class="px-6 py-3 rounded-3 font-semibold transition-all flex items-center gap-2 disabled:scale-100"
             :class="loading || !hasPermission || isCheckingPermissions
-              ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 cursor-not-allowed'
+              ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
               : 'text-white shadow-blue-500/50'">
             <svg v-if="loading" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

@@ -58,7 +58,7 @@
           @click.stop="toggleMenu"
           class="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors opacity-0 group-hover:opacity-100"
         >
-          <svg class="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+          <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
             <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
           </svg>
         </button>

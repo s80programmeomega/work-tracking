@@ -140,7 +140,7 @@
 
         <!-- Pagination -->
         <div v-if="pagination && pagination.last_page > 1" class="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-700">
-          <p class="text-sm text-gray-500">Page {{ pagination.current_page }} / {{ pagination.last_page }}</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Page {{ pagination.current_page }} / {{ pagination.last_page }}</p>
           <div class="flex gap-2">
             <button
               @click="page--; fetchWorkspaces()"

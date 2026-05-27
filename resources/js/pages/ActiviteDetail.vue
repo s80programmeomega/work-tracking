@@ -9,7 +9,7 @@
           <div class="space-y-6">
             <nav class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
               <button @click="$router.back()"
-                class="flex items-center space-x-1 hover:text-gray-700 dark:hover:text-gray-300">
+                class="flex items-center space-x-1 hover:text-gray-700 dark:text-gray-200 dark:hover:text-gray-300">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -19,7 +19,7 @@
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
               </svg>
-              <router-link :to="`/projets/${activite.projet?.id}`" class="hover:text-gray-700 dark:hover:text-gray-300">
+              <router-link :to="`/projets/${activite.projet?.id}`" class="hover:text-gray-700 dark:text-gray-200 dark:hover:text-gray-300">
                 {{ activite.projet?.nom }}
               </router-link>
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -166,7 +166,7 @@
               <!-- Description -->
               <div class="bg-white dark:bg-gray-800 rounded-3 p-6 border border-gray-200 dark:border-gray-700">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                  <svg class="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-5 h-5 mr-2 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
@@ -180,7 +180,7 @@
               <!-- Progression détaillée -->
               <div class="bg-white dark:bg-gray-800 rounded-3 p-6 border border-gray-200 dark:border-gray-700">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
-                  <svg class="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-5 h-5 mr-2 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
@@ -245,7 +245,7 @@
 <div class="bg-white dark:bg-gray-800 rounded-3 p-6 border border-gray-200 dark:border-gray-700">
   <div class="flex items-center justify-between mb-6">
     <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-      <svg class="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg class="w-5 h-5 mr-2 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
           d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
       </svg>
@@ -328,7 +328,7 @@
                 :style="{ width: `${tache.taux_realisation}%` }"
               ></div>
             </div>
-            <span class="text-xs text-gray-500">{{ tache.taux_realisation }}%</span>
+            <span class="text-xs text-gray-500 dark:text-gray-400">{{ tache.taux_realisation }}%</span>
           </div>
 
           <!-- Badge de compteur de sous-tâches (rendu inline ici, plutôt que via TacheCard) -->
@@ -345,7 +345,7 @@
         <div class="flex items-center gap-3">
           <!-- Date d'échéance -->
           <div v-if="tache.echeance" class="text-right">
-            <div class="text-xs text-gray-500">Échéance</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400">Échéance</div>
             <div 
               class="text-sm font-medium"
               :class="tache.is_overdue ? 'text-red-600' : 'text-gray-900 dark:text-white'"
@@ -416,7 +416,7 @@
               <!-- Informations -->
               <div class="bg-white dark:bg-gray-800 rounded-3 p-6 border border-gray-200 dark:border-gray-700">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
-                  <svg class="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-5 h-5 mr-2 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -474,7 +474,7 @@
               <div class="bg-white dark:bg-gray-800 rounded-3 p-6 border border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between mb-6">
                   <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 mr-2 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
@@ -886,7 +886,7 @@ const getStatusClasses = (status) => {
     'en_cours': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300',
     'terminee': 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300'
   }
-  return classes[status] || 'bg-gray-100 text-gray-800'
+  return classes[status] || 'bg-gray-100 text-gray-800 dark:text-gray-100'
 }
 
 const getStatusDotClass = (status) => {
@@ -918,7 +918,7 @@ const getTaskStatusClasses = (status) => {
     'en_cours': 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300',
     'termine': 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
   }
-  return classes[status] || 'bg-gray-100 text-gray-800'
+  return classes[status] || 'bg-gray-100 text-gray-800 dark:text-gray-100'
 }
 
 const getTaskStatusLabel = (status) => {
@@ -937,7 +937,7 @@ const getRoleBadgeClass = (role) => {
     'collaborator': 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300',
     'viewer': 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
   }
-  return classes[role] || 'bg-gray-100 text-gray-800'
+  return classes[role] || 'bg-gray-100 text-gray-800 dark:text-gray-100'
 }
 
 const getRoleLabel = (role) => {

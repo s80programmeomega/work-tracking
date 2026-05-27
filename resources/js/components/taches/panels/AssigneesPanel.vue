@@ -28,7 +28,7 @@
           <button
             v-if="showResponsablePicker"
             @click="showResponsablePicker = false"
-            class="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            class="text-xs text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300"
           >
             Annuler
           </button>

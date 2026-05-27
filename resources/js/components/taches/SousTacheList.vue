@@ -254,7 +254,7 @@
             <div v-if="canDelete" class="relative shrink-0">
               <button
                 @click.stop="toggleMenu(st.id)"
-                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1"
+                class="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300 p-1"
               >
                 <i class="fas fa-ellipsis-v text-xs"></i>
               </button>

@@ -60,42 +60,42 @@
         <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
           <!-- Total -->
           <div class="relative overflow-hidden rounded-3 bg-white dark:bg-gray-800 p-4 border ">
-            <p class="text-sm text-gray-500">Total</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Total</p>
             <p class="text-2xl font-bold text-purple-600 mt-1">{{ stats.total }}</p>
             <div class="absolute bottom-0 left-0 right-0 h-1 bg-brand-500"></div>
           </div>
           
           <!-- À faire -->
           <div class="relative overflow-hidden rounded-3 bg-white dark:bg-gray-800 p-4 border ">
-            <p class="text-sm text-gray-500">À faire</p>
-            <p class="text-2xl font-bold text-slate-600 mt-1">{{ stats.a_faire }}</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">À faire</p>
+            <p class="text-2xl font-bold text-slate-600 dark:text-slate-300 mt-1">{{ stats.a_faire }}</p>
             <div class="absolute bottom-0 left-0 right-0 h-1 bg-brand-500"></div>
           </div>
           
           <!-- En cours -->
           <div class="relative overflow-hidden rounded-3 bg-white dark:bg-gray-800 p-4 border ">
-            <p class="text-sm text-gray-500">En cours</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">En cours</p>
             <p class="text-2xl font-bold text-blue-600 mt-1">{{ stats.en_cours }}</p>
             <div class="absolute bottom-0 left-0 right-0 h-1 bg-brand-500"></div>
           </div>
           
           <!-- Terminées -->
           <div class="relative overflow-hidden rounded-3 bg-white dark:bg-gray-800 p-4 border ">
-            <p class="text-sm text-gray-500">Terminées</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Terminées</p>
             <p class="text-2xl font-bold text-green-600 mt-1">{{ stats.termine }}</p>
             <div class="absolute bottom-0 left-0 right-0 h-1 bg-brand-500"></div>
           </div>
           
           <!-- En retard -->
           <div class="relative overflow-hidden rounded-3 bg-white dark:bg-gray-800 p-4 border ">
-            <p class="text-sm text-gray-500">En retard</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">En retard</p>
             <p class="text-2xl font-bold mt-1" :class="stats.overdue > 0 ? 'text-red-600' : 'text-gray-400'">{{ stats.overdue }}</p>
             <div class="absolute bottom-0 left-0 right-0 h-1" :class="stats.overdue > 0 ? 'bg-red-500' : 'bg-gray-300'"></div>
           </div>
           
           <!-- Intervenants -->
           <div class="relative overflow-hidden rounded-3 bg-white dark:bg-gray-800 p-4 border ">
-            <p class="text-sm text-gray-500">Intervenants</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Intervenants</p>
             <p class="text-2xl font-bold text-indigo-600 mt-1">{{ stats.total_assignees }}</p>
             <div class="absolute bottom-0 left-0 right-0 h-1 bg-brand-500"></div>
           </div>
@@ -142,7 +142,7 @@
 
       <!-- Vue groupée -->
       <div v-else-if="currentView === 'grouped' && !loading" class="space-y-6">
-        <p v-if="tasksByActivite.length === 0" class="text-center py-12 text-gray-500">Aucune tâche</p>
+        <p v-if="tasksByActivite.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">Aucune tâche</p>
         
         <div v-for="group in tasksByActivite" :key="group.activite.id" class="rounded-3 border bg-white dark:bg-gray-800 overflow-hidden">
           <div class="px-6 py-4 bg-purple-50 dark:bg-purple-900/20 border-b">
@@ -178,7 +178,7 @@
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          <p class="text-gray-600">Chargement...</p>
+          <p class="text-gray-600 dark:text-gray-400">Chargement...</p>
         </div>
       </div>
     </div>

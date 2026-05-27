@@ -1,7 +1,7 @@
 <template>
   <div class="overflow-x-auto rounded-3 border border-gray-200 dark:border-gray-700">
     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-      <thead class="bg-gray-50 dark:bg-gray-800">
+      <thead class="bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400">
         <tr>
           <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-1/3">
             Titre
@@ -239,7 +239,7 @@ const statutClasses = (s) => ({
   termine: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
   en_retard: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
   a_refaire: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
-}[s] ?? 'bg-gray-100 text-gray-700')
+}[s] ?? 'bg-gray-100 text-gray-700 dark:text-gray-200')
 
 const prioriteLabel = (p) => ({
   faible: 'Faible', moyenne: 'Moyenne', elevee: 'Élevée', critique: 'Critique',
@@ -250,7 +250,7 @@ const prioriteClasses = (p) => ({
   moyenne: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
   elevee: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
   critique: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
-}[p] ?? 'bg-gray-100 text-gray-600')
+}[p] ?? 'bg-gray-100 text-gray-600 dark:text-gray-300')
 
 const progressColor = (pct) => {
   if (!pct || pct < 33) return 'bg-red-400'

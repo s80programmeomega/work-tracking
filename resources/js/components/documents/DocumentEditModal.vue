@@ -33,7 +33,7 @@
                   </DialogTitle>
                   <button
                     @click="$emit('close')"
-                    class="rounded-3 p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500 dark:hover:bg-gray-800"
+                    class="rounded-3 p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500 dark:text-gray-400 dark:hover:bg-gray-800"
                   >
                     <XMarkIcon class="h-6 w-6" />
                   </button>

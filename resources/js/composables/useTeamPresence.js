@@ -34,7 +34,7 @@ export function useTeamPresence() {
    */
   const updateStatus = async (teamUuid, status) => {
     try {
-      const response = await api.post(`/teams/${teamUuid}/presence/update`, { status })
+      const response = await api.post(`/teams/${teamUuid}/presence`, { status })
       return response.data
     } catch (err) {
       error.value = err.response?.data?.message || 'Erreur lors de la mise à jour du statut'

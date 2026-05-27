@@ -106,7 +106,7 @@
       </Card>
       <Card class="p-4">
         <div class="text-center">
-          <div class="text-2xl font-bold text-gray-600">{{ stats.terminees }}</div>
+          <div class="text-2xl font-bold text-gray-600 dark:text-gray-300">{{ stats.terminees }}</div>
           <div class="text-sm text-muted-foreground">Terminées</div>
         </div>
       </Card>

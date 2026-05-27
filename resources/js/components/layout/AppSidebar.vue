@@ -1,7 +1,7 @@
 <!-- resources\js\components\layout\AppSidebar.vue -->
 <template>
     <aside :class="[
-        'fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 text-gray-900 h-screen transition-all duration-300 ease-in-out z-40 border-r border-gray-200 dark:border-gray-800',
+        'fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 text-gray-900 dark:text-white h-screen transition-all duration-300 ease-in-out z-40 border-r border-gray-200 dark:border-gray-800',
         {
             'lg:w-[290px]': isExpanded || isMobileOpen || isHovered,
             'lg:w-[90px]': !isExpanded && !isHovered,
@@ -127,7 +127,7 @@
                             <FilterIcon class="w-3 h-3" />
                             <span>Dashboard filtré</span>
                             <button @click="clearDashboardFilter"
-                                class="ml-auto text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                class="ml-auto text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300"
                                 title="Effacer le filtre">
                                 <XIcon class="w-3 h-3" />
                             </button>
@@ -138,10 +138,11 @@
         </div>
 
         <!-- Navigation Menu avec gestion des permissions -->
-        <div class="flex flex-col flex-1 overflow-y-auto duration-300 ease-linear no-scrollbar">
+        <div class="flex flex-col flex-1 overflow-y-auto duration-300 ease-linear">
             <nav class="mb-6">
                 <div class="flex flex-col gap-4">
                     <div v-for="(menuGroup, groupIndex) in filteredMenuGroups" :key="groupIndex">
+                        <div v-if="groupIndex > 0" class="border-t border-gray-200 dark:border-gray-700 my-3"></div>
                         <h2 :class="[
                             'mb-4 text-xs uppercase flex leading-[20px] text-gray-400',
                             !isExpanded && !isHovered
@@ -164,7 +165,7 @@
                                     },
                                     !isExpanded && !isHovered
                                         ? 'lg:justify-center'
-                                        : 'lg:justify-start',
+                                        : 'justify-start',
                                 ]">
                                     <span :class="[
                                         isSubmenuOpen(groupIndex, index)
@@ -195,6 +196,7 @@
                                         'menu-item-active': isActive(item.path),
                                         'menu-item-inactive': !isActive(item.path),
                                     },
+                                    !isExpanded && !isHovered ? 'lg:justify-center' : 'justify-start',
                                 ]">
                                     <span :class="[
                                         isActive(item.path)
@@ -254,27 +256,27 @@
                     </div>
                 </div>
             </nav>
-        </div>
 
-        <!-- Bottom Actions -->
-        <div v-if="isExpanded || isHovered || isMobileOpen"
-            class="mt-auto pt-4 pb-6 border-t border-gray-200 dark:border-gray-700 space-y-2">
-            <router-link
-                v-if="canManageSettings || isSuperAdmin"
-                :to="currentWorkspace?.id ? { name: 'workspaces.settings', params: { id: currentWorkspace.id } } : '/workspaces'"
-                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                <SettingsIcon class="w-5 h-5" />
-                <span>Paramètres</span>
-            </router-link>
-            <router-link
-                v-if="(canManageSubscription || isSuperAdmin) && currentWorkspace?.id"
-                :to="{ name: 'workspaces.subscription', params: { id: currentWorkspace.id } }"
-                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-                <span>Abonnement</span>
-            </router-link>
+            <!-- Bottom Actions -->
+            <div v-if="isExpanded || isHovered || isMobileOpen"
+                class="pt-4 pb-6 border-t border-gray-200 dark:border-gray-700 space-y-2">
+                <router-link
+                    v-if="canManageSettings || isSuperAdmin"
+                    :to="currentWorkspace?.id ? { name: 'workspaces.settings', params: { id: currentWorkspace.id } } : '/workspaces'"
+                    :class="['menu-item menu-item-inactive group', !isExpanded && !isHovered ? 'lg:justify-center' : 'justify-start']">
+                    <SettingsIcon class="menu-item-icon-inactive w-5 h-5 shrink-0" />
+                    <span class="menu-item-text flex-1">Paramètres</span>
+                </router-link>
+                <router-link
+                    v-if="(canManageSubscription || isSuperAdmin) && currentWorkspace?.id"
+                    :to="{ name: 'workspaces.subscription', params: { id: currentWorkspace.id } }"
+                    :class="['menu-item menu-item-inactive group', !isExpanded && !isHovered ? 'lg:justify-center' : 'justify-start']">
+                    <svg class="menu-item-icon-inactive w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    <span class="menu-item-text flex-1">Abonnement</span>
+                </router-link>
+            </div>
         </div>
     </aside>
 </template>

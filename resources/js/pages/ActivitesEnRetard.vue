@@ -68,7 +68,7 @@
     <div v-else class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700">
       <div class="overflow-x-auto">
         <table class="w-full text-sm text-left">
-          <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700">
+          <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
             <tr>
               <th class="px-6 py-3">Activité</th>
               <th class="px-6 py-3">Projet</th>
@@ -367,7 +367,7 @@ const getStatusClass = (status) => {
     active: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
     archived: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
   }
-  return classes[status] || 'bg-gray-100 text-gray-800'
+  return classes[status] || 'bg-gray-100 text-gray-800 dark:text-gray-100'
 }
 
 const getStatusLabel = (status) => {

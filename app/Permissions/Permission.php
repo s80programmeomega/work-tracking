@@ -286,7 +286,9 @@ final class Permission
 
             'cadre' => [
                 self::WORKSPACES_VIEW,
+                self::WORKSPACES_INVITE_MEMBER,
                 self::PROJETS_VIEW,
+                self::PROJETS_MANAGE_MEMBERS,
                 self::ACTIVITES_VIEW,
                 self::ACTIVITES_EDIT,
                 self::ACTIVITES_CREATE_TASK,

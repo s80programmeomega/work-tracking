@@ -20,7 +20,7 @@
             </div>
           </div>
           <button @click="handleClose"
-            class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+            class="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
             <XIcon class="w-5 h-5" />
           </button>
         </div>
@@ -349,7 +349,7 @@
                   class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none font-mono text-sm disabled:opacity-50"></textarea>
                 <div class="absolute top-2 right-2">
                   <button type="button" @click="clearEmails"
-                    class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" title="Effacer tout"
+                    class="p-1 text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300" title="Effacer tout"
                     :disabled="submitting">
                     <TrashIcon class="w-4 h-4" />
                   </button>

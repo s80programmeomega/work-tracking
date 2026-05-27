@@ -31,7 +31,7 @@
     <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 dark:border-gray-600">
       <div class="flex -space-x-2">
         <div v-for="member in project.preview_members" :key="member.id" 
-             class="w-6 h-6 rounded-full border-2 border-white dark:border-gray-800 bg-gray-300 flex items-center justify-center text-xs font-semibold text-gray-700">
+             class="w-6 h-6 rounded-full border-2 border-white dark:border-gray-800 bg-gray-300 flex items-center justify-center text-xs font-semibold text-gray-700 dark:text-gray-200">
           {{ member.initials }}
         </div>
       </div>

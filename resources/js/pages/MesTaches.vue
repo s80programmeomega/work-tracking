@@ -411,4 +411,5 @@ useRealtimeRefresh({ onTacheChanged: () => loadTaches() })
 onMounted(async () => {
   await Promise.all([loadTaches(), loadActivites()])
 })
+
 </script>

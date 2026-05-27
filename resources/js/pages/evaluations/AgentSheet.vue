@@ -3,7 +3,7 @@
     <div class="space-y-6">
       <!-- ── Header: identité de l'agent + score global + indicateurs ───── -->
       <div class="bg-white dark:bg-gray-900 rounded-3 p-6 border border-gray-200 dark:border-gray-800">
-        <div v-if="loading && !sheet" class="text-center py-8 text-gray-500">
+        <div v-if="loading && !sheet" class="text-center py-8 text-gray-500 dark:text-gray-400">
           <i class="fas fa-spinner fa-spin mr-2"></i>Chargement de la fiche…
         </div>
 
@@ -33,7 +33,7 @@
               <div dusk="sheet-score-global" class="text-4xl font-bold" :class="scoreColor(sheet.score_global)">
                 {{ Math.round(sheet.score_global * 100) }}%
               </div>
-              <p class="text-xs text-gray-500 uppercase tracking-wider mt-1">Score global</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-1">Score global</p>
             </div>
 
             <!-- Badge escalades abusives -->
@@ -199,7 +199,7 @@
           >
             <div class="flex items-center justify-between mb-2">
               <span class="text-sm font-medium text-gray-900 dark:text-white">{{ criterionLabel(key) }}</span>
-              <span class="text-xs text-gray-500">Poids: {{ Math.round(payload.weight * 100) }}%</span>
+              <span class="text-xs text-gray-500 dark:text-gray-400">Poids: {{ Math.round(payload.weight * 100) }}%</span>
             </div>
             <div class="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-2 mb-2">
               <div
@@ -233,10 +233,10 @@
         </div>
 
         <div class="p-4">
-          <div v-if="sectionLoading" class="text-center py-8 text-gray-500">
+          <div v-if="sectionLoading" class="text-center py-8 text-gray-500 dark:text-gray-400">
             <i class="fas fa-spinner fa-spin mr-2"></i>Chargement…
           </div>
-          <div v-else-if="!sectionItems.length" dusk="section-empty" class="text-center py-8 text-gray-500">
+          <div v-else-if="!sectionItems.length" dusk="section-empty" class="text-center py-8 text-gray-500 dark:text-gray-400">
             <i class="fas fa-clipboard text-4xl mb-2 opacity-30"></i>
             <p class="text-sm">Aucun élément dans cette section sur la période.</p>
           </div>
@@ -250,7 +250,7 @@
                 <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
                   {{ activeSection === 'submitted_results' ? item.tache_titre : item.titre }}
                 </p>
-                <p class="text-xs text-gray-500 truncate">
+                <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
                   <template v-if="activeSection === 'submitted_results'">
                     {{ item.projet?.nom || '—' }} · {{ item.activite?.nom || '—' }}
                     <span class="ml-2 text-gray-400">Soumis le {{ item.soumis_le ? new Date(item.soumis_le).toLocaleDateString() : '—' }}</span>
@@ -319,26 +319,26 @@
           <button
             @click="drillItem = null"
             dusk="drilldown-close"
-            class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+            class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-200 dark:hover:text-gray-300"
           >
             <i class="fas fa-times"></i>
           </button>
         </div>
         <div class="p-6 space-y-4 text-sm">
           <div>
-            <span class="text-gray-500">Statut:</span>
+            <span class="text-gray-500 dark:text-gray-400">Statut:</span>
             <strong class="ml-2 text-gray-900 dark:text-white">{{ drillItem.statut }}</strong>
           </div>
           <div v-if="drillItem.taux_realisation !== undefined">
-            <span class="text-gray-500">Taux de réalisation:</span>
+            <span class="text-gray-500 dark:text-gray-400">Taux de réalisation:</span>
             <strong class="ml-2">{{ drillItem.taux_realisation }}%</strong>
           </div>
           <div v-if="drillItem.echeance">
-            <span class="text-gray-500">Échéance:</span>
+            <span class="text-gray-500 dark:text-gray-400">Échéance:</span>
             <strong class="ml-2">{{ drillItem.echeance }}</strong>
           </div>
           <!-- Note coefficient 0.5 sur sous-tâches: rappel UX. -->
-          <p v-if="isSubtaskSection" class="text-xs text-gray-500 italic">
+          <p v-if="isSubtaskSection" class="text-xs text-gray-500 dark:text-gray-400 italic">
             <i class="fas fa-info-circle mr-1"></i>
             Les sous-tâches contribuent au score à coefficient 0.5.
           </p>
@@ -441,7 +441,7 @@ function statutBadge(statut) {
     en_cours: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
     termine: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
   }
-  return map[statut] || 'bg-gray-100 text-gray-700'
+  return map[statut] || 'bg-gray-100 text-gray-700 dark:text-gray-200'
 }
 
 async function loadSheet() {

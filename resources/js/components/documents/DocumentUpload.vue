@@ -94,7 +94,7 @@
         <button
           v-if="!file.uploading"
           @click="removeFile(index)"
-          class="flex-shrink-0 rounded-3 p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+          class="flex-shrink-0 rounded-3 p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-300"
         >
           <XMarkIcon class="h-5 w-5" />
         </button>

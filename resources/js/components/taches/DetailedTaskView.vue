@@ -25,7 +25,7 @@
               v-model.number="editing.value"
               class="w-14 text-sm text-center border border-blue-400 rounded px-1 py-0.5 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
-            <span class="text-xs text-gray-500">%</span>
+            <span class="text-xs text-gray-500 dark:text-gray-400">%</span>
           </div>
           <div class="flex gap-1">
             <button @click="cancelEdit" class="flex-1 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300">Annuler</button>
@@ -152,7 +152,7 @@
           </div>
           <div v-else class="flex items-center gap-2">
             <div class="w-6 h-6 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
-              <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
@@ -473,7 +473,7 @@
     <!-- Métadonnées (display only) -->
     <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-6">
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>

@@ -254,15 +254,15 @@
         <div v-if="showArchived" class="space-y-4">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-              <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
               </svg>
               Tâches Archivées
-              <span class="text-sm font-normal text-gray-500">({{ archivedTasks.length }})</span>
+              <span class="text-sm font-normal text-gray-500 dark:text-gray-400">({{ archivedTasks.length }})</span>
             </h3>
           </div>
 
-          <div v-if="archivedTasks.length === 0" class="text-center py-12 text-gray-500">
+          <div v-if="archivedTasks.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">
             <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
             </svg>
@@ -314,7 +314,7 @@
 
         <!-- Active Tasks - List View -->
         <div v-else-if="currentView === 'list'" class="space-y-2">
-          <div v-if="filteredTasks.length === 0" class="text-center py-12 text-gray-500">
+          <div v-if="filteredTasks.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">
             <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
@@ -734,4 +734,5 @@ onMounted(async () => {
   await loadActivites()
   await loadPendingValidations()
 })
+
 </script>

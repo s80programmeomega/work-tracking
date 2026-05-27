@@ -11,7 +11,7 @@
           </h3>
           <button
             @click="$emit('close')"
-            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            class="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300"
           >
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -232,7 +232,7 @@ const getRoleBadgeClass = (role) => {
     cadre: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
     stagiaire: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
   }
-  return classes[role] || 'bg-gray-100 text-gray-800'
+  return classes[role] || 'bg-gray-100 text-gray-800 dark:text-gray-100'
 }
 
 const formatDate = (date) => {

@@ -347,7 +347,7 @@
           <h3 class="font-medium text-gray-900 dark:text-white">{{ notification.title }}</h3>
           <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">{{ notification.message }}</p>
         </div>
-        <button @click="notification.show = false" class="ml-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+        <button @click="notification.show = false" class="ml-4 text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
           </svg>

@@ -57,7 +57,7 @@
             <i class="fas fa-trophy text-yellow-500 mr-2"></i>
             Meilleurs performers
           </h2>
-          <div v-if="!data.top_performers.length" class="text-center py-6 text-gray-500 bg-gray-50 dark:bg-gray-800 rounded-3">
+          <div v-if="!data.top_performers.length" class="text-center py-6 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-3">
             Aucun score enregistré pour cette période.
           </div>
           <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
@@ -105,12 +105,12 @@
             <i class="fas fa-chart-bar text-blue-500 mr-2"></i>
             Scores de l'équipe
           </h2>
-          <div v-if="!data.scores.length" class="text-center py-6 text-gray-500 bg-gray-50 dark:bg-gray-800 rounded-3">
+          <div v-if="!data.scores.length" class="text-center py-6 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-3">
             Aucun score enregistré pour cette période.
           </div>
           <div v-else class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3 overflow-hidden">
             <table class="min-w-full text-sm">
-              <thead class="bg-gray-50 dark:bg-gray-700">
+              <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
                 <tr>
                   <th class="px-4 py-3 text-left font-medium text-gray-700 dark:text-gray-300">Membre</th>
                   <th class="px-4 py-3 text-right font-medium text-gray-700 dark:text-gray-300">Score total</th>

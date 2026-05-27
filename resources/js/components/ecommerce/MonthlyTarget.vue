@@ -44,7 +44,7 @@
           >+10%</span
         >
       </div>
-      <p class="mx-auto mt-1.5 w-full max-w-[380px] text-center text-sm text-gray-500 sm:text-base">
+      <p class="mx-auto mt-1.5 w-full max-w-[380px] text-center text-sm text-gray-500 dark:text-gray-400 sm:text-base">
         You earn $3287 today, it's higher than last month. Keep up your good work!
       </p>
     </div>

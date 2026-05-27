@@ -14,7 +14,7 @@
       <button
         v-if="canAdd"
         @click="$emit('add-task')"
-        class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+        class="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300"
         title="Ajouter une tâche"
       >
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

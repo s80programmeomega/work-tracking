@@ -127,7 +127,7 @@
           <div v-else
             class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3 overflow-hidden">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead class="bg-gray-50 dark:bg-gray-700">
+              <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
                 <tr>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                     Membre
@@ -206,7 +206,7 @@
                         Voir
                       </button>
                       <button v-if="canPerformMemberAction(member, 'edit')" @click="editMember(member)"
-                        class="text-gray-600 hover:text-gray-900 text-sm font-medium">
+                        class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white text-sm font-medium">
                         Modifier
                       </button>
 
@@ -448,11 +448,6 @@ const filteredMembers = computed(() => {
   if (filterRole.value !== 'all') {
     result = result.filter(m => m.pivot?.role === filterRole.value)
   }
-
-  // Filtrer les membres que l'utilisateur peut voir 
-  result = result.filter(member =>
-    canPerformMemberAction(member, 'view')
-  )
 
   return result
 })

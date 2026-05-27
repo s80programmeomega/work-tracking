@@ -62,7 +62,7 @@
 
         <button
           @click="resetFilters"
-          class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+          class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
         >
           Réinitialiser
         </button>
@@ -99,7 +99,7 @@
       <!-- Loading State -->
       <div v-if="loading" class="p-8 text-center">
         <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <p class="mt-2 text-gray-500">Chargement...</p>
+        <p class="mt-2 text-gray-500 dark:text-gray-400">Chargement...</p>
       </div>
 
       <!-- Error State -->
@@ -110,7 +110,7 @@
       <!-- Users Table -->
       <div v-else-if="users.length > 0" class="overflow-x-auto">
         <table class="w-full">
-          <thead class="bg-gray-50 dark:bg-gray-700">
+          <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                 Utilisateur
@@ -182,7 +182,7 @@
               <!-- Status -->
               <td class="px-6 py-4 whitespace-nowrap">
                 <span
-                  :class="user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                  :class="user.is_active ? 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300' : 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300'"
                   class="px-2 py-1 text-xs font-medium rounded-full"
                 >
                   {{ user.is_active ? 'Actif' : 'Inactif' }}
@@ -415,14 +415,14 @@ const getRoleLabel = (role) => {
 
 const getRoleBadgeClass = (role) => {
   const classes = {
-    super_admin: 'bg-purple-100 text-purple-800',
-    manager: 'bg-blue-100 text-blue-800',
-    responsable_n1: 'bg-indigo-100 text-indigo-800',
-    responsable_n2: 'bg-cyan-100 text-cyan-800',
-    cadre: 'bg-gray-100 text-gray-800',
-    stagiaire: 'bg-yellow-100 text-yellow-800',
+    super_admin: 'bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300',
+    manager: 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300',
+    responsable_n1: 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-800 dark:text-indigo-300',
+    responsable_n2: 'bg-cyan-100 dark:bg-cyan-900/40 text-cyan-800 dark:text-cyan-300',
+    cadre: 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200',
+    stagiaire: 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300',
   }
-  return classes[role] || 'bg-gray-100 text-gray-800'
+  return classes[role] || 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
 }
 
 const formatDate = (date) => {

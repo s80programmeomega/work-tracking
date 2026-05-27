@@ -50,7 +50,7 @@
           </div>
           <div class="bg-white dark:bg-gray-800 rounded-3 p-4 border border-gray-200 dark:border-gray-700">
             <p class="text-sm text-gray-500 dark:text-gray-400">Non démarrées</p>
-            <p class="text-2xl font-bold text-gray-600">{{ stats.not_started }}</p>
+            <p class="text-2xl font-bold text-gray-600 dark:text-gray-300">{{ stats.not_started }}</p>
           </div>
         </div>
       </div>
@@ -118,7 +118,7 @@
               <div class="flex items-start justify-between mb-3">
                 <div class="flex-1">
                   <div class="flex items-center gap-2 mb-2">
-                    <span class="text-xs font-mono text-gray-500">{{ tache.code }}</span>
+                    <span class="text-xs font-mono text-gray-500 dark:text-gray-400">{{ tache.code }}</span>
                     <span 
                       class="px-2 py-0.5 text-xs rounded-full"
                       :style="{ 
@@ -174,7 +174,7 @@
                         <p class="text-sm font-medium text-gray-900 dark:text-white">
                           {{ assignee.nom }}
                         </p>
-                        <p class="text-xs text-gray-500">
+                        <p class="text-xs text-gray-500 dark:text-gray-400">
                           {{ assignee.email }}
                         </p>
                       </div>
@@ -186,7 +186,7 @@
                       >
                         {{ assignee.statut_label }}
                       </span>
-                      <span class="text-sm text-gray-600">
+                      <span class="text-sm text-gray-600 dark:text-gray-300">
                         {{ assignee.progression }}%
                       </span>
                     </div>

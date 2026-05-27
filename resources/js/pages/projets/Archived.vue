@@ -30,9 +30,9 @@
                     {{ workspace.nom }}
                   </option>
                 </select>
-                <BuildingOfficeIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                <BuildingOfficeIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-gray-400" />
                 <ChevronDownIcon
-                  class="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                  class="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-gray-400 pointer-events-none" />
               </div>
 
               <!-- Display Mode Toggle for Super Admin -->
@@ -326,7 +326,7 @@
                     <div class="relative">
                       <button @click.stop="toggleMenu(projet.id)"
                         class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                        <HorizontalDots class="w-4 h-4 text-gray-500" />
+                        <HorizontalDots class="w-4 h-4 text-gray-500 dark:text-gray-400" />
                       </button>
 
                       <!-- Dropdown Menu -->

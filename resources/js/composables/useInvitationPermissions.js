@@ -7,7 +7,7 @@ import { useWorkspacePermissions } from './useWorkspacePermissions'
  * Valide et formate les permissions en fonction du rôle et du contexte
  */
 export function useInvitationPermissions(workspace) {
-  const { canManageSettings, canManageMembers, isOwner } = useWorkspacePermissions(workspace)
+  const { canManageSettings, canInviteMembers: canManageMembers, isDirecteur: isOwner } = useWorkspacePermissions(workspace)
 
   // Permissions disponibles selon le rôle
   const getAvailablePermissionsForRole = (role) => {

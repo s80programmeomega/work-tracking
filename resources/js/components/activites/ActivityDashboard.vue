@@ -41,10 +41,10 @@
       <Card class="p-6">
         <div class="flex items-center justify-between">
           <div>
-            <div class="text-2xl font-bold text-gray-600">{{ metrics.terminees }}</div>
+            <div class="text-2xl font-bold text-gray-600 dark:text-gray-300">{{ metrics.terminees }}</div>
             <div class="text-sm text-muted-foreground">Terminées</div>
           </div>
-          <CheckCircle class="w-8 h-8 text-gray-600" />
+          <CheckCircle class="w-8 h-8 text-gray-600 dark:text-gray-400" />
         </div>
       </Card>
     </div>

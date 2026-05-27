@@ -10,16 +10,16 @@
     <div class="flex-1 min-w-0">
       <div class="flex items-center gap-2 flex-wrap mb-1">
         <span class="text-xs px-2 py-0.5 rounded uppercase font-semibold"
-          :class="level === 'n1' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'">
+          :class="level === 'n1' ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300' : 'bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300'">
           {{ level }}
         </span>
-        <span v-if="row.is_urgent" dusk="urgent-badge" class="text-xs px-2 py-0.5 rounded bg-red-100 text-red-800 font-semibold">
+        <span v-if="row.is_urgent" dusk="urgent-badge" class="text-xs px-2 py-0.5 rounded bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 font-semibold">
           ⚠ Urgent (&lt; 24h)
         </span>
-        <span v-if="row.had_bypass" dusk="bypass-badge" class="text-xs px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-semibold">
+        <span v-if="row.had_bypass" dusk="bypass-badge" class="text-xs px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 font-semibold">
           ⚡ Bypass
         </span>
-        <span v-if="row.escalades_abusives" dusk="escalades-badge" class="text-xs px-2 py-0.5 rounded bg-red-100 text-red-800 font-semibold">
+        <span v-if="row.escalades_abusives" dusk="escalades-badge" class="text-xs px-2 py-0.5 rounded bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 font-semibold">
           🚨 Escalades abusives
         </span>
       </div>

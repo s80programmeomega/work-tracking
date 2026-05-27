@@ -1,87 +1,72 @@
 <!-- resources\js\components\layout\header\NotificationItem.vue -->
 <template>
   <div
-    class="notification-item group relative flex gap-4 border-b border-gray-100 p-4 transition-all duration-200 hover:dark:border-gray-800 dark:dark:cursor-pointer"
-    :class="{
-      'border-l-4 border-l-blue-500': !notification.read_at,
-      'opacity-75': notification.read_at
-    }" @click="handleClick">
-    <!-- Unread indicator dot -->
-    <div v-if="!notification.read_at"
-      class="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-12 rounded-r-full shadow-blue-500/50">
-    </div>
-
-    <!-- Icon with gradient background -->
-    <div class="flex-shrink-0 relative">
+    class="group relative flex gap-3 border-b border-gray-100 dark:border-gray-800 p-4 cursor-pointer transition-colors duration-150 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+    :class="{ 'border-l-2 border-l-brand-500': !notification.read_at }"
+    @click="handleClick"
+  >
+    <!-- Icon -->
+    <div class="shrink-0 relative">
       <div
-        class="w-12 h-12 rounded-3 flex items-center justify-center transition-transform duration-200 "
-        :class="getIconBackgroundClass(iconColor)">
-        <i :class="['fas', icon, 'text-white text-lg']"></i>
+        class="w-10 h-10 rounded-3 flex items-center justify-center"
+        :class="getIconBackgroundClass(iconColor)"
+      >
+        <i :class="['fas', icon, 'text-white text-sm']"></i>
       </div>
-      <!-- Badge pour les notifications importantes -->
       <div v-if="isUrgentNotification"
-        class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center ">
-        <i class="fas fa-exclamation text-white text-xs"></i>
+        class="absolute -top-1 -right-1 w-4 h-4 bg-error-500 rounded-full flex items-center justify-center">
+        <i class="fas fa-exclamation text-white" style="font-size: 8px;"></i>
       </div>
     </div>
 
     <!-- Content -->
     <div class="flex-1 min-w-0">
-      <!-- Title with badge -->
-      <div class="flex items-start gap-2 mb-1.5">
-        <h4 class="text-sm font-bold text-gray-900 dark:text-white flex-1 line-clamp-1">
+      <div class="flex items-start gap-2 mb-1">
+        <h4 class="text-sm font-semibold text-gray-900 dark:text-white flex-1 line-clamp-1">
           {{ notification.data?.title || notification.title || 'Notification' }}
         </h4>
         <span v-if="getNotificationBadge()"
-          class="flex-shrink-0 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide rounded-full"
+          class="shrink-0 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide rounded-full"
           :class="getNotificationBadge().class">
           {{ getNotificationBadge().text }}
         </span>
       </div>
 
-      <!-- Message -->
-      <p class="text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2 leading-relaxed">
+      <p class="text-xs text-gray-600 dark:text-gray-400 mb-1.5 line-clamp-2 leading-relaxed">
         {{ notification.data?.message || notification.message || 'Nouvelle notification' }}
       </p>
 
-      <!-- Meta info -->
-      <div class="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-500">
-        <span class="flex items-center gap-1.5">
+      <div class="flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500">
+        <span class="flex items-center gap-1">
           <i class="far fa-clock"></i>
           {{ notification.time_ago }}
         </span>
         <span
           v-if="notification.data?.auteur_nom || notification.data?.inviter_name || notification.data?.validateur_nom"
-          class="flex items-center gap-1.5">
+          class="flex items-center gap-1">
           <i class="far fa-user"></i>
           {{ notification.data.auteur_nom || notification.data.inviter_name || notification.data.validateur_nom }}
         </span>
         <span v-if="notification.data?.taux_realisation"
-          class="flex items-center gap-1.5 text-green-600 dark:text-green-400 font-semibold">
+          class="flex items-center gap-1 text-success-600 dark:text-success-400 font-semibold">
           <i class="fas fa-chart-line"></i>
           {{ notification.data.taux_realisation }}%
         </span>
       </div>
     </div>
 
-    <!-- Actions (visible au survol) -->
-    <div
-      class="flex-shrink-0 flex items-start gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+    <!-- Actions (visible on hover) -->
+    <div class="shrink-0 flex items-start gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
       <button v-if="!notification.read_at" type="button"
-        class="p-2 rounded-3 hover:bg-green-100 dark:hover:bg-green-900/20 text-green-600 dark:text-green-400 transition-colors duration-200"
+        class="p-1.5 rounded-3 hover:bg-success-50 dark:hover:bg-success-500/10 text-success-600 dark:text-success-400 transition-colors"
         @click.stop="markAsRead" title="Marquer comme lu">
-        <i class="fas fa-check text-sm"></i>
+        <i class="fas fa-check text-xs"></i>
       </button>
       <button type="button"
-        class="p-2 rounded-3 hover:bg-red-100 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 transition-colors duration-200"
+        class="p-1.5 rounded-3 hover:bg-error-50 dark:hover:bg-error-500/10 text-error-600 dark:text-error-400 transition-colors"
         @click.stop="confirmDelete" title="Supprimer">
-        <i class="fas fa-trash-alt text-sm"></i>
+        <i class="fas fa-trash-alt text-xs"></i>
       </button>
-    </div>
-
-    <!-- Hover effect overlay -->
-    <div
-      class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
     </div>
   </div>
 </template>
@@ -120,14 +105,14 @@ const getIconBackgroundClass = (color) => {
     orange: 'bg-warning-500',
     green: 'bg-success-500',
     purple: 'bg-purple-500',
-    cyan: 'bg-brand-500',
-    indigo: 'bg-purple-500',
+    cyan: 'bg-brand-400',
+    indigo: 'bg-purple-600',
     red: 'bg-error-500',
-    yellow: 'bg-warning-500',
-    emerald: 'bg-success-500',
+    yellow: 'bg-warning-400',
+    emerald: 'bg-success-400',
     brand: 'bg-brand-500',
   };
-  return colors[color] || 'bg-gray-500';
+  return colors[color] || 'bg-gray-400';
 };
 
 const getNotificationBadge = () => {
@@ -224,18 +209,3 @@ const isResultatNotification = (type) => {
 };
 </script>
 
-<style scoped>
-.line-clamp-1 {
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-</style>

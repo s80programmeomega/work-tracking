@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Team;
+use App\Models\User;
 use App\Services\TeamService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class TeamController extends Controller
@@ -69,10 +70,33 @@ class TeamController extends Controller
     }
 
     /**
+     * Vérifie si l'utilisateur peut créer des équipes
+     */
+    private function canCreateTeam(User $user): bool
+    {
+        return $user->isSuperAdmin() || $user->hasRole('directeur') || $user->hasRole('manager') || $user->hasRole('cadre');
+    }
+
+    /**
+     * Vérifie si l'utilisateur peut gérer cette équipe (propriétaire ou super admin)
+     */
+    private function canManageTeam(User $user, Team $team): bool
+    {
+        return $user->isSuperAdmin() || $team->owner_id === $user->id;
+    }
+
+    /**
      * Store a newly created team
      */
     public function store(Request $request): JsonResponse
     {
+        if (! $this->canCreateTeam($request->user())) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès non autorisé. Seuls les managers et cadres peuvent créer des équipes.',
+            ], 403);
+        }
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -147,6 +171,14 @@ class TeamController extends Controller
 
         try {
             $team = $this->teamService->getTeamByUuid($uuid);
+
+            if (! $this->canManageTeam($request->user(), $team)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Accès non autorisé. Seul le propriétaire peut modifier cette équipe.',
+                ], 403);
+            }
+
             $updatedTeam = $this->teamService->updateTeam($team, $validator->validated());
 
             return response()->json([
@@ -170,6 +202,14 @@ class TeamController extends Controller
     {
         try {
             $team = $this->teamService->getTeamByUuid($uuid);
+
+            if (! $this->canManageTeam(request()->user(), $team)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Accès non autorisé. Seul le propriétaire peut archiver cette équipe.',
+                ], 403);
+            }
+
             $this->teamService->archiveTeam($team);
 
             return response()->json([
@@ -192,6 +232,14 @@ class TeamController extends Controller
     {
         try {
             $team = $this->teamService->getTeamByUuid($uuid);
+
+            if (! $this->canManageTeam(request()->user(), $team)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Accès non autorisé. Seul le propriétaire peut restaurer cette équipe.',
+                ], 403);
+            }
+
             $this->teamService->restoreTeam($team);
 
             return response()->json([
@@ -214,6 +262,14 @@ class TeamController extends Controller
     {
         try {
             $team = $this->teamService->getTeamByUuid($uuid);
+
+            if (! $this->canManageTeam(request()->user(), $team)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Accès non autorisé. Seul le propriétaire peut supprimer cette équipe.',
+                ], 403);
+            }
+
             $this->teamService->deleteTeam($team);
 
             return response()->json([
@@ -247,12 +303,20 @@ class TeamController extends Controller
 
         try {
             $team = $this->teamService->getTeamByUuid($uuid);
+
+            if (! $this->canManageTeam($request->user(), $team)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Accès non autorisé. Seul le propriétaire peut modifier l\'avatar de cette équipe.',
+                ], 403);
+            }
+
             $path = $this->teamService->uploadAvatar($team, $request->file('avatar'));
 
             return response()->json([
                 'success' => true,
                 'path' => $path,
-                'url' => asset('storage/' . $path),
+                'url' => asset('storage/'.$path),
                 'message' => 'Avatar téléchargé avec succès',
             ]);
         } catch (\Exception $e) {

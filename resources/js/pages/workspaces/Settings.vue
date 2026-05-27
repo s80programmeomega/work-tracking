@@ -79,7 +79,7 @@
                                         <option value="internal">Interne - Tous les utilisateurs de l'organisation</option>
                                         <option value="public">Public - Visible par tous</option>
                                     </select>
-                                    <p class="mt-2 text-sm text-gray-500">
+                                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
                                         Contrôlez qui peut voir et accéder à ce workspace
                                     </p>
                                 </div>
@@ -157,7 +157,7 @@
                                     />
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900 dark:text-white">Créer des projets</p>
-                                        <p class="text-sm text-gray-500 mt-1">
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                             Permet aux membres de créer de nouveaux projets dans ce workspace
                                         </p>
                                     </div>
@@ -171,7 +171,7 @@
                                     />
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900 dark:text-white">Inviter des membres</p>
-                                        <p class="text-sm text-gray-500 mt-1">
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                             Permet aux membres d'inviter d'autres utilisateurs au workspace
                                         </p>
                                     </div>
@@ -185,7 +185,7 @@
                                     />
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900 dark:text-white">Supprimer des projets</p>
-                                        <p class="text-sm text-gray-500 mt-1">
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                             Permet aux membres de supprimer des projets
                                         </p>
                                     </div>
@@ -199,7 +199,7 @@
                                     />
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900 dark:text-white">Validation des tâches requise</p>
-                                        <p class="text-sm text-gray-500 mt-1">
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                             Les tâches créées nécessitent une validation avant d'être actives
                                         </p>
                                     </div>
@@ -213,7 +213,7 @@
                                     />
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900 dark:text-white">Approbation des congés</p>
-                                        <p class="text-sm text-gray-500 mt-1">
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                             Les demandes de congés nécessitent une approbation
                                         </p>
                                     </div>
@@ -248,7 +248,7 @@
                                     />
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900 dark:text-white">Nouveau membre</p>
-                                        <p class="text-sm text-gray-500 mt-1">
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                             Notifier tous les membres quand quelqu'un rejoint le workspace
                                         </p>
                                     </div>
@@ -262,7 +262,7 @@
                                     />
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900 dark:text-white">Nouveau projet</p>
-                                        <p class="text-sm text-gray-500 mt-1">
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                             Notifier les membres quand un nouveau projet est créé
                                         </p>
                                     </div>
@@ -276,7 +276,7 @@
                                     />
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900 dark:text-white">Tâche assignée</p>
-                                        <p class="text-sm text-gray-500 mt-1">
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                             Notifier quand une tâche est assignée
                                         </p>
                                     </div>
@@ -290,7 +290,7 @@
                                     />
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900 dark:text-white">Échéance proche</p>
-                                        <p class="text-sm text-gray-500 mt-1">
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                             Notifier quand une échéance approche (24h avant)
                                         </p>
                                     </div>
@@ -304,7 +304,7 @@
                                     />
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900 dark:text-white">Résumé hebdomadaire</p>
-                                        <p class="text-sm text-gray-500 mt-1">
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                             Envoyer un résumé hebdomadaire de l'activité du workspace
                                         </p>
                                     </div>
@@ -337,7 +337,7 @@
                                         <h3 class="font-medium text-gray-900 dark:text-white">
                                             Archiver le workspace
                                         </h3>
-                                        <p class="text-sm text-gray-500 mt-1">
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                             Le workspace ne sera plus accessible mais les données seront conservées
                                         </p>
                                     </div>
@@ -355,7 +355,7 @@
                                         <h3 class="font-medium text-gray-900 dark:text-white">
                                             Transférer la propriété
                                         </h3>
-                                        <p class="text-sm text-gray-500 mt-1">
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                             Transférer la propriété du workspace à un autre membre
                                         </p>
                                     </div>

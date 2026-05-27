@@ -625,10 +625,10 @@ const getStatusLabel = (statut) => {
 
 const getPriorityClass = (priorite) => {
   const classes = {
-    faible: 'bg-green-100 text-green-800',
-    moyenne: 'bg-amber-100 text-amber-800',
-    elevee: 'bg-orange-100 text-orange-800',
-    critique: 'bg-red-100 text-red-800'
+    faible: 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300',
+    moyenne: 'bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300',
+    elevee: 'bg-orange-100 dark:bg-orange-900/40 text-orange-800 dark:text-orange-300',
+    critique: 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300'
   }
   return classes[priorite] || classes.moyenne
 }

@@ -246,7 +246,7 @@
               <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Mon taux de complétion</p>
               <div class="flex items-end gap-2">
                 <p class="text-3xl font-bold text-blue-600">{{ stats.completionRate }}%</p>
-                <p class="text-sm text-gray-500 mb-1">{{ stats.termine }}/{{ stats.total }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">{{ stats.termine }}/{{ stats.total }}</p>
               </div>
               <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-2">
                 <div class="bg-blue-500 h-2 rounded-full transition-all" :style="{ width: stats.completionRate + '%' }"></div>
@@ -257,7 +257,7 @@
               <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Résultats validés</p>
               <div class="flex items-end gap-2">
                 <p class="text-3xl font-bold text-purple-600">{{ stats.validationRate }}%</p>
-                <p class="text-sm text-gray-500 mb-1">{{ stats.valide_n1 }}/{{ stats.avec_resultat }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">{{ stats.valide_n1 }}/{{ stats.avec_resultat }}</p>
               </div>
               <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-2">
                 <div class="bg-purple-500 h-2 rounded-full transition-all" :style="{ width: stats.validationRate + '%' }"></div>
@@ -268,7 +268,7 @@
               <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Heures travaillées</p>
               <div class="flex items-end gap-2">
                 <p class="text-3xl font-bold text-green-600">{{ stats.actual_hours }}h</p>
-                <p class="text-sm text-gray-500 mb-1">/ {{ stats.estimated_hours }}h</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">/ {{ stats.estimated_hours }}h</p>
               </div>
               <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-2">
                 <div 
@@ -542,4 +542,5 @@ async function exportToPDF() {
 onMounted(() => {
   loadWeekData()
 })
+
 </script>

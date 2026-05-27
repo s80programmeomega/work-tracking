@@ -9,7 +9,7 @@
       <!-- Loading State -->
       <div v-if="loading" class="p-8 text-center">
         <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <p class="mt-2 text-gray-500">Chargement du profil...</p>
+        <p class="mt-2 text-gray-500 dark:text-gray-400">Chargement du profil...</p>
       </div>
 
       <!-- Profile Content -->

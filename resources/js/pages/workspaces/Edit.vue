@@ -77,7 +77,7 @@
                                         </label>
                                         <input :value="workspace.code" type="text" disabled
                                             class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-3 bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 cursor-not-allowed" />
-                                        <p class="mt-1 text-sm text-gray-500">Le code ne peut pas être modifié</p>
+                                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Le code ne peut pas être modifié</p>
                                     </div>
 
                                     <!-- Nom du workspace -->
@@ -132,7 +132,7 @@
                                                     class="ml-2 px-4 py-2 bg-red-100 text-red-700 rounded-3 hover:bg-red-200 transition-colors">
                                                     Supprimer
                                                 </button>
-                                                <p class="mt-2 text-sm text-gray-500">
+                                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
                                                     Format recommandé: PNG ou JPG, max 2 MB
                                                 </p>
                                             </div>
@@ -157,7 +157,7 @@
                                                 <span class="text-gray-900 dark:text-white">Archivé</span>
                                             </label>
                                         </div>
-                                        <p class="mt-1 text-sm text-gray-500">
+                                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                             Les workspaces archivés ne sont plus accessibles aux membres
                                         </p>
                                     </div>
@@ -208,7 +208,7 @@
                                                 <div class="flex-1">
                                                     <p class="font-medium text-gray-900 dark:text-white">Créer des
                                                         projets</p>
-                                                    <p class="text-sm text-gray-500">Les membres peuvent créer de
+                                                    <p class="text-sm text-gray-500 dark:text-gray-400">Les membres peuvent créer de
                                                         nouveaux projets</p>
                                                 </div>
                                             </label>
@@ -220,7 +220,7 @@
                                                 <div class="flex-1">
                                                     <p class="font-medium text-gray-900 dark:text-white">Inviter des
                                                         membres</p>
-                                                    <p class="text-sm text-gray-500">Les membres peuvent inviter
+                                                    <p class="text-sm text-gray-500 dark:text-gray-400">Les membres peuvent inviter
                                                         d'autres utilisateurs</p>
                                                 </div>
                                             </label>
@@ -232,7 +232,7 @@
                                                 <div class="flex-1">
                                                     <p class="font-medium text-gray-900 dark:text-white">Validation des
                                                         tâches requise</p>
-                                                    <p class="text-sm text-gray-500">Les nouvelles tâches nécessitent
+                                                    <p class="text-sm text-gray-500 dark:text-gray-400">Les nouvelles tâches nécessitent
                                                         une validation</p>
                                                 </div>
                                             </label>

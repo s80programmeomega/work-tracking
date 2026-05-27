@@ -10,7 +10,7 @@
           <p class="text-2xl font-bold text-gray-900 dark:text-white">
             {{ value }}
           </p>
-          <span v-if="suffix" class="text-sm text-gray-500">{{ suffix }}</span>
+          <span v-if="suffix" class="text-sm text-gray-500 dark:text-gray-400">{{ suffix }}</span>
         </div>
       </div>
       <div class="w-10 h-10 rounded-full flex items-center justify-center" :class="iconBgColorClass">

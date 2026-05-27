@@ -18,7 +18,7 @@
           <span class="font-medium text-gray-900 dark:text-white">
             {{ task.titre }}
           </span>
-          <span class="text-xs text-gray-500">{{ task.code }}</span>
+          <span class="text-xs text-gray-500 dark:text-gray-400">{{ task.code }}</span>
         </div>
         <div class="text-sm text-gray-600 dark:text-gray-400">
           {{ task.activite?.nom }}
@@ -169,7 +169,7 @@
         <button
           v-if="task.my_result"
           @click="$emit('view-result', task, task.my_result)"
-          class="p-2 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-3 transition-colors"
+          class="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-3 transition-colors"
           title="Voir le résultat">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -180,7 +180,7 @@
         <!-- Rafraîchir -->
         <button
           @click="$emit('refresh')"
-          class="p-2 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-3 transition-colors"
+          class="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-3 transition-colors"
           title="Rafraîchir">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />

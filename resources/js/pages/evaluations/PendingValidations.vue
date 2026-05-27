@@ -40,10 +40,10 @@
         <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-3">
           En attente N1 ({{ counts.n1 }})
         </h2>
-        <div v-if="loading && !rows.pending_n1.length" class="text-center py-8 text-gray-500">
+        <div v-if="loading && !rows.pending_n1.length" class="text-center py-8 text-gray-500 dark:text-gray-400">
           Chargement…
         </div>
-        <div v-else-if="!rows.pending_n1.length" class="text-center py-8 text-gray-500 bg-gray-50 dark:bg-gray-800 rounded">
+        <div v-else-if="!rows.pending_n1.length" class="text-center py-8 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded">
           Aucun résultat en attente N1
         </div>
         <div v-else class="space-y-2">
@@ -62,10 +62,10 @@
         <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-3">
           En attente N2 ({{ counts.n2 }})
         </h2>
-        <div v-if="loading && !rows.pending_n2.length" class="text-center py-8 text-gray-500">
+        <div v-if="loading && !rows.pending_n2.length" class="text-center py-8 text-gray-500 dark:text-gray-400">
           Chargement…
         </div>
-        <div v-else-if="!rows.pending_n2.length" class="text-center py-8 text-gray-500 bg-gray-50 dark:bg-gray-800 rounded">
+        <div v-else-if="!rows.pending_n2.length" class="text-center py-8 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded">
           Aucun résultat en attente N2
         </div>
         <div v-else class="space-y-2">

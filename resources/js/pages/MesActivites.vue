@@ -82,7 +82,7 @@
 
           <div class="flex gap-2">
             <select v-model="filters.projet_id"
-              class="rounded-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm"
+              class="rounded-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm text-gray-900 dark:text-white"
               @change="loadActivites">
               <option value="">Tous les projets</option>
               <option v-for="projet in accessibleProjets" :key="projet.id" :value="projet.id">
@@ -91,7 +91,7 @@
             </select>
 
             <select v-model="filters.status"
-              class="rounded-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm"
+              class="rounded-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm text-gray-900 dark:text-white"
               @change="loadActivites">
               <option value="">Tous les statuts</option>
               <option value="active">Actives</option>
@@ -99,7 +99,7 @@
             </select>
 
             <button @click="resetFilters"
-              class="rounded-3 border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700">
+              class="rounded-3 border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
               Réinitialiser
             </button>
 
@@ -133,7 +133,7 @@
       <div v-else class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700">
         <div class="overflow-x-auto">
           <table class="w-full text-sm text-left">
-            <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700">
+            <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
               <tr>
                 <th class="px-6 py-3">Activité</th>
                 <th class="px-6 py-3">Projet</th>
@@ -186,7 +186,7 @@
                     </svg>
                     {{ activite.membres_count || 0 }} membre(s)
                   </button>
-                  <div v-else class="flex items-center gap-2 px-3 py-1.5 text-xs text-gray-500">
+                  <div v-else class="flex items-center gap-2 px-3 py-1.5 text-xs text-gray-500 dark:text-gray-400">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -215,7 +215,7 @@
                 </td>
 
                 <!-- Date fin -->
-                <td class="px-6 py-4">
+                <td class="px-6 py-4 text-gray-700 dark:text-gray-300">
                   {{ activite.date_fin ? formatDate(activite.date_fin) : '-' }}
                 </td>
 
@@ -271,12 +271,12 @@
           </div>
           <div class="flex gap-1">
             <button @click="changePage(pagination.current_page - 1)" :disabled="pagination.current_page === 1"
-              class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
+              class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-700 rounded-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
               Précédent
             </button>
             <button @click="changePage(pagination.current_page + 1)"
               :disabled="pagination.current_page === pagination.last_page"
-              class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
+              class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-700 rounded-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
               Suivant
             </button>
           </div>

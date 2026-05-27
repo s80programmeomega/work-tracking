@@ -378,7 +378,6 @@ const selectedProjet = ref(null)
 const showFormModal = ref(false)
 
 const { loading, stats, projets, errors, fetchDashboardStats, fetchProjets } = useProjets()
-
 const recentProjects = computed(() => {
   return projets.value.slice(0, 5)
 })
@@ -529,4 +528,5 @@ const refreshData = async () => {
 onMounted(async () => {
   await refreshData()
 })
+
 </script>

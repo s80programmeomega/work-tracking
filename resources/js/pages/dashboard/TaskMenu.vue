@@ -3,7 +3,7 @@
   <div class="relative">
     <button
       @click="toggleMenu"
-      class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded hover:bg-gray-100 dark:hover:bg-gray-600"
+      class="p-1 text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300 transition-colors rounded hover:bg-gray-100 dark:hover:bg-gray-600"
     >
       <HorizontalDots class="w-4 h-4" />
     </button>

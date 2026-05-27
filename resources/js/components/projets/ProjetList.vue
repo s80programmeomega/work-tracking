@@ -105,7 +105,7 @@
             'p-2 rounded-3 transition-colors',
             viewMode === 'grid'
               ? 'bg-brand-100 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400'
-              : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700'
+              : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
           ]"
         >
           <GridIcon class="w-5 h-5" />
@@ -116,7 +116,7 @@
             'p-2 rounded-3 transition-colors',
             viewMode === 'list'
               ? 'bg-brand-100 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400'
-              : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700'
+              : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
           ]"
         >
           <ListIcon class="w-5 h-5" />
@@ -190,7 +190,7 @@
                 <button
                   @click.stop="toggleMenu(projet.id)"
                   class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700" >
-                  <MoreVerticalIcon class="w-5 h-5 text-gray-500" />
+                  <MoreVerticalIcon class="w-5 h-5 text-gray-500 dark:text-gray-400" />
                 </button>
                 
                 <!-- Dropdown Menu -->
@@ -349,7 +349,7 @@
     <!-- List View -->
     <div v-else class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 overflow-hidden">
       <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-        <thead class="bg-gray-50 dark:bg-gray-700">
+        <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
           <tr>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
               Projet
@@ -621,7 +621,7 @@ const fetchProjetsList = async () => {
   await fetchProjets(filters)
 }
 
-// Watch workspaceId changes
+// Watch workspaceId prop changes (when passed explicitly)
 watch(() => props.workspaceId, (newWorkspaceId) => {
   if (newWorkspaceId) {
     fetchProjetsList()
