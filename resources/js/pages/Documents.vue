@@ -147,6 +147,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import WorkspaceDocumentsBrowser from '@/components/documents/browsers/WorkspaceDocumentsBrowser.vue'
@@ -168,8 +169,10 @@ import {
 } from '@heroicons/vue/24/outline'
 import api from '@/api/axios'
 
+const route = useRoute()
+const validTabs = ['workspaces', 'projects', 'activities', 'tasks', 'recent', 'shared', 'my-documents']
 const currentPageTitle = ref('Documents')
-const activeTab = ref('workspaces')
+const activeTab = ref(validTabs.includes(route.query.tab) ? route.query.tab : 'workspaces')
 const selectedEntity = ref(null)
 const stats = ref({
   workspaces: 0,

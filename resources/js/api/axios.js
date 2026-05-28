@@ -61,8 +61,9 @@ api.interceptors.response.use(
             }
         }
 
-        // 403 Forbidden - Insufficient permissions
-        if (error.response?.status === 403) {
+        // 403 Forbidden - rediriger uniquement pour les requêtes de navigation (GET)
+        // Les actions (POST/PUT/DELETE) gèrent l'erreur en local dans le composant appelant
+        if (error.response?.status === 403 && originalRequest.method?.toLowerCase() === 'get') {
             router.push('/unauthorized');
         }
 

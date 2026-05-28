@@ -96,8 +96,16 @@ export function useDocuments() {
             return response.data;
         } catch (err) {
             if (err.response?.status === 422 && err.response?.data?.errors) {
-                const messages = Object.values(err.response.data.errors).flat();
-                error.value = messages.join(' ');
+                const fileList = Array.isArray(files) ? files : [files];
+                const messages = Object.entries(err.response.data.errors).flatMap(([key, msgs]) => {
+                    const match = key.match(/^files\.(\d+)$/);
+                    if (match) {
+                        const name = fileList[parseInt(match[1])]?.name ?? `Fichier ${parseInt(match[1]) + 1}`;
+                        return msgs.map((m) => `${name} : ${m}`);
+                    }
+                    return msgs;
+                });
+                error.value = messages.join('\n');
             } else {
                 error.value = err.response?.data?.message || 'Erreur lors du téléchargement';
             }

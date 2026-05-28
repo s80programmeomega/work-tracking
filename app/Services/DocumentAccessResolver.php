@@ -455,12 +455,19 @@ class DocumentAccessResolver
             return false;
         }
 
-        // Owner du workspace
         if ($workspace->owner_id === $user->id) {
             return true;
         }
 
-        return $workspace->isOwnerOrAdmin($user);
+        // Directeur (rôle global) peut uploader s'il est membre du workspace
+        if ($user->hasRole('directeur') && $workspace->isMember($user)) {
+            return true;
+        }
+
+        // Rôles cadre et au-dessus (owner, manager, cadre, task_responsable)
+        $roleName = $workspace->getMemberRole($user);
+
+        return in_array($roleName, ['owner', 'manager', 'cadre', 'task_responsable']);
     }
 
     protected function canUploadToProjet(User $user, int $projetId): bool

@@ -325,14 +325,20 @@ class DocumentService
         array $permissions,
         ?\DateTime $expiresAt = null
     ): DocumentPermission {
-        return $document->grantPermissionTo(
-            $targetUser,
-            $permissions['can_view'] ?? false,
-            $permissions['can_download'] ?? false,
-            $permissions['can_edit'] ?? false,
-            $permissions['can_delete'] ?? false,
-            $permissions['can_share'] ?? false,
-            $expiresAt
+        return DocumentPermission::updateOrCreate(
+            [
+                'document_id' => $document->id,
+                'permissionable_type' => User::class,
+                'permissionable_id' => $targetUser->id,
+            ],
+            [
+                'can_view' => $permissions['can_view'] ?? false,
+                'can_download' => $permissions['can_download'] ?? false,
+                'can_edit' => $permissions['can_edit'] ?? false,
+                'can_delete' => $permissions['can_delete'] ?? false,
+                'can_share' => $permissions['can_share'] ?? false,
+                'expires_at' => $expiresAt,
+            ]
         );
     }
 
@@ -341,7 +347,10 @@ class DocumentService
      */
     public function revokePermission(Document $document, User $targetUser): bool
     {
-        return $document->revokePermissionFrom($targetUser);
+        return DocumentPermission::where('document_id', $document->id)
+            ->where('permissionable_type', User::class)
+            ->where('permissionable_id', $targetUser->id)
+            ->delete() > 0;
     }
 
     /**

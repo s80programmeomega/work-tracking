@@ -72,11 +72,13 @@
                     @click.stop
                     class="w-full rounded-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 py-2.5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
-                    <option value="collaborator">Collaborateur</option>
-                    <option value="viewer">Observateur</option>
+                    <option value="cadre">Cadre</option>
+                    <option value="collaborateur">Collaborateur</option>
+                    <option value="stagiaire">Stagiaire</option>
+                    <option value="observateur">Observateur</option>
                   </select>
                   <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    <span v-if="form.role === 'viewer'">⚠️ Les observateurs ne peuvent que consulter</span>
+                    <span v-if="form.role === 'observateur'">⚠️ Les observateurs ne peuvent que consulter</span>
                     <span v-else>✓ Les collaborateurs peuvent être assignés des permissions spécifiques</span>
                   </p>
                 </div>
@@ -89,13 +91,13 @@
                   <div class="space-y-3">
                     <label 
                       class="flex items-start space-x-3 cursor-pointer" 
-                      :class="form.role === 'viewer' ? 'opacity-50 cursor-not-allowed' : ''"
+                      :class="form.role === 'observateur' ? 'opacity-50 cursor-not-allowed' : ''"
                       @click.stop
                     >
                       <input
                         v-model="form.can_create_tasks"
                         type="checkbox"
-                        :disabled="form.role === 'viewer'"
+                        :disabled="form.role === 'observateur'"
                         class="mt-1 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         @click.stop
                       />
@@ -109,13 +111,13 @@
 
                     <label 
                       class="flex items-start space-x-3 cursor-pointer" 
-                      :class="form.role === 'viewer' ? 'opacity-50 cursor-not-allowed' : ''"
+                      :class="form.role === 'observateur' ? 'opacity-50 cursor-not-allowed' : ''"
                       @click.stop
                     >
                       <input
                         v-model="form.can_edit_tasks"
                         type="checkbox"
-                        :disabled="form.role === 'viewer'"
+                        :disabled="form.role === 'observateur'"
                         class="mt-1 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         @click.stop
                       />
@@ -129,13 +131,13 @@
 
                     <label 
                       class="flex items-start space-x-3 cursor-pointer" 
-                      :class="form.role === 'viewer' ? 'opacity-50 cursor-not-allowed' : ''"
+                      :class="form.role === 'observateur' ? 'opacity-50 cursor-not-allowed' : ''"
                       @click.stop
                     >
                       <input
                         v-model="form.can_delete_tasks"
                         type="checkbox"
-                        :disabled="form.role === 'viewer'"
+                        :disabled="form.role === 'observateur'"
                         class="mt-1 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         @click.stop
                       />
@@ -149,13 +151,13 @@
 
                     <label 
                       class="flex items-start space-x-3 cursor-pointer" 
-                      :class="form.role === 'viewer' ? 'opacity-50 cursor-not-allowed' : ''"
+                      :class="form.role === 'observateur' ? 'opacity-50 cursor-not-allowed' : ''"
                       @click.stop
                     >
                       <input
                         v-model="form.can_validate_results"
                         type="checkbox"
-                        :disabled="form.role === 'viewer'"
+                        :disabled="form.role === 'observateur'"
                         class="mt-1 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         @click.stop
                       />
@@ -169,13 +171,13 @@
 
                     <label 
                       class="flex items-start space-x-3 cursor-pointer" 
-                      :class="form.role === 'viewer' ? 'opacity-50 cursor-not-allowed' : ''"
+                      :class="form.role === 'observateur' ? 'opacity-50 cursor-not-allowed' : ''"
                       @click.stop
                     >
                       <input
                         v-model="form.can_assign_users"
                         type="checkbox"
-                        :disabled="form.role === 'viewer'"
+                        :disabled="form.role === 'observateur'"
                         class="mt-1 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         @click.stop
                       />
@@ -242,7 +244,7 @@ const loading = ref(false)
 const error = ref(null)
 
 const form = ref({
-  role: 'collaborator',
+  role: 'collaborateur',
   can_create_tasks: false,
   can_edit_tasks: false,
   can_delete_tasks: false,
@@ -258,7 +260,7 @@ const getInitials = (name) => {
 // ✅ CORRECTION : Gérer le changement de rôle
 const handleRoleChange = () => {
   console.log('Role changed to:', form.value.role)
-  if (form.value.role === 'viewer') {
+  if (form.value.role === 'observateur') {
     // Désactiver toutes les permissions
     form.value.can_create_tasks = false
     form.value.can_edit_tasks = false
@@ -293,7 +295,7 @@ const extractPermissionsFromMember = (member) => {
   
   // Les permissions sont directement dans l'objet membre
   return {
-    role: member.role || 'collaborator',
+    role: member.role || 'collaborateur',
     can_create_tasks: Boolean(member.can_create_tasks),
     can_edit_tasks: Boolean(member.can_edit_tasks),
     can_delete_tasks: Boolean(member.can_delete_tasks),

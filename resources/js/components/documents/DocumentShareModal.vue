@@ -1,18 +1,6 @@
 <template>
   <TransitionRoot as="template" :show="true">
     <Dialog as="div" class="relative z-50" @close="$emit('close')">
-      <TransitionChild
-        as="template"
-        enter="ease-out duration-300"
-        enter-from="opacity-0"
-        enter-to="opacity-100"
-        leave="ease-in duration-200"
-        leave-from="opacity-100"
-        leave-to="opacity-0"
-      >
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity dark:bg-gray-900 dark:bg-opacity-80" />
-      </TransitionChild>
-
       <div class="fixed inset-0 z-10 overflow-y-auto">
         <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
           <TransitionChild
@@ -70,13 +58,21 @@
                             @click="selectUser(user)"
                             class="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700"
                           >
-                            <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-sm font-medium text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                            <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-sm font-medium text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 shrink-0">
                               {{ getInitials(user.nom) }}
                             </div>
                             <div class="min-w-0 flex-1">
-                              <p class="truncate text-sm font-medium text-gray-900 dark:text-white">
-                                {{ user.nom }}
-                              </p>
+                              <div class="flex items-center gap-2">
+                                <p class="truncate text-sm font-medium text-gray-900 dark:text-white">
+                                  {{ user.nom }}
+                                </p>
+                                <span
+                                  v-if="user.is_member"
+                                  class="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                                >
+                                  Déjà membre
+                                </span>
+                              </div>
                               <p class="truncate text-xs text-gray-500 dark:text-gray-400">
                                 {{ user.email }}
                               </p>
@@ -162,7 +158,9 @@
                       </label>
                       <input
                         v-model="expiresAt"
-                        type="datetime-local"
+                        type="date"
+                        :min="today"
+                        :max="maxDate"
                         class="mt-1 block w-full rounded-3 border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                       />
                     </div>
@@ -265,7 +263,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import {
   XMarkIcon,
@@ -305,6 +303,12 @@ const permissions = reactive({
 })
 
 const expiresAt = ref('')
+const today = computed(() => new Date().toISOString().split('T')[0])
+const maxDate = computed(() => {
+  const d = new Date()
+  d.setFullYear(d.getFullYear() + 5)
+  return d.toISOString().split('T')[0]
+})
 
 const searchUsers = async () => {
   if (searchQuery.value.length < 2) {
@@ -315,7 +319,7 @@ const searchUsers = async () => {
 
   try {
     const response = await api.get('/users/search', {
-      params: { q: searchQuery.value }
+      params: { q: searchQuery.value, document_id: props.document.id }
     })
     searchResults.value = response.data.data
     showSearchResults.value = true
@@ -338,7 +342,7 @@ const handleGrantPermission = async () => {
       props.document.id,
       selectedUser.value.id,
       permissions,
-      expiresAt.value || null
+      expiresAt.value ? expiresAt.value : null
     )
     
     selectedUser.value = null

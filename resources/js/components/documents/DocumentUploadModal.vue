@@ -1,11 +1,6 @@
 <template>
   <TransitionRoot as="template" :show="true">
     <Dialog as="div" class="relative z-50" @close="$emit('close')">
-      <TransitionChild as="template" enter="ease-out duration-300" enter-from="opacity-0" enter-to="opacity-100"
-        leave="ease-in duration-200" leave-from="opacity-100" leave-to="opacity-0">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity dark:bg-gray-900 dark:bg-opacity-80" />
-      </TransitionChild>
-
       <div class="fixed inset-0 z-10 overflow-y-auto">
         <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
           <TransitionChild as="template" enter="ease-out duration-300"
@@ -144,8 +139,13 @@
                 <!-- Error Message -->
                 <div v-if="error" class="mt-4 rounded-3 bg-red-50 p-4 dark:bg-red-900/20">
                   <div class="flex items-start gap-3">
-                    <ExclamationTriangleIcon class="h-5 w-5 flex-shrink-0 text-red-600 dark:text-red-400" />
-                    <p class="text-sm text-red-800 dark:text-red-300">{{ error }}</p>
+                    <ExclamationTriangleIcon class="h-5 w-5 shrink-0 text-red-600 dark:text-red-400" />
+                    <div class="text-sm text-red-800 dark:text-red-300">
+                      <ul v-if="errorLines.length > 1" class="list-disc list-inside space-y-1">
+                        <li v-for="(line, i) in errorLines" :key="i">{{ line }}</li>
+                      </ul>
+                      <p v-else>{{ error }}</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -175,7 +175,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import {
   CloudArrowUpIcon,
@@ -205,6 +205,8 @@ const props = defineProps({
 const emit = defineEmits(['close', 'uploaded'])
 
 const { uploadDocuments, uploading, uploadProgress, error } = useDocuments()
+
+const errorLines = computed(() => error.value ? error.value.split('\n').filter(Boolean) : [])
 
 const fileInput = ref(null)
 const selectedFiles = ref([])

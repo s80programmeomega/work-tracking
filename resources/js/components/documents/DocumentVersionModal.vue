@@ -1,18 +1,6 @@
 <template>
   <TransitionRoot as="template" :show="true">
     <Dialog as="div" class="relative z-50" @close="$emit('close')">
-      <TransitionChild
-        as="template"
-        enter="ease-out duration-300"
-        enter-from="opacity-0"
-        enter-to="opacity-100"
-        leave="ease-in duration-200"
-        leave-from="opacity-100"
-        leave-to="opacity-0"
-      >
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity dark:bg-gray-900 dark:bg-opacity-80" />
-      </TransitionChild>
-
       <div class="fixed inset-0 z-10 overflow-y-auto">
         <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
           <TransitionChild
@@ -29,7 +17,7 @@
               <div class="border-b border-gray-200 bg-white px-6 py-4 dark:border-gray-800 dark:bg-gray-900">
                 <div class="flex items-center justify-between">
                   <DialogTitle class="text-lg font-semibold text-gray-900 dark:text-white">
-                    Créer une nouvelle version
+                    Gérer les versions
                   </DialogTitle>
                   <button
                     @click="$emit('close')"
@@ -41,13 +29,13 @@
               </div>
 
               <!-- Body -->
-              <div class="bg-white px-6 py-5 dark:bg-gray-900">
+              <div class="bg-white px-6 py-5 dark:bg-gray-900 space-y-6">
                 <!-- Current Document Info -->
                 <div class="rounded-3 border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/50">
                   <div class="flex items-center gap-4">
                     <component
                       :is="getFileIcon(document)"
-                      class="h-12 w-12 flex-shrink-0 text-gray-400"
+                      class="h-12 w-12 shrink-0 text-gray-400"
                     />
                     <div class="min-w-0 flex-1">
                       <p class="truncate text-sm font-medium text-gray-900 dark:text-white">
@@ -63,12 +51,66 @@
                   </div>
                 </div>
 
+                <!-- Version History -->
+                <div>
+                  <h4 class="text-sm font-medium text-gray-900 dark:text-white">
+                    Historique des versions
+                  </h4>
+                  <div v-if="versions.length === 0" class="mt-3 rounded-3 border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
+                    Aucune version enregistrée.
+                  </div>
+                  <div v-else class="mt-3 max-h-52 space-y-2 overflow-y-auto">
+                    <div
+                      v-for="version in versions"
+                      :key="version.id"
+                      class="flex items-center justify-between rounded-3 border border-gray-200 bg-white p-3 text-sm dark:border-gray-700 dark:bg-gray-800"
+                    >
+                      <div class="flex items-center gap-3">
+                        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-medium text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                          v{{ version.version }}
+                        </div>
+                        <div>
+                          <p class="font-medium text-gray-900 dark:text-white">
+                            {{ version.user?.nom ?? '—' }}
+                          </p>
+                          <p class="text-xs text-gray-500 dark:text-gray-400">
+                            {{ formatDate(version.created_at) }}
+                          </p>
+                        </div>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <span
+                          v-if="version.is_latest_version"
+                          class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                        >
+                          Actuelle
+                        </span>
+                        <button
+                          @click="handleDownloadVersion(version)"
+                          class="rounded-3 p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                          title="Télécharger cette version"
+                        >
+                          <ArrowDownTrayIcon class="h-4 w-4" />
+                        </button>
+                        <button
+                          v-if="!version.is_latest_version"
+                          @click="handleDeleteVersion(version)"
+                          class="rounded-3 p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                          title="Supprimer cette version"
+                        >
+                          <TrashIcon class="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <!-- Upload New Version -->
-                <div class="mt-5">
+                <div>
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Nouveau fichier (v{{ document.version + 1 }})
+                    Ajouter une nouvelle version (v{{ document.version + 1 }})
                   </label>
-                  
+
                   <div
                     @click="$refs.fileInput.click()"
                     @drop.prevent="handleDrop"
@@ -102,7 +144,7 @@
                     <div v-else class="flex items-center gap-3 p-4">
                       <component
                         :is="getFileIcon(document)"
-                        class="h-10 w-10 flex-shrink-0 text-gray-400"
+                        class="h-10 w-10 shrink-0 text-gray-400"
                       />
                       <div class="min-w-0 flex-1">
                         <p class="truncate text-sm font-medium text-gray-900 dark:text-white">
@@ -122,42 +164,8 @@
                   </div>
                 </div>
 
-                <!-- Version History -->
-                <div class="mt-6">
-                  <h4 class="text-sm font-medium text-gray-900 dark:text-white">
-                    Historique des versions
-                  </h4>
-                  <div class="mt-3 max-h-48 space-y-2 overflow-y-auto">
-                    <div
-                      v-for="version in versions"
-                      :key="version.id"
-                      class="flex items-center justify-between rounded-3 border border-gray-200 bg-white p-3 text-sm dark:border-gray-700 dark:bg-gray-800"
-                    >
-                      <div class="flex items-center gap-3">
-                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-xs font-medium text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
-                          v{{ version.version }}
-                        </div>
-                        <div>
-                          <p class="font-medium text-gray-900 dark:text-white">
-                            {{ version.user.nom }}
-                          </p>
-                          <p class="text-xs text-gray-500 dark:text-gray-400">
-                            {{ formatDate(version.created_at) }}
-                          </p>
-                        </div>
-                      </div>
-                      <span
-                        v-if="version.is_latest_version"
-                        class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                      >
-                        Actuelle
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
                 <!-- Upload Progress -->
-                <div v-if="uploading" class="mt-5">
+                <div v-if="uploading">
                   <div class="flex items-center justify-between text-sm">
                     <span class="text-gray-700 dark:text-gray-300">Création de la version...</span>
                     <span class="font-medium text-blue-600 dark:text-blue-400">{{ uploadProgress }}%</span>
@@ -171,9 +179,9 @@
                 </div>
 
                 <!-- Error Message -->
-                <div v-if="error" class="mt-4 rounded-3 bg-red-50 p-4 dark:bg-red-900/20">
+                <div v-if="error" class="rounded-3 bg-red-50 p-4 dark:bg-red-900/20">
                   <div class="flex items-start gap-3">
-                    <ExclamationTriangleIcon class="h-5 w-5 flex-shrink-0 text-red-600 dark:text-red-400" />
+                    <ExclamationTriangleIcon class="h-5 w-5 shrink-0 text-red-600 dark:text-red-400" />
                     <p class="text-sm text-red-800 dark:text-red-300">{{ error }}</p>
                   </div>
                 </div>
@@ -215,6 +223,8 @@ import {
   XMarkIcon,
   DocumentPlusIcon,
   DocumentDuplicateIcon,
+  ArrowDownTrayIcon,
+  TrashIcon,
   ExclamationTriangleIcon,
   DocumentIcon,
   PhotoIcon,
@@ -235,7 +245,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'created'])
 
-const { createVersion, uploading, uploadProgress, error } = useDocuments()
+const { createVersion, downloadDocument, deleteDocument, uploading, uploadProgress, error } = useDocuments()
 
 const fileInput = ref(null)
 const selectedFile = ref(null)
@@ -265,6 +275,24 @@ const handleCreateVersion = async () => {
     emit('created')
   } catch (err) {
     console.error('Create version error:', err)
+  }
+}
+
+const handleDownloadVersion = async (version) => {
+  try {
+    await downloadDocument(version.id, version.nom ?? props.document.nom)
+  } catch (err) {
+    console.error('Erreur téléchargement version:', err)
+  }
+}
+
+const handleDeleteVersion = async (version) => {
+  if (!confirm(`Supprimer la version v${version.version} ?`)) return
+  try {
+    await deleteDocument(version.id)
+    await loadVersions()
+  } catch (err) {
+    console.error('Erreur suppression version:', err)
   }
 }
 
