@@ -222,6 +222,16 @@
             <TacheAttachmentsTab :tache="tache" :permissions="permissions" @refresh="fetchTache" />
           </div>
 
+          <!-- Tab: Documents -->
+          <div v-show="activeTab === 'documents'">
+            <DocumentManager
+              :documentable-type="'App\\Models\\Tache'"
+              :documentable-id="tache.id"
+              :entity-label="tache.titre"
+              :can-upload="permissions.can_edit ?? false"
+            />
+          </div>
+
           <!-- Tab: Liens -->
           <div v-show="activeTab === 'links'">
             <TacheLinksTab :tache="tache" :permissions="permissions" @refresh="fetchTache" />
@@ -265,6 +275,7 @@ import TacheResultsTab from '@/components/taches/tacheDetail/TacheResultsTab.vue
 import TacheCommentsTab from '@/components/taches/tacheDetail/TacheCommentsTab.vue';
 import TacheActivityTab from '@/components/taches/tacheDetail/TacheActivityTab.vue';
 import SousTacheList from '@/components/taches/SousTacheList.vue';
+import DocumentManager from '@/components/documents/DocumentManager.vue';
 
 const route = useRoute();
 const tache = ref(null);
@@ -319,6 +330,7 @@ const tabs = computed(() => [
   { id: 'sous-taches', label: 'Sous-tâches', icon: 'fa-list-check', count: stats.value.sous_taches_count },
   { id: 'assignees', label: 'Assignés', icon: 'fa-users', count: stats.value.assignees_count },
   { id: 'attachments', label: 'Fichiers', icon: 'fa-paperclip', count: stats.value.attachments_count },
+  { id: 'documents', label: 'Documents', icon: 'fa-folder-open' },
   { id: 'links', label: 'Liens', icon: 'fa-link', count: stats.value.links_count },
   { id: 'results', label: 'Résultats', icon: 'fa-check-circle', count: stats.value.resultats_count },
   { id: 'comments', label: 'Commentaires', icon: 'fa-comment', count: stats.value.comments_count },

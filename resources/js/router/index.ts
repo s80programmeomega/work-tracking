@@ -633,24 +633,24 @@ const router = createRouter({
         requiresAuth: true,
       },
     },
-    // {
-    //   path: '/activites/:activiteId/documents',
-    //   name: 'ActiviteDocuments',
-    //   component: () => import('../pages/documents/ActiviteDocuments.vue'),
-    //   meta: {
-    //     title: 'Documents de l\'activité',
-    //     requiresAuth: true,
-    //   },
-    // },
-    // {
-    //   path: '/taches/:tacheId/documents',
-    //   name: 'TacheDocuments',
-    //   component: () => import('../pages/documents/TacheDocuments.vue'),
-    //   meta: {
-    //     title: 'Documents de la tâche',
-    //     requiresAuth: true,
-    //   },
-    // },
+    {
+      path: '/activites/:activiteId/documents',
+      name: 'ActiviteDocuments',
+      component: () => import('../pages/documents/ActiviteDocuments.vue'),
+      meta: {
+        title: 'Documents de l\'activité',
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/taches/:tacheId/documents',
+      name: 'TacheDocuments',
+      component: () => import('../pages/documents/TacheDocuments.vue'),
+      meta: {
+        title: 'Documents de la tâche',
+        requiresAuth: true,
+      },
+    },
     // ==========================================
     // PLATFORM ADMIN (super_admin only)
     // ==========================================
