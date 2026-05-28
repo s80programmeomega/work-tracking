@@ -688,6 +688,16 @@ const router = createRouter({
         requiresSuperAdmin: true,
       },
     },
+    {
+      path: '/admin/roles',
+      name: 'admin.roles',
+      component: () => import('../pages/admin/AdminRoles.vue'),
+      meta: {
+        title: 'Roles & Permissions',
+        requiresAuth: true,
+        requiresSuperAdmin: true,
+      },
+    },
 
     {
       path: '/error-404',

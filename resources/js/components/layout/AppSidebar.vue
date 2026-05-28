@@ -268,7 +268,7 @@
                                         },
                                         !isExpanded && !isHovered
                                             ? 'lg:justify-center'
-                                            : 'justify-start',
+                                            : 'justify-between',
                                     ]"
                                 >
                                     <div class="flex flex-row gap-3">
@@ -957,6 +957,12 @@ const menuGroups = computed(() => [
                 icon: UsersIcon,
                 name: "Utilisateurs",
                 path: "/admin/users",
+                superAdminOnly: true,
+            },
+            {
+                icon: ShieldIcon,
+                name: "Rôles & Permissions",
+                path: "/admin/roles",
                 superAdminOnly: true,
             },
         ],

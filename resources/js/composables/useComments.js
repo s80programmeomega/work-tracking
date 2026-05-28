@@ -66,7 +66,7 @@ export function useComments() {
 
             const response = await api.post('/comments', formData, {
                 headers: {
-                    'Content-Type': 'multipart/form-data',
+                    
                 },
             });
 
@@ -174,7 +174,7 @@ export function useComments() {
 
             const response = await api.post(`/comments/${commentId}/attachments`, formData, {
                 headers: {
-                    'Content-Type': 'multipart/form-data',
+                    
                 },
             });
 

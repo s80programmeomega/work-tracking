@@ -212,7 +212,7 @@ const isDragging = ref(false)
 const description = ref('')
 const visibility = ref('private')
 const allowDuplicates = ref(false)
-const maxSizeMB = ref(10)
+const maxSizeMB = ref(2)
 
 const handleDrop = (e) => {
   isDragging.value = false

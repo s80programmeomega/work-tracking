@@ -167,7 +167,7 @@ export const useTacheStore = defineStore('tache', () => {
       const axiosConfig = isFormData
         ? {
           headers: {
-            'Content-Type': 'multipart/form-data'
+            
           }
         }
         : {
@@ -205,7 +205,7 @@ export const useTacheStore = defineStore('tache', () => {
       // ✅ CORRECTION: Gestion correcte des headers pour FormData
       const config = isFormData ? {
         headers: {
-          'Content-Type': 'multipart/form-data'
+          
         }
       } : {}
 

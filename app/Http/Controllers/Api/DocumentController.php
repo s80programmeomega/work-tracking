@@ -144,8 +144,8 @@ class DocumentController extends Controller
         $request->validate([
             'documentable_type' => 'required|string',
             'documentable_id' => 'required|integer',
-            'files' => 'required|array',
-            'files.*' => 'required|file|max:'.config('documents.max_file_size', 10240),
+            'files' => 'required|array|min:1',
+            'files.*' => 'file|max:'.config('documents.max_file_size', 10240),
             'description' => 'sometimes|string|max:1000',
             'visibility' => 'sometimes|in:private,team,public',
             'disk' => 'sometimes|string',
@@ -153,15 +153,17 @@ class DocumentController extends Controller
             'custom_metadata' => 'sometimes|array',
         ]);
 
-        try {
-            $user = $request->user();
-            $files = $request->file('files');
+        $user = $request->user();
 
-            // Upload permission checked via DocumentAccessResolver
-            abort_unless(
-                app(DocumentAccessResolver::class)->canUpload($user, $request->documentable_type, $request->documentable_id),
-                403
-            );
+        if (! app(DocumentAccessResolver::class)->canUpload($user, $request->documentable_type, $request->documentable_id)) {
+            return response()->json([
+                'success' => false,
+                'message' => "Vous n'avez pas la permission d'uploader des documents ici",
+            ], 403);
+        }
+
+        try {
+            $files = $request->file('files');
 
             $options = [
                 'description' => $request->description,

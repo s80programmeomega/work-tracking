@@ -79,9 +79,6 @@ export function useDocuments() {
             }
 
             const response = await api.post('/documents', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
                 onUploadProgress: (progressEvent) => {
                     uploadProgress.value = Math.round(
                         (progressEvent.loaded * 100) / progressEvent.total
@@ -98,7 +95,12 @@ export function useDocuments() {
 
             return response.data;
         } catch (err) {
-            error.value = err.response?.data?.message || 'Erreur lors du téléchargement';
+            if (err.response?.status === 422 && err.response?.data?.errors) {
+                const messages = Object.values(err.response.data.errors).flat();
+                error.value = messages.join(' ');
+            } else {
+                error.value = err.response?.data?.message || 'Erreur lors du téléchargement';
+            }
             throw err;
         } finally {
             uploading.value = false;
@@ -211,7 +213,7 @@ export function useDocuments() {
 
             const response = await api.post(`/documents/${documentId}/versions`, formData, {
                 headers: {
-                    'Content-Type': 'multipart/form-data',
+                    
                 },
                 onUploadProgress: (progressEvent) => {
                     uploadProgress.value = Math.round(

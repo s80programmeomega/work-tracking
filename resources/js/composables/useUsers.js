@@ -40,11 +40,7 @@ export function useUsers() {
     error.value = null
 
     try {
-      const response = await axios.put('/api/users/profile', data, {
-        headers: {
-          'Content-Type': data instanceof FormData ? 'multipart/form-data' : 'application/json'
-        }
-      })
+      const response = await axios.put('/api/users/profile', data)
 
       // Update auth store
       if (response.data.data) {

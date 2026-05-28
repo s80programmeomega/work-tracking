@@ -380,9 +380,7 @@ const handleSave = async () => {
     fd.append('social_links[github]', form.github)
     if (avatarFile.value) { fd.append('avatar', avatarFile.value) }
 
-    const { data } = await api.post('/users/profile', fd, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
+    const { data } = await api.post('/users/profile', fd)
 
     emit('updated', data.data ?? data)
     emit('close')

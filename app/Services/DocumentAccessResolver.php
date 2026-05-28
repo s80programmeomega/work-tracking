@@ -508,10 +508,8 @@ class DocumentAccessResolver
             return true;
         }
 
-        // Membre de l'activité avec permission can_edit_activity
-        $member = $activite->membres()->where('user_id', $user->id)->first();
-
-        return $member && ($member->pivot->can_edit_activity ?? false);
+        // Tout membre de l'activité peut uploader des documents
+        return $activite->membres()->where('user_id', $user->id)->exists();
     }
 
     protected function canUploadToTache(User $user, int $tacheId): bool

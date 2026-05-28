@@ -70,7 +70,7 @@ class AvatarUploadTest extends TestCase
     public function unauthenticated_user_cannot_upload_avatar(): void
     {
         $response = $this->postJson('/api/users/profile', [
-            'avatar' => UploadedFile::fake()->image('avatar.jpg'),
+            'avatar' => UploadedFile::fake()->image('avatar.jpg', 100, 100),
         ]);
 
         $response->assertUnauthorized();

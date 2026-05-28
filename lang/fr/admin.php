@@ -23,6 +23,13 @@ return [
         'title' => 'Gestion des utilisateurs',
         'last_login' => 'Dernière connexion',
         'workspace' => 'Workspace actuel',
+        'role_updated' => 'Rôle utilisateur mis à jour avec succès.',
+    ],
+    'roles' => [
+        'title' => 'Rôles & Permissions',
+        'permissions_updated' => 'Permissions mises à jour avec succès.',
+        'global' => 'Global',
+        'contextual' => 'Contextuel',
     ],
     'actions' => [
         'extend_trial' => 'Prolonger l\'essai',

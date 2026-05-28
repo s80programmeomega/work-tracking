@@ -475,19 +475,13 @@ async function handleSubmit() {
       formData.append('_method', 'PUT')
       response = await api.put(
         `/taches/${props.tache.id}/resultats/${props.resultat.id}`,
-        formData,
-        {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        }
+        formData
       )
     } else {
       // Création
       response = await api.post(
         `/taches/${props.tache.id}/resultats`,
-        formData,
-        {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        }
+        formData
       )
     }
 

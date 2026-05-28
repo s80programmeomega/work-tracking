@@ -190,10 +190,7 @@ export function useWorkspace() {
         loading.value = true;
         error.value = null;
         try {
-            const config = data instanceof FormData
-                ? { headers: { 'Content-Type': 'multipart/form-data' } }
-                : {};
-            const response = await api.post('/workspaces', data, config);
+            const response = await api.post('/workspaces', data);
             const newWorkspace = response.data.data;
             authStore.workspaces.push(newWorkspace);
             await selectWorkspace(newWorkspace);
@@ -216,9 +213,7 @@ export function useWorkspace() {
             let response;
             if (data instanceof FormData) {
                 data.append('_method', 'PUT');
-                response = await api.post(`/workspaces/${id}`, data, {
-                    headers: { 'Content-Type': 'multipart/form-data' },
-                });
+                response = await api.post(`/workspaces/${id}`, data);
             } else {
                 response = await api.put(`/workspaces/${id}`, data);
             }
