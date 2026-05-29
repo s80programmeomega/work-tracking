@@ -25,7 +25,7 @@
 | P3 | Activité CRUD + members + kanban | 26 | 39f13e2+ | ✅ | 2026-05-29 | 424 | Fixes: soft-delete assertion, tache titre uniqueness |
 | P4 | Task gaps (attachments, links, move, responsable) | 22 | — | ✅ | 2026-05-29 | 446 | Fixes: moveTache null position, deleteExternalLink auth(), membres()→members() on Projet |
 | P5 | Workspace management (CRUD, transfer, invitations, subscription) | 37 | — | ✅ | 2026-05-29 | 483 | Fix: MemberRemovalService::getTransferCandidates wherePivotIn role→role_id |
-| P6 | Document management (resolver + controller) | ~30 | — | ⬜ | — | — | — |
+| P6 | Document management (resolver + controller) | 37 | — | ✅ | 2026-05-29 | 520 | Fixes: DocumentController search $request->query→input(), DocumentService::shareWithUsers missing model method |
 | P7 | Team features (controllers + service) | ~25 | — | ⬜ | — | — | — |
 | P8 | Comments (controller + reactions + mentions) | ~15 | — | ⬜ | — | — | — |
 | P9 | Labels (label + template + tache_label) | ~20 | — | ⬜ | — | — | — |
@@ -72,10 +72,10 @@
 
 ### Phase 6 — Document management
 
-- [ ] `tests/Feature/Services/DocumentAccessResolverTest.php`
-- [ ] `tests/Feature/Document/DocumentCrudTest.php`
-- [ ] `tests/Feature/Document/DocumentPermissionsTest.php`
-- [ ] `tests/Feature/Document/DocumentQueriesTest.php`
+- [x] `tests/Feature/Services/DocumentAccessResolverTest.php`
+- [x] `tests/Feature/Document/DocumentCrudTest.php`
+- [x] `tests/Feature/Document/DocumentPermissionsTest.php`
+- [x] `tests/Feature/Document/DocumentQueriesTest.php`
 
 ### Phase 7 — Team features
 

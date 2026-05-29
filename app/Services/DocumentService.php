@@ -362,7 +362,12 @@ class DocumentService
         array $permissions = [],
         ?\DateTime $expiresAt = null
     ): void {
-        $document->shareWithUsers($userIds, $permissions, $expiresAt);
+        foreach ($userIds as $userId) {
+            $user = User::find($userId);
+            if ($user) {
+                $this->grantPermission($document, $user, $permissions, $expiresAt);
+            }
+        }
     }
 
     /**

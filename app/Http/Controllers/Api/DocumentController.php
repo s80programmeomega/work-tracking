@@ -912,7 +912,7 @@ class DocumentController extends Controller
 
         try {
             $results = $this->documentService->search(
-                $request->query,
+                $request->input('query'),
                 $request->only(['type', 'user_id', 'documentable_type', 'documentable_id', 'mime_type', 'per_page'])
             );
 
