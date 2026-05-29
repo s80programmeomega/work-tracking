@@ -269,7 +269,7 @@ class EvaluationController extends Controller
         $actor = $request->user();
         $workspace = $actor->currentWorkspace;
 
-        abort_unless($workspace, 403, __('evaluation.errors.no_workspace'));
+        abort_unless($workspace !== null, 403, __('evaluation.errors.no_workspace'));
 
         $permissionService = app(PermissionService::class);
         $gate = app(ContextualPermissionGate::class);

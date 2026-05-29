@@ -60,7 +60,7 @@ class CheckSubscriptionLimits
             'add_member' => ! $this->subscriptionService->canAddMember($workspace),
             'upload_file' => ! $this->subscriptionService->canUploadFile(
                 $workspace,
-                (int) $request->header('Content-Length', 0)
+                (int) $request->header('Content-Length', '0')
             ),
             default => false,
         };

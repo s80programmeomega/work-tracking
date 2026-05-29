@@ -362,7 +362,12 @@ class DocumentService
         array $permissions = [],
         ?\DateTime $expiresAt = null
     ): void {
-        $document->shareWithUsers($userIds, $permissions, $expiresAt);
+        foreach ($userIds as $userId) {
+            $user = User::find($userId);
+            if ($user) {
+                $this->grantPermission($document, $user, $permissions, $expiresAt);
+            }
+        }
     }
 
     /**
@@ -542,7 +547,7 @@ class DocumentService
     /**
      * Récupère une entité par son type et son ID
      */
-    protected function getEntity(string $type, int $id)
+    public function getEntity(string $type, int $id)
     {
         return match ($type) {
             Workspace::class => Workspace::find($id),

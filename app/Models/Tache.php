@@ -19,6 +19,48 @@ use Illuminate\Support\Facades\Log;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Permission\Models\Role;
 
+/**
+ * @property int $id
+ * @property int|null $responsable_id
+ * @property int $activite_id
+ * @property string $titre
+ * @property string $code
+ * @property string|null $description
+ * @property string|null $objectif
+ * @property string|null $indicateurs_resultats
+ * @property TacheStatut $statut
+ * @property TachePriorite $priorite
+ * @property Carbon|null $echeance
+ * @property Carbon|null $date_debut
+ * @property Carbon|null $date_fin_reelle
+ * @property int $taux_realisation
+ * @property bool $validation_n1_required
+ * @property bool $validation_n2_required
+ * @property int|null $validated_n1_by
+ * @property Carbon|null $validated_n1_at
+ * @property int|null $validated_n2_by
+ * @property Carbon|null $validated_n2_at
+ * @property string|null $commentaire_n1
+ * @property string|null $commentaire_n2
+ * @property bool $verrou_reevaluation
+ * @property string|null $commentaire
+ * @property int|null $position
+ * @property string|null $couleur
+ * @property string|null $cover_image
+ * @property array|null $metadata
+ * @property string|null $estimated_hours
+ * @property string|null $actual_hours
+ * @property string|null $archive_status
+ * @property Carbon|null $archived_at
+ * @property int|null $created_by
+ * @property string $visibility
+ * @property int|null $week_number
+ * @property int|null $year
+ * @property bool $is_overdue computed accessor
+ * @property string|null $validation_status computed accessor
+ * @property bool $can_be_completed computed accessor
+ * @property bool $can_be_started computed accessor
+ */
 class Tache extends Model
 {
     use HasFactory, SoftDeletes;
@@ -155,7 +197,7 @@ class Tache extends Model
         do {
             $latest = static::withTrashed()->latest('id')->first();
             $nextId = $latest ? $latest->id + 1 : 1;
-            $code = 'TASK-'.str_pad($nextId, 4, '0', STR_PAD_LEFT);
+            $code = 'TASK-'.str_pad((string) $nextId, 4, '0', STR_PAD_LEFT);
         } while (static::withTrashed()->where('code', $code)->exists());
 
         return $code;
@@ -189,7 +231,7 @@ class Tache extends Model
             ->where('statut', '!=', TacheStatut::TERMINE->value)
             ->where(function ($q) {
                 $q->whereNull('date_fin_reelle')
-                    ->orWhere('date_fin_reelle', '>', $this->echeance);
+                    ->orWhereColumn('date_fin_reelle', '>', 'echeance');
             });
     }
 
@@ -978,7 +1020,7 @@ class Tache extends Model
             return null;
         }
 
-        return round((($this->actual_hours - $this->estimated_hours) / $this->estimated_hours) * 100, 2);
+        return round(((floatval($this->actual_hours) - floatval($this->estimated_hours)) / floatval($this->estimated_hours)) * 100, 2);
     }
 
     public function canBeStarted(?User $user = null): bool

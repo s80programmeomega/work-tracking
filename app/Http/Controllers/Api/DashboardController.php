@@ -112,7 +112,7 @@ class DashboardController extends Controller
 
         return response()->json([
             'stats' => $this->calculateStats($projets, $taches, $myTasks),
-            'monthly_progress' => $this->getMonthlyProgress($user, $workspaceIds),
+            'monthly_progress' => $this->getMonthlyProgress($user),
             'recent_projects' => $this->getRecentProjects($projets),
             'my_tasks' => $myTasks,
             'team_members' => $teamMembers,

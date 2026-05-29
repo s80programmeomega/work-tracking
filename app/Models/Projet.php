@@ -77,7 +77,7 @@ class Projet extends Model
         do {
             $latestProjet = static::withTrashed()->latest('id')->first();
             $nextId = $latestProjet ? $latestProjet->id + 1 : 1;
-            $code = 'PROJ-'.str_pad($nextId, 4, '0', STR_PAD_LEFT);
+            $code = 'PROJ-'.str_pad((string) $nextId, 4, '0', STR_PAD_LEFT);
         } while (static::where('code', $code)->exists());
 
         return $code;
@@ -300,12 +300,12 @@ class Projet extends Model
         });
     }
 
-    public function scopeInWorkspace($query, $workspaceId)
+    public function scopeInWorkspace(Builder $query, int|string $workspaceId): Builder
     {
         return $query->where('workspace_id', $workspaceId);
     }
 
-    public function scopeSearch($query, $term)
+    public function scopeSearch(Builder $query, string $term): Builder
     {
         return $query->where(function ($q) use ($term) {
             $q->where('nom', 'like', "%{$term}%")

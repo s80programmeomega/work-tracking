@@ -395,10 +395,14 @@ class MemberRemovalService
      */
     public function getTransferCandidates(Workspace $workspace, User $excludeUser): Collection
     {
+        $roleIds = Role::whereIn('name', ['manager', 'cadre', 'collaborateur'])
+            ->where('guard_name', 'web')
+            ->pluck('id');
+
         return $workspace->members()
             ->where('user_id', '!=', $excludeUser->id)
             ->where('user_id', '!=', $workspace->owner_id)
-            ->wherePivotIn('role', ['manager', 'cadre', 'collaborateur'])
+            ->wherePivotIn('role_id', $roleIds)
             ->select(['users.id', 'users.nom', 'users.email', 'users.avatar'])
             ->get();
     }

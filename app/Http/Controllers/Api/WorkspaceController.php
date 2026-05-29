@@ -1450,7 +1450,7 @@ class WorkspaceController extends Controller
         do {
             $latest = Workspace::withTrashed()->latest('id')->first();
             $nextId = $latest ? $latest->id + 1 : 1;
-            $code = 'WS-'.str_pad($nextId, 4, '0', STR_PAD_LEFT);
+            $code = 'WS-'.str_pad((string) $nextId, 4, '0', STR_PAD_LEFT);
         } while (Workspace::where('code', $code)->exists());
 
         return $code;

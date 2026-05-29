@@ -37,6 +37,11 @@ class RouteServiceProvider extends ServiceProvider
                 ->prefix('api')
                 ->group(base_path('routes/api.php'));
 
+            // "web" + "api" : sessions Laravel + tokens Sanctum — les deux permettent d'accéder aux docs
+            Route::middleware(['web', 'api'])
+                ->prefix('api')
+                ->group(base_path('routes/docs.php'));
+
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
         });

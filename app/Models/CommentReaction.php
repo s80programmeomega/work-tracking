@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $count SQL alias from selectRaw aggregate queries
+ */
 class CommentReaction extends Model
 {
     use HasFactory;
@@ -74,6 +77,7 @@ class CommentReaction extends Model
 
         if ($reaction) {
             $reaction->delete();
+
             return false; // Removed
         }
 

@@ -43,6 +43,7 @@ class TeamResourceController extends Controller
             $resource = TeamResource::create([
                 'team_id' => $team->id,
                 'user_id' => $request->user()->id,
+                'name' => $request->title,
                 'title' => $request->title,
                 'type' => $request->type,
                 'url' => $request->url,

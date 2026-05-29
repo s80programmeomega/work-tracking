@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Label;
 use App\Models\Tache;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\DB;
 
 class LabelService
@@ -60,6 +61,7 @@ class LabelService
         unset($data['is_global'], $data['projet_id']);
 
         $label->update($data);
+
         return $label->fresh();
     }
 
@@ -164,7 +166,7 @@ class LabelService
     public function duplicateLabel(Label $label, ?int $targetProjetId = null): Label
     {
         $newLabel = $label->replicate();
-        $newLabel->nom = $label->nom . ' (copie)';
+        $newLabel->nom = $label->nom.' (copie)';
         $newLabel->usage_count = 0;
         $newLabel->created_by = auth()->id();
 
@@ -181,7 +183,7 @@ class LabelService
     /**
      * Bulk create labels from array
      */
-    public function bulkCreateLabels(array $labelsData, ?int $projetId = null): Collection
+    public function bulkCreateLabels(array $labelsData, ?int $projetId = null): SupportCollection
     {
         $createdLabels = collect();
 

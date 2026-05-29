@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Models\LabelTemplate;
-use App\Models\LabelTemplateItem;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\DB;
 
 class LabelTemplateService
@@ -67,7 +67,7 @@ class LabelTemplateService
             $template = LabelTemplate::create($data);
 
             // Create template items
-            if (!empty($itemsData)) {
+            if (! empty($itemsData)) {
                 $this->createTemplateItems($template, $itemsData);
             }
 
@@ -86,7 +86,7 @@ class LabelTemplateService
             unset($data['items']);
 
             // If this is set as default, unset other defaults
-            if (($data['is_default'] ?? false) && !$template->is_default) {
+            if (($data['is_default'] ?? false) && ! $template->is_default) {
                 LabelTemplate::where('is_default', true)
                     ->where('id', '!=', $template->id)
                     ->update(['is_default' => false]);
@@ -140,7 +140,7 @@ class LabelTemplateService
         return DB::transaction(function () use ($template, $newName) {
             // Create new template
             $newTemplate = $template->replicate();
-            $newTemplate->nom = $newName ?? ($template->nom . ' (copie)');
+            $newTemplate->nom = $newName ?? ($template->nom.' (copie)');
             $newTemplate->is_default = false;
             $newTemplate->created_by = auth()->id();
             $newTemplate->save();
@@ -236,7 +236,7 @@ class LabelTemplateService
     /**
      * Seed predefined templates
      */
-    public function seedPredefinedTemplates(): Collection
+    public function seedPredefinedTemplates(): SupportCollection
     {
         $templates = collect();
 

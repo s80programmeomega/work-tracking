@@ -29,11 +29,6 @@ class ProjetService
         return $query->latest()->paginate($filters['per_page'] ?? 15);
     }
 
-    /**
-     * Get user's projects (where user is member or responsable)
-     *
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
-     */
     public function getUserProjets(User $user, array $filters = []): LengthAwarePaginator
     {
         $query = Projet::with(['responsable', 'workspace', 'members'])
@@ -192,10 +187,11 @@ class ProjetService
     /**
      * Apply filters to a query
      */
+    /** @param Builder<Projet> $query */
     protected function applyFilters(Builder $query, array $filters): void
     {
         if (! empty($filters['workspace_id'])) {
-            $query->inWorkspace($filters['workspace_id']);
+            $query->inWorkspace((int) $filters['workspace_id']);
         }
 
         if (! empty($filters['search'])) {
@@ -301,7 +297,7 @@ class ProjetService
     {
         return DB::transaction(function () use ($projet, $data) {
             // ✅ Si le code n'est pas fourni ou est null, ne pas le modifier
-            if (! isset($data['code']) || $data['code'] === null || $data['code'] === '') {
+            if (! isset($data['code']) || $data['code'] === '') {
                 unset($data['code']);
             }
 
@@ -388,6 +384,8 @@ class ProjetService
                 'budget',
                 'objectifs',
                 'metadata',
+                'date_debut',
+                'date_fin',
             ]), $overrides);
 
             // Add suffix to name if not provided
@@ -396,7 +394,7 @@ class ProjetService
             }
 
             // Reset some fields
-            $newData['status'] = 'pending';
+            $newData['status'] = 'active';
             $newData['progression'] = 0;
             $newData['is_favorite'] = false;
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Tache;
 use App\Models\User;
 use App\Permissions\ContextualPermissionGate;
 use App\Permissions\Permission;
@@ -9,8 +10,66 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Spatie\Permission\Models\Role;
 
+/**
+ * @property Tache $resource
+ *
+ * @mixin Tache
+ */
 class TacheResource extends JsonResource
 {
+    /**
+     * @responseField id integer Task unique identifier.
+     * @responseField code string Unique task code.
+     * @responseField activite_id integer Parent activite ID.
+     * @responseField activite object|null Parent activite summary.
+     * @responseField responsable_id integer|null Responsible user ID.
+     * @responseField responsable object|null Responsible user summary (when present).
+     * @responseField is_responsable boolean Whether the authenticated user is the responsable.
+     * @responseField titre string Task title.
+     * @responseField description string|null Optional description.
+     * @responseField objectif string|null Objective statement.
+     * @responseField indicateurs_resultats string|null Result indicators definition.
+     * @responseField commentaire string|null General comment.
+     * @responseField attachments TacheAttachmentResource[] File attachments (when loaded).
+     * @responseField external_links TacheExternalLinkResource[] External links (when loaded).
+     * @responseField statut string Status enum value: a_faire | en_cours | termine.
+     * @responseField statut_label string Human-readable status label.
+     * @responseField statut_color string Color identifier for status display.
+     * @responseField priorite string Priority enum value: faible | moyenne | elevee | critique.
+     * @responseField priorite_label string Human-readable priority label.
+     * @responseField priorite_color string Color identifier for priority display.
+     * @responseField priorite_icon string Icon identifier for priority display.
+     * @responseField my_status object|null Authenticated user's individual pivot status (when assigned).
+     * @responseField date_debut string|null Start date (Y-m-d).
+     * @responseField echeance string|null Due date (Y-m-d).
+     * @responseField date_fin_reelle string|null Actual completion date (Y-m-d).
+     * @responseField week_number integer|null ISO week number.
+     * @responseField year integer|null Year of the week number.
+     * @responseField taux_realisation integer Overall completion percentage (0-100).
+     * @responseField estimated_hours number|null Estimated work hours.
+     * @responseField actual_hours number|null Actual hours logged.
+     * @responseField validation object Validation circuit state (n1_required, n1_validated_at, n2_required, ...).
+     * @responseField assignees object[] Assigned users with pivot data (when loaded).
+     * @responseField team_stats object|null Team completion statistics (when more than one assignee).
+     * @responseField my_result object|null Authenticated user's result submission (when assigned and result exists).
+     * @responseField all_results object[]|null All individual results (visible to managers only).
+     * @responseField labels LabelResource[] Applied labels (when loaded).
+     * @responseField sous_taches_count integer Number of sub-tasks.
+     * @responseField position integer|null Kanban column sort position.
+     * @responseField couleur string|null Hex color code.
+     * @responseField cover_image string|null Cover image filename.
+     * @responseField visibility string Visibility enum: public | private.
+     * @responseField is_overdue boolean Whether the task is past its due date.
+     * @responseField can_be_completed boolean Whether all conditions to complete the task are met.
+     * @responseField can_be_started boolean Whether the task can be started.
+     * @responseField archive_status string|null Archive state identifier.
+     * @responseField archived_at string|null ISO datetime of archival.
+     * @responseField created_by integer|null ID of the user who created the task.
+     * @responseField created_at string|null ISO datetime of creation.
+     * @responseField updated_at string|null ISO datetime of last update.
+     * @responseField permissions object|null Gate-computed permissions for the authenticated user.
+     * @responseField evaluation object|null Evaluation display hints for the authenticated user.
+     */
     public function toArray(Request $request): array
     {
         $user = $request->user();

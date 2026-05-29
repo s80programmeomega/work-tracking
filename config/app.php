@@ -6,6 +6,7 @@ use App\Providers\BroadcastServiceProvider;
 use App\Providers\DocumentServiceProvider;
 use App\Providers\EventServiceProvider;
 use App\Providers\RouteServiceProvider;
+use App\Providers\ScribeServiceProvider;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\ServiceProvider;
 use Intervention\Image\Laravel\Facades\Image;
@@ -176,6 +177,7 @@ return [
         EventServiceProvider::class,
         RouteServiceProvider::class,
         DocumentServiceProvider::class,
+        ScribeServiceProvider::class,
     ])->toArray(),
 
     /*

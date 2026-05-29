@@ -1,13 +1,33 @@
 <?php
+
 // app/Http/Resources/TacheAttachmentResource.php
 
 namespace App\Http\Resources;
 
+use App\Models\TacheAttachment;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @property TacheAttachment $resource
+ *
+ * @mixin TacheAttachment
+ */
 class TacheAttachmentResource extends JsonResource
 {
+    /**
+     * @responseField id integer Attachment unique identifier.
+     * @responseField tache_id integer Parent task ID.
+     * @responseField file_name string Storage filename.
+     * @responseField original_name string Original filename as uploaded.
+     * @responseField file_size integer Size in bytes.
+     * @responseField formatted_file_size string Human-readable size (e.g. "1.2 MB").
+     * @responseField mime_type string MIME type (e.g. "application/pdf").
+     * @responseField file_url string Public URL to download the file.
+     * @responseField uploaded_by object|null Uploader summary (id, nom, email) — when loaded.
+     * @responseField created_at string|null ISO datetime of upload.
+     * @responseField updated_at string|null ISO datetime of last update.
+     */
     public function toArray(Request $request): array
     {
         return [

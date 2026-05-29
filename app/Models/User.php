@@ -3,8 +3,13 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -13,6 +18,35 @@ use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Permission\Traits\HasRoles;
 
+/**
+ * @property int $id
+ * @property string $nom
+ * @property string|null $prenom
+ * @property string|null $nom_complet
+ * @property string $email
+ * @property int|null $current_workspace_id
+ * @property string|null $fonction
+ * @property string|null $avatar
+ * @property string|null $bio
+ * @property string|null $numero_telephone
+ * @property string|null $adresse
+ * @property int|null $team_id
+ * @property string|null $language
+ * @property string|null $timezone
+ * @property array|null $notification_preferences
+ * @property bool $is_active
+ * @property bool $is_super_admin
+ * @property string|null $last_login_ip
+ * @property Carbon|null $last_login_at
+ * @property Carbon|null $last_activity_at
+ * @property Carbon|null $email_verified_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
+ * @property string $avatar_url computed accessor
+ * @property string $initials computed accessor
+ * @property Collection $unreadNotifications from Notifiable trait
+ */
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, HasRoles, LogsActivity, Notifiable, SoftDeletes;
@@ -157,7 +191,7 @@ class User extends Authenticatable
     /**
      * Team activities performed by user
      */
-    public function teamActivities()
+    public function teamActivities(): HasMany
     {
         return $this->hasMany(TeamActivity::class);
     }
@@ -165,7 +199,7 @@ class User extends Authenticatable
     /**
      * User's team presence records
      */
-    public function teamPresence()
+    public function teamPresence(): HasMany
     {
         return $this->hasMany(TeamPresence::class);
     }
@@ -177,7 +211,7 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
-    public function activites()
+    public function activites(): BelongsToMany
     {
         return $this->belongsToMany(Activite::class, 'activite_user', 'user_id', 'activite_id')
             ->withPivot([
@@ -191,7 +225,7 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
-    public function taches()
+    public function taches(): BelongsToMany
     {
         return $this->belongsToMany(Tache::class, 'tache_user')
             ->withPivot('role_id', 'is_responsable', 'can_edit', 'can_complete', 'can_validate', 'statut_individuel', 'progression_individuelle', 'started_at', 'completed_at')
@@ -203,7 +237,7 @@ class User extends Authenticatable
             ]);
     }
 
-    public function comments()
+    public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);
     }
@@ -211,7 +245,7 @@ class User extends Authenticatable
     /**
      * Notification preferences
      */
-    public function notificationPreference()
+    public function notificationPreference(): HasOne
     {
         return $this->hasOne(NotificationPreference::class);
     }
@@ -219,7 +253,7 @@ class User extends Authenticatable
     /**
      * Push subscriptions
      */
-    public function pushSubscriptions()
+    public function pushSubscriptions(): HasMany
     {
         return $this->hasMany(PushSubscription::class);
     }
@@ -375,12 +409,12 @@ class User extends Authenticatable
         ]);
     }
 
-    public function currentWorkspace()
+    public function currentWorkspace(): BelongsTo
     {
         return $this->belongsTo(Workspace::class, 'current_workspace_id');
     }
 
-    public function workspaces()
+    public function workspaces(): BelongsToMany
     {
         return $this->belongsToMany(Workspace::class, 'workspace_members')
             ->withPivot(['role_id', 'invited_at', 'invited_by'])

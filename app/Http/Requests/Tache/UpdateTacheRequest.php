@@ -4,6 +4,7 @@ namespace App\Http\Requests\Tache;
 
 use App\Enums\TachePriorite;
 use App\Enums\TacheStatut;
+use App\Models\Tache;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateTacheRequest extends FormRequest
@@ -16,21 +17,23 @@ class UpdateTacheRequest extends FormRequest
 
     public function rules(): array
     {
-        $tacheId = $this->route('tache')->id;
-        $activiteId = $this->activite_id ?? $this->route('tache')->activite_id;
+        /** @var Tache $tache */
+        $tache = $this->route('tache');
+        $tacheId = $tache->id;
+        $activiteId = $this->activite_id ?? $tache->activite_id;
 
         return [
             'titre' => [
                 'sometimes',
                 'string',
                 'max:255',
-                'unique:taches,titre,' . $tacheId . ',id,activite_id,' . $activiteId
+                'unique:taches,titre,'.$tacheId.',id,activite_id,'.$activiteId,
             ],
             'description' => ['nullable', 'string'],
             'objectif' => ['nullable', 'string'],
             'indicateurs_resultats' => ['nullable', 'string'],
-            'statut' => ['sometimes', 'in:' . implode(',', TacheStatut::values())],
-            'priorite' => ['sometimes', 'in:' . implode(',', TachePriorite::values())],
+            'statut' => ['sometimes', 'in:'.implode(',', TacheStatut::values())],
+            'priorite' => ['sometimes', 'in:'.implode(',', TachePriorite::values())],
             'echeance' => ['nullable', 'date'],
             'date_debut' => ['nullable', 'date'],
             'date_fin_reelle' => ['nullable', 'date'],

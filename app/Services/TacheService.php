@@ -720,7 +720,7 @@ class TacheService
 
         return DB::transaction(function () use ($tache, $newStatut, $newPosition) {
             $oldStatut = $tache->statut;
-            $oldPosition = $tache->position;
+            $oldPosition = $tache->position ?? 0;
 
             if ($oldStatut === $newStatut) {
                 $this->reorderTachesInStatus($tache->activite_id, $newStatut, $oldPosition, $newPosition);
@@ -744,7 +744,7 @@ class TacheService
             ]);
 
             $fresh = $tache->fresh(['activite', 'assignees']);
-            event(new TacheStatutChanged($fresh));
+            broadcast(new TacheStatutChanged($fresh))->toOthers();
 
             return $fresh;
         });

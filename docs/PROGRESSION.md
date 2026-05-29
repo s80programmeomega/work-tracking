@@ -38,6 +38,7 @@
 | 16 | PDF/Excel Export (evaluation sheet + project/task) | `feature/v2-task-16-export` | ✅ | 2026-05-26 | 2026-05-26 | CDC gaps B.1 + ST.7/E.2. 274 PHPUnit tests green. |
 | — | CDC Hotfixes (R7 guard + audit-log endpoint + rate limiting + agent sheet §5) | `fix/cdc-hotfixes` | ✅ | 2026-05-26 | 2026-05-26 | Merged into `jonas` 2026-05-26. |
 | — | Document management polish + notification fixes | `feature/design-system-v1` | ✅ | 2026-05-28 | 2026-05-28 | Version manager UX, sharing fixes, push toWebPush, WebPushChannel fallback, cadre upload, role values, expires_at cap. |
+| — | PHPStan cleanup: larastan swap + 154 errors → 0 | `chore/test-coverage-expansion` | ✅ | 2026-05-29 | 2026-05-29 | nunomaduro→larastan, @property/@mixin on all 16 resources, @responseField annotations, 12+ real bugs fixed. 627 tests passing. |
 
 ---
 

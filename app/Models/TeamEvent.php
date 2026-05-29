@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class TeamEvent extends Model
 {
@@ -28,7 +30,7 @@ class TeamEvent extends Model
     /**
      * Get the team that owns the event.
      */
-    public function team()
+    public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
@@ -36,7 +38,7 @@ class TeamEvent extends Model
     /**
      * Get the user who created the event.
      */
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
@@ -44,7 +46,7 @@ class TeamEvent extends Model
     /**
      * Get the attendees for the event.
      */
-    public function attendees()
+    public function attendees(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'team_event_user')->withTimestamps();
     }

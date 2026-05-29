@@ -2,14 +2,47 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Activite;
 use App\Permissions\ContextualPermissionGate;
 use App\Permissions\Permission;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Spatie\Permission\Models\Role;
 
+/**
+ * @property Activite $resource
+ *
+ * @mixin Activite
+ */
 class ActiviteResource extends JsonResource
 {
+    /**
+     * @responseField id integer Activite unique identifier.
+     * @responseField projet_id integer Parent project ID.
+     * @responseField projet ProjetResource|null Nested project (when loaded).
+     * @responseField workspace_owner_id integer|null Owner ID of the project workspace (when loaded).
+     * @responseField nom string Activite name.
+     * @responseField description string|null Optional description.
+     * @responseField code string Short unique code.
+     * @responseField responsable_id integer Responsible user ID.
+     * @responseField responsable UserResource|null Responsible user (when loaded).
+     * @responseField date_debut string|null Start date (Y-m-d).
+     * @responseField date_fin string|null End date (Y-m-d).
+     * @responseField ordre integer Sort order within the project.
+     * @responseField status string Status enum: active | completed | archived.
+     * @responseField progression integer Completion percentage (0-100).
+     * @responseField couleur string|null Hex color code.
+     * @responseField metadata object|null Arbitrary key-value metadata.
+     * @responseField archived_at string|null ISO datetime of archival.
+     * @responseField is_overdue boolean Whether the activite is past its end date.
+     * @responseField days_remaining integer|null Calendar days until the end date.
+     * @responseField tache_count integer Total number of tasks.
+     * @responseField membres object[]|null Members with pivot permissions (when loaded).
+     * @responseField membres_count integer|null Total member count (when loaded).
+     * @responseField user_permissions object|null Gate-computed permissions for the authenticated user.
+     * @responseField created_at string|null ISO datetime of creation.
+     * @responseField updated_at string|null ISO datetime of last update.
+     */
     public function toArray(Request $request): array
     {
         return [

@@ -51,11 +51,10 @@ class TeamResourceNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $typeLabel = match ($this->resource->type) {
-            'file' => '📎 Fichier',
             'link' => '🔗 Lien',
             'document' => '📄 Document',
             'template' => '📋 Modèle',
-            default => 'Ressource',
+            default => '📎 Ressource',
         };
 
         $mail = (new MailMessage)
