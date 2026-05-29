@@ -63,7 +63,7 @@ class Activite extends Model
         do {
             $latest = static::withTrashed()->latest('id')->first();
             $nextId = $latest ? $latest->id + 1 : 1;
-            $code = 'ACTIV-'.str_pad($nextId, 4, '0', STR_PAD_LEFT);
+            $code = 'ACTIV-'.str_pad((string) $nextId, 4, '0', STR_PAD_LEFT);
         } while (static::where('code', $code)->exists());
 
         return $code;
@@ -82,7 +82,7 @@ class Activite extends Model
         return $this->morphMany(Document::class, 'documentable');
     }
 
-    public function membres()
+    public function membres(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'activite_user')
             ->withPivot([

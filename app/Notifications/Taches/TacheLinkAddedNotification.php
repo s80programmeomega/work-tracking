@@ -14,8 +14,8 @@ class TacheLinkAddedNotification extends Notification implements ShouldQueue
     use Queueable;
 
     public function __construct(
-        public Tache $tache, 
-        public User $addedBy, 
+        public Tache $tache,
+        public User $addedBy,
         public TacheExternalLink $link
     ) {}
 
@@ -29,26 +29,25 @@ class TacheLinkAddedNotification extends Notification implements ShouldQueue
         return [
             'type' => 'task_link_added',
             'tache_id' => $this->tache->id,
-            'link_id' => $this->link->id,
-            'title' => "Nouveau lien ajouté",
+            'title' => 'Nouveau lien ajouté',
             'message' => "{$this->addedBy->nom} a ajouté un lien à la tâche \"{$this->tache->titre}\" : {$this->link->title}",
-            
+
             // Informations de la tâche
             'tache_titre' => $this->tache->titre,
             'activite_id' => $this->tache->activite_id,
-            
+
             // Informations du lien
             'link_id' => $this->link->id,
             'link_title' => $this->link->title,
             'link_url' => $this->link->url,
             'link_domain' => $this->extractDomain($this->link->url),
             'link_icon' => $this->getLinkIcon($this->link->url),
-            
+
             // Informations de l'utilisateur
             'added_by_id' => $this->addedBy->id,
             'added_by_nom' => $this->addedBy->nom,
             'added_by_avatar' => $this->addedBy->avatar,
-            
+
             // URLs d'accès
             'url' => "/taches/{$this->tache->id}?tab=links",
             'external_url' => $this->link->url,
@@ -62,6 +61,7 @@ class TacheLinkAddedNotification extends Notification implements ShouldQueue
     private function extractDomain(string $url): ?string
     {
         $parsed = parse_url($url);
+
         return $parsed['host'] ?? null;
     }
 
@@ -71,7 +71,7 @@ class TacheLinkAddedNotification extends Notification implements ShouldQueue
     private function getLinkIcon(string $url): string
     {
         $domain = strtolower($this->extractDomain($url) ?? '');
-        
+
         $icons = [
             'github.com' => 'fa-github',
             'gitlab.com' => 'fa-gitlab',

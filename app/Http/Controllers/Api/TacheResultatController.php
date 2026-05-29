@@ -219,8 +219,8 @@ class TacheResultatController extends Controller
 
         // Supprimer les documents
         foreach ($resultat->documents as $document) {
-            if ($document->chemin_fichier) {
-                Storage::disk('public')->delete($document->chemin_fichier);
+            if ($document->chemin) {
+                Storage::disk('public')->delete($document->chemin);
             }
             $document->delete();
         }
@@ -700,7 +700,7 @@ class TacheResultatController extends Controller
             // qui notifie déjà. Cette notification reste pour N2 (path non-service).
             if ($validated['level'] === 'n2') {
                 $resultat->user->notify(
-                    new ResultatRejeteNotification($tache, $resultat, $validated['commentaire'])
+                    new ResultatRejeteNotification($resultat, auth()->user(), $validated['commentaire'], 'n2')
                 );
             }
 
@@ -798,11 +798,11 @@ class TacheResultatController extends Controller
                 return [
                     'id' => $doc->id,
                     'nom' => $doc->nom,
-                    'nom_fichier' => $doc->nom_fichier,
-                    'taille' => $doc->taille_fichier,
-                    'type_fichier' => $doc->type_fichier,
+                    'nom_fichier' => $doc->nom,
+                    'taille' => $doc->taille,
+                    'mime_type' => $doc->mime_type,
                     'extension' => $doc->extension,
-                    'url' => Storage::disk('public')->url($doc->chemin_fichier),
+                    'url' => Storage::disk('public')->url($doc->chemin),
                     'uploaded_by' => $doc->user ? [
                         'id' => $doc->user->id,
                         'nom' => $doc->user->nom,
@@ -848,8 +848,8 @@ class TacheResultatController extends Controller
         }
 
         // Supprimer le fichier physique
-        if ($document->chemin_fichier) {
-            Storage::disk('public')->delete($document->chemin_fichier);
+        if ($document->chemin) {
+            Storage::disk('public')->delete($document->chemin);
         }
 
         $document->delete();
@@ -957,7 +957,7 @@ class TacheResultatController extends Controller
         ]);
 
         // Créer les permissions
-        $this->createDocumentPermissions($document, $tache);
+        $this->createDocumentPermissions($document, $tache, $resultat);
 
         activity()
             ->causedBy(auth()->user())
@@ -971,7 +971,7 @@ class TacheResultatController extends Controller
     /**
      * Créer les permissions pour un document
      */
-    private function createDocumentPermissions(Document $document, Tache $tache)
+    private function createDocumentPermissions(Document $document, Tache $tache, TacheResultat $resultat)
     {
         $permissions = collect();
         $currentUserId = auth()->id();
@@ -1023,12 +1023,12 @@ class TacheResultatController extends Controller
         // 4. Validateurs N1 et N2 (uniques et différents de l'uploader)
         $validateurs = collect();
 
-        if ($tache->validation_n1_required && $tache->validateur_n1_id && $tache->validateur_n1_id !== $currentUserId) {
-            $validateurs->push($tache->validateur_n1_id);
+        if ($tache->validation_n1_required && $resultat->validateur_n1_id && $resultat->validateur_n1_id !== $currentUserId) {
+            $validateurs->push($resultat->validateur_n1_id);
         }
 
-        if ($tache->validation_n2_required && $tache->validateur_n2_id && $tache->validateur_n2_id !== $currentUserId) {
-            $validateurs->push($tache->validateur_n2_id);
+        if ($tache->validation_n2_required && $resultat->validateur_n2_id && $resultat->validateur_n2_id !== $currentUserId) {
+            $validateurs->push($resultat->validateur_n2_id);
         }
         foreach ($validateurs->unique() as $validateurId) {
             $permissions->push([

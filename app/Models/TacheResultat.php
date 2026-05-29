@@ -14,6 +14,7 @@ use App\Notifications\ResultatValideN2Notification;
 // RejetConfirmeNotification — supprimées (auto-notifications du validateur
 // envers lui-même, déjà couvertes par le toast UI et la réponse API).
 use App\Services\NotificationService;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,6 +25,44 @@ use Illuminate\Support\Facades\Log;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * @property int $id
+ * @property int $tache_id
+ * @property int $user_id
+ * @property bool $is_individual
+ * @property string $statut brouillon|soumis|valide_n1|valide_n2|a_refaire|valide
+ * @property string|null $resultats_attendus
+ * @property string|null $resultats_obtenus
+ * @property int $taux_realisation
+ * @property string|null $difficultes_rencontrees
+ * @property string|null $solutions_envisagees
+ * @property string|null $observations
+ * @property Carbon|null $soumis_le
+ * @property Carbon|null $soumis_n0_le
+ * @property string|null $action_n0
+ * @property string|null $commentaire_n0
+ * @property int|null $n0_actor_id
+ * @property Carbon|null $action_n0_le
+ * @property bool $valide_par_n1
+ * @property int|null $validateur_n1_id
+ * @property Carbon|null $valide_le_n1
+ * @property string|null $commentaire_n1
+ * @property bool $valide_par_n2
+ * @property int|null $validateur_n2_id
+ * @property Carbon|null $valide_le_n2
+ * @property string|null $commentaire_n2
+ * @property bool $bypass_active
+ * @property string|null $motif_bypass
+ * @property Carbon|null $bypass_le
+ * @property int $bypass_count
+ * @property int|null $rejete_par
+ * @property Carbon|null $rejete_le
+ * @property string|null $motif_rejet
+ * @property string|null $niveau_rejet
+ * @property bool $is_fully_validated computed
+ * @property string $validation_status computed
+ * @property User|null $rejetePar
+ */
 class TacheResultat extends Model
 {
     use HasFactory, LogsActivity, SoftDeletes;
@@ -103,6 +142,11 @@ class TacheResultat extends Model
     public function validateurN2(): BelongsTo
     {
         return $this->belongsTo(User::class, 'validateur_n2_id');
+    }
+
+    public function rejetePar(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'rejete_par');
     }
 
     public function n0Actor(): BelongsTo
@@ -554,7 +598,7 @@ class TacheResultat extends Model
     /**
      * 🔔 Notifier les validateurs appropriés
      */
-    protected function notifyValidators(): void
+    public function notifyValidators(): void
     {
         // G2: garde-fou central. L'acteur ici est l'auteur du résultat
         // (this->user) — si lui-même est aussi N1 ou N2, on n'envoie pas.

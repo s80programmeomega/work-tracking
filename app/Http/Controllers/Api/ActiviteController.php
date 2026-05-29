@@ -500,7 +500,7 @@ class ActiviteController extends Controller
         try {
             $newActivite = $activite->replicate();
             $newActivite->nom = $validated['nom'] ?? $activite->nom.' (Copie)';
-            $newActivite->code = null;
+            $newActivite->code = '';
             $newActivite->progression = 0;
 
             if (isset($validated['projet_id'])) {
@@ -602,13 +602,7 @@ class ActiviteController extends Controller
 
         // ✅ Ajouter le responsable du projet s'il n'est pas déjà membre
         if ($projet->responsable && ! $members->contains('id', $projet->responsable->id)) {
-            $responsable = [
-                'id' => $projet->responsable->id,
-                'nom' => $projet->responsable->nom,
-                'email' => $projet->responsable->email,
-                'avatar' => $projet->responsable->avatar,
-            ];
-            $members->prepend($responsable);
+            $members->prepend($projet->responsable);
         }
 
         return response()->json([

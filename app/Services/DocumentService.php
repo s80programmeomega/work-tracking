@@ -547,7 +547,7 @@ class DocumentService
     /**
      * Récupère une entité par son type et son ID
      */
-    protected function getEntity(string $type, int $id)
+    public function getEntity(string $type, int $id)
     {
         return match ($type) {
             Workspace::class => Workspace::find($id),

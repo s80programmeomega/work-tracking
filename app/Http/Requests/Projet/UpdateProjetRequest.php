@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Projet;
 
+use App\Models\Projet;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -14,18 +15,20 @@ class UpdateProjetRequest extends FormRequest
 
     public function rules(): array
     {
-        $projetId = $this->route('projet')->id;
+        /** @var Projet $projet */
+        $projet = $this->route('projet');
+        $projetId = $projet->id;
 
         return [
             'workspace_id' => ['sometimes', 'required', 'exists:workspaces,id'],
             'nom' => 'sometimes|required|string|max:255',
-             'code' => [
+            'code' => [
                 'nullable',
                 'string',
                 'max:255',
                 Rule::unique('projets', 'code')
                     ->ignore($projetId)
-                    ->whereNull('deleted_at')
+                    ->whereNull('deleted_at'),
             ],
             'description' => 'nullable|string',
             'date_debut' => 'sometimes|required|date',
@@ -40,7 +43,7 @@ class UpdateProjetRequest extends FormRequest
             'is_template' => 'nullable|boolean',
             'is_favorite' => 'nullable|boolean',
             'metadata' => 'nullable|array',
-            
+
             // Relations
             'tags' => 'nullable|array',
             'tags.*' => 'exists:projet_tags,id',

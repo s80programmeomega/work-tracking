@@ -237,6 +237,7 @@ class AccessManagementService
      */
     public function revokeTemporaryAccess(int $temporaryAccessId): bool
     {
+        /** @var object{user_id: int, accessible_id: int, accessible_type: string}|null $access */
         $access = DB::table('temporary_access')->find($temporaryAccessId);
 
         if (! $access) {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Activite;
 
+use App\Models\Activite;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateActiviteRequest extends FormRequest
@@ -15,15 +16,17 @@ class UpdateActiviteRequest extends FormRequest
 
     public function rules(): array
     {
-        $activiteId = $this->route('activite')->id;
-        $projetId = $this->projet_id ?? $this->route('activite')->projet_id;
+        /** @var Activite $activite */
+        $activite = $this->route('activite');
+        $activiteId = $activite->id;
+        $projetId = $this->projet_id ?? $activite->projet_id;
 
         return [
             'nom' => [
                 'sometimes',
                 'string',
                 'max:255',
-                'unique:activites,nom,' . $activiteId . ',id,projet_id,' . $projetId
+                'unique:activites,nom,'.$activiteId.',id,projet_id,'.$projetId,
             ],
             'description' => ['nullable', 'string'],
             'responsable_id' => ['sometimes', 'exists:users,id'],

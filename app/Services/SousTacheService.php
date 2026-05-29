@@ -25,7 +25,7 @@ class SousTacheService
         ]));
 
         try {
-            event(new SousTacheChanged($sousTache->load(['tache.activite']), 'created'));
+            broadcast(new SousTacheChanged($sousTache->load(['tache.activite']), 'created'))->toOthers();
         } catch (\Throwable $e) {
             Log::warning('SousTache broadcast failed', ['error' => $e->getMessage()]);
         }
@@ -58,7 +58,7 @@ class SousTacheService
         $sousTache->update($data);
 
         try {
-            event(new SousTacheChanged($sousTache->load(['tache.activite']), 'updated'));
+            broadcast(new SousTacheChanged($sousTache->load(['tache.activite']), 'updated'))->toOthers();
         } catch (\Throwable $e) {
             Log::warning('SousTache broadcast failed', ['error' => $e->getMessage()]);
         }
@@ -78,7 +78,7 @@ class SousTacheService
         $tacheId = $sousTache->tache_id;
 
         try {
-            event(new SousTacheChanged($sousTache->loadMissing(['tache.activite']), 'deleted'));
+            broadcast(new SousTacheChanged($sousTache->loadMissing(['tache.activite']), 'deleted'))->toOthers();
         } catch (\Throwable $e) {
             Log::warning('SousTache broadcast failed', ['error' => $e->getMessage()]);
         }

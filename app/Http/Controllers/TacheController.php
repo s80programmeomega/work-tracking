@@ -26,7 +26,7 @@ class TacheController extends Controller
     public function index(Request $request): AnonymousResourceCollection
     {
         $filters = $request->only(['activite_id', 'statut', 'priorite', 'user_id', 'overdue', 'archive_status']);
-        $taches = $this->tacheService->getAllTaches($filters);
+        $taches = $this->tacheService->getAllTaches($request->user(), $filters);
 
         return TacheResource::collection($taches);
     }
@@ -50,7 +50,7 @@ class TacheController extends Controller
      */
     public function myTaches(Request $request): AnonymousResourceCollection
     {
-        $taches = $this->tacheService->getMyTaches($request->user()->id);
+        $taches = $this->tacheService->getMyTaches($request->user());
 
         return TacheResource::collection($taches);
     }
@@ -60,7 +60,7 @@ class TacheController extends Controller
      */
     public function store(StoreTacheRequest $request): JsonResponse
     {
-        $tache = $this->tacheService->createTache($request->validated());
+        $tache = $this->tacheService->createTache($request->validated(), $request->user());
 
         return response()->json([
             'message' => 'Tâche créée avec succès.',

@@ -21,7 +21,7 @@ class LabelController extends Controller
      */
     public function index(Request $request): AnonymousResourceCollection
     {
-        $projetId = $request->query('projet_id');
+        $projetId = $request->query('projet_id') ? (int) $request->query('projet_id') : null;
         $scope = $request->query('scope', 'all'); // all, global, project
 
         $labels = match ($scope) {

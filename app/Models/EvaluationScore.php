@@ -9,6 +9,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property float $total_score SQL alias from aggregate queries
+ * @property int $decision_count SQL alias from aggregate queries
+ */
 class EvaluationScore extends Model
 {
     use HasFactory;

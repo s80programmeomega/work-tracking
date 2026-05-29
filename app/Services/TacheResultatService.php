@@ -401,14 +401,14 @@ class TacheResultatService
         $workspaceId = $resultat->tache?->activite?->projet?->workspace_id;
 
         try {
-            event(new ResultatStatutChanged($resultat));
+            broadcast(new ResultatStatutChanged($resultat))->toOthers();
 
             if ($workspaceId) {
                 $validatorIds = collect([$resultat->validateur_n1_id, $resultat->validateur_n2_id])
                     ->filter()
                     ->values()
                     ->all();
-                event(new PendingValidationCountChanged($workspaceId, $validatorIds));
+                broadcast(new PendingValidationCountChanged($workspaceId, $validatorIds))->toOthers();
             }
         } catch (\Throwable $e) {
             Log::warning('Resultat broadcast failed', ['error' => $e->getMessage()]);

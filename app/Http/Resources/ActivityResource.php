@@ -4,13 +4,37 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Spatie\Activitylog\Models\Activity;
 
+/**
+ * @property Activity $resource
+ *
+ * @mixin Activity
+ */
 class ActivityResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
      *
      * @return array<string, mixed>
+     */
+    /**
+     * @responseField id integer Activity log entry unique identifier.
+     * @responseField log_name string Log channel name.
+     * @responseField description string Event key (e.g. created, updated, deleted).
+     * @responseField subject_type string Fully-qualified class name of the subject model.
+     * @responseField subject_id integer|null ID of the subject model instance.
+     * @responseField event string|null Event name (mirrors description for Spatie v3+).
+     * @responseField causer_type string|null Fully-qualified class name of the causer.
+     * @responseField causer_id integer|null ID of the causer.
+     * @responseField properties object Key-value bag of changed attributes or custom data.
+     * @responseField batch_uuid string|null UUID grouping related log entries.
+     * @responseField created_at string ISO 8601 datetime when the event was logged.
+     * @responseField causer object|null Causer summary (id, name, email) — when present.
+     * @responseField subject object|null Subject summary (shape depends on subject type).
+     * @responseField human_readable string Localised human-readable description of the event.
+     * @responseField icon string Icon identifier for UI display.
+     * @responseField color string Color name for UI display (e.g. green, red, blue).
      */
     public function toArray(Request $request): array
     {
@@ -52,7 +76,7 @@ class ActivityResource extends JsonResource
      */
     protected function formatSubject(): array
     {
-        if (!$this->subject) {
+        if (! $this->subject) {
             return [];
         }
 
@@ -125,7 +149,7 @@ class ActivityResource extends JsonResource
      */
     protected function getSubjectName(): string
     {
-        if (!$this->subject) {
+        if (! $this->subject) {
             return 'un élément supprimé';
         }
 
@@ -139,7 +163,7 @@ class ActivityResource extends JsonResource
             case 'Tache':
                 return "la tâche \"{$this->subject->titre}\"";
             case 'Comment':
-                return "un commentaire";
+                return 'un commentaire';
             default:
                 return "un {$type}";
         }

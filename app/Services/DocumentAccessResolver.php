@@ -214,18 +214,23 @@ class DocumentAccessResolver
 
         switch ($entityType) {
             case Workspace::class:
+                /** @var Workspace $entity */
                 return $this->checkWorkspaceAccess($user, $entity, $action);
 
             case Projet::class:
+                /** @var Projet $entity */
                 return $this->checkProjetAccess($user, $entity, $action);
 
             case Activite::class:
+                /** @var Activite $entity */
                 return $this->checkActiviteAccess($user, $entity, $action);
 
             case Tache::class:
+                /** @var Tache $entity */
                 return $this->checkTacheAccess($user, $entity, $action);
 
             case TacheResultat::class:
+                /** @var TacheResultat $entity */
                 return $this->checkResultatAccess($user, $entity, $action);
 
             default:

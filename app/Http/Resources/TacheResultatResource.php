@@ -2,13 +2,44 @@
 
 namespace App\Http\Resources;
 
+use App\Models\TacheResultat;
 use App\Permissions\ContextualPermissionGate;
 use App\Permissions\Permission;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @property TacheResultat $resource
+ *
+ * @mixin TacheResultat
+ */
 class TacheResultatResource extends JsonResource
 {
+    /**
+     * @responseField id integer Result unique identifier.
+     * @responseField tache_id integer Parent task ID.
+     * @responseField user object|null Result owner summary (id, nom, email, avatar).
+     * @responseField resultats_attendus string|null Expected results description.
+     * @responseField resultats_obtenus string|null Actual results obtained.
+     * @responseField taux_realisation integer Self-assessed completion percentage (0-100).
+     * @responseField difficultes_rencontrees string|null Difficulties encountered during execution.
+     * @responseField solutions_envisagees string|null Solutions considered for the difficulties.
+     * @responseField observations string|null Additional observations.
+     * @responseField statut string Status enum: brouillon | soumis | valide_n1 | valide_n2 | a_refaire.
+     * @responseField validation_status string Computed validation pipeline status.
+     * @responseField is_fully_validated boolean Whether all required validation levels are complete.
+     * @responseField soumis_le string|null ISO datetime when the result was submitted.
+     * @responseField validation_n0 object N0 circuit state: soumis_n0_le, action, commentaire, action_le, actor.
+     * @responseField bypass object Anti-sabotage bypass state: active, motif, bypass_le, bypass_count.
+     * @responseField audit_logs object[]|null Full action audit trail (when loaded).
+     * @responseField validation_n1 object N1 validation state: valide, validateur, valide_le, commentaire.
+     * @responseField validation_n2 object N2 validation state: valide, validateur, valide_le, commentaire.
+     * @responseField tache object|null Parent task with nested activite and projet (when loaded).
+     * @responseField documents object[]|null Supporting documents with per-user permissions (when loaded).
+     * @responseField created_at string|null ISO datetime of creation.
+     * @responseField updated_at string|null ISO datetime of last update.
+     * @responseField permissions object|null Gate-computed permissions for the authenticated user.
+     */
     public function toArray(Request $request): array
     {
         return [
@@ -100,7 +131,7 @@ class TacheResultatResource extends JsonResource
                 // 🔥 Activité (OBLIGATOIRE pour les permissions)
                 'activite' => $this->when($this->tache?->relationLoaded('activite'), [
                     'id' => $this->tache->activite?->id,
-                    'titre' => $this->tache->activite?->titre,
+                    'nom' => $this->tache->activite?->nom,
                     'responsable_id' => $this->tache->activite?->responsable_id,
                     'responsable' => $this->when($this->tache->activite?->relationLoaded('responsable'), [
                         'id' => $this->tache->activite->responsable?->id,
@@ -111,7 +142,7 @@ class TacheResultatResource extends JsonResource
                     // 🔥 Projet (OBLIGATOIRE pour validation N2)
                     'projet' => $this->when($this->tache->activite?->relationLoaded('projet'), [
                         'id' => $this->tache->activite->projet?->id,
-                        'titre' => $this->tache->activite->projet?->titre,
+                        'nom' => $this->tache->activite->projet?->nom,
                         'responsable_id' => $this->tache->activite->projet?->responsable_id,
                         'responsable' => $this->when($this->tache->activite->projet?->relationLoaded('responsable'), [
                             'id' => $this->tache->activite->projet->responsable?->id,

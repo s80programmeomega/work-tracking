@@ -744,7 +744,7 @@ class TacheService
             ]);
 
             $fresh = $tache->fresh(['activite', 'assignees']);
-            event(new TacheStatutChanged($fresh));
+            broadcast(new TacheStatutChanged($fresh))->toOthers();
 
             return $fresh;
         });

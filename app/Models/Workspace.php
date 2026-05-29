@@ -122,7 +122,7 @@ class Workspace extends Model
         do {
             $latest = static::withTrashed()->latest('id')->first();
             $nextId = $latest ? $latest->id + 1 : 1;
-            $code = 'WS-'.str_pad($nextId, 4, '0', STR_PAD_LEFT);
+            $code = 'WS-'.str_pad((string) $nextId, 4, '0', STR_PAD_LEFT);
         } while (static::where('code', $code)->exists());
 
         return $code;

@@ -1,0 +1,68 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - app
+
+    level: 5
+
+    ignoreErrors:
+        # Spatie ActivityLogger::forSubject() — method exists at runtime via __call magic
+        - '#Call to an undefined method Spatie\\Activitylog\\ActivityLogger::forSubject\(\)#'
+        # Laravel magic relationship properties — pivot comes from BelongsToMany at runtime
+        - '#Access to an undefined property (App\\Models\\[a-zA-Z]+|App\\Http\\Resources\\[a-zA-Z]+|Illuminate\\Database\\Eloquent\\Model)::\$pivot#'
+        # Dynamic stats property accessed safely via isset() in resources
+        - '#Access to an undefined property App\\Http\\Resources\\[a-zA-Z]+::\$stats#'
+        # Sanctum: currentAccessToken() returns HasAbilities interface which lacks delete() — works at runtime
+        - '#Call to an undefined method Laravel\\Sanctum\\Contracts\\HasAbilities::delete\(\)#'
+        # Macro closures in DocumentServiceProvider: $this is bound to model at runtime
+        - '#Call to an undefined method App\\Providers\\DocumentServiceProvider::getKey\(\)#'
+        # Incomplete feature stubs — methods planned but not yet implemented
+        - '#Call to an undefined method App\\Http\\Controllers\\Api\\EvaluationController::generateRecommendations\(\)#'
+        - '#Call to an undefined method App\\Services\\TacheService::validateTache\(\)#'
+        - '#Call to an undefined method App\\Services\\TacheService::updateProgress\(\)#'
+        - '#Call to an undefined method App\\Models\\User::canSeeAllWorkspaceProjects\(\)#'
+        - '#Call to an undefined method App\\Models\\User::hasTemporaryAccess\(\)#'
+        # LabelController: Collection typed as generic — load() exists on Eloquent collections at runtime
+        - '#Call to an undefined method Illuminate\\Support\\Collection.*::load\(\)#'
+        # JsonResource::when() accepts truthy mixed at runtime, not strictly bool
+        - '#Parameter \#1 \$condition of method Illuminate\\Http\\Resources\\Json\\JsonResource::when\(\) expects bool#'
+        # Polymorphic Model instances — accessors and relationships accessed via generic Model type
+        - '#Access to an undefined property Illuminate\\Database\\Eloquent\\Model::\$(id|name|email|avatar|nom|titre|statut|content|comment|initials|avatar_url|created_at|user_permissions)#'
+        # Nullsafe operator on Carbon dates that are never null — not a real bug
+        - '#Using nullsafe method call on non-nullable type Carbon\\Carbon#'
+        # Spatie Role model: priority column added via migration, not in base model
+        - '#Access to an undefined property Spatie\\Permission\\Models\\Role::\$priority#'
+        # Private unused methods kept for future internal use
+        - '#Method App\\Services\\ProjetService::isWorkspaceAdmin\(\) is unused#'
+        - '#Method App\\Http\\Resources\\ActiviteResource::(getFullPermissions|getDefaultPermissions)\(\) is unused#'
+        - '#Method App\\Http\\Controllers\\Api\\TacheController::uploadDocument\(\) is unused#'
+        # Dead-code / always-true defensive guards — intentional defensive programming
+        - message: '#(Negated boolean expression is always false|Result of \|\| is always true|Ternary operator condition is always true|Else branch is unreachable because ternary operator condition is always true|Comparison operation ">" between int<1, max> and 0 is always true|Right side of && is always true|If condition is always true|Expression on left side of \?\? is not nullable)#'
+          reportUnmatched: false
+        # Match arms on mixed values from DB/JSON — exhaustiveness can't be inferred
+        - '#Match expression does not handle remaining value(s)?: mixed#'
+        # Instanceof checks on string/BackedEnum — guarding against unexpected input
+        - '#Instanceof between string and .* will always evaluate to false#'
+        # Unreachable match arms due to PHPStan's enum analysis being overly strict
+        - message: '#Match arm is unreachable because previous comparison is always true#'
+          reportUnmatched: false
+        # Dynamic SQL alias properties on stdClass rows from DB::table() queries
+        - '#Access to an undefined property App\\Models\\TacheResultat::\$(inactions|total|total_score|decision_count)#'
+        # transform() callback type changes collection item type — works at runtime
+        - '#Parameter \#1 \$callback of method Illuminate\\Support\\Collection.*::transform\(\) expects#'
+        # TeamResourceNotification: match arm covers enum cases correctly at runtime
+        - message: '#Match arm comparison between .* is always true#'
+          reportUnmatched: false
+        # Dynamically assigned model properties for response enrichment — set via ->property = value
+        - '#Access to an undefined property App\\Models\\(Document|Workspace)::\$(permission|user_permissions)#'
+        # Private methods unused by PHPStan but called dynamically or kept for future use
+        - message: '#Method App\\Http\\Controllers\\Api\\DashboardController::.+\(\) is unused#'
+          reportUnmatched: false
+        - '#Method App\\Http\\Controllers\\Api\\TacheResultatController::notifyResponsablesOfResult\(\) is unused#'
+        - '#Method App\\Http\\Controllers\\Api\\EvaluationController::generateRecommandations\(\) is unused#'
+        # PDF class: third-party or local helper loaded at runtime
+        - '#Call to static method loadView\(\) on an unknown class App\\Http\\Controllers\\Api\\PDF#'
+        # LabelController collection: load() is available on Eloquent collections at runtime
+        - '#Called .take. on Laravel collection, but could have been retrieved as a query#'

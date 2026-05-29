@@ -2,18 +2,61 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Projet;
 use App\Permissions\ContextualPermissionGate;
 use App\Permissions\Permission;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Spatie\Permission\Models\Role;
 
+/**
+ * @property Projet $resource
+ *
+ * @mixin Projet
+ */
 class ProjetResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
      *
      * @return array<string, mixed>
+     */
+    /**
+     * @responseField id integer Project unique identifier.
+     * @responseField workspace_id integer Parent workspace ID.
+     * @responseField workspace object|null Workspace summary (when loaded).
+     * @responseField nom string Project name.
+     * @responseField description string|null Optional description.
+     * @responseField code string Short unique code.
+     * @responseField date_debut string|null Start date (Y-m-d).
+     * @responseField date_fin string|null End date (Y-m-d).
+     * @responseField responsable_id integer Responsible user ID.
+     * @responseField responsable UserResource|null Responsible user (when loaded).
+     * @responseField status string Status enum: active | completed | archived | on_hold.
+     * @responseField visibility string Visibility enum: public | private | team.
+     * @responseField couleur string|null Hex color code.
+     * @responseField budget number|null Budget amount.
+     * @responseField progression integer Auto-calculated completion percentage (0-100).
+     * @responseField progression_calculee integer Same as progression (alias).
+     * @responseField progression_manuelle integer|null Manual progression override value.
+     * @responseField is_template boolean Whether this project is a reusable template.
+     * @responseField is_favorite boolean Whether the current user has starred this project.
+     * @responseField objectifs string|null Free-text objectives.
+     * @responseField metadata object|null Arbitrary key-value metadata.
+     * @responseField archived_at string|null ISO datetime of archival.
+     * @responseField is_overdue boolean Whether the project is past its end date.
+     * @responseField days_remaining integer|null Calendar days until the end date.
+     * @responseField member_count integer|null Total member count (when loaded).
+     * @responseField activites_count integer Total number of activites.
+     * @responseField taches_count integer Total number of tasks across all activites.
+     * @responseField progression_details object|null Per-activite weight breakdown (when loaded).
+     * @responseField members ProjetMemberResource[]|null Project members with pivot permissions (when loaded).
+     * @responseField tags ProjetTagResource[]|null Project tags (when loaded).
+     * @responseField teams object[]|null Linked teams summary (when loaded).
+     * @responseField user_permissions object|null Gate-computed permissions for the authenticated user.
+     * @responseField activites object[]|null Full activite list with permissions (when loaded).
+     * @responseField created_at string|null ISO datetime of creation.
+     * @responseField updated_at string|null ISO datetime of last update.
      */
     public function toArray(Request $request): array
     {
@@ -27,7 +70,6 @@ class ProjetResource extends JsonResource
                 return [
                     'id' => $this->workspace->id,
                     'nom' => $this->workspace->nom,
-                    'slug' => $this->workspace->slug,
                     'owner_id' => $this->workspace->owner_id,
                 ];
             }),
@@ -169,7 +211,6 @@ class ProjetResource extends JsonResource
                         'is_overdue' => $activite->is_overdue,
                         'days_remaining' => $activite->days_remaining,
                         'tache_count' => $activite->tache_count ?? 0,
-                        'membres_count' => $activite->membres_count ?? $activite->membres()->count(),
 
                         // ✅ POIDS CALCULÉ pour cette activité
                         'poids_calcule' => $this->calculateActivityWeight($activite),
