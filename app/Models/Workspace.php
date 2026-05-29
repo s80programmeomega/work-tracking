@@ -312,6 +312,11 @@ class Workspace extends Model
         return $this->members()->where('user_id', $user->id)->exists();
     }
 
+    public function hasMember(int $userId): bool
+    {
+        return $this->members()->where('user_id', $userId)->exists();
+    }
+
     public function hasAccess(User $user): bool
     {
         return $user->isSuperAdmin()

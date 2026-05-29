@@ -388,6 +388,8 @@ class ProjetService
                 'budget',
                 'objectifs',
                 'metadata',
+                'date_debut',
+                'date_fin',
             ]), $overrides);
 
             // Add suffix to name if not provided
@@ -396,7 +398,7 @@ class ProjetService
             }
 
             // Reset some fields
-            $newData['status'] = 'pending';
+            $newData['status'] = 'active';
             $newData['progression'] = 0;
             $newData['is_favorite'] = false;
 

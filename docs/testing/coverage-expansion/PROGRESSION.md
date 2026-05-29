@@ -21,7 +21,7 @@
 | Phase | Scope | Test target | Branch commit | Status | Completed | PHPUnit total | Notes |
 |---|---|---|---|---|---|---|---|
 | P1 | Policy guards (5 policies) | 62 | 2cc323f+ | ✅ | 2026-05-29 | 363 | — |
-| P2 | Projet CRUD + members + stats | ~25 | — | ⬜ | — | — | — |
+| P2 | Projet CRUD + members + stats | 52 | 0ddd82d+ | ✅ | 2026-05-29 | 398 | Fixes: hasMember on Workspace, soft-delete assertion, cloneProjet status/dates |
 | P3 | Activité CRUD + members + kanban | ~25 | — | ⬜ | — | — | — |
 | P4 | Task gaps (attachments, links, move, responsable) | ~20 | — | ⬜ | — | — | — |
 | P5 | Workspace management (CRUD, transfer, invitations, subscription) | ~30 | — | ⬜ | — | — | — |
@@ -47,9 +47,9 @@
 
 ### Phase 2 — Projet CRUD + members + stats
 
-- [ ] `tests/Feature/Projet/ProjetCrudTest.php` — store, update, destroy, archive, unarchive, complete, clone, toggleFavorite
-- [ ] `tests/Feature/Projet/ProjetMembersTest.php` — getMembers, addMember, updateMember, removeMember, getMemberRemovalImpact, removeMemberWithTransfer
-- [ ] `tests/Feature/Projet/ProjetStatsTest.php` — getActivites, getTaches, getStatistics, dashboardStats, performanceReport, accessibleTasks, accessible
+- [x] `tests/Feature/Projet/ProjetCrudTest.php` — store, update, destroy, archive, unarchive, complete, clone, toggleFavorite
+- [x] `tests/Feature/Projet/ProjetMembersTest.php` — getMembers, addMember, updateMember, removeMember, getMemberRemovalImpact, removeMemberWithTransfer
+- [x] `tests/Feature/Projet/ProjetStatsTest.php` — getActivites, getTaches, getStatistics, dashboardStats, performanceReport, accessibleTasks, accessible
 
 ### Phase 3 — Activité CRUD + members + kanban
 
