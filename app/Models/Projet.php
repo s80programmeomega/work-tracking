@@ -165,6 +165,11 @@ class Projet extends Model
         return $this->hasMany(Activite::class);
     }
 
+    public function teams(): HasMany
+    {
+        return $this->hasMany(Team::class, 'project_id');
+    }
+
     public function taches()
     {
         return $this->hasManyThrough(Tache::class, Activite::class);
@@ -223,6 +228,50 @@ class Projet extends Model
     public function scopeTeam($query)
     {
         return $query->where('visibility', 'team');
+    }
+
+    /**
+     * Filtre les projets visibles par l'utilisateur selon la règle de visibilité :
+     * public → tout membre du workspace
+     * team  → membres du projet ou membres d'une équipe liée au projet
+     * private → rôle manager ou supérieur + membre du workspace
+     */
+    public function scopeVisibleTo(Builder $query, User $user): void
+    {
+        if ($user->isSuperAdmin()) {
+            return;
+        }
+
+        $query->where(function (Builder $q) use ($user) {
+            // Propriétaire du workspace : accès total
+            $q->whereHas('workspace', fn (Builder $w) => $w->where('owner_id', $user->id))
+                // Responsable du projet : accès garanti quelle que soit la visibilité
+                ->orWhere('responsable_id', $user->id)
+                // public : tout membre du workspace
+                ->orWhere(function (Builder $pub) use ($user) {
+                    $pub->where('visibility', 'public')
+                        ->whereHas('workspace.members', fn (Builder $m) => $m->where('user_id', $user->id));
+                })
+                // team : membre du projet OU membre d'une équipe liée au projet
+                ->orWhere(function (Builder $team) use ($user) {
+                    $team->where('visibility', 'team')
+                        ->where(function (Builder $access) use ($user) {
+                            $access->whereHas('members', fn (Builder $m) => $m->where('user_id', $user->id))
+                                ->orWhereHas('teams', fn (Builder $t) => $t->whereHas(
+                                    'members',
+                                    fn (Builder $m) => $m->where('user_id', $user->id)
+                                ));
+                        });
+                });
+
+            // private : manager et supérieur + membre du workspace
+            if ($user->hasRoleLevel('manager')) {
+                $q->orWhere(function (Builder $priv) use ($user) {
+                    $priv->where('visibility', 'private')
+                        ->whereHas('workspace.members', fn (Builder $m) => $m->where('user_id', $user->id));
+                });
+            }
+        });
     }
 
     public function scopeTemplate($query)
