@@ -24,7 +24,7 @@
 | P2 | Projet CRUD + members + stats | 52 | 0ddd82d+ | ✅ | 2026-05-29 | 398 | Fixes: hasMember on Workspace, soft-delete assertion, cloneProjet status/dates |
 | P3 | Activité CRUD + members + kanban | 26 | 39f13e2+ | ✅ | 2026-05-29 | 424 | Fixes: soft-delete assertion, tache titre uniqueness |
 | P4 | Task gaps (attachments, links, move, responsable) | 22 | — | ✅ | 2026-05-29 | 446 | Fixes: moveTache null position, deleteExternalLink auth(), membres()→members() on Projet |
-| P5 | Workspace management (CRUD, transfer, invitations, subscription) | ~30 | — | ⬜ | — | — | — |
+| P5 | Workspace management (CRUD, transfer, invitations, subscription) | 37 | — | ✅ | 2026-05-29 | 483 | Fix: MemberRemovalService::getTransferCandidates wherePivotIn role→role_id |
 | P6 | Document management (resolver + controller) | ~30 | — | ⬜ | — | — | — |
 | P7 | Team features (controllers + service) | ~25 | — | ⬜ | — | — | — |
 | P8 | Comments (controller + reactions + mentions) | ~15 | — | ⬜ | — | — | — |
@@ -66,10 +66,9 @@
 
 ### Phase 5 — Workspace management
 
-- [ ] `tests/Feature/Workspace/WorkspaceCrudTest.php`
-- [ ] `tests/Feature/Workspace/WorkspaceMemberRemovalTest.php`
-- [ ] `tests/Feature/Workspace/WorkspaceInvitationsTest.php`
-- [ ] `tests/Feature/Workspace/WorkspaceSubscriptionTest.php`
+- [x] `tests/Feature/Workspace/WorkspaceCrudTest.php`
+- [x] `tests/Feature/Workspace/WorkspaceMembersTest.php`
+- [x] `tests/Feature/Workspace/WorkspaceInvitationsTest.php`
 
 ### Phase 6 — Document management
 
