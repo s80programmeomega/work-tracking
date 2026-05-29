@@ -49,7 +49,7 @@ class DocumentResource extends JsonResource
             ],
 
             // Conditional relationships
-            'versions' => DocumentResource::collection($this->whenLoaded('versions')),
+            'versions' => $this->whenLoaded('versions', fn () => DocumentResource::collection($this->versions)),
             'permissions' => $this->whenLoaded('permissions'),
             'documentable' => $this->whenLoaded('documentable'),
 

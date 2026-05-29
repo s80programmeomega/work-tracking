@@ -165,7 +165,7 @@ class InvitationSystemTest extends TestCase
 
         $this->postJson("/api/projets/{$this->projet->id}/invitations", [
             'emails' => [$this->member->email],
-            'role' => 'member',
+            'role' => 'collaborateur',
             'send_email' => false,
         ])->assertOk()
             ->assertJsonPath('data.direct_add_count', 1)
@@ -184,7 +184,7 @@ class InvitationSystemTest extends TestCase
 
         $this->postJson("/api/projets/{$this->projet->id}/invitations", [
             'emails' => [$externalEmail],
-            'role' => 'member',
+            'role' => 'collaborateur',
             'can_edit' => true,
         ])->assertOk()
             ->assertJsonPath('data.invitation_count', 1);
@@ -208,7 +208,7 @@ class InvitationSystemTest extends TestCase
 
         $this->postJson("/api/projets/{$this->projet->id}/invitations", [
             'emails' => [$externalEmail],
-            'role' => 'admin',
+            'role' => 'cadre',
             'can_edit' => true,
             'can_delete' => true,
             'can_invite' => true,
@@ -296,7 +296,7 @@ class InvitationSystemTest extends TestCase
         // Le contrôleur retourne 422 quand tous les destinataires sont en erreur
         $this->postJson("/api/projets/{$this->projet->id}/invitations", [
             'emails' => [$this->owner->email],
-            'role' => 'member',
+            'role' => 'collaborateur',
         ])->assertStatus(422)
             ->assertJsonPath('data.error_count', 1)
             ->assertJsonPath('data.success_count', 0);

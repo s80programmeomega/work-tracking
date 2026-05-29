@@ -11,6 +11,7 @@ use App\Models\Tache;
 use App\Models\User;
 use App\Models\Workspace;
 use App\Notifications\DocumentDeletedNotification;
+use App\Notifications\DocumentPermissionGrantedNotification;
 use App\Notifications\DocumentSharedNotification;
 use App\Notifications\DocumentUploadedNotification;
 use App\Permissions\ContextualPermissionGate;
@@ -141,27 +142,38 @@ class DocumentController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+        $maxMB = (int) round(config('documents.max_file_size', 10240) / 1024);
+
         $request->validate([
             'documentable_type' => 'required|string',
             'documentable_id' => 'required|integer',
-            'files' => 'required|array',
-            'files.*' => 'required|file|max:'.config('documents.max_file_size', 10240),
+            'files' => 'required|array|min:1',
+            'files.*' => 'file|max:'.config('documents.max_file_size', 10240),
             'description' => 'sometimes|string|max:1000',
             'visibility' => 'sometimes|in:private,team,public',
             'disk' => 'sometimes|string',
             'allow_duplicates' => 'sometimes|boolean',
             'custom_metadata' => 'sometimes|array',
+        ], [
+            'files.required' => 'Veuillez sélectionner au moins un fichier.',
+            'files.min' => 'Veuillez sélectionner au moins un fichier.',
+            'files.*.file' => 'Le fichier ":attribute" n\'est pas un fichier valide.',
+            'files.*.max' => "Le fichier \":attribute\" dépasse la taille maximale de {$maxMB} MB.",
+            'description.max' => 'La description ne peut pas dépasser 1000 caractères.',
+            'visibility.in' => 'La visibilité doit être "privé", "équipe" ou "public".',
         ]);
 
-        try {
-            $user = $request->user();
-            $files = $request->file('files');
+        $user = $request->user();
 
-            // Upload permission checked via DocumentAccessResolver
-            abort_unless(
-                app(DocumentAccessResolver::class)->canUpload($user, $request->documentable_type, $request->documentable_id),
-                403
-            );
+        if (! app(DocumentAccessResolver::class)->canUpload($user, $request->documentable_type, $request->documentable_id)) {
+            return response()->json([
+                'success' => false,
+                'message' => "Vous n'avez pas la permission d'uploader des documents ici",
+            ], 403);
+        }
+
+        try {
+            $files = $request->file('files');
 
             $options = [
                 'description' => $request->description,
@@ -377,13 +389,20 @@ class DocumentController extends Controller
             'file' => 'required|file|max:'.config('documents.max_file_size', 10240),
         ]);
 
-        try {
-            $this->authorize('update', $document);
+        $user = $request->user();
 
+        if (! app(DocumentAccessResolver::class)->canEdit($user, $document)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous n\'avez pas la permission de créer une nouvelle version',
+            ], 403);
+        }
+
+        try {
             $newVersion = $this->documentService->createVersion(
                 $document,
                 $request->file('file'),
-                $request->user()
+                $user
             );
 
             return response()->json([
@@ -391,11 +410,6 @@ class DocumentController extends Controller
                 'message' => 'Nouvelle version créée avec succès',
                 'data' => new DocumentResource($newVersion),
             ], 201);
-        } catch (AuthorizationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Vous n\'avez pas la permission de créer une nouvelle version',
-            ], 403);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -424,7 +438,8 @@ class DocumentController extends Controller
                 ->orderByDesc('version')
                 ->get();
 
-            // Ajouter le document actuel
+            // Ajouter le document actuel avec son user chargé
+            $document->loadMissing('user:id,nom,email,avatar');
             $versions->prepend($document);
 
             return response()->json([
@@ -754,11 +769,15 @@ class DocumentController extends Controller
             'can_edit' => 'sometimes|boolean',
             'can_delete' => 'sometimes|boolean',
             'can_share' => 'sometimes|boolean',
-            'expires_at' => 'sometimes|date|after:now',
+            'expires_at' => 'sometimes|nullable|date|after:today|before:+5 years',
+        ], [
+            'expires_at.date' => 'La date d\'expiration est invalide.',
+            'expires_at.after' => 'La date d\'expiration doit être dans le futur.',
+            'expires_at.before' => 'La date d\'expiration ne peut pas dépasser 5 ans.',
         ]);
 
         try {
-            $this->authorize('update', $document);
+            $this->authorize('share', $document);
 
             $targetUser = User::findOrFail($request->user_id);
 
@@ -768,6 +787,8 @@ class DocumentController extends Controller
                 $request->only(['can_view', 'can_download', 'can_edit', 'can_delete', 'can_share']),
                 $request->expires_at ? new \DateTime($request->expires_at) : null
             );
+
+            $targetUser->notify(new DocumentPermissionGrantedNotification($document, $request->user()));
 
             return response()->json([
                 'success' => true,
@@ -792,7 +813,7 @@ class DocumentController extends Controller
         ]);
 
         try {
-            $this->authorize('update', $document);
+            $this->authorize('share', $document);
 
             $targetUser = User::findOrFail($request->user_id);
 

@@ -124,7 +124,7 @@ const handleFileSelect = async (event) => {
   try {
     await api.post(`/taches/${props.tache.id}/attachments`, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data'
+        
       }
     });
     

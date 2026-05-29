@@ -79,9 +79,6 @@ export function useDocuments() {
             }
 
             const response = await api.post('/documents', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
                 onUploadProgress: (progressEvent) => {
                     uploadProgress.value = Math.round(
                         (progressEvent.loaded * 100) / progressEvent.total
@@ -98,7 +95,20 @@ export function useDocuments() {
 
             return response.data;
         } catch (err) {
-            error.value = err.response?.data?.message || 'Erreur lors du téléchargement';
+            if (err.response?.status === 422 && err.response?.data?.errors) {
+                const fileList = Array.isArray(files) ? files : [files];
+                const messages = Object.entries(err.response.data.errors).flatMap(([key, msgs]) => {
+                    const match = key.match(/^files\.(\d+)$/);
+                    if (match) {
+                        const name = fileList[parseInt(match[1])]?.name ?? `Fichier ${parseInt(match[1]) + 1}`;
+                        return msgs.map((m) => `${name} : ${m}`);
+                    }
+                    return msgs;
+                });
+                error.value = messages.join('\n');
+            } else {
+                error.value = err.response?.data?.message || 'Erreur lors du téléchargement';
+            }
             throw err;
         } finally {
             uploading.value = false;
@@ -211,7 +221,7 @@ export function useDocuments() {
 
             const response = await api.post(`/documents/${documentId}/versions`, formData, {
                 headers: {
-                    'Content-Type': 'multipart/form-data',
+                    
                 },
                 onUploadProgress: (progressEvent) => {
                     uploadProgress.value = Math.round(

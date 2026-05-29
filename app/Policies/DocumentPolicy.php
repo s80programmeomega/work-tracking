@@ -55,6 +55,10 @@ class DocumentPolicy
 
     public function share(User $user, Document $document): bool
     {
+        if ($document->uploaded_by === $user->id || $document->user_id === $user->id) {
+            return true;
+        }
+
         $resource = $document->documentable;
         if (! $resource) {
             return false;

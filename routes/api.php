@@ -48,24 +48,16 @@ Route::prefix('auth')->group(function () {
 
 // Routes publiques pour les invitations (pas besoin d'authentification)
 Route::prefix('workspace-invitations')->group(function () {
-    // Vérifier une invitation
-    Route::get('/{token}', [WorkspaceController::class, 'checkInvitation']);
-
-    // Accepter une invitation
-    Route::post('/{token}/accept', [WorkspaceController::class, 'acceptInvitation']);
-
-    // Routes admin (nécessitent une authentification)
+    // Routes statiques authentifiées — doivent précéder les routes wildcard /{token}
     Route::middleware('auth:sanctum')->group(function () {
-        // Récupérer toutes les invitations (pour les admins)
         Route::get('/all', [WorkspaceController::class, 'allInvitations']);
-
-        // ✅ Refuser une invitation (authentifié)
-        Route::delete('/workspace-invitations/{invitation}', [WorkspaceController::class, 'declineInvitation']);
-
-        // Statistiques des invitations
         Route::get('/statistics', [WorkspaceController::class, 'invitationStatistics']);
+        Route::delete('/workspace-invitations/{invitation}', [WorkspaceController::class, 'declineInvitation']);
     });
 
+    // Routes dynamiques publiques
+    Route::get('/{token}', [WorkspaceController::class, 'checkInvitation']);
+    Route::post('/{token}/accept', [WorkspaceController::class, 'acceptInvitation']);
 });
 
 // Public routes (pas besoin d'authentification)
@@ -89,9 +81,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/stats', [AdminController::class, 'stats'])->name('admin.stats');
         Route::get('/workspaces', [AdminController::class, 'workspaces'])->name('admin.workspaces');
         Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
+        Route::patch('/users/{user}/role', [AdminController::class, 'updateUserRole'])->name('admin.users.update-role');
         Route::post('/workspaces/{workspace}/extend-trial', [AdminController::class, 'extendTrial'])->name('admin.workspaces.extend-trial');
         Route::post('/workspaces/{workspace}/suspend', [AdminController::class, 'suspendWorkspace'])->name('admin.workspaces.suspend');
         Route::post('/workspaces/{workspace}/reactivate', [AdminController::class, 'reactivateWorkspace'])->name('admin.workspaces.reactivate');
+        Route::get('/roles', [AdminController::class, 'roles'])->name('admin.roles');
+        Route::patch('/roles/{role}/permissions', [AdminController::class, 'syncRolePermissions'])->name('admin.roles.sync-permissions');
     });
 
     // Dashboard routes
@@ -228,11 +223,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Activity Management Routes
     Route::prefix('activites')->group(function () {
 
-        // ✅ Routes PUBLIQUES (accessibles à tous les utilisateurs authentifiés)
-        Route::get('/mes-activites', [ActiviteController::class, 'myActivites']); // Mes activités
-        Route::get('/my-activites', [ActiviteController::class, 'myActivites']); // Alias
-        Route::get('/en-retard', [ActiviteController::class, 'enRetard']); // Activités en retard
-        Route::get('/projet/{projetId}', [ActiviteController::class, 'forProjet']); // Par projet
+        // ✅ Routes statiques — doivent précéder les routes wildcard /{activite}
+        Route::get('/mes-activites', [ActiviteController::class, 'myActivites']);
+        Route::get('/my-activites', [ActiviteController::class, 'myActivites']);
+        Route::get('/en-retard', [ActiviteController::class, 'enRetard']);
+        Route::get('/projet/{projetId}', [ActiviteController::class, 'forProjet']);
+        Route::get('/available-members/{projetId}', [ActiviteController::class, 'availableMembers']);
+        Route::get('/all/activity', [ActiviteController::class, 'index']);
+        Route::post('/reorder', [ActiviteController::class, 'reorder']);
 
         // CRUD de base
         Route::post('/', [ActiviteController::class, 'store']);
@@ -241,15 +239,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('/{activite}', [ActiviteController::class, 'destroy']);
         Route::put('/{activite}/change-responsable', [ActiviteController::class, 'changeResponsable']);
 
-        // Actions
+        // Actions sur une activité spécifique
         Route::post('/{activite}/archive', [ActiviteController::class, 'archive']);
         Route::post('/{activite}/unarchive', [ActiviteController::class, 'unarchive']);
         Route::post('/{activite}/toggle-archive', [ActiviteController::class, 'toggleArchive']);
         Route::post('/{activite}/duplicate', [ActiviteController::class, 'duplicate']);
-        Route::post('/reorder', [ActiviteController::class, 'reorder']);
-
-        // Available members for projet
-        Route::get('/available-members/{projetId}', [ActiviteController::class, 'availableMembers']);
 
         // Membres d'une activité spécifique
         Route::get('/{activite}/membres', [ActiviteController::class, 'membres']);
@@ -264,13 +258,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         // Tâches de l'activité
         Route::get('/{activite}/taches', [ActiviteController::class, 'getTaches']);
-
-        // List and filter
-        // Route::middleware(['super_admin'])->group(function () {
-        Route::get('/all/activity', [ActiviteController::class, 'index']); // Toutes les activités (Super Admin)
-        // });
-
-        // ✅ NOUVEAU : Vue coordination (tâches par utilisateur)
         Route::get('/{activiteId}/taches-by-user', [TacheController::class, 'assignedByUser']);
     });
 
@@ -513,6 +500,36 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/workspace/{workspace}/stats', [DocumentController::class, 'workspaceStats'])->name('documents.workspace.stats');
 
         /**
+         * GET /api/documents/stats
+         * Statistiques globales des documents
+         */
+        Route::get('/stats', [DocumentController::class, 'globalStats'])->name('documents.global-stats');
+
+        /**
+         * GET /api/documents/hierarchy
+         * Récupère la hiérarchie d'une entité
+         */
+        Route::get('/hierarchy', [DocumentController::class, 'hierarchy'])->name('documents.hierarchy');
+
+        /**
+         * GET /api/documents/recent
+         * Documents récents de l'utilisateur
+         */
+        Route::get('/recent', [DocumentController::class, 'recent'])->name('documents.recent');
+
+        /**
+         * GET /api/documents/shared-with-me
+         * Documents partagés avec l'utilisateur
+         */
+        Route::get('/shared-with-me', [DocumentController::class, 'sharedWithMe'])->name('documents.shared-with-me');
+
+        /**
+         * GET /api/documents/my-documents
+         * Documents créés par l'utilisateur
+         */
+        Route::get('/my-documents', [DocumentController::class, 'myDocuments'])->name('documents.my-documents');
+
+        /**
          * POST /api/documents
          * Upload un ou plusieurs documents
          * Body: files[], documentable_type, documentable_id, description, visibility, disk
@@ -544,36 +561,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
          * Télécharge un document
          */
         Route::get('/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
-
-        /**
-         * GET /api/documents/stats
-         * Statistiques globales des documents
-         */
-        Route::get('/stats', [DocumentController::class, 'globalStats'])->name('documents.global-stats');
-
-        /**
-         * GET /api/documents/hierarchy
-         * Récupère la hiérarchie d'une entité
-         */
-        Route::get('/hierarchy', [DocumentController::class, 'hierarchy'])->name('documents.hierarchy');
-
-        /**
-         * GET /api/documents/recent
-         * Documents récents de l'utilisateur
-         */
-        Route::get('/recent', [DocumentController::class, 'recent'])->name('documents.recent');
-
-        /**
-         * GET /api/documents/shared-with-me
-         * Documents partagés avec l'utilisateur
-         */
-        Route::get('/shared-with-me', [DocumentController::class, 'sharedWithMe'])->name('documents.shared-with-me');
-
-        /**
-         * GET /api/documents/my-documents
-         * Documents créés par l'utilisateur
-         */
-        Route::get('/my-documents', [DocumentController::class, 'myDocuments'])->name('documents.my-documents');
 
         /**
          * POST /api/documents/{document}/versions
@@ -716,8 +703,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Comment Management Routes
     Route::prefix('comments')->group(function () {
-        // List comments for an entity
+        // Routes statiques — doivent précéder les routes wildcard /{comment}
         Route::get('/', [CommentController::class, 'index']);
+        Route::get('/mentions/unread', [CommentController::class, 'unreadMentions']);
+        Route::post('/mentions/mark-read', [CommentController::class, 'markMentionsAsRead']);
 
         // CRUD operations
         Route::post('/', [CommentController::class, 'store']);
@@ -731,10 +720,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Attachments
         Route::post('/{comment}/attachments', [CommentController::class, 'addAttachment']);
         Route::delete('/{comment}/attachments/{attachment}', [CommentController::class, 'deleteAttachment']);
-
-        // Mentions
-        Route::get('/mentions/unread', [CommentController::class, 'unreadMentions']);
-        Route::post('/mentions/mark-read', [CommentController::class, 'markMentionsAsRead']);
     });
 
     // Activity Log Routes

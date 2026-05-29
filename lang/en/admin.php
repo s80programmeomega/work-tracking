@@ -23,6 +23,13 @@ return [
         'title' => 'User Management',
         'last_login' => 'Last Login',
         'workspace' => 'Current Workspace',
+        'role_updated' => 'User role updated successfully.',
+    ],
+    'roles' => [
+        'title' => 'Roles & Permissions',
+        'permissions_updated' => 'Permissions updated successfully.',
+        'global' => 'Global',
+        'contextual' => 'Contextual',
     ],
     'actions' => [
         'extend_trial' => 'Extend Trial',

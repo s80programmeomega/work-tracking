@@ -455,12 +455,19 @@ class DocumentAccessResolver
             return false;
         }
 
-        // Owner du workspace
         if ($workspace->owner_id === $user->id) {
             return true;
         }
 
-        return $workspace->isOwnerOrAdmin($user);
+        // Directeur (rôle global) peut uploader s'il est membre du workspace
+        if ($user->hasRole('directeur') && $workspace->isMember($user)) {
+            return true;
+        }
+
+        // Rôles cadre et au-dessus (owner, manager, cadre, task_responsable)
+        $roleName = $workspace->getMemberRole($user);
+
+        return in_array($roleName, ['owner', 'manager', 'cadre', 'task_responsable']);
     }
 
     protected function canUploadToProjet(User $user, int $projetId): bool
@@ -508,10 +515,8 @@ class DocumentAccessResolver
             return true;
         }
 
-        // Membre de l'activité avec permission can_edit_activity
-        $member = $activite->membres()->where('user_id', $user->id)->first();
-
-        return $member && ($member->pivot->can_edit_activity ?? false);
+        // Tout membre de l'activité peut uploader des documents
+        return $activite->membres()->where('user_id', $user->id)->exists();
     }
 
     protected function canUploadToTache(User $user, int $tacheId): bool

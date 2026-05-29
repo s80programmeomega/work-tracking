@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\Role as RoleEnum;
 use App\Http\Controllers\Controller;
+use App\Models\Activite;
+use App\Models\Projet;
+use App\Models\Tache;
 use App\Models\User;
 use App\Models\Workspace;
 use App\Notifications\TrialExtendedNotification;
@@ -13,6 +17,9 @@ use App\Services\SubscriptionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class AdminController extends Controller
 {
@@ -28,8 +35,6 @@ class AdminController extends Controller
 
         $trialWorkspaces = Workspace::where('subscription_mode', 'trial')->count();
         $paidWorkspaces = Workspace::where('subscription_mode', 'paid')->count();
-
-        $warningDays = config('subscription.expiry_warning_days', 7);
 
         $expiredTrials = Workspace::where('subscription_mode', 'trial')
             ->whereNotNull('trial_started_at')
@@ -47,6 +52,24 @@ class AdminController extends Controller
         $activeUsers = User::whereNotNull('last_login_at')
             ->where('last_login_at', '>=', now()->subDays(30))
             ->count();
+        $superAdmins = User::where('is_super_admin', true)->count();
+        $newUsersLast7Days = User::where('created_at', '>=', now()->subDays(7))->count();
+
+        // Task statistics
+        $taskStatsByStatus = Tache::query()
+            ->selectRaw('statut, COUNT(*) as total')
+            ->groupBy('statut')
+            ->pluck('total', 'statut')
+            ->toArray();
+
+        $totalTasks = array_sum($taskStatsByStatus);
+        $overdueTasks = Tache::where('statut', 'en_retard')->count();
+        $criticalTasks = Tache::where('priorite', 'critique')
+            ->whereNotIn('statut', ['termine', 'annule'])
+            ->count();
+
+        $totalProjects = Projet::count();
+        $totalActivities = Activite::count();
 
         // 10 most recently created workspaces with owner info
         $recentWorkspaces = Workspace::with(['owner:id,nom,email'])
@@ -63,6 +86,17 @@ class AdminController extends Controller
                 'subscription' => $this->subscriptionService->summary($w),
             ]);
 
+        // Growth data: new workspaces + users per day for last 7 days
+        $growth = collect(range(6, 0))->map(function (int $daysAgo) {
+            $date = now()->subDays($daysAgo)->toDateString();
+
+            return [
+                'date' => $date,
+                'new_workspaces' => Workspace::whereDate('created_at', $date)->count(),
+                'new_users' => User::whereDate('created_at', $date)->count(),
+            ];
+        })->values();
+
         return response()->json([
             'data' => [
                 'workspaces' => [
@@ -76,7 +110,22 @@ class AdminController extends Controller
                 'users' => [
                     'total' => $totalUsers,
                     'active_last_30_days' => $activeUsers,
+                    'super_admins' => $superAdmins,
+                    'new_last_7_days' => $newUsersLast7Days,
                 ],
+                'tasks' => [
+                    'total' => $totalTasks,
+                    'by_status' => $taskStatsByStatus,
+                    'overdue' => $overdueTasks,
+                    'critical' => $criticalTasks,
+                ],
+                'projects' => [
+                    'total' => $totalProjects,
+                ],
+                'activities' => [
+                    'total' => $totalActivities,
+                ],
+                'growth' => $growth,
                 'recent_workspaces' => $recentWorkspaces,
             ],
         ]);
@@ -220,5 +269,115 @@ class AdminController extends Controller
         ]);
 
         return response()->json(['message' => __('admin.actions.workspace_reactivated')]);
+    }
+
+    /**
+     * List all roles with their permissions, grouped by module.
+     */
+    public function roles(): JsonResponse
+    {
+        $allPermissions = Permission::where('guard_name', 'web')
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        // Group permissions by their module prefix (e.g. "taches.view" → "taches")
+        $grouped = $allPermissions->groupBy(fn (Permission $p) => explode('.', $p->name)[0]);
+
+        $roles = Role::with('permissions')
+            ->where('guard_name', 'web')
+            ->orderBy('priority')
+            ->orderBy('name')
+            ->get()
+            ->map(fn (Role $role) => [
+                'id' => $role->id,
+                'name' => $role->name,
+                'is_global' => in_array($role->name, array_column(RoleEnum::cases(), 'value')),
+                'priority' => $role->priority,
+                'permissions' => $role->permissions->pluck('name')->values(),
+            ]);
+
+        return response()->json([
+            'data' => [
+                'roles' => $roles,
+                'permissions_grouped' => $grouped->map(fn ($perms, $module) => [
+                    'module' => $module,
+                    'permissions' => $perms->values()->map(fn (Permission $p) => [
+                        'id' => $p->id,
+                        'name' => $p->name,
+                    ]),
+                ])->values(),
+                'all_permissions' => $allPermissions->pluck('name')->values(),
+            ],
+        ]);
+    }
+
+    /**
+     * Sync the permissions assigned to a role.
+     */
+    public function syncRolePermissions(Request $request, Role $role): JsonResponse
+    {
+        $validated = $request->validate([
+            'permissions' => 'required|array',
+            'permissions.*' => 'string|exists:permissions,name',
+        ]);
+
+        $permissions = Permission::whereIn('name', $validated['permissions'])
+            ->where('guard_name', 'web')
+            ->get();
+
+        $role->syncPermissions($permissions);
+
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
+        Log::info('Permissions de rôle mises à jour par super-admin', [
+            'admin_id' => $request->user()->id,
+            'role' => $role->name,
+            'permission_count' => $permissions->count(),
+        ]);
+
+        return response()->json([
+            'data' => [
+                'role' => $role->name,
+                'permissions' => $role->fresh('permissions')->permissions->pluck('name')->values(),
+            ],
+            'message' => __('admin.roles.permissions_updated'),
+        ]);
+    }
+
+    /**
+     * Update the global Spatie role of a user (super_admin, directeur, utilisateur).
+     */
+    public function updateUserRole(Request $request, User $user): JsonResponse
+    {
+        $validated = $request->validate([
+            'role' => ['required', 'string', 'in:'.implode(',', array_column(RoleEnum::cases(), 'value'))],
+            'is_super_admin' => 'sometimes|boolean',
+        ]);
+
+        $user->syncRoles([$validated['role']]);
+
+        if (isset($validated['is_super_admin'])) {
+            $user->update(['is_super_admin' => $validated['is_super_admin']]);
+        }
+
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
+        Log::info('Rôle utilisateur modifié par super-admin', [
+            'admin_id' => $request->user()->id,
+            'target_user_id' => $user->id,
+            'new_role' => $validated['role'],
+            'is_super_admin' => $validated['is_super_admin'] ?? null,
+        ]);
+
+        return response()->json([
+            'data' => [
+                'id' => $user->id,
+                'nom' => $user->nom,
+                'email' => $user->email,
+                'roles' => $user->fresh()->getRoleNames(),
+                'is_super_admin' => $user->fresh()->is_super_admin,
+            ],
+            'message' => __('admin.users.role_updated'),
+        ]);
     }
 }

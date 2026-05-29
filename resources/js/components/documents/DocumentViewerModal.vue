@@ -1,18 +1,6 @@
 <template>
   <TransitionRoot as="template" :show="true">
     <Dialog as="div" class="relative z-50" @close="$emit('close')">
-      <TransitionChild
-        as="template"
-        enter="ease-out duration-300"
-        enter-from="opacity-0"
-        enter-to="opacity-100"
-        leave="ease-in duration-200"
-        leave-from="opacity-100"
-        leave-to="opacity-0"
-      >
-        <div class="fixed inset-0 bg-gray-900 bg-opacity-90 transition-opacity" />
-      </TransitionChild>
-
       <div class="fixed inset-0 z-10 overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-4">
           <TransitionChild
@@ -38,7 +26,7 @@
                   </div>
                   <div class="flex items-center gap-2">
                     <button
-                      @click="$emit('download')"
+                      @click="$emit('download', document)"
                       class="rounded-3 p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
                       title="Télécharger"
                     >
@@ -105,7 +93,7 @@
                       Ce type de fichier ne peut pas être prévisualisé
                     </p>
                     <button
-                      @click="$emit('download')"
+                      @click="$emit('download', document)"
                       class="mt-6 inline-flex items-center gap-2 rounded-3 bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
                     >
                       <ArrowDownTrayIcon class="h-5 w-5" />
@@ -133,9 +121,17 @@
                           <dt class="text-gray-500 dark:text-gray-400">Taille</dt>
                           <dd class="font-medium text-gray-900 dark:text-white">{{ document.formatted_size }}</dd>
                         </div>
-                        <div class="flex justify-between text-sm">
+                        <div class="flex justify-between text-sm items-center">
                           <dt class="text-gray-500 dark:text-gray-400">Version</dt>
-                          <dd class="font-medium text-gray-900 dark:text-white">v{{ document.version }}</dd>
+                          <dd class="flex items-center gap-2">
+                            <span class="font-medium text-gray-900 dark:text-white">v{{ document.version }}</span>
+                            <button
+                              @click="$emit('version', document)"
+                              class="text-xs text-blue-600 hover:underline dark:text-blue-400"
+                            >
+                              Gérer
+                            </button>
+                          </dd>
                         </div>
                         <div class="flex justify-between text-sm">
                           <dt class="text-gray-500 dark:text-gray-400">Téléchargements</dt>
@@ -232,7 +228,7 @@ const props = defineProps({
   }
 })
 
-defineEmits(['close', 'download'])
+defineEmits(['close', 'download', 'version'])
 
 const getFileIcon = (document) => {
   const mimeType = document.mime_type

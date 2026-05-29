@@ -22,9 +22,25 @@ class RolePermissionSeeder extends Seeder
             Permission::firstOrCreate(['name' => $permName, 'guard_name' => 'web']);
         }
 
-        // ── 2. Global Spatie roles (assigned to user accounts) ────────────
+        // ── 2. Role priority map (single source of truth) ────────────────
+        $rolePriorities = [
+            'super_admin' => 1,
+            'directeur' => 2,
+            'owner' => 3,
+            'manager' => 4,
+            'cadre' => 5,
+            'task_responsable' => 5,
+            'collaborateur' => 6,
+            'stagiaire' => 6,
+            'observateur' => 7,
+            'utilisateur' => 8,
+        ];
+
+        // ── 3. Global Spatie roles (assigned to user accounts) ────────────
         foreach (RoleEnum::cases() as $roleEnum) {
             $role = Role::firstOrCreate(['name' => $roleEnum->value, 'guard_name' => 'web']);
+            $role->priority = $rolePriorities[$roleEnum->value] ?? 99;
+            $role->save();
 
             $rolePermissions = $roleEnum->permissions();
 
@@ -37,13 +53,16 @@ class RolePermissionSeeder extends Seeder
             }
         }
 
-        // ── 3. Contextual roles (stored in pivot role_id — scoped per resource) ──
+        // ── 4. Contextual roles (stored in pivot role_id — scoped per resource) ──
         // These are Spatie roles but are NEVER assigned globally to users.
         // They live in pivot tables: workspace_members.role_id, projet_user.role_id, etc.
         $contextualRoles = ['owner', 'manager', 'cadre', 'collaborateur', 'stagiaire', 'observateur', 'task_responsable'];
 
         foreach ($contextualRoles as $roleName) {
             $role = Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
+            $role->priority = $rolePriorities[$roleName] ?? 99;
+            $role->save();
+
             $permNames = Perm::forRole($roleName);
 
             $role->syncPermissions(

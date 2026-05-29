@@ -46,26 +46,9 @@ class ProjetService
             }
 
             $query->inWorkspace($workspace->id);
-
-            if (! ($user->isSuperAdmin() || $workspace->owner_id === $user->id || $this->isWorkspaceAdmin($user, $workspace))) {
-                $query->where(function ($q) use ($user) {
-                    $q->where('responsable_id', $user->id)
-                        ->orWhereHas('members', fn ($m) => $m->where('user_id', $user->id));
-                });
-            }
-        } elseif (! $user->isSuperAdmin()) {
-            // Non-super_admin: filter to accessible workspaces only
-            $query->where(function ($q) use ($user) {
-                $q->where('responsable_id', $user->id)
-                    ->orWhereHas('members', fn ($m) => $m->where('user_id', $user->id))
-                    ->orWhereHas('workspace', fn ($w) => $w->where('owner_id', $user->id)
-                        ->orWhereHas('members', fn ($m) => $m->where('user_id', $user->id)
-                            ->whereIn('role_id', function ($r) {
-                                $r->select('id')->from('roles')->whereIn('name', ['owner', 'manager']);
-                            })));
-            });
         }
-        // super_admin with no workspace_id filter: see all projects
+
+        $query->visibleTo($user);
 
         $this->applyFilters($query, $filters);
 

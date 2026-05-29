@@ -62,9 +62,7 @@ export const usersAPI = {
       Object.keys(profileData).forEach(key => {
         formData.append(key, profileData[key])
       })
-      return api.post('/users/profile', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      })
+      return api.post('/users/profile', formData)
     }
 
     return api.put('/users/profile', profileData)

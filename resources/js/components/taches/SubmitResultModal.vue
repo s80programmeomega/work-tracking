@@ -687,7 +687,7 @@ async function handleSubmit() {
 
     await api.post(`/taches/${props.tache.id}/submit-my-result`, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data'
+        
       }
     })
 

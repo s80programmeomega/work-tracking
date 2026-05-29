@@ -271,7 +271,7 @@ const handleFileUpload = async (event) => {
 
     await api.post(`/taches/${props.tacheId}/attachments`, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data'
+        
       },
       onUploadProgress: (progressEvent) => {
         uploadProgress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)

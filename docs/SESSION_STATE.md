@@ -16,30 +16,40 @@
 
 ## Current Session
 
-**Date:** 2026-05-26
-**Session goal:** UX polish — inline editing on task detail views + subtasks
-**Status:** Complete. No new backend changes. Ready to commit.
+**Date:** 2026-05-28
+**Session goal:** Document management polish — version management, sharing, permissions, notifications, push
+**Branch:** `feature/design-system-v1`
+**Status:** Complete — ready to push.
 
 ---
 
 ## Current Task
 
-**Task:** UX Polish — Inline editing (task detail + subtasks)
-**Branch:** `feature/v2-task-16-export`
-**Status:** Complete — awaiting commit + push.
+**Task:** Document management polish + notification fixes
+**Branch:** `feature/design-system-v1`
+**Status:** Complete — awaiting push.
 
 **What was done this session:**
-- Fixed modal state machine in `Taches.vue` (showForm / showViewModal mutual exclusion)
-- `TacheDetailModal.vue` (view 1): inline editing for titre, statut, priorite, echeance (DatePicker), description, objectif, indicateurs_resultats, taux_realisation; removed "Modifier" footer button
-- `QuickActionsPanel.vue`: removed "Modifier" button
-- `DetailedTaskView.vue` (view 2 — hamburger → tabbed): same inline fields; Escape global handler; Tailwind v4 fixes (`flex-shrink-0` → `shrink-0`)
-- `TacheDetailsTab.vue` + `TacheDetail.vue` (view 3 — full page `/taches/:id`): inline editing for all fields using `permissions.can_update`; header inline editing for titre/statut/priorite/echeance; DatePicker for echeance
-- All 4 views: global `keydown` Escape listener to cancel active edit (works for DatePicker inline calendar too)
-- `SousTacheList.vue`: per-field inline editing for titre, statut, description, progression (slider+number), date_echeance (DatePicker); replaced expand-panel approach; ⋮ menu reduced to delete only; Escape handler
+- `DocumentVersionModal.vue`: renamed title to "Gérer les versions", reordered layout (version history first, upload form below), added per-version download buttons, added per-version delete (hidden on latest version)
+- `DocumentCard.vue`: renamed dropdown item "Nouvelle version" → "Gérer les versions"
+- `app.css`: fixed dark mode white margins — added `dark:bg-gray-900` to body
+- `DocumentAccessResolver::canUploadToWorkspace`: broadened from owner-only to cadre-and-above (`['owner', 'manager', 'cadre', 'task_responsable']` + directeur)
+- `axios.js`: 403 interceptor now only redirects on GET requests (not on POST/PUT/DELETE actions)
+- `DocumentShareModal.vue`: date field changed from datetime-local to date-only, made optional (`nullable`), added `:min="today"` and `:max="maxDate"` (5-year cap), smart user search passes `document_id` to exclude privileged users and badge entity members as "Déjà membre"
+- `UserController::search`: enriched with optional `document_id` param — excludes super_admin/directeur/owner/uploader, adds `is_member` flag per result; added `resolveEntityContext` private method
+- `AddMemberModal.vue` + `EditMemberPermissionsModal.vue`: fixed role values from English (`collaborator`/`viewer`) to French (`collaborateur`/`observateur`), added `cadre`/`stagiaire` options
+- `DocumentService::grantPermission` + `revokePermission`: fixed — was calling non-existent Spatie methods on Document model; now uses `DocumentPermission::updateOrCreate/delete` directly
+- `DocumentPermissionGrantedNotification`: new notification (database + mail + push via `channelsFor`) fired after `grantPermission`; has `toWebPush()` with proper title/body
+- `NotificationService`: added `document_shared` to both `wantsEmail` and `wantsWebPush` (high-signal)
+- `WebPushChannel::buildPayload` fallback: improved field discovery (`document_nom`, `assigned_by`, `auteur_nom`, `shared_by`) + added `icon` to default payload
+- `Documents.vue`: `activeTab` now reads from `?tab=` query param (email link lands on "Partagés" tab)
+- `DocumentController::grantPermission`: added `before:+5 years` + `nullable` to `expires_at` validation with French error messages
+
+**Infrastructure note:** `php artisan webpush:generate-vapid` requires `ext-gmp` or `ext-bcmath`. Install with `sudo apt-get install php8.4-gmp`.
 
 **What to do next:**
-1. Commit `feature/v2-task-16-export` (user will say "ready")
-2. Push `feature/v2-task-16-export` to `origin`
+1. Investigate push notification reaching unintended users (deferred — may be in-app broadcast confusion, not a push bug)
+2. Continue with next planned task or client feedback
 
 ## Last Completed Task
 
@@ -299,3 +309,4 @@ Tests: 11 feature in `NotificationServiceTest` + 8 feature in `SendDailyDigestCo
 | 2026-05-26 | Task 15 | TacheTable.vue (table view + inline edit), Taches.vue (table default, assignee filter, deep-link), ActiviteDetail.vue shortcut, PATCH route, statut validation fix, 5 PHPUnit tests. 269 total, all green. |
 | 2026-05-26 | Task 16 | PDF export (GET /api/evaluations/personnel/{user}/export-pdf, Blade+DomPDF, A4 portrait, criteria bars), Excel export (GET /api/workspace/taches/export-excel, WorkspaceTachesExport, 10-col, blue header, filter-aware). AgentSheet.vue + WorkspaceTaches.vue buttons wired. 5 PHPUnit tests. 274 total, all green. |
 | 2026-05-26 | UX Polish | Inline editing on all 3 task detail views + SousTacheList. Modal state machine fix. DatePicker for echeance everywhere. Escape cancels any active edit (global keydown). No new backend changes. |
+| 2026-05-28 | Document polish + notification fixes | Version manager UX, cadre upload fix, dark mode margin, share modal date fix, smart user filtering, activite role values fix, DocumentService grantPermission/revokePermission fix, DocumentPermissionGrantedNotification + push toWebPush, WebPushChannel fallback improved, Documents.vue tab from query param, expires_at 5-year cap. PHP ext-gmp installed for Web Push. |

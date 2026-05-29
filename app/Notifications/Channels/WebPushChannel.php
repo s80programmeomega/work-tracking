@@ -82,14 +82,28 @@ class WebPushChannel
             return (array) $notification->toWebPush($notifiable);
         }
 
-        // Fallback : on dérive un payload minimal depuis toArray()
+        // Fallback : on dérive un payload lisible depuis toArray()
         $data = method_exists($notification, 'toArray') ? (array) $notification->toArray($notifiable) : [];
 
+        $title = $data['tache_titre']
+            ?? $data['title']
+            ?? $data['document_nom']
+            ?? $data['projet_nom']
+            ?? 'Notification';
+
+        $body = $data['message']
+            ?? $data['commentaire']
+            ?? $data['assigned_by']
+            ?? $data['auteur_nom']
+            ?? $data['shared_by']
+            ?? '';
+
         return [
-            'title' => $data['tache_titre'] ?? $data['title'] ?? 'Notification',
-            'body' => $data['message'] ?? $data['commentaire'] ?? '',
+            'title' => $title,
+            'body' => $body,
             'url' => $data['url'] ?? '/notifications',
             'tag' => $data['type'] ?? 'default',
+            'icon' => url('/favicon.ico'),
             'data' => $data,
         ];
     }

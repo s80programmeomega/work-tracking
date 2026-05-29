@@ -139,6 +139,7 @@
       :document="selectedDocument"
       @close="selectedDocument = null"
       @download="handleDownloadDocument"
+      @version="handleCreateVersion"
     />
 
     <document-edit-modal

@@ -133,8 +133,10 @@
                         <select v-model="memberPermissions[member.id].role" @change="handleRoleChange(member.id)"
                           @click.stop
                           class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500">
-                          <option value="collaborator">Collaborateur</option>
-                          <option value="viewer">Observateur</option>
+                          <option value="cadre">Cadre</option>
+                          <option value="collaborateur">Collaborateur</option>
+                          <option value="stagiaire">Stagiaire</option>
+                          <option value="observateur">Observateur</option>
                         </select>
                       </div>
                       
@@ -142,56 +144,56 @@
                       <div class="grid grid-cols-2 gap-2">
                         <label class="flex items-center gap-2 cursor-pointer" @click.stop>
                           <input v-model="memberPermissions[member.id].can_create_tasks" type="checkbox"
-                            :disabled="memberPermissions[member.id].role === 'viewer'"
+                            :disabled="memberPermissions[member.id].role === 'observateur'"
                             class="rounded border-gray-300 dark:border-gray-600 text-brand-600 focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             @click.stop />
                           <span class="text-xs text-gray-700 dark:text-gray-300"
-                            :class="memberPermissions[member.id].role === 'viewer' ? 'opacity-50' : ''">Créer tâches</span>
+                            :class="memberPermissions[member.id].role === 'observateur' ? 'opacity-50' : ''">Créer tâches</span>
                         </label>
 
                         <label class="flex items-center gap-2 cursor-pointer" @click.stop>
                           <input v-model="memberPermissions[member.id].can_edit_tasks" type="checkbox"
-                            :disabled="memberPermissions[member.id].role === 'viewer'"
+                            :disabled="memberPermissions[member.id].role === 'observateur'"
                             class="rounded border-gray-300 dark:border-gray-600 text-brand-600 focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             @click.stop />
                           <span class="text-xs text-gray-700 dark:text-gray-300"
-                            :class="memberPermissions[member.id].role === 'viewer' ? 'opacity-50' : ''">Modifier tâches</span>
+                            :class="memberPermissions[member.id].role === 'observateur' ? 'opacity-50' : ''">Modifier tâches</span>
                         </label>
 
                         <label class="flex items-center gap-2 cursor-pointer" @click.stop>
                           <input v-model="memberPermissions[member.id].can_delete_tasks" type="checkbox"
-                            :disabled="memberPermissions[member.id].role === 'viewer'"
+                            :disabled="memberPermissions[member.id].role === 'observateur'"
                             class="rounded border-gray-300 dark:border-gray-600 text-brand-600 focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             @click.stop />
                           <span class="text-xs text-gray-700 dark:text-gray-300"
-                            :class="memberPermissions[member.id].role === 'viewer' ? 'opacity-50' : ''">Supprimer tâches</span>
+                            :class="memberPermissions[member.id].role === 'observateur' ? 'opacity-50' : ''">Supprimer tâches</span>
                         </label>
 
                         <label class="flex items-center gap-2 cursor-pointer" @click.stop>
                           <input v-model="memberPermissions[member.id].can_validate_results" type="checkbox"
-                            :disabled="memberPermissions[member.id].role === 'viewer'"
+                            :disabled="memberPermissions[member.id].role === 'observateur'"
                             class="rounded border-gray-300 dark:border-gray-600 text-brand-600 focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             @click.stop />
                           <span class="text-xs text-gray-700 dark:text-gray-300"
-                            :class="memberPermissions[member.id].role === 'viewer' ? 'opacity-50' : ''">Valider les
+                            :class="memberPermissions[member.id].role === 'observateur' ? 'opacity-50' : ''">Valider les
                             résultats de taches</span>
                         </label>
 
                         <label class="flex items-center gap-2 cursor-pointer col-span-2" @click.stop>
                           <input v-model="memberPermissions[member.id].can_assign_users" type="checkbox"
-                            :disabled="memberPermissions[member.id].role === 'viewer'"
+                            :disabled="memberPermissions[member.id].role === 'observateur'"
                             class="rounded border-gray-300 dark:border-gray-600 text-brand-600 focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             @click.stop />
                           <span class="text-xs text-gray-700 dark:text-gray-300"
-                            :class="memberPermissions[member.id].role === 'viewer' ? 'opacity-50' : ''">Assigner membres</span>
+                            :class="memberPermissions[member.id].role === 'observateur' ? 'opacity-50' : ''">Assigner membres</span>
                         </label>
                         <label class="flex items-center gap-2 cursor-pointer col-span-2" @click.stop>
                           <input v-model="memberPermissions[member.id].can_delete_member" type="checkbox"
-                            :disabled="memberPermissions[member.id].role === 'viewer'"
+                            :disabled="memberPermissions[member.id].role === 'observateur'"
                             class="rounded border-gray-300 dark:border-gray-600 text-brand-600 focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             @click.stop />
                           <span class="text-xs text-gray-700 dark:text-gray-300"
-                            :class="memberPermissions[member.id].role === 'viewer' ? 'opacity-50' : ''">Supprimer membres</span>
+                            :class="memberPermissions[member.id].role === 'observateur' ? 'opacity-50' : ''">Supprimer membres</span>
                         </label>
                       </div>
 
@@ -296,7 +298,7 @@ const toggleMemberSelection = (member) => {
   } else {
     selectedMemberIds.value.push(member.id)
     memberPermissions.value[member.id] = {
-      role: 'collaborator',
+      role: 'collaborateur',
       can_create_tasks: false,
       can_edit_tasks: false,
       can_delete_tasks: false,
@@ -319,7 +321,7 @@ const removeMemberFromSelection = (memberId) => {
 watch(() => memberPermissions.value, (newPermissions) => {
   Object.keys(newPermissions).forEach(memberId => {
     const permissions = newPermissions[memberId];
-    if (permissions.role === 'viewer') {
+    if (permissions.role === 'observateur') {
       permissions.can_create_tasks = false;
       permissions.can_edit_tasks = false;
       permissions.can_delete_tasks = false;
@@ -332,7 +334,7 @@ watch(() => memberPermissions.value, (newPermissions) => {
 
 // ✅ CORRECTION : Gérer le changement de rôle individuel
 const handleRoleChange = (memberId) => {
-  if (memberPermissions.value[memberId]?.role === 'viewer') {
+  if (memberPermissions.value[memberId]?.role === 'observateur') {
     memberPermissions.value[memberId].can_create_tasks = false
     memberPermissions.value[memberId].can_edit_tasks = false
     memberPermissions.value[memberId].can_delete_tasks = false

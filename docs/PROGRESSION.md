@@ -37,6 +37,7 @@
 | 15 | Task List UX (table mode + activity shortcut) | `feature/v2-task-15-task-list-ux` | ✅ | 2026-05-26 | 2026-05-26 | 269 PHPUnit tests green. |
 | 16 | PDF/Excel Export (evaluation sheet + project/task) | `feature/v2-task-16-export` | ✅ | 2026-05-26 | 2026-05-26 | CDC gaps B.1 + ST.7/E.2. 274 PHPUnit tests green. |
 | — | CDC Hotfixes (R7 guard + audit-log endpoint + rate limiting + agent sheet §5) | `fix/cdc-hotfixes` | ✅ | 2026-05-26 | 2026-05-26 | Merged into `jonas` 2026-05-26. |
+| — | Document management polish + notification fixes | `feature/design-system-v1` | ✅ | 2026-05-28 | 2026-05-28 | Version manager UX, sharing fixes, push toWebPush, WebPushChannel fallback, cadre upload, role values, expires_at cap. |
 
 ---
 

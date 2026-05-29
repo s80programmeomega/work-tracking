@@ -21,9 +21,12 @@ api.interceptors.request.use(
             config.headers.Authorization = `Bearer ${token}`;
         }
 
-        // ✅ IMPORTANT: Ne pas forcer Content-Type si c'est FormData
-        // Axios le détecte automatiquement et ajoute le boundary
-        if (!(config.data instanceof FormData)) {
+        // Pour FormData, supprimer Content-Type pour que le navigateur
+        // le définisse automatiquement avec le boundary multipart correct.
+        // Axios 1.x convertit sinon FormData → JSON si Content-Type: application/json est présent.
+        if (config.data instanceof FormData) {
+            delete config.headers['Content-Type'];
+        } else {
             config.headers['Content-Type'] = 'application/json';
         }
         return config;
@@ -58,8 +61,9 @@ api.interceptors.response.use(
             }
         }
 
-        // 403 Forbidden - Insufficient permissions
-        if (error.response?.status === 403) {
+        // 403 Forbidden - rediriger uniquement pour les requêtes de navigation (GET)
+        // Les actions (POST/PUT/DELETE) gèrent l'erreur en local dans le composant appelant
+        if (error.response?.status === 403 && originalRequest.method?.toLowerCase() === 'get') {
             router.push('/unauthorized');
         }
 

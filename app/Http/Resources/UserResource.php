@@ -29,8 +29,8 @@ class UserResource extends JsonResource
             'current_workspace_id' => $this->current_workspace_id,
             'last_login_at' => $this->last_login_at?->toISOString(),
             'email_verified_at' => $this->email_verified_at?->toISOString(),
-            'created_at' => $this->created_at->toISOString(),
-            'updated_at' => $this->updated_at->toISOString(),
+            'created_at' => $this->created_at?->toISOString(),
+            'updated_at' => $this->updated_at?->toISOString(),
 
             // Relationships
             // TODO: Uncomment when Team model exists

@@ -633,24 +633,24 @@ const router = createRouter({
         requiresAuth: true,
       },
     },
-    // {
-    //   path: '/activites/:activiteId/documents',
-    //   name: 'ActiviteDocuments',
-    //   component: () => import('../pages/documents/ActiviteDocuments.vue'),
-    //   meta: {
-    //     title: 'Documents de l\'activité',
-    //     requiresAuth: true,
-    //   },
-    // },
-    // {
-    //   path: '/taches/:tacheId/documents',
-    //   name: 'TacheDocuments',
-    //   component: () => import('../pages/documents/TacheDocuments.vue'),
-    //   meta: {
-    //     title: 'Documents de la tâche',
-    //     requiresAuth: true,
-    //   },
-    // },
+    {
+      path: '/activites/:activiteId/documents',
+      name: 'ActiviteDocuments',
+      component: () => import('../pages/documents/ActiviteDocuments.vue'),
+      meta: {
+        title: 'Documents de l\'activité',
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/taches/:tacheId/documents',
+      name: 'TacheDocuments',
+      component: () => import('../pages/documents/TacheDocuments.vue'),
+      meta: {
+        title: 'Documents de la tâche',
+        requiresAuth: true,
+      },
+    },
     // ==========================================
     // PLATFORM ADMIN (super_admin only)
     // ==========================================
@@ -684,6 +684,16 @@ const router = createRouter({
       component: () => import('../pages/admin/AdminUsers.vue'),
       meta: {
         title: 'User Management',
+        requiresAuth: true,
+        requiresSuperAdmin: true,
+      },
+    },
+    {
+      path: '/admin/roles',
+      name: 'admin.roles',
+      component: () => import('../pages/admin/AdminRoles.vue'),
+      meta: {
+        title: 'Roles & Permissions',
         requiresAuth: true,
         requiresSuperAdmin: true,
       },

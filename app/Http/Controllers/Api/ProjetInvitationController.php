@@ -34,7 +34,7 @@ class ProjetInvitationController extends Controller
         $request->validate([
             'emails' => 'required|array|min:1',
             'emails.*' => 'required|email',
-            'role' => 'required|in:admin,member,viewer',
+            'role' => 'required|in:manager,cadre,collaborateur,stagiaire,observateur',
             'message' => 'nullable|string|max:500',
             'can_edit' => 'boolean',
             'can_delete' => 'boolean',
@@ -47,7 +47,7 @@ class ProjetInvitationController extends Controller
         ]);
 
         // ✅ Validation des permissions selon le rôle
-        if ($request->role === 'viewer') {
+        if ($request->role === 'observateur') {
             $request->merge([
                 'can_edit' => false,
                 'can_delete' => false,
@@ -57,7 +57,7 @@ class ProjetInvitationController extends Controller
                 'can_edit_activity' => false,
                 'can_delete_activity' => false,
             ]);
-        } elseif ($request->role === 'member') {
+        } elseif (in_array($request->role, ['collaborateur', 'stagiaire'])) {
             $request->merge([
                 'can_delete' => false,
                 'can_invite' => false,
@@ -371,8 +371,8 @@ class ProjetInvitationController extends Controller
                     'current_workspace_id' => $projet->workspace_id,
                 ]);
 
-                // Assigner le rôle par défaut
-                $user->assignRole('member');
+                // Assigner le rôle global par défaut
+                $user->assignRole('utilisateur');
 
                 // Accepter l'invitation
                 $invitation->accept($user);

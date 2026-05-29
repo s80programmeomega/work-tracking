@@ -110,6 +110,40 @@
                   </div>
                 </div>
               </div>
+
+              <!-- Visibility -->
+              <div class="flex items-center gap-3">
+                <div class="p-2 bg-gray-100 dark:bg-gray-700 rounded-3">
+                  <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">Visibilité</div>
+                  <span :class="['inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium', projetVisibilityClasses(projet.visibility)]">
+                    {{ projetVisibilityLabel(projet.visibility) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Linked teams -->
+            <div v-if="projet.teams?.length" class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Équipes liées</div>
+              <div class="flex flex-wrap gap-2">
+                <router-link
+                  v-for="team in projet.teams"
+                  :key="team.uuid"
+                  :to="{ name: 'teams.show', params: { uuid: team.uuid } }"
+                  class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-brand-50 text-brand-700 dark:bg-brand-900/20 dark:text-brand-400 hover:bg-brand-100 dark:hover:bg-brand-900/40 transition-colors"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  {{ team.name }}
+                </router-link>
+              </div>
             </div>
           </div>
         </div>
@@ -1420,6 +1454,14 @@ const getActivityStatusLabel = (status) => {
   }
   return labels[status] || status
 }
+
+const projetVisibilityLabel = (v) => ({ public: 'Public', team: 'Équipe', private: 'Privé' }[v] ?? v)
+
+const projetVisibilityClasses = (v) => ({
+  public: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  team: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  private: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+}[v] ?? 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400')
 
 const getStatusColor = (status) => {
   const colors = {

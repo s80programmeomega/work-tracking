@@ -154,7 +154,7 @@
               class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
             >
               <DocumentDuplicateIcon class="h-4 w-4" />
-              Nouvelle version
+              Gérer les versions
             </button>
             <button
               @click="handleDelete"

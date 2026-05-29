@@ -98,7 +98,7 @@ const props = defineProps({
   color: {
     type: String,
     default: 'gray',
-    validator: (v) => ['gray', 'slate', 'blue', 'green', 'red', 'brand', 'amber', 'purple'].includes(v)
+    validator: (v) => ['gray', 'slate', 'blue', 'green', 'red', 'brand', 'amber', 'purple', 'teal', 'indigo'].includes(v)
   },
   alert: {
     type: Boolean,
@@ -166,6 +166,20 @@ const colorClasses = {
     value: 'text-purple-500 dark:text-purple-400',
     bar: 'bg-purple-500',
     progress: 'bg-purple-500'
+  },
+  teal: {
+    icon: 'text-teal-500 dark:text-teal-400',
+    iconBg: 'bg-teal-50 dark:bg-teal-500/15',
+    value: 'text-teal-500 dark:text-teal-400',
+    bar: 'bg-teal-500',
+    progress: 'bg-teal-500'
+  },
+  indigo: {
+    icon: 'text-indigo-500 dark:text-indigo-400',
+    iconBg: 'bg-indigo-50 dark:bg-indigo-500/15',
+    value: 'text-indigo-500 dark:text-indigo-400',
+    bar: 'bg-indigo-500',
+    progress: 'bg-indigo-500'
   }
 }
 

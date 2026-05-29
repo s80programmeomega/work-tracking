@@ -6,7 +6,13 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
+use App\Models\Activite;
+use App\Models\Document;
+use App\Models\Projet;
+use App\Models\Tache;
+use App\Models\TacheResultat;
 use App\Models\User;
+use App\Models\Workspace;
 use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -221,23 +227,106 @@ class UserController extends Controller
     }
 
     /**
-     * Search users
+     * Search users — enrichi pour le partage de document si document_id est fourni
      */
     public function search(Request $request): JsonResponse
     {
         $request->validate([
             'q' => ['required', 'string', 'min:2'],
             'limit' => ['nullable', 'integer', 'min:1', 'max:50'],
+            'document_id' => ['nullable', 'integer', 'exists:documents,id'],
         ]);
 
-        $users = $this->userService->searchUsers(
-            $request->q,
-            $request->limit ?? 10
+        $users = $this->userService->searchUsers($request->q, $request->limit ?? 10);
+
+        if (! $request->document_id) {
+            return response()->json([
+                'success' => true,
+                'data' => UserResource::collection($users),
+            ]);
+        }
+
+        // Enrichissement pour le partage de document
+        $document = Document::with('documentable')->find($request->document_id);
+
+        $excludeIds = collect([$document->user_id, $request->user()->id])->filter();
+
+        // Exclure super_admin et directeur (ont déjà accès partout)
+        $privilegedIds = User::role(['super_admin', 'directeur'])->pluck('id');
+        $excludeIds = $excludeIds->merge($privilegedIds);
+
+        [$memberIds, $workspaceOwnerId] = $this->resolveEntityContext(
+            $document->documentable_type,
+            $document->documentable
         );
+
+        if ($workspaceOwnerId) {
+            $excludeIds->push($workspaceOwnerId);
+        }
+
+        $excludeIds = $excludeIds->unique()->values()->all();
+        $memberIdsArray = $memberIds->all();
+
+        $result = $users
+            ->filter(fn ($u) => ! \in_array($u->id, $excludeIds))
+            ->map(fn ($u) => [
+                'id' => $u->id,
+                'nom' => $u->nom,
+                'email' => $u->email,
+                'avatar' => $u->avatar_url,
+                'initials' => $u->initials,
+                'is_member' => \in_array($u->id, $memberIdsArray),
+            ])
+            ->values();
 
         return response()->json([
             'success' => true,
-            'data' => UserResource::collection($users),
+            'data' => $result,
         ]);
+    }
+
+    /**
+     * Retourne [Collection(memberIds), workspaceOwnerId|null] pour une entité donnée
+     */
+    private function resolveEntityContext(string $type, $entity): array
+    {
+        if (! $entity) {
+            return [collect(), null];
+        }
+
+        switch ($type) {
+            case Workspace::class:
+                return [
+                    $entity->members()->get()->pluck('id'),
+                    $entity->owner_id,
+                ];
+
+            case Projet::class:
+                return [
+                    $entity->members()->get()->pluck('id'),
+                    $entity->workspace?->owner_id,
+                ];
+
+            case Activite::class:
+                return [
+                    $entity->membres()->get()->pluck('id'),
+                    $entity->projet?->workspace?->owner_id,
+                ];
+
+            case Tache::class:
+                return [
+                    $entity->assignees()->get()->pluck('id'),
+                    $entity->activite?->projet?->workspace?->owner_id,
+                ];
+
+            case TacheResultat::class:
+                return [
+                    $entity->tache?->assignees()->get()->pluck('id') ?? collect(),
+                    $entity->tache?->activite?->projet?->workspace?->owner_id,
+                ];
+
+            default:
+                return [collect(), null];
+        }
     }
 }

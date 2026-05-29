@@ -19,6 +19,9 @@
             Assigné à
           </th>
           <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            Visibilité
+          </th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
             Avancement
           </th>
           <th class="px-4 py-3 w-10"></th>
@@ -137,6 +140,14 @@
             </span>
           </td>
 
+          <!-- Visibilité -->
+          <td class="px-4 py-3">
+            <span
+              class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+              :class="visibilityClasses(tache.visibility)"
+            >{{ visibilityLabel(tache.visibility) }}</span>
+          </td>
+
           <!-- Avancement -->
           <td class="px-4 py-3">
             <div class="flex items-center gap-2">
@@ -169,7 +180,7 @@
         </tr>
 
         <tr v-if="taches.length === 0">
-          <td colspan="7" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
+          <td colspan="8" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
             Aucune tâche pour cette activité.
           </td>
         </tr>
@@ -251,6 +262,14 @@ const prioriteClasses = (p) => ({
   elevee: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
   critique: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
 }[p] ?? 'bg-gray-100 text-gray-600 dark:text-gray-300')
+
+const visibilityLabel = (v) => ({ public: 'Public', private: 'Privé', members_only: 'Membres' }[v] ?? v)
+
+const visibilityClasses = (v) => ({
+  public: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  members_only: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  private: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+}[v] ?? 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400')
 
 const progressColor = (pct) => {
   if (!pct || pct < 33) return 'bg-red-400'
