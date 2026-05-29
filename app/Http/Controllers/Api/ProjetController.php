@@ -191,6 +191,7 @@ class ProjetController extends Controller
             },
             'tags',
             'workspace',
+            'teams:id,uuid,name,visibility,project_id',
             'activites' => function ($query) use ($userId, $user, $projet) {
                 // ✅ FILTRE : Uniquement les activités où l'utilisateur est impliqué
                 // SAUF si super admin OU responsable du projet

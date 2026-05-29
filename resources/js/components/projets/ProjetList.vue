@@ -166,6 +166,12 @@
                 <span class="text-xs font-medium text-gray-500 dark:text-gray-400">
                   {{ projet.code }}
                 </span>
+                <span
+                  class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
+                  :class="visibilityClasses(projet.visibility)"
+                >
+                  {{ visibilityLabel(projet.visibility) }}
+                </span>
               </div>
               <h3
                 @click="$emit('view-projet', projet.id)"
@@ -388,8 +394,12 @@
                   <div class="text-sm font-medium text-gray-900 dark:text-white">
                     {{ projet.nom }}
                   </div>
-                  <div class="text-xs text-gray-500 dark:text-gray-400">
-                    {{ projet.code }}
+                  <div class="flex items-center gap-2 mt-0.5">
+                    <span class="text-xs text-gray-500 dark:text-gray-400">{{ projet.code }}</span>
+                    <span
+                      class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium"
+                      :class="visibilityClasses(projet.visibility)"
+                    >{{ visibilityLabel(projet.visibility) }}</span>
                   </div>
                 </div>
                 <StarIcon
@@ -721,6 +731,14 @@ const resetFilters = () => {
   }
   searchTerm.value = ''
 }
+
+const visibilityLabel = (v) => ({ public: 'Public', team: 'Équipe', private: 'Privé' }[v] ?? v)
+
+const visibilityClasses = (v) => ({
+  public: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  team: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  private: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+}[v] ?? 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400')
 
 const getStatusColor = (status) => {
   const colors = {

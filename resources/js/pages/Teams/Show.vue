@@ -34,7 +34,7 @@
             <div>
               <h1 class="text-3xl font-bold text-gray-900 dark:text-white" dusk="team-detail-name">{{ team.name }}</h1>
               <p v-if="team.description" class="text-gray-600 dark:text-gray-400 mt-1">{{ team.description }}</p>
-              <div class="flex items-center gap-3 mt-2">
+              <div class="flex items-center gap-3 mt-2 flex-wrap">
                 <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full" :class="{
                   'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400': team.visibility === 'public',
                   'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400': team.visibility === 'private',
@@ -42,6 +42,19 @@
                 }">
                   {{ getVisibilityLabel(team.visibility) }}
                 </span>
+
+                <!-- Linked project chip -->
+                <router-link
+                  v-if="team.project"
+                  :to="{ name: 'projets', query: { projet: team.project.id } }"
+                  class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-brand-50 text-brand-700 dark:bg-brand-900/20 dark:text-brand-400 hover:bg-brand-100 dark:hover:bg-brand-900/40 transition-colors"
+                >
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                  </svg>
+                  {{ team.project.nom }}
+                </router-link>
+
                 <span class="text-sm text-gray-600 dark:text-gray-400">
                   <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

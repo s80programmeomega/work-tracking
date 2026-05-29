@@ -113,6 +113,12 @@ class ProjetResource extends JsonResource
             // Relationships
             'members' => ProjetMemberResource::collection($this->whenLoaded('members')),
             'tags' => ProjetTagResource::collection($this->whenLoaded('tags')),
+            'teams' => $this->whenLoaded('teams', fn () => $this->teams->map(fn ($t) => [
+                'id' => $t->id,
+                'uuid' => $t->uuid,
+                'name' => $t->name,
+                'visibility' => $t->visibility,
+            ])),
 
             // Gate-computed permissions for this user on this project
             'user_permissions' => $this->when($request->user(), function () use ($request) {
