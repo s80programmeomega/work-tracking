@@ -26,7 +26,7 @@
 | P4 | Task gaps (attachments, links, move, responsable) | 22 | — | ✅ | 2026-05-29 | 446 | Fixes: moveTache null position, deleteExternalLink auth(), membres()→members() on Projet |
 | P5 | Workspace management (CRUD, transfer, invitations, subscription) | 37 | — | ✅ | 2026-05-29 | 483 | Fix: MemberRemovalService::getTransferCandidates wherePivotIn role→role_id |
 | P6 | Document management (resolver + controller) | 37 | — | ✅ | 2026-05-29 | 520 | Fixes: DocumentController search $request->query→input(), DocumentService::shareWithUsers missing model method |
-| P7 | Team features (controllers + service) | ~25 | — | ⬜ | — | — | — |
+| P7 | Team features (controllers + service) | 52 | — | ✅ | 2026-05-29 | 572 | Fix: TeamResourceController missing `name` field on create |
 | P8 | Comments (controller + reactions + mentions) | ~15 | — | ⬜ | — | — | — |
 | P9 | Labels (label + template + tache_label) | ~20 | — | ⬜ | — | — | — |
 | P10 | Pure service layer (Projet/Activite/Auth) | ~20 | — | ⬜ | — | — | — |
@@ -79,15 +79,13 @@
 
 ### Phase 7 — Team features
 
-- [ ] `database/factories/TeamFactory.php` (if missing)
-- [ ] `database/factories/TeamMemberFactory.php` (if missing)
-- [ ] `tests/Feature/Team/TeamCrudTest.php`
-- [ ] `tests/Feature/Team/TeamMembersTest.php`
-- [ ] `tests/Feature/Team/TeamMessagesTest.php`
-- [ ] `tests/Feature/Team/TeamAnnouncementsTest.php`
-- [ ] `tests/Feature/Team/TeamEventsTest.php`
-- [ ] `tests/Feature/Team/TeamResourcesTest.php`
-- [ ] `tests/Feature/Services/TeamServiceTest.php`
+- [x] `database/factories/TeamFactory.php`
+- [x] `tests/Feature/Team/TeamCrudTest.php`
+- [x] `tests/Feature/Team/TeamMembersTest.php`
+- [x] `tests/Feature/Team/TeamMessagesTest.php`
+- [x] `tests/Feature/Team/TeamAnnouncementsTest.php`
+- [x] `tests/Feature/Team/TeamEventsTest.php`
+- [x] `tests/Feature/Team/TeamResourcesTest.php`
 
 ### Phase 8 — Comments
 
