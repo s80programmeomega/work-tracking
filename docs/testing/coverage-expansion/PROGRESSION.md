@@ -27,7 +27,7 @@
 | P5 | Workspace management (CRUD, transfer, invitations, subscription) | 37 | — | ✅ | 2026-05-29 | 483 | Fix: MemberRemovalService::getTransferCandidates wherePivotIn role→role_id |
 | P6 | Document management (resolver + controller) | 37 | — | ✅ | 2026-05-29 | 520 | Fixes: DocumentController search $request->query→input(), DocumentService::shareWithUsers missing model method |
 | P7 | Team features (controllers + service) | 52 | — | ✅ | 2026-05-29 | 572 | Fix: TeamResourceController missing `name` field on create |
-| P8 | Comments (controller + reactions + mentions) | ~15 | — | ⬜ | — | — | — |
+| P8 | Comments (controller + reactions + mentions) | 18 | — | ✅ | 2026-05-29 | 590 | — |
 | P9 | Labels (label + template + tache_label) | ~20 | — | ⬜ | — | — | — |
 | P10 | Pure service layer (Projet/Activite/Auth) | ~20 | — | ⬜ | — | — | — |
 
@@ -89,10 +89,9 @@
 
 ### Phase 8 — Comments
 
-- [ ] `tests/Feature/Comment/CommentCrudTest.php`
-- [ ] `tests/Feature/Comment/CommentReactionsTest.php`
-- [ ] `tests/Feature/Comment/CommentMentionsTest.php`
-- [ ] `tests/Feature/Services/CommentServiceTest.php`
+- [x] `tests/Feature/Comment/CommentCrudTest.php`
+- [x] `tests/Feature/Comment/CommentReactionsTest.php`
+- [x] `tests/Feature/Comment/CommentMentionsTest.php`
 
 ### Phase 9 — Labels
 
