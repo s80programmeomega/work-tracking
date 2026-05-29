@@ -492,3 +492,22 @@ When code comments are written, they **must be in French** — same language pol
 **How to apply with existing English comments:**
 - Touch them only when you're editing the surrounding code for other reasons (Guide 14 — no silent rewrites).
 - A comment-only "translate all comments" PR is acceptable scope if explicitly requested, but never a side-effect of a feature PR.
+
+---
+
+## Guide 20 — Web Search Is Allowed
+
+You can — and often should — use web search to confirm library behavior, look up Laravel/Vue/PHPUnit syntax, check Stack Overflow for a tricky error message, or read a package's official docs. Don't guess when a quick search would settle the question.
+
+**When to search:**
+- A framework method's exact signature or return type
+- Known issues / breaking changes between minor versions
+- Library APIs (Spatie permissions, Laravel Sanctum, PHPUnit assertions, Tailwind utilities)
+- Migration patterns from other Laravel projects facing the same problem
+
+**When NOT to search:**
+- Internal project conventions — those live in `CLAUDE.md`, `WORKING_GUIDELINES.md`, and the existing code. Read the code.
+- Anything Laravel Boost's `search-docs` MCP tool can answer faster (Guide 11). Try that first.
+- User-specific data, credentials, or production state.
+
+**Why:** the AI agent has a habit of inventing plausible-but-wrong method signatures when uncertain. A 5-second `WebFetch` or `WebSearch` is cheaper than the round-trip of "I tried X, X doesn't exist, let me try Y" cycles.
