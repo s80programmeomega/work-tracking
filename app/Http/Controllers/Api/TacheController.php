@@ -1039,7 +1039,7 @@ class TacheController extends Controller
 
             $isMember = $tache->activite->membres()->where('user_id', $user->id)->exists();
             $isProjetMember = $tache->activite->projet &&
-                $tache->activite->projet->membres()->where('user_id', $user->id)->exists();
+                $tache->activite->projet->members()->where('user_id', $user->id)->exists();
 
             if (! $isMember && ! $isProjetMember && ! $user->isSuperAdmin()) {
                 return response()->json([
@@ -1137,7 +1137,7 @@ class TacheController extends Controller
         }
 
         try {
-            $this->tacheService->deleteExternalLink($link);
+            $this->tacheService->deleteExternalLink($link, auth()->user());
 
             return response()->json([
                 'message' => 'Lien supprimé avec succès',
@@ -1209,7 +1209,7 @@ class TacheController extends Controller
             // Vérifier que l'utilisateur est membre de l'activité ou du projet
             $isMember = $tache->activite->membres()->where('user_id', $user->id)->exists();
             $isProjetMember = $tache->activite->projet &&
-                $tache->activite->projet->membres()->where('user_id', $user->id)->exists();
+                $tache->activite->projet->members()->where('user_id', $user->id)->exists();
 
             if (! $isMember && ! $isProjetMember && ! $user->isSuperAdmin()) {
                 return response()->json([

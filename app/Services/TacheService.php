@@ -720,7 +720,7 @@ class TacheService
 
         return DB::transaction(function () use ($tache, $newStatut, $newPosition) {
             $oldStatut = $tache->statut;
-            $oldPosition = $tache->position;
+            $oldPosition = $tache->position ?? 0;
 
             if ($oldStatut === $newStatut) {
                 $this->reorderTachesInStatus($tache->activite_id, $newStatut, $oldPosition, $newPosition);

@@ -23,7 +23,7 @@
 | P1 | Policy guards (5 policies) | 62 | 2cc323f+ | ✅ | 2026-05-29 | 363 | — |
 | P2 | Projet CRUD + members + stats | 52 | 0ddd82d+ | ✅ | 2026-05-29 | 398 | Fixes: hasMember on Workspace, soft-delete assertion, cloneProjet status/dates |
 | P3 | Activité CRUD + members + kanban | 26 | 39f13e2+ | ✅ | 2026-05-29 | 424 | Fixes: soft-delete assertion, tache titre uniqueness |
-| P4 | Task gaps (attachments, links, move, responsable) | ~20 | — | ⬜ | — | — | — |
+| P4 | Task gaps (attachments, links, move, responsable) | 22 | — | ✅ | 2026-05-29 | 446 | Fixes: moveTache null position, deleteExternalLink auth(), membres()→members() on Projet |
 | P5 | Workspace management (CRUD, transfer, invitations, subscription) | ~30 | — | ⬜ | — | — | — |
 | P6 | Document management (resolver + controller) | ~30 | — | ⬜ | — | — | — |
 | P7 | Team features (controllers + service) | ~25 | — | ⬜ | — | — | — |
@@ -59,10 +59,10 @@
 
 ### Phase 4 — Task gaps
 
-- [ ] `tests/Feature/Tache/TacheAttachmentsTest.php`
-- [ ] `tests/Feature/Tache/TacheExternalLinksTest.php`
-- [ ] `tests/Feature/Tache/TacheMoveTest.php`
-- [ ] `tests/Feature/Tache/TacheResponsableTest.php`
+- [x] `tests/Feature/Tache/TacheAttachmentsTest.php`
+- [x] `tests/Feature/Tache/TacheExternalLinksTest.php`
+- [x] `tests/Feature/Tache/TacheMoveTest.php`
+- [x] `tests/Feature/Tache/TacheResponsableTest.php`
 
 ### Phase 5 — Workspace management
 
