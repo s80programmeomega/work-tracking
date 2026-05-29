@@ -29,7 +29,7 @@
 | P7 | Team features (controllers + service) | 52 | — | ✅ | 2026-05-29 | 572 | Fix: TeamResourceController missing `name` field on create |
 | P8 | Comments (controller + reactions + mentions) | 18 | — | ✅ | 2026-05-29 | 590 | — |
 | P9 | Labels (label + template + tache_label) | 18 | — | ✅ | 2026-05-29 | 608 | Note: `DELETE /taches/{id}/labels/detach-all` unreachable — shadowed by stale `TacheController::detachLabel` route |
-| P10 | Pure service layer (Projet/Activite/Auth) | ~20 | — | ⬜ | — | — | — |
+| P10 | Pure service layer (Projet/Activite/Auth) | 19 | — | ✅ | 2026-05-29 | 627 | Fixes: Tache::scopeOverdue `$this->echeance` → `whereColumn`; Spatie cache reset in AuthServiceTest |
 
 **Cumulative target**: ~240 new tests on top of the existing 65 (≈ 305 total).
 
@@ -100,6 +100,6 @@
 
 ### Phase 10 — Pure service layer
 
-- [ ] `tests/Feature/Services/ProjetServiceTest.php`
-- [ ] `tests/Feature/Services/ActiviteServiceTest.php`
-- [ ] `tests/Feature/Services/AuthServiceTest.php`
+- [x] `tests/Feature/Services/ProjetServiceTest.php`
+- [x] `tests/Feature/Services/ActiviteServiceTest.php`
+- [x] `tests/Feature/Services/AuthServiceTest.php`

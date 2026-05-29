@@ -189,7 +189,7 @@ class Tache extends Model
             ->where('statut', '!=', TacheStatut::TERMINE->value)
             ->where(function ($q) {
                 $q->whereNull('date_fin_reelle')
-                    ->orWhere('date_fin_reelle', '>', $this->echeance);
+                    ->orWhereColumn('date_fin_reelle', '>', 'echeance');
             });
     }
 
