@@ -20,7 +20,7 @@
 
 | Phase | Scope | Test target | Branch commit | Status | Completed | PHPUnit total | Notes |
 |---|---|---|---|---|---|---|---|
-| P1 | Policy guards (5 policies) | ~30 | — | ⬜ | — | — | — |
+| P1 | Policy guards (5 policies) | 62 | 2cc323f+ | ✅ | 2026-05-29 | 363 | — |
 | P2 | Projet CRUD + members + stats | ~25 | — | ⬜ | — | — | — |
 | P3 | Activité CRUD + members + kanban | ~25 | — | ⬜ | — | — | — |
 | P4 | Task gaps (attachments, links, move, responsable) | ~20 | — | ⬜ | — | — | — |
@@ -39,11 +39,11 @@
 
 ### Phase 1 — Policy guards
 
-- [ ] `tests/Feature/Policies/ProjetPolicyTest.php` — view, update, delete, manageMembers
-- [ ] `tests/Feature/Policies/TachePolicyTest.php` — view, update, delete, validateN1, validateN2
-- [ ] `tests/Feature/Policies/ActivitePolicyTest.php` — view, update, delete
-- [ ] `tests/Feature/Policies/WorkspacePolicyTest.php` — view, update, delete, manageMembers
-- [ ] `tests/Feature/Policies/DocumentPolicyTest.php` — view, download, update, delete (delegates to DocumentAccessResolver)
+- [x] `tests/Feature/Policies/ProjetPolicyTest.php` — view, update, delete, manageMembers
+- [x] `tests/Feature/Policies/TachePolicyTest.php` — view, update, delete, validateN1, validateN2, approveN0 (virtual role)
+- [x] `tests/Feature/Policies/ActivitePolicyTest.php` — view, update, delete + pivot overrides
+- [x] `tests/Feature/Policies/WorkspacePolicyTest.php` — view, manageSettings, manageMembers, createProject
+- [x] `tests/Feature/Policies/DocumentPolicyTest.php` — view, update, delete, share (uploader shortcut + contextual gate)
 
 ### Phase 2 — Projet CRUD + members + stats
 
