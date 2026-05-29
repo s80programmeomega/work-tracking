@@ -511,3 +511,149 @@ You can — and often should — use web search to confirm library behavior, loo
 - User-specific data, credentials, or production state.
 
 **Why:** the AI agent has a habit of inventing plausible-but-wrong method signatures when uncertain. A 5-second `WebFetch` or `WebSearch` is cheaper than the round-trip of "I tried X, X doesn't exist, let me try Y" cycles.
+
+---
+
+## Guide 22 — API Documentation (Scribe + Swagger UI)
+
+`knuckleswtf/scribe` is installed as a dev dependency. It auto-generates API docs from routes, FormRequests, and annotations, and produces an OpenAPI 3.0.3 spec consumed by a Swagger UI view.
+
+### Endpoints (all require `auth:sanctum`)
+
+| URL | Content |
+|---|---|
+| `/api/docs` | Scribe Pastel UI (HTML) |
+| `/api/docs/swagger` | Swagger UI (reads the OpenAPI JSON) |
+| `/api/docs.openapi` | Raw OpenAPI YAML |
+| `/api/docs.json` | OpenAPI spec as JSON |
+| `/api/docs.postman` | Postman collection v2.1 |
+
+Routes are registered in `app/Providers/ScribeServiceProvider.php` (not via `scribe.laravel.add_routes`).
+
+### Regenerating docs
+
+```bash
+php artisan scribe:generate
+```
+
+Run this after any controller, FormRequest, or annotation change. Output lands in `storage/app/scribe/` — commit those generated files so the docs are always up to date.
+
+### Annotating endpoints
+
+Group endpoints with `@group` and describe them with `@description`. Parameters are auto-inferred from FormRequests; add `@bodyParam` or `@queryParam` only when auto-inference misses something.
+
+```php
+/**
+ * @group Tâches
+ *
+ * @description Retourne la liste des tâches pour une activité.
+ *
+ * @queryParam statut string Filtre par statut. Example: en_cours
+ */
+public function index(Request $request, Activite $activite): JsonResponse
+```
+
+Mark public endpoints (login, register) explicitly:
+
+```php
+/**
+ * @group Authentification
+ * @unauthenticated
+ */
+public function login(LoginRequest $request): JsonResponse
+```
+
+### Excluding routes
+
+Add patterns to `config/scribe.php` → `routes[0].exclude`:
+
+```php
+'exclude' => [
+    'api/broadcasting/auth',
+    '_laravel-brain/*',
+    'api/internal/*',
+],
+```
+
+### Config file
+
+`config/scribe.php` — key settings:
+- `auth.enabled = true` + `auth.default = true` — all endpoints shown as authenticated by default
+- `openapi.version = '3.0.3'` — OpenAPI version
+- `groups.order` — controls sidebar ordering in both Scribe and Swagger UIs
+- `examples.faker_seed = 1234` — reproducible example values
+
+### Swagger UI token injection
+
+The Swagger view (`resources/views/scribe/swagger.blade.php`) reads `localStorage.getItem('auth_token')` automatically — the same key the Vue frontend stores the Sanctum token in. No manual authorisation needed after login.
+
+---
+
+## Guide 21 — Larastan Static Analysis
+
+[Larastan](https://github.com/larastan/larastan) (`larastan/larastan` v2.11) is installed and configured at **level 5**. Run it regularly — it catches type errors, wrong method signatures, and missing properties before tests do.
+
+### Running Larastan
+
+```bash
+php artisan clear-compiled && php -d memory_limit=1500M vendor/bin/phpstan analyse --memory-limit=1500M
+```
+
+Use `--memory-limit=1500M` — the 512 MB default is not enough on this codebase.
+
+### Suppressing false positives
+
+Add patterns to the `ignoreErrors` section of `phpstan.neon` (project root). Use `#` as the regex delimiter; escape literal `#` characters inside patterns as `\#`.
+
+```neon
+ignoreErrors:
+    - '#Access to an undefined property App\\Models\\Foo::\$bar#'
+    - message: '#Some pattern that may not always match#'
+      reportUnmatched: false
+```
+
+Use `reportUnmatched: false` for patterns that only fire conditionally (e.g., dead-code warnings that PHPStan version-dependently emits). Without it, an unmatched pattern itself becomes an error.
+
+### What to fix vs. suppress
+
+| Situation | Action |
+|---|---|
+| Wrong field name / wrong method call | Fix the code |
+| Missing `@property` on a model (real DB column) | Add `@property` PHPDoc to the model |
+| Route model binding type in FormRequest (`$this->route('model')` returns `mixed`) | Add `/** @var ModelClass $var */` assertion before use |
+| Dynamic SQL alias property (`selectRaw('count(*) as total')`) | Add `@property` PHPDoc to the model |
+| Pivot property access (`$model->pivot->field`) | Suppress with `ignoreErrors` pattern |
+| Dead code / always-true branch PHPStan detects | Suppress with `reportUnmatched: false` |
+| Unused private/protected method that is intentionally kept | Suppress with `ignoreErrors` |
+
+**Never suppress a real type error** — if PHPStan says a method doesn't exist, verify the field/method name before suppressing.
+
+### PHPDoc conventions for models
+
+```php
+/**
+ * @property int $id
+ * @property string $nom
+ * @property \Carbon\Carbon|null $created_at
+ * @property float $score_total  SQL alias from aggregate queries
+ */
+class MyModel extends Model
+```
+
+### JsonResource conventions
+
+Both `@property` and `@mixin` are required on resources for PHPStan to resolve proxy property accesses:
+
+```php
+/**
+ * @property MyModel $resource
+ * @mixin MyModel
+ */
+class MyModelResource extends JsonResource
+```
+
+### When to run
+
+- Before every commit (alongside Pint).
+- After any model, service, controller, or resource change.
+- After adding new routes (FormRequest route model binding may need `@var` assertions).

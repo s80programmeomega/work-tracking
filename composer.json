@@ -23,7 +23,9 @@
     "require-dev": {
         "doctrine/dbal": "^3.10",
         "fakerphp/faker": "^1.9.1",
+        "knuckleswtf/scribe": "^5.10",
         "laramint/laravel-brain": "^2.0",
+        "larastan/larastan": "^2.11",
         "laravel/boost": "^1.8",
         "laravel/dusk": "^8.6",
         "laravel/pint": "^1.0",

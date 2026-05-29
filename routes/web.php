@@ -13,10 +13,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// Portail de documentation API — servi côté serveur, auth gérée côté client via localStorage
+Route::get('/docs', function () {
+    return view('docs.index');
+})->name('docs.portal');
+
 // Route de login minimal (pour éviter l'erreur)
 Route::get('/login', function () {
     return response()->json([
-        'message' => 'Cette application utilise une API. Veuillez utiliser /api/login'
+        'message' => 'Cette application utilise une API. Veuillez utiliser /api/login',
     ], 401);
 })->name('login');
 

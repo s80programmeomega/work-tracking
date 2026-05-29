@@ -16,10 +16,10 @@
 
 ## Current Session
 
-**Date:** 2026-05-28
-**Session goal:** Document management polish — version management, sharing, permissions, notifications, push
-**Branch:** `feature/design-system-v1`
-**Status:** Complete — ready to push.
+**Date:** 2026-05-29
+**Session goal:** Static analysis cleanup — replace abandoned larastan, add @property/@mixin/@responseField annotations to all 16 resources, fix 154 → 0 PHPStan errors
+**Branch:** `chore/test-coverage-expansion`
+**Status:** Complete — PHPStan level 5 clean, 627 tests passing.
 
 ---
 
@@ -30,26 +30,40 @@
 **Status:** Complete — awaiting push.
 
 **What was done this session:**
-- `DocumentVersionModal.vue`: renamed title to "Gérer les versions", reordered layout (version history first, upload form below), added per-version download buttons, added per-version delete (hidden on latest version)
-- `DocumentCard.vue`: renamed dropdown item "Nouvelle version" → "Gérer les versions"
-- `app.css`: fixed dark mode white margins — added `dark:bg-gray-900` to body
-- `DocumentAccessResolver::canUploadToWorkspace`: broadened from owner-only to cadre-and-above (`['owner', 'manager', 'cadre', 'task_responsable']` + directeur)
-- `axios.js`: 403 interceptor now only redirects on GET requests (not on POST/PUT/DELETE actions)
-- `DocumentShareModal.vue`: date field changed from datetime-local to date-only, made optional (`nullable`), added `:min="today"` and `:max="maxDate"` (5-year cap), smart user search passes `document_id` to exclude privileged users and badge entity members as "Déjà membre"
-- `UserController::search`: enriched with optional `document_id` param — excludes super_admin/directeur/owner/uploader, adds `is_member` flag per result; added `resolveEntityContext` private method
-- `AddMemberModal.vue` + `EditMemberPermissionsModal.vue`: fixed role values from English (`collaborator`/`viewer`) to French (`collaborateur`/`observateur`), added `cadre`/`stagiaire` options
-- `DocumentService::grantPermission` + `revokePermission`: fixed — was calling non-existent Spatie methods on Document model; now uses `DocumentPermission::updateOrCreate/delete` directly
-- `DocumentPermissionGrantedNotification`: new notification (database + mail + push via `channelsFor`) fired after `grantPermission`; has `toWebPush()` with proper title/body
-- `NotificationService`: added `document_shared` to both `wantsEmail` and `wantsWebPush` (high-signal)
-- `WebPushChannel::buildPayload` fallback: improved field discovery (`document_nom`, `assigned_by`, `auteur_nom`, `shared_by`) + added `icon` to default payload
-- `Documents.vue`: `activeTab` now reads from `?tab=` query param (email link lands on "Partagés" tab)
-- `DocumentController::grantPermission`: added `before:+5 years` + `nullable` to `expires_at` validation with French error messages
-
-**Infrastructure note:** `php artisan webpush:generate-vapid` requires `ext-gmp` or `ext-bcmath`. Install with `sudo apt-get install php8.4-gmp`.
+- Replaced abandoned `nunomaduro/larastan` with `larastan/larastan` v2.11; updated `phpstan.neon` extension path
+- Added `@property ModelClass $resource` + `@mixin ModelClass` to all 16 API Resource classes (fixes PHPStan proxy property errors)
+- Added `@responseField` annotations to each resource's `toArray()` for future Scribe API doc generation
+- Added comprehensive `@property` PHPDoc blocks to: `Tache`, `TacheResultat`, `User`, `CommentReaction`, `EvaluationScore` models
+- Fixed real bugs uncovered by PHPStan:
+  - `DocumentPolicy`: removed non-existent `$document->uploaded_by` (replaced with `$document->user_id`)
+  - `TacheResultatController`: Document field names (`chemin_fichier→chemin`, `nom_fichier→nom`, `taille_fichier→taille`, `type_fichier→mime_type`)
+  - `ResultatRejeteNotification` constructor call: wrong args (`$tache,$resultat` → `$resultat,auth()->user(),'commentaire','n2'`)
+  - `TacheLinkAddedNotification`: removed duplicate `link_id` key
+  - `TacheResultatResource`: `$activite->titre` → `$activite->nom`, `$projet->titre` → `$projet->nom`
+  - `TacheResultatController::createDocumentPermissions`: validator IDs read from `$resultat` not `$tache` (correct model)
+  - `TacheResultat::notifyValidators()`: promoted from `protected` to `public` (called cross-model)
+  - `TacheStatut::badgeClass()`: added missing `ANNULE` and `EN_ATTENTE` match arms
+  - `DashboardController::getMonthlyProgress()`: removed extra `$workspaceIds` arg from call
+  - `EvaluationController::abort_unless($workspace)`: fixed to `$workspace !== null` for bool type
+  - `LabelController::$projetId`: cast from `string|null` to `int|null`
+  - `DocumentService::getEntity()`: `protected` → `public` (called from DocumentController)
+  - `TacheController::getAllTaches/getMyTaches/createTache`: fixed User param vs int ID mismatch
+  - `DocumentAccessResolver`: added `@var` type assertions per switch case for polymorphic entity
+  - `AccessManagementService`: typed raw DB row via `@var object{...}` for `temporary_access`
+  - `ProjetService`: removed incorrect `@return` PHPDoc, fixed `inWorkspace` cast, added typed `@param` Builder
+  - `LabelService` + `LabelTemplateService`: fixed `Collection` vs `SupportCollection` return types
+  - `ActiviteController::prepend()`: replaced array arg with User model
+  - `Tache.php:1023`: fixed string subtraction with `floatval()` cast
+  - `TeamResourceNotification.php`: removed impossible `'file'` match arm
+  - `CheckSubscriptionLimits.php`: fixed int `0` default on `header()` → `'0'`
+  - `UpdateActiviteRequest/UpdateProjetRequest/UpdateTacheRequest/UpdateUserRequest`: typed route model via `/** @var */`
+  - `User` model: added `HasOne`/`HasMany` return types to `notificationPreference()` and `pushSubscriptions()`
+  - `TacheResultat` model: added `rejetePar(): BelongsTo` relationship
+- 627 PHPUnit tests, all passing (0 regressions)
 
 **What to do next:**
-1. Investigate push notification reaching unintended users (deferred — may be in-app broadcast confusion, not a push bug)
-2. Continue with next planned task or client feedback
+1. Continue with next planned task or client feedback
+2. (Optional) Scribe API docs generation — resource annotations are now ready
 
 ## Last Completed Task
 
