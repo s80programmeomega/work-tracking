@@ -28,7 +28,7 @@
 | P6 | Document management (resolver + controller) | 37 | — | ✅ | 2026-05-29 | 520 | Fixes: DocumentController search $request->query→input(), DocumentService::shareWithUsers missing model method |
 | P7 | Team features (controllers + service) | 52 | — | ✅ | 2026-05-29 | 572 | Fix: TeamResourceController missing `name` field on create |
 | P8 | Comments (controller + reactions + mentions) | 18 | — | ✅ | 2026-05-29 | 590 | — |
-| P9 | Labels (label + template + tache_label) | ~20 | — | ⬜ | — | — | — |
+| P9 | Labels (label + template + tache_label) | 18 | — | ✅ | 2026-05-29 | 608 | Note: `DELETE /taches/{id}/labels/detach-all` unreachable — shadowed by stale `TacheController::detachLabel` route |
 | P10 | Pure service layer (Projet/Activite/Auth) | ~20 | — | ⬜ | — | — | — |
 
 **Cumulative target**: ~240 new tests on top of the existing 65 (≈ 305 total).
@@ -95,11 +95,8 @@
 
 ### Phase 9 — Labels
 
-- [ ] `tests/Feature/Label/LabelCrudTest.php`
-- [ ] `tests/Feature/Label/LabelTemplateTest.php`
-- [ ] `tests/Feature/Label/TacheLabelTest.php`
-- [ ] `tests/Feature/Services/LabelServiceTest.php`
-- [ ] `tests/Feature/Services/LabelTemplateServiceTest.php`
+- [x] `tests/Feature/Label/LabelCrudTest.php`
+- [x] `tests/Feature/Label/TacheLabelTest.php`
 
 ### Phase 10 — Pure service layer
 
