@@ -22,7 +22,7 @@
 |---|---|---|---|---|---|---|---|
 | P1 | Policy guards (5 policies) | 62 | 2cc323f+ | ✅ | 2026-05-29 | 363 | — |
 | P2 | Projet CRUD + members + stats | 52 | 0ddd82d+ | ✅ | 2026-05-29 | 398 | Fixes: hasMember on Workspace, soft-delete assertion, cloneProjet status/dates |
-| P3 | Activité CRUD + members + kanban | ~25 | — | ⬜ | — | — | — |
+| P3 | Activité CRUD + members + kanban | 26 | 39f13e2+ | ✅ | 2026-05-29 | 424 | Fixes: soft-delete assertion, tache titre uniqueness |
 | P4 | Task gaps (attachments, links, move, responsable) | ~20 | — | ⬜ | — | — | — |
 | P5 | Workspace management (CRUD, transfer, invitations, subscription) | ~30 | — | ⬜ | — | — | — |
 | P6 | Document management (resolver + controller) | ~30 | — | ⬜ | — | — | — |
@@ -53,9 +53,9 @@
 
 ### Phase 3 — Activité CRUD + members + kanban
 
-- [ ] `tests/Feature/Activite/ActiviteCrudTest.php`
-- [ ] `tests/Feature/Activite/ActiviteMembersTest.php`
-- [ ] `tests/Feature/Activite/ActiviteKanbanTest.php`
+- [x] `tests/Feature/Activite/ActiviteCrudTest.php`
+- [x] `tests/Feature/Activite/ActiviteMembersTest.php`
+- [x] `tests/Feature/Activite/ActiviteKanbanTest.php`
 
 ### Phase 4 — Task gaps
 
