@@ -916,7 +916,10 @@ const getTaskStatusClasses = (status) => {
     'a_faire': 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300',
     'en_attente': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300',
     'en_cours': 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300',
-    'termine': 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
+    'termine': 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300',
+    'en_retard': 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300',
+    'a_refaire': 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300',
+    'annule': 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400 line-through'
   }
   return classes[status] || 'bg-gray-100 text-gray-800 dark:text-gray-100'
 }
@@ -926,7 +929,10 @@ const getTaskStatusLabel = (status) => {
     'a_faire': 'À faire',
     'en_attente': 'En attente',
     'en_cours': 'En cours',
-    'termine': 'Terminé'
+    'termine': 'Terminé',
+    'en_retard': 'En retard',
+    'a_refaire': 'À refaire',
+    'annule': 'Annulé'
   }
   return labels[status] || status
 }

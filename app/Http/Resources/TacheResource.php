@@ -32,7 +32,7 @@ class TacheResource extends JsonResource
      * @responseField commentaire string|null General comment.
      * @responseField attachments TacheAttachmentResource[] File attachments (when loaded).
      * @responseField external_links TacheExternalLinkResource[] External links (when loaded).
-     * @responseField statut string Status enum value: a_faire | en_cours | termine.
+     * @responseField statut string Status enum value: a_faire | en_cours | termine | en_retard | a_refaire | en_attente | annule.
      * @responseField statut_label string Human-readable status label.
      * @responseField statut_color string Color identifier for status display.
      * @responseField priorite string Priority enum value: faible | moyenne | elevee | critique.
@@ -419,6 +419,7 @@ class TacheResource extends JsonResource
                 return [
                     'can_view' => $gate->userCan($user, Permission::TACHES_VIEW, $tache),
                     'can_edit' => $gate->userCan($user, Permission::TACHES_EDIT, $tache),
+                    'can_inline_edit' => $gate->userCan($user, Permission::TACHES_INLINE_EDIT, $tache),
                     'can_complete' => $gate->userCan($user, Permission::TACHES_EDIT, $tache),
                     'can_validate_n1' => $gate->userCan($user, Permission::TACHES_VALIDATE_N1, $tache),
                     'can_validate_n2' => $gate->userCan($user, Permission::TACHES_VALIDATE_N2, $tache),

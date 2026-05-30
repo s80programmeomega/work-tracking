@@ -570,6 +570,7 @@ const getStatutLabel = (statut) => {
         en_retard: 'En retard',
         termine: 'Terminé',
         a_refaire: 'À refaire',
+        en_attente: 'En attente',
         annule: 'Annulé',
     }
     return labels[statut] ?? statut
@@ -582,7 +583,8 @@ const getStatutClass = (statut) => {
         en_retard: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
         termine: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
         a_refaire: 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300',
-        annule: 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400',
+        en_attente: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+        annule: 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400 line-through',
     }
     return classes[statut] ?? classes.a_faire
 }

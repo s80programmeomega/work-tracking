@@ -217,9 +217,13 @@ export function useNotifications() {
             // Responsable activité changé
             responsable_changed: 'fa-user-check',
 
+            // Documents (Task 12)
+            document_uploaded: 'fa-file-upload',
+            document_deleted: 'fa-trash',
+            document_shared: 'fa-share-alt',
+
             // Autres
             deadline_approaching: 'fa-exclamation-triangle',
-            document_uploaded: 'fa-file-upload',
         };
 
         return icons[type] || 'fa-bell';
@@ -268,9 +272,13 @@ export function useNotifications() {
             // Responsable activité changé
             responsable_changed: 'purple',
 
+            // Documents (Task 12)
+            document_uploaded: 'yellow',
+            document_deleted: 'red',
+            document_shared: 'cyan',
+
             // Autres
             deadline_approaching: 'red',
-            document_uploaded: 'yellow',
         };
 
         return colors[type] || 'gray';

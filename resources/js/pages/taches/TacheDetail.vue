@@ -61,8 +61,8 @@
                 v-else
                 @click="startHeaderEdit('titre', tache.titre)"
                 class="text-3xl font-bold text-gray-900 dark:text-white"
-                :class="permissions.can_update ? 'cursor-pointer hover:text-brand-600 dark:hover:text-brand-400' : ''"
-                :title="permissions.can_update ? 'Cliquer pour modifier' : ''"
+                :class="permissions.can_inline_edit ? 'cursor-pointer hover:text-brand-600 dark:hover:text-brand-400' : ''"
+                :title="permissions.can_inline_edit ? 'Cliquer pour modifier' : ''"
               >{{ tache.titre }}</h1>
 
               <!-- Statut inline editable -->
@@ -78,13 +78,15 @@
                 <option value="a_faire">À faire</option>
                 <option value="en_cours">En cours</option>
                 <option value="termine">Terminé</option>
+                <option value="en_retard">En retard</option>
+                <option value="a_refaire">À refaire</option>
               </select>
               <span
                 v-else
                 @click="startHeaderEdit('statut', tache.statut)"
                 class="px-3 py-1 rounded-full text-xs font-bold"
-                :class="[getStatutClass(tache.statut), permissions.can_update ? 'cursor-pointer hover:opacity-80' : '']"
-                :title="permissions.can_update ? 'Cliquer pour modifier' : ''"
+                :class="[getStatutClass(tache.statut), permissions.can_inline_edit ? 'cursor-pointer hover:opacity-80' : '']"
+                :title="permissions.can_inline_edit ? 'Cliquer pour modifier' : ''"
               >
                 {{ getStatutLabel(tache.statut) }}
               </span>
@@ -108,8 +110,8 @@
                 v-else-if="tache.priorite"
                 @click="startHeaderEdit('priorite', tache.priorite)"
                 class="px-3 py-1 rounded-full text-xs font-bold"
-                :class="[getPrioriteClass(tache.priorite), permissions.can_update ? 'cursor-pointer hover:opacity-80' : '']"
-                :title="permissions.can_update ? 'Cliquer pour modifier' : ''"
+                :class="[getPrioriteClass(tache.priorite), permissions.can_inline_edit ? 'cursor-pointer hover:opacity-80' : '']"
+                :title="permissions.can_inline_edit ? 'Cliquer pour modifier' : ''"
               >
                 {{ tache.priorite_label || tache.priorite }}
               </span>
@@ -152,11 +154,11 @@
                 <span
                   v-else-if="tache.echeance"
                   @click="startHeaderEdit('echeance', tache.echeance)"
-                  :class="permissions.can_update ? 'cursor-pointer hover:opacity-80' : ''"
-                  :title="permissions.can_update ? 'Cliquer pour modifier' : ''"
+                  :class="permissions.can_inline_edit ? 'cursor-pointer hover:opacity-80' : ''"
+                  :title="permissions.can_inline_edit ? 'Cliquer pour modifier' : ''"
                 >{{ formatDate(tache.echeance) }}</span>
                 <span
-                  v-else-if="permissions.can_update"
+                  v-else-if="permissions.can_inline_edit"
                   @click="startHeaderEdit('echeance', null)"
                   class="cursor-pointer text-gray-400 hover:text-brand-600 dark:hover:text-brand-400"
                 >+ Échéance</span>
@@ -206,7 +208,7 @@
               :tache-id="tache.id"
               :parent-echeance="tache.echeance"
               :can-create="permissions.can_create_subtask ?? false"
-              :can-edit="permissions.can_update ?? false"
+              :can-edit="permissions.can_inline_edit ?? false"
               :can-delete="permissions.can_delete ?? false"
               @updated="fetchTache"
             />
@@ -300,7 +302,7 @@ const formatDateForApi = (date) => {
 }
 
 const startHeaderEdit = (field, value) => {
-  if (!permissions.value.can_update) return
+  if (!permissions.value.can_inline_edit) return
   headerEditing.field = field
   headerEditing.value = field === 'echeance' ? (value ? new Date(value) : null) : value
 }

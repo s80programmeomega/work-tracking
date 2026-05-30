@@ -71,8 +71,8 @@
               <span
                 class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium cursor-pointer"
                 :class="statutClasses(tache.statut)"
-                :title="tache.permissions?.can_edit ? 'Cliquer pour modifier' : ''"
-                @click="tache.permissions?.can_edit && startEdit(tache, 'statut', tache.statut)"
+                :title="tache.permissions?.can_inline_edit ? 'Cliquer pour modifier' : ''"
+                @click="tache.permissions?.can_inline_edit && startEdit(tache, 'statut', tache.statut)"
               >
                 {{ statutLabel(tache.statut) }}
               </span>
@@ -100,8 +100,8 @@
               <span
                 class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium cursor-pointer"
                 :class="prioriteClasses(tache.priorite)"
-                :title="tache.permissions?.can_edit ? 'Cliquer pour modifier' : ''"
-                @click="tache.permissions?.can_edit && startEdit(tache, 'priorite', tache.priorite)"
+                :title="tache.permissions?.can_inline_edit ? 'Cliquer pour modifier' : ''"
+                @click="tache.permissions?.can_inline_edit && startEdit(tache, 'priorite', tache.priorite)"
               >
                 {{ prioriteLabel(tache.priorite) }}
               </span>
@@ -125,8 +125,8 @@
               <span
                 class="text-sm cursor-pointer"
                 :class="tache.is_overdue ? 'text-red-600 dark:text-red-400 font-medium' : 'text-gray-600 dark:text-gray-400'"
-                :title="tache.permissions?.can_edit ? 'Cliquer pour modifier' : ''"
-                @click="tache.permissions?.can_edit && startEdit(tache, 'echeance', tache.echeance ? tache.echeance.substring(0, 10) : '')"
+                :title="tache.permissions?.can_inline_edit ? 'Cliquer pour modifier' : ''"
+                @click="tache.permissions?.can_inline_edit && startEdit(tache, 'echeance', tache.echeance ? tache.echeance.substring(0, 10) : '')"
               >
                 {{ tache.echeance ? formatDate(tache.echeance) : '—' }}
               </span>
@@ -242,6 +242,7 @@ const formatDate = (dateStr) => {
 const statutLabel = (s) => ({
   a_faire: 'À faire', en_cours: 'En cours', termine: 'Terminé',
   en_retard: 'En retard', a_refaire: 'À refaire',
+  en_attente: 'En attente', annule: 'Annulé',
 }[s] ?? s)
 
 const statutClasses = (s) => ({
@@ -250,6 +251,8 @@ const statutClasses = (s) => ({
   termine: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
   en_retard: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
   a_refaire: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
+  en_attente: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+  annule: 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400 line-through',
 }[s] ?? 'bg-gray-100 text-gray-700 dark:text-gray-200')
 
 const prioriteLabel = (p) => ({

@@ -452,6 +452,95 @@
               </div>
             </div>
 
+            <!-- ========== DOCUMENT UPLOADÉ ========== -->
+            <div v-else-if="notification?.type === 'document_uploaded'" class="space-y-4">
+              <div class="rounded-3 border border-warning-200 dark:border-warning-800/50 bg-white dark:bg-gray-900 p-5">
+                <div class="flex items-center gap-3 mb-4">
+                  <div class="w-10 h-10 rounded-3 bg-warning-400 flex items-center justify-center shrink-0">
+                    <i class="fas fa-file-upload text-white"></i>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-xs font-semibold text-warning-600 dark:text-warning-400 uppercase tracking-wide mb-0.5">Nouveau document</p>
+                    <p class="text-base font-bold text-gray-900 dark:text-white truncate">{{ notification.data.document_nom }}</p>
+                  </div>
+                </div>
+
+                <div v-if="notification.data.uploaded_by" class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-3">
+                  <div class="w-8 h-8 rounded-2 bg-warning-100 dark:bg-warning-500/20 flex items-center justify-center shrink-0">
+                    <i class="fas fa-user text-warning-600 dark:text-warning-400 text-sm"></i>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Ajouté par</p>
+                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ notification.data.uploaded_by }}</p>
+                  </div>
+                </div>
+
+                <div class="mt-3 flex gap-2">
+                  <button @click="viewDocument" class="flex-1 px-4 py-2.5 rounded-3 text-sm font-semibold text-white bg-warning-500 hover:bg-warning-600 transition-colors flex items-center justify-center gap-2">
+                    <i class="fas fa-eye"></i>
+                    Voir le document
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- ========== DOCUMENT SUPPRIMÉ ========== -->
+            <div v-else-if="notification?.type === 'document_deleted'" class="space-y-4">
+              <div class="rounded-3 border border-error-200 dark:border-error-800/50 bg-white dark:bg-gray-900 p-5">
+                <div class="flex items-center gap-3 mb-4">
+                  <div class="w-10 h-10 rounded-3 bg-error-400 flex items-center justify-center shrink-0">
+                    <i class="fas fa-trash text-white"></i>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-xs font-semibold text-error-600 dark:text-error-400 uppercase tracking-wide mb-0.5">Document supprimé</p>
+                    <p class="text-base font-bold text-gray-900 dark:text-white truncate">{{ notification.data.document_nom }}</p>
+                  </div>
+                </div>
+
+                <div v-if="notification.data.deleted_by" class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-3">
+                  <div class="w-8 h-8 rounded-2 bg-error-100 dark:bg-error-500/20 flex items-center justify-center shrink-0">
+                    <i class="fas fa-user-times text-error-600 dark:text-error-400 text-sm"></i>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Supprimé par</p>
+                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ notification.data.deleted_by }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ========== DOCUMENT PARTAGÉ ========== -->
+            <div v-else-if="notification?.type === 'document_shared'" class="space-y-4">
+              <div class="rounded-3 border border-cyan-200 dark:border-cyan-800/50 bg-white dark:bg-gray-900 p-5">
+                <div class="flex items-center gap-3 mb-4">
+                  <div class="w-10 h-10 rounded-3 bg-cyan-400 flex items-center justify-center shrink-0">
+                    <i class="fas fa-share-alt text-white"></i>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-xs font-semibold text-cyan-600 dark:text-cyan-400 uppercase tracking-wide mb-0.5">Document partagé</p>
+                    <p class="text-base font-bold text-gray-900 dark:text-white truncate">{{ notification.data.document_nom }}</p>
+                  </div>
+                </div>
+
+                <div v-if="notification.data.shared_by" class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-3">
+                  <div class="w-8 h-8 rounded-2 bg-cyan-100 dark:bg-cyan-500/20 flex items-center justify-center shrink-0">
+                    <i class="fas fa-user-friends text-cyan-600 dark:text-cyan-400 text-sm"></i>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Partagé par</p>
+                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ notification.data.shared_by }}</p>
+                  </div>
+                </div>
+
+                <div class="mt-3 flex gap-2">
+                  <button @click="viewDocument" class="flex-1 px-4 py-2.5 rounded-3 text-sm font-semibold text-white bg-cyan-500 hover:bg-cyan-600 transition-colors flex items-center justify-center gap-2">
+                    <i class="fas fa-eye"></i>
+                    Voir le document
+                  </button>
+                </div>
+              </div>
+            </div>
+
             <!-- ========== AUTRES NOTIFICATIONS ========== -->
             <div v-else class="space-y-4">
               <div class="p-4 rounded-3 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
@@ -601,6 +690,17 @@ const viewTask = () => {
     router.push(`/taches/${props.notification.data.tache_id}`);
     emit('close');
   }
+};
+
+const viewDocument = () => {
+  // Les notifications de partage routent vers l'onglet "Partagés avec moi" ;
+  // les autres ouvrent la liste générale (le filtrage par documentable
+  // reste piloté côté page Documents).
+  const route = props.notification?.type === 'document_shared'
+    ? '/documents?tab=shared'
+    : '/documents';
+  router.push(route);
+  emit('close');
 };
 
 const isResultatNotification = computed(() => {

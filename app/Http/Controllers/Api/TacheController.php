@@ -776,6 +776,7 @@ class TacheController extends Controller
 
                     return [
                         'can_update' => $user->can('update', $tache),
+                        'can_inline_edit' => $gate->userCan($user, Permission::TACHES_INLINE_EDIT, $tache),
                         'can_delete' => $user->can('delete', $tache),
                         'can_validate_n1' => $user->can('validateN1', $tache),
                         'can_validate_n2' => $user->can('validateN2', $tache),

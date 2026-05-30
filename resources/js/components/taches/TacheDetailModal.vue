@@ -267,10 +267,10 @@
                 <SousTacheList
                   :tache-id="localTache.id"
                   :parent-echeance="localTache.echeance"
-                  :can-create="true"
-                  :can-edit="true"
-                  :can-delete="true"
-                  :can-assign="true"
+                  :can-create="localTache.permissions?.can_create_subtask ?? false"
+                  :can-edit="localTache.permissions?.can_inline_edit ?? false"
+                  :can-delete="localTache.permissions?.can_delete ?? false"
+                  :can-assign="localTache.permissions?.can_edit ?? false"
                 />
               </SectionCollapsible>
 
@@ -450,10 +450,10 @@
             <SousTacheList
               :tache-id="localTache.id"
               :parent-echeance="localTache.echeance"
-              :can-create="true"
-              :can-edit="true"
-              :can-delete="true"
-              :can-assign="true"
+              :can-create="localTache.permissions?.can_create_subtask ?? false"
+              :can-edit="localTache.permissions?.can_inline_edit ?? false"
+              :can-delete="localTache.permissions?.can_delete ?? false"
+              :can-assign="localTache.permissions?.can_edit ?? false"
             />
           </div>
 

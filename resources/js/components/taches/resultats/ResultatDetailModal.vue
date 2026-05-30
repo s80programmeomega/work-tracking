@@ -294,7 +294,7 @@
                               </p>
                               <div class="flex items-center gap-3 mt-1">
                                 <span class="text-xs text-gray-500 dark:text-gray-400">
-                                  {{ formatFileSize(doc.taille_fichier || doc.taille) }}
+                                  {{ formatFileSize(doc.taille) }}
                                 </span>
                                 <span
                                   class="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded font-medium uppercase">
@@ -667,7 +667,7 @@
             <div>
               <h3 class="font-bold text-gray-900 dark:text-white">{{ previewDocument?.nom }}</h3>
               <div class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
-                <span>{{ formatFileSize(previewDocument?.taille_fichier || previewDocument?.taille) }}</span>
+                <span>{{ formatFileSize(previewDocument?.taille) }}</span>
                 <span>•</span>
                 <span class="uppercase font-medium">{{ previewDocument?.extension }}</span>
               </div>
