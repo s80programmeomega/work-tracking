@@ -313,7 +313,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import FullScreenLayout from '@/components/layout/FullScreenLayout.vue'
-import axios from 'axios'
+import api from '@/api/axios'
 
 const route = useRoute()
 const router = useRouter()
@@ -357,7 +357,7 @@ const checkInvitation = async () => {
     loading.value = true
     const token = route.params.token
 
-    const response = await axios.get(`/api/invitations/projet/${token}/check`)
+    const response = await api.get(`/invitations/projet/${token}/check`)
     invitation.value = response.data.data.invitation
     userExists.value = response.data.data.user_exists
 
@@ -382,7 +382,7 @@ const acceptInvitation = async () => {
     accepting.value = true
     const token = route.params.token
 
-    const response = await axios.post(`/api/invitations/projet/${token}/accept`)
+    const response = await api.post(`/invitations/projet/${token}/accept`)
 
     router.push(response.data.data.redirect_to)
 
@@ -406,7 +406,7 @@ const registerAndAccept = async () => {
     accepting.value = true
     const token = route.params.token
 
-    const response = await axios.post(`/api/invitations/projet/${token}/accept`, form.value)
+    const response = await api.post(`/invitations/projet/${token}/accept`, form.value)
 
     authStore.setUser(response.data.data.user)
     authStore.token = response.data.data.token
