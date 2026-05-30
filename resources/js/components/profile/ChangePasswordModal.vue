@@ -129,6 +129,8 @@
 </template>
 
 <script>
+import api from '@/api/axios'
+
 export default {
   name: 'ChangePasswordModal',
   props: {
@@ -233,7 +235,7 @@ export default {
         this.loading = true
         this.errors = {}
 
-        const response = await axios.put('/api/profile/password', this.form)
+        const response = await api.post('/users/change-password', this.form)
 
         this.$toast.success(response.data.message)
         this.closeModal()

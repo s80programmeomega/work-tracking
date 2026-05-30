@@ -200,7 +200,7 @@ const confirmDeleteAccount = async () => {
   try {
     await api.delete('/users/profile', { data: { password: deleteAccountPassword.value } })
     await authStore.logout?.()
-    router.push('/login')
+    router.push('/signin')
   } catch (err) {
     deleteAccountError.value = err.response?.data?.message ?? 'Mot de passe incorrect.'
   } finally {
