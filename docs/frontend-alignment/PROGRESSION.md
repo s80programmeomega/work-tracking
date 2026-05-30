@@ -87,10 +87,13 @@ For each page: every axios call hits an existing route with matching verb; paylo
 
 | Page | Status | Date | Findings |
 |---|---|---|---|
-| `components/taches/resultats/ResultatDetailModal.vue` | ☐ | | |
-| Validation actions (approve N0 / renvoyer N0 / N1 / N2) | ☐ | | |
-| Bypass UI | ☐ | | |
-| `components/layout/header/NotificationMenu.vue` + live-toast | ☐ | | |
+| `components/taches/resultats/ResultatDetailModal.vue` | ✅ | 2026-05-30 | Already touched in Phase 1.4 (`taille_fichier` cleanup). No additional issues found. |
+| Validation actions (`pages/ValidationResultats.vue` + `ValidationModal.vue`) | ✅ | 2026-05-30 | **Bug fixed:** reject endpoint path was `/evaluations/${id}/reject` (404) — backend route is `/evaluations/resultats/${id}/reject`. The full reject flow was silently failing on the wrong URL. Validate N1/N2 paths + history endpoint confirmed correct. |
+| Bypass UI | ✅ | 2026-05-30 | Backend bypass surface exposed in `TacheResultatResource` (`bypass` block, `can_activer_bypass`, `audit_logs`) — handled inline by ResultatCard / DetailModal. No new issues identified beyond the cross-tab cleanup. |
+| `components/layout/header/NotificationMenu.vue` + live-toast | ✅ | 2026-05-30 | Clean. `useNotifications` composable for fetch/mark/delete, `useRealtimeRefresh` for echo+poll fallback, `safeFetchUnread()` guards unauthenticated polling. Calls `/tache-resultats/{id}` for the deep-link modal — endpoint verified. |
+| `components/taches/ResultatForm copy.vue` | 🗑 | 2026-05-30 | **Deleted:** orphan duplicate of `ResultatForm.vue`, never imported. Same dead-code pattern as Index.vue from the Documents batch. |
+
+**Out-of-scope finding noted, not fixed:** `pages/TachesParUtilisateur.vue` mounts `ValidationModal` with props (`:tache`/`:user`/`@validated`) that don't match the modal's actual contract (`:resultat`/`:action`/`:level`/`@confirmed`). The modal would never receive its required `resultat` prop. Likely an abandoned alternate flow — outside this batch's scope, flagged for a future pass.
 
 ### Projects / Activities
 
@@ -177,3 +180,4 @@ For each priority-page, walk Chrome DevTools at 375 (sm) / 768 (md) / 1024 (lg).
 | 2026-05-30 | Phase 2 — Documents | Audited Documents.vue + 4 hierarchical doc pages + share modal. **WorkspaceDocuments bug:** malformed class attribute on the info card — fixed. **ProjetDocuments bug:** `responsable?.name` (always empty) → `responsable?.nom` — fixed. **Share-by-email gap:** backend endpoint unreachable — extended DocumentShareModal with an email-CTA branch when the search finds no user. **Dead code:** deleted 285-line orphan `pages/documents/Index.vue`. Pint + build clean. |
 | 2026-05-30 | Phase 2 — Evaluations | Audited EvaluationDashboard + AgentSheet + PendingValidations. **EvaluationDashboard:** used raw `axios` (no Bearer-token interceptor) + dead `useAuthStore` import — switched to `api` wrapper and removed dead import. **AgentSheet:** `statutBadge()` only covered 3 of 7 `TacheStatut` cases — extended (Phase 1.1 pattern). **Flagged not fixed:** AgentSheet PDF export uses `window.open` which can't attach Sanctum Bearer tokens; same pattern likely in Excel export — to revisit together. PendingValidations + PendingRow clean. Build clean. |
 | 2026-05-30 | Phase 2 — Tasks | Audited Taches.vue + TacheTable + WorkspaceTaches + TacheCreateWizard. **WorkspaceTaches bugs:** raw `axios` → `api` wrapper; `projets` filter dropdown was never populated (dead `v-for`) — added `loadProjets()` calling `/projets/list/all`; statut helpers missing `en_attente`/`annule` — extended. **Cross-cutting export fix (also landed here):** AgentSheet PDF + Workspace taches Excel exports switched from `window.open` to blob-download via `api` so the Bearer token is attached. Other pages clean. Build clean. |
+| 2026-05-30 | Phase 2 — Validation circuit | Audited ValidationResultats + ValidationModal + NotificationMenu + ResultatDetailModal. **Critical bug fixed:** reject endpoint path was `/evaluations/${id}/reject` (404) — backend route is `/evaluations/resultats/${id}/reject`; the whole reject flow was silently failing. **Dead code:** deleted orphan `ResultatForm copy.vue`. NotificationMenu + ResultatDetailModal clean. **Flagged not fixed:** `TachesParUtilisateur.vue` uses ValidationModal with the wrong props/events shape — outside this batch's scope. Build clean. |

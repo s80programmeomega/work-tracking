@@ -340,7 +340,7 @@ async function handleValidationConfirmed(data) {
   try {
     const endpoint = action === 'validate'
       ? `/evaluations/resultats-individuels/${resultat.id}/validate-${level}`
-      : `/evaluations/${resultat.id}/reject`
+      : `/evaluations/resultats/${resultat.id}/reject`
 
     const payload = action === 'reject'
       ? { commentaire, level }
