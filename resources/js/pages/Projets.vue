@@ -72,6 +72,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 
@@ -81,6 +82,7 @@ import {
   ProjetDetail
 } from '@/components/projets'
 
+const router = useRouter()
 const activeTab = ref('dashboard')
 const selectedProjetId = ref(null)
 
@@ -94,14 +96,11 @@ const backToList = () => {
 }
 
 const createActivity = () => {
-  // Navigate to activity creation form
-  console.log('Creating activity for project:', selectedProjetId.value)
-  // TODO: Implement activity creation
+  // La création d'activité se fait depuis la liste des activités.
+  router.push({ name: 'Activites' })
 }
 
 const viewActivity = (activityId) => {
-  // Navigate to activity detail
-  console.log('Viewing activity:', activityId)
-  // TODO: Implement activity view
+  router.push({ name: 'activites.show', params: { id: activityId } })
 }
 </script>

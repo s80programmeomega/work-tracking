@@ -99,10 +99,15 @@ For each page: every axios call hits an existing route with matching verb; paylo
 
 | Page | Status | Date | Findings |
 |---|---|---|---|
-| `pages/Projets.vue` | ☐ | | |
-| `pages/projets/*` | ☐ | | |
-| `pages/Activites.vue` | ☐ | | |
-| `pages/ActiviteDetail.vue` | ☐ | | |
+| `pages/Projets.vue` | ✅ | 2026-05-30 | **Bug fixed:** `createActivity` / `viewActivity` were TODO console.log stubs — now route to `Activites` / `activites.show`. Tab system + child components clean. |
+| `pages/Activites.vue` | ✅ | 2026-05-30 | Clean (15-line wrapper around `ActiviteList`). |
+| `pages/projets/Create.vue` | ✅ | 2026-05-30 | **Rebuilt:** was a stub literally rendering "Projets archivés". Now a thin AdminLayout wrapper around the existing `ProjetForm` component with router-aware close/save handlers. Reaches `POST /projets`. |
+| `pages/projets/Edit.vue` | ✅ | 2026-05-30 | **Rebuilt:** same stub problem as Create.vue. Now loads the projet via `useProjets.fetchProjet` and mounts `ProjetForm` with the loaded entity. Reaches `PUT /projets/{id}`. |
+| `pages/projets/Show.vue` | ✅ | 2026-05-30 | **Bug fixed:** `createActivity` was a TODO `console.log` stub — now navigates to the Activites list. `viewActivity` was already navigating but had leftover TODO/console — cleaned. |
+| `pages/projets/MyProjects.vue` | ✅ | 2026-05-30 | Clean. Removed leftover `console.log(projet)` debug. All other API calls go through composables. |
+| `pages/projets/Archived.vue` | ✅ | 2026-05-30 | Clean (uses composables, no direct API calls). |
+| `pages/ActiviteDetail.vue` | ✅ | 2026-05-30 | **Critical bug fixed:** `handleValidation` called `POST /taches/{id}/validate-n{1,2}` (404 — these routes were removed in the Phase 5/8 refactor). Now picks pending resultats from `tache.all_results` and validates each via the resultat-level endpoint `POST /evaluations/resultats-individuels/{resultat}/validate-n{1,2}` (in parallel). The `@validate-n1`/`@validate-n2` bindings now capture the commentaire arg from QuickActionsPanel that was previously dropped. |
+| `pages/Taches.vue` | ✅ | 2026-05-30 | Same critical bug as ActiviteDetail — `handleValidateN1/N2` were calling the dead `/taches/{id}/validate-n{1,2}` routes. Now uses a shared `validateAllPendingForLevel` helper that hits the resultat-level endpoint. |
 
 ### Auth
 
@@ -181,3 +186,4 @@ For each priority-page, walk Chrome DevTools at 375 (sm) / 768 (md) / 1024 (lg).
 | 2026-05-30 | Phase 2 — Evaluations | Audited EvaluationDashboard + AgentSheet + PendingValidations. **EvaluationDashboard:** used raw `axios` (no Bearer-token interceptor) + dead `useAuthStore` import — switched to `api` wrapper and removed dead import. **AgentSheet:** `statutBadge()` only covered 3 of 7 `TacheStatut` cases — extended (Phase 1.1 pattern). **Flagged not fixed:** AgentSheet PDF export uses `window.open` which can't attach Sanctum Bearer tokens; same pattern likely in Excel export — to revisit together. PendingValidations + PendingRow clean. Build clean. |
 | 2026-05-30 | Phase 2 — Tasks | Audited Taches.vue + TacheTable + WorkspaceTaches + TacheCreateWizard. **WorkspaceTaches bugs:** raw `axios` → `api` wrapper; `projets` filter dropdown was never populated (dead `v-for`) — added `loadProjets()` calling `/projets/list/all`; statut helpers missing `en_attente`/`annule` — extended. **Cross-cutting export fix (also landed here):** AgentSheet PDF + Workspace taches Excel exports switched from `window.open` to blob-download via `api` so the Bearer token is attached. Other pages clean. Build clean. |
 | 2026-05-30 | Phase 2 — Validation circuit | Audited ValidationResultats + ValidationModal + NotificationMenu + ResultatDetailModal. **Critical bug fixed:** reject endpoint path was `/evaluations/${id}/reject` (404) — backend route is `/evaluations/resultats/${id}/reject`; the whole reject flow was silently failing. **Dead code:** deleted orphan `ResultatForm copy.vue`. NotificationMenu + ResultatDetailModal clean. **Flagged not fixed:** `TachesParUtilisateur.vue` uses ValidationModal with the wrong props/events shape — outside this batch's scope. Build clean. |
+| 2026-05-30 | Phase 2 — Projects / Activities | Audited Projets, Activites, ActiviteDetail + 5 projets/* pages. **Critical bug fixed:** ActiviteDetail + Taches were calling the dead `POST /taches/{id}/validate-n{1,2}` routes (removed in Phase 5/8 refactor) — now pick pending resultats from `tache.all_results` and validate via the resultat-level endpoint in parallel. **Rebuilt:** Create.vue + Edit.vue placeholder stubs (literally rendered "Projets archivés") replaced with thin wrappers around the existing `ProjetForm` modal, reaching POST /projets and PUT /projets/{id}. **Bugs fixed:** TODO console.log stubs for `createActivity` / `viewActivity` in Projets.vue + Show.vue — now navigate to Activites / activites.show. Cleaned `console.log(projet)` debug in MyProjects. Build clean. |

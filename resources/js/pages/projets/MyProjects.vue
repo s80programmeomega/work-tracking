@@ -649,8 +649,6 @@ const getProjectProgression = (projet) => {
 }
 
 const getProjectActivitiesCount = (projet) => {
-  console.log(projet);
-  
   // Priorité 1: Utiliser le count du backend
   if (projet.activites_count !== undefined && projet.activites_count !== null) {
     return projet.activites_count

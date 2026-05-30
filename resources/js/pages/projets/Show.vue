@@ -113,17 +113,12 @@ const goBack = () => {
 }
 
 const createActivity = () => {
-  // TODO: Open create activity modal or navigate to create page
-  console.log('Create activity for projet:', projetId.value)
+  // L'activité se crée depuis ActiviteDetail (route activites.show).
+  router.push({ name: 'Activites' })
 }
 
 const viewActivity = (activityId) => {
-  // TODO: Navigate to activity detail
-  console.log('View activity:', activityId)
-  router.push({ 
-    name: 'activites.show', 
-    params: { id: activityId } 
-  })
+  router.push({ name: 'activites.show', params: { id: activityId } })
 }
 
 // Watch route changes

@@ -752,8 +752,8 @@
   :tache="selectedTask"
   @close="showTaskDetail = false; selectedTask = null"
   @edit="editTask"
-  @validate-n1="handleValidation('n1', $event)"
-  @validate-n2="handleValidation('n2', $event)"
+  @validate-n1="(tache, commentaire) => handleValidation('n1', tache, commentaire)"
+  @validate-n2="(tache, commentaire) => handleValidation('n2', tache, commentaire)"
 />
 
     </div>
@@ -1170,20 +1170,28 @@ const removeMember = async (member) => {
   }
 }
 
-const handleValidation = async (level, tache) => {
+const handleValidation = async (level, tache, commentaire = '') => {
+  // Post-refactor: la validation se fait au niveau resultat, pas au niveau tâche.
+  // On valide tous les resultats en attente du niveau demandé en parallèle.
+  const matcher = level === 'n1'
+    ? (r) => !r.valide_par_n1
+    : (r) => r.valide_par_n1 && !r.valide_par_n2
+  const pending = (tache.all_results ?? []).filter(matcher)
+  if (!pending.length) {
+    alert('Aucun résultat en attente de validation à ce niveau.')
+    return
+  }
   try {
-    if (level === 'n1') {
-      await api.post(`/taches/${tache.id}/validate-n1`)
-    } else {
-      await api.post(`/taches/${tache.id}/validate-n2`)
-    }
-    
+    await Promise.all(pending.map((r) =>
+      api.post(`/evaluations/resultats-individuels/${r.id}/validate-${level}`, { commentaire })
+    ))
+
     // Recharger les données
     await loadTaches()
     if (showKanbanView.value) {
       await loadKanban()
     }
-    
+
     // Fermer le modal de détail si ouvert
     if (showTaskDetail.value) {
       showTaskDetail.value = false

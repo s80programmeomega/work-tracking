@@ -1,10 +1,29 @@
 <template>
-  <div class="p-6 text-center text-gray-500 dark:text-gray-400">
-    <h1 class="text-xl font-semibold">Projets archivés</h1>
-    <p>Aucun projet archivé pour le moment.</p>
-  </div>
+  <AdminLayout>
+    <ProjetForm
+      :projet="null"
+      @close="goBack"
+      @saved="onSaved"
+    />
+  </AdminLayout>
 </template>
 
 <script setup>
-// futur code JS ici si nécessaire
+import { useRouter } from 'vue-router'
+import AdminLayout from '@/components/layout/AdminLayout.vue'
+import ProjetForm from '@/components/projets/ProjetForm.vue'
+
+const router = useRouter()
+
+const goBack = () => {
+  if (window.history.length > 2) {
+    router.back()
+  } else {
+    router.push({ name: 'projets.my' })
+  }
+}
+
+const onSaved = () => {
+  router.push({ name: 'projets.my' })
+}
 </script>

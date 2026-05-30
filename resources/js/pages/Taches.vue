@@ -658,12 +658,34 @@ const handleValidateTask = async (tache) => {
   }
 }
 
+// Post-refactor: la validation est faite au niveau resultat (pas tâche). On
+// récupère le tache complet pour lire `all_results`, puis on valide tous les
+// resultats en attente du niveau demandé en parallèle.
+async function validateAllPendingForLevel(tache, level, commentaire) {
+  const fresh = tache.all_results
+    ? tache
+    : (await api.get(`/taches/${tache.id}`)).data.data
+  const matcher = level === 'n1'
+    ? (r) => !r.valide_par_n1
+    : (r) => r.valide_par_n1 && !r.valide_par_n2
+  const pending = (fresh.all_results ?? []).filter(matcher)
+  if (!pending.length) {
+    alert('Aucun résultat en attente de validation à ce niveau.')
+    return false
+  }
+  await Promise.all(pending.map((r) =>
+    api.post(`/evaluations/resultats-individuels/${r.id}/validate-${level}`, { commentaire })
+  ))
+  return true
+}
+
 const handleValidateN1 = async (tache) => {
   const commentaire = prompt('Commentaire de validation (optionnel):')
   if (commentaire === null) return
 
   try {
-    await api.post(`/taches/${tache.id}/validate-n1`, { commentaire })
+    const ok = await validateAllPendingForLevel(tache, 'n1', commentaire)
+    if (!ok) return
     await fetchKanbanForActivite(selectedActiviteId.value)
     await loadPendingValidations()
     if (showViewModal.value) {
@@ -680,7 +702,8 @@ const handleValidateN2 = async (tache) => {
   if (commentaire === null) return
 
   try {
-    await api.post(`/taches/${tache.id}/validate-n2`, { commentaire })
+    const ok = await validateAllPendingForLevel(tache, 'n2', commentaire)
+    if (!ok) return
     await fetchKanbanForActivite(selectedActiviteId.value)
     await loadPendingValidations()
     if (showViewModal.value) {
