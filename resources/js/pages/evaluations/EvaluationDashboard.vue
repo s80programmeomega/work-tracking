@@ -218,10 +218,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
-import { useAuthStore } from '@/stores/authStore'
-import axios from 'axios'
-
-const authStore = useAuthStore()
+import api from '@/api/axios'
 
 // Période par défaut : mois courant
 const today = new Date()
@@ -251,7 +248,7 @@ async function fetchDashboard() {
       periode_start: filters.value.periodeStart,
       periode_end:   filters.value.periodeEnd,
     }
-    const res = await axios.get('/api/evaluations/tableau-de-bord', { params })
+    const res = await api.get('/evaluations/tableau-de-bord', { params })
     data.value = res.data.data
   } catch (e) {
     error.value = e.response?.data?.message ?? 'Erreur lors du chargement du tableau de bord.'
