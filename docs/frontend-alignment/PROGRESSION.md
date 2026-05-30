@@ -35,10 +35,12 @@ For each page: every axios call hits an existing route with matching verb; paylo
 
 | Page | Status | Date | Findings |
 |---|---|---|---|
-| `pages/admin/AdminDashboard.vue` | ☐ | | |
-| `pages/admin/AdminWorkspaces.vue` | ☐ | | |
-| `pages/admin/AdminUsers.vue` | ☐ | | |
-| `pages/admin/AdminRoles.vue` | ☐ | | |
+| `pages/admin/AdminDashboard.vue` | ✅ | 2026-05-30 | Clean. All response dereferences match `AdminController::stats`; `ws.subscription.*` in recent-workspaces matches `SubscriptionService::summary()`. |
+| `pages/admin/AdminWorkspaces.vue` | ✅ | 2026-05-30 | **Bug fixed:** Extend-Trial modal pre-filled `days` with `remaining_trial_days` but the endpoint overwrites total `trial_duration_days` — saving without editing would shrink the trial. Now pre-fills with `trial_duration_days`. |
+| `pages/admin/AdminUsers.vue` | ✅ | 2026-05-30 | **Gap fixed:** Backend `PATCH /admin/users/{user}/role` had no UI. Added Change-role modal (role dropdown + is_super_admin toggle) matching the extend/suspend pattern. |
+| `pages/admin/AdminRoles.vue` | ✅ | 2026-05-30 | Clean. GET /admin/roles + PATCH /admin/roles/{role}/permissions both correctly wired with matching payload + response shapes. |
+
+**Cross-cutting note (not fixed in this pass):** All four admin pages hardcode English text despite `lang/{fr,en}/admin.php` existing with the right keys. Inconsistent with the rest of the app's i18n pattern — to be revisited in a dedicated translation pass.
 
 ### Subscription / trial (Task 13)
 
@@ -153,7 +155,8 @@ For each priority-page, walk Chrome DevTools at 375 (sm) / 768 (md) / 1024 (lg).
 | 4.5 | Statut badge renders `en_attente`/`annule` correctly | Dusk | ⏭ | | Deferred to Phase 2 page sweep. |
 | 4.6 | Notification bell shows `document_shared` toast | Dusk | ⏭ | | Deferred to Phase 2 page sweep. |
 | 4.7 | Inline edit dropdown gated on `can_inline_edit` (stagiaire = no, cadre = yes) | Dusk | ⏭ | | Deferred to Phase 2 page sweep. Contract is covered by PHPUnit 4.4. |
-| 4.8+ | Phase 2 page Dusk happy paths (one row per page that got a fix) | Dusk | ☐ | | |
+| 4.8 | `updateUserRole` endpoint: 403 regular / 200 super_admin / 422 invalid role | PHPUnit Feature | ✅ | 2026-05-30 | 3 tests appended to `tests/Feature/Admin/PlatformDashboardTest.php`. |
+| 4.9+ | Phase 2 page Dusk happy paths (one row per page that got a fix) | Dusk | ☐ | | Pending — AdminWorkspaces extend-trial regression + AdminUsers role-change happy path. |
 
 ---
 
@@ -163,3 +166,4 @@ For each priority-page, walk Chrome DevTools at 375 (sm) / 768 (md) / 1024 (lg).
 |---|---|---|
 | 2026-05-29 | Planning | Plan + progression docs created under `docs/frontend-alignment/`. Backend route inventory + frontend audit complete. Awaiting approval to start Phase 1. |
 | 2026-05-29 | Phase 1 complete | Branch `feature/frontend-alignment-phase-1` cut from `jonas`. All 14 Phase 1 fixes shipped + 6 new PHPUnit feature tests in `tests/Feature/FrontendAlignment/`. Suite: 651 tests passing (was 627 + 6 new + recent additions). Pint clean. PHPStan level-5 clean. `npm run build` clean. Dusk happy-paths deferred to Phase 2 per-page sweep (the underlying contracts are covered by PHPUnit; UI surfaces will get Dusk as each page is audited). |
+| 2026-05-30 | Phase 2 — Admin section | Audited 4 admin pages. AdminDashboard + AdminRoles clean. **AdminWorkspaces bug:** extend-trial modal pre-filled `remaining_trial_days` instead of `trial_duration_days` — could silently shrink the trial. Fixed. **AdminUsers gap:** Change-role modal added to reach `PATCH /admin/users/{user}/role` (was unreachable from the UI). 3 new PHPUnit tests for the role endpoint (403 / 200 / 422). All gates green: pint, 14/14 PlatformDashboardTest, PHPStan level-5, `npm run build`. Dusk happy-paths still deferred. |

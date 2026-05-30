@@ -251,7 +251,9 @@ const fetchWorkspaces = async () => {
 // Extend trial
 const extendModal = ref({ open: false, workspace: null, days: 30, loading: false });
 const openExtendModal = (ws) => {
-  extendModal.value = { open: true, workspace: ws, days: ws.subscription?.remaining_trial_days ?? 30, loading: false };
+  // L'endpoint extendTrial écrase trial_duration_days (durée totale), pas le reste à courir.
+  // Pré-remplir avec remaining_trial_days raccourcirait la période d'essai à la sauvegarde.
+  extendModal.value = { open: true, workspace: ws, days: ws.subscription?.trial_duration_days ?? 30, loading: false };
 };
 const confirmExtend = async () => {
   extendModal.value.loading = true;
