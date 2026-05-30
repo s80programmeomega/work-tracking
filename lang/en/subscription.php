@@ -6,6 +6,7 @@ return [
         'expires_in' => 'Expires in :days day(s)',
         'expired' => 'Your trial period has expired. Please upgrade to a paid plan to continue.',
         'expiring_soon' => 'Your trial is expiring soon',
+        'dismiss' => 'Dismiss',
     ],
     'limits' => [
         'members' => 'You have reached the member limit (:max members) for the trial plan.',

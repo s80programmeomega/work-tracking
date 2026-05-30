@@ -46,8 +46,8 @@ For each page: every axios call hits an existing route with matching verb; paylo
 
 | Page | Status | Date | Findings |
 |---|---|---|---|
-| `components/workspace/TrialBanner.vue` | ☐ | | |
-| Workspace settings page | ☐ | | |
+| `components/common/TrialBanner.vue` | ✅ | 2026-05-30 | **Bug fixed:** dismiss button used `subscription.trial.expiring_soon` (the warning sentence) as its label — confusing CTA. Replaced with a proper × icon + `subscription.trial.dismiss` aria-label/title. New `dismiss` key in `lang/{fr,en}/subscription.php`. |
+| `pages/workspaces/Subscription.vue` | ✅ | 2026-05-30 | Clean. All `summary.*` dereferences match `SubscriptionService::summary()`. **Gap noted (not fixed):** `PATCH /workspaces/{id}/subscription` (subscription_mode trial→paid) has no UI — likely intentional pending payment integration. |
 
 ### Documents (Task 12)
 
@@ -167,3 +167,4 @@ For each priority-page, walk Chrome DevTools at 375 (sm) / 768 (md) / 1024 (lg).
 | 2026-05-29 | Planning | Plan + progression docs created under `docs/frontend-alignment/`. Backend route inventory + frontend audit complete. Awaiting approval to start Phase 1. |
 | 2026-05-29 | Phase 1 complete | Branch `feature/frontend-alignment-phase-1` cut from `jonas`. All 14 Phase 1 fixes shipped + 6 new PHPUnit feature tests in `tests/Feature/FrontendAlignment/`. Suite: 651 tests passing (was 627 + 6 new + recent additions). Pint clean. PHPStan level-5 clean. `npm run build` clean. Dusk happy-paths deferred to Phase 2 per-page sweep (the underlying contracts are covered by PHPUnit; UI surfaces will get Dusk as each page is audited). |
 | 2026-05-30 | Phase 2 — Admin section | Audited 4 admin pages. AdminDashboard + AdminRoles clean. **AdminWorkspaces bug:** extend-trial modal pre-filled `remaining_trial_days` instead of `trial_duration_days` — could silently shrink the trial. Fixed. **AdminUsers gap:** Change-role modal added to reach `PATCH /admin/users/{user}/role` (was unreachable from the UI). 3 new PHPUnit tests for the role endpoint (403 / 200 / 422). All gates green: pint, 14/14 PlatformDashboardTest, PHPStan level-5, `npm run build`. Dusk happy-paths still deferred. |
+| 2026-05-30 | Phase 2 — Subscription / trial | Audited TrialBanner + Subscription page. **TrialBanner bug:** dismiss button used the warning sentence as its label — fixed (× icon + new `dismiss` i18n key). Subscription page clean. Gap noted: `PATCH /workspaces/{id}/subscription` (trial→paid) has no UI, likely intentional. Pint + build clean. |

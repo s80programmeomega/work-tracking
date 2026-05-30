@@ -6,6 +6,7 @@ return [
         'expires_in' => 'Expire dans :days jour(s)',
         'expired' => 'Votre période d\'essai a expiré. Veuillez passer à un plan payant pour continuer.',
         'expiring_soon' => 'Votre essai expire bientôt',
+        'dismiss' => 'Fermer',
     ],
     'limits' => [
         'members' => 'Vous avez atteint la limite de :max membres pour le plan d\'essai.',
