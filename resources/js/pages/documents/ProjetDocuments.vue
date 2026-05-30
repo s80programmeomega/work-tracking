@@ -35,7 +35,7 @@
           <div class="mt-3 flex flex-wrap gap-3 text-sm">
             <span class="inline-flex items-center gap-1 text-gray-600 dark:text-gray-400">
               <UserIcon class="h-4 w-4" />
-              {{ projet.responsable?.name }}
+              {{ projet.responsable?.nom }}
             </span>
             <span class="inline-flex items-center gap-1 text-gray-600 dark:text-gray-400">
               <CalendarIcon class="h-4 w-4" />

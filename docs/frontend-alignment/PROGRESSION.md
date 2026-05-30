@@ -53,10 +53,15 @@ For each page: every axios call hits an existing route with matching verb; paylo
 
 | Page | Status | Date | Findings |
 |---|---|---|---|
-| `pages/Documents.vue` | ☐ | | |
-| `pages/workspace/WorkspaceDocuments.vue` | ☐ | | |
-| `pages/documents/*` | ☐ | | |
-| Share-by-email modal | ☐ | | |
+| `pages/Documents.vue` | ✅ | 2026-05-30 | Clean. `GET /documents/stats` response shape matches `DocumentController::globalStats` exactly. Tab system + browser/list components correctly wired. |
+| `pages/documents/WorkspaceDocuments.vue` | ✅ | 2026-05-30 | **Bug fixed:** malformed class attribute (stray `>` + missing `bg-white` / `dark:bg-white/[0.03]`) on the workspace info card. Endpoint + permission gating clean. |
+| `pages/documents/ProjetDocuments.vue` | ✅ | 2026-05-30 | **Bug fixed:** `projet.responsable?.name` → `projet.responsable?.nom` (UserResource uses `nom`, never `name`). The previous code silently rendered an empty span. |
+| `pages/documents/ActiviteDocuments.vue` | ✅ | 2026-05-30 | Clean. |
+| `pages/documents/TacheDocuments.vue` | ✅ | 2026-05-30 | Clean. |
+| `pages/documents/Index.vue` | 🗑 | 2026-05-30 | **Deleted:** 285-line half-finished draft, no router or import references. Empty handler stubs, broken DocumentViewerModal import, wrong breadcrumb title ("Gestion des Activités"). Documents.vue covers the same surface. |
+| Share-by-email flow | ✅ | 2026-05-30 | **Gap closed:** `POST /documents/{id}/share-by-email` had zero callers in the frontend. Extended DocumentShareModal so that when the search query is a valid email matching no registered user, a "Envoyer une invitation par email" CTA appears and hits the endpoint. Existing PHPUnit coverage in `tests/Feature/Task12/DocumentManagementTest::share_by_email_sends_notification_to_external_email` still applies. |
+
+**Style note (not fixed):** ProjetDocuments / ActiviteDocuments / TacheDocuments each hardcode upload-permission logic. The `useProjet/useActivite/useTachePermissions` composables don't yet expose a `canUploadDocuments` helper — adding one would centralize this. Flagged for a future composable pass.
 
 ### Evaluations (Tasks 7 / 9 / 10 / 16)
 
@@ -168,3 +173,4 @@ For each priority-page, walk Chrome DevTools at 375 (sm) / 768 (md) / 1024 (lg).
 | 2026-05-29 | Phase 1 complete | Branch `feature/frontend-alignment-phase-1` cut from `jonas`. All 14 Phase 1 fixes shipped + 6 new PHPUnit feature tests in `tests/Feature/FrontendAlignment/`. Suite: 651 tests passing (was 627 + 6 new + recent additions). Pint clean. PHPStan level-5 clean. `npm run build` clean. Dusk happy-paths deferred to Phase 2 per-page sweep (the underlying contracts are covered by PHPUnit; UI surfaces will get Dusk as each page is audited). |
 | 2026-05-30 | Phase 2 — Admin section | Audited 4 admin pages. AdminDashboard + AdminRoles clean. **AdminWorkspaces bug:** extend-trial modal pre-filled `remaining_trial_days` instead of `trial_duration_days` — could silently shrink the trial. Fixed. **AdminUsers gap:** Change-role modal added to reach `PATCH /admin/users/{user}/role` (was unreachable from the UI). 3 new PHPUnit tests for the role endpoint (403 / 200 / 422). All gates green: pint, 14/14 PlatformDashboardTest, PHPStan level-5, `npm run build`. Dusk happy-paths still deferred. |
 | 2026-05-30 | Phase 2 — Subscription / trial | Audited TrialBanner + Subscription page. **TrialBanner bug:** dismiss button used the warning sentence as its label — fixed (× icon + new `dismiss` i18n key). Subscription page clean. Gap noted: `PATCH /workspaces/{id}/subscription` (trial→paid) has no UI, likely intentional. Pint + build clean. |
+| 2026-05-30 | Phase 2 — Documents | Audited Documents.vue + 4 hierarchical doc pages + share modal. **WorkspaceDocuments bug:** malformed class attribute on the info card — fixed. **ProjetDocuments bug:** `responsable?.name` (always empty) → `responsable?.nom` — fixed. **Share-by-email gap:** backend endpoint unreachable — extended DocumentShareModal with an email-CTA branch when the search finds no user. **Dead code:** deleted 285-line orphan `pages/documents/Index.vue`. Pint + build clean. |
