@@ -196,7 +196,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
-import axios from 'axios'
+import api from '@/api/axios'
 
 const router = useRouter()
 
@@ -227,7 +227,7 @@ async function fetchTaches(page = 1) {
     if (filters.value.activiteId) params.activite_id = filters.value.activiteId
     if (filters.value.assigneeId) params.assignee_id = filters.value.assigneeId
 
-    const res    = await axios.get('/api/workspace/taches', { params })
+    const res    = await api.get('/workspace/taches', { params })
     taches.value = res.data.data
     meta.value   = res.data.meta
   } catch (e) {
@@ -242,13 +242,29 @@ function clearFilters() {
   fetchTaches(1)
 }
 
-function exportExcel() {
-  const params = new URLSearchParams()
-  if (filters.value.statut) params.append('statut', filters.value.statut)
-  if (filters.value.projetId) params.append('projet_id', filters.value.projetId)
-  if (filters.value.activiteId) params.append('activite_id', filters.value.activiteId)
-  if (filters.value.assigneeId) params.append('assignee_id', filters.value.assigneeId)
-  window.open(`/api/workspace/taches/export-excel?${params}`, '_blank')
+async function exportExcel() {
+  // window.open ne transporte pas l'en-tête Authorization Bearer du localStorage —
+  // on télécharge via api (qui ajoute le token via son intercepteur) et on déclenche
+  // une ancre synthétique avec un object-URL.
+  const params = {}
+  if (filters.value.statut) params.statut = filters.value.statut
+  if (filters.value.projetId) params.projet_id = filters.value.projetId
+  if (filters.value.activiteId) params.activite_id = filters.value.activiteId
+  if (filters.value.assigneeId) params.assignee_id = filters.value.assigneeId
+  try {
+    const res = await api.get('/workspace/taches/export-excel', { params, responseType: 'blob' })
+    const blob = new Blob([res.data], { type: res.headers['content-type'] || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `taches-workspace-${new Date().toISOString().slice(0, 10)}.xlsx`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+  } catch (e) {
+    error.value = e.response?.data?.message ?? 'Échec de l\'export Excel.'
+  }
 }
 
 function goToTache(tache) {
@@ -264,9 +280,11 @@ function statutLabel(statut) {
   const map = {
     a_faire: 'À faire',
     en_cours: 'En cours',
+    en_attente: 'En attente',
     termine: 'Terminé',
     en_retard: 'En retard',
     a_refaire: 'À refaire',
+    annule: 'Annulé',
   }
   return map[statut] ?? statut
 }
@@ -275,9 +293,11 @@ function statutBadge(statut) {
   const map = {
     a_faire: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
     en_cours: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    en_attente: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
     termine: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
     en_retard: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
     a_refaire: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+    annule: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
   }
   return map[statut] ?? 'bg-gray-100 text-gray-700 dark:text-gray-200'
 }
@@ -292,6 +312,18 @@ function prioriteBadge(priorite) {
   return map[priorite] ?? 'bg-gray-100 text-gray-600 dark:text-gray-300'
 }
 
-onMounted(fetchTaches)
+async function loadProjets() {
+  // Liste tous les projets pour alimenter le filtre du dropdown (owner uniquement).
+  try {
+    const res = await api.get('/projets/list/all')
+    projets.value = res.data?.data ?? res.data ?? []
+  } catch {
+    // non-bloquant — le dropdown restera vide si l'appel échoue.
+  }
+}
+
+onMounted(async () => {
+  await Promise.all([loadProjets(), fetchTaches()])
+})
 
 </script>

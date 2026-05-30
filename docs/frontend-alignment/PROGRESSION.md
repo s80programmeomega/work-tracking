@@ -70,17 +70,18 @@ For each page: every axios call hits an existing route with matching verb; paylo
 | `pages/evaluations/EvaluationDashboard.vue` | ✅ | 2026-05-30 | **Bugs fixed:** Used raw `axios` instead of the project's `api` wrapper — no automatic Bearer-token attachment, only worked because Sanctum stateful session was present. Also had a dead `useAuthStore` import. Switched to `api`, removed dead import. Response dereferences (`top_performers`, `scores`, `alerts.escalades_abusives`, `alerts.high_inaction_rate`) all match `EvaluationController::evaluationDashboard`. |
 | `pages/evaluations/AgentSheet.vue` | ✅ | 2026-05-30 | **Bug fixed:** `statutBadge()` only mapped 3 of 7 `TacheStatut` cases — same pattern as Phase 1.1. Extended to all 7 (`en_attente`, `en_retard`, `a_refaire`, `annule`). Endpoint + response shapes (`sheet.user`, `score_global`, `indicators`, `criteria`, sections) match `EvaluationController::agentSheet` / `agentSheetSections`. |
 | `pages/evaluations/PendingValidations.vue` + `PendingRow.vue` | ✅ | 2026-05-30 | Clean. `GET /evaluations/validations/en-attente` reads `pending_n1` / `pending_n2` / `counts` from `EvaluationController::pendingValidationsDashboard`. |
-| Agent sheet PDF export | ⚠️ | 2026-05-30 | **Flagged (not fixed):** `exportSheet()` uses `window.open('/api/.../export-pdf?...')` which cannot attach the Sanctum Bearer token from localStorage. Works today only because the Sanctum stateful session cookie is also present. Fragile for pure-token deployments. Suggested fix: fetch the file with `api.get(..., { responseType: 'blob' })` and trigger a synthetic anchor download. Same pattern used by the Workspace taches Excel export — to revisit together. |
-| Workspace taches Excel export | (next batch) | | Audited as part of the Tasks batch since the button lives in `pages/workspace/WorkspaceTaches.vue`. |
+| Agent sheet PDF export | ✅ | 2026-05-30 | Fix landed alongside the Tasks batch (see below). `window.open` → `api.get(..., { responseType: 'blob' })` + synthetic anchor download. |
+| Workspace taches Excel export | ✅ | 2026-05-30 | Same blob-download pattern as the PDF export. |
 
 ### Tasks (Tasks 11 / 15 / 16)
 
 | Page | Status | Date | Findings |
 |---|---|---|---|
-| `pages/Taches.vue` | ☐ | | |
-| `components/taches/TacheTable.vue` | ☐ | | |
-| `pages/workspace/WorkspaceTaches.vue` | ☐ | | |
-| Task creation wizard | ☐ | | |
+| `pages/Taches.vue` | ✅ | 2026-05-30 | Clean. Uses `api` wrapper, calls match `/activites/mes-activites`, `/taches`, `/taches/:id`, `/taches/:id/unarchive`, `/taches/:id/validate-n1`/`-n2`, `/taches/en-attente`. Console.log debug noise on a few lines — out of scope. |
+| `components/taches/TacheTable.vue` | ✅ | 2026-05-30 | Already audited and fixed in Phase 1.1 (`en_attente`/`annule` badges) + Phase 1.3 (`can_inline_edit` gating). No further issues. |
+| `pages/workspace/WorkspaceTaches.vue` | ✅ | 2026-05-30 | **3 bugs fixed:** (a) raw `axios` → `api` (Bearer-token interceptor); (b) `projets` ref declared and used by the filter dropdown but never populated — added `loadProjets()` calling `/projets/list/all`; (c) statut helpers missing `en_attente`/`annule` (Phase 1.1 pattern) — added. (d) Excel export switched from `window.open` to blob-download via `api` so the Bearer token is attached. |
+| `pages/evaluations/AgentSheet.vue` (export) | ✅ | 2026-05-30 | Cross-cutting fix from the previous batch's flag: PDF export switched from `window.open` to blob-download via `api`. |
+| `components/taches/TacheCreateWizard.vue` | ✅ | 2026-05-30 | Clean. Uses `api`, validates each step, FormData submission matches `TacheController::store`. |
 
 ### Validation circuit (Tasks 5 – 8)
 
@@ -175,3 +176,4 @@ For each priority-page, walk Chrome DevTools at 375 (sm) / 768 (md) / 1024 (lg).
 | 2026-05-30 | Phase 2 — Subscription / trial | Audited TrialBanner + Subscription page. **TrialBanner bug:** dismiss button used the warning sentence as its label — fixed (× icon + new `dismiss` i18n key). Subscription page clean. Gap noted: `PATCH /workspaces/{id}/subscription` (trial→paid) has no UI, likely intentional. Pint + build clean. |
 | 2026-05-30 | Phase 2 — Documents | Audited Documents.vue + 4 hierarchical doc pages + share modal. **WorkspaceDocuments bug:** malformed class attribute on the info card — fixed. **ProjetDocuments bug:** `responsable?.name` (always empty) → `responsable?.nom` — fixed. **Share-by-email gap:** backend endpoint unreachable — extended DocumentShareModal with an email-CTA branch when the search finds no user. **Dead code:** deleted 285-line orphan `pages/documents/Index.vue`. Pint + build clean. |
 | 2026-05-30 | Phase 2 — Evaluations | Audited EvaluationDashboard + AgentSheet + PendingValidations. **EvaluationDashboard:** used raw `axios` (no Bearer-token interceptor) + dead `useAuthStore` import — switched to `api` wrapper and removed dead import. **AgentSheet:** `statutBadge()` only covered 3 of 7 `TacheStatut` cases — extended (Phase 1.1 pattern). **Flagged not fixed:** AgentSheet PDF export uses `window.open` which can't attach Sanctum Bearer tokens; same pattern likely in Excel export — to revisit together. PendingValidations + PendingRow clean. Build clean. |
+| 2026-05-30 | Phase 2 — Tasks | Audited Taches.vue + TacheTable + WorkspaceTaches + TacheCreateWizard. **WorkspaceTaches bugs:** raw `axios` → `api` wrapper; `projets` filter dropdown was never populated (dead `v-for`) — added `loadProjets()` calling `/projets/list/all`; statut helpers missing `en_attente`/`annule` — extended. **Cross-cutting export fix (also landed here):** AgentSheet PDF + Workspace taches Excel exports switched from `window.open` to blob-download via `api` so the Bearer token is attached. Other pages clean. Build clean. |

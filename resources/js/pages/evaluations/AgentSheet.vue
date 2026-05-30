@@ -504,9 +504,27 @@ function openDrillDown(item) {
   drillItem.value = item
 }
 
-function exportSheet() {
-  const params = new URLSearchParams({ start: filters.value.start, end: filters.value.end })
-  window.open(`/api/evaluations/personnel/${userId.value}/export-pdf?${params}`, '_blank')
+async function exportSheet() {
+  // window.open ne transmet pas l'en-tête Authorization Bearer du localStorage.
+  // On télécharge via api (intercepteur ajoute le token) puis on déclenche une
+  // ancre synthétique avec un object-URL.
+  try {
+    const res = await api.get(`/evaluations/personnel/${userId.value}/export-pdf`, {
+      params: { start: filters.value.start, end: filters.value.end },
+      responseType: 'blob',
+    })
+    const blob = new Blob([res.data], { type: res.headers['content-type'] || 'application/pdf' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `fiche-evaluation-${userId.value}-${filters.value.start}-${filters.value.end}.pdf`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+  } catch (e) {
+    error.value = e.response?.data?.message || 'Échec de l\'export PDF.'
+  }
 }
 
 onMounted(() => {
