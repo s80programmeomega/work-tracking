@@ -14,7 +14,7 @@
       ]"
     >
       <!-- Icon -->
-      <div class="flex-shrink-0">
+      <div class="shrink-0">
         <component
           :is="getNotificationIcon(notification.type)"
           class="w-5 h-5"
@@ -31,7 +31,7 @@
       <!-- Close button -->
       <button
         @click="removeNotification(notification.id)"
-        class="ml-4 flex-shrink-0 text-gray-400 hover:text-gray-500 dark:text-gray-400"
+        class="ml-4 shrink-0 text-gray-400 hover:text-gray-500 dark:text-gray-400"
       >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -67,10 +67,10 @@ const emit = defineEmits(['remove'])
 
 const getNotificationClass = (type) => {
   const classes = {
-    success: 'bg-green-50 text-green-800 border-green-200',
-    error: 'bg-red-50 text-red-800 border-red-200',
-    warning: 'bg-yellow-50 text-yellow-800 border-yellow-200',
-    info: 'bg-blue-50 text-blue-800 border-blue-200'
+    success: 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300 border-green-200 dark:border-green-700',
+    error: 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 border-red-200 dark:border-red-700',
+    warning: 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300 border-yellow-200 dark:border-yellow-700',
+    info: 'bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-700'
   }
   return classes[type] || classes.info
 }

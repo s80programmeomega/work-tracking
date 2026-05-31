@@ -1,6 +1,7 @@
 <!-- resources\js\components\layout\header\NotificationItem.vue -->
 <template>
   <div
+    dusk="notification-item"
     class="group relative flex gap-3 border-b border-gray-100 dark:border-gray-800 p-4 cursor-pointer transition-colors duration-150 hover:bg-gray-50 dark:hover:bg-gray-800/50"
     :class="{ 'border-l-2 border-l-brand-500': !notification.read_at }"
     @click="handleClick"

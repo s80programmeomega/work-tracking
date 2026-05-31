@@ -34,8 +34,8 @@
       </div>
 
       <!-- Filters -->
-      <div class="bg-white dark:bg-gray-800 p-4 rounded-3 border border-gray-200 dark:border-gray-700">
-        <div class="flex flex-col space-y-4 md:flex-row md:items-center md:space-y-0 md:space-x-4">
+      <div class="bg-white dark:bg-gray-800 p-4 rounded-3 border border-gray-200 dark:border-gray-700 space-y-3">
+        <div class="flex flex-wrap items-center gap-4">
           <div class="flex-1">
             <input
               v-model="filters.search"
@@ -66,6 +66,9 @@
             Réinitialiser
           </button>
         </div>
+
+        <!-- Date range filter -->
+        <DateRangeFilter @change="onDateRangeChange" />
       </div>
 
       <!-- Loading -->
@@ -89,11 +92,11 @@
                 <th class="px-6 py-3 font-medium text-gray-500 dark:text-gray-400">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody ref="tbodyRef">
               <tr
                 v-for="activite in activites"
                 :key="activite.id"
-                class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                class="stagger-item border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
                 <td class="px-6 py-4">
                   <div class="cursor-pointer group" @click="viewActivityDetail(activite)">
@@ -262,15 +265,20 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useActivites } from '@/composables/useActivites'
+import { useStagger } from '@/composables/useAnimations'
 import ActiviteDetail from '@/pages/ActiviteDetail.vue'
 import ActiviteForm from './ActiviteForm.vue'
+import DateRangeFilter from '@/components/common/DateRangeFilter.vue'
 
 const { fetchActivites, activites, loading, deleteActivite: deleteAct, pagination, getStatusLabel,getStatusClass ,fetchActiviteTaches } = useActivites()
+const { staggerRef: tbodyRef, applyStagger } = useStagger(40)
 
 const filters = ref({
   search: '',
   status: '',
-  page: 1
+  page: 1,
+  date_from: null,
+  date_to: null,
 })
 
 const showCreateForm = ref(false)
@@ -333,6 +341,7 @@ const formatDate = (dateString) => {
 // Méthodes existantes (conservées)
 const loadActivites = async () => {
   await fetchActivites(filters.value)
+  applyStagger()
 }
 
 const editActivite = (activite) => {
@@ -348,11 +357,20 @@ const debouncedSearch = () => {
   }, 500)
 }
 
+const onDateRangeChange = ({ from, to }) => {
+  filters.value.date_from = from
+  filters.value.date_to = to
+  filters.value.page = 1
+  loadActivites()
+}
+
 const resetFilters = () => {
   filters.value = {
     search: '',
     status: '',
-    page: 1
+    page: 1,
+    date_from: null,
+    date_to: null,
   }
   loadActivites()
 }

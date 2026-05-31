@@ -46,12 +46,13 @@
         <div v-else-if="!rows.pending_n1.length" class="text-center py-8 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded">
           Aucun résultat en attente N1
         </div>
-        <div v-else class="space-y-2">
+        <div v-else ref="n1Ref" class="space-y-2">
           <PendingRow
             v-for="row in rows.pending_n1"
             :key="`n1-${row.id}`"
             :row="row"
             level="n1"
+            class="stagger-item"
             @open="openTask"
           />
         </div>
@@ -68,12 +69,13 @@
         <div v-else-if="!rows.pending_n2.length" class="text-center py-8 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded">
           Aucun résultat en attente N2
         </div>
-        <div v-else class="space-y-2">
+        <div v-else ref="n2Ref" class="space-y-2">
           <PendingRow
             v-for="row in rows.pending_n2"
             :key="`n2-${row.id}`"
             :row="row"
             level="n2"
+            class="stagger-item"
             @open="openTask"
           />
         </div>
@@ -88,6 +90,7 @@ import { useRouter } from 'vue-router'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import StatCard from '@/components/common/StatCard.vue'
 import PendingRow from './PendingRow.vue'
+import { useStagger } from '@/composables/useAnimations'
 import api from '@/api/axios'
 
 const router = useRouter()
@@ -95,6 +98,8 @@ const loading = ref(false)
 const error = ref(null)
 const rows = ref({ pending_n1: [], pending_n2: [] })
 const counts = ref({ n1: 0, n2: 0, urgent: 0, total: 0 })
+const { staggerRef: n1Ref, applyStagger: applyN1Stagger } = useStagger(40)
+const { staggerRef: n2Ref, applyStagger: applyN2Stagger } = useStagger(40)
 
 const fetchData = async () => {
   loading.value = true
@@ -104,6 +109,8 @@ const fetchData = async () => {
     rows.value.pending_n1 = res.data?.data?.pending_n1 ?? []
     rows.value.pending_n2 = res.data?.data?.pending_n2 ?? []
     counts.value = res.data?.data?.counts ?? { n1: 0, n2: 0, urgent: 0, total: 0 }
+    applyN1Stagger()
+    applyN2Stagger()
   } catch (err) {
     error.value = err.response?.data?.message || 'Erreur de chargement'
   } finally {

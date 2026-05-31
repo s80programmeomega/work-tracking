@@ -521,7 +521,7 @@
                 :checked="formData.assignee_ids.includes(user.id)"
                 :disabled="user.id === formData.responsable_id || !canAssignUsers"
                 @change="toggleAssignee(user.id)"
-                class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0"
+                class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-blue-600 focus:ring-blue-500 flex-shrink-0"
               />
               <span
                 class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
@@ -572,7 +572,7 @@
                   :class="formData.validation_n1_required ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
                     : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'">
                   <input v-model="formData.validation_n1_required" type="checkbox"
-                    class="mt-1 rounded border-gray-300 text-green-600 focus:ring-green-500" />
+                    class="mt-1 rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-green-600 focus:ring-green-500" />
                   <div class="flex-1">
                     <span class="block text-sm font-bold text-gray-900 dark:text-white">Validation N1 requise</span>
                     <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Par le responsable d'activité</p>
@@ -583,7 +583,7 @@
                   :class="formData.validation_n2_required ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
                     : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'">
                   <input v-model="formData.validation_n2_required" type="checkbox"
-                    class="mt-1 rounded border-gray-300 text-purple-600 focus:ring-purple-500" />
+                    class="mt-1 rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-purple-600 focus:ring-purple-500" />
                   <div class="flex-1">
                     <span class="block text-sm font-bold text-gray-900 dark:text-white">Validation N2 requise</span>
                     <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Par le responsable de projet</p>

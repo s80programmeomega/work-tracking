@@ -9,12 +9,12 @@
       ]" 
     />
     
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div class="bg-gray-50 dark:bg-gray-900 py-8">
       <div class="container mx-auto px-4">
         <!-- Header -->
         <div class="mb-8">
-          <div class="flex items-center justify-between">
-            <div>
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div class="min-w-0">
               <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
                 Invitations en attente
               </h1>
@@ -22,7 +22,7 @@
                 Gérez toutes les invitations en attente de réponse
               </p>
             </div>
-            <div class="flex items-center gap-4">
+            <div class="flex flex-wrap items-center gap-4">
               <!-- Global Stats -->
               <div class="flex items-center gap-6">
                 <div class="text-center">
@@ -125,11 +125,11 @@
         </div>
 
         <!-- Invitations List -->
-        <div v-else class="space-y-4">
+        <div v-else ref="listRef" class="space-y-4">
           <div
             v-for="invitation in filteredInvitations"
             :key="invitation.id"
-            class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-6 transition-shadow"
+            class="stagger-item bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-6 transition-shadow"
           >
             <div class="flex items-start justify-between">
               <!-- Left Section -->
@@ -296,6 +296,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useWorkspace } from '@/composables/useWorkspace'
+import { useStagger } from '@/composables/useAnimations'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import {
@@ -460,6 +461,7 @@ const loadData = async () => {
     
     // Données mockées pour le moment
     invitations.value = []
+    applyStagger()
     statistics.value = {
       total_invitations: 0,
       pending_invitations: 0,

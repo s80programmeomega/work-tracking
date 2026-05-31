@@ -16,18 +16,28 @@
 
 ## Current Session
 
-**Date:** 2026-05-29
-**Session goal:** Static analysis cleanup — replace abandoned larastan, add @property/@mixin/@responseField annotations to all 16 resources, fix 154 → 0 PHPStan errors
-**Branch:** `chore/test-coverage-expansion`
-**Status:** Complete — PHPStan level 5 clean, 627 tests passing.
+**Date:** 2026-05-31
+**Session goal:** Frontend alignment Phase 3 — responsive fixes for all ~17 pages found in the sweep
+**Branch:** `feature/frontend-alignment-phase-1`
+**Status:** In progress — all fixes applied, tests running.
 
 ---
 
 ## Current Task
 
-**Task:** Document management polish + notification fixes
-**Branch:** `feature/design-system-v1`
-**Status:** Complete — awaiting push.
+**Task:** Frontend Alignment Phase 3 responsive fixes
+**Branch:** `feature/frontend-alignment-phase-1`
+**Status:** Complete — 654 tests passing. Awaiting push.
+
+**What was done this session:**
+- Pattern A (flex-wrap): added `flex-wrap gap-3` + `min-w-0` to header rows in 12 pages: MyProjects, Archived, Taches, TachesAssignees, TachesResponsable, TachesParUtilisateur, LabelsManagement, LabelTemplates, workspaces/Index, Teams, Users/Invitations. ActiviteList filter row switched from `md:flex-row` to `flex-wrap gap-4`.
+- Pattern B (table overflow): wrapped `<table>` in `<div class="overflow-x-auto">` in AdminUsers and WorkspaceTaches.
+- Pattern C (tab strip overflow): ValidationResultats tab strip and TacheDetail `<nav>` both wrapped in `overflow-x-auto` + inner content given `min-w-max`.
+- Router fix: created `TachesEnRetard.vue` (calls `GET /taches/en-retard`) and restored the route before `/taches/:id` — eliminates the "en-retard" → TacheDetail 404 collision.
+
+**What to do next:**
+1. Push `feature/frontend-alignment-phase-1` to origin (Phase 3 fixes complete)
+2. Phase 4: Dusk happy-path tests for the pages that got fixes (AdminWorkspaces extend-trial, AdminUsers role-change)
 
 **What was done this session:**
 - Replaced abandoned `nunomaduro/larastan` with `larastan/larastan` v2.11; updated `phpstan.neon` extension path

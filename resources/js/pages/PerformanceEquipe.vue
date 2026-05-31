@@ -90,11 +90,11 @@
                 </th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody ref="tbodyRef" class="divide-y divide-gray-200 dark:divide-gray-700">
               <tr
                 v-for="member in performance.team_stats"
                 :key="member.user.id"
-                class="hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
+                class="stagger-item hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
               >
                 <td class="px-6 py-4">
                   <div class="flex items-center gap-3">
@@ -159,8 +159,10 @@ import { ref, onMounted } from 'vue'
 import api from '@/api/axios'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
+import { useStagger } from '@/composables/useAnimations'
 
 const loading = ref(false)
+const { staggerRef: tbodyRef, applyStagger } = useStagger(50)
 const activites = ref([])
 const selectedActivite = ref('')
 const performance = ref(null)
@@ -185,6 +187,7 @@ const loadPerformance = async () => {
       `/evaluations/performance-equipe/${selectedActivite.value}`
     )
     performance.value = data
+    applyStagger()
   } catch (error) {
     console.error('Error loading performance:', error)
   } finally {

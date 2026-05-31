@@ -2,7 +2,7 @@
 <template>
   <teleport to="body">
     <transition name="modal-fade">
-      <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 "
+      <div v-if="isOpen" dusk="notification-detail-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 "
         @click.self="close">
         <div
           class="relative w-full max-w-2xl bg-white dark:bg-gray-900 rounded-3 max-h-[90vh] overflow-hidden border border-gray-200 dark:border-gray-800"
@@ -29,7 +29,7 @@
               </p>
             </div>
 
-            <button @click="close"
+            <button dusk="modal-close-btn" @click="close"
               class="shrink-0 p-2 rounded-3 hover:bg-white/20 text-white transition-colors border border-white/20">
               <i class="fas fa-times"></i>
             </button>

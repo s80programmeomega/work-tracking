@@ -123,6 +123,15 @@ class TacheService
             }
         }
 
+        // Filtre par plage de dates (écheance)
+        if (! empty($filters['date_from'])) {
+            $query->where('echeance', '>=', $filters['date_from']);
+        }
+
+        if (! empty($filters['date_to'])) {
+            $query->where('echeance', '<=', $filters['date_to']);
+        }
+
         // Archive status
         if (isset($filters['archive_status'])) {
             if ($filters['archive_status'] === 'archived') {

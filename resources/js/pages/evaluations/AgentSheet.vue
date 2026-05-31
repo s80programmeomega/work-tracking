@@ -218,7 +218,8 @@
 
       <!-- ── 4 sections paginées ──────────────────────────────────────── -->
       <div v-if="sheet" class="bg-white dark:bg-gray-900 rounded-3 border border-gray-200 dark:border-gray-800">
-        <div class="border-b border-gray-200 dark:border-gray-800 flex gap-1 px-4">
+        <div class="border-b border-gray-200 dark:border-gray-800 overflow-x-auto">
+        <div class="flex gap-1 px-4 min-w-max">
           <button
             v-for="s in sections"
             :key="s.id"
@@ -230,6 +231,7 @@
             <i :class="['fas', s.icon, 'mr-1']"></i>
             {{ s.label }}
           </button>
+        </div>
         </div>
 
         <div class="p-4">
@@ -446,7 +448,7 @@ function statutBadge(statut) {
     a_refaire: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
     annule: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
   }
-  return map[statut] || 'bg-gray-100 text-gray-700 dark:text-gray-200'
+  return map[statut] || 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200'
 }
 
 async function loadSheet() {

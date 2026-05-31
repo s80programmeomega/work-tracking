@@ -174,7 +174,7 @@
                       <input
                         v-model="formData.can_view"
                         type="checkbox"
-                        class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500/20"
+                        class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-blue-600 focus:ring-2 focus:ring-blue-500/20"
                       />
                       <span class="text-sm text-gray-900 dark:text-white">Consulter</span>
                     </label>
@@ -183,7 +183,7 @@
                       <input
                         v-model="formData.can_download"
                         type="checkbox"
-                        class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500/20"
+                        class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-blue-600 focus:ring-2 focus:ring-blue-500/20"
                       />
                       <span class="text-sm text-gray-900 dark:text-white">Télécharger</span>
                     </label>
@@ -192,7 +192,7 @@
                       <input
                         v-model="formData.can_edit"
                         type="checkbox"
-                        class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500/20"
+                        class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-blue-600 focus:ring-2 focus:ring-blue-500/20"
                       />
                       <span class="text-sm text-gray-900 dark:text-white">Modifier</span>
                     </label>
@@ -201,7 +201,7 @@
                       <input
                         v-model="formData.can_delete"
                         type="checkbox"
-                        class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500/20"
+                        class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-blue-600 focus:ring-2 focus:ring-blue-500/20"
                       />
                       <span class="text-sm text-gray-900 dark:text-white">Supprimer</span>
                     </label>
@@ -210,7 +210,7 @@
                       <input
                         v-model="formData.can_share"
                         type="checkbox"
-                        class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500/20"
+                        class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-blue-600 focus:ring-2 focus:ring-blue-500/20"
                       />
                       <span class="text-sm text-gray-900 dark:text-white">Partager</span>
                     </label>

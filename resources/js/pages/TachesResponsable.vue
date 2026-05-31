@@ -4,8 +4,8 @@
     <div class="space-y-6">
       <!-- Header Premium avec thème violet/purple pour "Responsable" -->
       <div class="rounded-3 border border-purple-200 dark:border-purple-800 p-6 ">
-        <div class="flex items-center justify-between mb-6">
-          <div class="flex items-center gap-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+          <div class="flex min-w-0 items-center gap-4">
             <div class="w-14 h-14 rounded-3 flex items-center justify-center ring-4 ring-purple-100 dark:ring-purple-900/30">
               <span class="text-2xl">👑</span>
             </div>
@@ -17,7 +17,7 @@
             </div>
           </div>
 
-          <div class="flex items-center gap-3">
+          <div class="flex flex-wrap items-center gap-3">
             <!-- Bouton refresh -->
             <button 
               @click="loadResponsableTasks" 
@@ -32,9 +32,10 @@
 
             <!-- Toggle vue -->
             <div class="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-3">
-              <button 
-                @click="currentView = 'kanban'" 
-                :class="['px-3 py-2 rounded-md transition-all flex items-center gap-2 text-sm', 
+              <button
+                dusk="view-kanban-btn"
+                @click="currentView = 'kanban'"
+                :class="['px-3 py-2 rounded-md transition-all flex items-center gap-2 text-sm',
                   currentView === 'kanban' ? 'bg-white dark:bg-gray-700 text-purple-600 dark:text-purple-400' : 'text-gray-600 dark:text-gray-400']"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -42,9 +43,10 @@
                 </svg>
                 Kanban
               </button>
-              <button 
-                @click="currentView = 'grouped'" 
-                :class="['px-3 py-2 rounded-md transition-all flex items-center gap-2 text-sm', 
+              <button
+                dusk="view-grouped-btn"
+                @click="currentView = 'grouped'"
+                :class="['px-3 py-2 rounded-md transition-all flex items-center gap-2 text-sm',
                   currentView === 'grouped' ? 'bg-white dark:bg-gray-700 text-purple-600 dark:text-purple-400' : 'text-gray-600 dark:text-gray-400']"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,7 +127,7 @@
       </div>
 
       <!-- Vue Kanban -->
-      <div v-if="currentView === 'kanban' && !loading" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div dusk="view-kanban-panel" v-if="currentView === 'kanban' && !loading" class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <KanbanColumnResponsable
           v-for="column in kanbanColumns"
           :key="column.statut"
@@ -141,10 +143,10 @@
       </div>
 
       <!-- Vue groupée -->
-      <div v-else-if="currentView === 'grouped' && !loading" class="space-y-6">
+      <div dusk="view-grouped-panel" v-else-if="currentView === 'grouped' && !loading" ref="listRef" class="space-y-6">
         <p v-if="tasksByActivite.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">Aucune tâche</p>
         
-        <div v-for="group in tasksByActivite" :key="group.activite.id" class="rounded-3 border bg-white dark:bg-gray-800 overflow-hidden">
+        <div v-for="group in tasksByActivite" :key="group.activite.id" class="stagger-item rounded-3 border bg-white dark:bg-gray-800 overflow-hidden">
           <div class="px-6 py-4 bg-purple-50 dark:bg-purple-900/20 border-b">
             <div class="flex items-center justify-between">
               <h3 class="font-semibold">{{ group.activite.nom }}</h3>
@@ -207,10 +209,12 @@ import AdminLayout from '@/components/layout/AdminLayout.vue'
 import KanbanColumnResponsable from '@/components/taches/KanbanColumnResponsable.vue'
 import TacheDetailModal from '@/components/taches/TacheDetailModal.vue'
 import TacheForm from '@/components/taches/TacheForm.vue'
+import { useStagger } from '@/composables/useAnimations'
 import api from '@/api/axios'
 import { useToast } from 'vue-toastification'
 
 const toast = useToast()
+const { staggerRef: listRef, applyStagger } = useStagger(55)
 
 const taches = ref([])
 const loading = ref(false)
@@ -266,6 +270,7 @@ async function loadResponsableTasks() {
   try {
     const { data } = await api.get('/taches/my-tasks-as-responsable')
     taches.value = data.data || []
+    applyStagger()
   } catch (err) {
     error.value = err.response?.data?.message || 'Erreur de chargement'
     toast.error(error.value)

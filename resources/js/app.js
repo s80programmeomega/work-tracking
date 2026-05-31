@@ -1,6 +1,7 @@
 // resources\js\app.js
 import './bootstrap';
 import '../css/app.css';
+import '../css/animations.css';
 
 // Import libraries CSS
 import 'swiper/css';

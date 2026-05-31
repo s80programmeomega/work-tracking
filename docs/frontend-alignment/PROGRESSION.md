@@ -134,30 +134,78 @@ For each page: every axios call hits an existing route with matching verb; paylo
 
 ## Phase 3 — Responsiveness sweep
 
-For each priority-page, walk Chrome DevTools at 375 (sm) / 768 (md) / 1024 (lg). Capture screenshot under `docs/frontend-alignment/responsive/<page-name>.png`.
+Driven by `tests/Browser/Phase3/ResponsivenessSweepTest.php` (Dusk). Walks **every routed page** at 375 / 768 / 1024 px; screenshots saved under `docs/frontend-alignment/responsive/<page-name>-<width>.png`. Re-run with `php artisan dusk tests/Browser/Phase3/` (requires `APP_ENV=dusk.local php artisan serve` + the `work-tracking-dusk` DB). The dusk env bypasses the `api` rate limiter (RouteServiceProvider) so the sweep doesn't trip `throttle:60,1`.
 
-| Page | 375px | 768px | 1024px | Date | Notes |
-|---|---|---|---|---|---|
-| AdminDashboard | ☐ | ☐ | ☐ | | |
-| AdminWorkspaces | ☐ | ☐ | ☐ | | |
-| AdminUsers | ☐ | ☐ | ☐ | | |
-| TrialBanner + workspace settings | ☐ | ☐ | ☐ | | |
-| Documents | ☐ | ☐ | ☐ | | |
-| WorkspaceDocuments | ☐ | ☐ | ☐ | | |
-| EvaluationDashboard | ☐ | ☐ | ☐ | | |
-| AgentSheet | ☐ | ☐ | ☐ | | |
-| PendingValidations | ☐ | ☐ | ☐ | | |
-| Taches (table + kanban + liste) | ☐ | ☐ | ☐ | | |
-| WorkspaceTaches | ☐ | ☐ | ☐ | | |
-| Task creation wizard | ☐ | ☐ | ☐ | | |
-| ResultatDetailModal | ☐ | ☐ | ☐ | | |
-| Projets / ProjetDetail | ☐ | ☐ | ☐ | | |
-| Activites / ActiviteDetail | ☐ | ☐ | ☐ | | |
-| Auth (login / register) | ☐ | ☐ | ☐ | | |
-| AcceptInvitation flows | ☐ | ☐ | ☐ | | |
-| Profile edit | ☐ | ☐ | ☐ | | |
-| NotificationPreferences | ☐ | ☐ | ☐ | | |
-| Sidebar drawer at sm | ☐ | — | — | | |
+**Coverage:** 59 routes × 3 breakpoints = **177 screenshots** (all captured).
+
+### Real responsive issues found (Phase 3 follow-up)
+
+Listed by impact, most common pattern first.
+
+#### A. Header / action-bar rows that don't wrap → overflow at 375 px
+
+Every page below uses `flex items-center justify-between` (or similar) on its header without `flex-wrap`, so the rightmost CTA bleeds off the viewport and creates a page-level horizontal scrollbar.
+
+| Page | Symptom |
+|---|---|
+| `projets/MyProjects` | "+ Nouveau projet" clipped, page-level horizontal scroll |
+| `projets/Archived` | "Mes projets archivés" CTA clipped |
+| `Activites` (`/activites/mes-activites`) | Bottom filter row (3 dropdowns + Réinitialiser) overflows |
+| `Taches` (`/taches/mes-taches`) | Page-level horizontal scroll from header / filter area |
+| `TachesAssignees` (`/taches/assignees`) | "Activité" toggle button clipped |
+| `TachesResponsable` (`/taches/responsable`) | Minor page-level scroll |
+| `TachesCoordination` (`/taches/coordination`) | Empty input + buttons bleed off right |
+| `labels/LabelsManagement` | "Nouveau Label" clipped |
+| `labels/LabelTemplates` | "Nouv... Template" clipped |
+| `workspaces/Index` (`/workspaces`) | Search row + right-edge button clipped |
+| `Teams` (`/teams`) | "Toutes les équipes" filter button clipped |
+| `Users/Invitations` (`/users/invitations`) | "Tous les workspaces" filter clipped |
+| `FichesEvaluation` (`/evaluations/fiches`) | "Aujourd'hui" button clipped |
+
+**Fix pattern:** add `flex-wrap gap-3` to these header rows + `min-w-0` on the title/text block so it can shrink.
+
+#### B. Tables missing `overflow-x-auto` wrapper → last columns clip at 375 px
+
+| Page | Symptom |
+|---|---|
+| `admin/AdminUsers` | "Role" column / "Super Admin" badge clipped |
+| `workspace/WorkspaceTaches` | "Priorité" + "Assignés" columns clipped |
+
+**Fix pattern:** wrap each `<table>` in a `<div class="overflow-x-auto">` so the table scrolls inside its container instead of pushing the viewport.
+
+#### C. Tab strips that don't compress → labels clip
+
+| Page | Symptom |
+|---|---|
+| `ValidationResultats` (`/validations/a-traiter`, `/taches/resultats/en-attente`) | "Historique" tab clipped |
+| `taches/TacheDetail` (`/taches/:id`) | "Fichiers" tab clipped |
+
+**Fix pattern:** wrap the `<nav>` in `<div class="overflow-x-auto">` and reduce horizontal padding on tabs at sm.
+
+### Clean pages (reflow correctly at all 3 breakpoints)
+
+- Auth: Signin, Signup, ForgotPassword, ResetPassword, Unauthorized error page
+- AdminDashboard, AdminRoles, AdminWorkspaces
+- Workspace pages: subscription, settings, edit, documents, create
+- ProjetsCreate (rebuilt page — modal overlay), ProjetEdit (rebuilt page — modal overlay), ProjetsListAll (`Projets.vue` tabs)
+- TachesWaitingColleagues, TacheDocuments
+- Documents, EvaluationsDashboard (both v1 + v2), EvaluationsPerformance, MesValidations, NotificationPreferences
+- Users, Notifications (loading state)
+
+### Non-responsive findings caught by the sweep (out of scope but flagged)
+
+- **`/dashboard` route renders blank.** The page loads but nothing renders — likely missing workspace seed data in the dusk environment. Flagged; out of scope for this phase.
+- **`/taches/en-retard` router collision — FIXED (2026-05-31).** Created `TachesEnRetard.vue` (calls `GET /taches/en-retard`) and moved the route before `/taches/:id` in `router/index.ts` so the specific path is matched first.
+- **`/projets/:id/documents` renders the global ErrorBoundary ("Une erreur est survenue").** Likely missing seed data, but worth verifying after Phase 1's `responsable?.name → nom` fix.
+- **`/evaluations/rapport-hebdomadaire` renders the global ErrorBoundary.** Same — likely missing weekly-report data in the seed; verify with real data.
+- **`/unauthorized` redirects to `/signin`** instead of rendering the unauthorized page (the route guard kicks in because the test was authenticated). The page itself was captured via `/error-404` which IS the same Unauthorized component.
+
+### Out of scope for this sweep
+
+- **Modals** (task wizard, share modal, change-role, validation, etc.): only render on click — Phase 4 Dusk happy-paths will cover modal sizing.
+- **Sidebar drawer interaction at sm**: burger icon is visible in all screenshots, but open/close drawer behaviour wasn't exercised.
+- **AcceptInvitation flows** (`/accept-invitation/:token`, `/invitations/projet/:token`): require valid tokens.
+- **UI demo pages** (`/alerts`, `/avatars`, `/badge`, `/bar-chart`, `/basic-tables`, `/blank`, `/buttons`, `/form-elements`, `/images`, `/line-chart`, `/videos`): TailAdmin template scaffolding, not real product surface — excluded from the sweep.
 
 ---
 
@@ -192,3 +240,5 @@ For each priority-page, walk Chrome DevTools at 375 (sm) / 768 (md) / 1024 (lg).
 | 2026-05-30 | Phase 2 — Projects / Activities | Audited Projets, Activites, ActiviteDetail + 5 projets/* pages. **Critical bug fixed:** ActiviteDetail + Taches were calling the dead `POST /taches/{id}/validate-n{1,2}` routes (removed in Phase 5/8 refactor) — now pick pending resultats from `tache.all_results` and validate via the resultat-level endpoint in parallel. **Rebuilt:** Create.vue + Edit.vue placeholder stubs (literally rendered "Projets archivés") replaced with thin wrappers around the existing `ProjetForm` modal, reaching POST /projets and PUT /projets/{id}. **Bugs fixed:** TODO console.log stubs for `createActivity` / `viewActivity` in Projets.vue + Show.vue — now navigate to Activites / activites.show. Cleaned `console.log(projet)` debug in MyProjects. Build clean. |
 | 2026-05-30 | Phase 2 — Auth | Audited Signin/Signup/AcceptInvitation/AcceptProjetInvitation/Forgot+ResetPassword/LanguageSwitcher. **Cleaned:** debug `console.log` in Signin (CSRF cookie test) and Signup (mislabelled "Début de la tentative de connexion" on the register handler). Replaced an English fallback string in Signup with French. **Bug fixed:** AcceptProjetInvitation used raw `axios` with `/api/...` prefix — switched to project's `api` wrapper. **Flagged not fixed (infra gap):** ForgotPassword + ResetPassword call `/auth/forgot-password` and `/auth/reset-password` which **don't exist** — `config/fortify.php` has all features commented out, including `resetPasswords()`. The whole password-reset UI is broken end-to-end; restoring it requires enabling the Fortify feature + mail configuration. Build clean. |
 | 2026-05-30 | Phase 2 — Profile / Settings | Audited Others/UserProfile + ChangePasswordModal + NotificationPreferences + the components/profile orphan. **Critical bug fixed:** ChangePasswordModal called the non-existent `axios.put('/api/profile/password')` (axios not imported either — relied on `window.axios` global) — switched to `api.post('/users/change-password', this.form)`. **Bug fixed:** account-deletion redirect went to `/login` (route doesn't exist) → now `/signin`. **Refactor:** useUsers.js had 4 functions referencing un-imported `axios` (bypassed the api wrapper's Bearer interceptor + 401 refresh) — switched to `api`. Removed duplicate `changePassword` key + dead `exportProfileData` (`/users/export` route doesn't exist). **Dead code:** deleted 261-line orphan `components/profile/UserProfile.vue` (broken endpoint, AdminLTE markup, markup outside template). Build clean. |
+| 2026-05-30 | Phase 3 — Responsiveness sweep | Wrote `tests/Browser/Phase3/ResponsivenessSweepTest.php` — Dusk test that walks **every routed page** at 375/768/1024 px and saves screenshots under `docs/frontend-alignment/responsive/`. Aligned `.env.dusk.local` with `.env` (MAIL_HOST `mailpit` → `127.0.0.1`, added the VAPID block matching the dev env). Added a rate-limit bypass in RouteServiceProvider for `dusk.local` env so the sweep doesn't trip `throttle:60,1`. Walked 59 pages × 3 breakpoints = **177 screenshots captured**. **Findings:** ~17 pages need responsive fixes, grouped into three patterns: (A) header / action-bar rows missing `flex-wrap` → CTA buttons clip on sm (MyProjects, Archived, Activites/mes-activites, Taches mes-taches/assignees/responsable/coordination, labels + templates, workspaces/index, Teams, Users/Invitations, FichesEvaluation); (B) tables missing `overflow-x-auto` → rightmost columns clip (AdminUsers, WorkspaceTaches); (C) tab strips that don't compress → labels clip (ValidationResultats, TacheDetail). All other ~37 pages reflow cleanly. Non-responsive bugs caught along the way: `/dashboard` renders blank, `/taches/en-retard` collides with `/taches/:id` route, `/projets/:id/documents` + `/evaluations/rapport-hebdomadaire` hit ErrorBoundary. Documented separately for follow-up. |
+| 2026-05-31 | Phase 3 — Responsive fixes | **Pattern A (13 pages):** added `flex-wrap gap-3` + `min-w-0` to header rows in MyProjects, Archived, Taches, TachesAssignees, TachesResponsable, TachesParUtilisateur (coordination), LabelsManagement, LabelTemplates, workspaces/Index, Teams, Users/Invitations. ActiviteList filter row changed from `md:flex-row` to `flex-wrap gap-4` (applied at all breakpoints). FichesEvaluation header already used `flex-col lg:flex-row` — the filter sub-row already had `flex-wrap` so no change needed. **Pattern B (2 pages):** wrapped `<table>` in `<div class="overflow-x-auto">` in AdminUsers and WorkspaceTaches. **Pattern C (2 pages):** ValidationResultats tab strip wrapped in `overflow-x-auto` + inner `min-w-max`; TacheDetail `<nav>` wrapper given `overflow-x-auto` + `min-w-max`. **Router fix:** created `TachesEnRetard.vue` (calls `GET /taches/en-retard`) and restored the route before `/taches/:id`. Build clean. Pint clean. |

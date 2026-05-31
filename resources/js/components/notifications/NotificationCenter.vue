@@ -23,7 +23,7 @@
       leave-from-class="transform opacity-100 scale-100"
       leave-to-class="transform opacity-0 scale-95"
     >
-      <MenuItems class="absolute right-0 mt-2 w-96 origin-top-right rounded-3 bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-50 max-h-[80vh] overflow-hidden flex flex-col">
+      <MenuItems class="absolute right-0 mt-2 w-96 origin-top-right rounded-3 bg-white dark:bg-gray-800 ring-1 ring-black/5 dark:ring-white/10 focus:outline-none z-50 max-h-[80vh] overflow-hidden flex flex-col">
         <!-- Header -->
         <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
@@ -62,7 +62,7 @@
                 <!-- Icône selon le type -->
                 <div 
                   :class="[
-                    'flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center',
+                    'shrink-0 w-10 h-10 rounded-full flex items-center justify-center',
                     getNotificationStyle(notification.data.type).bg
                   ]"
                 >
@@ -93,7 +93,7 @@
                 </div>
 
                 <!-- Badge non lu -->
-                <div v-if="!notification.read_at" class="flex-shrink-0">
+                <div v-if="!notification.read_at" class="shrink-0">
                   <span class="inline-block w-2 h-2 bg-blue-600 rounded-full"></span>
                 </div>
               </div>

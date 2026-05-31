@@ -1,6 +1,6 @@
 <!-- resources/js/components/taches/TacheDetailModal.vue -->
 <template>
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 "
+  <div dusk="tache-detail-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 "
        @click.self="$emit('close')">
 
     <div class="bg-white dark:bg-gray-800 rounded-3 w-full overflow-hidden flex flex-col transition-all duration-300"
@@ -137,7 +137,7 @@
               </svg>
             </button>
 
-            <button @click="$emit('close')"
+            <button dusk="modal-close-btn" @click="$emit('close')"
                     class="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300 transition-colors p-2">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -175,9 +175,9 @@
 
         <!-- MODE RAPIDE -->
         <div v-if="!isDetailedView" class="px-8 py-6">
-          <div class="grid grid-cols-3 gap-8">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Colonne principale -->
-            <div class="col-span-2 space-y-6">
+            <div class="lg:col-span-2 space-y-6">
               <!-- Description -->
               <SectionCollapsible title="Description" :default-open="!!localTache.description">
                 <div v-if="editing.field === 'description'">

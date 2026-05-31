@@ -153,7 +153,7 @@
                                     <input
                                         v-model="settings.members_can_create_projects"
                                         type="checkbox"
-                                        class="mt-1 w-5 h-5 text-brand-600 border-gray-300 rounded focus:ring-brand-500"
+                                        class="mt-1 w-5 h-5 text-brand-600 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded focus:ring-brand-500"
                                     />
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900 dark:text-white">Créer des projets</p>
@@ -167,7 +167,7 @@
                                     <input
                                         v-model="settings.members_can_invite"
                                         type="checkbox"
-                                        class="mt-1 w-5 h-5 text-brand-600 border-gray-300 rounded focus:ring-brand-500"
+                                        class="mt-1 w-5 h-5 text-brand-600 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded focus:ring-brand-500"
                                     />
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900 dark:text-white">Inviter des membres</p>
@@ -181,7 +181,7 @@
                                     <input
                                         v-model="settings.members_can_delete_projects"
                                         type="checkbox"
-                                        class="mt-1 w-5 h-5 text-brand-600 border-gray-300 rounded focus:ring-brand-500"
+                                        class="mt-1 w-5 h-5 text-brand-600 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded focus:ring-brand-500"
                                     />
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900 dark:text-white">Supprimer des projets</p>
@@ -195,7 +195,7 @@
                                     <input
                                         v-model="settings.require_task_validation"
                                         type="checkbox"
-                                        class="mt-1 w-5 h-5 text-brand-600 border-gray-300 rounded focus:ring-brand-500"
+                                        class="mt-1 w-5 h-5 text-brand-600 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded focus:ring-brand-500"
                                     />
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900 dark:text-white">Validation des tâches requise</p>
@@ -209,7 +209,7 @@
                                     <input
                                         v-model="settings.require_approval_for_time_off"
                                         type="checkbox"
-                                        class="mt-1 w-5 h-5 text-brand-600 border-gray-300 rounded focus:ring-brand-500"
+                                        class="mt-1 w-5 h-5 text-brand-600 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded focus:ring-brand-500"
                                     />
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900 dark:text-white">Approbation des congés</p>
@@ -244,7 +244,7 @@
                                     <input
                                         v-model="settings.notify_on_new_member"
                                         type="checkbox"
-                                        class="mt-1 w-5 h-5 text-brand-600 border-gray-300 rounded focus:ring-brand-500"
+                                        class="mt-1 w-5 h-5 text-brand-600 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded focus:ring-brand-500"
                                     />
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900 dark:text-white">Nouveau membre</p>
@@ -258,7 +258,7 @@
                                     <input
                                         v-model="settings.notify_on_new_project"
                                         type="checkbox"
-                                        class="mt-1 w-5 h-5 text-brand-600 border-gray-300 rounded focus:ring-brand-500"
+                                        class="mt-1 w-5 h-5 text-brand-600 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded focus:ring-brand-500"
                                     />
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900 dark:text-white">Nouveau projet</p>
@@ -272,7 +272,7 @@
                                     <input
                                         v-model="settings.notify_on_task_assigned"
                                         type="checkbox"
-                                        class="mt-1 w-5 h-5 text-brand-600 border-gray-300 rounded focus:ring-brand-500"
+                                        class="mt-1 w-5 h-5 text-brand-600 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded focus:ring-brand-500"
                                     />
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900 dark:text-white">Tâche assignée</p>
@@ -286,7 +286,7 @@
                                     <input
                                         v-model="settings.notify_on_deadline_approaching"
                                         type="checkbox"
-                                        class="mt-1 w-5 h-5 text-brand-600 border-gray-300 rounded focus:ring-brand-500"
+                                        class="mt-1 w-5 h-5 text-brand-600 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded focus:ring-brand-500"
                                     />
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900 dark:text-white">Échéance proche</p>
@@ -300,7 +300,7 @@
                                     <input
                                         v-model="settings.weekly_digest"
                                         type="checkbox"
-                                        class="mt-1 w-5 h-5 text-brand-600 border-gray-300 rounded focus:ring-brand-500"
+                                        class="mt-1 w-5 h-5 text-brand-600 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded focus:ring-brand-500"
                                     />
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900 dark:text-white">Résumé hebdomadaire</p>
@@ -395,7 +395,7 @@
         <Teleport to="body">
             <div
                 v-if="showDeleteModal"
-                class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
                 @click.self="showDeleteModal = false"
             >
                 <div class="bg-white dark:bg-gray-800 rounded-3 max-w-md w-full mx-4 p-6">
@@ -451,7 +451,7 @@
             <!-- Archive Modal (placeholder) -->
             <div
                 v-if="showArchiveModal"
-                class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
                 @click.self="showArchiveModal = false"
             >
                 <div class="bg-white dark:bg-gray-800 rounded-3 max-w-md w-full mx-4 p-6">
@@ -481,7 +481,7 @@
             <!-- Transfer Modal (placeholder) -->
             <div
                 v-if="showTransferModal"
-                class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
                 @click.self="showTransferModal = false"
             >
                 <div class="bg-white dark:bg-gray-800 rounded-3 max-w-md w-full mx-4 p-6">

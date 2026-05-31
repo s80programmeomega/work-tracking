@@ -1,5 +1,5 @@
 <template>
-  <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div dusk="resultat-detail-modal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <!-- Backdrop -->
     <div class="fixed inset-0 bg-gray-900/75 transition-opacity" @click="$emit('close')"></div>
 
@@ -52,7 +52,7 @@
               </div>
             </div>
 
-            <button @click="$emit('close')"
+            <button dusk="modal-close-btn" @click="$emit('close')"
               class="p-2 hover:bg-white/50 dark:hover:bg-black/20 rounded-3 transition-all duration-200 ">
               <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />

@@ -135,7 +135,7 @@
                     <label
                       class="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
                       <input v-model="form.settings.members_can_create_projects" type="checkbox"
-                        class="w-5 h-5 text-brand-600 border-gray-300 rounded focus:ring-brand-500" />
+                        class="w-5 h-5 text-brand-600 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded focus:ring-brand-500" />
                       <div class="flex-1">
                         <p class="font-medium text-gray-900 dark:text-white">Créer des projets</p>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Les membres peuvent créer de nouveaux projets</p>
@@ -145,7 +145,7 @@
                     <label
                       class="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
                       <input v-model="form.settings.members_can_invite" type="checkbox"
-                        class="w-5 h-5 text-brand-600 border-gray-300 rounded focus:ring-brand-500" />
+                        class="w-5 h-5 text-brand-600 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded focus:ring-brand-500" />
                       <div class="flex-1">
                         <p class="font-medium text-gray-900 dark:text-white">Inviter des membres</p>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Les membres peuvent inviter d'autres utilisateurs</p>
@@ -155,7 +155,7 @@
                     <label
                       class="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
                       <input v-model="form.settings.require_task_validation" type="checkbox"
-                        class="w-5 h-5 text-brand-600 border-gray-300 rounded focus:ring-brand-500" />
+                        class="w-5 h-5 text-brand-600 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded focus:ring-brand-500" />
                       <div class="flex-1">
                         <p class="font-medium text-gray-900 dark:text-white">Validation des tâches requise</p>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Les nouvelles tâches nécessitent une validation</p>

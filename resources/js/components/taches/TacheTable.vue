@@ -27,16 +27,17 @@
           <th class="px-4 py-3 w-10"></th>
         </tr>
       </thead>
-      <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-100 dark:divide-gray-800">
+      <tbody ref="tbodyRef" class="bg-white dark:bg-gray-900 divide-y divide-gray-100 dark:divide-gray-800">
         <tr
           v-for="tache in taches"
           :key="tache.id"
           :dusk="`table-row-${tache.id}`"
-          class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group"
+          class="stagger-item hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group"
         >
           <!-- Titre -->
           <td class="px-4 py-3">
             <button
+              :dusk="`tache-view-btn-${tache.id}`"
               class="text-left font-medium text-gray-900 dark:text-white hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
               @click="$emit('view', tache)"
             >
@@ -190,14 +191,18 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+import { reactive, watch } from 'vue'
 import api from '@/api/axios'
+import { useStagger } from '@/composables/useAnimations'
 
 const props = defineProps({
   taches: { type: Array, required: true },
 })
 
 const emit = defineEmits(['view', 'edit', 'updated'])
+
+const { staggerRef: tbodyRef, applyStagger } = useStagger(40)
+watch(() => props.taches, applyStagger, { immediate: true })
 
 const editing = reactive({ id: null, field: null, value: null })
 
@@ -253,7 +258,7 @@ const statutClasses = (s) => ({
   a_refaire: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
   en_attente: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
   annule: 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400 line-through',
-}[s] ?? 'bg-gray-100 text-gray-700 dark:text-gray-200')
+}[s] ?? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200')
 
 const prioriteLabel = (p) => ({
   faible: 'Faible', moyenne: 'Moyenne', elevee: 'Élevée', critique: 'Critique',
@@ -264,7 +269,7 @@ const prioriteClasses = (p) => ({
   moyenne: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
   elevee: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
   critique: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
-}[p] ?? 'bg-gray-100 text-gray-600 dark:text-gray-300')
+}[p] ?? 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300')
 
 const visibilityLabel = (v) => ({ public: 'Public', private: 'Privé', members_only: 'Membres' }[v] ?? v)
 

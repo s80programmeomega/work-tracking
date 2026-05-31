@@ -49,6 +49,24 @@ export default {
     transition: opacity 0.3s ease;
 }
 
+:global(.dark) .global-loader {
+    background: rgba(17, 24, 39, 0.9);
+}
+
+:global(.dark) .loader-content {
+    background: #1f2937;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+:global(.dark) .loader-spinner {
+    border-color: #374151;
+    border-top-color: #3b82f6;
+}
+
+:global(.dark) .loader-text {
+    color: #d1d5db;
+}
+
 .loader-content {
     text-align: center;
     background: white;

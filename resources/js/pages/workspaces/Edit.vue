@@ -148,12 +148,12 @@
                                         <div class="flex items-center gap-4">
                                             <label class="flex items-center gap-2 cursor-pointer">
                                                 <input v-model="form.is_active" :value="true" type="radio"
-                                                    class="w-4 h-4 text-brand-600 border-gray-300 focus:ring-brand-500" />
+                                                    class="w-4 h-4 text-brand-600 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-brand-500" />
                                                 <span class="text-gray-900 dark:text-white">Actif</span>
                                             </label>
                                             <label class="flex items-center gap-2 cursor-pointer">
                                                 <input v-model="form.is_active" :value="false" type="radio"
-                                                    class="w-4 h-4 text-brand-600 border-gray-300 focus:ring-brand-500" />
+                                                    class="w-4 h-4 text-brand-600 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-brand-500" />
                                                 <span class="text-gray-900 dark:text-white">Archivé</span>
                                             </label>
                                         </div>
@@ -204,7 +204,7 @@
                                                 class="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
                                                 <input v-model="form.settings.members_can_create_projects"
                                                     type="checkbox"
-                                                    class="w-5 h-5 text-brand-600 border-gray-300 rounded focus:ring-brand-500" />
+                                                    class="w-5 h-5 text-brand-600 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded focus:ring-brand-500" />
                                                 <div class="flex-1">
                                                     <p class="font-medium text-gray-900 dark:text-white">Créer des
                                                         projets</p>
@@ -216,7 +216,7 @@
                                             <label
                                                 class="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
                                                 <input v-model="form.settings.members_can_invite" type="checkbox"
-                                                    class="w-5 h-5 text-brand-600 border-gray-300 rounded focus:ring-brand-500" />
+                                                    class="w-5 h-5 text-brand-600 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded focus:ring-brand-500" />
                                                 <div class="flex-1">
                                                     <p class="font-medium text-gray-900 dark:text-white">Inviter des
                                                         membres</p>
@@ -228,7 +228,7 @@
                                             <label
                                                 class="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
                                                 <input v-model="form.settings.require_task_validation" type="checkbox"
-                                                    class="w-5 h-5 text-brand-600 border-gray-300 rounded focus:ring-brand-500" />
+                                                    class="w-5 h-5 text-brand-600 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded focus:ring-brand-500" />
                                                 <div class="flex-1">
                                                     <p class="font-medium text-gray-900 dark:text-white">Validation des
                                                         tâches requise</p>
@@ -303,7 +303,7 @@
             <!-- Delete Confirmation Modal -->
             <teleport to="body">
                 <div v-if="showDeleteModal"
-                    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+                    class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
                     @click.self="showDeleteModal = false">
                     <div class="bg-white dark:bg-gray-800 rounded-3 max-w-md w-full p-6">
                         <div class="flex items-center gap-4 mb-4">

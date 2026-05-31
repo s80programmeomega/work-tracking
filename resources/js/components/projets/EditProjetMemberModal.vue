@@ -256,7 +256,7 @@
                 <div
                   class="flex items-start gap-3 p-3 rounded-3 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                   <input v-model="form.can_edit" :disabled="form.role === 'viewer'" type="checkbox" id="edit_can_edit"
-                    class="mt-1 w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-brand-500" />
+                    class="mt-1 w-4 h-4 text-brand-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-brand-500" />
                   <div class="flex-1">
                     <label for="edit_can_edit" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
                       Modifier le projet
@@ -272,7 +272,7 @@
                   class="flex items-start gap-3 p-3 rounded-3 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                   <input v-model="form.can_delete" :disabled="form.role === 'member' || form.role === 'viewer'"
                     type="checkbox" id="edit_can_delete"
-                    class="mt-1 w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500" />
+                    class="mt-1 w-4 h-4 text-red-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-red-500" />
                   <div class="flex-1">
                     <label for="edit_can_delete" class="text-sm font-medium text-red-700 dark:text-red-300 cursor-pointer">
                       Supprimer le projet
@@ -288,7 +288,7 @@
                   class="flex items-start gap-3 p-3 rounded-3 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                   <input v-model="form.can_invite" :disabled="form.role === 'member' || form.role === 'viewer'"
                     type="checkbox" id="edit_can_invite"
-                    class="mt-1 w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-brand-500" />
+                    class="mt-1 w-4 h-4 text-brand-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-brand-500" />
                   <div class="flex-1">
                     <label for="edit_can_invite" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
                       Inviter des membres
@@ -304,7 +304,7 @@
                   class="flex items-start gap-3 p-3 rounded-3 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                   <input v-model="form.can_delete_member" :disabled="form.role === 'member' || form.role === 'viewer'"
                     type="checkbox" id="can_delete_member"
-                    class="mt-1 w-4 h-4 text-orange-600 bg-gray-100 border-gray-300 rounded focus:ring-orange-500" />
+                    class="mt-1 w-4 h-4 text-orange-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-orange-500" />
                   <div class="flex-1">
                     <label for="can_delete_member"
                       class="text-sm font-medium text-orange-700 dark:text-orange-300 cursor-pointer">
@@ -329,7 +329,7 @@
                     class="flex items-start gap-3 p-3 rounded-3 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <input v-model="form.can_create_activity" :disabled="form.role === 'viewer'" type="checkbox"
                       id="inv_can_create_activity"
-                      class="mt-1 w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500" />
+                      class="mt-1 w-4 h-4 text-green-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-green-500" />
                     <div class="flex-1">
                       <label for="inv_can_create_activity"
                         class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
@@ -346,7 +346,7 @@
                     class="flex items-start gap-3 p-3 rounded-3 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <input v-model="form.can_edit_activity" :disabled="form.role === 'viewer'" type="checkbox"
                       id="inv_can_edit_activity"
-                      class="mt-1 w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500" />
+                      class="mt-1 w-4 h-4 text-blue-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500" />
                     <div class="flex-1">
                       <label for="inv_can_edit_activity"
                         class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
@@ -364,7 +364,7 @@
                     <input v-model="form.can_delete_activity"
                       :disabled="form.role === 'member' || form.role === 'viewer'" type="checkbox"
                       id="inv_can_delete_activity"
-                      class="mt-1 w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500" />
+                      class="mt-1 w-4 h-4 text-red-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-red-500" />
                     <div class="flex-1">
                       <label for="inv_can_delete_activity"
                         class="text-sm font-medium text-red-700 dark:text-red-300 cursor-pointer">

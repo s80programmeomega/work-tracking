@@ -132,8 +132,8 @@
               </th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-            <tr v-for="user in users" :key="user.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
+          <tbody ref="tbodyRef" class="divide-y divide-gray-200 dark:divide-gray-700">
+            <tr v-for="user in users" :key="user.id" class="stagger-item hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
               <!-- User Info -->
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex items-center">
@@ -304,6 +304,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useUsers } from '@/composables/useUsers'
+import { useStagger } from '@/composables/useAnimations'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import UserModal from '@/components/users/UserModal.vue'
@@ -325,6 +326,7 @@ const {
   usersByRole,
 } = useUsers()
 
+const { staggerRef: tbodyRef, applyStagger } = useStagger(40)
 const showModal = ref(false)
 const selectedUser = ref(null)
 const modalMode = ref('create')
@@ -332,8 +334,9 @@ const modalMode = ref('create')
 const canCreate = computed(() => true) // TODO: implement permission check
 const canDelete = computed(() => true) // TODO: implement permission check
 
-onMounted(() => {
-  fetchUsers()
+onMounted(async () => {
+  await fetchUsers()
+  applyStagger()
 })
 
 const applyFilters = () => {

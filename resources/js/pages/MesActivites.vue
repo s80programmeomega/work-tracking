@@ -76,7 +76,7 @@
         <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div class="flex-1">
             <input v-model="filters.search" type="text" placeholder="Rechercher une activité..."
-              class="w-full max-w-md rounded-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm"
+              class="w-full max-w-md rounded-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
               @input="debouncedSearch" />
           </div>
 

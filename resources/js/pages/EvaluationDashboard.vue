@@ -1,11 +1,11 @@
 <!-- resources/js/views/evaluations/EvaluationDashboard.vue -->
 <template>
   <AdminLayout>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <div class="bg-gray-50 dark:bg-gray-900">
     
     <!-- Header -->
     <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 ">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="py-6">
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
           <div class="w-12 h-12 rounded-3 flex items-center justify-center">
             <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -21,7 +21,7 @@
     </div>
 
     <!-- Contenu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div class="py-8 space-y-8">
       
       <!-- Loading -->
       <div v-if="loading" class="flex items-center justify-center py-16">

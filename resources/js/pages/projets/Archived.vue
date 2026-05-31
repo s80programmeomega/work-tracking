@@ -1,13 +1,13 @@
 <!-- resources/js/pages/projets/ArchivedProjects.vue -->
 <template>
   <AdminLayout>
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div class="bg-gray-50 dark:bg-gray-900">
       <!-- Header Section - Trello Style -->
       <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div class="max-w-full mx-auto px-4 py-4">
-          <div class="flex items-center justify-between">
+          <div class="flex flex-wrap items-center justify-between gap-3">
             <!-- Left Side -->
-            <div class="flex items-center gap-4">
+            <div class="flex min-w-0 items-center gap-4">
               <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
                   {{ pageTitle }}
@@ -20,7 +20,7 @@
             </div>
 
             <!-- Right Side -->
-            <div class="flex items-center gap-3">
+            <div class="flex flex-wrap items-center gap-3">
               <!-- Workspace Selector -->
               <div v-if="hasWorkspaces" class="relative">
                 <select v-model="selectedWorkspaceId" @change="onWorkspaceChange"
@@ -48,7 +48,7 @@
 
               <!-- Bulk Actions -->
               <div class="relative" v-if="selectedProjets.length > 0">
-                <button @click="showBulkActions = !showBulkActions"
+                <button dusk="bulk-actions-btn" @click="showBulkActions = !showBulkActions"
                   class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-3 hover:bg-blue-700 transition-colors font-medium">
                   <ArchiveIcon class="w-4 h-4" />
                   Actions groupées ({{ selectedProjets.length }})
@@ -56,7 +56,7 @@
                 </button>
 
                 <!-- Bulk Actions Dropdown -->
-                <div v-if="showBulkActions" v-click-outside="() => showBulkActions = false"
+                <div dusk="bulk-actions-dropdown" v-if="showBulkActions" v-click-outside="() => showBulkActions = false"
                   class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-3 border border-gray-200 dark:border-gray-600 z-10">
                   <button @click="bulkUnarchive"
                     class="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-t-lg transition-colors">
@@ -279,9 +279,9 @@
           </div>
 
           <!-- Archived Projects Grid -->
-          <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div v-else ref="gridRef" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <div v-for="projet in filteredProjets" :key="projet.id"
-              class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 transition-shadow overflow-hidden"
+              class="stagger-item bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 transition-shadow overflow-hidden"
               :class="{
                 'ring-2 ring-blue-500': isSelected(projet.id),
                 'opacity-75': projet.status === 'archived'
@@ -494,6 +494,7 @@ import { useRouter } from 'vue-router'
 import { useProjets } from '@/composables/useProjets'
 import { useWorkspace } from '@/composables/useWorkspace'
 import { useAuthStore } from '@/stores/authStore'
+import { useStagger } from '@/composables/useAnimations'
 import AdminLayout from "@/components/layout/AdminLayout.vue"
 import ConfirmModal from '@/components/common/ConfirmModal.vue'
 import {
@@ -680,6 +681,7 @@ const loadData = async () => {
 
   // Charger les workspaces
   await fetchWorkspaces()
+  applyStagger()
 
   // Set selected workspace to current workspace
   if (currentWorkspaceId.value && !selectedWorkspaceId.value) {

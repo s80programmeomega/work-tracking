@@ -1,7 +1,7 @@
 <!-- resources/js/components/projets/ProjetFormModal.vue -->
 <template>
   <Teleport to="body">
-    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div dusk="projet-form-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div class="bg-white dark:bg-gray-800 rounded-3 max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col"
         @click.stop>
 
@@ -10,7 +10,7 @@
           <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
             {{ isEdit ? 'Modifier le projet: ' + projet.nom : 'Créer un nouveau projet' }}
           </h2>
-          <button @click="$emit('close')"
+          <button dusk="modal-close-btn" @click="$emit('close')"
             class="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
             <XIcon class="w-5 h-5" />
           </button>

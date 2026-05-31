@@ -8,10 +8,10 @@
       <!-- Header avec filtres et statistiques -->
       <div class="mb-6 space-y-4">
         <!-- Ligne 1: Sélection activité et actions -->
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-4 flex-1">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center gap-3 flex-1">
             <!-- Activity Selector -->
-            <div class="relative flex-1 max-w-md">
+            <div class="relative w-full sm:flex-1 sm:max-w-md">
               <select
                 v-model="selectedActiviteId"
                 @change="handleActiviteChange"
@@ -28,7 +28,7 @@
             </div>
 
             <!-- Vue Toggle -->
-            <div class="flex gap-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-3">
+            <div class="flex gap-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-3 shrink-0">
               <button
                 dusk="view-table-btn"
                 @click="currentView = 'table'"
@@ -80,7 +80,7 @@
             <select
               v-model="filterAssignee"
               dusk="filter-assignee"
-              class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+              class="w-full sm:w-auto px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
             >
               <option value="me">Mes tâches</option>
               <option value="all">Toutes les tâches</option>
@@ -88,7 +88,7 @@
           </div>
 
           <!-- Actions -->
-          <div class="flex gap-3">
+          <div class="flex flex-wrap gap-3 w-full sm:w-auto">
             <!-- Validations en attente -->
             <button
               v-if="pendingValidationsCount > 0"
@@ -285,7 +285,7 @@
         </div>
 
         <!-- Active Tasks - Table View (default) -->
-        <div v-else-if="currentView === 'table'">
+        <div dusk="view-table-panel" v-else-if="currentView === 'table'">
           <TacheTable
             dusk="tache-table"
             :taches="filteredTasks"
@@ -296,7 +296,7 @@
         </div>
 
         <!-- Active Tasks - Kanban View -->
-        <div v-else-if="currentView === 'kanban'">
+        <div dusk="view-kanban-panel" v-else-if="currentView === 'kanban'">
           <KanbanBoard
             :kanban="kanban"
             :loading="loading"
@@ -313,7 +313,7 @@
         </div>
 
         <!-- Active Tasks - List View -->
-        <div v-else-if="currentView === 'list'" class="space-y-2">
+        <div dusk="view-list-panel" v-else-if="currentView === 'list'" class="space-y-2">
           <div v-if="filteredTasks.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">
             <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />

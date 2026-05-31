@@ -46,6 +46,15 @@ class ActiviteService
             });
         }
 
+        // Filtre par plage de dates (date_debut)
+        if (! empty($filters['date_from'])) {
+            $query->where('date_debut', '>=', $filters['date_from']);
+        }
+
+        if (! empty($filters['date_to'])) {
+            $query->where('date_debut', '<=', $filters['date_to']);
+        }
+
         // Sorting
         $query->orderByPosition();
 

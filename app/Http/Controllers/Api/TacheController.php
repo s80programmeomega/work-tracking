@@ -62,6 +62,8 @@ class TacheController extends Controller
             'week_number',
             'year',
             'validation_status',
+            'date_from',
+            'date_to',
         ]);
 
         $taches = $this->tacheService->getAllTaches($request->user(), $filters);
@@ -2276,6 +2278,15 @@ class TacheController extends Controller
             $query->whereHas('assignees', fn ($q) => $q->where('users.id', $request->integer('assignee_id')));
         }
 
+        // Filtre par plage de dates (écheance)
+        if ($request->filled('date_from')) {
+            $query->where('echeance', '>=', $request->string('date_from'));
+        }
+
+        if ($request->filled('date_to')) {
+            $query->where('echeance', '<=', $request->string('date_to'));
+        }
+
         $taches = $query
             ->orderBy('echeance', 'asc')
             ->paginate($request->integer('per_page', 25));
@@ -2283,7 +2294,7 @@ class TacheController extends Controller
         Log::info('Vue globale des tâches consultée', [
             'user_id' => $user->id,
             'workspace_id' => $workspace?->id,
-            'filters' => $request->only(['projet_id', 'activite_id', 'statut', 'assignee_id']),
+            'filters' => $request->only(['projet_id', 'activite_id', 'statut', 'assignee_id', 'date_from', 'date_to']),
         ]);
 
         return response()->json([

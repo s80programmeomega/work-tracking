@@ -108,9 +108,9 @@
             </p>
           </div>
 
-          <div v-else>
+          <div v-else ref="listRef">
             <NotificationItem v-for="notification in displayedNotifications" :key="notification.id"
-              :notification="notification" @click="handleNotificationClick" @mark-read="handleMarkAsRead"
+              :notification="notification" class="stagger-item" @click="handleNotificationClick" @mark-read="handleMarkAsRead"
               @delete="handleDelete" @open-resultat-modal="handleOpenResultatModal" />
           </div>
 
@@ -154,6 +154,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useNotifications } from '@/composables/useNotifications';
+import { useStagger } from '@/composables/useAnimations';
 import NotificationItem from '@/components/layout/header/NotificationItem.vue';
 import NotificationDetailModal from '@/components/layout/header/NotificationDetailModal.vue';
 import ResultatDetailModal from '@/components/taches/resultats/ResultatDetailModal.vue';
@@ -162,6 +163,7 @@ import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue';
 import api from '@/api/axios';
 
 const router = useRouter();
+const { staggerRef: listRef, applyStagger } = useStagger(35);
 const filterType = ref('all');
 const showDetailModal = ref(false);
 const selectedNotification = ref(null);
@@ -207,6 +209,7 @@ const loadPage = async (page) => {
     const response = await fetchAll(page);
     notifications.value = response.data;
     pagination.value = response.meta;
+    applyStagger();
   } catch (error) {
     console.error('Error loading page:', error);
   }

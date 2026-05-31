@@ -1,9 +1,9 @@
 <template>
   <AdminLayout>
-    <div class="min-h-screen bg-gray-50/50 dark:bg-gray-900/50">
+    <div class="bg-gray-50/50 dark:bg-gray-900/50">
       <!-- Header -->
       <div class="bg-white dark:bg-gray-900 border-b border-gray-200/80 dark:border-gray-800/80">
-        <div class="max-w-7xl mx-auto px-6 py-8">
+        <div class="py-8">
           <div class="flex items-start justify-between">
             <div class="flex items-center gap-5">
               <div class="relative">
@@ -58,7 +58,7 @@
       </div>
 
       <!-- Content -->
-      <div class="max-w-7xl mx-auto px-6 py-6">
+      <div class="py-6">
 
         <!-- Loading -->
         <div v-if="loading" class="flex justify-center items-center h-64">
@@ -86,11 +86,11 @@
         </div>
 
         <!-- Results list -->
-        <div v-else class="space-y-4">
+        <div v-else ref="listRef" class="space-y-4">
           <div
             v-for="resultat in currentResultats"
             :key="resultat.id"
-            class="bg-white/80 dark:bg-gray-800/80 rounded-3 border border-gray-200/50 dark:border-gray-700/50 p-6 ">
+            class="stagger-item bg-white/80 dark:bg-gray-800/80 rounded-3 border border-gray-200/50 dark:border-gray-700/50 p-6">
             <div class="flex items-start justify-between gap-4">
               <div class="flex-1 min-w-0">
                 <h3 class="font-semibold text-gray-900 dark:text-white truncate">
@@ -135,11 +135,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
+import { useStagger } from '@/composables/useAnimations'
 import api from '@/api/axios'
 import { useToast } from 'vue-toastification'
 import { useRealtimeRefresh } from '@/composables/useRealtimeRefresh'
 
 const toast = useToast()
+const { staggerRef: listRef, applyStagger } = useStagger(50)
 
 const loading = ref(false)
 const error = ref(null)
@@ -174,6 +176,7 @@ async function loadData() {
     const { data } = await api.get('/evaluations/mes-resultats/en-attente')
     resultats.value = data.data.resultats || []
     counts.value = data.data.counts || { en_validation_n1: 0, en_validation_n2: 0, total: 0 }
+    applyStagger()
   } catch (err) {
     error.value = err.response?.data?.message || 'Erreur lors du chargement'
     toast.error(error.value)

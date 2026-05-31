@@ -1,38 +1,33 @@
 <template>
   <AdminLayout>
-    <!-- Header Asana-style -->
-    <div class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Workspaces</h1>
-            <p class="text-gray-600 dark:text-gray-400 mt-1">Tous vos espaces de travail en un seul endroit</p>
+    <!-- Header -->
+    <div class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 mb-6">
+      <div class="py-6 flex flex-wrap items-center justify-between gap-3">
+        <div class="min-w-0">
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Workspaces</h1>
+          <p class="text-gray-600 dark:text-gray-400 mt-1">Tous vos espaces de travail en un seul endroit</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <div class="relative">
+            <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input v-model="searchQuery" type="text" placeholder="Rechercher des workspaces..."
+              class="pl-10 pr-4 py-2 w-64 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
           </div>
-          <div class="flex items-center space-x-3">
-            <!-- Search Bar -->
-            <div class="relative">
-              <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <input v-model="searchQuery" type="text" placeholder="Rechercher des workspaces..."
-                class="pl-10 pr-4 py-2 w-64 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-            </div>
-            
-            <!-- Create Button -->
-            <button @click="$router.push({ name: 'workspaces.create' })"
-              class="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-3 transition-colors text-sm font-medium">
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-              </svg>
-              Nouveau workspace
-            </button>
-          </div>
+          <button @click="$router.push({ name: 'workspaces.create' })"
+            class="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-3 transition-colors text-sm font-medium">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Nouveau workspace
+          </button>
         </div>
       </div>
     </div>
 
     <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="py-6">
       <!-- Quick Stats -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <div class="rounded-3 p-5 border border-blue-100 dark:border-blue-800/30">
@@ -355,6 +350,7 @@
       </div>
     </div>
   </AdminLayout>
+
 </template>
 
 <script setup lang="ts">

@@ -1,7 +1,7 @@
 <!-- resources\js\pages\taches\TacheDetail.vue -->
 <template>
   <AdminLayout>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-950">
+  <div class="bg-gray-50 dark:bg-gray-950">
     <!-- Loading -->
     <div v-if="loading" class="flex items-center justify-center min-h-screen">
       <i class="fas fa-spinner fa-spin text-4xl text-brand-600"></i>
@@ -20,7 +20,7 @@
     </div>
 
     <!-- Content -->
-    <div v-else-if="tache" class="container mx-auto px-4 py-6 max-w-7xl">
+    <div v-else-if="tache" class="py-6">
       <!-- Breadcrumb -->
       <nav class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-6">
         <router-link to="/" class="hover:text-brand-600">
@@ -178,8 +178,8 @@
 
       <!-- Tabs -->
       <div class="bg-white dark:bg-gray-900 rounded-3 mb-6">
-        <div class="border-b border-gray-200 dark:border-gray-800">
-          <nav class="flex gap-1 px-6">
+        <div class="border-b border-gray-200 dark:border-gray-800 overflow-x-auto">
+          <nav class="flex gap-1 px-6 min-w-max">
             <button v-for="tab in tabs" :key="tab.id"
               :dusk="`tab-${tab.id}`"
               @click="activeTab = tab.id"

@@ -1,11 +1,11 @@
 <!-- resources/js/pages/ValidationResultats.vue -->
 <template>
   <AdminLayout>
-    <div class="min-h-screen bg-gray-50/50 dark:bg-gray-900/50">
+    <div class="bg-gray-50/50 dark:bg-gray-900/50">
       <!-- Header Premium -->
       <div class="bg-white dark:bg-gray-900 border-b border-gray-200/80 dark:border-gray-800/80 ">
-        <div class="max-w-7xl mx-auto px-6 py-8">
-          <div class="flex items-start justify-between">
+        <div class="py-8">
+          <div class="flex flex-wrap items-start justify-between gap-3">
             <div class="flex items-center gap-5">
               <div class="relative">
                 <div
@@ -43,8 +43,10 @@
           </div>
 
           <!-- Enhanced Tabs -->
-          <div class="flex gap-1 mt-8 bg-gray-100/80 dark:bg-gray-800/80 rounded-3 p-1.5 ">
+          <div class="overflow-x-auto mt-8">
+          <div class="flex gap-1 bg-gray-100/80 dark:bg-gray-800/80 rounded-3 p-1.5 min-w-max">
             <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
+              :dusk="`validation-tab-${tab.id}`"
               class="flex items-center gap-3 px-6 py-3.5 text-sm font-semibold transition-all duration-200 rounded-3 relative group"
               :class="activeTab === tab.id
                 ? 'text-white ' + tab.activeGradient
@@ -59,11 +61,17 @@
               </div>
             </button>
           </div>
+          </div>
         </div>
       </div>
 
+      <!-- Date range filter -->
+      <div class="bg-white dark:bg-gray-900 border-b border-gray-200/80 dark:border-gray-800/80 px-0 py-3">
+        <DateRangeFilter @change="onDateRangeChange" />
+      </div>
+
       <!-- Stats Cards Grid -->
-      <div class="max-w-7xl mx-auto px-6 py-6">
+      <div class="py-6">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
           <div v-for="stat in stats" :key="stat.id"
             class="bg-white/80 dark:bg-gray-800/80 rounded-3 p-6 border border-gray-200/50 dark:border-gray-700/50 transition-all duration-200 hover:border-gray-300/80 dark:hover:border-gray-600/80">
@@ -131,8 +139,8 @@
           </div>
 
           <!-- Results Grid -->
-          <div v-else class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <ResultatCard v-for="resultat in currentResults" :key="resultat.id" :resultat="resultat" :level="activeTab"
+          <div v-else ref="gridRef" class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <ResultatCard v-for="resultat in currentResults" :key="resultat.id" :resultat="resultat" :level="activeTab" class="stagger-item"
               :expanded="expandedCards.includes(resultat.id)" @toggle="toggleCard(resultat.id)"
               @validate="handleValidate" @reject="handleReject" @view-details="viewResultatDetails" />
           </div>
@@ -156,11 +164,14 @@ import AdminLayout from '@/components/layout/AdminLayout.vue'
 import ResultatCard from '@/components/taches/resultats/ResultatCard.vue'
 import ValidationModal from '@/components/taches/resultats/ValidationModal.vue'
 import ResultatDetailModal from '@/components/taches/resultats/ResultatDetailModal.vue'
+import DateRangeFilter from '@/components/common/DateRangeFilter.vue'
+import { useStagger } from '@/composables/useAnimations'
 import api from '@/api/axios'
 import { useToast } from 'vue-toastification'
 import { useRealtimeRefresh } from '@/composables/useRealtimeRefresh'
 
 const toast = useToast()
+const { staggerRef: gridRef, applyStagger } = useStagger(50)
 
 // State
 const activeTab = ref('n1')
@@ -270,16 +281,27 @@ const totalProcessed = computed(() => {
   return countsN1.value.validated + countsN2.value.validated + countsN1.value.rejected + countsN2.value.rejected
 })
 
+const dateRange = ref({ from: null, to: null })
+
+function onDateRangeChange({ from, to }) {
+  dateRange.value = { from, to }
+  loadData()
+}
+
 // Methods (rest of the methods remain the same as original)
 async function loadData() {
   loading.value = true
   error.value = null
 
   try {
-    const { data } = await api.get('/evaluations/resultats/en-attente')
+    const params = {}
+    if (dateRange.value.from) { params.date_from = dateRange.value.from }
+    if (dateRange.value.to) { params.date_to = dateRange.value.to }
+    const { data } = await api.get('/evaluations/resultats/en-attente', { params })
 
     resultatsN1.value = data.data.pending_n1 || []
     resultatsN2.value = data.data.pending_n2 || []
+    applyStagger()
     countsN1.value = {
       pending: data.data.counts.n1 || 0,
       validated: 0,

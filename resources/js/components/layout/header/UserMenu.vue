@@ -19,7 +19,7 @@
         <!-- Dropdown Start -->
         <div
             v-if="dropdownOpen"
-            class="absolute right-0 mt-[17px] flex w-[260px] flex-col rounded-3 border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-gray-dark"
+            class="absolute right-0 mt-4.25 flex w-65 flex-col rounded-3 border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-gray-900"
         >
             <div>
                 <span
@@ -45,7 +45,7 @@
                         <!-- SVG icon would go here -->
                         <component
                             :is="item.icon"
-                            class="text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:text-gray-200 dark:group-hover:text-gray-300"
+                            class="text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200"
                         />
                         {{ item.text }}
                     </router-link>
@@ -58,7 +58,7 @@
                 class="flex items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-3 group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
             >
                 <LogoutIcon
-                    class="text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:text-gray-200 dark:group-hover:text-gray-300"
+                    class="text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200"
                 />
                 Sign out
             </router-link>

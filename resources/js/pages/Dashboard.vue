@@ -2,7 +2,7 @@
 <template>
   <AdminLayout>
     <div
-      class="min-h-screen bg-gray-100 dark:bg-gray-900 p-6 transition-colors duration-300">
+      class="bg-gray-100 dark:bg-gray-900 p-6 transition-colors duration-300">
       <!-- Header avec navigation workspace et membre -->
       <div class="mb-8">
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
@@ -99,24 +99,17 @@
       </div>
 
       <!-- Loading State -->
-      <div v-if="loading" class="flex items-center justify-center py-20">
-        <div class="text-center">
-          <div class="relative">
-            <div class="w-16 h-16 border-4 border-brand-200 dark:border-brand-800 rounded-full animate-spin"></div>
-            <div
-              class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 border-4 border-transparent border-t-brand-600 rounded-full animate-spin">
-            </div>
-          </div>
-          <p class="mt-4 text-gray-600 dark:text-gray-400 font-medium">Chargement des données...</p>
-        </div>
+      <div v-if="loading" class="space-y-8">
+        <SkeletonLoader type="stats" :cols="4" grid-class="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" />
+        <SkeletonLoader type="cards" :rows="3" :card-height="200" grid-class="grid-cols-1 lg:grid-cols-3" />
       </div>
 
       <!-- Dashboard Content -->
       <div v-else class="space-y-8">
         <!-- Stats Cards -->
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div ref="statsRef" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           <div v-for="(stat, index) in statsCards" :key="index"
-            class="group bg-white dark:bg-gray-800 rounded-3 p-5 border border-gray-200 dark:border-gray-700 hover:border-brand-300 dark:hover:border-brand-600 transition-colors duration-200">
+            class="stagger-item group bg-white dark:bg-gray-800 rounded-3 p-5 border border-gray-200 dark:border-gray-700 hover:border-brand-300 dark:hover:border-brand-600 transition-colors duration-200">
 
             <div class="flex items-start justify-between">
               <div class="flex-1">
@@ -320,9 +313,12 @@ import {
   XIcon
 } from '@/icons'
 import { useWorkspace } from '@/composables/useWorkspace'
+import { useStagger } from '@/composables/useAnimations'
+import SkeletonLoader from '@/components/common/SkeletonLoader.vue'
 
 const router = useRouter()
 const loading = ref(true)
+const { staggerRef: statsRef, applyStagger: applyStatsStagger } = useStagger(60)
 const selectedPeriod = ref('month')
 const selectedWorkspace = ref('all')
 const selectedMember = ref('all')
@@ -473,6 +469,7 @@ const loadDashboardData = async () => {
     updateStatsCards()
     await nextTick()
     createCharts()
+    applyStatsStagger()
   } catch (error) {
     console.error('Error loading dashboard data:', error)
   } finally {

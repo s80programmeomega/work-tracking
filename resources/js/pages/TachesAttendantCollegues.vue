@@ -3,8 +3,8 @@
     <div class="space-y-6">
       <!-- Header -->
       <div class="rounded-3 border border-gray-200 dark:border-gray-800 p-6 ">
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center gap-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div class="flex min-w-0 items-center gap-4">
             <div class="w-14 h-14 rounded-3 flex items-center justify-center ">
               <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -39,7 +39,7 @@
         </div>
 
         <!-- Stats -->
-        <div class="grid grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div class="bg-white dark:bg-gray-800 rounded-3 p-4 border border-gray-200 dark:border-gray-700">
             <p class="text-sm text-gray-500 dark:text-gray-400">Total en attente</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.total }}</p>
@@ -89,11 +89,11 @@
       </div>
 
       <!-- Liste des tâches groupées par activité -->
-      <div v-else class="space-y-6">
+      <div v-else ref="listRef" class="space-y-6">
         <div
           v-for="group in tachesByActivite"
           :key="group.activite.id"
-          class="rounded-3 border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] overflow-hidden"
+          class="stagger-item rounded-3 border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/3 overflow-hidden"
         >
           <!-- Header du groupe -->
           <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
@@ -231,6 +231,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import TacheDetailModal from '@/components/taches/TacheDetailModal.vue'
+import { useStagger } from '@/composables/useAnimations'
 import api from '@/api/axios'
 
 // State
@@ -240,6 +241,7 @@ const error = ref(null)
 const router = useRouter()
 const showDetailModal = ref(false)
 const selectedTache = ref(null)
+const { staggerRef: listRef, applyStagger } = useStagger(60)
 
 // Computed
 const stats = computed(() => {
@@ -288,6 +290,7 @@ async function loadTaches() {
   try {
     const { data } = await api.get('/taches/waiting-for-colleagues')
     taches.value = data.data || []
+    applyStagger()
   } catch (err) {
     console.error('Erreur chargement:', err)
     error.value = err.response?.data?.message || 'Erreur lors du chargement'

@@ -399,6 +399,16 @@ const router = createRouter({
       }
     },
     {
+      path: '/taches/en-retard',
+      name: 'taches.overdue',
+      component: () => import('../pages/TachesEnRetard.vue'),
+      meta: {
+        title: 'Tâches en Retard',
+        requiresAuth: true,
+        breadcrumb: 'Tâches en Retard'
+      }
+    },
+    {
       path: '/taches/:id',
       name: 'taches.show',
       component: () => import('../pages/taches/TacheDetail.vue'),
@@ -407,16 +417,6 @@ const router = createRouter({
         title: 'Détails de la tâche'
       }
     },
-    // {
-    //   path: '/taches/en-retard',
-    //   name: 'taches.overdue',
-    //   component: () => import('../pages/TachesEnRetard.vue'),
-    //   meta: {
-    //     title: 'Tâches en Retard',
-    //     requiresAuth: true,
-    //     breadcrumb: 'Tâches en Retard'
-    //   }
-    // },
 
     // {
     // path: '/evaluations',

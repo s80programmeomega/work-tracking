@@ -63,11 +63,11 @@
       </div>
 
       <!-- Sous-tâche items -->
-      <div class="space-y-2">
+      <div ref="listRef" class="space-y-2">
         <div
           v-for="st in orderedSousTaches"
           :key="st.id"
-          class="bg-white dark:bg-gray-900 rounded-3 border border-gray-200 dark:border-gray-700 p-4 transition-all"
+          class="stagger-item bg-white dark:bg-gray-900 rounded-3 border border-gray-200 dark:border-gray-700 p-4 transition-all"
           :class="{
             'border-l-4 border-l-red-400': st.statut === 'en_retard',
             'border-l-4 border-l-green-400': st.statut === 'termine',
@@ -363,6 +363,7 @@ import '@vuepic/vue-datepicker/dist/main.css'
 import SousTacheForm from './SousTacheForm.vue'
 import { useSousTaches } from '@/composables/useSousTaches'
 import { useAuthStore } from '@/stores/authStore'
+import { useStagger } from '@/composables/useAnimations'
 
 const props = defineProps({
     tacheId: { type: Number, required: true },
@@ -391,7 +392,9 @@ const {
     removeIntervenant,
 } = useSousTaches(props.tacheId)
 
-fetchSousTaches()
+const { staggerRef: listRef, applyStagger } = useStagger(50)
+
+fetchSousTaches().then(applyStagger)
 
 const showForm = ref(false)
 const creating = ref(false)

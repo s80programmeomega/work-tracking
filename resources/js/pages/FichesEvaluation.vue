@@ -1,11 +1,11 @@
 <!-- resources/js/pages/FicheEvaluation.vue -->
 <template>
   <AdminLayout>
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div class="bg-gray-50 dark:bg-gray-900">
       
       <!-- Header -->
       <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30 ">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="py-6">
           <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
             <!-- Titre et info semaine -->
             <div>
@@ -134,7 +134,7 @@
       </div>
 
       <!-- Contenu principal -->
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="py-8">
         
         <!-- Loading -->
         <div v-if="loading" class="flex flex-col items-center justify-center py-16">

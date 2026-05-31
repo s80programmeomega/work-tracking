@@ -87,12 +87,14 @@ class DocumentController extends Controller
                 'type' => 'sometimes|string',
                 'search' => 'sometimes|string|min:2',
                 'per_page' => 'sometimes|integer|min:1|max:100',
+                'date_from' => 'sometimes|date_format:Y-m-d',
+                'date_to' => 'sometimes|date_format:Y-m-d',
             ]);
 
             $documents = $this->documentService->getWorkspaceDocuments(
                 $workspace,
                 $request->user(),
-                $request->only(['type', 'search', 'per_page'])
+                $request->only(['type', 'search', 'per_page', 'date_from', 'date_to'])
             );
 
             return response()->json([

@@ -60,7 +60,8 @@
           <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
         </div>
 
-        <table v-else class="w-full text-sm">
+        <div v-else class="overflow-x-auto">
+        <table class="w-full text-sm">
           <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500 dark:text-gray-400 uppercase">
             <tr>
               <th class="px-4 py-3 text-left">Workspace</th>
@@ -137,6 +138,7 @@
             </tr>
           </tbody>
         </table>
+        </div>
 
         <!-- Pagination -->
         <div v-if="pagination && pagination.last_page > 1" class="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-700">
@@ -215,12 +217,14 @@
 import { ref, onMounted } from 'vue';
 import AdminLayout from '@/components/layout/AdminLayout.vue';
 import SubscriptionBadge from '@/components/admin/SubscriptionBadge.vue';
+import { useStagger } from '@/composables/useAnimations';
 import api from '@/api/axios';
 
 const workspaces = ref([]);
 const pagination = ref(null);
 const loading = ref(false);
 const error = ref(null);
+const { staggerRef: tbodyRef, applyStagger } = useStagger(40);
 const search = ref('');
 const page = ref(1);
 const filters = ref({ subscription_mode: '', is_active: '' });
@@ -241,6 +245,7 @@ const fetchWorkspaces = async () => {
     const { data } = await api.get('/admin/workspaces', { params });
     workspaces.value = data.data;
     pagination.value = { current_page: data.current_page, last_page: data.last_page };
+    applyStagger();
   } catch (e) {
     error.value = e.response?.data?.message ?? 'Failed to load workspaces.';
   } finally {

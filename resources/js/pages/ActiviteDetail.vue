@@ -2,8 +2,8 @@
 <template>
   <AdminLayout>
     <PageBreadcrumb :pageTitle="'Détail de l\'activité'" />
-    <div class="min-h-screen bg-gray-50/30 dark:bg-gray-900/50 py-6">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="py-6">
+      <div>
         <div class="space-y-6" v-if="!loading && activite">
           <!-- Header -->
           <div class="space-y-6">
@@ -886,7 +886,7 @@ const getStatusClasses = (status) => {
     'en_cours': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300',
     'terminee': 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300'
   }
-  return classes[status] || 'bg-gray-100 text-gray-800 dark:text-gray-100'
+  return classes[status] || 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100'
 }
 
 const getStatusDotClass = (status) => {
@@ -921,7 +921,7 @@ const getTaskStatusClasses = (status) => {
     'a_refaire': 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300',
     'annule': 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400 line-through'
   }
-  return classes[status] || 'bg-gray-100 text-gray-800 dark:text-gray-100'
+  return classes[status] || 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100'
 }
 
 const getTaskStatusLabel = (status) => {

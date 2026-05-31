@@ -1,6 +1,7 @@
 <!-- resources\js\components\layout\AppSidebar.vue -->
 <template>
     <aside
+        dusk="app-sidebar"
         :class="[
             'fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 text-gray-900 dark:text-white h-screen transition-all duration-300 ease-in-out z-40 border-r border-gray-200 dark:border-gray-800',
             {
@@ -219,7 +220,7 @@
         <div
             class="flex flex-col flex-1 overflow-y-auto duration-300 ease-linear"
         >
-            <nav class="mb-6">
+            <nav dusk="sidebar-nav" class="mb-6" @click.capture="handleNavClick">
                 <div class="flex flex-col gap-4">
                     <div
                         v-for="(menuGroup, groupIndex) in filteredMenuGroups"
@@ -457,6 +458,7 @@
             <div
                 v-if="isExpanded || isHovered || isMobileOpen"
                 class="pt-4 pb-6 border-t border-gray-200 dark:border-gray-700 space-y-2"
+                @click.capture="handleNavClick"
             >
                 <router-link
                     v-if="canManageSettings || isSuperAdmin"
@@ -554,7 +556,7 @@ const Icon = new URL("@/assets/images/logo/icon.jpg", import.meta.url).href;
 
 const route = useRoute();
 const router = useRouter();
-const { isExpanded, isMobileOpen, isHovered, openSubmenu } = useSidebar();
+const { isExpanded, isMobileOpen, isHovered, openSubmenu, toggleMobileSidebar } = useSidebar();
 const authStore = useAuthStore();
 
 // ✅ Utiliser le composable workspace
@@ -759,9 +761,8 @@ const menuGroups = computed(() => [
                         path: "/projets/list/all",
                         superAdminOnly: true,
                     },
-                    { name: "Mes projets", path: "/projets/mes-projets" },
+                    { name: "Mes projets", path: "/projets/mes-projets", superAdminHidden: true },
                     { name: "Projets archivés", path: "/projets/archives" },
-                    // { name: 'Créer un projet', path: '/projets/create', new: true },
                 ],
             },
             {
@@ -773,8 +774,7 @@ const menuGroups = computed(() => [
                         path: "/activites/all/activity",
                         superAdminOnly: true,
                     },
-                    { name: "Mes activités", path: "/activites/mes-activites" },
-                    // { name: 'En retard', path: '/activites/en-retard', count: 5 },
+                    { name: "Mes activités", path: "/activites/mes-activites", superAdminHidden: true },
                 ],
             },
             // ==================== MISE À JOUR DE AppSidebar.vue ====================
@@ -837,17 +837,20 @@ const menuGroups = computed(() => [
                         path: "/taches/responsable",
                         icon: "👑",
                         badge: "new",
+                        superAdminHidden: true,
                     },
                     {
                         name: "En tant qu'intervenant",
                         path: "/taches/assignees",
                         icon: "👤",
+                        superAdminHidden: true,
                     },
                     {
                         name: "Mes validations en attente",
                         path: "/mes-validations",
                         icon: "⏳",
                         requiresPermission: "canSubmitResult",
+                        superAdminHidden: true,
                     },
                     // {
                     //     name: 'En attente de collègues',
@@ -912,12 +915,16 @@ const menuGroups = computed(() => [
             {
                 icon: ChatIcon,
                 name: "Équipes",
-                subItems: [{ name: "Mes équipes", path: "/teams" }],
+                subItems: [
+                    { name: "Mes équipes", path: "/teams", superAdminHidden: true },
+                ],
             },
             {
                 icon: UsersIcon,
                 name: "Utilisateurs",
-                subItems: [{ name: "Invitations", path: "/users/invitations" }],
+                subItems: [
+                    { name: "Invitations", path: "/users/invitations", superAdminHidden: true },
+                ],
             },
             {
                 icon: MailIcon,
@@ -970,15 +977,11 @@ const menuGroups = computed(() => [
     {
         title: "Autres",
         items: [
-            // {
-            //     icon: CalenderIcon,
-            //     name: 'Calendrier',
-            //     path: '/calendar',
-            // },
             {
                 icon: UserCircleIcon,
                 name: "Mon Profil",
                 path: "/profile",
+                superAdminHidden: true,
             },
         ],
     },
@@ -989,10 +992,17 @@ const filteredMenuGroups = computed(() => {
     if (!menuGroups.value) return [];
 
     return menuGroups.value
+        .filter((group) => {
+            if (!group) return false;
+            if (group.superAdminOnly && !isSuperAdmin.value) return false;
+            if (group.superAdminHidden && isSuperAdmin.value) return false;
+            return true;
+        })
         .map((group) => ({
             ...group,
             items: (group.items || []).filter((item) => {
                 if (!item) return false;
+                if (item.superAdminHidden && isSuperAdmin.value) return false;
 
                 // Si l'item a des subItems, on vérifie s'il en reste après filtrage
                 if (item.subItems) {
@@ -1024,6 +1034,7 @@ const getFilteredSubItems = (subItems) => {
     return subItems.filter((subItem) => {
         if (!subItem) return false;
         if (subItem.superAdminOnly && !isSuperAdmin.value) return false;
+        if (subItem.superAdminHidden && isSuperAdmin.value) return false;
         if (subItem.requiresPermission) {
             return permissionMap.value[subItem.requiresPermission] ?? false;
         }
@@ -1079,6 +1090,14 @@ const syncOpenSubmenuFromRoute = () => {
 };
 
 watch(() => route.path, syncOpenSubmenuFromRoute);
+
+const handleNavClick = (event) => {
+    if (!isMobileOpen.value) return;
+    const link = event.target.closest('a');
+    if (link) {
+        toggleMobileSidebar();
+    }
+};
 
 const startTransition = (el) => {
     el.style.height = "auto";

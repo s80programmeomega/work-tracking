@@ -5,8 +5,8 @@
       <!-- Header Premium -->
       <div
         class="rounded-3 border border-gray-200 dark:border-gray-800 p-6 ">
-        <div class="flex items-center justify-between mb-6">
-          <div class="flex items-center gap-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+          <div class="flex min-w-0 items-center gap-4">
             <div
               class="w-14 h-14 rounded-3 flex items-center justify-center ">
               <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -20,7 +20,7 @@
             </div>
           </div>
 
-          <div class="flex items-center gap-3">
+          <div class="flex flex-wrap items-center gap-3">
             <!-- Bouton refresh -->
             <button @click="loadAssignedTasks" :disabled="loading"
               class="p-2 rounded-3 border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
@@ -34,7 +34,7 @@
 
             <!-- Toggle vue -->
             <div class="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-3">
-              <button @click="currentView = 'kanban'"
+              <button dusk="view-kanban-btn" @click="currentView = 'kanban'"
                 :class="['px-3 py-2 rounded-md transition-all flex items-center gap-2 text-sm',
                   currentView === 'kanban' ? 'bg-white dark:bg-gray-700 text-brand-600 dark:text-brand-400' : 'text-gray-600 dark:text-gray-400']">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -43,7 +43,7 @@
                 </svg>
                 Kanban
               </button>
-              <button @click="currentView = 'grouped'"
+              <button dusk="view-grouped-btn" @click="currentView = 'grouped'"
                 :class="['px-3 py-2 rounded-md transition-all flex items-center gap-2 text-sm',
                   currentView === 'grouped' ? 'bg-white dark:bg-gray-700 text-brand-600 dark:text-brand-400' : 'text-gray-600 dark:text-gray-400']">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -169,7 +169,7 @@
       </div>
 
       <!-- Vue Kanban Personnel -->
-      <div v-if="currentView === 'kanban' && !loading" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div dusk="view-kanban-panel" v-if="currentView === 'kanban' && !loading" class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <KanbanColumnPersonal v-for="column in kanbanColumns" :key="column.statut" :title="column.title"
           :statut="column.statut" :taches="getMyTasksByStatus(column.statut)" :status-color="column.color"
           :status-icon="column.icon" @move-card="handleMoveMyCard" @view-task="handleViewTask"
@@ -177,13 +177,13 @@
       </div>
 
       <!-- Vue groupée par activité -->
-      <div v-else-if="currentView === 'grouped' && !loading" class="space-y-6">
+      <div dusk="view-grouped-panel" v-else-if="currentView === 'grouped' && !loading" ref="listRef" class="space-y-6">
         <div v-if="tasksByActivite.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">
           Aucune tâche assignée pour le moment
         </div>
 
         <div v-for="group in tasksByActivite" :key="group.activite.id"
-          class="rounded-3 border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] overflow-hidden">
+          class="stagger-item rounded-3 border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/3 overflow-hidden">
           <div
             class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
@@ -273,11 +273,13 @@ import KanbanColumnPersonal from '@/components/taches/KanbanColumnPersonal.vue'
 import TacheCardPersonal from '@/components/taches/TacheCardPersonal.vue'
 import TacheDetailModal from '@/components/taches/TacheDetailModal.vue'
 import SubmitResultModal from '@/components/taches/SubmitResultModal.vue'
-import TacheForm from '@/components/taches/TacheForm.vue' // ✅ AJOUT
+import TacheForm from '@/components/taches/TacheForm.vue'
+import { useStagger } from '@/composables/useAnimations'
 import api from '@/api/axios'
 import { useToast } from 'vue-toastification'
 
 const toast = useToast()
+const { staggerRef: listRef, applyStagger } = useStagger(55)
 
 // State
 const taches = ref([])
@@ -342,7 +344,7 @@ async function loadAssignedTasks() {
   try {
     const { data } = await api.get('/taches/assignees')
     taches.value = data.data || []
-
+    applyStagger()
     console.log('✅ Tâches assignées chargées:', {
       total: taches.value.length,
       sample: taches.value.slice(0, 2).map(t => ({

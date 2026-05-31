@@ -1,7 +1,7 @@
 <!-- resources/js/pages/workspaces/Show.vue -->
 <template>
   <AdminLayout>
-    <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div class="bg-gray-100 dark:bg-gray-900">
       <!-- Loading State -->
       <div v-if="loading" class="flex items-center justify-center h-screen">
         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>

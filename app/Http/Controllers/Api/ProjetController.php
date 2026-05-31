@@ -43,6 +43,8 @@ class ProjetController extends Controller
             'is_overdue',
             'per_page',
             'workspace_id', // ✅ Permet au super_admin de filtrer par workspace
+            'date_from',
+            'date_to',
         ]);
 
         // Si le super_admin spécifie un workspace_id, on filtre par ce workspace

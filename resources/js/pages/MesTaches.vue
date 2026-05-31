@@ -4,7 +4,7 @@
     <div class="space-y-6">
       <!-- Header avec statistiques personnelles -->
       <div class="rounded-3 border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex flex-wrap items-start justify-between gap-3 mb-6">
           <div>
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
               <div class="w-12 h-12 rounded-3 flex items-center justify-center">
@@ -19,7 +19,7 @@
             </p>
           </div>
 
-          <div class="flex items-center gap-3">
+          <div class="flex flex-wrap items-center gap-3">
             <!-- Filtre par semaine -->
             <div class="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-3 p-1">
               <button @click="changeWeek(-1)" class="p-2 rounded-md hover:bg-white dark:hover:bg-gray-700 transition-colors" title="Semaine précédente">
@@ -94,7 +94,7 @@
             <option value="termine">Terminé</option>
           </select>
           <label class="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" v-model="filters.overdue" @change="applyFilters" class="w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-brand-500" />
+            <input type="checkbox" v-model="filters.overdue" @change="applyFilters" class="w-4 h-4 text-brand-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-brand-500" />
             <span class="text-sm text-gray-700 dark:text-gray-300">En retard uniquement</span>
           </label>
           <button @click="resetFilters" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
@@ -156,8 +156,8 @@
         </div>
 
         <!-- Vue Liste -->
-        <div v-else-if="currentView === 'list'" class="space-y-3">
-          <div v-for="tache in filteredTaches" :key="tache.id">
+        <div v-else-if="currentView === 'list'" ref="listRef" class="space-y-3">
+          <div v-for="tache in filteredTaches" :key="tache.id" class="stagger-item">
             <TacheCardPersonal
               :tache="tache"
               @view="handleViewTask"
@@ -198,6 +198,7 @@ import KanbanColumnPersonal from '@/components/taches/KanbanColumnPersonal.vue'
 import TacheCardPersonal from '@/components/taches/TacheCardPersonal.vue'
 import TacheDetailModal from '@/components/taches/TacheDetailModal.vue'
 import SubmitResultModal from '@/components/taches/SubmitResultModal.vue'
+import { useStagger } from '@/composables/useAnimations'
 import api from '@/api/axios'
 import { useRealtimeRefresh } from '@/composables/useRealtimeRefresh'
 
@@ -208,6 +209,7 @@ const loading = ref(false)
 const error = ref(null)
 const currentView = ref('kanban')
 const router = useRouter()
+const { staggerRef: listRef, applyStagger } = useStagger(45)
 const showViewModal = ref(false)
 const showSubmitResultModal = ref(false)
 const currentTache = ref(null)
@@ -306,6 +308,7 @@ async function loadTaches() {
 
     const { data } = await api.get('/taches/mes-taches', { params })
     taches.value = data.data || []
+    applyStagger()
     console.log('✅ Mes tâches chargées:', taches.value.length)
   } catch (err) {
     console.error('❌ Erreur chargement tâches:', err)

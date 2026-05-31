@@ -104,7 +104,7 @@
                 <input
                   v-model="formData.is_default"
                   type="checkbox"
-                  class="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                  class="w-4 h-4 text-purple-600 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded focus:ring-purple-500"
                 />
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
                   Définir comme template par défaut

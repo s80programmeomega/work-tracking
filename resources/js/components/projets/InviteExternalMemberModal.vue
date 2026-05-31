@@ -335,7 +335,7 @@
                   <label v-for="member in filteredWorkspaceMembers" :key="member.id"
                     class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-200 dark:border-gray-700 last:border-0">
                     <input type="checkbox" :value="member.id" v-model="selectedMembers"
-                      class="w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-brand-500" />
+                      class="w-4 h-4 text-brand-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-brand-500" />
                     <div v-if="member.avatar" class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
                       <img :src="member.avatar" :alt="member.nom" class="w-full h-full object-cover" />
                     </div>
@@ -409,7 +409,7 @@
               <div class="space-y-3">
                 <div class="flex items-start gap-3">
                   <input v-model="form.can_edit" :disabled="form.role === 'viewer'" type="checkbox" id="inv_can_edit"
-                    class="mt-1 w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-brand-500" />
+                    class="mt-1 w-4 h-4 text-brand-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-brand-500" />
                   <div>
                     <label for="inv_can_edit" class="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Peut modifier le projet
@@ -423,7 +423,7 @@
                 <div class="flex items-start gap-3">
                   <input v-model="form.can_delete" :disabled="form.role === 'member' || form.role === 'viewer'"
                     type="checkbox" id="inv_can_delete"
-                    class="mt-1 w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-brand-500" />
+                    class="mt-1 w-4 h-4 text-brand-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-brand-500" />
                   <div>
                     <label for="inv_can_delete" class="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Peut supprimer le projet
@@ -437,7 +437,7 @@
                 <div class="flex items-start gap-3">
                   <input v-model="form.can_invite" :disabled="form.role === 'member' || form.role === 'viewer'"
                     type="checkbox" id="inv_can_invite"
-                    class="mt-1 w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-brand-500" />
+                    class="mt-1 w-4 h-4 text-brand-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-brand-500" />
                   <div>
                     <label for="inv_can_invite" class="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Peut inviter des membres
@@ -451,7 +451,7 @@
                 <div class="flex items-start gap-3">
                   <input v-model="form.can_delete_member" :disabled="form.role === 'member' || form.role === 'viewer'"
                     type="checkbox" id="can_delete_member"
-                    class="mt-1 w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-brand-500" />
+                    class="mt-1 w-4 h-4 text-brand-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-brand-500" />
                   <div>
                     <label for="can_delete_member" class="text-sm font-medium text-orange-700 dark:text-orange-300">
                       Peut supprimer des membres
@@ -471,7 +471,7 @@
                   <div class="flex items-start gap-3">
                     <input v-model="form.can_create_activity" :disabled="form.role === 'viewer'" type="checkbox"
                       id="inv_can_create_activity"
-                      class="mt-1 w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-brand-500" />
+                      class="mt-1 w-4 h-4 text-brand-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-brand-500" />
                     <div>
                       <label for="inv_can_create_activity" class="text-sm font-medium text-gray-700 dark:text-gray-300">
                         Peut créer des activités
@@ -485,7 +485,7 @@
                   <div class="flex items-start gap-3">
                     <input v-model="form.can_edit_activity" :disabled="form.role === 'viewer'" type="checkbox"
                       id="inv_can_edit_activity"
-                      class="mt-1 w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-brand-500" />
+                      class="mt-1 w-4 h-4 text-brand-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-brand-500" />
                     <div>
                       <label for="inv_can_edit_activity" class="text-sm font-medium text-gray-700 dark:text-gray-300">
                         Peut modifier des activités
@@ -500,7 +500,7 @@
                     <input v-model="form.can_delete_activity"
                       :disabled="form.role === 'member' || form.role === 'viewer'" type="checkbox"
                       id="inv_can_delete_activity"
-                      class="mt-1 w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-brand-500" />
+                      class="mt-1 w-4 h-4 text-brand-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-brand-500" />
                     <div>
                       <label for="inv_can_delete_activity" class="text-sm font-medium text-red-700 dark:text-red-300">
                         Peut supprimer des activités

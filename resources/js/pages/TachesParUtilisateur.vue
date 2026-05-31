@@ -4,8 +4,8 @@
     <div class="space-y-6">
       <!-- Header -->
       <div class="rounded-3 border border-gray-200 dark:border-gray-800 p-6 ">
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center gap-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div class="flex min-w-0 items-center gap-4">
             <div class="w-14 h-14 rounded-3 flex items-center justify-center ">
               <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -19,7 +19,7 @@
             </div>
           </div>
 
-          <div class="flex items-center gap-3">
+          <div class="flex flex-wrap items-center gap-3">
             <!-- Sélecteur d'activité -->
             <select v-model="selectedActiviteId" @change="handleActiviteChange" class="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
               <option value="">Sélectionner une activité</option>
@@ -102,7 +102,7 @@
         </div>
 
         <!-- Statistiques globales -->
-        <div v-if="usersData.length > 0" class="grid grid-cols-4 gap-4">
+        <div v-if="usersData.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div class="bg-white dark:bg-gray-800 p-4 rounded-3 border border-gray-200 dark:border-gray-700">
             <p class="text-sm text-gray-500 dark:text-gray-400">Membres</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ totalUsers }}</p>
@@ -198,7 +198,7 @@
             </div>
 
             <!-- Statistiques utilisateur -->
-            <div class="grid grid-cols-4 gap-2 mt-4">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4">
               <div class="text-center">
                 <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ userData.stats.total }}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400">Total</p>

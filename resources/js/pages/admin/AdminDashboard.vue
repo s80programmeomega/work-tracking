@@ -106,6 +106,7 @@
             Growth — Last 7 Days
           </h2>
           <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="overflow-x-auto">
             <table class="w-full text-sm">
               <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500 dark:text-gray-400 uppercase">
                 <tr>
@@ -114,11 +115,11 @@
                   <th class="px-4 py-3 text-right">New Users</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+              <tbody ref="growthRef" class="divide-y divide-gray-100 dark:divide-gray-700">
                 <tr
                   v-for="day in stats.growth"
                   :key="day.date"
-                  class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
+                  class="stagger-item hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
                 >
                   <td class="px-4 py-2 text-gray-700 dark:text-gray-300">{{ formatDate(day.date) }}</td>
                   <td class="px-4 py-2 text-right">
@@ -132,6 +133,7 @@
                 </tr>
               </tbody>
             </table>
+            </div>
           </div>
         </section>
 
@@ -142,6 +144,7 @@
             Recent Workspaces
           </h2>
           <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="overflow-x-auto">
             <table class="w-full text-sm">
               <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500 dark:text-gray-400 uppercase">
                 <tr>
@@ -153,11 +156,11 @@
                   <th class="px-4 py-3 text-left">Created</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+              <tbody ref="recentRef" class="divide-y divide-gray-100 dark:divide-gray-700">
                 <tr
                   v-for="ws in stats.recent_workspaces"
                   :key="ws.id"
-                  class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
+                  class="stagger-item hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
                 >
                   <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ ws.nom }}</td>
                   <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ ws.owner?.nom ?? '—' }}</td>
@@ -187,6 +190,7 @@
                 </tr>
               </tbody>
             </table>
+            </div>
           </div>
         </section>
 
@@ -221,11 +225,14 @@ import { ref, computed, onMounted } from 'vue';
 import AdminLayout from '@/components/layout/AdminLayout.vue';
 import StatCard from '@/components/common/StatCard.vue';
 import SubscriptionBadge from '@/components/admin/SubscriptionBadge.vue';
+import { useStagger } from '@/composables/useAnimations';
 import api from '@/api/axios';
 
 const stats = ref(null);
 const loading = ref(false);
 const error = ref(null);
+const { staggerRef: growthRef, applyStagger: applyGrowthStagger } = useStagger(40);
+const { staggerRef: recentRef, applyStagger: applyRecentStagger } = useStagger(40);
 
 const statusLabels = {
   a_faire: 'To do',
@@ -260,6 +267,8 @@ const fetchStats = async () => {
   try {
     const { data } = await api.get('/admin/stats');
     stats.value = data.data;
+    applyGrowthStagger();
+    applyRecentStagger();
   } catch (e) {
     error.value = e.response?.data?.message ?? 'Failed to load stats.';
   } finally {

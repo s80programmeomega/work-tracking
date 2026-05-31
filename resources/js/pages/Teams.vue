@@ -4,8 +4,8 @@
 
     <div class="rounded-3 border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
       <!-- Header with Actions -->
-      <div class="flex items-center justify-between mb-6">
-        <div class="flex items-center gap-4">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <div class="flex flex-wrap items-center gap-4">
           <!-- Search -->
           <div class="relative">
             <input
@@ -120,13 +120,13 @@
       </div>
 
       <!-- Teams Grid -->
-      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div v-else ref="gridRef" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         <div
           v-for="team in filteredTeams"
           :key="team.uuid"
           :dusk="`team-card-${team.uuid}`"
           @click="goToTeam(team.uuid)"
-          class="group relative rounded-3 p-6 border border-gray-200 dark:border-gray-700 hover:border-brand-500 dark:hover:border-brand-500 transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
+          class="stagger-item group relative rounded-3 p-6 border border-gray-200 dark:border-gray-700 hover:border-brand-500 dark:hover:border-brand-500 transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
         >
           <!-- Visibility Badge -->
           <div class="absolute top-4 right-4">
@@ -207,7 +207,7 @@
     </div>
 
     <!-- Create Team Modal -->
-    <div v-if="showCreateModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 " @click.self="showCreateModal = false">
+    <div v-if="showCreateModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 " @click.self="showCreateModal = false">
       <div class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-2xl transform transition-all">
         <!-- Modal Header -->
         <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700">
@@ -267,7 +267,7 @@
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                 Visibilité
               </label>
-              <div class="grid grid-cols-3 gap-3">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <label
                   v-for="option in visibilityOptions"
                   :key="option.value"
@@ -327,11 +327,13 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTeams } from '@/composables/useTeams'
+import { useStagger } from '@/composables/useAnimations'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 
 const router = useRouter()
 const { teams, loading, error, fetchMyTeams, createTeam: createTeamApi } = useTeams()
+const { staggerRef: gridRef, applyStagger } = useStagger(55)
 
 const searchQuery = ref('')
 const visibilityFilter = ref('')
@@ -432,6 +434,7 @@ onMounted(async () => {
   try {
     console.log('Fetching teams...')
     const result = await fetchMyTeams()
+    applyStagger()
     console.log('Teams fetched successfully:', result)
     console.log('Loading after fetch:', loading.value)
   } catch (error) {

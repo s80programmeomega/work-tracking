@@ -24,7 +24,7 @@
               <!-- Loading Overlay -->
               <div
                 v-if="uploadingAvatar"
-                class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center"
+                class="absolute inset-0 bg-black/70 flex items-center justify-center"
               >
                 <div class="animate-spin rounded-full h-10 w-10 border-3 border-t-transparent border-white"></div>
               </div>

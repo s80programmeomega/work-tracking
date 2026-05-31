@@ -125,17 +125,17 @@
           <!-- Task Assigned -->
           <div>
             <h4 class="font-medium text-gray-900 dark:text-white mb-3">Tâche assignée</h4>
-            <div class="grid grid-cols-3 gap-4 ml-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 ml-4">
               <label class="flex items-center">
-                <input type="checkbox" v-model="preferences.task_assigned_in_app" class="mr-2 rounded" />
+                <input type="checkbox" v-model="preferences.task_assigned_in_app" class="mr-2 w-4 h-4 rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-blue-600 focus:ring-blue-500" />
                 <span class="text-sm text-gray-700 dark:text-gray-300">In-app</span>
               </label>
               <label class="flex items-center">
-                <input type="checkbox" v-model="preferences.task_assigned_email" class="mr-2 rounded" />
+                <input type="checkbox" v-model="preferences.task_assigned_email" class="mr-2 w-4 h-4 rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-blue-600 focus:ring-blue-500" />
                 <span class="text-sm text-gray-700 dark:text-gray-300">Email</span>
               </label>
               <label class="flex items-center">
-                <input type="checkbox" v-model="preferences.task_assigned_push" class="mr-2 rounded" />
+                <input type="checkbox" v-model="preferences.task_assigned_push" class="mr-2 w-4 h-4 rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-blue-600 focus:ring-blue-500" />
                 <span class="text-sm text-gray-700 dark:text-gray-300">Push</span>
               </label>
             </div>
@@ -144,17 +144,17 @@
           <!-- Task Due Soon -->
           <div>
             <h4 class="font-medium text-gray-900 dark:text-white mb-3">Échéance proche</h4>
-            <div class="grid grid-cols-3 gap-4 ml-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 ml-4">
               <label class="flex items-center">
-                <input type="checkbox" v-model="preferences.task_due_soon_in_app" class="mr-2 rounded" />
+                <input type="checkbox" v-model="preferences.task_due_soon_in_app" class="mr-2 w-4 h-4 rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-blue-600 focus:ring-blue-500" />
                 <span class="text-sm text-gray-700 dark:text-gray-300">In-app</span>
               </label>
               <label class="flex items-center">
-                <input type="checkbox" v-model="preferences.task_due_soon_email" class="mr-2 rounded" />
+                <input type="checkbox" v-model="preferences.task_due_soon_email" class="mr-2 w-4 h-4 rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-blue-600 focus:ring-blue-500" />
                 <span class="text-sm text-gray-700 dark:text-gray-300">Email</span>
               </label>
               <label class="flex items-center">
-                <input type="checkbox" v-model="preferences.task_due_soon_push" class="mr-2 rounded" />
+                <input type="checkbox" v-model="preferences.task_due_soon_push" class="mr-2 w-4 h-4 rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-blue-600 focus:ring-blue-500" />
                 <span class="text-sm text-gray-700 dark:text-gray-300">Push</span>
               </label>
             </div>
@@ -163,17 +163,17 @@
           <!-- Mentioned in Comment -->
           <div>
             <h4 class="font-medium text-gray-900 dark:text-white mb-3">Mention dans un commentaire</h4>
-            <div class="grid grid-cols-3 gap-4 ml-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 ml-4">
               <label class="flex items-center">
-                <input type="checkbox" v-model="preferences.mentioned_in_comment_in_app" class="mr-2 rounded" />
+                <input type="checkbox" v-model="preferences.mentioned_in_comment_in_app" class="mr-2 w-4 h-4 rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-blue-600 focus:ring-blue-500" />
                 <span class="text-sm text-gray-700 dark:text-gray-300">In-app</span>
               </label>
               <label class="flex items-center">
-                <input type="checkbox" v-model="preferences.mentioned_in_comment_email" class="mr-2 rounded" />
+                <input type="checkbox" v-model="preferences.mentioned_in_comment_email" class="mr-2 w-4 h-4 rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-blue-600 focus:ring-blue-500" />
                 <span class="text-sm text-gray-700 dark:text-gray-300">Email</span>
               </label>
               <label class="flex items-center">
-                <input type="checkbox" v-model="preferences.mentioned_in_comment_push" class="mr-2 rounded" />
+                <input type="checkbox" v-model="preferences.mentioned_in_comment_push" class="mr-2 w-4 h-4 rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-blue-600 focus:ring-blue-500" />
                 <span class="text-sm text-gray-700 dark:text-gray-300">Push</span>
               </label>
             </div>
@@ -207,7 +207,7 @@
               <input
                 type="time"
                 v-model="preferences.quiet_hours_start"
-                class="w-full px-3 py-2 border border-gray-300 rounded-3 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
             <div>
@@ -215,7 +215,7 @@
               <input
                 type="time"
                 v-model="preferences.quiet_hours_end"
-                class="w-full px-3 py-2 border border-gray-300 rounded-3 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
           </div>

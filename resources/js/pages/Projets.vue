@@ -8,6 +8,7 @@
         <div class="border-b border-gray-200 dark:border-gray-700">
           <nav class="-mb-px flex space-x-8" aria-label="Tabs">
           <button
+            dusk="tab-dashboard"
             @click="activeTab = 'dashboard'"
             :class="[
               activeTab === 'dashboard'
@@ -19,6 +20,7 @@
             Dashboard
           </button>
           <button
+            dusk="tab-list"
             @click="activeTab = 'list'"
             :class="[
               activeTab === 'list'

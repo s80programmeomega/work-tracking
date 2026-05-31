@@ -16,29 +16,32 @@
         </div>
 
         <!-- Filtres période -->
-        <div class="flex items-center gap-2">
-          <input
-            v-model="filters.periodeStart"
-            type="date"
-            dusk="periode-start"
-            class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-          />
-          <span class="text-gray-500 dark:text-gray-400 text-sm">→</span>
-          <input
-            v-model="filters.periodeEnd"
-            type="date"
-            dusk="periode-end"
-            class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-          />
-          <button
-            @click="fetchDashboard"
-            :disabled="loading"
-            dusk="refresh-dashboard-btn"
-            class="px-4 py-2 bg-brand-600 text-white rounded-3 text-sm hover:bg-brand-700 disabled:opacity-50"
-          >
-            <i class="fas fa-sync-alt mr-1" :class="{ 'animate-spin': loading }"></i>
-            Actualiser
-          </button>
+        <div class="flex flex-col gap-2">
+          <DateRangeFilter @change="onDateRangeChange" />
+          <div class="flex items-center gap-2">
+            <input
+              v-model="filters.periodeStart"
+              type="date"
+              dusk="periode-start"
+              class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            />
+            <span class="text-gray-500 dark:text-gray-400 text-sm">→</span>
+            <input
+              v-model="filters.periodeEnd"
+              type="date"
+              dusk="periode-end"
+              class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            />
+            <button
+              @click="fetchDashboard"
+              :disabled="loading"
+              dusk="refresh-dashboard-btn"
+              class="px-4 py-2 bg-brand-600 text-white rounded-3 text-sm hover:bg-brand-700 disabled:opacity-50"
+            >
+              <i class="fas fa-sync-alt mr-1" :class="{ 'animate-spin': loading }"></i>
+              Actualiser
+            </button>
+          </div>
         </div>
       </div>
 
@@ -60,12 +63,12 @@
           <div v-if="!data.top_performers.length" class="text-center py-6 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-3">
             Aucun score enregistré pour cette période.
           </div>
-          <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          <div v-else ref="performersRef" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             <div
               v-for="(entry, idx) in data.top_performers"
               :key="entry.user_id"
               dusk="top-performer-card"
-              class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3 p-4 flex flex-col items-center text-center "
+              class="stagger-item bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3 p-4 flex flex-col items-center text-center"
             >
               <!-- Rang -->
               <div
@@ -117,12 +120,12 @@
                   <th class="px-4 py-3 text-right font-medium text-gray-700 dark:text-gray-300">Décisions</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+              <tbody ref="scoresRef" class="divide-y divide-gray-200 dark:divide-gray-700">
                 <tr
                   v-for="entry in sortedScores"
                   :key="entry.user_id"
                   dusk="score-row"
-                  class="hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                  class="stagger-item hover:bg-gray-50 dark:hover:bg-gray-700/50"
                 >
                   <td class="px-4 py-3 text-gray-900 dark:text-gray-100">
                     {{ entry.user?.nom }} {{ entry.user?.prenom }}
@@ -218,6 +221,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
+import DateRangeFilter from '@/components/common/DateRangeFilter.vue'
+import { useStagger } from '@/composables/useAnimations'
 import api from '@/api/axios'
 
 // Période par défaut : mois courant
@@ -225,10 +230,19 @@ const today = new Date()
 const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 10)
 const lastOfMonth  = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().slice(0, 10)
 
+const { staggerRef: performersRef, applyStagger: applyPerformersStagger } = useStagger(60)
+const { staggerRef: scoresRef, applyStagger: applyScoresStagger } = useStagger(40)
+
 const filters = ref({
   periodeStart: firstOfMonth,
   periodeEnd: lastOfMonth,
 })
+
+function onDateRangeChange({ from, to }) {
+  if (from) { filters.value.periodeStart = from }
+  if (to) { filters.value.periodeEnd = to }
+  if (from || to) { fetchDashboard() }
+}
 
 const loading = ref(false)
 const error   = ref(null)
@@ -250,6 +264,8 @@ async function fetchDashboard() {
     }
     const res = await api.get('/evaluations/tableau-de-bord', { params })
     data.value = res.data.data
+    applyPerformersStagger()
+    applyScoresStagger()
   } catch (e) {
     error.value = e.response?.data?.message ?? 'Erreur lors du chargement du tableau de bord.'
   } finally {

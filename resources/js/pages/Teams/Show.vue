@@ -527,7 +527,7 @@
 
     <!-- Edit Team Modal -->
     <div v-if="showEditModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 "
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 "
       @click.self="showEditModal = false">
       <div class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-2xl transform transition-all">
         <!-- Modal Header -->
@@ -627,7 +627,7 @@
 
     <!-- Add Member Modal -->
     <div v-if="showAddMemberModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 "
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 "
       @click.self="showAddMemberModal = false">
       <div class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-lg transform transition-all">
         <!-- Modal Header -->
@@ -723,7 +723,7 @@
 
     <!-- Edit Team Modal -->
     <div v-if="showEditModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 "
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 "
       @click.self="showEditModal = false">
       <div class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-2xl transform transition-all">
         <!-- Modal Header -->
@@ -823,7 +823,7 @@
 
     <!-- Add Member Modal -->
     <div v-if="showAddMemberModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 "
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 "
       @click.self="showAddMemberModal = false">
       <div class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-lg transform transition-all">
         <!-- Modal Header -->
@@ -919,7 +919,7 @@
 
     <!-- Create Announcement Modal -->
     <div v-if="showAnnouncementModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 "
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 "
       @click.self="showAnnouncementModal = false">
       <div class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-2xl transform transition-all">
         <!-- Modal Header -->
@@ -1037,7 +1037,7 @@
 
     <!-- Create Resource Modal -->
     <div v-if="showResourceModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 "
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 "
       @click.self="showResourceModal = false">
       <div class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-2xl transform transition-all">
         <!-- Modal Header -->
@@ -1145,7 +1145,7 @@
 
     <!-- Create Event Modal -->
     <div v-if="showEventModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 "
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 "
       @click.self="showEventModal = false">
       <div class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-2xl transform transition-all">
         <!-- Modal Header -->
