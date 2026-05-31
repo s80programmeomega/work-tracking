@@ -46,6 +46,18 @@
                 {{ displayMode === 'all-projects' ? 'Tous les projets' : 'Mes projets' }}
               </button>
 
+              <!-- Bouton Statistiques -->
+              <button
+                @click="showStats = !showStats"
+                :disabled="loading || !hasStats"
+                class="inline-flex items-center gap-2 rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                Statistiques
+              </button>
+
               <!-- Create Project Button -->
               <button dusk="create-projet-btn" @click="openCreateModal"
                 class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-3 hover:bg-blue-700 transition-colors font-medium">
@@ -57,106 +69,23 @@
         </div>
       </div>
 
-      <!-- Statistics Cards - Trello Style -->
-      <div v-if="!loading && hasStats" class="px-4 py-4">
-        <div class="max-w-full mx-auto">
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <!-- Total Projects -->
-            <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-4">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-2xl font-bold text-gray-900 dark:text-white">
-                    {{ stats.total_projets || 0 }}
-                  </p>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">
-                    Projets total
-                  </p>
-                </div>
-                <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-3">
-                  <FolderIcon class="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                </div>
-              </div>
-              <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 dark:border-gray-600">
-                <span class="text-xs font-medium text-green-600 dark:text-green-400">
-                  {{ stats.projets_actifs || 0 }} actifs
-                </span>
-                <span class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ stats.projets_termines || 0 }} terminés
-                </span>
-              </div>
-            </div>
-
-            <!-- Activities -->
-            <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-4">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-2xl font-bold text-gray-900 dark:text-white">
-                    {{ stats.total_activites || 0 }}
-                  </p>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">
-                    Activités
-                  </p>
-                </div>
-                <div class="p-2 bg-green-100 dark:bg-green-900/30 rounded-3">
-                  <ListIcon class="w-6 h-6 text-green-600 dark:text-green-400" />
-                </div>
-              </div>
-              <div class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-600">
-                <span class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ stats.activites_actives || 0 }} actives
-                </span>
-              </div>
-            </div>
-
-            <!-- Tasks -->
-            <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-4">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-2xl font-bold text-gray-900 dark:text-white">
-                    {{ stats.total_taches || 0 }}
-                  </p>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">
-                    Tâches
-                  </p>
-                </div>
-                <div class="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-3">
-                  <CheckCircleIcon class="w-6 h-6 text-purple-600 dark:text-purple-400" />
-                </div>
-              </div>
-              <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 dark:border-gray-600">
-                <span class="text-xs font-medium text-green-600 dark:text-green-400">
-                  {{ stats.taux_completion || 0 }}% complétées
-                </span>
-                <span class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ stats.taches_terminees || 0 }}/{{ stats.total_taches || 0 }}
-                </span>
-              </div>
-            </div>
-
-            <!-- Overdue -->
-            <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-4">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-2xl font-bold text-gray-900 dark:text-white">
-                    {{ stats.projets_en_retard || 0 }}
-                  </p>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">
-                    En retard
-                  </p>
-                </div>
-                <div class="p-2 bg-red-100 dark:bg-red-900/30 rounded-3">
-                  <AlertCircleIcon class="w-6 h-6 text-red-600 dark:text-red-400" />
-                </div>
-              </div>
-              <div class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-600">
-                <span class="text-xs font-medium"
-                  :class="(stats.projets_en_retard || 0) > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">
-                  {{ (stats.projets_en_retard || 0) > 0 ? 'Nécessite attention' : 'Aucun retard' }}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
+      <!-- Panneau statistiques -->
+      <div v-if="!loading && hasStats" class="px-4 pt-4">
+        <transition
+          enter-active-class="transition-all duration-300 ease-out"
+          enter-from-class="opacity-0 -translate-y-4"
+          enter-to-class="opacity-100 translate-y-0"
+          leave-active-class="transition-all duration-200 ease-in"
+          leave-from-class="opacity-100 translate-y-0"
+          leave-to-class="opacity-0 -translate-y-4"
+        >
+          <MyProjectsStats
+            v-if="showStats"
+            :stats="stats"
+            :loading="false"
+            @close="showStats = false"
+          />
+        </transition>
       </div>
 
       <!-- Main Content -->
@@ -468,6 +397,7 @@ import { useWorkspace } from '@/composables/useWorkspace'
 import { useAuthStore } from '@/stores/authStore'
 import { useStagger } from '@/composables/useAnimations'
 import AdminLayout from "@/components/layout/AdminLayout.vue"
+import MyProjectsStats from '@/components/projets/MyProjectsStats.vue'
 import ProjetFormModal from '@/components/projets/ProjetFormModal.vue'
 import ConfirmModal from '@/components/common/ConfirmModal.vue'
 import {
@@ -478,6 +408,7 @@ import {
 } from '@/icons'
 
 const router = useRouter()
+const showStats = ref(false)
 const authStore = useAuthStore()
 
 const {

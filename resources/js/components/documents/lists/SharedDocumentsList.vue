@@ -29,12 +29,12 @@
     </div>
 
     <!-- Documents List -->
-    <div v-else-if="filteredDocuments.length > 0" class="space-y-3">
+    <div v-else-if="filteredDocuments.length > 0" ref="staggerRef" class="space-y-3">
       <div
         v-for="document in filteredDocuments"
         :key="document.id"
         @click="handleView(document)"
-        class="group cursor-pointer overflow-hidden rounded-3 border border-gray-200 bg-white transition-all hover:border-purple-500 dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-purple-400"
+        class="stagger-item group cursor-pointer overflow-hidden rounded-3 border border-gray-200 bg-white transition-all hover:border-purple-500 dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-purple-400"
       >
         <div class="flex items-center gap-4 p-4">
           <!-- File Icon -->
@@ -162,6 +162,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useStagger } from '@/composables/useAnimations'
 import {
   UserGroupIcon,
   ArrowDownTrayIcon,
@@ -182,6 +183,7 @@ import DocumentShareModal from '@/components/documents/DocumentShareModal.vue'
 import api from '@/api/axios'
 
 const { downloadDocument } = useDocuments()
+const { staggerRef, applyStagger } = useStagger(40)
 
 const documents = ref([])
 const loading = ref(false)
@@ -291,7 +293,8 @@ const loadDocuments = async () => {
   }
 }
 
-onMounted(() => {
-  loadDocuments()
+onMounted(async () => {
+  await loadDocuments()
+  applyStagger()
 })
 </script>

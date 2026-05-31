@@ -45,12 +45,12 @@
     </div>
 
     <!-- Activities List -->
-    <div v-else-if="filteredActivities.length > 0" class="space-y-3">
+    <div v-else-if="filteredActivities.length > 0" ref="staggerRef" class="space-y-3">
       <div
         v-for="activity in filteredActivities"
         :key="activity.id"
         @click="$emit('select', activity)"
-        class="group cursor-pointer overflow-hidden rounded-3 border border-gray-200 bg-white transition-all hover:border-purple-500 dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-purple-400"
+        class="stagger-item group cursor-pointer overflow-hidden rounded-3 border border-gray-200 bg-white transition-all hover:border-purple-500 dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-purple-400"
       >
         <div class="flex items-center gap-4 p-4">
           <!-- Activity Icon with Color -->
@@ -159,6 +159,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useStagger } from '@/composables/useAnimations'
 import {
   RectangleStackIcon,
   MagnifyingGlassIcon,
@@ -171,6 +172,8 @@ import {
 import api from '@/api/axios'
 
 defineEmits(['select'])
+
+const { staggerRef, applyStagger } = useStagger(50)
 
 const activities = ref([])
 const projects = ref([])
@@ -227,8 +230,8 @@ const loadProjects = async () => {
   }
 }
 
-onMounted(() => {
-  loadActivities()
-  loadProjects()
+onMounted(async () => {
+  await Promise.all([loadActivities(), loadProjects()])
+  applyStagger()
 })
 </script>

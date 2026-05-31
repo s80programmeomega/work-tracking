@@ -86,11 +86,11 @@
           </div>
 
           <!-- Tasks List -->
-          <div v-else class="space-y-4">
+          <div v-else ref="staggerRef" class="space-y-4">
             <div
               v-for="tache in getCurrentTabTasks()"
               :key="tache.id"
-              class="border border-gray-200 dark:border-gray-700 rounded-3 p-4 transition-shadow"
+              class="stagger-item border border-gray-200 dark:border-gray-700 rounded-3 p-4 transition-shadow"
             >
               <div class="flex items-start justify-between">
                 <div class="flex-1 min-w-0">
@@ -233,7 +233,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
+import { useStagger } from '@/composables/useAnimations'
 import { useTaches } from '@/composables/useTaches'
 
 const props = defineProps({
@@ -243,6 +244,8 @@ const props = defineProps({
 const emit = defineEmits(['close', 'validated'])
 
 const { fetchPendingValidations, validateTacheN1, validateTacheN2 } = useTaches()
+
+const { staggerRef, applyStagger } = useStagger(50)
 
 const activeTab = ref('n1')
 const loading = ref(false)
@@ -274,6 +277,8 @@ const loadPendingValidations = async () => {
       n1: data.pending_n1 || [],
       n2: data.pending_n2 || []
     }
+    await nextTick()
+    applyStagger()
   } catch (error) {
     console.error('Error loading pending validations:', error)
   } finally {

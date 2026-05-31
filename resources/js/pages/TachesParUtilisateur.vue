@@ -28,6 +28,18 @@
               </option>
             </select>
 
+            <!-- Bouton Statistiques -->
+            <button
+              @click="showStats = !showStats"
+              :disabled="!selectedActiviteId || usersData.length === 0"
+              class="inline-flex items-center gap-2 rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              Statistiques
+            </button>
+
             <button @click="loadData" :disabled="loading || !selectedActiviteId" class="p-2 rounded-3 border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50" title="Actualiser">
               <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" :class="{ 'animate-spin': loading }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -101,25 +113,25 @@
           </div>
         </div>
 
-        <!-- Statistiques globales -->
-        <div v-if="usersData.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div class="bg-white dark:bg-gray-800 p-4 rounded-3 border border-gray-200 dark:border-gray-700">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Membres</p>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ totalUsers }}</p>
-          </div>
-          <div class="bg-white dark:bg-gray-800 p-4 rounded-3 border border-gray-200 dark:border-gray-700">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Tâches totales</p>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ totalTasks }}</p>
-          </div>
-          <div class="bg-white dark:bg-gray-800 p-4 rounded-3 border border-gray-200 dark:border-gray-700">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Progression moyenne</p>
-            <p class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">{{ averageProgress }}%</p>
-          </div>
-          <div class="bg-white dark:bg-gray-800 p-4 rounded-3 border border-gray-200 dark:border-gray-700">
-            <p class="text-sm text-gray-500 dark:text-gray-400">En attente validation</p>
-            <p class="text-2xl font-bold text-orange-600 dark:text-orange-400 mt-1">{{ totalPendingValidation }}</p>
-          </div>
-        </div>
+        <!-- Statistiques panel -->
+        <transition
+          enter-active-class="transition-all duration-300 ease-out"
+          enter-from-class="opacity-0 -translate-y-4"
+          enter-to-class="opacity-100 translate-y-0"
+          leave-active-class="transition-all duration-200 ease-in"
+          leave-from-class="opacity-100 translate-y-0"
+          leave-to-class="opacity-0 -translate-y-4"
+        >
+          <TachesParUtilisateurStats
+            v-if="showStats && usersData.length > 0"
+            :total-users="totalUsers"
+            :total-tasks="totalTasks"
+            :average-progress="averageProgress"
+            :total-pending-validation="totalPendingValidation"
+            :loading="loading"
+            @close="showStats = false"
+          />
+        </transition>
 
         <!-- Actions -->
         <div class="flex items-center justify-between mt-4">
@@ -176,8 +188,8 @@
       </div>
 
       <!-- Grille des utilisateurs -->
-      <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div v-for="userData in filteredUsersData" :key="userData.user.id" class="rounded-3 border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] overflow-hidden">
+      <div v-else ref="staggerRef" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div v-for="userData in filteredUsersData" :key="userData.user.id" class="stagger-item rounded-3 border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] overflow-hidden">
           <!-- User Header -->
           <div class="p-6 border-b border-gray-200 dark:border-gray-700">
             <div class="flex items-center gap-4">
@@ -330,10 +342,12 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useStagger } from '@/composables/useAnimations'
 import { CalendarIcon } from '@heroicons/vue/24/outline'
 import DatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
+import TachesParUtilisateurStats from '@/components/taches/TachesParUtilisateurStats.vue'
 import TacheDetailModal from '@/components/taches/TacheDetailModal.vue'
 import ValidationModal from '@/components/taches/resultats/ValidationModal.vue'
 import ReportModal from '@/components/reports/ReportModal.vue'
@@ -342,6 +356,7 @@ import api from '@/api/axios'
 // State
 const activites = ref([])
 const selectedActiviteId = ref(null)
+const showStats = ref(false)
 const usersData = ref([])
 const activityMembers = ref([])
 const activite = ref(null)
@@ -440,6 +455,7 @@ async function loadData() {
     lastUpdate.value = new Date().toLocaleString('fr-FR')
     
     console.log('✅ Données chargées:', usersData.value.length, 'utilisateurs')
+    applyStagger()
   } catch (err) {
     console.error('❌ Erreur:', err)
     error.value = err.response?.data?.message || 'Erreur de chargement'
@@ -686,6 +702,8 @@ const getInitials = (name) => {
 }
 
 // Lifecycle
+const { staggerRef, applyStagger } = useStagger(60)
+
 onMounted(async () => {
   await loadActivites()
   initializeDates()

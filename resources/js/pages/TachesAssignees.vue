@@ -21,6 +21,17 @@
           </div>
 
           <div class="flex flex-wrap items-center gap-3">
+            <!-- Bouton Statistiques -->
+            <button
+              @click="showStats = !showStats"
+              class="inline-flex items-center gap-2 rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              Statistiques
+            </button>
+
             <!-- Bouton refresh -->
             <button @click="loadAssignedTasks" :disabled="loading"
               class="p-2 rounded-3 border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
@@ -56,104 +67,22 @@
           </div>
         </div>
 
-        <!-- Statistiques avec design premium -->
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <div
-            class="relative overflow-hidden rounded-3 bg-white dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-700 group transition-shadow">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Total assignées</p>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ stats.total }}</p>
-              </div>
-              <div
-                class="w-12 h-12 rounded-3 bg-gray-100 dark:bg-gray-700 flex items-center justify-center transition-transform">
-                <svg class="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor"
-                  viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-              </div>
-            </div>
-            <div class="absolute bottom-0 left-0 right-0 h-1 bg-brand-500"></div>
-          </div>
-
-          <div
-            class="relative overflow-hidden rounded-3 bg-white dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-700 group transition-shadow">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-gray-500 dark:text-gray-400">À faire</p>
-                <p class="text-2xl font-bold text-slate-600 dark:text-slate-400 mt-1">{{ stats.a_faire }}</p>
-              </div>
-              <div
-                class="w-12 h-12 rounded-3 bg-slate-100 dark:bg-slate-900/30 flex items-center justify-center transition-transform">
-                <svg class="w-6 h-6 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-            <div class="absolute bottom-0 left-0 right-0 h-1 bg-brand-500"></div>
-          </div>
-
-          <div
-            class="relative overflow-hidden rounded-3 bg-white dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-700 group transition-shadow">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-gray-500 dark:text-gray-400">En cours</p>
-                <p class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">{{ stats.en_cours }}</p>
-              </div>
-              <div
-                class="w-12 h-12 rounded-3 bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center transition-transform">
-                <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-            </div>
-            <div class="absolute bottom-0 left-0 right-0 h-1 bg-brand-500"></div>
-          </div>
-
-          <div
-            class="relative overflow-hidden rounded-3 bg-white dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-700 group transition-shadow">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Terminées</p>
-                <p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">{{ stats.termine }}</p>
-              </div>
-              <div
-                class="w-12 h-12 rounded-3 bg-green-100 dark:bg-green-900/30 flex items-center justify-center transition-transform">
-                <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-            <div class="absolute bottom-0 left-0 right-0 h-1 bg-brand-500"></div>
-          </div>
-
-          <div
-            class="relative overflow-hidden rounded-3 bg-white dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-700 group transition-shadow">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-gray-500 dark:text-gray-400">En retard</p>
-                <p class="text-2xl font-bold mt-1"
-                  :class="stats.overdue > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-400'">{{ stats.overdue }}
-                </p>
-              </div>
-              <div
-                class="w-12 h-12 rounded-3 flex items-center justify-center transition-transform"
-                :class="stats.overdue > 0 ? 'bg-red-100 dark:bg-red-900/30' : 'bg-gray-100 dark:bg-gray-700'">
-                <svg class="w-6 h-6" :class="stats.overdue > 0 ? 'text-red-500 animate-pulse' : 'text-gray-400'"
-                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-            </div>
-            <div class="absolute bottom-0 left-0 right-0 h-1"
-              :class="stats.overdue > 0 ? 'bg-error-500' : 'bg-gray-300'"></div>
-          </div>
-        </div>
+        <!-- Statistiques panel -->
+        <transition
+          enter-active-class="transition-all duration-300 ease-out"
+          enter-from-class="opacity-0 -translate-y-4"
+          enter-to-class="opacity-100 translate-y-0"
+          leave-active-class="transition-all duration-200 ease-in"
+          leave-from-class="opacity-100 translate-y-0"
+          leave-to-class="opacity-0 -translate-y-4"
+        >
+          <TachesAssigneesStats
+            v-if="showStats"
+            :stats="stats"
+            :loading="loading"
+            @close="showStats = false"
+          />
+        </transition>
       </div>
 
       <!-- Message d'erreur -->
@@ -269,6 +198,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
+import TachesAssigneesStats from '@/components/taches/TachesAssigneesStats.vue'
 import KanbanColumnPersonal from '@/components/taches/KanbanColumnPersonal.vue'
 import TacheCardPersonal from '@/components/taches/TacheCardPersonal.vue'
 import TacheDetailModal from '@/components/taches/TacheDetailModal.vue'
@@ -287,8 +217,9 @@ const loading = ref(false)
 const error = ref(null)
 const currentView = ref('kanban')
 const showViewModal = ref(false)
+const showStats = ref(false)
 const showSubmitResultModal = ref(false)
-const showEditModal = ref(false) // ✅ AJOUT
+const showEditModal = ref(false)
 const currentTache = ref(null)
 
 // Colonnes Kanban

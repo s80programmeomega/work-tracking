@@ -533,6 +533,8 @@ const {
   fetchWorkspaces
 } = useWorkspace()
 
+const { staggerRef, applyStagger } = useStagger(60)
+
 // State
 const searchTerm = ref('')
 const activeMenuId = ref(null)

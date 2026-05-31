@@ -56,6 +56,17 @@
 
               <!-- Actions dans le header -->
               <div class="flex items-center space-x-3">
+                <!-- Bouton Statistiques -->
+                <button
+                  @click="showStats = !showStats"
+                  class="inline-flex items-center gap-2 rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                  Statistiques
+                </button>
+
                 <!-- A.10: Voir toutes les tâches de cette activité -->
                 <router-link
                   dusk="voir-toutes-taches-btn"
@@ -94,71 +105,23 @@
             </div>
           </div>
 
-          <!-- Stats Cards -->
-          <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <div class="bg-white dark:bg-gray-800 rounded-3 p-6 border border-gray-200 dark:border-gray-700">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Tâches totales</p>
-                  <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ stats.totalTaches }}</p>
-                </div>
-                <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-3">
-                  <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 rounded-3 p-6 border border-gray-200 dark:border-gray-700">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Terminées</p>
-                  <p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">{{ stats.tachesTerminees }}</p>
-                </div>
-                <div class="p-3 bg-green-50 dark:bg-green-900/20 rounded-3">
-                  <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 rounded-3 p-6 border border-gray-200 dark:border-gray-700">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Progression</p>
-                  <p class="text-2xl font-bold text-orange-600 dark:text-orange-400 mt-1">
-                    {{ stats.progression }}%
-                  </p>
-                </div>
-                <div class="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-3">
-                  <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 rounded-3 p-6 border border-gray-200 dark:border-gray-700">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Membres</p>
-                  <p class="text-2xl font-bold text-purple-600 dark:text-purple-400 mt-1">
-                    {{ activite.membres?.length || 0 }}
-                  </p>
-                </div>
-                <div class="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-3">
-                  <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </div>
+          <!-- Panneau statistiques -->
+          <transition
+            enter-active-class="transition-all duration-300 ease-out"
+            enter-from-class="opacity-0 -translate-y-4"
+            enter-to-class="opacity-100 translate-y-0"
+            leave-active-class="transition-all duration-200 ease-in"
+            leave-from-class="opacity-100 translate-y-0"
+            leave-to-class="opacity-0 -translate-y-4"
+          >
+            <ActiviteStats
+              v-if="showStats"
+              :stats="stats"
+              :members-count="activite.membres?.length || 0"
+              :loading="false"
+              @close="showStats = false"
+            />
+          </transition>
 
           <div class="grid gap-8 lg:grid-cols-3">
             <!-- Contenu principal -->
@@ -293,12 +256,12 @@
 
   <!-- Vue Liste (par défaut) -->
   <div v-else>
-    <div v-if="taches.length > 0" class="space-y-3">
+    <div v-if="taches.length > 0" ref="taskStaggerRef" class="space-y-3">
       <div
         v-for="tache in recentTaches"
         :key="tache.id"
         :dusk="`task-row-${tache.id}`"
-        class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group"
+        class="stagger-item flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group"
         @click="viewTaskDetails(tache)"
       >
         <div class="space-y-1 flex-1">
@@ -495,10 +458,10 @@
                   </button>
                 </div>
 
-                <div v-if="activite.membres && activite.membres.length > 0" class="space-y-3">
+                <div v-if="activite.membres && activite.membres.length > 0" ref="memberStaggerRef" class="space-y-3">
                   <!-- Responsable -->
                   <div
-                    class="flex items-center space-x-3 p-3 rounded-3 border border-orange-200 dark:border-orange-800">
+                    class="stagger-item flex items-center space-x-3 p-3 rounded-3 border border-orange-200 dark:border-orange-800">
                     <div
                       class="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold">
                       <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -518,7 +481,7 @@
 
                   <!-- Membres avec permissions détaillées -->
                   <div v-for="member in otherMembers" :key="member.id"
-                    class="flex items-center justify-between p-3 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group">
+                    class="stagger-item flex items-center justify-between p-3 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group">
                     <div class="flex items-center space-x-3 flex-1">
                       <div
                         class="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold">
@@ -765,7 +728,9 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/api/axios'
 import { useAuthStore } from '@/stores/authStore'
+import { useStagger } from '@/composables/useAnimations'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
+import ActiviteStats from '@/components/activites/ActiviteStats.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import ActiviteForm from '@/components/activites/ActiviteForm.vue'
 import ManageMembersModal from '@/components/activites/ManageMembersModal.vue'
@@ -783,7 +748,11 @@ const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore() 
 
+const { staggerRef: taskStaggerRef, applyStagger: applyTaskStagger } = useStagger(50)
+const { staggerRef: memberStaggerRef, applyStagger: applyMemberStagger } = useStagger(40)
+
 const loading = ref(true)
+const showStats = ref(false)
 const activite = ref(null)
 const taches = ref([])
 const showMembersModal = ref(false)
@@ -1207,6 +1176,8 @@ const handleValidation = async (level, tache, commentaire = '') => {
 
 onMounted(async () => {
   await loadActivite()
+  applyTaskStagger()
+  applyMemberStagger()
   // Charger le kanban si nécessaire
   if (showKanbanView.value) {
     await loadKanban()

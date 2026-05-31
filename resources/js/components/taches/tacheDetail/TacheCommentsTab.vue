@@ -49,12 +49,12 @@
     </div>
 
     <!-- Liste des commentaires -->
-    <div v-if="comments.length > 0" class="space-y-4">
-      <div 
-        v-for="comment in comments" 
+    <div v-if="comments.length > 0" ref="staggerRef" class="space-y-4">
+      <div
+        v-for="comment in comments"
         :key="comment.id"
         :id="`comment-${comment.id}`"
-        class="bg-white dark:bg-gray-800 rounded-3 p-4 border-2 border-gray-200 dark:border-gray-700 transition-colors"
+        class="stagger-item bg-white dark:bg-gray-800 rounded-3 p-4 border-2 border-gray-200 dark:border-gray-700 transition-colors"
         :class="{ 'ring-2 ring-brand-500 border-brand-500': highlightedComment === comment.id }"
       >
         <div class="flex gap-3">
@@ -209,7 +209,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
+import { useStagger } from '@/composables/useAnimations';
 import { useRoute } from 'vue-router';
 import api from '@/api/axios';
 import { useNotifications } from '@/composables/useNotifications';
@@ -231,6 +232,8 @@ const emit = defineEmits(['refresh']);
 const route = useRoute();
 const authStore = useAuthStore();
 const { showSuccess, showError } = useNotifications();
+
+const { staggerRef, applyStagger } = useStagger(40);
 
 const newComment = ref('');
 const comments = ref([]);
@@ -276,6 +279,8 @@ const fetchComments = async () => {
   try {
     const response = await api.get(`/taches/${props.tache.id}/comments`);
     comments.value = response.data?.data ?? [];
+    await nextTick();
+    applyStagger();
   } catch (error) {
     console.error('Erreur lors du chargement des commentaires:', error);
     showError('Erreur lors du chargement des commentaires');

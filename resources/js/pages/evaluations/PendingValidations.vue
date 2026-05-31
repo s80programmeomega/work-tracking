@@ -11,24 +11,44 @@
             Résultats en attente d'action N1 ou N2, triés par échéance.
           </p>
         </div>
-        <button
-          @click="refresh"
-          :disabled="loading"
-          dusk="refresh-pending-btn"
-          class="px-4 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700 disabled:opacity-50"
-        >
-          <i class="fas fa-sync-alt mr-2" :class="{ 'animate-spin': loading }"></i>
-          Rafraîchir
-        </button>
+        <div class="flex items-center gap-3">
+          <button
+            @click="showStats = !showStats"
+            class="inline-flex items-center gap-2 rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            Statistiques
+          </button>
+          <button
+            @click="refresh"
+            :disabled="loading"
+            dusk="refresh-pending-btn"
+            class="px-4 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700 disabled:opacity-50"
+          >
+            <i class="fas fa-sync-alt mr-2" :class="{ 'animate-spin': loading }"></i>
+            Rafraîchir
+          </button>
+        </div>
       </div>
 
-      <!-- Stats -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard title="N1 en attente" :value="counts.n1" color="blue" />
-        <StatCard title="N2 en attente" :value="counts.n2" color="purple" />
-        <StatCard title="Urgents (< 24h)" :value="counts.urgent" color="red" />
-        <StatCard title="Total" :value="counts.total" color="gray" />
-      </div>
+      <!-- Stats panel -->
+      <transition
+        enter-active-class="transition-all duration-300 ease-out"
+        enter-from-class="opacity-0 -translate-y-4"
+        enter-to-class="opacity-100 translate-y-0"
+        leave-active-class="transition-all duration-200 ease-in"
+        leave-from-class="opacity-100 translate-y-0"
+        leave-to-class="opacity-0 -translate-y-4"
+      >
+        <PendingValidationsStats
+          v-if="showStats"
+          :counts="counts"
+          :loading="loading"
+          @close="showStats = false"
+        />
+      </transition>
 
       <!-- Error -->
       <div v-if="error" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded">
@@ -88,13 +108,14 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
-import StatCard from '@/components/common/StatCard.vue'
 import PendingRow from './PendingRow.vue'
+import PendingValidationsStats from '@/components/evaluations/PendingValidationsStats.vue'
 import { useStagger } from '@/composables/useAnimations'
 import api from '@/api/axios'
 
 const router = useRouter()
 const loading = ref(false)
+const showStats = ref(false)
 const error = ref(null)
 const rows = ref({ pending_n1: [], pending_n2: [] })
 const counts = ref({ n1: 0, n2: 0, urgent: 0, total: 0 })

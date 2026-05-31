@@ -17,27 +17,28 @@
 ## Current Session
 
 **Date:** 2026-05-31
-**Session goal:** Frontend alignment Phase 3 — responsive fixes for all ~17 pages found in the sweep
+**Session goal:** Frontend alignment — stagger animations, stats toggles, notification polish
 **Branch:** `feature/frontend-alignment-phase-1`
-**Status:** In progress — all fixes applied, tests running.
+**Status:** Complete — build passing. Awaiting commit + push.
 
 ---
 
 ## Current Task
 
-**Task:** Frontend Alignment Phase 3 responsive fixes
+**Task:** Frontend Alignment — animations, stats toggles, notification fixes
 **Branch:** `feature/frontend-alignment-phase-1`
-**Status:** Complete — 654 tests passing. Awaiting push.
+**Status:** Complete — build passing (17.38s). Awaiting commit + push.
 
 **What was done this session:**
-- Pattern A (flex-wrap): added `flex-wrap gap-3` + `min-w-0` to header rows in 12 pages: MyProjects, Archived, Taches, TachesAssignees, TachesResponsable, TachesParUtilisateur, LabelsManagement, LabelTemplates, workspaces/Index, Teams, Users/Invitations. ActiviteList filter row switched from `md:flex-row` to `flex-wrap gap-4`.
-- Pattern B (table overflow): wrapped `<table>` in `<div class="overflow-x-auto">` in AdminUsers and WorkspaceTaches.
-- Pattern C (tab strip overflow): ValidationResultats tab strip and TacheDetail `<nav>` both wrapped in `overflow-x-auto` + inner content given `min-w-max`.
-- Router fix: created `TachesEnRetard.vue` (calls `GET /taches/en-retard`) and restored the route before `/taches/:id` — eliminates the "en-retard" → TacheDetail 404 collision.
+- Stagger animations: added `useStagger` + `.stagger-item` to ProjetDetail (activities + members tbody), ProjetDashboard (recentActivities + recentProjects), TacheCommentsTab, TacheAssigneesTab, TacheActivityTab, TacheAttachmentsTab, TacheLinksTab, TacheResultsTab, PendingValidationsModal, ActivityDetail (tasks + members)
+- Stats toggle button: added to MesActivites.vue, evaluations/PendingValidations.vue, MesValidationsEnAttente.vue — each replaces always-visible grid with `showStats` ref + `<transition>` + dedicated stats component
+- New stats components: MesActivitesStats.vue, PendingValidationsStats.vue (evaluations/), MesValidationsStats.vue (evaluations/)
+- Notification fixes: useNotifications.js icon/color/type maps cover all real notification types; NotificationItem rewritten with correct field names; NotificationDetailModal updated with all real type handlers
 
 **What to do next:**
-1. Push `feature/frontend-alignment-phase-1` to origin (Phase 3 fixes complete)
-2. Phase 4: Dusk happy-path tests for the pages that got fixes (AdminWorkspaces extend-trial, AdminUsers role-change)
+1. Commit all changes on `feature/frontend-alignment-phase-1`
+2. Push to origin (and client when applicable)
+3. Phase 4: Dusk happy-path tests for the pages that got fixes
 
 **What was done this session:**
 - Replaced abandoned `nunomaduro/larastan` with `larastan/larastan` v2.11; updated `phpstan.neon` extension path

@@ -339,9 +339,9 @@
                         <th class="px-6 py-3">Actions</th>
                       </tr>
                     </thead>
-                    <tbody>
+                    <tbody ref="activityStaggerRef">
                       <tr v-for="activity in displayedActivities" :key="activity.id"
-                        class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                        class="stagger-item border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
                         <!-- Activité -->
                         <td class="px-6 py-4">
                           <div class="cursor-pointer" @click="navigateToActivityDetail(activity)">
@@ -490,9 +490,9 @@
                         <th v-if="canManageMembers" class="px-6 py-3 text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody>
+                    <tbody ref="memberStaggerRef">
                       <tr v-for="member in members" :key="member.id"
-                        class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                        class="stagger-item border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
                         <td class="px-6 py-4 whitespace-nowrap">
                           <div class="flex items-center gap-3">
                             <div v-if="member.avatar" class="w-8 h-8 rounded-full overflow-hidden">
@@ -844,7 +844,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProjets } from '@/composables/useProjets'
 import { useActivites } from '@/composables/useActivites'
@@ -852,6 +852,7 @@ import { useActivityPermissions } from '@/composables/useActivityPermissions'
 import { useAuthStore } from '@/stores/authStore'
 import { useProjetInvitations } from '@/composables/useProjetInvitations'
 import EditMemberPermissionsModal from '@/components/activites/EditMemberPermissionsModal.vue'
+import { useStagger } from '@/composables/useAnimations'
 
 import {
   ChevronLeftIcon, EditIcon,
@@ -888,6 +889,8 @@ const emit = defineEmits(['back', 'create-activity', 'view-activity'])
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { staggerRef: activityStaggerRef, applyStagger: applyActivityStagger } = useStagger(50)
+const { staggerRef: memberStaggerRef, applyStagger: applyMemberStagger } = useStagger(50)
 const { fetchProjet, removeMember: removeMemberService, fetchProjets } = useProjets()
 const { deleteActivite: deleteActiviteService } = useActivites()
 
@@ -1347,6 +1350,10 @@ const loadProjet = async () => {
 
       console.log('📋 Activités chargées:', activities.value)
       console.log('👥 Membres chargés:', members.value.length)
+
+      await nextTick()
+      applyActivityStagger()
+      applyMemberStagger()
 
       // Réinitialiser le filtre à "mes activités" par défaut
       showAllActivities.value = false

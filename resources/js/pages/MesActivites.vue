@@ -9,67 +9,23 @@
     <PageBreadcrumb :pageTitle="'Mes Activités'" />
 
     <div class="rounded-3 border border-gray-200 bg-white dark:bg-gray-800 p-7.5 shadow-default">
-      <!-- Stats Cards -->
-      <div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
-        <div class="bg-blue-50 dark:bg-blue-900/20 rounded-3 p-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-600 dark:text-gray-400">Total</p>
-              <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.total }}</p>
-            </div>
-            <div class="w-12 h-12 bg-blue-500 rounded-3 flex items-center justify-center">
-              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-green-50 dark:bg-green-900/20 rounded-3 p-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-600 dark:text-gray-400">Actives</p>
-              <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.active }}</p>
-            </div>
-            <div class="w-12 h-12 bg-green-500 rounded-3 flex items-center justify-center">
-              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-red-50 dark:bg-red-900/20 rounded-3 p-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-600 dark:text-gray-400">En retard</p>
-              <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.overdue }}</p>
-            </div>
-            <div class="w-12 h-12 bg-red-500 rounded-3 flex items-center justify-center">
-              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-purple-50 dark:bg-purple-900/20 rounded-3 p-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-600 dark:text-gray-400">Progression moy.</p>
-              <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.avgProgress }}%</p>
-            </div>
-            <div class="w-12 h-12 bg-purple-500 rounded-3 flex items-center justify-center">
-              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-            </div>
-          </div>
-        </div>
-      </div>
+      <!-- Stats panel -->
+      <transition
+        enter-active-class="transition-all duration-300 ease-out"
+        enter-from-class="opacity-0 -translate-y-4"
+        enter-to-class="opacity-100 translate-y-0"
+        leave-active-class="transition-all duration-200 ease-in"
+        leave-from-class="opacity-100 translate-y-0"
+        leave-to-class="opacity-0 -translate-y-4"
+      >
+        <MesActivitesStats
+          v-if="showStats"
+          :stats="stats"
+          :loading="loading"
+          class="mb-6"
+          @close="showStats = false"
+        />
+      </transition>
 
       <!-- Filters -->
       <div class="mb-6 bg-gray-50 dark:bg-gray-900 rounded-3 p-4">
@@ -101,6 +57,16 @@
             <button @click="resetFilters"
               class="rounded-3 border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
               Réinitialiser
+            </button>
+
+            <button
+              @click="showStats = !showStats"
+              class="inline-flex items-center gap-2 rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              Statistiques
             </button>
 
              <button
@@ -145,9 +111,9 @@
                 <th class="px-6 py-3">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody ref="staggerRef">
               <tr v-for="activite in activites" :key="activite.id"
-                class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                class="stagger-item border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
                 <!-- Activité -->
                 <td class="px-6 py-4">
                   <div class="cursor-pointer" @click="viewActivityDetail(activite)">
@@ -313,6 +279,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
+import { useStagger } from '@/composables/useAnimations'
 import { useRouter } from 'vue-router'
 import { useActivites } from '@/composables/useActivites'
 import { useProjets } from '@/composables/useProjets'
@@ -330,6 +297,7 @@ import ActiviteForm from '@/components/activites/ActiviteForm.vue'
 import ManageMembersModal from '@/components/activites/ManageMembersModal.vue'
 import EditMemberPermissionsModal from '@/components/activites/EditMemberPermissionsModal.vue'
 import AddMemberModal from '@/components/activites/AddMemberModal.vue'
+import MesActivitesStats from '@/components/activites/MesActivitesStats.vue'
 
 const router = useRouter()
 
@@ -359,6 +327,8 @@ const {
   fetchProjetsByWorkspace
 } = useProjets()
 
+const { staggerRef, applyStagger } = useStagger(40)
+
 const filters = ref({
   search: '',
   status: '',
@@ -366,6 +336,7 @@ const filters = ref({
   page: 1
 })
 
+const showStats = ref(false)
 const showCreateForm = ref(false)
 const showEditForm = ref(false)
 const showMembersModal = ref(false)
@@ -469,6 +440,7 @@ const loadData = async () => {
       loadProjets()
     ])
     console.log('✅ Données chargées avec succès')
+    applyStagger()
   } catch (error) {
     console.error('❌ Erreur lors du chargement des données:', error)
   }

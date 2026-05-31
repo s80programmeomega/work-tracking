@@ -96,66 +96,7 @@
           </div>
           <form class="flex flex-col">
             <div class="custom-scrollbar h-[458px] overflow-y-auto p-2">
-              <div>
-                <h5 class="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
-                  Social Links
-                </h5>
-
-                <div class="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                  <div>
-                    <label
-                      class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
-                    >
-                      Facebook
-                    </label>
-                    <input
-                      type="text"
-                      value="https://www.facebook.com/PimjoHQ"
-                      class="dark:bg-dark-900 h-11 w-full appearance-none rounded-3 border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
-                    >
-                      X.com
-                    </label>
-                    <input
-                      type="text"
-                      value="https://x.com/PimjoHQ"
-                      class="dark:bg-dark-900 h-11 w-full appearance-none rounded-3 border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
-                    >
-                      Linkedin
-                    </label>
-                    <input
-                      type="text"
-                      value="https://www.linkedin.com/company/pimjo/posts/?feedView=all"
-                      class="dark:bg-dark-900 h-11 w-full appearance-none rounded-3 border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
-                    >
-                      Instagram
-                    </label>
-                    <input
-                      type="text"
-                      value="https://instagram.com/PimjoHQ"
-                      class="dark:bg-dark-900 h-11 w-full appearance-none rounded-3 border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div class="mt-7">
+              <div class="mt-0">
                 <h5 class="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
                    Information Personnelle
                 </h5>
@@ -205,11 +146,11 @@
                     <label
                       class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
                     >
-                      Phone
+                      Téléphone
                     </label>
                     <input
                       type="text"
-                      v-model="formData.phone"
+                      v-model="formData.numero_telephone"
                       class="dark:bg-dark-900 h-11 w-full appearance-none rounded-3 border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                     />
                   </div>
@@ -257,7 +198,10 @@
 import { ref, computed, watch } from 'vue'
 import Modal from './Modal.vue'
 import { useToast } from "vue-toastification"
+import { useUsers } from '../../composables/useUsers'
+
 const toast = useToast()
+const { updateProfile } = useUsers()
 
 
 const props = defineProps({
@@ -271,73 +215,37 @@ const emit = defineEmits(['refresh'])
 
 const isProfileInfoModal = ref(false)
 
-const uploadingAvatar = ref(false)
-const avatarPreview = ref(null)
-const avatarInput = ref(null)
-
-// Split name into first and Nom
-const prenom = computed(() => {
-  const names = props.user?.nom?.split(' ') || []
-  return names[0] || ''
-})
-
-const nom = computed(() => {
-  const names = props.user?.nom?.split(' ') || []
-  return names.slice(1).join(' ') || ''
-})
+const prenom = computed(() => props.user?.prenom || '')
+const nom = computed(() => props.user?.nom || '')
 
 // Form data
 const formData = ref({
   prenom: '',
   nom: '',
   email: '',
-  phone: '',
+  numero_telephone: '',
   bio: '',
-  facebook: '',
-  twitter: '',
-  linkedin: '',
-  instagram: ''
 })
 
 // Watch for user changes and populate form
 watch(() => props.user, (newUser) => {
   if (newUser) {
-    const names = newUser.nom?.split(' ') || []
-    formData.value.prenom = names[0] || ''
-    formData.value.nom = names.slice(1).join(' ') || ''
+    formData.value.prenom = newUser.prenom || ''
+    formData.value.nom = newUser.nom || ''
     formData.value.email = newUser.email || ''
-    formData.value.phone = newUser.numero_telephone || ''
+    formData.value.numero_telephone = newUser.numero_telephone || ''
     formData.value.bio = newUser.bio || ''
   }
 }, { immediate: true })
 
 const saveProfile = async () => {
- 
-   try {
-    
-    // formData.append('_method', 'PUT')
-
-    await updateProfile(formData)
-    toast.success('utilisateur mis à jour avec succès')
+  try {
+    await updateProfile(formData.value)
+    toast.success('Profil mis à jour avec succès')
+    isProfileInfoModal.value = false
     emit('refresh')
-    
-    // Reset preview after successful upload
-    // setTimeout(() => {
-    //   avatarPreview.value = null
-    // }, 2000)
   } catch (error) {
-    console.error('Error uploading avatar:', error)
-    toast.error(error.response?.data?.message || 'Erreur lors du téléchargement de l\'avatar')
-    avatarPreview.value = null
-  } finally {
-    uploadingAvatar.value = false
-    if (avatarInput.value) {
-      avatarInput.value.value = ''
-    }
+    toast.error(error.response?.data?.message || 'Erreur lors de la mise à jour du profil')
   }
-
-  console.log('Profile saved', formData.value)
-  isProfileInfoModal.value = false
-  emit('refresh')
 }
 </script>

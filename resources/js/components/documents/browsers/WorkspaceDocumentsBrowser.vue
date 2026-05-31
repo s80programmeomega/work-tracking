@@ -18,12 +18,12 @@
     </div>
 
     <!-- Workspaces Grid -->
-    <div v-else-if="filteredWorkspaces.length > 0" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div v-else-if="filteredWorkspaces.length > 0" ref="staggerRef" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
       <div
         v-for="workspace in filteredWorkspaces"
         :key="workspace.id"
         @click="$emit('select', workspace)"
-        class="group relative cursor-pointer overflow-hidden rounded-3 border border-gray-200 bg-white p-5 transition-all hover:border-blue-500 dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-blue-400"
+        class="stagger-item group relative cursor-pointer overflow-hidden rounded-3 border border-gray-200 bg-white p-5 transition-all hover:border-blue-500 dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-blue-400"
       >
         <!-- Badge Role -->
         <div class="absolute right-4 top-4">
@@ -117,12 +117,14 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useStagger } from '@/composables/useAnimations'
 import { FolderIcon, MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
 import { useWorkspace } from '@/composables/useWorkspace'
 
 defineEmits(['select'])
 
 const { workspaces, loading, fetchWorkspaces } = useWorkspace()
+const { staggerRef, applyStagger } = useStagger(50)
 const searchQuery = ref('')
 
 const filteredWorkspaces = computed(() => {
@@ -156,7 +158,8 @@ const getRoleBadgeClass = (role) => {
   return classes[role] || classes.viewer
 }
 
-onMounted(() => {
-  fetchWorkspaces()
+onMounted(async () => {
+  await fetchWorkspaces()
+  applyStagger()
 })
 </script>

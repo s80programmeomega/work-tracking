@@ -20,6 +20,17 @@
           </div>
 
           <div class="flex flex-wrap items-center gap-3">
+            <!-- Bouton Statistiques -->
+            <button
+              @click="showStats = !showStats"
+              class="inline-flex items-center gap-2 rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              Statistiques
+            </button>
+
             <!-- Filtre par semaine -->
             <div class="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-3 p-1">
               <button @click="changeWeek(-1)" class="p-2 rounded-md hover:bg-white dark:hover:bg-gray-700 transition-colors" title="Semaine précédente">
@@ -58,15 +69,22 @@
           </div>
         </div>
 
-        <!-- Statistiques personnelles -->
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          <StatCard title="Total" :value="stats.total" icon="clipboard-list" color="gray" />
-          <StatCard title="À faire" :value="stats.a_faire" icon="clock" color="slate" />
-          <StatCard title="En cours" :value="stats.en_cours" icon="play" color="blue" />
-          <StatCard title="Terminées" :value="stats.termine" icon="check-circle" color="green" />
-          <StatCard title="En retard" :value="stats.overdue" icon="exclamation" color="red" :alert="stats.overdue > 0" />
-          <StatCard title="Taux" :value="`${completionRate}%`" icon="chart-pie" color="brand" :progress="completionRate" />
-        </div>
+        <!-- Statistiques panel -->
+        <transition
+          enter-active-class="transition-all duration-300 ease-out"
+          enter-from-class="opacity-0 -translate-y-4"
+          enter-to-class="opacity-100 translate-y-0"
+          leave-active-class="transition-all duration-200 ease-in"
+          leave-from-class="opacity-100 translate-y-0"
+          leave-to-class="opacity-0 -translate-y-4"
+        >
+          <MesTachesStats
+            v-if="showStats"
+            :stats="stats"
+            :loading="loading"
+            @close="showStats = false"
+          />
+        </transition>
       </div>
 
       <!-- Filtres avancés -->
@@ -193,7 +211,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
-import StatCard from '@/components/common/StatCard.vue'
+import MesTachesStats from '@/components/taches/MesTachesStats.vue'
 import KanbanColumnPersonal from '@/components/taches/KanbanColumnPersonal.vue'
 import TacheCardPersonal from '@/components/taches/TacheCardPersonal.vue'
 import TacheDetailModal from '@/components/taches/TacheDetailModal.vue'
@@ -210,6 +228,7 @@ const error = ref(null)
 const currentView = ref('kanban')
 const router = useRouter()
 const { staggerRef: listRef, applyStagger } = useStagger(45)
+const showStats = ref(false)
 const showViewModal = ref(false)
 const showSubmitResultModal = ref(false)
 const currentTache = ref(null)

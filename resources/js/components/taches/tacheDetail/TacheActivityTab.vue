@@ -40,13 +40,13 @@
     </div>
 
     <!-- Timeline -->
-    <div v-if="filteredActivities.length > 0" class="relative">
+    <div v-if="filteredActivities.length > 0" ref="staggerRef" class="relative">
       <div class="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700"></div>
 
-      <div 
-        v-for="activity in filteredActivities" 
+      <div
+        v-for="activity in filteredActivities"
         :key="activity.id"
-        class="relative flex gap-4 pb-8"
+        class="stagger-item relative flex gap-4 pb-8"
       >
         <!-- Icon -->
         <div class="relative z-10 flex-shrink-0">
@@ -147,7 +147,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
+import { useStagger } from '@/composables/useAnimations';
 import api from '@/api/axios';
 
 const props = defineProps({
@@ -156,6 +157,8 @@ const props = defineProps({
     required: true
   }
 });
+
+const { staggerRef, applyStagger } = useStagger(40);
 
 const activities = ref([]);
 const filterType = ref('all');
@@ -178,6 +181,8 @@ const fetchActivities = async () => {
   try {
     const response = await api.get(`/taches/${props.tache.id}/activities`);
     activities.value = response.data?.data ?? [];
+    await nextTick();
+    applyStagger();
   } catch (error) {
     console.error('Erreur lors du chargement des activités:', error);
   }

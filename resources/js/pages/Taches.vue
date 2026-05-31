@@ -89,6 +89,18 @@
 
           <!-- Actions -->
           <div class="flex flex-wrap gap-3 w-full sm:w-auto">
+            <!-- Statistiques toggle -->
+            <button
+              v-if="selectedActiviteId && stats.total > 0"
+              @click="showStats = !showStats"
+              class="inline-flex items-center gap-2 rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              Statistiques
+            </button>
+
             <!-- Validations en attente -->
             <button
               v-if="pendingValidationsCount > 0"
@@ -134,70 +146,22 @@
           </div>
         </div>
 
-        <!-- Ligne 2: Statistiques (si activité sélectionnée) -->
-        <div v-if="selectedActiviteId && !showArchived && stats.total > 0" class="flex items-center gap-6 p-4 rounded-3 border border-gray-200 dark:border-gray-700">
-          <!-- À faire -->
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-3 bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-              <div class="w-3 h-3 rounded-full bg-gray-500"></div>
-            </div>
-            <div>
-              <p class="text-sm text-gray-600 dark:text-gray-400">À faire</p>
-              <p class="text-xl font-bold text-gray-900 dark:text-white">{{ stats.a_faire }}</p>
-            </div>
-          </div>
-
-          <!-- En cours -->
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-3 bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
-              <div class="w-3 h-3 rounded-full bg-blue-500"></div>
-            </div>
-            <div>
-              <p class="text-sm text-gray-600 dark:text-gray-400">En cours</p>
-              <p class="text-xl font-bold text-blue-600 dark:text-blue-400">{{ stats.en_cours }}</p>
-            </div>
-          </div>
-
-          <!-- Terminé -->
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-3 bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
-              <div class="w-3 h-3 rounded-full bg-green-500"></div>
-            </div>
-            <div>
-              <p class="text-sm text-gray-600 dark:text-gray-400">Terminé</p>
-              <p class="text-xl font-bold text-green-600 dark:text-green-400">{{ stats.termine }}</p>
-            </div>
-          </div>
-
-          <!-- Taux de complétion -->
-          <div class="ml-auto">
-            <div class="flex items-center gap-3">
-              <div class="text-right">
-                <p class="text-sm text-gray-600 dark:text-gray-400">Taux de complétion</p>
-                <p class="text-xl font-bold text-brand-600 dark:text-brand-400">{{ completionRate }}%</p>
-              </div>
-              <div class="w-16 h-16 relative">
-                <svg class="transform -rotate-90" viewBox="0 0 36 36">
-                  <path
-                    class="text-gray-200 dark:text-gray-700"
-                    stroke="currentColor"
-                    stroke-width="3"
-                    fill="none"
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  />
-                  <path
-                    class="text-brand-500"
-                    stroke="currentColor"
-                    stroke-width="3"
-                    fill="none"
-                    :stroke-dasharray="`${completionRate}, 100`"
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
-        </div>
+        <!-- Statistiques panel -->
+        <transition
+          enter-active-class="transition-all duration-300 ease-out"
+          enter-from-class="opacity-0 -translate-y-4"
+          enter-to-class="opacity-100 translate-y-0"
+          leave-active-class="transition-all duration-200 ease-in"
+          leave-from-class="opacity-100 translate-y-0"
+          leave-to-class="opacity-0 -translate-y-4"
+        >
+          <TachesStats
+            v-if="showStats && selectedActiviteId"
+            :stats="stats"
+            :loading="loading"
+            @close="showStats = false"
+          />
+        </transition>
       </div>
 
       <!-- Debug Info (si activé) -->
@@ -380,6 +344,7 @@ import { useRoute } from 'vue-router'
 import { useTaches } from '@/composables/useTaches'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
+import TachesStats from '@/components/taches/TachesStats.vue'
 import KanbanBoard from '@/components/taches/KanbanBoardSimple.vue'
 import TacheForm from '@/components/taches/TacheForm.vue'
 import TacheCreateWizard from '@/components/taches/TacheCreateWizard.vue'
@@ -429,6 +394,7 @@ const stats = computed(() => {
 const activites = ref([])
 const selectedActiviteId = ref(null)
 const showForm = ref(false)
+const showStats = ref(false)
 const showViewModal = ref(false)
 const showArchived = ref(false)
 const showPendingValidations = ref(false)

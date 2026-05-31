@@ -46,12 +46,12 @@
     </div>
 
     <!-- Projects Grid -->
-    <div v-else-if="filteredProjects.length > 0" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div v-else-if="filteredProjects.length > 0" ref="staggerRef" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
       <div
         v-for="project in filteredProjects"
         :key="project.id"
         @click="$emit('select', project)"
-        class="group relative cursor-pointer overflow-hidden rounded-3 border border-gray-200 bg-white transition-all hover:border-blue-500 dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-blue-400"
+        class="stagger-item group relative cursor-pointer overflow-hidden rounded-3 border border-gray-200 bg-white transition-all hover:border-blue-500 dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-blue-400"
       >
         <!-- Header with Status -->
         <div class="relative h-24 p-4">
@@ -159,6 +159,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useStagger } from '@/composables/useAnimations'
 import {
   BriefcaseIcon,
   MagnifyingGlassIcon,
@@ -167,6 +168,8 @@ import {
 import api from '@/api/axios'
 
 defineEmits(['select'])
+
+const { staggerRef, applyStagger } = useStagger(50)
 
 const projects = ref([])
 const workspaces = ref([])
@@ -241,8 +244,8 @@ const loadWorkspaces = async () => {
   }
 }
 
-onMounted(() => {
-  loadProjects()
-  loadWorkspaces()
+onMounted(async () => {
+  await Promise.all([loadProjects(), loadWorkspaces()])
+  applyStagger()
 })
 </script>

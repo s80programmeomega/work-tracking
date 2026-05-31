@@ -22,11 +22,11 @@
     </div>
 
     <!-- Documents Grouped by Date -->
-    <div v-else-if="groupedDocuments.length > 0" class="space-y-6">
+    <div v-else-if="groupedDocuments.length > 0" ref="staggerRef" class="space-y-6">
       <div
         v-for="group in groupedDocuments"
         :key="group.date"
-        class="space-y-3"
+        class="stagger-item space-y-3"
       >
         <!-- Date Header -->
         <div class="sticky top-0 z-10 flex items-center gap-2 bg-gray-50 py-2 dark:bg-gray-900/50">
@@ -131,6 +131,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useStagger } from '@/composables/useAnimations'
 import {
   ClockIcon,
   CalendarIcon,
@@ -149,6 +150,7 @@ import DocumentShareModal from '@/components/documents/DocumentShareModal.vue'
 import api from '@/api/axios'
 
 const { downloadDocument } = useDocuments()
+const { staggerRef, applyStagger } = useStagger(40)
 
 const documents = ref([])
 const loading = ref(false)
@@ -285,7 +287,8 @@ const loadDocuments = async () => {
   }
 }
 
-onMounted(() => {
-  loadDocuments()
+onMounted(async () => {
+  await loadDocuments()
+  applyStagger()
 })
 </script>

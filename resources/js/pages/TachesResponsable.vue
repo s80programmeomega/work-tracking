@@ -18,8 +18,19 @@
           </div>
 
           <div class="flex flex-wrap items-center gap-3">
+            <!-- Bouton Statistiques -->
+            <button
+              @click="showStats = !showStats"
+              class="inline-flex items-center gap-2 rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              Statistiques
+            </button>
+
             <!-- Bouton refresh -->
-            <button 
+            <button
               @click="loadResponsableTasks" 
               :disabled="loading" 
               class="p-2 rounded-3 border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" 
@@ -58,50 +69,22 @@
           </div>
         </div>
 
-        <!-- Statistiques -->
-        <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
-          <!-- Total -->
-          <div class="relative overflow-hidden rounded-3 bg-white dark:bg-gray-800 p-4 border ">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Total</p>
-            <p class="text-2xl font-bold text-purple-600 mt-1">{{ stats.total }}</p>
-            <div class="absolute bottom-0 left-0 right-0 h-1 bg-brand-500"></div>
-          </div>
-          
-          <!-- À faire -->
-          <div class="relative overflow-hidden rounded-3 bg-white dark:bg-gray-800 p-4 border ">
-            <p class="text-sm text-gray-500 dark:text-gray-400">À faire</p>
-            <p class="text-2xl font-bold text-slate-600 dark:text-slate-300 mt-1">{{ stats.a_faire }}</p>
-            <div class="absolute bottom-0 left-0 right-0 h-1 bg-brand-500"></div>
-          </div>
-          
-          <!-- En cours -->
-          <div class="relative overflow-hidden rounded-3 bg-white dark:bg-gray-800 p-4 border ">
-            <p class="text-sm text-gray-500 dark:text-gray-400">En cours</p>
-            <p class="text-2xl font-bold text-blue-600 mt-1">{{ stats.en_cours }}</p>
-            <div class="absolute bottom-0 left-0 right-0 h-1 bg-brand-500"></div>
-          </div>
-          
-          <!-- Terminées -->
-          <div class="relative overflow-hidden rounded-3 bg-white dark:bg-gray-800 p-4 border ">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Terminées</p>
-            <p class="text-2xl font-bold text-green-600 mt-1">{{ stats.termine }}</p>
-            <div class="absolute bottom-0 left-0 right-0 h-1 bg-brand-500"></div>
-          </div>
-          
-          <!-- En retard -->
-          <div class="relative overflow-hidden rounded-3 bg-white dark:bg-gray-800 p-4 border ">
-            <p class="text-sm text-gray-500 dark:text-gray-400">En retard</p>
-            <p class="text-2xl font-bold mt-1" :class="stats.overdue > 0 ? 'text-red-600' : 'text-gray-400'">{{ stats.overdue }}</p>
-            <div class="absolute bottom-0 left-0 right-0 h-1" :class="stats.overdue > 0 ? 'bg-red-500' : 'bg-gray-300'"></div>
-          </div>
-          
-          <!-- Intervenants -->
-          <div class="relative overflow-hidden rounded-3 bg-white dark:bg-gray-800 p-4 border ">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Intervenants</p>
-            <p class="text-2xl font-bold text-indigo-600 mt-1">{{ stats.total_assignees }}</p>
-            <div class="absolute bottom-0 left-0 right-0 h-1 bg-brand-500"></div>
-          </div>
-        </div>
+        <!-- Statistiques panel -->
+        <transition
+          enter-active-class="transition-all duration-300 ease-out"
+          enter-from-class="opacity-0 -translate-y-4"
+          enter-to-class="opacity-100 translate-y-0"
+          leave-active-class="transition-all duration-200 ease-in"
+          leave-from-class="opacity-100 translate-y-0"
+          leave-to-class="opacity-0 -translate-y-4"
+        >
+          <TachesResponsableStats
+            v-if="showStats"
+            :stats="stats"
+            :loading="loading"
+            @close="showStats = false"
+          />
+        </transition>
 
         <!-- Info box -->
         <div class="mt-4 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-3 border border-purple-200 dark:border-purple-800">
@@ -206,6 +189,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
+import TachesResponsableStats from '@/components/taches/TachesResponsableStats.vue'
 import KanbanColumnResponsable from '@/components/taches/KanbanColumnResponsable.vue'
 import TacheDetailModal from '@/components/taches/TacheDetailModal.vue'
 import TacheForm from '@/components/taches/TacheForm.vue'
@@ -221,6 +205,7 @@ const loading = ref(false)
 const error = ref(null)
 const currentView = ref('kanban')
 const showViewModal = ref(false)
+const showStats = ref(false)
 const showEditModal = ref(false)
 const currentTache = ref(null)
 

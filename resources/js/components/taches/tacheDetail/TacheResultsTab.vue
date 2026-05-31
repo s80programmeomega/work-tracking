@@ -162,11 +162,11 @@
         Résultats de l'équipe ({{ tache.all_results.length }})
       </h3>
 
-      <div class="space-y-4">
-        <div 
-          v-for="result in tache.all_results" 
+      <div ref="staggerRef" class="space-y-4">
+        <div
+          v-for="result in tache.all_results"
           :key="result.id"
-          class="bg-white dark:bg-gray-800 rounded-3 p-4 border-2 border-gray-200 dark:border-gray-700"
+          class="stagger-item bg-white dark:bg-gray-800 rounded-3 p-4 border-2 border-gray-200 dark:border-gray-700"
         >
           <div class="flex items-start gap-4">
             <!-- Avatar -->
@@ -254,7 +254,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch, nextTick } from 'vue';
+import { useStagger } from '@/composables/useAnimations';
 import { useNotifications } from '@/composables/useNotifications';
 import api from '@/api/axios';
 import SubmitResultModal from '../../../components/taches/SubmitResultModal.vue';
@@ -274,7 +275,13 @@ const props = defineProps({
 const emit = defineEmits(['refresh']);
 
 const { showSuccess, showError } = useNotifications();
+const { staggerRef, applyStagger } = useStagger(50);
 const showSubmitModal = ref(false);
+
+watch(() => props.tache?.all_results, async () => {
+  await nextTick();
+  applyStagger();
+}, { immediate: true });
 
 // ── Bypass anti-sabotage ──────────────────────────────────────────────────
 const bypassMotif = ref('');

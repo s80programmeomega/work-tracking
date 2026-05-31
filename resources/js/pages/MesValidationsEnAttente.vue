@@ -28,16 +28,45 @@
               </div>
             </div>
 
-            <button @click="loadData" :disabled="loading"
-              class="p-3 rounded-3 border border-gray-300/80 dark:border-gray-700/80 bg-white/80 dark:bg-gray-800/80 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 disabled:opacity-50 "
-              title="Actualiser">
-              <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" :class="{ 'animate-spin': loading }"
-                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-            </button>
+            <div class="flex items-center gap-2">
+              <button
+                @click="showStats = !showStats"
+                class="inline-flex items-center gap-2 rounded-3 border border-gray-300/80 dark:border-gray-700/80 bg-white/80 dark:bg-gray-800/80 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                Statistiques
+              </button>
+              <button @click="loadData" :disabled="loading"
+                class="p-3 rounded-3 border border-gray-300/80 dark:border-gray-700/80 bg-white/80 dark:bg-gray-800/80 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 disabled:opacity-50"
+                title="Actualiser">
+                <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" :class="{ 'animate-spin': loading }"
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </button>
+            </div>
           </div>
+
+          <!-- Stats panel -->
+          <transition
+            enter-active-class="transition-all duration-300 ease-out"
+            enter-from-class="opacity-0 -translate-y-4"
+            enter-to-class="opacity-100 translate-y-0"
+            leave-active-class="transition-all duration-200 ease-in"
+            leave-from-class="opacity-100 translate-y-0"
+            leave-to-class="opacity-0 -translate-y-4"
+          >
+            <MesValidationsStats
+              v-if="showStats"
+              :counts="counts"
+              :loading="loading"
+              class="mt-6"
+              @close="showStats = false"
+            />
+          </transition>
 
           <!-- Tabs -->
           <div class="flex gap-1 mt-8 bg-gray-100/80 dark:bg-gray-800/80 rounded-3 p-1.5">
@@ -135,6 +164,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
+import MesValidationsStats from '@/components/evaluations/MesValidationsStats.vue'
 import { useStagger } from '@/composables/useAnimations'
 import api from '@/api/axios'
 import { useToast } from 'vue-toastification'
@@ -142,6 +172,7 @@ import { useRealtimeRefresh } from '@/composables/useRealtimeRefresh'
 
 const toast = useToast()
 const { staggerRef: listRef, applyStagger } = useStagger(50)
+const showStats = ref(false)
 
 const loading = ref(false)
 const error = ref(null)

@@ -4,67 +4,63 @@
   <div class="bg-gray-50 dark:bg-gray-900">
     
     <!-- Header -->
-    <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 ">
-      <div class="py-6">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-          <div class="w-12 h-12 rounded-3 flex items-center justify-center">
-            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-          </div>
-          Tableau de bord des évaluations
-        </h1>
-        <p class="text-gray-600 dark:text-gray-400 mt-2">
-          Vue d'ensemble de vos performances et validations en attente
-        </p>
+    <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+      <div class="py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+            <div class="w-12 h-12 rounded-3 flex items-center justify-center">
+              <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            Tableau de bord des évaluations
+          </h1>
+          <p class="text-gray-600 dark:text-gray-400 mt-2">
+            Vue d'ensemble de vos performances et validations en attente
+          </p>
+        </div>
+
+        <!-- Bouton Statistiques -->
+        <button
+          @click="showStats = !showStats"
+          class="inline-flex items-center gap-2 rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+          Statistiques
+        </button>
       </div>
     </div>
 
     <!-- Contenu -->
     <div class="py-8 space-y-8">
-      
+
+      <!-- Panneau statistiques -->
+      <transition
+        enter-active-class="transition-all duration-300 ease-out"
+        enter-from-class="opacity-0 -translate-y-4"
+        enter-to-class="opacity-100 translate-y-0"
+        leave-active-class="transition-all duration-200 ease-in"
+        leave-from-class="opacity-100 translate-y-0"
+        leave-to-class="opacity-0 -translate-y-4"
+      >
+        <EvaluationDashboardStats
+          v-if="showStats"
+          :my-tasks="myTasks"
+          :pending-validations="pendingValidations"
+          :week-number="weekInfo.week_number"
+          :loading="loading"
+          @close="showStats = false"
+        />
+      </transition>
+
       <!-- Loading -->
       <div v-if="loading" class="flex items-center justify-center py-16">
         <div class="animate-spin rounded-full h-16 w-16 border-4 border-purple-500 border-t-transparent"></div>
       </div>
 
       <template v-else>
-        <!-- Statistiques principales -->
-        <div>
-          <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">
-            Mes tâches - Semaine {{ weekInfo.week_number }}
-          </h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <DashboardCard
-              title="Total tâches"
-              :value="myTasks.total"
-              icon="clipboard-list"
-              color="blue"
-              :trend="{ value: '+12%', positive: true }"
-            />
-            <DashboardCard
-              title="Complétées"
-              :value="myTasks.completed"
-              :subtitle="`${myTasks.completionRate}% de complétion`"
-              icon="check-circle"
-              color="green"
-            />
-            <DashboardCard
-              title="En cours"
-              :value="myTasks.in_progress"
-              icon="clock"
-              color="yellow"
-            />
-            <DashboardCard
-              title="En retard"
-              :value="myTasks.overdue"
-              icon="exclamation"
-              color="red"
-              :urgent="myTasks.overdue > 0"
-            />
-          </div>
-        </div>
-
         <!-- Validations en attente -->
         <div v-if="pendingValidations.total > 0">
           <div class="flex items-center justify-between mb-4">
@@ -222,6 +218,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/api/axios'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
+import EvaluationDashboardStats from '@/components/evaluations/EvaluationDashboardStats.vue'
 
 // import DashboardCard from './components/DashboardCard.vue'
 // import ValidationCard from './components/ValidationCard.vue'
@@ -230,6 +227,7 @@ import AdminLayout from '@/components/layout/AdminLayout.vue'
 
 const router = useRouter()
 const loading = ref(true)
+const showStats = ref(false)
 const dashboardData = ref(null)
 
 const weekInfo = computed(() => dashboardData.value?.week_info || { week_number: 0, year: 2025 })

@@ -149,9 +149,9 @@
       </div>
 
       <!-- Grid View (Asana-style) -->
-      <div v-else-if="viewMode === 'grid'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div v-else-if="viewMode === 'grid'" ref="staggerRef" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <div v-for="workspace in filteredWorkspaces" :key="workspace.id"
-          class="group relative bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300 overflow-hidden cursor-pointer"
+          class="stagger-item group relative bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300 overflow-hidden cursor-pointer"
           @click="navigateToWorkspace(workspace.id)">
           
           <!-- Visual Identifier -->
@@ -257,9 +257,9 @@
       </div>
 
       <!-- List View (Asana-style) -->
-      <div v-else class="space-y-3">
+      <div v-else ref="staggerRef" class="space-y-3">
         <div v-for="workspace in filteredWorkspaces" :key="workspace.id"
-          class="group bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 cursor-pointer"
+          class="stagger-item group bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 cursor-pointer"
           @click="navigateToWorkspace(workspace.id)">
           
           <!-- Active Indicator -->
@@ -357,10 +357,12 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useWorkspace } from '@/composables/useWorkspace';
+import { useStagger } from '@/composables/useAnimations';
 import AdminLayout from '@/components/layout/AdminLayout.vue';
 
 const router = useRouter();
 const { workspaces, loading, fetchWorkspaces, selectWorkspace } = useWorkspace();
+const { staggerRef, applyStagger } = useStagger(60);
 
 const searchQuery = ref('');
 const filterActive = ref('all');
@@ -428,6 +430,7 @@ const openSettings = (workspace: any) => {
 
 onMounted(async () => {
   await fetchWorkspaces();
+  applyStagger();
 });
 </script>
 
