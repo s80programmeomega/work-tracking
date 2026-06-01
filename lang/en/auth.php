@@ -13,18 +13,30 @@ return [
     'dont_have_account' => 'Don\'t have an account?',
     'signup' => 'Sign Up',
     'or' => 'Or',
-    
+
     // Social buttons
     'signin_with_google' => 'Sign in with Google',
     'signin_with_x' => 'Sign in with X',
-    
+
     // Errors
     'invalid_credentials' => 'Invalid email or password',
     'login_failed' => 'Login failed',
-    
+
     // Placeholders
     'email_placeholder' => 'info@gmail.com',
     'password_placeholder' => 'Enter your password',
 
     'tagline' => 'Free and Open-Source Project Management and Work Tracking Solution',
+
+    // MFA
+    'mfa' => [
+        'challenge_expired' => 'Session expired, please sign in again.',
+        'invalid_code' => 'Invalid or expired code.',
+        'email_otp_not_enabled' => 'Email OTP is not enabled on this account.',
+        'email_otp_cooldown' => 'Please wait before requesting a new code.',
+        'email_otp_sent' => 'Code sent to your email address.',
+        'email_otp_enabled' => 'Email OTP enabled successfully.',
+        'email_otp_disabled' => 'Email OTP disabled.',
+        'email_otp_requires_totp' => 'Authenticator app must be enabled before activating email OTP.',
+    ],
 ];

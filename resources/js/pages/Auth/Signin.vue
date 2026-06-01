@@ -11,7 +11,79 @@
                     </div>
 
                     <div class="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
-                        <div>
+
+                        <!-- ===== MFA CHALLENGE SCREEN ===== -->
+                        <div v-if="mfaMode" class="space-y-6" dusk="mfa-challenge-screen">
+                            <div>
+                                <h2 class="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
+                                    {{ $t('auth.mfa.title') }}
+                                </h2>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">
+                                    {{ mfaType === 'email' ? $t('auth.mfa.subtitle_email') : $t('auth.mfa.subtitle') }}
+                                </p>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                                        {{ $t('auth.mfa.code_label') }}
+                                    </label>
+                                    <input
+                                        v-model="mfaCode"
+                                        type="text"
+                                        inputmode="numeric"
+                                        pattern="[0-9a-zA-Z\-]*"
+                                        maxlength="20"
+                                        :placeholder="$t('auth.mfa.code_placeholder')"
+                                        dusk="mfa-code-input"
+                                        class="w-full rounded-3 border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                                        @keyup.enter="submitMfaChallenge"
+                                    />
+                                </div>
+
+                                <p v-if="mfaError" class="text-sm text-red-600">{{ mfaError }}</p>
+                                <p v-if="mfaEmailSent" class="text-sm text-green-600">{{ $t('auth.mfa.email_sent') }}</p>
+
+                                <button
+                                    @click="submitMfaChallenge"
+                                    :disabled="mfaLoading || mfaCode.length < 6"
+                                    dusk="mfa-submit"
+                                    class="w-full rounded-3 bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    <span v-if="mfaLoading" class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2" />
+                                    {{ mfaLoading ? $t('auth.mfa.verifying') : $t('auth.mfa.submit') }}
+                                </button>
+                            </div>
+
+                            <!-- Alternatives -->
+                            <div class="flex flex-col gap-2">
+                                <button
+                                    v-if="mfaType !== 'recovery'"
+                                    @click="mfaType = 'recovery'; mfaCode = ''"
+                                    class="text-sm text-blue-600 hover:underline dark:text-blue-400 text-left"
+                                >
+                                    {{ $t('auth.mfa.use_recovery') }}
+                                </button>
+                                <button
+                                    v-if="mfaType !== 'totp'"
+                                    @click="mfaType = 'totp'; mfaCode = ''"
+                                    class="text-sm text-blue-600 hover:underline dark:text-blue-400 text-left"
+                                >
+                                    {{ $t('auth.mfa.use_totp') }}
+                                </button>
+                                <button
+                                    v-if="authStore.mfaEmailOtpAvailable && mfaType !== 'email'"
+                                    @click="mfaType = 'email'; mfaCode = ''; sendMfaEmailCode()"
+                                    :disabled="mfaEmailSending"
+                                    class="text-sm text-blue-600 hover:underline dark:text-blue-400 text-left disabled:opacity-50"
+                                >
+                                    {{ mfaEmailSending ? $t('auth.mfa.sending_email') : $t('auth.mfa.use_email') }}
+                                </button>
+                            </div>
+                        </div>
+                        <!-- ===== END MFA CHALLENGE ===== -->
+
+                        <div v-else>
                             <!-- En-tête -->
                             <div class="mb-5 sm:mb-8">
                                 <h2
@@ -221,6 +293,7 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- end v-else login form -->
                     </div>
                 </div>
 
@@ -311,6 +384,15 @@ const authStore = useAuthStore();
 const showPassword = ref(false);
 const validationErrors = ref<Record<string, string[]>>({});
 
+// État du challenge MFA
+const mfaMode = ref(false); // true quand le serveur retourne two_factor:true
+const mfaType = ref<'totp' | 'recovery' | 'email'>('totp');
+const mfaCode = ref('');
+const mfaLoading = ref(false);
+const mfaError = ref('');
+const mfaEmailSending = ref(false);
+const mfaEmailSent = ref(false);
+
 // Données du formulaire
 const form = reactive({
     email: "",
@@ -360,11 +442,18 @@ const handleSubmit = async () => {
         // Sanctum SPA stateful auth — il faut récupérer le cookie CSRF avant le login.
         await fetch('/sanctum/csrf-cookie', { credentials: 'include' });
         // Appeler l'action de connexion du store
-        await authStore.login({
+        const result = await authStore.login({
             email: form.email,
             password: form.password,
             remember: form.remember
         });
+
+        // Challenge MFA requis — afficher l'écran de vérification
+        if (result?.two_factor) {
+            mfaMode.value = true;
+            mfaType.value = 'totp';
+            return;
+        }
 
         // Redirection gérée par le store après connexion réussie
 
@@ -387,10 +476,47 @@ const handleSubmit = async () => {
     }
 };
 
+// ==========================================
+// CHALLENGE MFA
+// ==========================================
+import api from '@/api/axios';
+
+const submitMfaChallenge = async () => {
+    mfaError.value = '';
+    mfaLoading.value = true;
+    try {
+        const response = await api.post('/auth/two-factor-challenge', {
+            challenge_token: authStore.mfaChallengeToken,
+            code: mfaCode.value,
+            type: mfaType.value,
+        });
+        await authStore.completeMfaLogin(response.data.data);
+    } catch (err: any) {
+        mfaError.value = err.response?.data?.message ?? t('auth.mfa.invalid_code');
+    } finally {
+        mfaLoading.value = false;
+    }
+};
+
+const sendMfaEmailCode = async () => {
+    mfaEmailSending.value = true;
+    mfaEmailSent.value = false;
+    mfaError.value = '';
+    try {
+        await api.post('/auth/two-factor-email-send', {
+            challenge_token: authStore.mfaChallengeToken,
+        });
+        mfaEmailSent.value = true;
+    } catch (err: any) {
+        mfaError.value = err.response?.data?.message ?? t('auth.mfa.invalid_code');
+    } finally {
+        mfaEmailSending.value = false;
+    }
+};
+
 // Nettoyage lors de la destruction du composant
 import { onUnmounted } from 'vue';
 onUnmounted(() => {
-    // Réinitialiser l'erreur du store quand le composant est détruit
     authStore.error = null;
 });
 </script>

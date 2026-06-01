@@ -32,6 +32,10 @@ export const useAuthStore = defineStore('auth', {
         workspaces: [],
         currentWorkspace: null,
 
+        // État du challenge MFA (entre login et challenge validé)
+        mfaChallengeToken: null,
+        mfaEmailOtpAvailable: false,
+
         // Inactivity timeout management
         inactivityTimeout: 60 * 60 * 1000, // 60 minutes by default
         inactivityTimer: null,
@@ -647,7 +651,17 @@ export const useAuthStore = defineStore('auth', {
                 await axios.get('/sanctum/csrf-cookie').catch(() => {});
 
                 const response = await authAPI.login(credentials);
-                const data = response.data?.data ?? response.data;
+                const raw = response.data;
+
+                // Détection du challenge MFA — le serveur retourne two_factor:true au lieu d'un token
+                if (raw.two_factor) {
+                    this.mfaChallengeToken = raw.challenge_token;
+                    this.mfaEmailOtpAvailable = raw.email_otp_available ?? false;
+                    this.loading = false;
+                    return { two_factor: true };
+                }
+
+                const data = raw?.data ?? raw;
 
                 // Flexible response parsing
                 const token = data.token || data.access_token;
@@ -690,9 +704,49 @@ export const useAuthStore = defineStore('auth', {
         },
 
         // ==========================================
+        // COMPLÉTER LE LOGIN APRÈS CHALLENGE MFA
+        // ==========================================
+        async completeMfaLogin(data) {
+            const token = data.token || data.access_token;
+            const user = data.user;
+            if (!token || !user) { throw new Error('Invalid MFA auth response'); }
+
+            this.user = user;
+            this.token = token;
+            this.isAuthenticated = true;
+            this.tokenExpiry = data.expires_at ? new Date(data.expires_at).getTime() : null;
+            this.mfaChallengeToken = null;
+            this.mfaEmailOtpAvailable = false;
+
+            localStorage.setItem('user', JSON.stringify(user));
+            localStorage.setItem('auth_token', token);
+            localStorage.setItem('user_language', user.language || 'fr');
+            this.setAxiosToken(token);
+            if (user.language) { this.setLanguage(user.language); }
+            if (this.tokenExpiry) { this.startTokenAutoRefresh(); }
+
+            const invitationToken = router.currentRoute.value.query.invitation;
+            router.push(invitationToken ? `/accept-invitation/${invitationToken}` : '/');
+        },
+
+        // ==========================================
+        // RAFRAÎCHIR LES DONNÉES UTILISATEUR
+        // ==========================================
+        async fetchUser() {
+            try {
+                const response = await authAPI.me();
+                const user = response.data?.data ?? response.data;
+                this.user = user;
+                localStorage.setItem('user', JSON.stringify(user));
+            } catch {
+                // Ignore — utilisateur déjà connecté, ce n'est qu'un rafraîchissement
+            }
+        },
+
+        // ==========================================
         // DÉCONNEXION
         // ==========================================
-         async logout() {
+        async logout() {
             this.loading = true;
             try {
                 // ⭐ Nettoyer les timers d'inactivité

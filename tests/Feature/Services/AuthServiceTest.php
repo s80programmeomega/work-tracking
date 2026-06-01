@@ -80,10 +80,12 @@ class AuthServiceTest extends TestCase
             'password' => 'secret123',
         ]);
 
-        $this->assertArrayHasKey('token', $result);
+        // Depuis l'introduction du MFA, login() retourne uniquement l'utilisateur.
+        // Le token Sanctum est émis séparément via issueToken() (ou après challenge MFA).
         $this->assertArrayHasKey('user', $result);
-        $this->assertEquals('Bearer', $result['token_type']);
-        $this->assertNotEmpty($result['token']);
+        $this->assertArrayHasKey('requires_mfa', $result);
+        $this->assertFalse($result['requires_mfa']);
+        $this->assertArrayNotHasKey('token', $result);
     }
 
     /** @test */
