@@ -461,7 +461,7 @@ End-of-batch:
 
 - 2FA, email change with verification (Group 10 deferred).
 - The 2 pre-existing `BypassTest` Dusk failures (separate issue, needs dev-server env alignment).
-- Help Center implementation (deferred to `feature/v2-help-center` per `docs/HELP_CENTER_PLAN.md`).
+- Help Center implementation (deferred to `feature/v2-help-center` per `docs/extended-features/HELP_CENTER_PLAN.md`).
 
 ## Estimated effort
 
