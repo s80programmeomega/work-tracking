@@ -1,11 +1,11 @@
 <!-- resources/js/pages/ValidationResultats.vue -->
 <template>
   <AdminLayout>
-    <div class="min-h-screen bg-gray-50/50 dark:bg-gray-900/50">
+    <div class="bg-gray-50/50 dark:bg-gray-900/50">
       <!-- Header Premium -->
       <div class="bg-white dark:bg-gray-900 border-b border-gray-200/80 dark:border-gray-800/80 ">
-        <div class="max-w-7xl mx-auto px-6 py-8">
-          <div class="flex items-start justify-between">
+        <div class="py-8">
+          <div class="flex flex-wrap items-start justify-between gap-3">
             <div class="flex items-center gap-5">
               <div class="relative">
                 <div
@@ -21,18 +21,30 @@
               </div>
               <div>
                 <h1
-                  class="text-3xl font-bold bg-clip-text text-transparent"> Validation des Résultats
+                  class="text-3xl font-bold text-gray-900 dark:text-white">{{ $t('validation_resultats.title') }}
                 </h1>
                 <p class="text-gray-600 dark:text-gray-400 mt-2 text-lg">
-                  Valider ou rejeter les résultats soumis par les membres
+                  {{ $t('validation_resultats.subtitle') }}
                 </p>
               </div>
             </div>
 
             <div class="flex items-center gap-3">
+              <button
+                @click="showStats = !showStats"
+                :class="showStats
+                  ? 'border-green-400/80 dark:border-green-600/80 bg-green-50/80 dark:bg-green-900/20 text-green-700 dark:text-green-300'
+                  : 'border-gray-300/80 dark:border-gray-700/80 bg-white/80 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'"
+                class="inline-flex items-center gap-2 rounded-3 border px-4 py-2 text-sm font-medium transition-all duration-200"
+              >
+                <svg class="w-4 h-4 transition-transform duration-300" :class="showStats ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                {{ $t('common.statistics') }}
+              </button>
               <button @click="loadData" :disabled="loading"
-                class="p-3 rounded-3 border border-gray-300/80 dark:border-gray-700/80 bg-white/80 dark:bg-gray-800/80 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 disabled:opacity-50 "
-                title="Actualiser">
+                class="p-3 rounded-3 border border-gray-300/80 dark:border-gray-700/80 bg-white/80 dark:bg-gray-800/80 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 disabled:opacity-50"
+                :title="$t('validation_resultats.refresh')">
                 <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" :class="{ 'animate-spin': loading }" fill="none"
                   stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -43,8 +55,10 @@
           </div>
 
           <!-- Enhanced Tabs -->
-          <div class="flex gap-1 mt-8 bg-gray-100/80 dark:bg-gray-800/80 rounded-3 p-1.5 ">
+          <div class="overflow-x-auto mt-8">
+          <div class="flex gap-1 bg-gray-100/80 dark:bg-gray-800/80 rounded-3 p-1.5 min-w-max">
             <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
+              :dusk="`validation-tab-${tab.id}`"
               class="flex items-center gap-3 px-6 py-3.5 text-sm font-semibold transition-all duration-200 rounded-3 relative group"
               :class="activeTab === tab.id
                 ? 'text-white ' + tab.activeGradient
@@ -53,40 +67,55 @@
                 <component :is="tab.icon" class="w-4 h-4" />
                 <span>{{ tab.label }}</span>
                 <span v-if="tab.count > 0"
-                  class="px-2 py-1 text-xs font-bold bg-white/20 rounded-full min-w-[24px] text-center">
+                  class="px-2 py-1 text-xs font-bold bg-white/20 rounded-full min-w-6 text-center">
                   {{ tab.count }}
                 </span>
               </div>
             </button>
           </div>
+          </div>
         </div>
       </div>
 
+      <!-- Date range filter -->
+      <div class="bg-white dark:bg-gray-900 border-b border-gray-200/80 dark:border-gray-800/80 px-0 py-3">
+        <DateRangeFilter @change="onDateRangeChange" />
+      </div>
+
       <!-- Stats Cards Grid -->
-      <div class="max-w-7xl mx-auto px-6 py-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-          <div v-for="stat in stats" :key="stat.id"
-            class="bg-white/80 dark:bg-gray-800/80 rounded-3 p-6 border border-gray-200/50 dark:border-gray-700/50 transition-all duration-200 hover:border-gray-300/80 dark:hover:border-gray-600/80">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ stat.label }}</p>
-                <p class="text-3xl font-bold mt-2" :class="stat.color">{{ stat.value }}</p>
+      <div class="py-6">
+        <transition
+          enter-active-class="transition-all duration-300 ease-out"
+          enter-from-class="opacity-0 -translate-y-4"
+          enter-to-class="opacity-100 translate-y-0"
+          leave-active-class="transition-all duration-200 ease-in"
+          leave-from-class="opacity-100 translate-y-0"
+          leave-to-class="opacity-0 -translate-y-4"
+        >
+          <div v-if="showStats" ref="statsRef" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+            <div v-for="stat in stats" :key="stat.id"
+              class="stagger-item bg-white/80 dark:bg-gray-800/80 rounded-3 p-6 border border-gray-200/50 dark:border-gray-700/50 transition-all duration-200 hover:border-gray-300/80 dark:hover:border-gray-600/80">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ stat.label }}</p>
+                  <p class="text-3xl font-bold mt-2" :class="stat.color">{{ stat.value }}</p>
+                </div>
+                <div class="w-12 h-12 rounded-3 flex items-center justify-center" :class="stat.bgColor">
+                  <component :is="stat.icon" class="w-6 h-6" :class="stat.iconColor" />
+                </div>
               </div>
-              <div class="w-12 h-12 rounded-3 flex items-center justify-center" :class="stat.bgColor">
-                <component :is="stat.icon" class="w-6 h-6" :class="stat.iconColor" />
+              <div class="mt-4 pt-4 border-t border-gray-200/50 dark:border-gray-700/50">
+                <p class="text-xs text-gray-500 dark:text-gray-400" v-html="stat.description"></p>
               </div>
-            </div>
-            <div class="mt-4 pt-4 border-t border-gray-200/50 dark:border-gray-700/50">
-              <p class="text-xs text-gray-500 dark:text-gray-400" v-html="stat.description"></p>
             </div>
           </div>
-        </div>
+        </transition>
 
         <!-- Loading State -->
         <div v-if="loading" class="flex justify-center items-center h-64">
           <div class="text-center">
             <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-green-500 mx-auto mb-4"></div>
-            <p class="text-gray-600 dark:text-gray-400 text-lg">Chargement des résultats...</p>
+            <p class="text-gray-600 dark:text-gray-400 text-lg">{{ $t('validation_resultats.loading') }}</p>
           </div>
         </div>
 
@@ -103,7 +132,7 @@
             <div>
               <p class="text-red-700 dark:text-red-300 font-medium">{{ error }}</p>
               <button @click="loadData" class="text-red-600 dark:text-red-400 text-sm mt-1 hover:underline">
-                Réessayer
+                {{ $t('validation_resultats.retry') }}
               </button>
             </div>
           </div>
@@ -122,19 +151,20 @@
               </svg>
             </div>
             <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              Aucun résultat en attente
+              {{ $t('validation_resultats.empty_title') }}
             </h3>
             <p class="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-              Tous les résultats ont été traités pour le moment. Les nouvelles soumissions apparaîtront ici
-              automatiquement.
+              {{ $t('validation_resultats.empty_desc') }}
             </p>
           </div>
 
           <!-- Results Grid -->
-          <div v-else class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <ResultatCard v-for="resultat in currentResults" :key="resultat.id" :resultat="resultat" :level="activeTab"
-              :expanded="expandedCards.includes(resultat.id)" @toggle="toggleCard(resultat.id)"
-              @validate="handleValidate" @reject="handleReject" @view-details="viewResultatDetails" />
+          <div v-else ref="gridRef" class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <div v-for="resultat in currentResults" :key="resultat.id" class="stagger-item">
+              <ResultatCard :resultat="resultat" :level="activeTab"
+                :expanded="expandedCards.includes(resultat.id)" @toggle="toggleCard(resultat.id)"
+                @validate="handleValidate" @reject="handleReject" @view-details="viewResultatDetails" />
+            </div>
           </div>
         </div>
       </div>
@@ -152,15 +182,21 @@
 
 <script setup>
 import { ref, computed, onMounted, watch, h } from 'vue'
+import { useI18n } from 'vue-i18n'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import ResultatCard from '@/components/taches/resultats/ResultatCard.vue'
 import ValidationModal from '@/components/taches/resultats/ValidationModal.vue'
 import ResultatDetailModal from '@/components/taches/resultats/ResultatDetailModal.vue'
+import DateRangeFilter from '@/components/common/DateRangeFilter.vue'
+import { useStagger } from '@/composables/useAnimations'
 import api from '@/api/axios'
 import { useToast } from 'vue-toastification'
 import { useRealtimeRefresh } from '@/composables/useRealtimeRefresh'
 
+const { t } = useI18n()
 const toast = useToast()
+const { staggerRef: gridRef, applyStagger } = useStagger(50)
+const { staggerRef: statsRef, applyStagger: applyStatsStagger } = useStagger(60)
 
 // State
 const activeTab = ref('n1')
@@ -178,12 +214,14 @@ const selectedResultatForDetail = ref(null)
 const validationAction = ref('validate')
 const validationLevel = ref('n1')
 const historyItems = ref([])
+const showStats = ref(false)
+watch(showStats, (val) => { if (val) { applyStatsStagger() } })
 
 // Enhanced Tabs Configuration
 const tabs = computed(() => [
   {
     id: 'n1',
-    label: 'Validation N1',
+    label: t('validation_resultats.tab_n1'),
     icon: 'ClockIcon',
     count: countsN1.value.pending,
     activeGradient: ' bg-warning-500',
@@ -191,7 +229,7 @@ const tabs = computed(() => [
   },
   {
     id: 'n2',
-    label: 'Validation N2',
+    label: t('validation_resultats.tab_n2'),
     icon: 'CheckCircleIcon',
     count: countsN2.value.pending,
     activeGradient: ' bg-brand-500',
@@ -199,7 +237,7 @@ const tabs = computed(() => [
   },
   {
     id: 'history',
-    label: 'Historique',
+    label: t('validation_resultats.tab_history'),
     icon: 'ArchiveIcon',
     count: 0,
     activeGradient: ' bg-purple-500',
@@ -211,43 +249,43 @@ const tabs = computed(() => [
 const stats = computed(() => [
   {
     id: 'pendingN1',
-    label: 'En attente N1',
+    label: t('validation_resultats.stat_pending_n1'),
     value: countsN1.value.pending,
     color: 'text-orange-600 dark:text-orange-400',
     bgColor: 'bg-orange-100 dark:bg-orange-900/30',
     icon: ClockIcon,
     iconColor: 'text-orange-600 dark:text-orange-400',
-    description: 'En attente de votre validation'
+    description: t('validation_resultats.stat_awaiting_yours')
   },
   {
     id: 'pendingN2',
-    label: 'En attente N2',
+    label: t('validation_resultats.stat_pending_n2'),
     value: countsN2.value.pending,
     color: 'text-blue-600 dark:text-blue-400',
     bgColor: 'bg-blue-100 dark:bg-blue-900/30',
     icon: CheckCircleIcon,
     iconColor: 'text-blue-600 dark:text-blue-400',
-    description: 'En attente validation finale'
+    description: t('validation_resultats.stat_awaiting_final')
   },
   {
     id: 'today',
-    label: 'Validés aujourd\'hui',
+    label: t('validation_resultats.stat_validated_today'),
     value: todayValidated.value,
     color: 'text-green-600 dark:text-green-400',
     bgColor: 'bg-green-100 dark:bg-green-900/30',
     icon: ChartBarIcon,
     iconColor: 'text-green-600 dark:text-green-400',
-    description: `Résultats validés aujourd'hui`
+    description: t('validation_resultats.stat_validated_today_desc')
   },
   {
     id: 'total',
-    label: 'Total traités',
+    label: t('validation_resultats.stat_total'),
     value: totalProcessed.value,
     color: 'text-gray-900 dark:text-white',
     bgColor: 'bg-gray-100 dark:bg-gray-900/30',
     icon: DocumentChartBarIcon,
     iconColor: 'text-gray-600 dark:text-gray-400',
-    description: 'Total des validations effectuées'
+    description: t('validation_resultats.stat_total_desc')
   }
 ])
 
@@ -270,13 +308,23 @@ const totalProcessed = computed(() => {
   return countsN1.value.validated + countsN2.value.validated + countsN1.value.rejected + countsN2.value.rejected
 })
 
+const dateRange = ref({ from: null, to: null })
+
+function onDateRangeChange({ from, to }) {
+  dateRange.value = { from, to }
+  loadData()
+}
+
 // Methods (rest of the methods remain the same as original)
 async function loadData() {
   loading.value = true
   error.value = null
 
   try {
-    const { data } = await api.get('/evaluations/resultats/en-attente')
+    const params = {}
+    if (dateRange.value.from) { params.date_from = dateRange.value.from }
+    if (dateRange.value.to) { params.date_to = dateRange.value.to }
+    const { data } = await api.get('/evaluations/resultats/en-attente', { params })
 
     resultatsN1.value = data.data.pending_n1 || []
     resultatsN2.value = data.data.pending_n2 || []
@@ -299,6 +347,7 @@ async function loadData() {
     toast.error(error.value)
   } finally {
     loading.value = false
+    applyStagger()
   }
 }
 
@@ -340,7 +389,7 @@ async function handleValidationConfirmed(data) {
   try {
     const endpoint = action === 'validate'
       ? `/evaluations/resultats-individuels/${resultat.id}/validate-${level}`
-      : `/evaluations/${resultat.id}/reject`
+      : `/evaluations/resultats/${resultat.id}/reject`
 
     const payload = action === 'reject'
       ? { commentaire, level }
@@ -391,6 +440,8 @@ const DocumentChartBarIcon = strokeIcon('M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-
 watch(activeTab, (newTab) => {
   if (newTab === 'history') {
     loadHistory()
+  } else {
+    applyStagger()
   }
 })
 

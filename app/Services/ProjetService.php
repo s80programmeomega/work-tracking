@@ -229,6 +229,14 @@ class ProjetService
             $query->where('date_fin', '<', now())
                 ->whereNotIn('status', ['completed', 'archived']);
         }
+
+        if (! empty($filters['date_from'])) {
+            $query->where('date_debut', '>=', $filters['date_from']);
+        }
+
+        if (! empty($filters['date_to'])) {
+            $query->where('date_debut', '<=', $filters['date_to']);
+        }
     }
 
     /**

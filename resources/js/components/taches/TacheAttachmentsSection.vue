@@ -186,7 +186,7 @@
     <Teleport to="body">
       <div 
         v-if="previewUrl" 
-        class="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-90 p-4"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4"
         @click="closePreview"
       >
         <button 
@@ -203,7 +203,7 @@
           class="max-w-full max-h-full object-contain"
           @click.stop
         />
-        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-75 text-white px-4 py-2 rounded-3">
+        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/75 text-white px-4 py-2 rounded-3">
           {{ previewFileName }}
         </div>
       </div>

@@ -10,15 +10,15 @@
           {{ workspace?.nom || 'Workspace' }}
         </router-link>
         <ChevronRightIcon class="h-4 w-4 text-gray-400" />
-        <span class="font-medium text-gray-900 dark:text-white">Documents</span>
+        <span class="font-medium text-gray-900 dark:text-white">{{ $t('document_pages.documents') }}</span>
       </nav>
 
       <!-- Workspace Info Card -->
       <div
         v-if="workspace"
-        class="rounded-3 border border-gray-200 p-6 dark:border-gray-800 >
-       ">
-          <div class="flex items-start gap-4">
+        class="rounded-3 border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]"
+      >
+        <div class="flex items-start gap-4">
           <div class="flex h-14 w-14 items-center justify-center rounded-3 bg-indigo-600 text-white">
             <BuildingOffice2Icon class="h-7 w-7" />
           </div>
@@ -40,7 +40,7 @@
       >
         <LockClosedIcon class="mx-auto h-10 w-10 text-red-500" />
         <p class="mt-3 text-sm font-medium text-red-700 dark:text-red-400">
-          Vous n'avez pas accès aux documents de ce workspace.
+          {{ $t('document_pages.access_denied') }}
         </p>
       </div>
 

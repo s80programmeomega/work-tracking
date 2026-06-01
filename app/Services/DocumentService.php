@@ -708,6 +708,14 @@ class DocumentService
             $query->search($filters['search']);
         }
 
+        if (! empty($filters['date_from'])) {
+            $query->where('created_at', '>=', $filters['date_from']);
+        }
+
+        if (! empty($filters['date_to'])) {
+            $query->where('created_at', '<=', $filters['date_to'].' 23:59:59');
+        }
+
         $query->with(['user:id,nom,email,avatar', 'documentable']);
         $query->latest('created_at');
 

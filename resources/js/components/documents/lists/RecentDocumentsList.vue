@@ -3,16 +3,16 @@
     <!-- Header -->
     <div class="flex items-center justify-between">
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-        Documents Récents
+        {{ $t('documents_page.recent_list.title') }}
       </h3>
       <select
         v-model="timeRange"
         class="rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
       >
-        <option value="today">Aujourd'hui</option>
-        <option value="week">Cette semaine</option>
-        <option value="month">Ce mois</option>
-        <option value="all">Tous</option>
+        <option value="today">{{ $t('documents_page.recent_list.range_today') }}</option>
+        <option value="week">{{ $t('documents_page.recent_list.range_week') }}</option>
+        <option value="month">{{ $t('documents_page.recent_list.range_month') }}</option>
+        <option value="all">{{ $t('documents_page.recent_list.range_all') }}</option>
       </select>
     </div>
 
@@ -22,11 +22,11 @@
     </div>
 
     <!-- Documents Grouped by Date -->
-    <div v-else-if="groupedDocuments.length > 0" class="space-y-6">
+    <div v-else-if="groupedDocuments.length > 0" ref="staggerRef" class="space-y-6">
       <div
         v-for="group in groupedDocuments"
         :key="group.date"
-        class="space-y-3"
+        class="stagger-item space-y-3"
       >
         <!-- Date Header -->
         <div class="sticky top-0 z-10 flex items-center gap-2 bg-gray-50 py-2 dark:bg-gray-900/50">
@@ -73,14 +73,14 @@
                   <button
                     @click.stop="handleDownload(document)"
                     class="rounded-3 p-1.5 text-gray-400 hover:bg-gray-100 hover:text-blue-600 dark:hover:bg-gray-800"
-                    title="Télécharger"
+                    :title="$t('documents_page.recent_list.btn_download')"
                   >
                     <ArrowDownTrayIcon class="h-4 w-4" />
                   </button>
                   <button
                     @click.stop="handleShare(document)"
                     class="rounded-3 p-1.5 text-gray-400 hover:bg-gray-100 hover:text-blue-600 dark:hover:bg-gray-800"
-                    title="Partager"
+                    :title="$t('documents_page.recent_list.btn_share')"
                   >
                     <ShareIcon class="h-4 w-4" />
                   </button>
@@ -106,10 +106,10 @@
     <div v-else class="rounded-3 border-2 border-dashed border-gray-300 bg-gray-50 p-12 text-center dark:border-gray-700 dark:bg-gray-800/50">
       <ClockIcon class="mx-auto h-12 w-12 text-gray-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">
-        Aucun document récent
+        {{ $t('documents_page.recent_list.empty_title') }}
       </h3>
       <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        Les documents que vous créez ou modifiez apparaîtront ici
+        {{ $t('documents_page.recent_list.empty_subtitle') }}
       </p>
     </div>
 
@@ -131,6 +131,8 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStagger } from '@/composables/useAnimations'
 import {
   ClockIcon,
   CalendarIcon,
@@ -148,7 +150,9 @@ import DocumentViewerModal from '@/components/documents/DocumentViewerModal.vue'
 import DocumentShareModal from '@/components/documents/DocumentShareModal.vue'
 import api from '@/api/axios'
 
+const { t } = useI18n()
 const { downloadDocument } = useDocuments()
+const { staggerRef, applyStagger } = useStagger(40)
 
 const documents = ref([])
 const loading = ref(false)
@@ -205,11 +209,11 @@ const getDateLabel = (date) => {
   const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000)
 
   if (date >= today) {
-    return "Aujourd'hui"
+    return t('documents_page.recent_list.date_today')
   } else if (date >= yesterday) {
-    return 'Hier'
+    return t('documents_page.recent_list.date_yesterday')
   } else {
-    return date.toLocaleDateString('fr-FR', {
+    return date.toLocaleDateString(undefined, {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
@@ -220,7 +224,7 @@ const getDateLabel = (date) => {
 
 const formatTime = (dateString) => {
   const date = new Date(dateString)
-  return date.toLocaleTimeString('fr-FR', {
+  return date.toLocaleTimeString(undefined, {
     hour: '2-digit',
     minute: '2-digit'
   })
@@ -237,14 +241,15 @@ const getFileIcon = (document) => {
 }
 
 const getEntityLabel = (type) => {
-  const labels = {
-    'App\\Models\\Workspace': 'Workspace',
-    'App\\Models\\Projet': 'Projet',
-    'App\\Models\\Activite': 'Activité',
-    'App\\Models\\Tache': 'Tâche',
-    'App\\Models\\TacheResultat': 'Résultat'
+  const map = {
+    'App\\Models\\Workspace': 'workspace',
+    'App\\Models\\Projet': 'project',
+    'App\\Models\\Activite': 'activity',
+    'App\\Models\\Tache': 'task',
+    'App\\Models\\TacheResultat': 'result'
   }
-  return labels[type] || 'Document'
+  const key = map[type]
+  return key ? t(`documents_page.entity_labels.${key}`) : t('documents_page.entity_labels.document')
 }
 
 const getInitials = (name) => {
@@ -285,7 +290,8 @@ const loadDocuments = async () => {
   }
 }
 
-onMounted(() => {
-  loadDocuments()
+onMounted(async () => {
+  await loadDocuments()
+  applyStagger()
 })
 </script>

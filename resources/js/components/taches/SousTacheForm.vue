@@ -1,7 +1,7 @@
 <template>
   <div class="bg-gray-50 dark:bg-gray-800 rounded-3 p-4 border border-dashed border-gray-300 dark:border-gray-600">
     <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-      <i class="fas fa-plus-circle text-brand-600"></i>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-brand-600"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
       Nouvelle sous-tâche
     </h4>
 
@@ -105,8 +105,8 @@
           dusk="soustache-form-submit"
           class="px-4 py-2 text-sm bg-brand-600 text-white rounded-3 hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          <i v-if="loading" class="fas fa-spinner fa-spin mr-1"></i>
-          <i v-else class="fas fa-plus mr-1"></i>
+          <svg v-if="loading" class="animate-spin h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-1"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
           Créer
         </button>
       </div>

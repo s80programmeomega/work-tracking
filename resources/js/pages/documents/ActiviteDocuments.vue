@@ -6,17 +6,17 @@
         :to="{ name: 'Activites' }"
         class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
       >
-        Activités
+        {{ $t('document_pages.activities') }}
       </router-link>
       <ChevronRightIcon class="h-4 w-4 text-gray-400" />
       <router-link
         :to="{ name: 'activites.show', params: { id: activiteId } }"
         class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
       >
-        {{ activite?.nom || 'Activité' }}
+        {{ activite?.nom || $t('document_pages.activities') }}
       </router-link>
       <ChevronRightIcon class="h-4 w-4 text-gray-400" />
-      <span class="font-medium text-gray-900 dark:text-white">Documents</span>
+      <span class="font-medium text-gray-900 dark:text-white">{{ $t('document_pages.documents') }}</span>
     </nav>
 
     <!-- Activite Info Card -->

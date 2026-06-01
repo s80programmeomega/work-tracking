@@ -1,28 +1,28 @@
 <template>
   <AdminLayout>
-    <PageBreadcrumb :pageTitle="'Performance d\'équipe'" />
+    <PageBreadcrumb :pageTitle="$t('performance_equipe.title')" />
   <div class="space-y-6">
     <!-- Header -->
     <div>
       <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
-        Performance d'équipe
+        {{ $t('performance_equipe.title') }}
       </h1>
       <p class="text-gray-600 dark:text-gray-400 mt-1">
-        Analyse des performances par activité
+        {{ $t('performance_equipe.subtitle') }}
       </p>
     </div>
 
     <!-- Sélection activité -->
     <div class="bg-white dark:bg-gray-800 rounded-3 border p-6">
       <label class="block text-sm font-semibold text-gray-900 dark:text-white mb-3">
-        Sélectionner une activité
+        {{ $t('performance_equipe.select_activity') }}
       </label>
       <select
         v-model="selectedActivite"
         @change="loadPerformance"
         class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-3 dark:bg-gray-900"
       >
-        <option value="">Choisir une activité...</option>
+        <option value="">{{ $t('performance_equipe.choose_activity') }}</option>
         <option v-for="act in activites" :key="act.id" :value="act.id">
           {{ act.nom }} ({{ act.projet_nom }})
         </option>
@@ -39,19 +39,19 @@
       <!-- Vue d'ensemble -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="bg-white dark:bg-gray-800 rounded-3 border p-6">
-          <p class="text-sm text-gray-600 dark:text-gray-400">Total tâches</p>
+          <p class="text-sm text-gray-600 dark:text-gray-400">{{ $t('performance_equipe.total_tasks') }}</p>
           <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">
             {{ performance.overall.total_tasks }}
           </p>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-3 border p-6">
-          <p class="text-sm text-gray-600 dark:text-gray-400">Complétées</p>
+          <p class="text-sm text-gray-600 dark:text-gray-400">{{ $t('performance_equipe.completed') }}</p>
           <p class="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">
             {{ performance.overall.completed }}
           </p>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-3 border p-6">
-          <p class="text-sm text-gray-600 dark:text-gray-400">Taux de complétion</p>
+          <p class="text-sm text-gray-600 dark:text-gray-400">{{ $t('performance_equipe.completion_rate') }}</p>
           <p class="text-3xl font-bold text-brand-600 dark:text-brand-400 mt-2">
             {{ performance.overall.completion_rate }}%
           </p>
@@ -62,7 +62,7 @@
       <div class="bg-white dark:bg-gray-800 rounded-3 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <h2 class="text-xl font-bold text-gray-900 dark:text-white">
-            Performance par membre
+            {{ $t('performance_equipe.member_stats') }}
           </h2>
         </div>
 
@@ -71,30 +71,30 @@
             <thead class="bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400">
               <tr>
                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">
-                  Membre
+                  {{ $t('performance_equipe.col_member') }}
                 </th>
                 <th class="px-6 py-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-300">
-                  Total
+                  {{ $t('performance_equipe.col_total') }}
                 </th>
                 <th class="px-6 py-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-300">
-                  Terminées
+                  {{ $t('performance_equipe.col_done') }}
                 </th>
                 <th class="px-6 py-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-300">
-                  En cours
+                  {{ $t('performance_equipe.col_in_progress') }}
                 </th>
                 <th class="px-6 py-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-300">
-                  En retard
+                  {{ $t('performance_equipe.col_overdue') }}
                 </th>
                 <th class="px-6 py-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-300">
-                  Taux
+                  {{ $t('performance_equipe.col_rate') }}
                 </th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody ref="tbodyRef" class="divide-y divide-gray-200 dark:divide-gray-700">
               <tr
                 v-for="member in performance.team_stats"
                 :key="member.user.id"
-                class="hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
+                class="stagger-item hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
               >
                 <td class="px-6 py-4">
                   <div class="flex items-center gap-3">
@@ -159,8 +159,10 @@ import { ref, onMounted } from 'vue'
 import api from '@/api/axios'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
+import { useStagger } from '@/composables/useAnimations'
 
 const loading = ref(false)
+const { staggerRef: tbodyRef, applyStagger } = useStagger(50)
 const activites = ref([])
 const selectedActivite = ref('')
 const performance = ref(null)
@@ -185,6 +187,7 @@ const loadPerformance = async () => {
       `/evaluations/performance-equipe/${selectedActivite.value}`
     )
     performance.value = data
+    applyStagger()
   } catch (error) {
     console.error('Error loading performance:', error)
   } finally {

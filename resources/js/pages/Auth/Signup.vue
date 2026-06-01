@@ -485,8 +485,6 @@ const handleSubmit = async () => {
     }
 
     try {
-        console.log('🔄 Début de la tentative de connexion...');
-
         // Préparer les données pour l'API
         const userData = {
             nom: `${form.prenom} ${form.nom}`,
@@ -504,7 +502,7 @@ const handleSubmit = async () => {
         // Show success feedback before redirect to signin
         authStore.error = null;
         // Use a temporary success state to show the message
-        successMessage.value = t('auth.registration_success') || 'Account created successfully! Please sign in.';
+        successMessage.value = t('auth.registration_success') || 'Compte créé avec succès. Vous pouvez maintenant vous connecter.';
 
     } catch (error: any) {
         console.error('Registration error:', error);

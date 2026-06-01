@@ -148,11 +148,11 @@
               </Button>
             </div>
 
-            <div class="space-y-3">
+            <div ref="taskStaggerRef" class="space-y-3">
               <div
                 v-for="tache in recentTaches"
                 :key="tache.id"
-                class="flex items-center justify-between p-3 border rounded-3 hover:bg-muted/50"
+                class="stagger-item flex items-center justify-between p-3 border rounded-3 hover:bg-muted/50"
               >
                 <div class="space-y-1">
                   <div class="font-medium">{{ tache.titre }}</div>
@@ -251,10 +251,11 @@
               </div>
 
               <!-- Membres avec permissions -->
-              <div 
-                v-for="member in members" 
+              <div ref="memberStaggerRef" class="contents">
+              <div
+                v-for="member in members"
                 :key="member.id"
-                class="flex items-center space-x-3 p-2 rounded-3 hover:bg-muted/50 transition-colors"
+                class="stagger-item flex items-center space-x-3 p-2 rounded-3 hover:bg-muted/50 transition-colors"
               >
                 <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-medium">
                   {{ getInitials(member.nom) }}
@@ -262,32 +263,33 @@
                 <div class="flex-1 min-w-0">
                   <div class="text-sm font-medium truncate">{{ member.nom }}</div>
                   <div class="text-xs text-muted-foreground capitalize">{{ member.role }}</div>
-                  
+
                   <!-- Badges des permissions -->
                   <div class="flex flex-wrap gap-1 mt-1">
-                    <Badge 
-                      v-if="member.can_create_tasks" 
-                      variant="outline" 
+                    <Badge
+                      v-if="member.can_create_tasks"
+                      variant="outline"
                       class="text-xs px-1 py-0 h-4"
                     >
                       Créer
                     </Badge>
-                    <Badge 
-                      v-if="member.can_edit_tasks" 
-                      variant="outline" 
+                    <Badge
+                      v-if="member.can_edit_tasks"
+                      variant="outline"
                       class="text-xs px-1 py-0 h-4"
                     >
                       Éditer
                     </Badge>
-                    <Badge 
-                      v-if="member.can_validate_results" 
-                      variant="outline" 
+                    <Badge
+                      v-if="member.can_validate_results"
+                      variant="outline"
                       class="text-xs px-1 py-0 h-4"
                     >
                       Valider
                     </Badge>
                   </div>
                 </div>
+              </div>
               </div>
 
               <!-- État vide -->
@@ -362,7 +364,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
+import { useStagger } from '@/composables/useAnimations'
 import {
   Edit,
   List,
@@ -405,6 +408,9 @@ const props = defineProps({
 
 const emit = defineEmits(['go-back', 'edit-activite', 'view-tasks', 'create-task'])
 
+const { staggerRef: memberStaggerRef, applyStagger: applyMemberStagger } = useStagger(50)
+const { staggerRef: taskStaggerRef, applyStagger: applyTaskStagger } = useStagger(40)
+
 const members = ref([])
 const showMembersModal = ref(false)
 const loadingMembers = ref(false)
@@ -414,6 +420,11 @@ const recentTaches = computed(() => {
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
     .slice(0, 5)
 })
+
+watch(recentTaches, async () => {
+  await nextTick()
+  applyTaskStagger()
+}, { immediate: true })
 
 const isOverdue = computed(() => {
   if (!props.activite?.date_fin) return false
@@ -429,9 +440,11 @@ const loadMembers = async () => {
   try {
     const response = await api.get(`/activites/${props.activite.id}/members`)
     // Filtrer pour exclure le responsable (déjà affiché séparément)
-    members.value = response.data.data.filter(member => 
+    members.value = response.data.data.filter(member =>
       member.id !== props.activite.responsable_id
     )
+    await nextTick()
+    applyMemberStagger()
   } catch (error) {
     console.error('Erreur lors du chargement des membres:', error)
     members.value = []

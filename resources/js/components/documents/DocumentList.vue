@@ -19,10 +19,11 @@
     </div>
 
     <!-- Grid View -->
-    <div v-else-if="viewMode === 'grid'" class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div v-else-if="viewMode === 'grid'" ref="staggerRef" class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       <document-card
         v-for="document in documents"
         :key="document.id"
+        class="stagger-item"
         :document="document"
         @view="$emit('view', document)"
         @download="$emit('download', document)"
@@ -59,11 +60,11 @@
               </th>
             </tr>
           </thead>
-          <tbody class="bg-white divide-y divide-gray-200 dark:bg-transparent dark:divide-gray-800">
+          <tbody ref="staggerRef" class="bg-white divide-y divide-gray-200 dark:bg-transparent dark:divide-gray-800">
             <tr
               v-for="document in documents"
               :key="document.id"
-              class="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors"
+              class="stagger-item hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors"
             >
               <!-- Document Name -->
               <td class="px-6 py-4 whitespace-nowrap">
@@ -134,7 +135,8 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, watch, nextTick } from 'vue'
+import { useStagger } from '@/composables/useAnimations'
 import {
   DocumentIcon,
   ArrowDownTrayIcon,
@@ -146,6 +148,8 @@ import {
 } from '@heroicons/vue/24/outline'
 import DocumentCard from './DocumentCard.vue'
 import DocumentActionsMenu from './DocumentActionsMenu.vue'
+
+const { staggerRef, applyStagger } = useStagger(40)
 
 const props = defineProps({
   documents: {
@@ -164,6 +168,11 @@ const props = defineProps({
 })
 
 defineEmits(['view', 'download', 'edit', 'delete', 'share', 'version'])
+
+watch(() => props.documents, async () => {
+  await nextTick()
+  applyStagger()
+}, { immediate: true })
 
 // Methods
 const getFileIcon = (document) => {

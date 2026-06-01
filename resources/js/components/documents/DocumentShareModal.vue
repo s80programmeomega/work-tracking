@@ -79,6 +79,32 @@
                             </div>
                           </button>
                         </div>
+
+                        <!-- Aucun utilisateur trouvé mais saisie = email valide → partage externe -->
+                        <div
+                          v-else-if="showSearchResults && searchResults.length === 0 && isEmail(searchQuery)"
+                          class="absolute z-10 mt-1 w-full rounded-3 border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800"
+                        >
+                          <p class="text-sm text-gray-700 dark:text-gray-300">
+                            Aucun utilisateur trouvé pour
+                            <strong class="font-medium">{{ searchQuery }}</strong>.
+                          </p>
+                          <button
+                            dusk="share-by-email-button"
+                            @click="handleSendByEmail"
+                            :disabled="sendingByEmail"
+                            class="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-3 bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                          >
+                            <ShareIcon class="h-5 w-5" />
+                            {{ sendingByEmail ? 'Envoi...' : 'Envoyer une invitation par email' }}
+                          </button>
+                          <p v-if="emailShareSuccess" class="mt-2 text-xs text-green-600 dark:text-green-400">
+                            {{ emailShareSuccess }}
+                          </p>
+                          <p v-if="emailShareError" class="mt-2 text-xs text-red-600 dark:text-red-400">
+                            {{ emailShareError }}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -303,6 +329,12 @@ const permissions = reactive({
 })
 
 const expiresAt = ref('')
+const sendingByEmail = ref(false)
+const emailShareSuccess = ref('')
+const emailShareError = ref('')
+
+const isEmail = (str) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(str).trim())
+
 const today = computed(() => new Date().toISOString().split('T')[0])
 const maxDate = computed(() => {
   const d = new Date()
@@ -368,6 +400,26 @@ const handleRevokePermission = async (permission) => {
     loadPermissions()
   } catch (err) {
     console.error('Revoke permission error:', err)
+  }
+}
+
+const handleSendByEmail = async () => {
+  if (!isEmail(searchQuery.value)) return
+  sendingByEmail.value = true
+  emailShareSuccess.value = ''
+  emailShareError.value = ''
+  try {
+    const response = await api.post(`/documents/${props.document.id}/share-by-email`, {
+      email: searchQuery.value.trim().toLowerCase(),
+    })
+    emailShareSuccess.value = response.data?.message ?? 'Email envoyé.'
+    searchQuery.value = ''
+    showSearchResults.value = false
+    emit('shared')
+  } catch (err) {
+    emailShareError.value = err.response?.data?.message ?? 'Échec de l\'envoi.'
+  } finally {
+    sendingByEmail.value = false
   }
 }
 

@@ -6,17 +6,17 @@
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 dusk="admin-workspaces-title" class="text-2xl font-semibold text-gray-900 dark:text-white">
-            Workspace Management
+            {{ $t('admin.workspaces.title') }}
           </h1>
           <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Manage all workspaces, subscriptions and trial periods.
+            {{ $t('admin.workspaces.subtitle') }}
           </p>
         </div>
         <router-link
           to="/admin/dashboard"
           class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
         >
-          <i class="fas fa-arrow-left"></i> Back to dashboard
+          <i class="fas fa-arrow-left"></i> {{ $t('admin.workspaces.back') }}
         </router-link>
       </div>
 
@@ -26,7 +26,7 @@
           v-model="search"
           @input="debouncedFetch"
           type="text"
-          placeholder="Search workspace..."
+          :placeholder="$t('admin.workspaces.search_placeholder')"
           class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 w-56"
         />
         <select
@@ -34,18 +34,18 @@
           @change="fetchWorkspaces"
           class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
         >
-          <option value="">All modes</option>
-          <option value="trial">Trial</option>
-          <option value="paid">Paid</option>
+          <option value="">{{ $t('admin.workspaces.filter_all_modes') }}</option>
+          <option value="trial">{{ $t('admin.workspaces.filter_trial') }}</option>
+          <option value="paid">{{ $t('admin.workspaces.filter_paid') }}</option>
         </select>
         <select
           v-model="filters.is_active"
           @change="fetchWorkspaces"
           class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
         >
-          <option value="">All statuses</option>
-          <option value="1">Active</option>
-          <option value="0">Suspended</option>
+          <option value="">{{ $t('admin.workspaces.filter_all_statuses') }}</option>
+          <option value="1">{{ $t('admin.workspaces.filter_active') }}</option>
+          <option value="0">{{ $t('admin.workspaces.filter_suspended') }}</option>
         </select>
       </div>
 
@@ -60,7 +60,8 @@
           <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
         </div>
 
-        <table v-else class="w-full text-sm">
+        <div v-else class="overflow-x-auto">
+        <table class="w-full text-sm">
           <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500 dark:text-gray-400 uppercase">
             <tr>
               <th class="px-4 py-3 text-left">Workspace</th>
@@ -74,7 +75,7 @@
           </thead>
           <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
             <tr v-if="!workspaces.length">
-              <td colspan="7" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">No workspaces found.</td>
+              <td colspan="7" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">{{ $t('admin.workspaces.no_workspaces') }}</td>
             </tr>
             <tr
               v-for="ws in workspaces"
@@ -137,6 +138,7 @@
             </tr>
           </tbody>
         </table>
+        </div>
 
         <!-- Pagination -->
         <div v-if="pagination && pagination.last_page > 1" class="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-700">
@@ -146,12 +148,12 @@
               @click="page--; fetchWorkspaces()"
               :disabled="pagination.current_page <= 1"
               class="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded disabled:opacity-40"
-            >Prev</button>
+            >{{ $t('common.previous') }}</button>
             <button
               @click="page++; fetchWorkspaces()"
               :disabled="pagination.current_page >= pagination.last_page"
               class="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded disabled:opacity-40"
-            >Next</button>
+            >{{ $t('common.next') }}</button>
           </div>
         </div>
       </div>
@@ -213,14 +215,18 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import AdminLayout from '@/components/layout/AdminLayout.vue';
 import SubscriptionBadge from '@/components/admin/SubscriptionBadge.vue';
+import { useStagger } from '@/composables/useAnimations';
 import api from '@/api/axios';
 
+const { t } = useI18n();
 const workspaces = ref([]);
 const pagination = ref(null);
 const loading = ref(false);
 const error = ref(null);
+const { staggerRef: tbodyRef, applyStagger } = useStagger(40);
 const search = ref('');
 const page = ref(1);
 const filters = ref({ subscription_mode: '', is_active: '' });
@@ -241,6 +247,7 @@ const fetchWorkspaces = async () => {
     const { data } = await api.get('/admin/workspaces', { params });
     workspaces.value = data.data;
     pagination.value = { current_page: data.current_page, last_page: data.last_page };
+    applyStagger();
   } catch (e) {
     error.value = e.response?.data?.message ?? 'Failed to load workspaces.';
   } finally {
@@ -251,7 +258,9 @@ const fetchWorkspaces = async () => {
 // Extend trial
 const extendModal = ref({ open: false, workspace: null, days: 30, loading: false });
 const openExtendModal = (ws) => {
-  extendModal.value = { open: true, workspace: ws, days: ws.subscription?.remaining_trial_days ?? 30, loading: false };
+  // L'endpoint extendTrial écrase trial_duration_days (durée totale), pas le reste à courir.
+  // Pré-remplir avec remaining_trial_days raccourcirait la période d'essai à la sauvegarde.
+  extendModal.value = { open: true, workspace: ws, days: ws.subscription?.trial_duration_days ?? 30, loading: false };
 };
 const confirmExtend = async () => {
   extendModal.value.loading = true;

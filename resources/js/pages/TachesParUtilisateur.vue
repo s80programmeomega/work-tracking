@@ -4,29 +4,41 @@
     <div class="space-y-6">
       <!-- Header -->
       <div class="rounded-3 border border-gray-200 dark:border-gray-800 p-6 ">
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center gap-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div class="flex min-w-0 items-center gap-4">
             <div class="w-14 h-14 rounded-3 flex items-center justify-center ">
               <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
             </div>
             <div>
-              <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Vue Coordination</h1>
+              <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('taches_par_user.title') }}</h1>
               <p class="text-gray-500 dark:text-gray-400">
-                {{ activite?.nom }} · Suivi et validation par utilisateur
+                {{ activite?.nom }} · {{ $t('taches_par_user.subtitle') }}
               </p>
             </div>
           </div>
 
-          <div class="flex items-center gap-3">
+          <div class="flex flex-wrap items-center gap-3">
             <!-- Sélecteur d'activité -->
             <select v-model="selectedActiviteId" @change="handleActiviteChange" class="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
-              <option value="">Sélectionner une activité</option>
+              <option value="">{{ $t('taches_par_user.select_activity') }}</option>
               <option v-for="act in activites" :key="act.id" :value="act.id">
                 {{ act.nom }} ({{ act.projet?.nom }})
               </option>
             </select>
+
+            <!-- Bouton Statistiques -->
+            <button
+              @click="showStats = !showStats"
+              :disabled="!selectedActiviteId || usersData.length === 0"
+              class="inline-flex items-center gap-2 rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              {{ $t('taches_par_user.btn_statistics') }}
+            </button>
 
             <button @click="loadData" :disabled="loading || !selectedActiviteId" class="p-2 rounded-3 border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50" title="Actualiser">
               <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" :class="{ 'animate-spin': loading }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -40,9 +52,9 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
           <!-- Filtre par membre -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filtrer par membre</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $t('taches_par_user.filter_member') }}</label>
             <select v-model="filters.user_id" @change="loadData" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
-              <option value="">Tous les membres</option>
+              <option value="">{{ $t('taches_par_user.filter_all_members') }}</option>
               <option v-for="member in activityMembers" :key="member.id" :value="member.id">
                 {{ member.nom }} ({{ member.email }})
               </option>
@@ -51,20 +63,20 @@
 
           <!-- Filtre par période -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Période</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $t('taches_par_user.filter_period') }}</label>
             <select v-model="filters.period" @change="handlePeriodChange" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
-              <option value="current_week">Semaine en cours</option>
-              <option value="last_week">Semaine dernière</option>
-              <option value="current_month">Mois en cours</option>
-              <option value="last_month">Mois dernier</option>
-              <option value="custom">Personnalisée</option>
+              <option value="current_week">{{ $t('taches_par_user.period_current_week') }}</option>
+              <option value="last_week">{{ $t('taches_par_user.period_last_week') }}</option>
+              <option value="current_month">{{ $t('taches_par_user.period_current_month') }}</option>
+              <option value="last_month">{{ $t('taches_par_user.period_last_month') }}</option>
+              <option value="custom">{{ $t('taches_par_user.period_custom') }}</option>
             </select>
           </div>
 
           <!-- Dates personnalisées -->
           <div v-if="filters.period === 'custom'" class="flex items-end gap-2">
             <div class="flex-1">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Du</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $t('taches_par_user.date_from') }}</label>
               <DatePicker
                 v-model="filters.start_date"
                 :enable-time-picker="false"
@@ -72,7 +84,7 @@
                 :format="'dd/MM/yyyy'"
                 :locale="'fr'"
                 :dark="isDark"
-                placeholder="Date de début"
+                :placeholder="$t('taches_par_user.placeholder_start_date')"
                 class="w-full date-input"
               >
                 <template #input-icon>
@@ -81,7 +93,7 @@
               </DatePicker>
             </div>
             <div class="flex-1">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Au</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $t('taches_par_user.date_to') }}</label>
               <DatePicker
                 v-model="filters.end_date"
                 :enable-time-picker="false"
@@ -90,7 +102,7 @@
                 :locale="'fr'"
                 :dark="isDark"
                 :min-date="filters.start_date"
-                placeholder="Date de fin"
+                :placeholder="$t('taches_par_user.placeholder_end_date')"
                 class="w-full date-input"
               >
                 <template #input-icon>
@@ -101,25 +113,25 @@
           </div>
         </div>
 
-        <!-- Statistiques globales -->
-        <div v-if="usersData.length > 0" class="grid grid-cols-4 gap-4">
-          <div class="bg-white dark:bg-gray-800 p-4 rounded-3 border border-gray-200 dark:border-gray-700">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Membres</p>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ totalUsers }}</p>
-          </div>
-          <div class="bg-white dark:bg-gray-800 p-4 rounded-3 border border-gray-200 dark:border-gray-700">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Tâches totales</p>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ totalTasks }}</p>
-          </div>
-          <div class="bg-white dark:bg-gray-800 p-4 rounded-3 border border-gray-200 dark:border-gray-700">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Progression moyenne</p>
-            <p class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">{{ averageProgress }}%</p>
-          </div>
-          <div class="bg-white dark:bg-gray-800 p-4 rounded-3 border border-gray-200 dark:border-gray-700">
-            <p class="text-sm text-gray-500 dark:text-gray-400">En attente validation</p>
-            <p class="text-2xl font-bold text-orange-600 dark:text-orange-400 mt-1">{{ totalPendingValidation }}</p>
-          </div>
-        </div>
+        <!-- Statistiques panel -->
+        <transition
+          enter-active-class="transition-all duration-300 ease-out"
+          enter-from-class="opacity-0 -translate-y-4"
+          enter-to-class="opacity-100 translate-y-0"
+          leave-active-class="transition-all duration-200 ease-in"
+          leave-from-class="opacity-100 translate-y-0"
+          leave-to-class="opacity-0 -translate-y-4"
+        >
+          <TachesParUtilisateurStats
+            v-if="showStats && usersData.length > 0"
+            :total-users="totalUsers"
+            :total-tasks="totalTasks"
+            :average-progress="averageProgress"
+            :total-pending-validation="totalPendingValidation"
+            :loading="loading"
+            @close="showStats = false"
+          />
+        </transition>
 
         <!-- Actions -->
         <div class="flex items-center justify-between mt-4">
@@ -132,7 +144,7 @@
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              Générer Rapport
+              {{ $t('taches_par_user.btn_generate_report') }}
             </button>
 
             <button
@@ -143,12 +155,12 @@
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              Exporter Excel
+              {{ $t('taches_par_user.btn_export_excel') }}
             </button>
           </div>
 
           <div class="text-sm text-gray-500 dark:text-gray-400">
-            Données mises à jour: {{ lastUpdate }}
+            {{ $t('taches_par_user.last_update', { date: lastUpdate }) }}
           </div>
         </div>
       </div>
@@ -157,7 +169,7 @@
       <div v-if="loading" class="flex justify-center items-center h-64">
         <div class="text-center">
           <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
-          <p class="text-gray-600 dark:text-gray-400">Chargement...</p>
+          <p class="text-gray-600 dark:text-gray-400">{{ $t('taches_par_user.loading') }}</p>
         </div>
       </div>
 
@@ -168,16 +180,16 @@
 
       <!-- Empty State -->
       <div v-else-if="!selectedActiviteId" class="rounded-3 border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] p-12 text-center">
-        <p class="text-gray-500 dark:text-gray-400">Sélectionnez une activité pour voir la répartition des tâches</p>
+        <p class="text-gray-500 dark:text-gray-400">{{ $t('taches_par_user.empty_select_activity') }}</p>
       </div>
 
       <div v-else-if="filteredUsersData.length === 0" class="rounded-3 border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] p-12 text-center">
-        <p class="text-gray-500 dark:text-gray-400">Aucune tâche ne correspond aux critères sélectionnés</p>
+        <p class="text-gray-500 dark:text-gray-400">{{ $t('taches_par_user.empty_no_results') }}</p>
       </div>
 
       <!-- Grille des utilisateurs -->
-      <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div v-for="userData in filteredUsersData" :key="userData.user.id" class="rounded-3 border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] overflow-hidden">
+      <div v-else ref="staggerRef" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div v-for="userData in filteredUsersData" :key="userData.user.id" class="stagger-item rounded-3 border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] overflow-hidden">
           <!-- User Header -->
           <div class="p-6 border-b border-gray-200 dark:border-gray-700">
             <div class="flex items-center gap-4">
@@ -198,31 +210,31 @@
             </div>
 
             <!-- Statistiques utilisateur -->
-            <div class="grid grid-cols-4 gap-2 mt-4">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4">
               <div class="text-center">
                 <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ userData.stats.total }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">Total</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('taches_par_user.stat_total') }}</p>
               </div>
               <div class="text-center">
                 <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ userData.stats.termine }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">Terminé</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('taches_par_user.stat_termine') }}</p>
               </div>
               <div class="text-center">
                 <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ userData.stats.en_cours }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">En cours</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('taches_par_user.stat_en_cours') }}</p>
               </div>
               <div class="text-center">
                 <p class="text-2xl font-bold" :class="userData.stats.en_retard > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-400'">
                   {{ userData.stats.en_retard }}
                 </p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">Retard</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('taches_par_user.stat_en_retard') }}</p>
               </div>
             </div>
 
             <!-- Barre de progression -->
             <div class="mt-4">
               <div class="flex justify-between text-xs text-gray-600 dark:text-gray-400 mb-1">
-                <span>Progression globale</span>
+                <span>{{ $t('taches_par_user.stat_global_progress') }}</span>
                 <span class="font-medium">{{ userData.stats.progression_moyenne }}%</span>
               </div>
               <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
@@ -233,17 +245,17 @@
             <!-- Indicateurs de performance -->
             <div class="grid grid-cols-3 gap-2 mt-3 text-center">
               <div>
-                <p class="text-xs text-gray-500 dark:text-gray-400">Taux réalisation</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('taches_par_user.stat_taux_realisation') }}</p>
                 <p class="text-sm font-bold" :class="getPerformanceColor(userData.stats.taux_realisation_moyen)">
                   {{ userData.stats.taux_realisation_moyen }}%
                 </p>
               </div>
               <div>
-                <p class="text-xs text-gray-500 dark:text-gray-400">Heures estimées</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('taches_par_user.stat_heures_estimees') }}</p>
                 <p class="text-sm font-bold text-gray-900 dark:text-white">{{ userData.stats.heures_estimees }}</p>
               </div>
               <div>
-                <p class="text-xs text-gray-500 dark:text-gray-400">Heures réelles</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('taches_par_user.stat_heures_reelles') }}</p>
                 <p class="text-sm font-bold text-gray-900 dark:text-white">{{ userData.stats.heures_reelles }}</p>
               </div>
             </div>
@@ -260,7 +272,7 @@
                       {{ getPriorityIcon(tache.priorite) }}
                     </span>
                     <span v-if="tache.is_overdue && tache.statut_individuel !== 'termine'" class="text-xs font-medium px-2 py-0.5 bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 rounded">
-                      En retard
+                      {{ $t('taches_par_user.badge_overdue') }}
                     </span>
                   </div>
                   <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ tache.titre }}</p>
@@ -275,7 +287,7 @@
                       <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                       </svg>
-                      Résultat
+                      {{ $t('taches_par_user.badge_result') }}
                     </span>
 
                     <!-- Badge validation -->
@@ -283,27 +295,27 @@
                       <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
                       </svg>
-                      En attente
+                      {{ $t('taches_par_user.badge_pending') }}
                     </span>
                   </div>
                   <p v-if="tache.echeance" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Échéance: {{ formatDate(tache.echeance) }}
+                    {{ $t('taches_par_user.label_echeance', { date: formatDate(tache.echeance) }) }}
                   </p>
                 </div>
 
                 <!-- Actions de validation -->
                 <div v-if="canValidate && tache.has_result && tache.validation_status === 'pending'" class="flex flex-col gap-1">
                   <button @click.stop="handleValidate(tache, userData.user)" class="px-2 py-1 text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors">
-                    ✓ Valider
+                    {{ $t('taches_par_user.btn_validate') }}
                   </button>
                   <button @click.stop="handleReject(tache, userData.user)" class="px-2 py-1 text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors">
-                    ✗ Refuser
+                    {{ $t('taches_par_user.btn_reject') }}
                   </button>
                 </div>
 
                 <!-- Statut global vs individuel -->
                 <div class="flex flex-col items-end gap-1">
-                  <span class="text-xs text-gray-400">Global:</span>
+                  <span class="text-xs text-gray-400">{{ $t('taches_par_user.label_global') }}</span>
                   <span class="text-xs px-2 py-0.5 rounded" :class="getStatusBadgeClass(tache.statut_global)">
                     {{ getStatusLabel(tache.statut_global) }}
                   </span>
@@ -330,18 +342,24 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { useStagger } from '@/composables/useAnimations'
 import { CalendarIcon } from '@heroicons/vue/24/outline'
 import DatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
+import TachesParUtilisateurStats from '@/components/taches/TachesParUtilisateurStats.vue'
 import TacheDetailModal from '@/components/taches/TacheDetailModal.vue'
 import ValidationModal from '@/components/taches/resultats/ValidationModal.vue'
 import ReportModal from '@/components/reports/ReportModal.vue'
 import api from '@/api/axios'
 
+const { t } = useI18n()
+
 // State
 const activites = ref([])
 const selectedActiviteId = ref(null)
+const showStats = ref(false)
 const usersData = ref([])
 const activityMembers = ref([])
 const activite = ref(null)
@@ -440,9 +458,10 @@ async function loadData() {
     lastUpdate.value = new Date().toLocaleString('fr-FR')
     
     console.log('✅ Données chargées:', usersData.value.length, 'utilisateurs')
+    applyStagger()
   } catch (err) {
     console.error('❌ Erreur:', err)
-    error.value = err.response?.data?.message || 'Erreur de chargement'
+    error.value = err.response?.data?.message || t('taches_par_user.error_loading')
   } finally {
     loading.value = false
   }
@@ -507,7 +526,7 @@ function formatDateForApi(date) {
 
 function generateReport() {
   if (!selectedActiviteId.value) {
-    alert('Veuillez sélectionner une activité')
+    alert(t('taches_par_user.alert_select_activity'))
     return
   }
   showReportModal.value = true
@@ -515,7 +534,7 @@ function generateReport() {
 
 async function exportToExcel() {
   if (!selectedActiviteId.value || filteredUsersData.value.length === 0) {
-    alert('Aucune donnée à exporter')
+    alert(t('taches_par_user.alert_no_data_export'))
     return
   }
 
@@ -546,7 +565,7 @@ async function exportToExcel() {
     window.URL.revokeObjectURL(url)
   } catch (err) {
     console.error('Erreur export Excel:', err)
-    alert('Erreur lors de l\'export Excel')
+    alert(t('taches_par_user.alert_export_error'))
   }
 }
 
@@ -557,7 +576,7 @@ async function viewTacheDetails(tacheId) {
     showDetailModal.value = true
   } catch (err) {
     console.error('Erreur:', err)
-    alert('Erreur lors du chargement')
+    alert(t('taches_par_user.alert_load_error'))
   }
 }
 
@@ -578,7 +597,7 @@ function handleReject(tache, user) {
 async function handleValidationComplete() {
   showValidationModal.value = false
   await loadData()
-  alert('✅ Validation effectuée avec succès !')
+  alert(t('taches_par_user.alert_validated'))
 }
 
 // Helpers
@@ -616,9 +635,9 @@ const getStatusBadgeClass = (statut) => {
 
 const getStatusLabel = (statut) => {
   const labels = {
-    'termine': 'Terminé',
-    'en_cours': 'En cours',
-    'a_faire': 'À faire'
+    'termine': t('statuts.termine'),
+    'en_cours': t('statuts.en_cours'),
+    'a_faire': t('statuts.a_faire')
   }
   return labels[statut] || statut
 }
@@ -654,11 +673,11 @@ const getRoleBadgeClass = (role) => {
 
 const getUserRoleLabel = (role) => {
   const labels = {
-    responsable: 'Responsable',
-    membre: 'Membre',
-    observateur: 'Observateur'
+    responsable: t('taches_par_user.role_responsable'),
+    membre: t('taches_par_user.role_membre'),
+    observateur: t('taches_par_user.role_observateur')
   }
-  return labels[role] || 'Membre'
+  return labels[role] || t('taches_par_user.role_membre')
 }
 
 const formatDate = (date) => {
@@ -686,6 +705,8 @@ const getInitials = (name) => {
 }
 
 // Lifecycle
+const { staggerRef, applyStagger } = useStagger(60)
+
 onMounted(async () => {
   await loadActivites()
   initializeDates()

@@ -73,6 +73,9 @@ class EvaluationController extends Controller
 
         $timeoutHours = (int) ($workspace?->getSetting('validation_timeout_hours', 48) ?? 48);
 
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
+
         $pendingN1 = TacheResultat::query()
             ->with(['tache.activite.projet', 'user'])
             ->where('statut', 'en_validation_n1')
@@ -83,6 +86,8 @@ class EvaluationController extends Controller
                 // cadre/owner: see their activity's results
                 $q->where('responsable_id', $user->id);
             })
+            ->when($dateFrom, fn ($q) => $q->where('soumis_le', '>=', $dateFrom))
+            ->when($dateTo, fn ($q) => $q->where('soumis_le', '<=', $dateTo.' 23:59:59'))
             ->get();
 
         $pendingN2 = TacheResultat::query()
@@ -94,6 +99,8 @@ class EvaluationController extends Controller
                 }
                 $q->where('responsable_id', $user->id);
             })
+            ->when($dateFrom, fn ($q) => $q->where('soumis_le', '>=', $dateFrom))
+            ->when($dateTo, fn ($q) => $q->where('soumis_le', '<=', $dateTo.' 23:59:59'))
             ->get();
 
         $now = now();
@@ -642,6 +649,8 @@ class EvaluationController extends Controller
     public function pendingValidations(Request $request): JsonResponse
     {
         $user = $request->user();
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
 
         // 🔵 N1 : Résultats des activités dont je suis responsable
         $pendingN1 = TacheResultat::query()
@@ -651,6 +660,8 @@ class EvaluationController extends Controller
             ->whereHas('tache.activite', function ($q) use ($user) {
                 $q->where('responsable_id', $user->id);
             })
+            ->when($dateFrom, fn ($q) => $q->where('soumis_le', '>=', $dateFrom))
+            ->when($dateTo, fn ($q) => $q->where('soumis_le', '<=', $dateTo.' 23:59:59'))
             ->latest('soumis_le')
             ->get();
 
@@ -662,6 +673,8 @@ class EvaluationController extends Controller
             ->whereHas('tache.activite.projet', function ($q) use ($user) {
                 $q->where('responsable_id', $user->id);
             })
+            ->when($dateFrom, fn ($q) => $q->where('soumis_le', '>=', $dateFrom))
+            ->when($dateTo, fn ($q) => $q->where('soumis_le', '<=', $dateTo.' 23:59:59'))
             ->latest('valide_le_n1')
             ->get();
 

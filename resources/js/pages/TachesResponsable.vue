@@ -4,26 +4,37 @@
     <div class="space-y-6">
       <!-- Header Premium avec thème violet/purple pour "Responsable" -->
       <div class="rounded-3 border border-purple-200 dark:border-purple-800 p-6 ">
-        <div class="flex items-center justify-between mb-6">
-          <div class="flex items-center gap-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+          <div class="flex min-w-0 items-center gap-4">
             <div class="w-14 h-14 rounded-3 flex items-center justify-center ring-4 ring-purple-100 dark:ring-purple-900/30">
               <span class="text-2xl">👑</span>
             </div>
             <div>
               <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                Mes Tâches en Responsabilité
+                {{ $t('taches_responsable.title') }}
               </h1>
-              <p class="text-gray-500 dark:text-gray-400">Tâches dont vous êtes le responsable avec pleins pouvoirs</p>
+              <p class="text-gray-500 dark:text-gray-400">{{ $t('taches_responsable.subtitle') }}</p>
             </div>
           </div>
 
-          <div class="flex items-center gap-3">
+          <div class="flex flex-wrap items-center gap-3">
+            <!-- Bouton Statistiques -->
+            <button
+              @click="showStats = !showStats"
+              class="inline-flex items-center gap-2 rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              {{ $t('taches_responsable.statistics') }}
+            </button>
+
             <!-- Bouton refresh -->
-            <button 
-              @click="loadResponsableTasks" 
-              :disabled="loading" 
-              class="p-2 rounded-3 border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" 
-              title="Actualiser"
+            <button
+              @click="loadResponsableTasks"
+              :disabled="loading"
+              class="p-2 rounded-3 border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              :title="$t('taches_responsable.refresh')"
             >
               <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" :class="{ 'animate-spin': loading }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -32,74 +43,48 @@
 
             <!-- Toggle vue -->
             <div class="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-3">
-              <button 
-                @click="currentView = 'kanban'" 
-                :class="['px-3 py-2 rounded-md transition-all flex items-center gap-2 text-sm', 
+              <button
+                dusk="view-kanban-btn"
+                @click="currentView = 'kanban'"
+                :class="['px-3 py-2 rounded-md transition-all flex items-center gap-2 text-sm',
                   currentView === 'kanban' ? 'bg-white dark:bg-gray-700 text-purple-600 dark:text-purple-400' : 'text-gray-600 dark:text-gray-400']"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
                 </svg>
-                Kanban
+                {{ $t('taches_responsable.view_kanban') }}
               </button>
-              <button 
-                @click="currentView = 'grouped'" 
-                :class="['px-3 py-2 rounded-md transition-all flex items-center gap-2 text-sm', 
+              <button
+                dusk="view-grouped-btn"
+                @click="currentView = 'grouped'"
+                :class="['px-3 py-2 rounded-md transition-all flex items-center gap-2 text-sm',
                   currentView === 'grouped' ? 'bg-white dark:bg-gray-700 text-purple-600 dark:text-purple-400' : 'text-gray-600 dark:text-gray-400']"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
-                Par Activité
+                {{ $t('taches_responsable.view_grouped') }}
               </button>
             </div>
           </div>
         </div>
 
-        <!-- Statistiques -->
-        <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
-          <!-- Total -->
-          <div class="relative overflow-hidden rounded-3 bg-white dark:bg-gray-800 p-4 border ">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Total</p>
-            <p class="text-2xl font-bold text-purple-600 mt-1">{{ stats.total }}</p>
-            <div class="absolute bottom-0 left-0 right-0 h-1 bg-brand-500"></div>
-          </div>
-          
-          <!-- À faire -->
-          <div class="relative overflow-hidden rounded-3 bg-white dark:bg-gray-800 p-4 border ">
-            <p class="text-sm text-gray-500 dark:text-gray-400">À faire</p>
-            <p class="text-2xl font-bold text-slate-600 dark:text-slate-300 mt-1">{{ stats.a_faire }}</p>
-            <div class="absolute bottom-0 left-0 right-0 h-1 bg-brand-500"></div>
-          </div>
-          
-          <!-- En cours -->
-          <div class="relative overflow-hidden rounded-3 bg-white dark:bg-gray-800 p-4 border ">
-            <p class="text-sm text-gray-500 dark:text-gray-400">En cours</p>
-            <p class="text-2xl font-bold text-blue-600 mt-1">{{ stats.en_cours }}</p>
-            <div class="absolute bottom-0 left-0 right-0 h-1 bg-brand-500"></div>
-          </div>
-          
-          <!-- Terminées -->
-          <div class="relative overflow-hidden rounded-3 bg-white dark:bg-gray-800 p-4 border ">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Terminées</p>
-            <p class="text-2xl font-bold text-green-600 mt-1">{{ stats.termine }}</p>
-            <div class="absolute bottom-0 left-0 right-0 h-1 bg-brand-500"></div>
-          </div>
-          
-          <!-- En retard -->
-          <div class="relative overflow-hidden rounded-3 bg-white dark:bg-gray-800 p-4 border ">
-            <p class="text-sm text-gray-500 dark:text-gray-400">En retard</p>
-            <p class="text-2xl font-bold mt-1" :class="stats.overdue > 0 ? 'text-red-600' : 'text-gray-400'">{{ stats.overdue }}</p>
-            <div class="absolute bottom-0 left-0 right-0 h-1" :class="stats.overdue > 0 ? 'bg-red-500' : 'bg-gray-300'"></div>
-          </div>
-          
-          <!-- Intervenants -->
-          <div class="relative overflow-hidden rounded-3 bg-white dark:bg-gray-800 p-4 border ">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Intervenants</p>
-            <p class="text-2xl font-bold text-indigo-600 mt-1">{{ stats.total_assignees }}</p>
-            <div class="absolute bottom-0 left-0 right-0 h-1 bg-brand-500"></div>
-          </div>
-        </div>
+        <!-- Statistiques panel -->
+        <transition
+          enter-active-class="transition-all duration-300 ease-out"
+          enter-from-class="opacity-0 -translate-y-4"
+          enter-to-class="opacity-100 translate-y-0"
+          leave-active-class="transition-all duration-200 ease-in"
+          leave-from-class="opacity-100 translate-y-0"
+          leave-to-class="opacity-0 -translate-y-4"
+        >
+          <TachesResponsableStats
+            v-if="showStats"
+            :stats="stats"
+            :loading="loading"
+            @close="showStats = false"
+          />
+        </transition>
 
         <!-- Info box -->
         <div class="mt-4 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-3 border border-purple-200 dark:border-purple-800">
@@ -108,11 +93,11 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <div class="text-sm text-purple-700 dark:text-purple-300">
-              <p class="font-semibold mb-1">En tant que responsable, vous avez :</p>
+              <p class="font-semibold mb-1">{{ $t('taches_responsable.info_title') }}</p>
               <ul class="space-y-1 list-disc list-inside ml-2">
-                <li>Tous les droits de gestion (édition, validation, suppression)</li>
-                <li>La responsabilité du pilotage et de la coordination</li>
-                <li>La capacité de valider les résultats des intervenants</li>
+                <li>{{ $t('taches_responsable.info_rights') }}</li>
+                <li>{{ $t('taches_responsable.info_responsibility') }}</li>
+                <li>{{ $t('taches_responsable.info_validation') }}</li>
               </ul>
             </div>
           </div>
@@ -125,10 +110,11 @@
       </div>
 
       <!-- Vue Kanban -->
-      <div v-if="currentView === 'kanban' && !loading" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div dusk="view-kanban-panel" v-if="currentView === 'kanban' && !loading" ref="kanbanRef" class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <KanbanColumnResponsable
           v-for="column in kanbanColumns"
           :key="column.statut"
+          class="stagger-item"
           :title="column.title"
           :statut="column.statut"
           :taches="getTasksByStatus(column.statut)"
@@ -141,10 +127,10 @@
       </div>
 
       <!-- Vue groupée -->
-      <div v-else-if="currentView === 'grouped' && !loading" class="space-y-6">
-        <p v-if="tasksByActivite.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">Aucune tâche</p>
+      <div dusk="view-grouped-panel" v-else-if="currentView === 'grouped' && !loading" ref="listRef" class="space-y-6">
+        <p v-if="tasksByActivite.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">{{ $t('taches_responsable.no_tasks') }}</p>
         
-        <div v-for="group in tasksByActivite" :key="group.activite.id" class="rounded-3 border bg-white dark:bg-gray-800 overflow-hidden">
+        <div v-for="group in tasksByActivite" :key="group.activite.id" class="stagger-item rounded-3 border bg-white dark:bg-gray-800 overflow-hidden">
           <div class="px-6 py-4 bg-purple-50 dark:bg-purple-900/20 border-b">
             <div class="flex items-center justify-between">
               <h3 class="font-semibold">{{ group.activite.nom }}</h3>
@@ -178,7 +164,7 @@
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          <p class="text-gray-600 dark:text-gray-400">Chargement...</p>
+          <p class="text-gray-600 dark:text-gray-400">{{ $t('taches_responsable.loading') }}</p>
         </div>
       </div>
     </div>
@@ -203,28 +189,35 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
+import TachesResponsableStats from '@/components/taches/TachesResponsableStats.vue'
 import KanbanColumnResponsable from '@/components/taches/KanbanColumnResponsable.vue'
 import TacheDetailModal from '@/components/taches/TacheDetailModal.vue'
 import TacheForm from '@/components/taches/TacheForm.vue'
+import { useStagger } from '@/composables/useAnimations'
 import api from '@/api/axios'
 import { useToast } from 'vue-toastification'
 
+const { t } = useI18n()
 const toast = useToast()
+const { staggerRef: listRef, applyStagger } = useStagger(55)
+const { staggerRef: kanbanRef, applyStagger: applyKanbanStagger } = useStagger(80)
 
 const taches = ref([])
 const loading = ref(false)
 const error = ref(null)
 const currentView = ref('kanban')
 const showViewModal = ref(false)
+const showStats = ref(false)
 const showEditModal = ref(false)
 const currentTache = ref(null)
 
-const kanbanColumns = [
-  { statut: 'a_faire', title: 'À faire', color: '#6B7280', icon: '📋' },
-  { statut: 'en_cours', title: 'En cours', color: '#3B82F6', icon: '🔄' },
-  { statut: 'termine', title: 'Terminé', color: '#10B981', icon: '✅' }
-]
+const kanbanColumns = computed(() => [
+  { statut: 'a_faire', title: t('taches_responsable.kanban_col_a_faire'), color: '#6B7280', icon: '📋' },
+  { statut: 'en_cours', title: t('taches_responsable.kanban_col_en_cours'), color: '#3B82F6', icon: '🔄' },
+  { statut: 'termine', title: t('taches_responsable.kanban_col_termine'), color: '#10B981', icon: '✅' }
+])
 
 const stats = computed(() => ({
   total: taches.value.length,
@@ -267,10 +260,12 @@ async function loadResponsableTasks() {
     const { data } = await api.get('/taches/my-tasks-as-responsable')
     taches.value = data.data || []
   } catch (err) {
-    error.value = err.response?.data?.message || 'Erreur de chargement'
+    error.value = err.response?.data?.message || t('taches_responsable.load_error')
     toast.error(error.value)
   } finally {
     loading.value = false
+    applyStagger()
+    applyKanbanStagger()
   }
 }
 
@@ -278,9 +273,9 @@ async function handleMoveCard({ tache, newStatut }) {
   try {
     await api.put(`/taches/${tache.id}`, { statut: newStatut })
     await loadResponsableTasks()
-    toast.success("Tâche mise à jour !")
+    toast.success(t('taches_responsable.task_updated'))
   } catch (err) {
-    toast.error('Erreur lors du déplacement')
+    toast.error(t('taches_responsable.move_error'))
     await loadResponsableTasks()
   }
 }
@@ -291,7 +286,7 @@ async function handleViewTask(tache) {
     currentTache.value = data.data
     showViewModal.value = true
   } catch (err) {
-    toast.error('Erreur de chargement')
+    toast.error(t('taches_responsable.view_error'))
   }
 }
 
@@ -303,7 +298,7 @@ function handleEditTask(tache) {
 async function handleTaskSaved() {
   showEditModal.value = false
   await loadResponsableTasks()
-  toast.success("Tâche enregistrée !")
+  toast.success(t('taches_responsable.task_saved'))
 }
 
 onMounted(() => {

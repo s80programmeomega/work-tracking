@@ -11,7 +11,7 @@
         leave-from="opacity-100"
         leave-to="opacity-0"
       >
-        <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" />
+        <div class="fixed inset-0 bg-black/50 transition-opacity" />
       </TransitionChild>
 
       <div class="fixed inset-0 z-10 overflow-y-auto">
@@ -46,7 +46,7 @@
               <!-- Body -->
               <div class="p-6 max-h-[calc(100vh-200px)] overflow-y-auto">
                 <!-- Statistiques globales -->
-                <div class="grid grid-cols-4 gap-4 mb-6">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
                   <div class="bg-gray-50 dark:bg-gray-900 p-4 rounded-3 text-center">
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ usersData.length }}</p>
                     <p class="text-sm text-gray-500 dark:text-gray-400">Membres</p>
@@ -82,7 +82,7 @@
                       </div>
                     </div>
                     
-                    <div class="grid grid-cols-4 gap-2 text-center text-sm">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-sm">
                       <div>
                         <p class="font-bold text-gray-900 dark:text-white">{{ userData.stats.total }}</p>
                         <p class="text-gray-500 dark:text-gray-400">Total</p>

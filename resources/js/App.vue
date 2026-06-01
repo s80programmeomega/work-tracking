@@ -8,16 +8,8 @@
         @remove="removeNotification"
       />
 
-            <!-- Overlay de chargement global -->
-            <div v-if="isLoading" class="loading-overlay">
-                <div class="spinner-container">
-                    <div class="spinner"></div>
-                    <p class="loading-text">Chargement de l'application...</p>
-                </div>
-            </div>
-
             <!-- Erreur d'initialisation -->
-            <div v-else-if="error" class="error-overlay">
+            <div v-if="error" class="error-overlay">
                 <div class="error-container">
                     <p class="error-title">Une erreur est survenue</p>
                     <p class="error-message">Veuillez recharger la page. Si le problème persiste, contactez le support.</p>
@@ -40,7 +32,6 @@ import NotificationContainer from "@/components/ui/NotificationContainer.vue"
 
 
 const authStore = useAuthStore();
-const isLoading = ref(true);
 const error = ref(null);
 const notifications = ref([])
 
@@ -92,71 +83,18 @@ onNotification((data) => {
     showNotification(title, 'info', 4000);
 });
 
-onMounted(async () => {
+onMounted(() => {
     try {
-        console.log('🚀 Initialisation de l\'application...');
-
-        // Initialiser l'authentification
         authStore.initialize();
-
-        // Attendre un peu pour s'assurer que tout est chargé
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        // Start the Reverb subscription once auth is ready. Safe to call when
-        // unauthenticated — useLiveNotifications no-ops without a user id.
         startLiveNotifications();
-
-        console.log('✅ Application initialisée');
     } catch (err) {
         console.error('❌ Erreur lors de l\'initialisation:', err);
         error.value = err;
-    } finally {
-        isLoading.value = false;
     }
 });
 </script>
 
 <style scoped>
-.loading-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    transition: opacity 0.3s ease;
-}
-
-.spinner-container {
-    text-align: center;
-    color: white;
-}
-
-.spinner {
-    width: 60px;
-    height: 60px;
-    border: 4px solid rgba(255, 255, 255, 0.3);
-    border-top: 4px solid #ffffff;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 20px;
-}
-
-.loading-text {
-    font-size: 16px;
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.9);
-    margin-top: 15px;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
 
 .error-overlay {
     position: fixed;
@@ -169,6 +107,18 @@ onMounted(async () => {
     justify-content: center;
     align-items: center;
     z-index: 9999;
+}
+
+:global(.dark) .error-overlay {
+    background: #111827;
+}
+
+:global(.dark) .error-title {
+    color: #f87171;
+}
+
+:global(.dark) .error-message {
+    color: #9ca3af;
 }
 
 .error-container {

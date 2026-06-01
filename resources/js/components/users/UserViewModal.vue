@@ -1,11 +1,11 @@
 <template>
   <div class="fixed inset-0 z-50 overflow-y-auto" @click.self="$emit('close')">
     <div class="flex items-center justify-center min-h-screen px-4">
-      <div class="fixed inset-0 bg-black opacity-50"></div>
+      <div class="fixed inset-0 bg-black/30"></div>
 
-      <div class="relative bg-white dark:bg-gray-800 rounded-3 max-w-3xl w-full p-6">
+      <div ref="dialogRef" :style="dragStyle" class="relative bg-white dark:bg-gray-800 rounded-3 max-w-3xl w-full p-6">
         <!-- Header -->
-        <div class="flex items-center justify-between mb-6">
+        <div ref="handleRef" class="flex items-center justify-between mb-6 cursor-move select-none">
           <h3 class="text-xl font-bold text-gray-900 dark:text-white">
             Détails de l'utilisateur
           </h3>
@@ -202,6 +202,12 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue'
+import { useDraggable } from '@/composables/useDraggable'
+
+const { dialogRef, handleRef, dragStyle, attachHandle } = useDraggable()
+onMounted(attachHandle)
+
 const props = defineProps({
   user: {
     type: Object,
@@ -232,7 +238,7 @@ const getRoleBadgeClass = (role) => {
     cadre: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
     stagiaire: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
   }
-  return classes[role] || 'bg-gray-100 text-gray-800 dark:text-gray-100'
+  return classes[role] || 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100'
 }
 
 const formatDate = (date) => {

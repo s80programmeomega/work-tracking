@@ -79,11 +79,11 @@
               <th class="px-6 py-3">Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody ref="tbodyRef">
             <tr
               v-for="activite in activites"
               :key="activite.id"
-              class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+              class="stagger-item border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
               :class="{ 'bg-red-50 dark:bg-red-900/10': activite.is_overdue }"
             >
               <td class="px-6 py-4">
@@ -220,8 +220,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useActiviteStore } from '@/stores/activiteStore'
-// import ActiviteForm from './ActiviteForm.vue'
-import ActiviteForm from "@/components/activites/ActiviteForm.vue";
+import ActiviteForm from "@/components/activites/ActiviteForm.vue"
+import { useStagger } from '@/composables/useAnimations'
 
 
 const props = defineProps({
@@ -275,6 +275,8 @@ const getEmptyMessage = computed(() => {
   return messages[props.viewType]
 })
 
+const { staggerRef: tbodyRef, applyStagger } = useStagger(40)
+
 const loadActivites = async () => {
   try {
     switch (props.viewType) {
@@ -287,6 +289,7 @@ const loadActivites = async () => {
       default:
         await activiteStore.fetchActivites(filters.value)
     }
+    applyStagger()
   } catch (error) {
     console.error('Erreur chargement:', error)
   }
@@ -367,7 +370,7 @@ const getStatusClass = (status) => {
     active: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
     archived: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
   }
-  return classes[status] || 'bg-gray-100 text-gray-800 dark:text-gray-100'
+  return classes[status] || 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100'
 }
 
 const getStatusLabel = (status) => {

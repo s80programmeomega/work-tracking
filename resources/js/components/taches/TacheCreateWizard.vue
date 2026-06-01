@@ -1,12 +1,12 @@
 <template>
   <div
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4"
     @click.self="$emit('close')"
   >
-    <div class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-2xl max-h-[95vh] overflow-hidden flex flex-col animate-fade-in">
+    <div ref="dialogRef" :style="dragStyle" class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-2xl max-h-[95vh] overflow-hidden flex flex-col animate-fade-in">
 
       <!-- Header -->
-      <div class="px-6 py-5 border-b border-gray-200 dark:border-gray-700 text-white">
+      <div ref="handleRef" class="px-6 py-5 border-b border-gray-200 dark:border-gray-700 text-white cursor-move select-none">
         <div class="flex items-center justify-between">
           <div>
             <h2 class="text-xl font-bold" dusk="wizard-title">Nouvelle tâche</h2>
@@ -336,6 +336,10 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useToast } from 'vue-toastification'
+import { useDraggable } from '@/composables/useDraggable'
+
+const { dialogRef, handleRef, dragStyle, attachHandle } = useDraggable()
+onMounted(attachHandle)
 import api from '@/api/axios'
 import { useActivityMembers } from '@/composables/useActivityMembers'
 import IntervenantPicker from './IntervenantPicker.vue'

@@ -26,10 +26,15 @@
       </span>
 
       <button
-        class="underline underline-offset-2 hover:opacity-80 transition-opacity shrink-0"
+        dusk="trial-banner-dismiss"
+        :aria-label="$t('subscription.trial.dismiss')"
+        :title="$t('subscription.trial.dismiss')"
+        class="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded hover:bg-white/20 transition-colors"
         @click="dismiss"
       >
-        {{ $t('subscription.trial.expiring_soon') }}
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
       </button>
     </div>
   </transition>

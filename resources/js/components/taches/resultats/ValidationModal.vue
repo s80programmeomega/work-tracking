@@ -2,13 +2,13 @@
 <template>
   <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <!-- Backdrop -->
-    <div class="fixed inset-0 bg-gray-900/75 transition-opacity" @click="$emit('close')"></div>
+    <div class="fixed inset-0 bg-black/30 transition-opacity" @click="$emit('close')"></div>
 
     <!-- Modal -->
     <div class="flex min-h-screen items-center justify-center p-4">
-      <div class="relative bg-white dark:bg-gray-900 rounded-3 w-full max-w-2xl transform transition-all">
+      <div ref="dialogRef" :style="dragStyle" class="relative bg-white dark:bg-gray-900 rounded-3 w-full max-w-2xl transform transition-all">
         <!-- Header -->
-        <div class="p-6 border-b border-gray-200 dark:border-gray-700" :class="getHeaderClass()">
+        <div ref="handleRef" class="p-6 border-b border-gray-200 dark:border-gray-700 cursor-move select-none" :class="getHeaderClass()">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div class="w-12 h-12 rounded-3 flex items-center justify-center" :class="getIconContainerClass()">
@@ -47,19 +47,19 @@
             <h4 class="font-medium text-gray-900 dark:text-white mb-3">📋 Résumé</h4>
             <div class="space-y-2 text-sm">
               <div class="flex items-start gap-2">
-                <span class="text-gray-500 dark:text-gray-400 min-w-[120px]">Tâche:</span>
+                <span class="text-gray-500 dark:text-gray-400 min-w-30">Tâche:</span>
                 <span class="text-gray-900 dark:text-white font-medium">{{ resultat?.tache?.titre }}</span>
               </div>
               <div class="flex items-start gap-2">
-                <span class="text-gray-500 dark:text-gray-400 min-w-[120px]">Taux réalisation:</span>
+                <span class="text-gray-500 dark:text-gray-400 min-w-30">Taux réalisation:</span>
                 <span class="text-gray-900 dark:text-white font-bold">{{ resultat?.taux_realisation }}%</span>
               </div>
               <div class="flex items-start gap-2">
-                <span class="text-gray-500 dark:text-gray-400 min-w-[120px]">Soumis le:</span>
+                <span class="text-gray-500 dark:text-gray-400 min-w-30">Soumis le:</span>
                 <span class="text-gray-900 dark:text-white">{{ formatDateTime(resultat?.soumis_le) }}</span>
               </div>
               <div class="flex items-start gap-2">
-                <span class="text-gray-500 dark:text-gray-400 min-w-[120px]">Par:</span>
+                <span class="text-gray-500 dark:text-gray-400 min-w-30">Par:</span>
                 <span class="text-gray-900 dark:text-white">{{ resultat?.user?.nom }}</span>
               </div>
             </div>
@@ -80,7 +80,7 @@
           <!-- Warning en cas de rejet -->
           <div v-if="action === 'reject'" class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-3">
             <div class="flex gap-3">
-              <svg class="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <svg class="w-5 h-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
               </svg>
               <div>
@@ -96,7 +96,7 @@
           <!-- Info validation N2 -->
           <div v-if="action === 'validate' && level === 'n2'" class="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-3">
             <div class="flex gap-3">
-              <svg class="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <svg class="w-5 h-5 text-green-600 dark:text-green-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
               </svg>
               <div>
@@ -183,7 +183,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useDraggable } from '@/composables/useDraggable'
+
+const { dialogRef, handleRef, dragStyle, attachHandle } = useDraggable()
+onMounted(attachHandle)
 
 const props = defineProps({
   resultat: {

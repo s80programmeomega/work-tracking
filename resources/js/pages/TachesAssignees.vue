@@ -5,8 +5,8 @@
       <!-- Header Premium -->
       <div
         class="rounded-3 border border-gray-200 dark:border-gray-800 p-6 ">
-        <div class="flex items-center justify-between mb-6">
-          <div class="flex items-center gap-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+          <div class="flex min-w-0 items-center gap-4">
             <div
               class="w-14 h-14 rounded-3 flex items-center justify-center ">
               <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -15,16 +15,27 @@
               </svg>
             </div>
             <div>
-              <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Mes Tâches Assignées</h1>
-              <p class="text-gray-500 dark:text-gray-400">Gérez votre avancement personnel de manière indépendante</p>
+              <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('taches_assignees.title') }}</h1>
+              <p class="text-gray-500 dark:text-gray-400">{{ $t('taches_assignees.subtitle') }}</p>
             </div>
           </div>
 
-          <div class="flex items-center gap-3">
+          <div class="flex flex-wrap items-center gap-3">
+            <!-- Bouton Statistiques -->
+            <button
+              @click="showStats = !showStats"
+              class="inline-flex items-center gap-2 rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              {{ $t('taches_assignees.btn_stats') }}
+            </button>
+
             <!-- Bouton refresh -->
             <button @click="loadAssignedTasks" :disabled="loading"
               class="p-2 rounded-3 border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              title="Actualiser">
+              :title="$t('taches_assignees.btn_refresh')">
               <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" :class="{ 'animate-spin': loading }" fill="none"
                 stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -34,126 +45,44 @@
 
             <!-- Toggle vue -->
             <div class="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-3">
-              <button @click="currentView = 'kanban'"
+              <button dusk="view-kanban-btn" @click="currentView = 'kanban'"
                 :class="['px-3 py-2 rounded-md transition-all flex items-center gap-2 text-sm',
                   currentView === 'kanban' ? 'bg-white dark:bg-gray-700 text-brand-600 dark:text-brand-400' : 'text-gray-600 dark:text-gray-400']">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
                 </svg>
-                Kanban
+                {{ $t('taches_assignees.view_kanban') }}
               </button>
-              <button @click="currentView = 'grouped'"
+              <button dusk="view-grouped-btn" @click="currentView = 'grouped'"
                 :class="['px-3 py-2 rounded-md transition-all flex items-center gap-2 text-sm',
                   currentView === 'grouped' ? 'bg-white dark:bg-gray-700 text-brand-600 dark:text-brand-400' : 'text-gray-600 dark:text-gray-400']">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
-                Par Activité
+                {{ $t('taches_assignees.view_grouped') }}
               </button>
             </div>
           </div>
         </div>
 
-        <!-- Statistiques avec design premium -->
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <div
-            class="relative overflow-hidden rounded-3 bg-white dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-700 group transition-shadow">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Total assignées</p>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ stats.total }}</p>
-              </div>
-              <div
-                class="w-12 h-12 rounded-3 bg-gray-100 dark:bg-gray-700 flex items-center justify-center transition-transform">
-                <svg class="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor"
-                  viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-              </div>
-            </div>
-            <div class="absolute bottom-0 left-0 right-0 h-1 bg-brand-500"></div>
-          </div>
-
-          <div
-            class="relative overflow-hidden rounded-3 bg-white dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-700 group transition-shadow">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-gray-500 dark:text-gray-400">À faire</p>
-                <p class="text-2xl font-bold text-slate-600 dark:text-slate-400 mt-1">{{ stats.a_faire }}</p>
-              </div>
-              <div
-                class="w-12 h-12 rounded-3 bg-slate-100 dark:bg-slate-900/30 flex items-center justify-center transition-transform">
-                <svg class="w-6 h-6 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-            <div class="absolute bottom-0 left-0 right-0 h-1 bg-brand-500"></div>
-          </div>
-
-          <div
-            class="relative overflow-hidden rounded-3 bg-white dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-700 group transition-shadow">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-gray-500 dark:text-gray-400">En cours</p>
-                <p class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">{{ stats.en_cours }}</p>
-              </div>
-              <div
-                class="w-12 h-12 rounded-3 bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center transition-transform">
-                <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-            </div>
-            <div class="absolute bottom-0 left-0 right-0 h-1 bg-brand-500"></div>
-          </div>
-
-          <div
-            class="relative overflow-hidden rounded-3 bg-white dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-700 group transition-shadow">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Terminées</p>
-                <p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">{{ stats.termine }}</p>
-              </div>
-              <div
-                class="w-12 h-12 rounded-3 bg-green-100 dark:bg-green-900/30 flex items-center justify-center transition-transform">
-                <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-            <div class="absolute bottom-0 left-0 right-0 h-1 bg-brand-500"></div>
-          </div>
-
-          <div
-            class="relative overflow-hidden rounded-3 bg-white dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-700 group transition-shadow">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-gray-500 dark:text-gray-400">En retard</p>
-                <p class="text-2xl font-bold mt-1"
-                  :class="stats.overdue > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-400'">{{ stats.overdue }}
-                </p>
-              </div>
-              <div
-                class="w-12 h-12 rounded-3 flex items-center justify-center transition-transform"
-                :class="stats.overdue > 0 ? 'bg-red-100 dark:bg-red-900/30' : 'bg-gray-100 dark:bg-gray-700'">
-                <svg class="w-6 h-6" :class="stats.overdue > 0 ? 'text-red-500 animate-pulse' : 'text-gray-400'"
-                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-            </div>
-            <div class="absolute bottom-0 left-0 right-0 h-1"
-              :class="stats.overdue > 0 ? 'bg-error-500' : 'bg-gray-300'"></div>
-          </div>
-        </div>
+        <!-- Statistiques panel -->
+        <transition
+          enter-active-class="transition-all duration-300 ease-out"
+          enter-from-class="opacity-0 -translate-y-4"
+          enter-to-class="opacity-100 translate-y-0"
+          leave-active-class="transition-all duration-200 ease-in"
+          leave-from-class="opacity-100 translate-y-0"
+          leave-to-class="opacity-0 -translate-y-4"
+        >
+          <TachesAssigneesStats
+            v-if="showStats"
+            :stats="stats"
+            :loading="loading"
+            @close="showStats = false"
+          />
+        </transition>
       </div>
 
       <!-- Message d'erreur -->
@@ -169,21 +98,21 @@
       </div>
 
       <!-- Vue Kanban Personnel -->
-      <div v-if="currentView === 'kanban' && !loading" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <KanbanColumnPersonal v-for="column in kanbanColumns" :key="column.statut" :title="column.title"
+      <div dusk="view-kanban-panel" v-if="currentView === 'kanban' && !loading" ref="kanbanRef" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <KanbanColumnPersonal v-for="column in kanbanColumns" :key="column.statut" :title="column.title" class="stagger-item"
           :statut="column.statut" :taches="getMyTasksByStatus(column.statut)" :status-color="column.color"
           :status-icon="column.icon" @move-card="handleMoveMyCard" @view-task="handleViewTask"
           @submit-result="handleSubmitResult" @edit-task="handleEditTask" />
       </div>
 
       <!-- Vue groupée par activité -->
-      <div v-else-if="currentView === 'grouped' && !loading" class="space-y-6">
+      <div dusk="view-grouped-panel" v-else-if="currentView === 'grouped' && !loading" ref="listRef" class="space-y-6">
         <div v-if="tasksByActivite.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">
-          Aucune tâche assignée pour le moment
+          {{ $t('taches_assignees.empty_grouped') }}
         </div>
 
         <div v-for="group in tasksByActivite" :key="group.activite.id"
-          class="rounded-3 border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] overflow-hidden">
+          class="stagger-item rounded-3 border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/3 overflow-hidden">
           <div
             class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
@@ -202,7 +131,7 @@
               </div>
               <span
                 class="px-3 py-1 text-sm font-medium bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 rounded-full">
-                {{ group.taches.length }} tâche{{ group.taches.length > 1 ? 's' : '' }}
+                {{ $t('taches_assignees.tache_count', group.taches.length) }}
               </span>
             </div>
           </div>
@@ -233,7 +162,7 @@
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          <p class="text-gray-600 dark:text-gray-400">Chargement de vos tâches...</p>
+          <p class="text-gray-600 dark:text-gray-400">{{ $t('taches_assignees.loading') }}</p>
         </div>
       </div>
     </div>
@@ -267,17 +196,23 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
+import TachesAssigneesStats from '@/components/taches/TachesAssigneesStats.vue'
 import KanbanColumnPersonal from '@/components/taches/KanbanColumnPersonal.vue'
 import TacheCardPersonal from '@/components/taches/TacheCardPersonal.vue'
 import TacheDetailModal from '@/components/taches/TacheDetailModal.vue'
 import SubmitResultModal from '@/components/taches/SubmitResultModal.vue'
-import TacheForm from '@/components/taches/TacheForm.vue' // ✅ AJOUT
+import TacheForm from '@/components/taches/TacheForm.vue'
+import { useStagger } from '@/composables/useAnimations'
 import api from '@/api/axios'
 import { useToast } from 'vue-toastification'
 
+const { t } = useI18n()
 const toast = useToast()
+const { staggerRef: listRef, applyStagger } = useStagger(55)
+const { staggerRef: kanbanRef, applyStagger: applyKanbanStagger } = useStagger(80)
 
 // State
 const taches = ref([])
@@ -285,16 +220,17 @@ const loading = ref(false)
 const error = ref(null)
 const currentView = ref('kanban')
 const showViewModal = ref(false)
+const showStats = ref(false)
 const showSubmitResultModal = ref(false)
-const showEditModal = ref(false) // ✅ AJOUT
+const showEditModal = ref(false)
 const currentTache = ref(null)
 
 // Colonnes Kanban
-const kanbanColumns = [
-  { statut: 'a_faire', title: 'À faire', color: '#6B7280', icon: '📋' },
-  { statut: 'en_cours', title: 'En cours', color: '#3B82F6', icon: '🔄' },
-  { statut: 'termine', title: 'Terminé', color: '#10B981', icon: '✅' }
-]
+const kanbanColumns = computed(() => [
+  { statut: 'a_faire', title: t('taches_assignees.col_a_faire'), color: '#6B7280', icon: '📋' },
+  { statut: 'en_cours', title: t('taches_assignees.col_en_cours'), color: '#3B82F6', icon: '🔄' },
+  { statut: 'termine', title: t('taches_assignees.col_termine'), color: '#10B981', icon: '✅' }
+])
 
 // Computed
 const stats = computed(() => {
@@ -342,7 +278,10 @@ async function loadAssignedTasks() {
   try {
     const { data } = await api.get('/taches/assignees')
     taches.value = data.data || []
-
+    nextTick(() => {
+      applyStagger()
+      applyKanbanStagger()
+    })
     console.log('✅ Tâches assignées chargées:', {
       total: taches.value.length,
       sample: taches.value.slice(0, 2).map(t => ({
@@ -355,7 +294,7 @@ async function loadAssignedTasks() {
     })
   } catch (err) {
     console.error('❌ Erreur chargement:', err)
-    error.value = err.response?.data?.message || 'Impossible de charger les tâches assignées'
+    error.value = err.response?.data?.message || t('taches_assignees.error_load')
     toast.error(error.value)
   } finally {
     loading.value = false
@@ -381,10 +320,10 @@ async function handleMoveMyCard({ tache, newStatut, progression, notes }) {
 
     await loadAssignedTasks()
 
-    toast.success("Carte mise à jour avec succès !")
+    toast.success(t('taches_assignees.toast_card_updated'))
   } catch (err) {
     console.error('❌ Erreur déplacement:', err)
-    error.value = err.response?.data?.message || 'Erreur lors du déplacement'
+    error.value = err.response?.data?.message || t('taches_assignees.error_move')
     toast.error(error.value)
 
     await loadAssignedTasks()
@@ -401,7 +340,7 @@ async function handleResultSubmitted() {
   await loadAssignedTasks()
   error.value = null
 
-  toast.success("Résultat soumis avec succès !")
+  toast.success(t('taches_assignees.toast_result_submitted'))
 }
 
 async function handleViewTask(tache) {
@@ -411,7 +350,7 @@ async function handleViewTask(tache) {
     showViewModal.value = true
   } catch (err) {
     console.error('Erreur:', err)
-    error.value = 'Erreur lors du chargement de la tâche'
+    error.value = t('taches_assignees.error_view')
     toast.error(error.value)
   }
 }
@@ -425,7 +364,7 @@ async function handleEditTask(tache) {
     showEditModal.value = true
   } catch (err) {
     console.error('Erreur:', err)
-    toast.error('Erreur lors du chargement de la tâche')
+    toast.error(t('taches_assignees.error_view'))
   }
 }
 
@@ -434,7 +373,7 @@ async function handleTaskSaved() {
   showEditModal.value = false
   currentTache.value = null
   await loadAssignedTasks()
-  toast.success("Tâche modifiée avec succès !")
+  toast.success(t('taches_assignees.toast_task_saved'))
 }
 
 function handleTaskUpdated() {
@@ -442,6 +381,14 @@ function handleTaskUpdated() {
 }
 
 // Lifecycle
+watch(currentView, (view) => {
+  if (view === 'grouped') {
+    nextTick(() => applyStagger())
+  } else if (view === 'kanban') {
+    nextTick(() => applyKanbanStagger())
+  }
+})
+
 onMounted(() => {
   loadAssignedTasks()
 })

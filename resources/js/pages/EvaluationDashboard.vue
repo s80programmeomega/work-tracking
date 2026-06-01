@@ -1,70 +1,66 @@
 <!-- resources/js/views/evaluations/EvaluationDashboard.vue -->
 <template>
   <AdminLayout>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <div class="bg-gray-50 dark:bg-gray-900">
     
     <!-- Header -->
-    <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 ">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-          <div class="w-12 h-12 rounded-3 flex items-center justify-center">
-            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-          </div>
-          Tableau de bord des évaluations
-        </h1>
-        <p class="text-gray-600 dark:text-gray-400 mt-2">
-          Vue d'ensemble de vos performances et validations en attente
-        </p>
+    <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+      <div class="py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+            <div class="w-12 h-12 rounded-3 flex items-center justify-center">
+              <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            {{ $t('eval_dashboard.title') }}
+          </h1>
+          <p class="text-gray-600 dark:text-gray-400 mt-2">
+            {{ $t('eval_dashboard.subtitle') }}
+          </p>
+        </div>
+
+        <!-- Bouton Statistiques -->
+        <button
+          @click="showStats = !showStats"
+          class="inline-flex items-center gap-2 rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+          {{ $t('eval_dashboard.statistics') }}
+        </button>
       </div>
     </div>
 
     <!-- Contenu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      
+    <div class="py-8 space-y-8">
+
+      <!-- Panneau statistiques -->
+      <transition
+        enter-active-class="transition-all duration-300 ease-out"
+        enter-from-class="opacity-0 -translate-y-4"
+        enter-to-class="opacity-100 translate-y-0"
+        leave-active-class="transition-all duration-200 ease-in"
+        leave-from-class="opacity-100 translate-y-0"
+        leave-to-class="opacity-0 -translate-y-4"
+      >
+        <EvaluationDashboardStats
+          v-if="showStats"
+          :my-tasks="myTasks"
+          :pending-validations="pendingValidations"
+          :week-number="weekInfo.week_number"
+          :loading="loading"
+          @close="showStats = false"
+        />
+      </transition>
+
       <!-- Loading -->
       <div v-if="loading" class="flex items-center justify-center py-16">
         <div class="animate-spin rounded-full h-16 w-16 border-4 border-purple-500 border-t-transparent"></div>
       </div>
 
       <template v-else>
-        <!-- Statistiques principales -->
-        <div>
-          <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">
-            Mes tâches - Semaine {{ weekInfo.week_number }}
-          </h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <DashboardCard
-              title="Total tâches"
-              :value="myTasks.total"
-              icon="clipboard-list"
-              color="blue"
-              :trend="{ value: '+12%', positive: true }"
-            />
-            <DashboardCard
-              title="Complétées"
-              :value="myTasks.completed"
-              :subtitle="`${myTasks.completionRate}% de complétion`"
-              icon="check-circle"
-              color="green"
-            />
-            <DashboardCard
-              title="En cours"
-              :value="myTasks.in_progress"
-              icon="clock"
-              color="yellow"
-            />
-            <DashboardCard
-              title="En retard"
-              :value="myTasks.overdue"
-              icon="exclamation"
-              color="red"
-              :urgent="myTasks.overdue > 0"
-            />
-          </div>
-        </div>
-
         <!-- Validations en attente -->
         <div v-if="pendingValidations.total > 0">
           <div class="flex items-center justify-between mb-4">
@@ -72,15 +68,15 @@
               <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              Validations en attente
+              {{ $t('eval_dashboard.pending_validations') }}
               <span class="inline-flex items-center px-3 py-1 text-sm font-semibold rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300">
                 {{ pendingValidations.total }}
               </span>
             </h2>
-            <router-link 
+            <router-link
               to="/evaluations/fiches"
               class="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 flex items-center gap-1">
-              Voir tout
+              {{ $t('eval_dashboard.see_all') }}
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
               </svg>
@@ -89,15 +85,15 @@
 
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <ValidationCard
-              title="Validation N1"
-              subtitle="Responsable d'activité"
+              :title="$t('eval_dashboard.validation_n1_title')"
+              :subtitle="$t('eval_dashboard.validation_n1_subtitle')"
               :count="pendingValidations.n1"
               color="green"
               @click="goToValidations('n1')"
             />
             <ValidationCard
-              title="Validation N2"
-              subtitle="Responsable de projet"
+              :title="$t('eval_dashboard.validation_n2_title')"
+              :subtitle="$t('eval_dashboard.validation_n2_subtitle')"
               :count="pendingValidations.n2"
               color="purple"
               @click="goToValidations('n2')"
@@ -110,23 +106,23 @@
           <!-- Progression hebdomadaire -->
           <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Progression hebdomadaire
+              {{ $t('eval_dashboard.weekly_progress') }}
             </h3>
             <div class="space-y-4">
               <ProgressBar
-                label="Tâches complétées"
+                :label="$t('eval_dashboard.tasks_completed')"
                 :value="myTasks.completed"
                 :max="myTasks.total"
                 color="green"
               />
               <ProgressBar
-                label="Tâches validées"
+                :label="$t('eval_dashboard.tasks_validated')"
                 :value="myTasks.validated"
                 :max="myTasks.completed"
                 color="purple"
               />
               <ProgressBar
-                label="En cours"
+                :label="$t('eval_dashboard.in_progress')"
                 :value="myTasks.in_progress"
                 :max="myTasks.total"
                 color="blue"
@@ -137,26 +133,26 @@
           <!-- Répartition par priorité -->
           <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Répartition par priorité
+              {{ $t('eval_dashboard.priority_breakdown') }}
             </h3>
             <div class="space-y-3">
               <PriorityBadge
-                label="Critique"
+                :label="$t('eval_dashboard.priority_critique')"
                 :count="priorityStats.critique"
                 color="red"
               />
               <PriorityBadge
-                label="Élevée"
+                :label="$t('eval_dashboard.priority_elevee')"
                 :count="priorityStats.elevee"
                 color="orange"
               />
               <PriorityBadge
-                label="Moyenne"
+                :label="$t('eval_dashboard.priority_moyenne')"
                 :count="priorityStats.moyenne"
                 color="yellow"
               />
               <PriorityBadge
-                label="Faible"
+                :label="$t('eval_dashboard.priority_faible')"
                 :count="priorityStats.faible"
                 color="green"
               />
@@ -166,9 +162,9 @@
 
         <!-- Actions rapides -->
         <div class="rounded-3 p-8 text-white">
-          <h2 class="text-2xl font-bold mb-4">Actions rapides</h2>
+          <h2 class="text-2xl font-bold mb-4">{{ $t('eval_dashboard.quick_actions') }}</h2>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <router-link 
+            <router-link
               to="/evaluations/fiches"
               class="flex items-center gap-4 bg-white/10 hover:bg-white/20 rounded-3 p-4 transition-all">
               <div class="w-12 h-12 bg-white/20 rounded-3 flex items-center justify-center">
@@ -177,12 +173,12 @@
                 </svg>
               </div>
               <div>
-                <p class="font-semibold">Fiche d'évaluation</p>
-                <p class="text-sm text-white/80">Remplir ma fiche</p>
+                <p class="font-semibold">{{ $t('eval_dashboard.eval_sheet') }}</p>
+                <p class="text-sm text-white/80">{{ $t('eval_dashboard.eval_sheet_sub') }}</p>
               </div>
             </router-link>
 
-            <router-link 
+            <router-link
               to="/evaluations/rapport-hebdomadaire"
               class="flex items-center gap-4 bg-white/10 hover:bg-white/20 rounded-3 p-4 transition-all">
               <div class="w-12 h-12 bg-white/20 rounded-3 flex items-center justify-center">
@@ -191,12 +187,12 @@
                 </svg>
               </div>
               <div>
-                <p class="font-semibold">Rapport hebdomadaire</p>
-                <p class="text-sm text-white/80">Voir mon rapport</p>
+                <p class="font-semibold">{{ $t('eval_dashboard.weekly_report') }}</p>
+                <p class="text-sm text-white/80">{{ $t('eval_dashboard.weekly_report_sub') }}</p>
               </div>
             </router-link>
 
-            <router-link 
+            <router-link
               to="/evaluations/performance"
               class="flex items-center gap-4 bg-white/10 hover:bg-white/20 rounded-3 p-4 transition-all">
               <div class="w-12 h-12 bg-white/20 rounded-3 flex items-center justify-center">
@@ -205,8 +201,8 @@
                 </svg>
               </div>
               <div>
-                <p class="font-semibold">Performance d'équipe</p>
-                <p class="text-sm text-white/80">Analyse collective</p>
+                <p class="font-semibold">{{ $t('eval_dashboard.team_performance') }}</p>
+                <p class="text-sm text-white/80">{{ $t('eval_dashboard.team_performance_sub') }}</p>
               </div>
             </router-link>
           </div>
@@ -222,6 +218,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/api/axios'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
+import EvaluationDashboardStats from '@/components/evaluations/EvaluationDashboardStats.vue'
 
 // import DashboardCard from './components/DashboardCard.vue'
 // import ValidationCard from './components/ValidationCard.vue'
@@ -230,6 +227,7 @@ import AdminLayout from '@/components/layout/AdminLayout.vue'
 
 const router = useRouter()
 const loading = ref(true)
+const showStats = ref(false)
 const dashboardData = ref(null)
 
 const weekInfo = computed(() => dashboardData.value?.week_info || { week_number: 0, year: 2025 })

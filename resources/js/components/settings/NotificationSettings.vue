@@ -3,17 +3,17 @@
   <div class="notification-settings">
     <div class="mb-6">
       <h4 class="text-lg font-semibold text-gray-800 dark:text-white/90">
-        Paramètres de notifications
+        {{ $t('notif_settings.title') }}
       </h4>
       <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        Gérez comment et quand vous recevez des notifications
+        {{ $t('notif_settings.subtitle') }}
       </p>
     </div>
 
     <!-- Loading State -->
     <div v-if="loading" class="p-8 text-center">
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      <p class="mt-2 text-gray-500 dark:text-gray-400">Chargement des paramètres...</p>
+      <p class="mt-2 text-gray-500 dark:text-gray-400">{{ $t('notif_settings.loading') }}</p>
     </div>
 
     <!-- Settings Content -->
@@ -22,8 +22,8 @@
       <div class="p-5 border border-gray-200 rounded-3 dark:border-gray-800">
         <div class="flex items-center justify-between mb-4">
           <div>
-            <h5 class="font-medium text-gray-800 dark:text-white/90">Notifications par email</h5>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Recevoir des emails pour les activités importantes</p>
+            <h5 class="font-medium text-gray-800 dark:text-white/90">{{ $t('notif_settings.email_title') }}</h5>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('notif_settings.email_desc') }}</p>
           </div>
           <label class="relative inline-flex items-center cursor-pointer">
             <input
@@ -40,8 +40,8 @@
         <div v-if="settings.emailNotifications" class="pl-4 mt-4 space-y-4 border-l-2 border-gray-200 dark:border-gray-700">
           <div class="flex items-center justify-between">
             <div>
-              <h6 class="text-sm font-medium text-gray-700 dark:text-gray-300">Nouvelles tâches</h6>
-              <p class="text-xs text-gray-500 dark:text-gray-400">Quand on vous assigne une nouvelle tâche</p>
+              <h6 class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('notif_settings.email_tasks_title') }}</h6>
+              <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('notif_settings.email_tasks_desc') }}</p>
             </div>
             <input
               type="checkbox"
@@ -53,8 +53,8 @@
 
           <div class="flex items-center justify-between">
             <div>
-              <h6 class="text-sm font-medium text-gray-700 dark:text-gray-300">Délais de tâches</h6>
-              <p class="text-xs text-gray-500 dark:text-gray-400">Rappels pour les tâches en retard</p>
+              <h6 class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('notif_settings.email_deadlines_title') }}</h6>
+              <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('notif_settings.email_deadlines_desc') }}</p>
             </div>
             <input
               type="checkbox"
@@ -66,8 +66,8 @@
 
           <div class="flex items-center justify-between">
             <div>
-              <h6 class="text-sm font-medium text-gray-700 dark:text-gray-300">Mises à jour de projet</h6>
-              <p class="text-xs text-gray-500 dark:text-gray-400">Changements importants dans vos projets</p>
+              <h6 class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('notif_settings.email_projects_title') }}</h6>
+              <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('notif_settings.email_projects_desc') }}</p>
             </div>
             <input
               type="checkbox"
@@ -83,8 +83,8 @@
       <div class="p-5 border border-gray-200 rounded-3 dark:border-gray-800">
         <div class="flex items-center justify-between mb-4">
           <div>
-            <h5 class="font-medium text-gray-800 dark:text-white/90">Notifications push</h5>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Recevoir des notifications sur votre appareil</p>
+            <h5 class="font-medium text-gray-800 dark:text-white/90">{{ $t('notif_settings.push_title') }}</h5>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('notif_settings.push_desc') }}</p>
           </div>
           <label class="relative inline-flex items-center cursor-pointer">
             <input
@@ -102,8 +102,8 @@
       <div class="p-5 border border-gray-200 rounded-3 dark:border-gray-800">
         <div class="flex items-center justify-between mb-4">
           <div>
-            <h5 class="font-medium text-gray-800 dark:text-white/90">Notifications dans l'app</h5>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Voir les notifications dans l'application</p>
+            <h5 class="font-medium text-gray-800 dark:text-white/90">{{ $t('notif_settings.inapp_title') }}</h5>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('notif_settings.inapp_desc') }}</p>
           </div>
           <label class="relative inline-flex items-center cursor-pointer">
             <input
@@ -120,23 +120,23 @@
         <div v-if="settings.inAppNotifications" class="pl-4 mt-4 space-y-4 border-l-2 border-gray-200 dark:border-gray-700">
           <div>
             <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-              Fréquence des rappels
+              {{ $t('notif_settings.freq_label') }}
             </label>
             <select
               v-model="settings.notificationFrequency"
               @change="updateSettings"
               class="bg-gray-50 border border-gray-300 text-gray-700 text-sm rounded-3 focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             >
-              <option value="realtime">En temps réel</option>
-              <option value="hourly">Toutes les heures</option>
-              <option value="daily">Quotidiennement</option>
-              <option value="weekly">Hebdomadairement</option>
+              <option value="realtime">{{ $t('notif_settings.freq_realtime') }}</option>
+              <option value="hourly">{{ $t('notif_settings.freq_hourly') }}</option>
+              <option value="daily">{{ $t('notif_settings.freq_daily') }}</option>
+              <option value="weekly">{{ $t('notif_settings.freq_weekly') }}</option>
             </select>
           </div>
 
           <div>
             <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-              Heures de réception
+              {{ $t('notif_settings.hours_label') }}
             </label>
             <div class="flex items-center space-x-4">
               <input
@@ -145,7 +145,7 @@
                 @change="updateSettings"
                 class="bg-gray-50 border border-gray-300 text-gray-700 text-sm rounded-3 focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               >
-              <span class="text-gray-500 dark:text-gray-400">à</span>
+              <span class="text-gray-500 dark:text-gray-400">{{ $t('notif_settings.hours_to') }}</span>
               <input
                 type="time"
                 v-model="settings.notificationEndTime"
@@ -161,8 +161,8 @@
       <div class="p-5 border border-gray-200 rounded-3 dark:border-gray-800">
         <div class="flex items-center justify-between mb-4">
           <div>
-            <h5 class="font-medium text-gray-800 dark:text-white/90">Sons de notification</h5>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Jouer un son pour les nouvelles notifications</p>
+            <h5 class="font-medium text-gray-800 dark:text-white/90">{{ $t('notif_settings.sounds_title') }}</h5>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('notif_settings.sounds_desc') }}</p>
           </div>
           <label class="relative inline-flex items-center cursor-pointer">
             <input
@@ -188,10 +188,10 @@
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            Enregistrement...
+            {{ $t('notif_settings.btn_saving') }}
           </span>
           <span v-else>
-            Enregistrer les modifications
+            {{ $t('notif_settings.btn_save') }}
           </span>
         </button>
       </div>
@@ -201,6 +201,7 @@
 
 <script setup>
 import { ref, reactive, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
   user: {
@@ -211,6 +212,7 @@ const props = defineProps({
 
 const emit = defineEmits(['refresh'])
 
+const { t } = useI18n()
 const loading = ref(true)
 const saving = ref(false)
 const hasChanges = ref(false)
@@ -266,13 +268,12 @@ const saveSettings = async () => {
     hasChanges.value = false
     originalSettings.value = { ...settings }
     
-    // Show success message
-    alert('Paramètres enregistrés avec succès')
-    
+    alert(t('notif_settings.save_success'))
+
     emit('refresh')
   } catch (error) {
     console.error('Error saving settings:', error)
-    alert('Erreur lors de l\'enregistrement')
+    alert(t('notif_settings.save_error'))
   } finally {
     saving.value = false
   }

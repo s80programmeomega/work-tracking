@@ -1,7 +1,7 @@
 <!-- resources/js/pages/projets/Show.vue -->
 <template>
   <AdminLayout>
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div class="bg-gray-50 dark:bg-gray-900">
       <!-- Loading State -->
       <div v-if="loading" class="flex items-center justify-center h-screen">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600"></div>
@@ -15,15 +15,15 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <div>
-              <h3 class="text-lg font-semibold text-red-900 dark:text-red-200">Erreur de chargement</h3>
+              <h3 class="text-lg font-semibold text-red-900 dark:text-red-200">{{ $t('projets_show.load_error') }}</h3>
               <p class="text-red-700 dark:text-red-300 mt-1">{{ error }}</p>
             </div>
           </div>
-          <button 
+          <button
             @click="goBack"
             class="mt-4 px-4 py-2 bg-red-600 text-white rounded-3 hover:bg-red-700 transition-colors"
           >
-            Retour
+            {{ $t('projets_show.back') }}
           </button>
         </div>
       </div>
@@ -44,13 +44,13 @@
           <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <h3 class="mt-4 text-lg font-semibold text-gray-900 dark:text-white">Projet introuvable</h3>
-          <p class="mt-2 text-gray-600 dark:text-gray-400">Le projet que vous recherchez n'existe pas ou a été supprimé.</p>
-          <button 
+          <h3 class="mt-4 text-lg font-semibold text-gray-900 dark:text-white">{{ $t('projets_show.not_found_title') }}</h3>
+          <p class="mt-2 text-gray-600 dark:text-gray-400">{{ $t('projets_show.not_found_desc') }}</p>
+          <button
             @click="goBack"
             class="mt-4 px-4 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700 transition-colors"
           >
-            Retour aux projets
+            {{ $t('projets_show.back_to_projects') }}
           </button>
         </div>
       </div>
@@ -113,17 +113,12 @@ const goBack = () => {
 }
 
 const createActivity = () => {
-  // TODO: Open create activity modal or navigate to create page
-  console.log('Create activity for projet:', projetId.value)
+  // L'activité se crée depuis ActiviteDetail (route activites.show).
+  router.push({ name: 'Activites' })
 }
 
 const viewActivity = (activityId) => {
-  // TODO: Navigate to activity detail
-  console.log('View activity:', activityId)
-  router.push({ 
-    name: 'activites.show', 
-    params: { id: activityId } 
-  })
+  router.push({ name: 'activites.show', params: { id: activityId } })
 }
 
 // Watch route changes

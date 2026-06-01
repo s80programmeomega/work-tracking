@@ -1,15 +1,15 @@
 <template>
-  <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div dusk="resultat-detail-modal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <!-- Backdrop -->
-    <div class="fixed inset-0 bg-gray-900/75 transition-opacity" @click="$emit('close')"></div>
+    <div class="fixed inset-0 bg-black/30 transition-opacity" @click="$emit('close')"></div>
 
     <!-- Modal -->
     <div class="flex min-h-screen items-center justify-center p-4">
-      <div
+      <div ref="dialogRef" :style="dragStyle"
         class="relative bg-white dark:bg-gray-900 rounded-3 w-full max-w-5xl max-h-[90vh] overflow-hidden transform transition-all">
         <!-- Header amélioré -->
-        <div
-          class="sticky top-0 z-20 p-6 border-b border-gray-200 dark:border-gray-700 ">
+        <div ref="handleRef"
+          class="sticky top-0 z-20 p-6 border-b border-gray-200 dark:border-gray-700 cursor-move select-none">
           <div class="flex items-start justify-between">
             <div class="flex-1">
               <div class="flex items-center gap-2 mb-2">
@@ -52,7 +52,7 @@
               </div>
             </div>
 
-            <button @click="$emit('close')"
+            <button dusk="modal-close-btn" @click="$emit('close')"
               class="p-2 hover:bg-white/50 dark:hover:bg-black/20 rounded-3 transition-all duration-200 ">
               <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -294,7 +294,7 @@
                               </p>
                               <div class="flex items-center gap-3 mt-1">
                                 <span class="text-xs text-gray-500 dark:text-gray-400">
-                                  {{ formatFileSize(doc.taille_fichier || doc.taille) }}
+                                  {{ formatFileSize(doc.taille) }}
                                 </span>
                                 <span
                                   class="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded font-medium uppercase">
@@ -667,7 +667,7 @@
             <div>
               <h3 class="font-bold text-gray-900 dark:text-white">{{ previewDocument?.nom }}</h3>
               <div class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
-                <span>{{ formatFileSize(previewDocument?.taille_fichier || previewDocument?.taille) }}</span>
+                <span>{{ formatFileSize(previewDocument?.taille) }}</span>
                 <span>•</span>
                 <span class="uppercase font-medium">{{ previewDocument?.extension }}</span>
               </div>
@@ -719,6 +719,10 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, h } from 'vue'
+import { useDraggable } from '@/composables/useDraggable'
+
+const { dialogRef, handleRef, dragStyle, attachHandle } = useDraggable()
+onMounted(attachHandle)
 
 const props = defineProps({
   resultat: {

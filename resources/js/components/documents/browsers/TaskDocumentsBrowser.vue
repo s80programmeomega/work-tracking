@@ -8,7 +8,7 @@
         <input
           v-model="searchQuery"
           type="text"
-          placeholder="Rechercher une tâche..."
+          :placeholder="$t('documents_page.task_browser.search_placeholder')"
           class="w-full rounded-3 border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
         />
       </div>
@@ -18,7 +18,7 @@
         v-model="selectedActivityId"
         class="rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
       >
-        <option value="">Toutes les activités</option>
+        <option value="">{{ $t('documents_page.task_browser.filter_all_activities') }}</option>
         <option
           v-for="activity in activities"
           :key="activity.id"
@@ -33,10 +33,10 @@
         v-model="statusFilter"
         class="rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
       >
-        <option value="">Tous les statuts</option>
-        <option value="a_faire">À faire</option>
-        <option value="en_cours">En cours</option>
-        <option value="termine">Terminé</option>
+        <option value="">{{ $t('documents_page.task_browser.filter_all_statuses') }}</option>
+        <option value="a_faire">{{ $t('documents_page.task_browser.status_a_faire') }}</option>
+        <option value="en_cours">{{ $t('documents_page.task_browser.status_en_cours') }}</option>
+        <option value="termine">{{ $t('documents_page.task_browser.status_termine') }}</option>
       </select>
 
       <!-- Priority Filter -->
@@ -44,11 +44,11 @@
         v-model="priorityFilter"
         class="rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
       >
-        <option value="">Toutes priorités</option>
-        <option value="faible">Faible</option>
-        <option value="moyenne">Moyenne</option>
-        <option value="elevee">Élevée</option>
-        <option value="critique">Critique</option>
+        <option value="">{{ $t('documents_page.task_browser.filter_all_priorities') }}</option>
+        <option value="faible">{{ $t('documents_page.task_browser.priority_faible') }}</option>
+        <option value="moyenne">{{ $t('documents_page.task_browser.priority_moyenne') }}</option>
+        <option value="elevee">{{ $t('documents_page.task_browser.priority_elevee') }}</option>
+        <option value="critique">{{ $t('documents_page.task_browser.priority_critique') }}</option>
       </select>
     </div>
 
@@ -58,12 +58,12 @@
     </div>
 
     <!-- Tasks List -->
-    <div v-else-if="filteredTasks.length > 0" class="space-y-3">
+    <div v-else-if="filteredTasks.length > 0" ref="staggerRef" class="space-y-3">
       <div
         v-for="task in filteredTasks"
         :key="task.id"
         @click="$emit('select', task)"
-        class="group cursor-pointer overflow-hidden rounded-3 border border-gray-200 bg-white transition-all hover:border-blue-500 dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-blue-400"
+        class="stagger-item group cursor-pointer overflow-hidden rounded-3 border border-gray-200 bg-white transition-all hover:border-blue-500 dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-blue-400"
       >
         <div class="flex items-start gap-4 p-4">
           <!-- Priority Indicator -->
@@ -109,7 +109,7 @@
                 <div class="mt-2 flex items-center gap-2">
                   <RectangleStackIcon class="h-4 w-4 text-gray-400" />
                   <span class="truncate text-xs text-gray-600 dark:text-gray-400">
-                    {{ task.activite?.nom || 'Sans activité' }}
+                    {{ task.activite?.nom || $t('documents_page.task_browser.no_activity') }}
                   </span>
                 </div>
               </div>
@@ -189,10 +189,10 @@
     <div v-else class="rounded-3 border-2 border-dashed border-gray-300 bg-gray-50 p-12 text-center dark:border-gray-700 dark:bg-gray-800/50">
       <CheckCircleIcon class="mx-auto h-12 w-12 text-gray-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">
-        Aucune tâche trouvée
+        {{ $t('documents_page.task_browser.empty_title') }}
       </h3>
       <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        {{ searchQuery ? 'Essayez une autre recherche' : 'Vous n\'avez accès à aucune tâche' }}
+        {{ searchQuery ? $t('documents_page.task_browser.empty_search') : $t('documents_page.task_browser.empty_default') }}
       </p>
     </div>
   </div>
@@ -200,6 +200,8 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStagger } from '@/composables/useAnimations'
 import {
   CheckCircleIcon,
   MagnifyingGlassIcon,
@@ -215,6 +217,9 @@ import {
 import api from '@/api/axios'
 
 defineEmits(['select'])
+
+const { t } = useI18n()
+const { staggerRef, applyStagger } = useStagger(50)
 
 const tasks = ref([])
 const activities = ref([])
@@ -252,12 +257,8 @@ const filteredTasks = computed(() => {
 })
 
 const getStatusLabel = (status) => {
-  const labels = {
-    a_faire: 'À faire',
-    en_cours: 'En cours',
-    termine: 'Terminé'
-  }
-  return labels[status] || status
+  const key = `documents_page.task_browser.status_${status}`
+  return t(key, status)
 }
 
 const getStatusBadgeClass = (status) => {
@@ -270,13 +271,8 @@ const getStatusBadgeClass = (status) => {
 }
 
 const getPriorityLabel = (priority) => {
-  const labels = {
-    faible: 'Faible',
-    moyenne: 'Moyenne',
-    elevee: 'Élevée',
-    critique: 'Critique'
-  }
-  return labels[priority] || priority
+  const key = `documents_page.task_browser.priority_${priority}`
+  return t(key, priority)
 }
 
 const getPriorityIcon = (priority) => {
@@ -312,7 +308,7 @@ const getPriorityTextClass = (priority) => {
 const formatDate = (dateString) => {
   if (!dateString) return '-'
   const date = new Date(dateString)
-  return date.toLocaleDateString('fr-FR', {
+  return date.toLocaleDateString(undefined, {
     day: 'numeric',
     month: 'short',
     year: 'numeric'
@@ -344,8 +340,8 @@ const loadActivities = async () => {
   }
 }
 
-onMounted(() => {
-  loadTasks()
-  loadActivities()
+onMounted(async () => {
+  await Promise.all([loadTasks(), loadActivities()])
+  applyStagger()
 })
 </script>

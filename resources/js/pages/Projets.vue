@@ -1,6 +1,6 @@
 <template>
   <AdminLayout>
-    <PageBreadcrumb :pageTitle="'Gestion des Projets'" />
+    <PageBreadcrumb :pageTitle="$t('projets_page.page_title')" />
 
     <div class="rounded-3 border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
       <!-- Navigation Tabs -->
@@ -8,6 +8,7 @@
         <div class="border-b border-gray-200 dark:border-gray-700">
           <nav class="-mb-px flex space-x-8" aria-label="Tabs">
           <button
+            dusk="tab-dashboard"
             @click="activeTab = 'dashboard'"
             :class="[
               activeTab === 'dashboard'
@@ -16,9 +17,10 @@
               'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
             ]"
           >
-            Dashboard
+            {{ $t('projets_page.tab_dashboard') }}
           </button>
           <button
+            dusk="tab-list"
             @click="activeTab = 'list'"
             :class="[
               activeTab === 'list'
@@ -27,7 +29,7 @@
               'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
             ]"
           >
-            Liste des projets
+            {{ $t('projets_page.tab_list') }}
           </button>
           <button
             v-if="selectedProjetId"
@@ -39,7 +41,7 @@
               'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
             ]"
           >
-            Détail projet
+            {{ $t('projets_page.tab_detail') }}
           </button>
         </nav>
       </div>
@@ -72,6 +74,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 
@@ -81,6 +84,7 @@ import {
   ProjetDetail
 } from '@/components/projets'
 
+const router = useRouter()
 const activeTab = ref('dashboard')
 const selectedProjetId = ref(null)
 
@@ -94,14 +98,11 @@ const backToList = () => {
 }
 
 const createActivity = () => {
-  // Navigate to activity creation form
-  console.log('Creating activity for project:', selectedProjetId.value)
-  // TODO: Implement activity creation
+  // La création d'activité se fait depuis la liste des activités.
+  router.push({ name: 'Activites' })
 }
 
 const viewActivity = (activityId) => {
-  // Navigate to activity detail
-  console.log('Viewing activity:', activityId)
-  // TODO: Implement activity view
+  router.push({ name: 'activites.show', params: { id: activityId } })
 }
 </script>

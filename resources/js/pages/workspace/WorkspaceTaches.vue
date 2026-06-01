@@ -8,10 +8,10 @@
             dusk="workspace-taches-title"
             class="text-2xl font-semibold text-gray-900 dark:text-white"
           >
-            Toutes les tâches
+            {{ $t('sidebar.workspace_tasks') }}
           </h1>
           <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Vue globale de toutes les tâches du workspace.
+            {{ $t('sidebar.all_tasks') }}
           </p>
         </div>
 
@@ -35,41 +35,45 @@
 
       <!-- Filtres -->
       <div
-        class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3 p-4 flex flex-wrap gap-3"
+        class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3 p-4 space-y-3"
         dusk="workspace-taches-filters"
       >
-        <select
-          v-model="filters.statut"
-          @change="fetchTaches(1)"
-          dusk="filter-statut"
-          class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-        >
-          <option value="">Tous les statuts</option>
-          <option value="a_faire">À faire</option>
-          <option value="en_cours">En cours</option>
-          <option value="termine">Terminé</option>
-          <option value="en_retard">En retard</option>
-          <option value="a_refaire">À refaire</option>
-        </select>
+        <div class="flex flex-wrap gap-3">
+          <select
+            v-model="filters.statut"
+            @change="fetchTaches(1)"
+            dusk="filter-statut"
+            class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+          >
+            <option value="">{{ $t('statuts.all') }}</option>
+            <option value="a_faire">{{ $t('statuts.a_faire') }}</option>
+            <option value="en_cours">{{ $t('statuts.en_cours') }}</option>
+            <option value="termine">{{ $t('statuts.termine') }}</option>
+            <option value="en_retard">{{ $t('statuts.en_retard') }}</option>
+            <option value="a_refaire">{{ $t('statuts.a_refaire') }}</option>
+          </select>
 
-        <select
-          v-model="filters.projetId"
-          @change="filters.activiteId = ''; fetchTaches(1)"
-          dusk="filter-projet"
-          class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-        >
-          <option value="">Tous les projets</option>
-          <option v-for="p in projets" :key="p.id" :value="p.id">{{ p.nom }}</option>
-        </select>
+          <select
+            v-model="filters.projetId"
+            @change="filters.activiteId = ''; fetchTaches(1)"
+            dusk="filter-projet"
+            class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+          >
+            <option value="">{{ $t('projects.all_projects') }}</option>
+            <option v-for="p in projets" :key="p.id" :value="p.id">{{ p.nom }}</option>
+          </select>
 
-        <button
-          v-if="hasActiveFilter"
-          @click="clearFilters"
-          dusk="clear-filters-btn"
-          class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-        >
-          <i class="fas fa-times mr-1"></i> Effacer
-        </button>
+          <button
+            v-if="hasActiveFilter"
+            @click="clearFilters"
+            dusk="clear-filters-btn"
+            class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+          >
+            <i class="fas fa-times mr-1"></i> {{ $t('common.reset') }}
+          </button>
+        </div>
+
+        <DateRangeFilter @change="onDateRangeChange" />
       </div>
 
       <!-- Erreur -->
@@ -82,9 +86,8 @@
 
       <!-- Table -->
       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3 overflow-hidden">
-        <div v-if="loading" class="text-center py-12 text-gray-500 dark:text-gray-400">
-          <i class="fas fa-circle-notch fa-spin text-2xl mb-2"></i>
-          <p class="text-sm">Chargement…</p>
+        <div v-if="loading" class="p-4">
+          <SkeletonLoader type="table" :rows="8" :cols="7" :col-widths="[3,2,1,1,1,1,1]" />
         </div>
 
         <div
@@ -92,10 +95,11 @@
           class="text-center py-12 text-gray-500 dark:text-gray-400"
           dusk="no-tasks-message"
         >
-          Aucune tâche trouvée pour ces critères.
+          {{ $t('projects.empty.description_with_filter') }}
         </div>
 
-        <table v-else class="min-w-full text-sm" dusk="workspace-taches-table">
+        <div v-else class="overflow-x-auto">
+        <table class="min-w-full text-sm" dusk="workspace-taches-table">
           <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
             <tr>
               <th class="px-4 py-3 text-left font-medium text-gray-700 dark:text-gray-300">Titre</th>
@@ -107,12 +111,12 @@
               <th class="px-4 py-3 text-left font-medium text-gray-700 dark:text-gray-300">ST</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody ref="tbodyRef" class="divide-y divide-gray-200 dark:divide-gray-700">
             <tr
               v-for="tache in taches"
               :key="tache.id"
               dusk="tache-row"
-              class="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer"
+              class="stagger-item hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer"
               @click="goToTache(tache)"
             >
               <td class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100 max-w-xs truncate">
@@ -161,6 +165,7 @@
             </tr>
           </tbody>
         </table>
+        </div>
       </div>
 
       <!-- Pagination -->
@@ -176,7 +181,7 @@
             dusk="prev-page-btn"
             class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-3 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
-            Précédent
+            {{ $t('common.previous') }}
           </button>
           <button
             :disabled="meta.current_page >= meta.last_page"
@@ -184,7 +189,7 @@
             dusk="next-page-btn"
             class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-3 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
-            Suivant
+            {{ $t('common.next') }}
           </button>
         </div>
       </div>
@@ -194,11 +199,17 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
-import axios from 'axios'
+import DateRangeFilter from '@/components/common/DateRangeFilter.vue'
+import { useStagger } from '@/composables/useAnimations'
+import SkeletonLoader from '@/components/common/SkeletonLoader.vue'
+import api from '@/api/axios'
 
+const { t } = useI18n()
 const router = useRouter()
+const { staggerRef: tbodyRef, applyStagger } = useStagger(40)
 
 const filters = ref({
   statut: '',
@@ -206,6 +217,13 @@ const filters = ref({
   activiteId: '',
   assigneeId: '',
 })
+
+const dateRange = ref({ from: null, to: null })
+
+function onDateRangeChange({ from, to }) {
+  dateRange.value = { from, to }
+  fetchTaches(1)
+}
 
 const loading = ref(false)
 const error   = ref(null)
@@ -226,10 +244,13 @@ async function fetchTaches(page = 1) {
     if (filters.value.projetId)   params.projet_id   = filters.value.projetId
     if (filters.value.activiteId) params.activite_id = filters.value.activiteId
     if (filters.value.assigneeId) params.assignee_id = filters.value.assigneeId
+    if (dateRange.value.from)     params.date_from   = dateRange.value.from
+    if (dateRange.value.to)       params.date_to     = dateRange.value.to
 
-    const res    = await axios.get('/api/workspace/taches', { params })
+    const res    = await api.get('/workspace/taches', { params })
     taches.value = res.data.data
     meta.value   = res.data.meta
+    applyStagger()
   } catch (e) {
     error.value = e.response?.data?.message ?? 'Erreur lors du chargement des tâches.'
   } finally {
@@ -242,13 +263,29 @@ function clearFilters() {
   fetchTaches(1)
 }
 
-function exportExcel() {
-  const params = new URLSearchParams()
-  if (filters.value.statut) params.append('statut', filters.value.statut)
-  if (filters.value.projetId) params.append('projet_id', filters.value.projetId)
-  if (filters.value.activiteId) params.append('activite_id', filters.value.activiteId)
-  if (filters.value.assigneeId) params.append('assignee_id', filters.value.assigneeId)
-  window.open(`/api/workspace/taches/export-excel?${params}`, '_blank')
+async function exportExcel() {
+  // window.open ne transporte pas l'en-tête Authorization Bearer du localStorage —
+  // on télécharge via api (qui ajoute le token via son intercepteur) et on déclenche
+  // une ancre synthétique avec un object-URL.
+  const params = {}
+  if (filters.value.statut) params.statut = filters.value.statut
+  if (filters.value.projetId) params.projet_id = filters.value.projetId
+  if (filters.value.activiteId) params.activite_id = filters.value.activiteId
+  if (filters.value.assigneeId) params.assignee_id = filters.value.assigneeId
+  try {
+    const res = await api.get('/workspace/taches/export-excel', { params, responseType: 'blob' })
+    const blob = new Blob([res.data], { type: res.headers['content-type'] || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `taches-workspace-${new Date().toISOString().slice(0, 10)}.xlsx`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+  } catch (e) {
+    error.value = e.response?.data?.message ?? 'Échec de l\'export Excel.'
+  }
 }
 
 function goToTache(tache) {
@@ -261,25 +298,22 @@ function formatDate(date) {
 }
 
 function statutLabel(statut) {
-  const map = {
-    a_faire: 'À faire',
-    en_cours: 'En cours',
-    termine: 'Terminé',
-    en_retard: 'En retard',
-    a_refaire: 'À refaire',
-  }
-  return map[statut] ?? statut
+  const key = `statuts.${statut}`
+  const label = t(key)
+  return label !== key ? label : statut
 }
 
 function statutBadge(statut) {
   const map = {
     a_faire: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
     en_cours: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    en_attente: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
     termine: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
     en_retard: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
     a_refaire: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+    annule: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
   }
-  return map[statut] ?? 'bg-gray-100 text-gray-700 dark:text-gray-200'
+  return map[statut] ?? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200'
 }
 
 function prioriteBadge(priorite) {
@@ -289,9 +323,21 @@ function prioriteBadge(priorite) {
     elevee: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
     critique: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
   }
-  return map[priorite] ?? 'bg-gray-100 text-gray-600 dark:text-gray-300'
+  return map[priorite] ?? 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
 }
 
-onMounted(fetchTaches)
+async function loadProjets() {
+  // Liste tous les projets pour alimenter le filtre du dropdown (owner uniquement).
+  try {
+    const res = await api.get('/projets/list/all')
+    projets.value = res.data?.data ?? res.data ?? []
+  } catch {
+    // non-bloquant — le dropdown restera vide si l'appel échoue.
+  }
+}
+
+onMounted(async () => {
+  await Promise.all([loadProjets(), fetchTaches()])
+})
 
 </script>

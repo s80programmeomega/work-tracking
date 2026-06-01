@@ -188,9 +188,9 @@
               Aucune activité récente
             </p>
           </div>
-          <div v-else class="space-y-4">
+          <div v-else ref="activityStaggerRef" class="space-y-4">
             <div v-for="activity in recentActivities.slice(0, 5)" :key="activity.id"
-              class="flex items-start gap-3 pb-3 border-b border-gray-200 dark:border-gray-700 last:border-0">
+              class="stagger-item flex items-start gap-3 pb-3 border-b border-gray-200 dark:border-gray-700 last:border-0">
               <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
                 :class="getActivityStyle(activity.description).bgColor">
                 <component :is="getActivityStyle(activity.description).icon"
@@ -238,9 +238,9 @@
             </button>
           </div>
 
-          <div v-else class="space-y-3">
+          <div v-else ref="projectStaggerRef" class="space-y-3">
             <div v-for="projet in recentProjects" :key="projet.id" @click="$emit('view-projet', projet.id)"
-              class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors group">
+              class="stagger-item flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors group">
               <div class="flex items-center gap-4 flex-1 min-w-0">
                 <div class="w-12 h-12 rounded-3 flex items-center justify-center flex-shrink-0"
                   :style="{ backgroundColor: (projet.couleur || '#3B82F6') + '20' }">
@@ -353,7 +353,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useProjets } from '@/composables/useProjets'
 import {
   FolderIcon,
@@ -370,8 +370,12 @@ import {
   RefreshIcon
 } from '@/icons'
 import ProjetFormModal from './ProjetFormModal.vue'
+import { useStagger } from '@/composables/useAnimations'
 
 const emit = defineEmits(['view-all', 'view-projet', 'create-projet', 'view-favorites', 'view-overdue'])
+
+const { staggerRef: activityStaggerRef, applyStagger: applyActivityStagger } = useStagger(40)
+const { staggerRef: projectStaggerRef, applyStagger: applyProjectStagger } = useStagger(50)
 
 // state
 const selectedProjet = ref(null)
@@ -524,6 +528,16 @@ const refreshData = async () => {
     fetchProjets({ per_page: 5 })
   ])
 }
+
+watch(recentActivities, async () => {
+  await nextTick()
+  applyActivityStagger()
+})
+
+watch(recentProjects, async () => {
+  await nextTick()
+  applyProjectStagger()
+})
 
 onMounted(async () => {
   await refreshData()

@@ -37,7 +37,7 @@
     >
       <div class="flex items-center justify-between pb-3 mb-3 border-b border-gray-200 dark:border-gray-800">
         <h5 class="text-base font-semibold text-gray-900 dark:text-white">
-          Notifications
+          {{ $t('notifications.heading') }}
           <span v-if="unreadCount > 0" class="ml-1.5 text-sm font-medium text-brand-600 dark:text-brand-400">
             ({{ unreadCount }})
           </span>
@@ -48,9 +48,9 @@
             v-if="unreadCount > 0"
             @click="handleMarkAllAsRead"
             class="p-1.5 rounded-3 text-success-600 hover:bg-success-50 dark:text-success-400 dark:hover:bg-success-500/10 transition-colors"
-            title="Tout marquer comme lu"
+            :title="$t('notifications.mark_read_title')"
           >
-            <i class="fas fa-check-double text-sm"></i>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="m1.5 12.75 6 6 9-13.5m3 0-6 6-3-3"/></svg>
           </button>
           <button
             @click="closeDropdown"
@@ -66,12 +66,12 @@
       </div>
 
       <div v-if="loading" class="flex items-center justify-center py-8">
-        <i class="fas fa-spinner fa-spin text-2xl text-gray-400"></i>
+        <svg class="animate-spin h-6 w-6 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
       </div>
 
       <div v-else-if="displayedNotifications.length === 0" class="flex flex-col items-center justify-center py-8 gap-2">
-        <i class="fas fa-bell-slash text-4xl text-gray-300 dark:text-gray-700"></i>
-        <p class="text-sm text-gray-500 dark:text-gray-400">Aucune notification</p>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 text-gray-300 dark:text-gray-700"><path stroke-linecap="round" stroke-linejoin="round" d="M9.143 17.082a24.248 24.248 0 0 0 3.844.148m-3.844-.148a23.856 23.856 0 0 1-5.455-1.31 8.964 8.964 0 0 0 2.3-5.542m3.155 6.852a3 3 0 0 0 5.667 1.97m1.965-2.277L21 21m-4.225-4.225a23.81 23.81 0 0 0 .356-1.899M6.228 6.228 3 3m3.228 3.228a23.793 23.793 0 0 0-.021.614 8.985 8.985 0 0 0 2.14 5.755m9.592-9.592a6 6 0 0 0-7.752 5.929m9.447 2.021a6 6 0 0 0 .3-1.95"/></svg>
+        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('notifications.none') }}</p>
       </div>
 
       <div v-else class="flex flex-col overflow-y-auto">
@@ -82,7 +82,6 @@
           @click="handleNotificationClick"
           @mark-read="handleMarkAsRead"
           @delete="handleDelete"
-          @open-resultat-modal="handleOpenResultatModal"
         />
       </div>
 
@@ -91,7 +90,7 @@
         class="mt-3 flex justify-center rounded-3 border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white transition-colors"
         @click="closeDropdown"
       >
-        Voir toutes les notifications
+        {{ $t('notifications.view_all') }}
       </router-link>
     </div>
 
@@ -116,6 +115,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useNotifications } from '@/composables/useNotifications'
 import { useAuthStore } from '@/stores/authStore'
 import NotificationItem from './NotificationItem.vue'
@@ -126,6 +126,7 @@ import api from '@/api/axios'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { t } = useI18n()
 const dropdownOpen = ref(false)
 const dropdownRef = ref(null)
 const maxDisplayed = 5

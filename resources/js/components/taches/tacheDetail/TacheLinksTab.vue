@@ -28,12 +28,12 @@
     </div>
 
     <!-- Links list -->
-    <div v-if="tache.external_links && tache.external_links.length > 0" class="grid grid-cols-1 gap-4">
-      <div 
-        v-for="link in tache.external_links" 
+    <div v-if="tache.external_links && tache.external_links.length > 0" ref="staggerRef" class="grid grid-cols-1 gap-4">
+      <div
+        v-for="link in tache.external_links"
         :key="link.id"
         :id="`link-${link.id}`"
-        class="bg-white dark:bg-gray-800 rounded-3 p-4 border-2 border-gray-200 dark:border-gray-700 hover:border-brand-500 transition-colors"
+        class="stagger-item bg-white dark:bg-gray-800 rounded-3 p-4 border-2 border-gray-200 dark:border-gray-700 hover:border-brand-500 transition-colors"
         :class="{ 'ring-2 ring-brand-500': highlightedLink === link.id }"
       >
         <div class="flex items-start gap-4">
@@ -95,7 +95,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, watch, onMounted, nextTick } from 'vue';
+import { useStagger } from '@/composables/useAnimations';
 import { useRoute } from 'vue-router';
 import api from '@/api/axios';
 import { useNotifications } from '@/composables/useNotifications';
@@ -115,7 +116,13 @@ const emit = defineEmits(['refresh']);
 
 const route = useRoute();
 const { showSuccess, showError } = useNotifications();
+const { staggerRef, applyStagger } = useStagger(50);
 const highlightedLink = ref(null);
+
+watch(() => props.tache?.external_links, async () => {
+  await nextTick();
+  applyStagger();
+}, { immediate: true });
 
 const newLink = reactive({
   url: '',

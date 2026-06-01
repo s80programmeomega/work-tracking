@@ -357,11 +357,8 @@ const handleSubmit = async () => {
     authStore.error = null;
 
     try {
-        // Test direct de l'API
-        const testResponse = await fetch('/sanctum/csrf-cookie', {
-            credentials: 'include'
-        });
-        console.log('✅ CSRF Cookie test:', testResponse.status);
+        // Sanctum SPA stateful auth — il faut récupérer le cookie CSRF avant le login.
+        await fetch('/sanctum/csrf-cookie', { credentials: 'include' });
         // Appeler l'action de connexion du store
         await authStore.login({
             email: form.email,

@@ -1,6 +1,6 @@
 <template>
   <AdminLayout>
-    <PageBreadcrumb :pageTitle="team?.name || 'Équipe'" />
+    <PageBreadcrumb :pageTitle="team?.name || $t('team_show.fallback_name')" />
 
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center items-center h-64">
@@ -60,7 +60,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
-                  {{ team.members_count || 0 }} membre{{ (team.members_count || 0) > 1 ? 's' : '' }}
+                  {{ $t('team_show.members_count', { count: team.members_count || 0 }) }}
                 </span>
               </div>
             </div>
@@ -74,7 +74,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
               </svg>
-              Modifier
+              {{ $t('team_show.modify') }}
             </button>
             <button @click="deleteTeamConfirm"
               class="px-4 py-2 border border-red-300 dark:border-red-700 rounded-3 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 transition-colors flex items-center gap-2">
@@ -82,7 +82,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
-              Supprimer
+              {{ $t('team_show.delete') }}
             </button>
           </div>
         </div>
@@ -156,14 +156,14 @@
                         d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
                   </div>
-                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">Aucun message</h3>
-                  <p class="text-gray-500 dark:text-gray-400">Soyez le premier à envoyer un message!</p>
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">{{ $t('team_show.no_messages') }}</h3>
+                  <p class="text-gray-500 dark:text-gray-400">{{ $t('team_show.be_first_message') }}</p>
                 </div>
               </div>
 
               <!-- Message Input -->
               <form @submit.prevent="sendMessage" class="mt-4 flex gap-2">
-                <input v-model="newMessage" type="text" placeholder="Tapez votre message..."
+                <input v-model="newMessage" type="text" :placeholder="$t('team_show.message_placeholder')"
                   class="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" />
                 <button type="submit" :disabled="!newMessage.trim()"
                   class="px-6 py-3 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
@@ -171,7 +171,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                   </svg>
-                  Envoyer
+                  {{ $t('team_show.send') }}
                 </button>
               </form>
             </div>
@@ -180,14 +180,14 @@
           <!-- Members Tab -->
           <div v-else-if="activeTab === 'members'" class="space-y-4">
             <div class="flex justify-between items-center mb-6">
-              <h3 class="text-xl font-bold text-gray-900 dark:text-white">Membres de l'équipe</h3>
+              <h3 class="text-xl font-bold text-gray-900 dark:text-white">{{ $t('team_show.members_title') }}</h3>
               <button v-if="isTeamOwner" @click="showAddMemberModal = true"
                 class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-3 font-medium transition-colors flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                 </svg>
-                Ajouter un membre
+                {{ $t('team_show.add_member') }}
               </button>
             </div>
 
@@ -207,7 +207,7 @@
                         'bg-green-500': isOnline(presences.find(p => p.user_id === member.id)?.last_seen),
                         'bg-gray-400': !isOnline(presences.find(p => p.user_id === member.id)?.last_seen)
                       }"
-                      :title="isOnline(presences.find(p => p.user_id === member.id)?.last_seen) ? 'En ligne' : formatLastSeen(presences.find(p => p.user_id === member.id)?.last_seen)">
+                      :title="isOnline(presences.find(p => p.user_id === member.id)?.last_seen) ? $t('team_show.online') : formatLastSeen(presences.find(p => p.user_id === member.id)?.last_seen)">
                     </div>
                   </div>
                   <div class="flex-1">
@@ -225,7 +225,7 @@
                       <!-- Last seen -->
                       <span v-if="presences.find(p => p.user_id === member.id)"
                         class="text-xs text-gray-500 dark:text-gray-400">
-                        {{isOnline(presences.find(p => p.user_id === member.id)?.last_seen) ? '🟢 En ligne' :
+                        {{ isOnline(presences.find(p => p.user_id === member.id)?.last_seen) ? ('🟢 ' + $t('team_show.online')) :
                           formatLastSeen(presences.find(p => p.user_id === member.id)?.last_seen) }}
                       </span>
                     </div>
@@ -245,14 +245,14 @@
           <!-- Announcements Tab -->
           <div v-else-if="activeTab === 'announcements'" class="space-y-4">
             <div class="flex justify-between items-center mb-6">
-              <h3 class="text-xl font-bold text-gray-900 dark:text-white">Annonces de l'équipe</h3>
+              <h3 class="text-xl font-bold text-gray-900 dark:text-white">{{ $t('team_show.announcements_title') }}</h3>
               <button @click="showAnnouncementModal = true"
                 class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-3 font-medium transition-colors flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
                 </svg>
-                Nouvelle annonce
+                {{ $t('team_show.new_announcement') }}
               </button>
             </div>
 
@@ -272,12 +272,12 @@
                       <h4 class="text-lg font-bold text-gray-900 dark:text-white">{{ announcement.title }}</h4>
                       <span v-if="announcement.priority === 'high'"
                         class="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
-                        Urgent
+                        {{ $t('team_show.urgent') }}
                       </span>
                     </div>
                     <p class="text-gray-700 dark:text-gray-300 mb-3">{{ announcement.content }}</p>
                     <div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                      <span>Par {{ announcement.user?.nom }}</span>
+                      <span>{{ $t('team_show.by_prefix') }} {{ announcement.user?.nom }}</span>
                       <span>•</span>
                       <span>{{ formatDate(announcement.published_at || announcement.created_at) }}</span>
                     </div>
@@ -302,8 +302,8 @@
                       d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
                   </svg>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">Aucune annonce</h3>
-                <p class="text-gray-500 dark:text-gray-400">Créez la première annonce pour votre équipe</p>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">{{ $t('team_show.no_announcements') }}</h3>
+                <p class="text-gray-500 dark:text-gray-400">{{ $t('team_show.no_announcements_desc') }}</p>
               </div>
             </div>
           </div>
@@ -311,13 +311,13 @@
           <!-- Resources Tab -->
           <div v-else-if="activeTab === 'resources'" class="space-y-4">
             <div class="flex justify-between items-center mb-6">
-              <h3 class="text-xl font-bold text-gray-900 dark:text-white">Ressources partagées</h3>
+              <h3 class="text-xl font-bold text-gray-900 dark:text-white">{{ $t('team_show.resources_title') }}</h3>
               <button @click="showResourceModal = true"
                 class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-3 font-medium transition-colors flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
-                Ajouter ressource
+                {{ $t('team_show.add_resource') }}
               </button>
             </div>
 
@@ -361,9 +361,8 @@
                       d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                   </svg>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">Aucune ressource</h3>
-                <p class="text-gray-500 dark:text-gray-400">Partagez des documents, liens ou templates avec votre équipe
-                </p>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">{{ $t('team_show.no_resources') }}</h3>
+                <p class="text-gray-500 dark:text-gray-400">{{ $t('team_show.no_resources_desc') }}</p>
               </div>
             </div>
           </div>
@@ -371,13 +370,13 @@
           <!-- Calendar Tab -->
           <div v-else-if="activeTab === 'calendar'" class="space-y-4">
             <div class="flex justify-between items-center mb-6">
-              <h3 class="text-xl font-bold text-gray-900 dark:text-white">Calendrier de l'équipe</h3>
+              <h3 class="text-xl font-bold text-gray-900 dark:text-white">{{ $t('team_show.calendar_title') }}</h3>
               <button @click="showEventModal = true"
                 class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-3 font-medium transition-colors flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
-                Nouvel événement
+                {{ $t('team_show.new_event') }}
               </button>
             </div>
 
@@ -438,11 +437,11 @@
                       </div>
                       <span v-if="isToday(event.start_date)"
                         class="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                        Aujourd'hui
+                        {{ $t('team_show.today') }}
                       </span>
                       <span v-if="isPast(event.end_date || event.start_date)"
                         class="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-                        Passé
+                        {{ $t('team_show.past') }}
                       </span>
                     </div>
                     <div v-if="event.attendees && event.attendees.length > 0" class="mt-3 flex items-center gap-2">
@@ -476,15 +475,15 @@
                       d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">Aucun événement</h3>
-                <p class="text-gray-500 dark:text-gray-400">Créez le premier événement pour votre équipe</p>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">{{ $t('team_show.no_events') }}</h3>
+                <p class="text-gray-500 dark:text-gray-400">{{ $t('team_show.no_events_desc') }}</p>
               </div>
             </div>
           </div>
 
           <!-- Activity Tab -->
           <div v-else-if="activeTab === 'activity'" class="space-y-4">
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Activités récentes</h3>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">{{ $t('team_show.recent_activities') }}</h3>
 
             <!-- Activity Timeline -->
             <div class="space-y-4">
@@ -516,8 +515,8 @@
                       d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">Aucune activité</h3>
-                <p class="text-gray-500 dark:text-gray-400">L'historique des activités apparaîtra ici</p>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">{{ $t('team_show.no_activities') }}</h3>
+                <p class="text-gray-500 dark:text-gray-400">{{ $t('team_show.no_activities_desc') }}</p>
               </div>
             </div>
           </div>
@@ -527,7 +526,7 @@
 
     <!-- Edit Team Modal -->
     <div v-if="showEditModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 "
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 "
       @click.self="showEditModal = false">
       <div class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-2xl transform transition-all">
         <!-- Modal Header -->
@@ -543,8 +542,8 @@
                 </svg>
               </div>
               <div>
-                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Modifier l'équipe</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Mettez à jour les informations de l'équipe</p>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('team_show.modal_edit_title') }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('team_show.modal_edit_subtitle') }}</p>
               </div>
             </div>
             <button type="button" @click="showEditModal = false"
@@ -562,25 +561,25 @@
             <!-- Team Name -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Nom de l'équipe <span class="text-red-500">*</span>
+                {{ $t('team_show.team_name_label') }} <span class="text-red-500">*</span>
               </label>
-              <input v-model="editForm.name" type="text" required placeholder="Ex: Équipe Marketing, Développement..."
+              <input v-model="editForm.name" type="text" required :placeholder="$t('team_show.team_name_placeholder')"
                 class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" />
             </div>
 
             <!-- Description -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Description
+                {{ $t('team_show.description_label') }}
               </label>
-              <textarea v-model="editForm.description" rows="3" placeholder="Décrivez l'objectif de cette équipe..."
+              <textarea v-model="editForm.description" rows="3" :placeholder="$t('team_show.description_placeholder')"
                 class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all resize-none"></textarea>
             </div>
 
             <!-- Visibility -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                Visibilité
+                {{ $t('team_show.visibility_label') }}
               </label>
               <div class="grid grid-cols-3 gap-3">
                 <label v-for="option in visibilityOptions" :key="option.value"
@@ -609,7 +608,7 @@
           class="px-8 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end gap-3">
           <button type="button" @click="showEditModal = false"
             class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all">
-            Annuler
+            {{ $t('team_show.cancel') }}
           </button>
           <button type="button" @click="updateTeam" :disabled="updating || !editForm.name"
             class="px-5 py-2.5 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
@@ -619,7 +618,7 @@
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
               </path>
             </svg>
-            {{ updating ? 'Mise à jour...' : 'Enregistrer' }}
+            {{ updating ? $t('team_show.updating') : $t('team_show.save') }}
           </button>
         </div>
       </div>
@@ -627,7 +626,7 @@
 
     <!-- Add Member Modal -->
     <div v-if="showAddMemberModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 "
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 "
       @click.self="showAddMemberModal = false">
       <div class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-lg transform transition-all">
         <!-- Modal Header -->
@@ -643,8 +642,8 @@
                 </svg>
               </div>
               <div>
-                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Ajouter un membre</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Invitez un utilisateur à rejoindre l'équipe</p>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('team_show.modal_add_member_title') }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('team_show.modal_add_member_subtitle') }}</p>
               </div>
             </div>
             <button type="button" @click="showAddMemberModal = false"
@@ -662,11 +661,11 @@
             <!-- User Selection -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Utilisateur <span class="text-red-500">*</span>
+                {{ $t('team_show.user_label') }} <span class="text-red-500">*</span>
               </label>
               <select v-model="newMemberForm.user_id" required
                 class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all">
-                <option value="">Sélectionnez un utilisateur</option>
+                <option value="">{{ $t('team_show.select_user') }}</option>
                 <option v-for="user in availableUsers" :key="user.id" :value="user.id">
                   {{ user.nom }} ({{ user.email }})
                 </option>
@@ -676,7 +675,7 @@
             <!-- Role Selection -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                Rôle
+                {{ $t('team_show.role_label') }}
               </label>
               <div class="grid grid-cols-2 gap-3">
                 <label v-for="role in memberRoles" :key="role.value"
@@ -705,7 +704,7 @@
           class="px-8 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end gap-3">
           <button type="button" @click="showAddMemberModal = false"
             class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all">
-            Annuler
+            {{ $t('team_show.cancel') }}
           </button>
           <button type="button" @click="addMember" :disabled="addingMember || !newMemberForm.user_id"
             class="px-5 py-2.5 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
@@ -715,7 +714,7 @@
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
               </path>
             </svg>
-            {{ addingMember ? 'Ajout...' : 'Ajouter' }}
+            {{ addingMember ? $t('team_show.adding') : $t('common.add') }}
           </button>
         </div>
       </div>
@@ -723,7 +722,7 @@
 
     <!-- Edit Team Modal -->
     <div v-if="showEditModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 "
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 "
       @click.self="showEditModal = false">
       <div class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-2xl transform transition-all">
         <!-- Modal Header -->
@@ -739,8 +738,8 @@
                 </svg>
               </div>
               <div>
-                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Modifier l'équipe</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Mettez à jour les informations de l'équipe</p>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('team_show.modal_edit_title') }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('team_show.modal_edit_subtitle') }}</p>
               </div>
             </div>
             <button type="button" @click="showEditModal = false"
@@ -758,25 +757,25 @@
             <!-- Team Name -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Nom de l'équipe <span class="text-red-500">*</span>
+                {{ $t('team_show.team_name_label') }} <span class="text-red-500">*</span>
               </label>
-              <input v-model="editForm.name" type="text" required placeholder="Ex: Équipe Marketing, Développement..."
+              <input v-model="editForm.name" type="text" required :placeholder="$t('team_show.team_name_placeholder')"
                 class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" />
             </div>
 
             <!-- Description -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Description
+                {{ $t('team_show.description_label') }}
               </label>
-              <textarea v-model="editForm.description" rows="3" placeholder="Décrivez l'objectif de cette équipe..."
+              <textarea v-model="editForm.description" rows="3" :placeholder="$t('team_show.description_placeholder')"
                 class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all resize-none"></textarea>
             </div>
 
             <!-- Visibility -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                Visibilité
+                {{ $t('team_show.visibility_label') }}
               </label>
               <div class="grid grid-cols-3 gap-3">
                 <label v-for="option in visibilityOptions" :key="option.value"
@@ -805,7 +804,7 @@
           class="px-8 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end gap-3">
           <button type="button" @click="showEditModal = false"
             class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all">
-            Annuler
+            {{ $t('team_show.cancel') }}
           </button>
           <button type="button" @click="updateTeam" :disabled="updating || !editForm.name"
             class="px-5 py-2.5 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
@@ -815,7 +814,7 @@
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
               </path>
             </svg>
-            {{ updating ? 'Mise à jour...' : 'Enregistrer' }}
+            {{ updating ? $t('team_show.updating') : $t('team_show.save') }}
           </button>
         </div>
       </div>
@@ -823,7 +822,7 @@
 
     <!-- Add Member Modal -->
     <div v-if="showAddMemberModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 "
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 "
       @click.self="showAddMemberModal = false">
       <div class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-lg transform transition-all">
         <!-- Modal Header -->
@@ -839,8 +838,8 @@
                 </svg>
               </div>
               <div>
-                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Ajouter un membre</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Invitez un utilisateur à rejoindre l'équipe</p>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('team_show.modal_add_member_title') }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('team_show.modal_add_member_subtitle') }}</p>
               </div>
             </div>
             <button type="button" @click="showAddMemberModal = false"
@@ -858,11 +857,11 @@
             <!-- User Selection -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Utilisateur <span class="text-red-500">*</span>
+                {{ $t('team_show.user_label') }} <span class="text-red-500">*</span>
               </label>
               <select v-model="newMemberForm.user_id" required
                 class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all">
-                <option value="">Sélectionnez un utilisateur</option>
+                <option value="">{{ $t('team_show.select_user') }}</option>
                 <option v-for="user in availableUsers" :key="user.id" :value="user.id">
                   {{ user.nom }} ({{ user.email }})
                 </option>
@@ -872,7 +871,7 @@
             <!-- Role Selection -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                Rôle
+                {{ $t('team_show.role_label') }}
               </label>
               <div class="grid grid-cols-2 gap-3">
                 <label v-for="role in memberRoles" :key="role.value"
@@ -901,7 +900,7 @@
           class="px-8 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end gap-3">
           <button type="button" @click="showAddMemberModal = false"
             class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all">
-            Annuler
+            {{ $t('team_show.cancel') }}
           </button>
           <button type="button" @click="addMember" :disabled="addingMember || !newMemberForm.user_id"
             class="px-5 py-2.5 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
@@ -911,7 +910,7 @@
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
               </path>
             </svg>
-            {{ addingMember ? 'Ajout...' : 'Ajouter' }}
+            {{ addingMember ? $t('team_show.adding') : $t('common.add') }}
           </button>
         </div>
       </div>
@@ -919,7 +918,7 @@
 
     <!-- Create Announcement Modal -->
     <div v-if="showAnnouncementModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 "
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 "
       @click.self="showAnnouncementModal = false">
       <div class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-2xl transform transition-all">
         <!-- Modal Header -->
@@ -932,8 +931,8 @@
                 📢
               </div>
               <div>
-                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Nouvelle annonce</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Créez une annonce importante pour votre équipe</p>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('team_show.modal_new_announcement') }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('team_show.modal_new_announcement_subtitle') }}</p>
               </div>
             </div>
             <button type="button" @click="showAnnouncementModal = false"
@@ -951,27 +950,27 @@
             <!-- Title -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Titre de l'annonce <span class="text-red-500">*</span>
+                {{ $t('team_show.announcement_title_label') }} <span class="text-red-500">*</span>
               </label>
               <input v-model="announcementForm.title" type="text" required
-                placeholder="Ex: Nouvelle procédure, Mise à jour importante..."
+                :placeholder="$t('team_show.announcement_title_placeholder')"
                 class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all" />
             </div>
 
             <!-- Content -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Contenu <span class="text-red-500">*</span>
+                {{ $t('team_show.announcement_content_label') }} <span class="text-red-500">*</span>
               </label>
               <textarea v-model="announcementForm.content" rows="6" required
-                placeholder="Décrivez votre annonce en détail..."
+                :placeholder="$t('team_show.announcement_content_placeholder')"
                 class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all resize-none"></textarea>
             </div>
 
             <!-- Priority -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                Priorité
+                {{ $t('team_show.announcement_priority') }}
               </label>
               <div class="grid grid-cols-2 gap-3">
                 <label class="relative flex items-center gap-3 p-4 border-2 rounded-3 cursor-pointer transition-all"
@@ -981,8 +980,8 @@
                   <input type="radio" v-model="announcementForm.priority" value="normal" class="sr-only" />
                   <span class="text-2xl">ℹ️</span>
                   <div class="flex-1">
-                    <span class="block text-sm font-semibold text-gray-900 dark:text-white">Normale</span>
-                    <span class="text-xs text-gray-500 dark:text-gray-400">Information standard</span>
+                    <span class="block text-sm font-semibold text-gray-900 dark:text-white">{{ $t('team_show.priority_normal') }}</span>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">{{ $t('team_show.priority_normal_desc') }}</span>
                   </div>
                   <svg v-if="announcementForm.priority === 'normal'" class="w-5 h-5 text-blue-500" fill="currentColor"
                     viewBox="0 0 20 20">
@@ -998,8 +997,8 @@
                   <input type="radio" v-model="announcementForm.priority" value="high" class="sr-only" />
                   <span class="text-2xl">⚠️</span>
                   <div class="flex-1">
-                    <span class="block text-sm font-semibold text-gray-900 dark:text-white">Urgente</span>
-                    <span class="text-xs text-gray-500 dark:text-gray-400">Nécessite une attention immédiate</span>
+                    <span class="block text-sm font-semibold text-gray-900 dark:text-white">{{ $t('team_show.priority_urgent') }}</span>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">{{ $t('team_show.priority_urgent_desc') }}</span>
                   </div>
                   <svg v-if="announcementForm.priority === 'high'" class="w-5 h-5 text-red-500" fill="currentColor"
                     viewBox="0 0 20 20">
@@ -1018,7 +1017,7 @@
           class="px-8 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end gap-3">
           <button type="button" @click="showAnnouncementModal = false"
             class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all">
-            Annuler
+            {{ $t('team_show.cancel') }}
           </button>
           <button type="button" @click="createNewAnnouncement"
             :disabled="creatingAnnouncement || !announcementForm.title || !announcementForm.content"
@@ -1029,7 +1028,7 @@
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
               </path>
             </svg>
-            {{ creatingAnnouncement ? 'Création...' : 'Créer l\'annonce' }}
+            {{ creatingAnnouncement ? $t('team_show.creating_announcement') : $t('team_show.create_announcement') }}
           </button>
         </div>
       </div>
@@ -1037,7 +1036,7 @@
 
     <!-- Create Resource Modal -->
     <div v-if="showResourceModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 "
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 "
       @click.self="showResourceModal = false">
       <div class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-2xl transform transition-all">
         <!-- Modal Header -->
@@ -1050,8 +1049,8 @@
                 📎
               </div>
               <div>
-                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Ajouter une ressource</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Partagez un document, lien, template ou outil</p>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('team_show.modal_add_resource') }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('team_show.modal_add_resource_subtitle') }}</p>
               </div>
             </div>
             <button type="button" @click="showResourceModal = false"
@@ -1069,7 +1068,7 @@
             <!-- Type Selection -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                Type de ressource
+                {{ $t('team_show.resource_type_label') }}
               </label>
               <div class="grid grid-cols-4 gap-3">
                 <label v-for="type in resourceTypes" :key="type.value"
@@ -1093,29 +1092,29 @@
             <!-- Title -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Titre <span class="text-red-500">*</span>
+                {{ $t('team_show.resource_title_label') }} <span class="text-red-500">*</span>
               </label>
               <input v-model="resourceForm.title" type="text" required
-                placeholder="Ex: Guide utilisateur, Lien API documentation..."
+                :placeholder="$t('team_show.resource_title_placeholder')"
                 class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" />
             </div>
 
             <!-- URL -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                URL ou chemin <span class="text-red-500">*</span>
+                {{ $t('team_show.resource_url_label') }} <span class="text-red-500">*</span>
               </label>
               <input v-model="resourceForm.url" type="text" required
-                placeholder="https://example.com/document.pdf ou /chemin/vers/fichier"
+                :placeholder="$t('team_show.resource_url_placeholder')"
                 class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" />
             </div>
 
             <!-- Description -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Description
+                {{ $t('team_show.resource_desc_label') }}
               </label>
-              <textarea v-model="resourceForm.description" rows="3" placeholder="Décrivez brièvement cette ressource..."
+              <textarea v-model="resourceForm.description" rows="3" :placeholder="$t('team_show.resource_desc_placeholder')"
                 class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all resize-none"></textarea>
             </div>
           </div>
@@ -1126,7 +1125,7 @@
           class="px-8 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end gap-3">
           <button type="button" @click="showResourceModal = false"
             class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all">
-            Annuler
+            {{ $t('team_show.cancel') }}
           </button>
           <button type="button" @click="createNewResource"
             :disabled="creatingResource || !resourceForm.title || !resourceForm.url"
@@ -1137,7 +1136,7 @@
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
               </path>
             </svg>
-            {{ creatingResource ? 'Ajout...' : 'Ajouter la ressource' }}
+            {{ creatingResource ? $t('team_show.adding_resource') : $t('team_show.add_resource_btn') }}
           </button>
         </div>
       </div>
@@ -1145,7 +1144,7 @@
 
     <!-- Create Event Modal -->
     <div v-if="showEventModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 "
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 "
       @click.self="showEventModal = false">
       <div class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-2xl transform transition-all">
         <!-- Modal Header -->
@@ -1158,8 +1157,8 @@
                 📅
               </div>
               <div>
-                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Nouvel événement</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Créez un événement pour le calendrier d'équipe</p>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('team_show.modal_new_event') }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('team_show.modal_new_event_subtitle') }}</p>
               </div>
             </div>
             <button type="button" @click="showEventModal = false"
@@ -1177,7 +1176,7 @@
             <!-- Event Type -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                Type d'événement
+                {{ $t('team_show.event_type_label') }}
               </label>
               <div class="grid grid-cols-3 gap-3">
                 <label v-for="type in eventTypes" :key="type.value"
@@ -1201,19 +1200,19 @@
             <!-- Title -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Titre <span class="text-red-500">*</span>
+                {{ $t('team_show.event_title_label') }} <span class="text-red-500">*</span>
               </label>
               <input v-model="eventForm.title" type="text" required
-                placeholder="Ex: Réunion d'équipe, Sprint planning..."
+                :placeholder="$t('team_show.event_title_placeholder')"
                 class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" />
             </div>
 
             <!-- Description -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Description
+                {{ $t('team_show.event_desc_label') }}
               </label>
-              <textarea v-model="eventForm.description" rows="3" placeholder="Ajoutez des détails sur l'événement..."
+              <textarea v-model="eventForm.description" rows="3" :placeholder="$t('team_show.event_desc_placeholder')"
                 class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all resize-none"></textarea>
             </div>
 
@@ -1221,14 +1220,14 @@
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Date de début <span class="text-red-500">*</span>
+                  {{ $t('team_show.event_start_label') }} <span class="text-red-500">*</span>
                 </label>
                 <input v-model="eventForm.start_date" type="datetime-local" required
                   class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" />
               </div>
               <div>
                 <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Date de fin
+                  {{ $t('team_show.event_end_label') }}
                 </label>
                 <input v-model="eventForm.end_date" type="datetime-local"
                   class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" />
@@ -1238,9 +1237,9 @@
             <!-- Location -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Lieu
+                {{ $t('team_show.event_location_label') }}
               </label>
-              <input v-model="eventForm.location" type="text" placeholder="Ex: Salle de réunion A, Zoom, Bureau..."
+              <input v-model="eventForm.location" type="text" :placeholder="$t('team_show.event_location_placeholder')"
                 class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" />
             </div>
           </div>
@@ -1251,7 +1250,7 @@
           class="px-8 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end gap-3">
           <button type="button" @click="showEventModal = false"
             class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all">
-            Annuler
+            {{ $t('team_show.cancel') }}
           </button>
           <button type="button" @click="createNewEvent"
             :disabled="creatingEvent || !eventForm.title || !eventForm.start_date"
@@ -1262,7 +1261,7 @@
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
               </path>
             </svg>
-            {{ creatingEvent ? 'Création...' : 'Créer l\'événement' }}
+            {{ creatingEvent ? $t('team_show.creating_event') : $t('team_show.create_event') }}
           </button>
         </div>
       </div>
@@ -1272,6 +1271,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick, watch, h } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useTeams } from '@/composables/useTeams'
 import { useTeamMessages } from '@/composables/useTeamMessages'
@@ -1285,6 +1285,7 @@ import api from '@/api/axios'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const { currentTeam: team, loading, fetchTeam, removeMember, updateTeam: updateTeamApi, deleteTeam: deleteTeamApi, addMember: addMemberApi } = useTeams()
@@ -1366,35 +1367,35 @@ const eventForm = ref({
   attendees: []
 })
 
-const resourceTypes = [
-  { value: 'document', label: 'Document', icon: '📄' },
-  { value: 'link', label: 'Lien', icon: '🔗' },
-  { value: 'template', label: 'Template', icon: '📋' },
-  { value: 'tool', label: 'Outil', icon: '🔧' }
-]
+const resourceTypes = computed(() => [
+  { value: 'document', label: t('team_show.type_document'), icon: '📄' },
+  { value: 'link', label: t('team_show.type_link'), icon: '🔗' },
+  { value: 'template', label: t('team_show.type_template'), icon: '📋' },
+  { value: 'tool', label: t('team_show.type_tool'), icon: '🔧' },
+])
 
-const eventTypes = [
-  { value: 'meeting', label: 'Réunion', icon: '👥' },
-  { value: 'deadline', label: 'Échéance', icon: '⏰' },
-  { value: 'milestone', label: 'Jalon', icon: '🎯' },
-  { value: 'task', label: 'Tâche', icon: '✓' },
-  { value: 'reminder', label: 'Rappel', icon: '🔔' },
-  { value: 'event', label: 'Événement', icon: '📅' }
-]
+const eventTypes = computed(() => [
+  { value: 'meeting', label: t('team_show.type_meeting'), icon: '👥' },
+  { value: 'deadline', label: t('team_show.type_deadline'), icon: '⏰' },
+  { value: 'milestone', label: t('team_show.type_milestone'), icon: '🎯' },
+  { value: 'task', label: t('team_show.type_task'), icon: '✓' },
+  { value: 'reminder', label: t('team_show.type_reminder'), icon: '🔔' },
+  { value: 'event', label: t('team_show.type_event'), icon: '📅' },
+])
 
 // Visibility options
-const visibilityOptions = [
-  { value: 'public', label: 'Public', icon: '🌍', description: 'Visible par tous' },
-  { value: 'private', label: 'Privé', icon: '🔒', description: 'Sur invitation' },
-  { value: 'secret', label: 'Secret', icon: '🕵️', description: 'Totalement privé' }
-]
+const visibilityOptions = computed(() => [
+  { value: 'public', label: t('teams_page.vis_public'), icon: '🌍', description: t('teams_page.vis_public_desc') },
+  { value: 'private', label: t('teams_page.vis_private'), icon: '🔒', description: t('teams_page.vis_private_desc') },
+  { value: 'secret', label: t('teams_page.vis_secret'), icon: '🕵️', description: t('teams_page.vis_secret_desc') },
+])
 
 // Member roles
-const memberRoles = [
-  { value: 'admin', label: 'Administrateur', icon: '👑', description: 'Tous les droits' },
-  { value: 'moderator', label: 'Modérateur', icon: '🛡️', description: 'Modération' },
-  { value: 'member', label: 'Membre', icon: '👤', description: 'Accès standard' }
-]
+const memberRoles = computed(() => [
+  { value: 'admin', label: t('team_show.role_admin'), icon: '👑', description: t('team_show.role_admin_desc') },
+  { value: 'moderator', label: t('team_show.role_moderator'), icon: '🛡️', description: t('team_show.role_moderator_desc') },
+  { value: 'member', label: t('team_show.role_member'), icon: '👤', description: t('team_show.role_member_desc') },
+])
 
 // Available users (not already in team)
 const availableUsers = computed(() => {
@@ -1432,12 +1433,12 @@ const AnnouncementIcon = strokeIcon('M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2
 const CalendarIcon = strokeIcon('M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z')
 
 const tabs = computed(() => [
-  { id: 'chat', label: 'Discussion', icon: ChatIcon, badge: messages.value.length || null },
-  { id: 'announcements', label: 'Annonces', icon: AnnouncementIcon, badge: announcements.value.length || null },
-  { id: 'members', label: 'Membres', icon: UsersIcon, badge: team.value?.members_count || null },
-  { id: 'resources', label: 'Ressources', icon: FolderIcon, badge: resources.value.length || null },
-  { id: 'calendar', label: 'Calendrier', icon: CalendarIcon, badge: events.value.length || null },
-  { id: 'activity', label: 'Activité', icon: ClockIcon }
+  { id: 'chat', label: t('team_show.tab_chat'), icon: ChatIcon, badge: messages.value.length || null },
+  { id: 'announcements', label: t('team_show.tab_announcements'), icon: AnnouncementIcon, badge: announcements.value.length || null },
+  { id: 'members', label: t('team_show.tab_members'), icon: UsersIcon, badge: team.value?.members_count || null },
+  { id: 'resources', label: t('team_show.tab_resources'), icon: FolderIcon, badge: resources.value.length || null },
+  { id: 'calendar', label: t('team_show.tab_calendar'), icon: CalendarIcon, badge: events.value.length || null },
+  { id: 'activity', label: t('team_show.tab_activity'), icon: ClockIcon },
 ])
 
 const getInitials = (name) => {
@@ -1449,16 +1450,20 @@ const getUserInitials = (user) => {
 }
 
 const getVisibilityLabel = (visibility) => {
-  const labels = { public: 'Public', private: 'Privé', secret: 'Secret' }
+  const labels = {
+    public: t('teams_page.vis_public'),
+    private: t('teams_page.vis_private'),
+    secret: t('teams_page.vis_secret'),
+  }
   return labels[visibility] || visibility
 }
 
 const getRoleLabel = (role) => {
   const labels = {
-    owner: 'Propriétaire',
-    admin: 'Administrateur',
-    moderator: 'Modérateur',
-    member: 'Membre'
+    owner: t('team_show.role_owner'),
+    admin: t('team_show.role_admin'),
+    moderator: t('team_show.role_moderator'),
+    member: t('team_show.role_member'),
   }
   return labels[role] || role
 }

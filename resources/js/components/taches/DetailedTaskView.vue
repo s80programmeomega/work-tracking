@@ -34,8 +34,8 @@
         </div>
         <div
           v-else
-          :class="tache.permissions?.can_edit ? 'cursor-pointer' : ''"
-          :title="tache.permissions?.can_edit ? 'Cliquer pour modifier' : ''"
+          :class="tache.permissions?.can_inline_edit ? 'cursor-pointer' : ''"
+          :title="tache.permissions?.can_inline_edit ? 'Cliquer pour modifier' : ''"
           @click="startEdit('taux_realisation', localTache.taux_realisation ?? 0)"
         >
           <div class="flex items-end gap-2">
@@ -96,8 +96,8 @@
         </div>
         <div
           v-else
-          :class="tache.permissions?.can_edit ? 'cursor-pointer' : ''"
-          :title="tache.permissions?.can_edit ? 'Cliquer pour modifier l\'échéance' : ''"
+          :class="tache.permissions?.can_inline_edit ? 'cursor-pointer' : ''"
+          :title="tache.permissions?.can_inline_edit ? 'Cliquer pour modifier l\'échéance' : ''"
           @click="startEdit('echeance', localTache.echeance)"
         >
           <div v-if="localTache.echeance">
@@ -118,7 +118,7 @@
           </div>
           <p v-else class="text-sm text-gray-500 dark:text-gray-400">
             Non définie
-            <span v-if="tache.permissions?.can_edit" class="text-amber-600 text-xs"> — cliquer pour ajouter</span>
+            <span v-if="tache.permissions?.can_inline_edit" class="text-amber-600 text-xs"> — cliquer pour ajouter</span>
           </p>
         </div>
       </div>
@@ -187,8 +187,8 @@
         <div
           v-else-if="localTache.description"
           class="prose prose-sm dark:prose-invert max-w-none"
-          :class="tache.permissions?.can_edit ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 rounded-3 p-2 -m-2 transition-colors' : ''"
-          :title="tache.permissions?.can_edit ? 'Cliquer pour modifier' : ''"
+          :class="tache.permissions?.can_inline_edit ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 rounded-3 p-2 -m-2 transition-colors' : ''"
+          :title="tache.permissions?.can_inline_edit ? 'Cliquer pour modifier' : ''"
           @click="startEdit('description', localTache.description)"
         >
           <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">{{ localTache.description }}</p>
@@ -196,7 +196,7 @@
         <div
           v-else
           class="text-center py-8"
-          :class="tache.permissions?.can_edit ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 rounded-3 transition-colors' : ''"
+          :class="tache.permissions?.can_inline_edit ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 rounded-3 transition-colors' : ''"
           @click="startEdit('description', '')"
         >
           <svg class="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -205,7 +205,7 @@
           </svg>
           <p class="text-sm text-gray-500 dark:text-gray-400">
             Aucune description
-            <span v-if="tache.permissions?.can_edit" class="block text-brand-400 text-xs mt-1">Cliquer pour ajouter</span>
+            <span v-if="tache.permissions?.can_inline_edit" class="block text-brand-400 text-xs mt-1">Cliquer pour ajouter</span>
           </p>
         </div>
       </div>
@@ -233,8 +233,8 @@
         <div
           v-else-if="localTache.objectif"
           class="prose prose-sm dark:prose-invert max-w-none"
-          :class="tache.permissions?.can_edit ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 rounded-3 p-2 -m-2 transition-colors' : ''"
-          :title="tache.permissions?.can_edit ? 'Cliquer pour modifier' : ''"
+          :class="tache.permissions?.can_inline_edit ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 rounded-3 p-2 -m-2 transition-colors' : ''"
+          :title="tache.permissions?.can_inline_edit ? 'Cliquer pour modifier' : ''"
           @click="startEdit('objectif', localTache.objectif)"
         >
           <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">{{ localTache.objectif }}</p>
@@ -242,7 +242,7 @@
         <div
           v-else
           class="text-center py-8"
-          :class="tache.permissions?.can_edit ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 rounded-3 transition-colors' : ''"
+          :class="tache.permissions?.can_inline_edit ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 rounded-3 transition-colors' : ''"
           @click="startEdit('objectif', '')"
         >
           <svg class="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -251,7 +251,7 @@
           </svg>
           <p class="text-sm text-gray-500 dark:text-gray-400">
             Aucun objectif défini
-            <span v-if="tache.permissions?.can_edit" class="block text-brand-400 text-xs mt-1">Cliquer pour ajouter</span>
+            <span v-if="tache.permissions?.can_inline_edit" class="block text-brand-400 text-xs mt-1">Cliquer pour ajouter</span>
           </p>
         </div>
       </div>
@@ -281,18 +281,18 @@
       <p
         v-else-if="localTache.indicateurs_resultats"
         class="text-gray-700 dark:text-gray-300 whitespace-pre-line"
-        :class="tache.permissions?.can_edit ? 'cursor-pointer hover:bg-white/50 dark:hover:bg-gray-800/50 rounded-3 p-2 -m-2 transition-colors' : ''"
-        :title="tache.permissions?.can_edit ? 'Cliquer pour modifier' : ''"
+        :class="tache.permissions?.can_inline_edit ? 'cursor-pointer hover:bg-white/50 dark:hover:bg-gray-800/50 rounded-3 p-2 -m-2 transition-colors' : ''"
+        :title="tache.permissions?.can_inline_edit ? 'Cliquer pour modifier' : ''"
         @click="startEdit('indicateurs_resultats', localTache.indicateurs_resultats)"
       >{{ localTache.indicateurs_resultats }}</p>
       <p
         v-else
         class="text-sm text-gray-500 dark:text-gray-400 italic"
-        :class="tache.permissions?.can_edit ? 'cursor-pointer' : ''"
+        :class="tache.permissions?.can_inline_edit ? 'cursor-pointer' : ''"
         @click="startEdit('indicateurs_resultats', '')"
       >
         Aucun indicateur défini
-        <span v-if="tache.permissions?.can_edit" class="text-brand-400 not-italic"> — cliquer pour ajouter</span>
+        <span v-if="tache.permissions?.can_inline_edit" class="text-brand-400 not-italic"> — cliquer pour ajouter</span>
       </p>
     </div>
 
@@ -455,18 +455,18 @@
       <p
         v-else-if="localTache.commentaire"
         class="text-gray-700 dark:text-gray-300 whitespace-pre-line"
-        :class="tache.permissions?.can_edit ? 'cursor-pointer hover:bg-amber-100/50 dark:hover:bg-amber-900/30 rounded-3 p-2 -m-2 transition-colors' : ''"
-        :title="tache.permissions?.can_edit ? 'Cliquer pour modifier' : ''"
+        :class="tache.permissions?.can_inline_edit ? 'cursor-pointer hover:bg-amber-100/50 dark:hover:bg-amber-900/30 rounded-3 p-2 -m-2 transition-colors' : ''"
+        :title="tache.permissions?.can_inline_edit ? 'Cliquer pour modifier' : ''"
         @click="startEdit('commentaire', localTache.commentaire)"
       >{{ localTache.commentaire }}</p>
       <p
         v-else
         class="text-sm text-gray-500 dark:text-gray-400 italic"
-        :class="tache.permissions?.can_edit ? 'cursor-pointer' : ''"
+        :class="tache.permissions?.can_inline_edit ? 'cursor-pointer' : ''"
         @click="startEdit('commentaire', '')"
       >
         Aucun commentaire
-        <span v-if="tache.permissions?.can_edit" class="text-amber-600 not-italic"> — cliquer pour ajouter</span>
+        <span v-if="tache.permissions?.can_inline_edit" class="text-amber-600 not-italic"> — cliquer pour ajouter</span>
       </p>
     </div>
 
@@ -523,7 +523,7 @@ const editing = reactive({ field: null, value: null })
 const isDark = computed(() => document.documentElement.classList.contains('dark'))
 
 const startEdit = (field, value) => {
-  if (!props.tache.permissions?.can_edit) return
+  if (!props.tache.permissions?.can_inline_edit) return
   editing.field = field
   editing.value = value ? new Date(value) : null
 }

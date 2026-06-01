@@ -43,6 +43,8 @@ class ActiviteController extends Controller
             'is_overdue',
             'per_page',
             'workspace_id', // ✅ Permet de filtrer par workspace
+            'date_from',
+            'date_to',
         ]);
 
         // ✅ Si Super Admin : toutes les activités

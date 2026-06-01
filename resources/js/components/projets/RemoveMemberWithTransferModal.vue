@@ -1,10 +1,10 @@
 <!-- resources\js\components\projets\RemoveMemberWithTransferModal.vue -->
 <template>
   <Teleport to="body">
-    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div class="bg-white dark:bg-gray-800 rounded-3 max-w-2xl w-full" @click.stop>
+    <div class="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
+      <div ref="dialogRef" :style="dragStyle" class="bg-white dark:bg-gray-800 rounded-3 max-w-2xl w-full" @click.stop>
         <!-- Header -->
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div ref="handleRef" class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 cursor-move select-none">
           <div class="flex items-center gap-3">
             <div class="p-2 bg-red-100 dark:bg-red-900/30 rounded-3">
               <AlertCircleIcon class="w-6 h-6 text-red-600 dark:text-red-400" />
@@ -222,6 +222,10 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useProjetInvitations } from '@/composables/useProjetInvitations'
+import { useDraggable } from '@/composables/useDraggable'
+
+const { dialogRef, handleRef, dragStyle, attachHandle } = useDraggable()
+onMounted(attachHandle)
 import { XIcon, AlertCircleIcon, CheckIcon } from '@/icons'
 
 const props = defineProps({

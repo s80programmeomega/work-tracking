@@ -1,10 +1,10 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div>
       <!-- Header -->
       <div class="mb-8">
-        <div class="flex items-center justify-between">
-          <div>
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div class="min-w-0">
             <h1 class="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
               <div class="w-12 h-12 rounded-3 flex items-center justify-center ">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -18,7 +18,7 @@
             </p>
           </div>
 
-          <div class="flex gap-3">
+          <div class="flex flex-wrap gap-3">
             <button
               @click="showTemplateModal = true"
               class="px-4 py-2.5 bg-purple-500 text-white rounded-3 hover:bg-purple-600 transition-all flex items-center gap-2 font-medium"
@@ -157,12 +157,12 @@
         </div>
 
         <!-- Labels List -->
-        <div v-else-if="filteredLabels.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div v-else-if="filteredLabels.length > 0" ref="gridRef" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div
             v-for="label in filteredLabels"
             :key="label.id"
             :dusk="`label-card-${label.id}`"
-            class="group relative p-5 border-2 border-gray-200 dark:border-gray-700 rounded-3 hover:border-indigo-300 dark:hover:border-indigo-700 transition-all cursor-pointer"
+            class="stagger-item group relative p-5 border-2 border-gray-200 dark:border-gray-700 rounded-3 hover:border-indigo-300 dark:hover:border-indigo-700 transition-all cursor-pointer"
             @click="openEditLabelModal(label)"
           >
             <!-- Label Badge -->
@@ -268,10 +268,12 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useLabels } from '../../composables/useLabels'
+import { useStagger } from '@/composables/useAnimations'
 import LabelModal from '../../components/labels/LabelModal.vue'
 import LabelTemplateModal from '../../components/labels/LabelTemplateModal.vue'
 
 const { labels, loading, fetchLabels, duplicateLabel: duplicateLabelAction, deleteLabel } = useLabels()
+const { staggerRef: gridRef, applyStagger } = useStagger(50)
 
 const searchQuery = ref('')
 const scopeFilter = ref('all')
@@ -374,5 +376,6 @@ const confirmDeleteLabel = async (label) => {
 // Load labels on mount
 onMounted(async () => {
   await fetchLabels()
+  applyStagger()
 })
 </script>

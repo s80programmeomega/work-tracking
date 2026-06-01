@@ -1,9 +1,9 @@
 <template>
   <AdminLayout>
-    <div class="min-h-screen bg-gray-50/50 dark:bg-gray-900/50">
+    <div class="bg-gray-50/50 dark:bg-gray-900/50">
       <!-- Header -->
       <div class="bg-white dark:bg-gray-900 border-b border-gray-200/80 dark:border-gray-800/80">
-        <div class="max-w-7xl mx-auto px-6 py-8">
+        <div class="py-8">
           <div class="flex items-start justify-between">
             <div class="flex items-center gap-5">
               <div class="relative">
@@ -21,23 +21,52 @@
                 </div>
               </div>
               <div>
-                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Mes validations en attente</h1>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ $t('mes_validations.title') }}</h1>
                 <p class="text-gray-600 dark:text-gray-400 mt-2 text-lg">
-                  Résultats que vous avez soumis et qui attendent une réponse
+                  {{ $t('mes_validations.subtitle') }}
                 </p>
               </div>
             </div>
 
-            <button @click="loadData" :disabled="loading"
-              class="p-3 rounded-3 border border-gray-300/80 dark:border-gray-700/80 bg-white/80 dark:bg-gray-800/80 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 disabled:opacity-50 "
-              title="Actualiser">
-              <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" :class="{ 'animate-spin': loading }"
-                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-            </button>
+            <div class="flex items-center gap-2">
+              <button
+                @click="showStats = !showStats"
+                class="inline-flex items-center gap-2 rounded-3 border border-gray-300/80 dark:border-gray-700/80 bg-white/80 dark:bg-gray-800/80 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                {{ $t('common.statistics') }}
+              </button>
+              <button @click="loadData" :disabled="loading"
+                class="p-3 rounded-3 border border-gray-300/80 dark:border-gray-700/80 bg-white/80 dark:bg-gray-800/80 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 disabled:opacity-50"
+                :title="$t('mes_validations.refresh')">
+                <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" :class="{ 'animate-spin': loading }"
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </button>
+            </div>
           </div>
+
+          <!-- Stats panel -->
+          <transition
+            enter-active-class="transition-all duration-300 ease-out"
+            enter-from-class="opacity-0 -translate-y-4"
+            enter-to-class="opacity-100 translate-y-0"
+            leave-active-class="transition-all duration-200 ease-in"
+            leave-from-class="opacity-100 translate-y-0"
+            leave-to-class="opacity-0 -translate-y-4"
+          >
+            <MesValidationsStats
+              v-if="showStats"
+              :counts="counts"
+              :loading="loading"
+              class="mt-6"
+              @close="showStats = false"
+            />
+          </transition>
 
           <!-- Tabs -->
           <div class="flex gap-1 mt-8 bg-gray-100/80 dark:bg-gray-800/80 rounded-3 p-1.5">
@@ -58,13 +87,13 @@
       </div>
 
       <!-- Content -->
-      <div class="max-w-7xl mx-auto px-6 py-6">
+      <div class="py-6">
 
         <!-- Loading -->
         <div v-if="loading" class="flex justify-center items-center h-64">
           <div class="text-center">
             <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto mb-4"></div>
-            <p class="text-gray-600 dark:text-gray-400">Chargement...</p>
+            <p class="text-gray-600 dark:text-gray-400">{{ $t('common.loading') }}</p>
           </div>
         </div>
 
@@ -81,16 +110,16 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Aucun résultat en attente</h3>
-          <p class="text-gray-600 dark:text-gray-400">Tous vos résultats soumis ont été traités.</p>
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">{{ $t('mes_validations.empty_title') }}</h3>
+          <p class="text-gray-600 dark:text-gray-400">{{ $t('mes_validations.empty_desc') }}</p>
         </div>
 
         <!-- Results list -->
-        <div v-else class="space-y-4">
+        <div v-else ref="listRef" class="space-y-4">
           <div
             v-for="resultat in currentResultats"
             :key="resultat.id"
-            class="bg-white/80 dark:bg-gray-800/80 rounded-3 border border-gray-200/50 dark:border-gray-700/50 p-6 ">
+            class="stagger-item bg-white/80 dark:bg-gray-800/80 rounded-3 border border-gray-200/50 dark:border-gray-700/50 p-6">
             <div class="flex items-start justify-between gap-4">
               <div class="flex-1 min-w-0">
                 <h3 class="font-semibold text-gray-900 dark:text-white truncate">
@@ -100,7 +129,7 @@
                   {{ resultat.tache?.activite?.nom }} &middot; {{ resultat.tache?.activite?.projet?.nom }}
                 </p>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  Soumis {{ formatDate(resultat.soumis_le) }}
+                  {{ $t('mes_validations.submitted') }} {{ formatDate(resultat.soumis_le) }}
                 </p>
               </div>
 
@@ -134,12 +163,18 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
+import MesValidationsStats from '@/components/evaluations/MesValidationsStats.vue'
+import { useStagger } from '@/composables/useAnimations'
 import api from '@/api/axios'
 import { useToast } from 'vue-toastification'
 import { useRealtimeRefresh } from '@/composables/useRealtimeRefresh'
 
+const { t } = useI18n()
 const toast = useToast()
+const { staggerRef: listRef, applyStagger } = useStagger(50)
+const showStats = ref(false)
 
 const loading = ref(false)
 const error = ref(null)
@@ -150,13 +185,13 @@ const activeTab = ref('n1')
 const tabs = computed(() => [
   {
     id: 'n1',
-    label: 'En attente N1',
+    label: t('mes_validations.tab_n1'),
     count: counts.value.en_validation_n1,
     activeClass: 'bg-warning-500',
   },
   {
     id: 'n2',
-    label: 'En attente N2',
+    label: t('mes_validations.tab_n2'),
     count: counts.value.en_validation_n2,
     activeClass: 'bg-brand-500',
   },
@@ -174,6 +209,7 @@ async function loadData() {
     const { data } = await api.get('/evaluations/mes-resultats/en-attente')
     resultats.value = data.data.resultats || []
     counts.value = data.data.counts || { en_validation_n1: 0, en_validation_n2: 0, total: 0 }
+    applyStagger()
   } catch (err) {
     error.value = err.response?.data?.message || 'Erreur lors du chargement'
     toast.error(error.value)
@@ -189,8 +225,8 @@ function formatDate(iso) {
 
 function statutLabel(statut) {
   const labels = {
-    en_validation_n1: 'En attente N1',
-    en_validation_n2: 'En attente N2',
+    en_validation_n1: t('mes_validations.tab_n1'),
+    en_validation_n2: t('mes_validations.tab_n2'),
   }
   return labels[statut] ?? statut
 }

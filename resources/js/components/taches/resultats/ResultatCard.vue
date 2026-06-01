@@ -293,7 +293,7 @@
       <!-- Actions de validation CONDITIONNELLES -->
       <div class="flex items-center gap-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
         <!-- Bouton Voir détails (toujours visible si can_view) -->
-        <button v-if="availableActions.canView" @click="$emit('view-details', resultat)"
+        <button v-if="availableActions.canView" dusk="resultat-view-btn" @click="$emit('view-details', resultat)"
           class="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-3 transition-colors flex items-center justify-center gap-2">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

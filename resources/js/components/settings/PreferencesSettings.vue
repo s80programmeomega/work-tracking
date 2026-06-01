@@ -3,24 +3,24 @@
   <div class="preferences-settings">
     <div class="mb-6">
       <h4 class="text-lg font-semibold text-gray-800 dark:text-white/90">
-        Préférences générales
+        {{ $t('pref_settings.title') }}
       </h4>
       <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        Personnalisez votre expérience utilisateur
+        {{ $t('pref_settings.subtitle') }}
       </p>
     </div>
 
     <!-- Loading State -->
     <div v-if="loading" class="p-8 text-center">
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      <p class="mt-2 text-gray-500 dark:text-gray-400">Chargement des préférences...</p>
+      <p class="mt-2 text-gray-500 dark:text-gray-400">{{ $t('pref_settings.loading') }}</p>
     </div>
 
     <!-- Preferences Content -->
     <div v-else class="space-y-6">
       <!-- Theme Settings -->
       <div class="p-5 border border-gray-200 rounded-3 dark:border-gray-800">
-        <h5 class="mb-4 font-medium text-gray-800 dark:text-white/90">Thème</h5>
+        <h5 class="mb-4 font-medium text-gray-800 dark:text-white/90">{{ $t('pref_settings.theme_title') }}</h5>
         
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <label class="relative cursor-pointer">
@@ -40,7 +40,7 @@
                   <div class="w-2/3 h-2 bg-gray-300 rounded"></div>
                 </div>
               </div>
-              <span class="font-medium text-gray-700 dark:text-gray-300">Clair</span>
+              <span class="font-medium text-gray-700 dark:text-gray-300">{{ $t('pref_settings.theme_light') }}</span>
             </div>
           </label>
 
@@ -61,7 +61,7 @@
                   <div class="w-2/3 h-2 bg-gray-700 rounded"></div>
                 </div>
               </div>
-              <span class="font-medium text-gray-700 dark:text-gray-300">Sombre</span>
+              <span class="font-medium text-gray-700 dark:text-gray-300">{{ $t('pref_settings.theme_dark') }}</span>
             </div>
           </label>
 
@@ -89,7 +89,7 @@
                   </div>
                 </div>
               </div>
-              <span class="font-medium text-gray-700 dark:text-gray-300">Système</span>
+              <span class="font-medium text-gray-700 dark:text-gray-300">{{ $t('pref_settings.theme_system') }}</span>
             </div>
           </label>
         </div>
@@ -99,8 +99,8 @@
       <div class="p-5 border border-gray-200 rounded-3 dark:border-gray-800">
         <div class="flex items-center justify-between mb-4">
           <div>
-            <h5 class="font-medium text-gray-800 dark:text-white/90">Langue</h5>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Choisissez la langue d'affichage</p>
+            <h5 class="font-medium text-gray-800 dark:text-white/90">{{ $t('pref_settings.lang_title') }}</h5>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('pref_settings.lang_desc') }}</p>
           </div>
         </div>
         
@@ -121,8 +121,8 @@
       <div class="p-5 border border-gray-200 rounded-3 dark:border-gray-800">
         <div class="flex items-center justify-between mb-4">
           <div>
-            <h5 class="font-medium text-gray-800 dark:text-white/90">Fuseau horaire</h5>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Définissez votre fuseau horaire local</p>
+            <h5 class="font-medium text-gray-800 dark:text-white/90">{{ $t('pref_settings.tz_title') }}</h5>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('pref_settings.tz_desc') }}</p>
           </div>
         </div>
         
@@ -143,8 +143,8 @@
       <div class="p-5 border border-gray-200 rounded-3 dark:border-gray-800">
         <div class="flex items-center justify-between mb-4">
           <div>
-            <h5 class="font-medium text-gray-800 dark:text-white/90">Format de date</h5>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Choisissez comment les dates sont affichées</p>
+            <h5 class="font-medium text-gray-800 dark:text-white/90">{{ $t('pref_settings.date_title') }}</h5>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('pref_settings.date_desc') }}</p>
           </div>
         </div>
         
@@ -190,7 +190,7 @@
               @change="updatePreferences"
               class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
             >
-            <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">Relatif (il y a 2 jours)</span>
+            <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('pref_settings.date_relative') }}</span>
           </label>
         </div>
       </div>
@@ -199,8 +199,8 @@
       <div class="p-5 border border-gray-200 rounded-3 dark:border-gray-800">
         <div class="flex items-center justify-between mb-4">
           <div>
-            <h5 class="font-medium text-gray-800 dark:text-white/90">Densité d'affichage</h5>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Contrôlez l'espacement des éléments</p>
+            <h5 class="font-medium text-gray-800 dark:text-white/90">{{ $t('pref_settings.density_title') }}</h5>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('pref_settings.density_desc') }}</p>
           </div>
         </div>
         
@@ -213,7 +213,7 @@
               @change="updatePreferences"
               class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
             >
-            <span class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Compact</span>
+            <span class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('pref_settings.density_compact') }}</span>
           </label>
           
           <label class="flex items-center cursor-pointer">
@@ -224,7 +224,7 @@
               @change="updatePreferences"
               class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
             >
-            <span class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Confortable</span>
+            <span class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('pref_settings.density_comfortable') }}</span>
           </label>
           
           <label class="flex items-center cursor-pointer">
@@ -235,7 +235,7 @@
               @change="updatePreferences"
               class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
             >
-            <span class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Spacieux</span>
+            <span class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('pref_settings.density_spacious') }}</span>
           </label>
         </div>
       </div>
@@ -244,8 +244,8 @@
       <div class="p-5 border border-gray-200 rounded-3 dark:border-gray-800">
         <div class="flex items-center justify-between">
           <div>
-            <h5 class="font-medium text-gray-800 dark:text-white/90">Sauvegarde automatique</h5>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Sauvegarder automatiquement les modifications</p>
+            <h5 class="font-medium text-gray-800 dark:text-white/90">{{ $t('pref_settings.autosave_title') }}</h5>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('pref_settings.autosave_desc') }}</p>
           </div>
           <label class="relative inline-flex items-center cursor-pointer">
             <input
@@ -260,9 +260,9 @@
         
         <div v-if="preferences.autoSave" class="mt-4 pl-4 border-l-2 border-gray-200 dark:border-gray-700">
           <div class="flex items-center justify-between mb-2">
-            <span class="text-sm text-gray-600 dark:text-gray-400">Intervalle de sauvegarde</span>
+            <span class="text-sm text-gray-600 dark:text-gray-400">{{ $t('pref_settings.autosave_interval') }}</span>
             <span class="text-sm font-medium text-gray-800 dark:text-gray-300">
-              {{ preferences.saveInterval }} secondes
+              {{ preferences.saveInterval }} {{ $t('pref_settings.autosave_seconds') }}
             </span>
           </div>
           <input
@@ -288,9 +288,9 @@
           @click="resetPreferences"
           class="px-6 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-3 hover:bg-gray-50 focus:outline-hidden focus:ring-4 focus:ring-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600"
         >
-          Réinitialiser
+          {{ $t('pref_settings.btn_reset') }}
         </button>
-        
+
         <button
           @click="savePreferences"
           :disabled="saving"
@@ -301,10 +301,10 @@
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            Enregistrement...
+            {{ $t('pref_settings.btn_saving') }}
           </span>
           <span v-else>
-            Enregistrer les préférences
+            {{ $t('pref_settings.btn_save') }}
           </span>
         </button>
       </div>
@@ -314,6 +314,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import api from '@/api/axios'
 
 const props = defineProps({
@@ -325,6 +326,7 @@ const props = defineProps({
 
 const emit = defineEmits(['refresh'])
 
+const { t } = useI18n()
 const loading = ref(true)
 const saving = ref(false)
 const hasChanges = ref(false)

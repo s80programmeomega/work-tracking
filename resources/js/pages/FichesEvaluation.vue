@@ -1,11 +1,11 @@
 <!-- resources/js/pages/FicheEvaluation.vue -->
 <template>
   <AdminLayout>
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div class="bg-gray-50 dark:bg-gray-900">
       
       <!-- Header -->
       <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30 ">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="py-6">
           <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
             <!-- Titre et info semaine -->
             <div>
@@ -15,13 +15,13 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                   </svg>
                 </div>
-                Ma Fiche d'évaluation hebdomadaire
+                {{ $t('fiches_eval.title') }}
               </h1>
               <p class="text-gray-600 dark:text-gray-400 mt-2 flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                Semaine {{ selectedWeek }} - {{ selectedYear }} 
+                {{ $t('fiches_eval.subtitle_week', { week: selectedWeek, year: selectedYear }) }}
                 <span class="text-sm">({{ formatDateRange(weekDates.start, weekDates.end) }})</span>
               </p>
             </div>
@@ -43,7 +43,7 @@
                   @change="loadWeekData"
                   class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
                   <option v-for="week in 53" :key="week" :value="week">
-                    Semaine {{ week }}
+                    {{ $t('fiches_eval.week_option', { week }) }}
                   </option>
                 </select>
 
@@ -67,7 +67,7 @@
                 <button
                   @click="goToCurrentWeek"
                   class="px-4 py-2 bg-blue-500 text-white rounded-3 hover:bg-blue-600 transition-colors font-medium">
-                  Aujourd'hui
+                  {{ $t('fiches_eval.btn_today') }}
                 </button>
               </div>
 
@@ -76,11 +76,22 @@
                 v-model="selectedActivite"
                 @change="filterByActivite"
                 class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
-                <option :value="null">Toutes les activités</option>
+                <option :value="null">{{ $t('fiches_eval.filter_all_activities') }}</option>
                 <option v-for="activite in activites" :key="activite.id" :value="activite.id">
                   {{ activite.nom }}
                 </option>
               </select>
+
+              <!-- Bouton Statistiques -->
+              <button
+                @click="showStats = !showStats"
+                class="inline-flex items-center gap-2 rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                {{ $t('fiches_eval.btn_stats') }}
+              </button>
 
               <!-- Export -->
               <button
@@ -89,57 +100,38 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                Exporter PDF
+                {{ $t('fiches_eval.btn_export_pdf') }}
               </button>
             </div>
           </div>
 
-          <!-- Statistiques rapides -->
-          <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mt-6">
-            <StatCard
-              title="Total tâches"
-              :value="stats.total"
-              icon="clipboard-list"
-              color="gray"
+          <!-- Statistiques panel -->
+          <transition
+            enter-active-class="transition-all duration-300 ease-out"
+            enter-from-class="opacity-0 -translate-y-4"
+            enter-to-class="opacity-100 translate-y-0"
+            leave-active-class="transition-all duration-200 ease-in"
+            leave-from-class="opacity-100 translate-y-0"
+            leave-to-class="opacity-0 -translate-y-4"
+          >
+            <FichesEvaluationStats
+              v-if="showStats"
+              :stats="stats"
+              :loading="loading"
+              class="mt-6"
+              @close="showStats = false"
             />
-            <StatCard
-              title="À faire"
-              :value="stats.a_faire"
-              icon="clock"
-              color="slate"
-            />
-            <StatCard
-              title="En cours"
-              :value="stats.en_cours"
-              :progress="stats.total > 0 ? Math.round((stats.en_cours / stats.total) * 100) : 0"
-              icon="play"
-              color="blue"
-            />
-            <StatCard
-              title="Terminées"
-              :value="stats.termine"
-              :progress="stats.total > 0 ? Math.round((stats.termine / stats.total) * 100) : 0"
-              icon="check-circle"
-              color="green"
-            />
-            <StatCard
-              title="En retard"
-              :value="stats.en_retard"
-              :alert="stats.en_retard > 0"
-              icon="exclamation"
-              color="red"
-            />
-          </div>
+          </transition>
         </div>
       </div>
 
       <!-- Contenu principal -->
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="py-8">
         
         <!-- Loading -->
         <div v-if="loading" class="flex flex-col items-center justify-center py-16">
           <div class="animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent mb-4"></div>
-          <p class="text-gray-600 dark:text-gray-400">Chargement de votre fiche d'évaluation...</p>
+          <p class="text-gray-600 dark:text-gray-400">{{ $t('fiches_eval.loading') }}</p>
         </div>
 
         <!-- Empty state -->
@@ -150,12 +142,12 @@
             </svg>
           </div>
           <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-            Aucune tâche en cours pour cette semaine
+            {{ $t('fiches_eval.empty_title') }}
           </h3>
           <p class="text-gray-600 dark:text-gray-400 mb-6">
-            {{ selectedActivite 
-              ? 'Aucune tâche en cours pour cette activité.' 
-              : 'Toutes vos tâches sont terminées et validées !' }}
+            {{ selectedActivite
+              ? $t('fiches_eval.empty_filtered')
+              : $t('fiches_eval.empty_all_done') }}
           </p>
           <button
             @click="goToCurrentWeek"
@@ -163,7 +155,7 @@
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
-            Voir la semaine actuelle
+            {{ $t('fiches_eval.btn_current_week') }}
           </button>
         </div>
 
@@ -176,7 +168,7 @@
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              Cette fiche affiche vos tâches en cours et terminées en attente de validation. Les tâches complètement validées disparaissent automatiquement.
+              {{ $t('fiches_eval.info_banner') }}
             </p>
           </div>
 
@@ -186,41 +178,42 @@
               <thead class="border-b-2 border-gray-200 dark:border-gray-700">
                 <tr>
                   <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                    N°
+                    {{ $t('fiches_eval.col_num') }}
                   </th>
                   <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider min-w-[200px]">
-                    Tâche
+                    {{ $t('fiches_eval.col_task') }}
                   </th>
                   <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider min-w-[180px]">
-                    Résultats attendus
+                    {{ $t('fiches_eval.col_expected_results') }}
                   </th>
                   <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                    Échéance
+                    {{ $t('fiches_eval.col_deadline') }}
                   </th>
                   <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                    Mon Statut
+                    {{ $t('fiches_eval.col_my_status') }}
                   </th>
                   <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                    Ma Progression
+                    {{ $t('fiches_eval.col_my_progress') }}
                   </th>
                   <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider min-w-[180px]">
-                    Résultats obtenus
+                    {{ $t('fiches_eval.col_obtained_results') }}
                   </th>
                   <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                    Taux
+                    {{ $t('fiches_eval.col_rate') }}
                   </th>
                   <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                    Validation
+                    {{ $t('fiches_eval.col_validation') }}
                   </th>
                   <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                    Actions
+                    {{ $t('fiches_eval.col_actions') }}
                   </th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+              <tbody ref="tbodyRef" class="divide-y divide-gray-200 dark:divide-gray-700">
                 <EvaluationRow
                   v-for="(task, index) in filteredTasks"
                   :key="task.id"
+                  class="stagger-item"
                   :task="task"
                   :index="index + 1"
                   @add-result="openResultForm"
@@ -239,11 +232,11 @@
             <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
-            Résumé de ma semaine
+            {{ $t('fiches_eval.summary_title') }}
           </h3>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="bg-white dark:bg-gray-800 rounded-3 p-4">
-              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Mon taux de complétion</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">{{ $t('fiches_eval.summary_completion') }}</p>
               <div class="flex items-end gap-2">
                 <p class="text-3xl font-bold text-blue-600">{{ stats.completionRate }}%</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">{{ stats.termine }}/{{ stats.total }}</p>
@@ -254,7 +247,7 @@
             </div>
 
             <div class="bg-white dark:bg-gray-800 rounded-3 p-4">
-              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Résultats validés</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">{{ $t('fiches_eval.summary_validated') }}</p>
               <div class="flex items-end gap-2">
                 <p class="text-3xl font-bold text-purple-600">{{ stats.validationRate }}%</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">{{ stats.valide_n1 }}/{{ stats.avec_resultat }}</p>
@@ -265,7 +258,7 @@
             </div>
 
             <div class="bg-white dark:bg-gray-800 rounded-3 p-4">
-              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Heures travaillées</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">{{ $t('fiches_eval.summary_hours') }}</p>
               <div class="flex items-end gap-2">
                 <p class="text-3xl font-bold text-green-600">{{ stats.actual_hours }}h</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">/ {{ stats.estimated_hours }}h</p>
@@ -305,17 +298,22 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import { useStagger } from '@/composables/useAnimations'
 import api from '@/api/axios'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
-import StatCard from '@/components/common/StatCard.vue'
+import FichesEvaluationStats from '@/components/evaluations/FichesEvaluationStats.vue'
 import EvaluationRow from '@/components/taches/EvaluationRow.vue'
 import ResultatFormModal from '@/components/taches/ResultatForm.vue'
 import ResultatDetailModal from '@/components/taches/resultats/ResultatDetailModal.vue'
 
 // État réactif
+const { t } = useI18n()
 const router = useRouter()
+const { staggerRef: tbodyRef, applyStagger } = useStagger(40)
 const loading = ref(false)
+const showStats = ref(false)
 const tasks = ref([])
 const activites = ref([])
 const selectedWeek = ref(getCurrentWeek())
@@ -449,6 +447,7 @@ async function loadWeekData() {
     console.error('Error loading week data:', error)
   } finally {
     loading.value = false
+    applyStagger()
   }
 }
 
@@ -535,7 +534,7 @@ async function exportToPDF() {
     link.remove()
   } catch (error) {
     console.error('Error exporting PDF:', error)
-    alert('Erreur lors de l\'export PDF')
+    alert(t('fiches_eval.error_export'))
   }
 }
 

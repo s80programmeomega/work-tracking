@@ -6,17 +6,17 @@
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 dusk="admin-roles-title" class="text-2xl font-semibold text-gray-900 dark:text-white">
-            Roles & Permissions
+            {{ $t('admin.roles.title') }}
           </h1>
           <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Manage what each role can do across the platform.
+            {{ $t('admin.roles.subtitle') }}
           </p>
         </div>
         <router-link
           to="/admin/dashboard"
           class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
         >
-          <i class="fas fa-arrow-left"></i> Back to dashboard
+          <i class="fas fa-arrow-left"></i> {{ $t('admin.roles.back') }}
         </router-link>
       </div>
 
@@ -33,76 +33,95 @@
         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
       </div>
 
-      <div v-if="rolesData" class="flex gap-6 items-start">
+      <div v-if="rolesData" class="flex flex-col lg:flex-row gap-6 items-start">
         <!-- Left: role list -->
-        <div class="w-60 shrink-0 space-y-1">
-          <!-- Filter tabs -->
-          <div class="flex gap-1 mb-3 p-1 bg-gray-100 dark:bg-gray-800 rounded-3">
+        <div class="w-full lg:w-60 lg:shrink-0">
+          <!-- Mobile: collapsible role selector -->
+          <div class="lg:hidden mb-3">
             <button
-              v-for="tab in filterTabs"
-              :key="tab.value"
-              @click="activeFilter = tab.value"
-              :class="[
-                'flex-1 text-xs font-medium py-1 px-2 rounded-2 transition-colors',
-                activeFilter === tab.value
-                  ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-              ]"
+              @click="showRoleList = !showRoleList"
+              class="w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3 text-sm font-medium text-gray-900 dark:text-white"
             >
-              {{ tab.label }}
-              <span class="ml-1 text-gray-400 dark:text-gray-500">{{ tab.count }}</span>
+              <span>{{ selectedRole ? formatRoleName(selectedRole.name) : $t('admin.roles.select_role') }}</span>
+              <svg
+                class="w-4 h-4 text-gray-400 transition-transform"
+                :class="{ 'rotate-180': showRoleList }"
+                fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
             </button>
           </div>
 
-          <button
-            v-for="role in filteredRoles"
-            :key="role.name"
-            @click="selectRole(role)"
-            :class="[
-              'w-full text-left px-3 py-2 rounded-3 text-sm transition-colors',
-              selectedRole?.name === role.name
-                ? 'bg-brand-600 text-white'
-                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-            ]"
-          >
-            <div class="flex items-center justify-between gap-2">
-              <span class="truncate font-medium">{{ formatRoleName(role.name) }}</span>
-              <span
+          <div :class="['space-y-1', 'lg:block', showRoleList ? 'block' : 'hidden lg:block']">
+            <!-- Filter tabs -->
+            <div class="flex gap-1 mb-3 p-1 bg-gray-100 dark:bg-gray-800 rounded-3">
+              <button
+                v-for="tab in filterTabs"
+                :key="tab.value"
+                @click="activeFilter = tab.value"
                 :class="[
-                  'text-xs tabular-nums shrink-0 font-semibold',
-                  selectedRole?.name === role.name ? 'text-white/60' : 'text-gray-400 dark:text-gray-500'
+                  'flex-1 text-xs font-medium py-1 px-2 rounded-2 transition-colors',
+                  activeFilter === tab.value
+                    ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                 ]"
               >
-                #{{ role.priority }}
-              </span>
+                {{ tab.label }}
+                <span class="ml-1 text-gray-400 dark:text-gray-500">{{ tab.count }}</span>
+              </button>
             </div>
-            <div class="mt-0.5">
-              <span
-                :class="[
-                  'text-xs px-1.5 py-0.5 rounded-full font-medium',
-                  role.is_global
-                    ? (selectedRole?.name === role.name ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400')
-                    : (selectedRole?.name === role.name ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400')
-                ]"
-              >
-                {{ role.is_global ? 'global' : 'contextual' }}
-              </span>
-            </div>
-          </button>
+
+            <button
+              v-for="role in filteredRoles"
+              :key="role.name"
+              @click="selectRole(role); showRoleList = false"
+              :class="[
+                'w-full text-left px-3 py-2 rounded-3 text-sm transition-colors',
+                selectedRole?.name === role.name
+                  ? 'bg-brand-600 text-white'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+              ]"
+            >
+              <div class="flex items-center justify-between gap-2">
+                <span class="truncate font-medium">{{ formatRoleName(role.name) }}</span>
+                <span
+                  :class="[
+                    'text-xs tabular-nums shrink-0 font-semibold',
+                    selectedRole?.name === role.name ? 'text-white/60' : 'text-gray-400 dark:text-gray-500'
+                  ]"
+                >
+                  #{{ role.priority }}
+                </span>
+              </div>
+              <div class="mt-0.5">
+                <span
+                  :class="[
+                    'text-xs px-1.5 py-0.5 rounded-full font-medium',
+                    role.is_global
+                      ? (selectedRole?.name === role.name ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400')
+                      : (selectedRole?.name === role.name ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400')
+                  ]"
+                >
+                  {{ role.is_global ? 'global' : 'contextual' }}
+                </span>
+              </div>
+            </button>
+          </div>
         </div>
 
         <!-- Right: permission matrix -->
-        <div class="flex-1 min-w-0">
+        <div class="flex-1 min-w-0 w-full">
           <div v-if="!selectedRole" class="flex items-center justify-center h-48 text-gray-400 dark:text-gray-500">
             <div class="text-center">
               <i class="fas fa-shield-alt text-4xl mb-3 block"></i>
-              <p>Select a role to manage its permissions</p>
+              <p>{{ $t('admin.roles.select_role') }}</p>
             </div>
           </div>
 
           <template v-else>
             <!-- Role header -->
-            <div class="flex items-center justify-between mb-4">
+            <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
               <div>
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
                   {{ formatRoleName(selectedRole.name) }}
@@ -112,7 +131,7 @@
                   <span v-if="isDirty" class="ml-2 text-amber-600 dark:text-amber-400 font-medium">• Unsaved changes</span>
                 </p>
               </div>
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-2 shrink-0">
                 <button
                   v-if="isDirty"
                   @click="resetDraft"
@@ -146,7 +165,7 @@
                   </span>
                   <button
                     @click="toggleGroup(group)"
-                    class="text-xs text-brand-600 dark:text-brand-400 hover:underline"
+                    class="text-xs text-brand-600 dark:text-brand-400 hover:underline shrink-0 ml-2"
                   >
                     {{ isGroupAllChecked(group) ? 'Deselect all' : 'Select all' }}
                   </button>
@@ -156,15 +175,15 @@
                   <label
                     v-for="perm in group.permissions"
                     :key="perm.name"
-                    class="flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
+                    class="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
                   >
                     <input
                       type="checkbox"
                       :checked="draftPermissions.has(perm.name)"
                       @change="togglePermission(perm.name)"
-                      class="w-4 h-4 text-brand-600 rounded border-gray-300 dark:border-gray-600 focus:ring-brand-500"
+                      class="w-4 h-4 shrink-0 text-brand-600 rounded border-gray-300 dark:border-gray-600 focus:ring-brand-500"
                     />
-                    <span class="text-sm text-gray-700 dark:text-gray-300 font-mono">{{ perm.name.split('.')[1] }}</span>
+                    <span class="text-sm text-gray-700 dark:text-gray-300 font-mono break-all">{{ perm.name.split('.')[1] }}</span>
                   </label>
                 </div>
               </div>
@@ -178,9 +197,11 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import AdminLayout from '@/components/layout/AdminLayout.vue';
 import api from '@/api/axios';
 
+const { t } = useI18n();
 const rolesData = ref(null);
 const selectedRole = ref(null);
 const activeFilter = ref('all');
@@ -190,6 +211,7 @@ const loading = ref(false);
 const saving = ref(false);
 const error = ref(null);
 const successMsg = ref(null);
+const showRoleList = ref(true);
 
 const filterTabs = computed(() => {
   const roles = rolesData.value?.roles ?? [];

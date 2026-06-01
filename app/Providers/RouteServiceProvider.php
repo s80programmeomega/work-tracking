@@ -25,7 +25,9 @@ class RouteServiceProvider extends ServiceProvider
     public function boot(): void
     {
         RateLimiter::for('api', function (Request $request) {
-            if (app()->environment('testing')) {
+            // Tests PHPUnit + sweep Dusk (dusk.local) : pas de rate limit pour
+            // ne pas étrangler les balayages multi-pages.
+            if (app()->environment('testing', 'dusk.local')) {
                 return Limit::none();
             }
 

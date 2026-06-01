@@ -198,4 +198,45 @@ class PlatformDashboardTest extends TestCase
             'trial_duration_days' => 60,
         ])->assertStatus(403);
     }
+
+    public function test_update_user_role_returns_403_for_regular_user(): void
+    {
+        $target = $this->regularUser();
+
+        Sanctum::actingAs($this->regularUser());
+
+        $this->patchJson("/api/admin/users/{$target->id}/role", [
+            'role' => 'directeur',
+        ])->assertStatus(403);
+    }
+
+    public function test_update_user_role_syncs_spatie_role_and_super_admin_flag(): void
+    {
+        $target = User::factory()->create(['is_super_admin' => false]);
+
+        Sanctum::actingAs($this->superAdmin());
+
+        $response = $this->patchJson("/api/admin/users/{$target->id}/role", [
+            'role' => 'directeur',
+            'is_super_admin' => true,
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.id', $target->id)
+            ->assertJsonPath('data.is_super_admin', true)
+            ->assertJsonPath('data.roles.0', 'directeur');
+
+        $this->assertDatabaseHas('users', ['id' => $target->id, 'is_super_admin' => true]);
+    }
+
+    public function test_update_user_role_rejects_unknown_role(): void
+    {
+        $target = $this->regularUser();
+
+        Sanctum::actingAs($this->superAdmin());
+
+        $this->patchJson("/api/admin/users/{$target->id}/role", [
+            'role' => 'not_a_real_role',
+        ])->assertStatus(422)->assertJsonValidationErrors(['role']);
+    }
 }

@@ -4,7 +4,7 @@
     <div class="space-y-6">
       <!-- Header avec statistiques personnelles -->
       <div class="rounded-3 border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex flex-wrap items-start justify-between gap-3 mb-6">
           <div>
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
               <div class="w-12 h-12 rounded-3 flex items-center justify-center">
@@ -12,17 +12,28 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
               </div>
-              Mes Tâches
+              {{ $t('mes_taches.title') }}
             </h1>
             <p class="text-gray-500 dark:text-gray-400 mt-1">
-              Gérez vos tâches individuelles et collaboratives
+              {{ $t('mes_taches.subtitle') }}
             </p>
           </div>
 
-          <div class="flex items-center gap-3">
+          <div class="flex flex-wrap items-center gap-3">
+            <!-- Bouton Statistiques -->
+            <button
+              @click="showStats = !showStats"
+              class="inline-flex items-center gap-2 rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              {{ $t('common.statistics') }}
+            </button>
+
             <!-- Filtre par semaine -->
             <div class="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-3 p-1">
-              <button @click="changeWeek(-1)" class="p-2 rounded-md hover:bg-white dark:hover:bg-gray-700 transition-colors" title="Semaine précédente">
+              <button @click="changeWeek(-1)" class="p-2 rounded-md hover:bg-white dark:hover:bg-gray-700 transition-colors" :title="$t('mes_taches.prev_week')">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
@@ -30,13 +41,13 @@
               <span class="px-3 py-1 text-sm font-medium text-gray-700 dark:text-gray-300">
                 S{{ currentWeek }} - {{ currentYear }}
               </span>
-              <button @click="changeWeek(1)" class="p-2 rounded-md hover:bg-white dark:hover:bg-gray-700 transition-colors" title="Semaine suivante">
+              <button @click="changeWeek(1)" class="p-2 rounded-md hover:bg-white dark:hover:bg-gray-700 transition-colors" :title="$t('mes_taches.next_week')">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
               </button>
-              <button @click="resetToCurrentWeek" class="px-3 py-1 text-xs font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400" title="Revenir à la semaine actuelle">
-                Aujourd'hui
+              <button @click="resetToCurrentWeek" class="px-3 py-1 text-xs font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400" :title="$t('mes_taches.today')">
+                {{ $t('mes_taches.today') }}
               </button>
             </div>
 
@@ -46,27 +57,34 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
                 </svg>
-                Kanban
+                {{ $t('mes_taches.kanban') }}
               </button>
               <button @click="currentView = 'list'" :class="['px-3 py-2 rounded-md transition-all flex items-center gap-2 text-sm', currentView === 'list' ? 'bg-white dark:bg-gray-700 text-brand-600 dark:text-brand-400' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white']">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                 </svg>
-                Liste
+                {{ $t('mes_taches.list') }}
               </button>
             </div>
           </div>
         </div>
 
-        <!-- Statistiques personnelles -->
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          <StatCard title="Total" :value="stats.total" icon="clipboard-list" color="gray" />
-          <StatCard title="À faire" :value="stats.a_faire" icon="clock" color="slate" />
-          <StatCard title="En cours" :value="stats.en_cours" icon="play" color="blue" />
-          <StatCard title="Terminées" :value="stats.termine" icon="check-circle" color="green" />
-          <StatCard title="En retard" :value="stats.overdue" icon="exclamation" color="red" :alert="stats.overdue > 0" />
-          <StatCard title="Taux" :value="`${completionRate}%`" icon="chart-pie" color="brand" :progress="completionRate" />
-        </div>
+        <!-- Statistiques panel -->
+        <transition
+          enter-active-class="transition-all duration-300 ease-out"
+          enter-from-class="opacity-0 -translate-y-4"
+          enter-to-class="opacity-100 translate-y-0"
+          leave-active-class="transition-all duration-200 ease-in"
+          leave-from-class="opacity-100 translate-y-0"
+          leave-to-class="opacity-0 -translate-y-4"
+        >
+          <MesTachesStats
+            v-if="showStats"
+            :stats="stats"
+            :loading="loading"
+            @close="showStats = false"
+          />
+        </transition>
       </div>
 
       <!-- Filtres avancés -->
@@ -74,31 +92,31 @@
         <div class="flex flex-wrap items-center gap-4">
           <div class="flex-1 min-w-[200px]">
             <select v-model="filters.activite_id" @change="applyFilters" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500">
-              <option value="">Toutes les activités</option>
+              <option value="">{{ $t('mes_taches.all_activities') }}</option>
               <option v-for="activite in activites" :key="activite.id" :value="activite.id">
                 {{ activite.nom }} ({{ activite.projet?.nom }})
               </option>
             </select>
           </div>
           <select v-model="filters.priorite" @change="applyFilters" class="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500">
-            <option value="">Toutes priorités</option>
-            <option value="critique">🔴 Critique</option>
-            <option value="elevee">🟠 Élevée</option>
-            <option value="moyenne">🟡 Moyenne</option>
-            <option value="faible">🟢 Faible</option>
+            <option value="">{{ $t('mes_taches.all_priorities') }}</option>
+            <option value="critique">🔴 {{ $t('priorites.critique') }}</option>
+            <option value="elevee">🟠 {{ $t('priorites.elevee') }}</option>
+            <option value="moyenne">🟡 {{ $t('priorites.moyenne') }}</option>
+            <option value="faible">🟢 {{ $t('priorites.faible') }}</option>
           </select>
           <select v-model="filters.statut" @change="applyFilters" class="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500">
-            <option value="">Tous statuts</option>
-            <option value="a_faire">À faire</option>
-            <option value="en_cours">En cours</option>
-            <option value="termine">Terminé</option>
+            <option value="">{{ $t('mes_taches.all_statuses') }}</option>
+            <option value="a_faire">{{ $t('statuts.a_faire') }}</option>
+            <option value="en_cours">{{ $t('statuts.en_cours') }}</option>
+            <option value="termine">{{ $t('statuts.termine') }}</option>
           </select>
           <label class="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" v-model="filters.overdue" @change="applyFilters" class="w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-brand-500" />
-            <span class="text-sm text-gray-700 dark:text-gray-300">En retard uniquement</span>
+            <input type="checkbox" v-model="filters.overdue" @change="applyFilters" class="w-4 h-4 text-brand-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-brand-500" />
+            <span class="text-sm text-gray-700 dark:text-gray-300">{{ $t('mes_taches.overdue_only') }}</span>
           </label>
           <button @click="resetFilters" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
-            Réinitialiser
+            {{ $t('common.reset') }}
           </button>
         </div>
       </div>
@@ -107,7 +125,7 @@
       <div v-if="loading" class="flex justify-center items-center h-64">
         <div class="text-center">
           <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500 mx-auto mb-4"></div>
-          <p class="text-gray-600 dark:text-gray-400">Chargement de vos tâches...</p>
+          <p class="text-gray-600 dark:text-gray-400">{{ $t('mes_taches.loading_tasks') }}</p>
         </div>
       </div>
 
@@ -128,12 +146,12 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
           </svg>
         </div>
-        <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">Aucune tâche trouvée</h3>
+        <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ $t('mes_taches.no_tasks_title') }}</h3>
         <p class="text-gray-500 dark:text-gray-400 mb-6">
-          {{ hasActiveFilters ? 'Essayez de modifier vos filtres' : 'Vous n\'avez aucune tâche pour cette période' }}
+          {{ hasActiveFilters ? $t('mes_taches.no_tasks_filters') : $t('mes_taches.no_tasks_period') }}
         </p>
         <button v-if="hasActiveFilters" @click="resetFilters" class="px-6 py-2 bg-brand-500 text-white rounded-3 hover:bg-brand-600 transition-colors">
-          Réinitialiser les filtres
+          {{ $t('mes_taches.reset_filters') }}
         </button>
       </div>
 
@@ -156,8 +174,8 @@
         </div>
 
         <!-- Vue Liste -->
-        <div v-else-if="currentView === 'list'" class="space-y-3">
-          <div v-for="tache in filteredTaches" :key="tache.id">
+        <div v-else-if="currentView === 'list'" ref="listRef" class="space-y-3">
+          <div v-for="tache in filteredTaches" :key="tache.id" class="stagger-item">
             <TacheCardPersonal
               :tache="tache"
               @view="handleViewTask"
@@ -191,15 +209,19 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
-import StatCard from '@/components/common/StatCard.vue'
+import MesTachesStats from '@/components/taches/MesTachesStats.vue'
 import KanbanColumnPersonal from '@/components/taches/KanbanColumnPersonal.vue'
 import TacheCardPersonal from '@/components/taches/TacheCardPersonal.vue'
 import TacheDetailModal from '@/components/taches/TacheDetailModal.vue'
 import SubmitResultModal from '@/components/taches/SubmitResultModal.vue'
+import { useStagger } from '@/composables/useAnimations'
 import api from '@/api/axios'
 import { useRealtimeRefresh } from '@/composables/useRealtimeRefresh'
+
+const { t } = useI18n()
 
 // State
 const taches = ref([])
@@ -208,6 +230,8 @@ const loading = ref(false)
 const error = ref(null)
 const currentView = ref('kanban')
 const router = useRouter()
+const { staggerRef: listRef, applyStagger } = useStagger(45)
+const showStats = ref(false)
 const showViewModal = ref(false)
 const showSubmitResultModal = ref(false)
 const currentTache = ref(null)
@@ -226,11 +250,11 @@ const filters = ref({
 })
 
 // Colonnes Kanban basées sur MON statut individuel
-const kanbanColumns = [
-  { statut: 'a_faire', title: 'À faire', color: '#6B7280', icon: '📋' },
-  { statut: 'en_cours', title: 'En cours', color: '#3B82F6', icon: '🔄' },
-  { statut: 'termine', title: 'Terminé', color: '#10B981', icon: '✅' }
-]
+const kanbanColumns = computed(() => [
+  { statut: 'a_faire', title: t('statuts.a_faire'), color: '#6B7280', icon: '📋' },
+  { statut: 'en_cours', title: t('statuts.en_cours'), color: '#3B82F6', icon: '🔄' },
+  { statut: 'termine', title: t('statuts.termine'), color: '#10B981', icon: '✅' }
+])
 
 // Computed
 const filteredTaches = computed(() => {
@@ -306,6 +330,7 @@ async function loadTaches() {
 
     const { data } = await api.get('/taches/mes-taches', { params })
     taches.value = data.data || []
+    applyStagger()
     console.log('✅ Mes tâches chargées:', taches.value.length)
   } catch (err) {
     console.error('❌ Erreur chargement tâches:', err)

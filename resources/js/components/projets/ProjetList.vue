@@ -96,6 +96,9 @@
         </button>
       </div>
 
+      <!-- Date range filter -->
+      <DateRangeFilter @change="onDateRangeChange" />
+
       <!-- Vue (Grid/List) -->
       <div class="flex items-center gap-2 border-t border-gray-200 dark:border-gray-700 pt-4">
         <span class="text-sm text-gray-600 dark:text-gray-400">Vue :</span>
@@ -148,11 +151,11 @@
     </div>
 
     <!-- Grid View -->
-    <div v-else-if="viewMode === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div v-else-if="viewMode === 'grid'" ref="gridRef" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <div
         v-for="projet in filteredProjets"
         :key="projet.id"
-        class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 transition-all cursor-pointer group"
+        class="stagger-item bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 transition-all cursor-pointer group"
       >
         <!-- Card Header -->
         <div class="p-6 border-b border-gray-200 dark:border-gray-700">
@@ -354,6 +357,7 @@
 
     <!-- List View -->
     <div v-else class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
         <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
           <tr>
@@ -481,6 +485,7 @@
           </tr>
         </tbody>
       </table>
+      </div>
     </div>
 
     <!-- Project Form Modal -->
@@ -508,6 +513,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useProjets } from '@/composables/useProjets'
+import { useStagger } from '@/composables/useAnimations'
 import {
   PlusIcon,
   SearchIcon,
@@ -529,6 +535,7 @@ import {
 } from '@/icons'
 import ProjetFormModal from './ProjetFormModal.vue'
 import ConfirmModal from '@/components/common/ConfirmModal.vue'
+import DateRangeFilter from '@/components/common/DateRangeFilter.vue'
 
 const emit = defineEmits(['view-projet'])
 
@@ -562,6 +569,8 @@ const {
   unarchiveProjet: unarchiveProjetService,
   cloneProjet: cloneProjetService
 } = useProjets()
+
+const { staggerRef: gridRef, applyStagger } = useStagger(55)
 
 // State
 const searchTerm = ref('')
@@ -623,12 +632,22 @@ const filteredProjets = computed(() => {
   return result
 })
 
+const dateRange = ref({ from: null, to: null })
+
+const onDateRangeChange = ({ from, to }) => {
+  dateRange.value = { from, to }
+  fetchProjetsList()
+}
+
 // Méthode fetchProjets exposée
 const fetchProjetsList = async () => {
   const filters = {
-    workspace_id: props.workspaceId
+    workspace_id: props.workspaceId,
+    ...(dateRange.value.from ? { date_from: dateRange.value.from } : {}),
+    ...(dateRange.value.to ? { date_to: dateRange.value.to } : {}),
   }
   await fetchProjets(filters)
+  applyStagger()
 }
 
 // Watch workspaceId prop changes (when passed explicitly)

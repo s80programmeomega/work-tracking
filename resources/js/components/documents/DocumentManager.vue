@@ -52,7 +52,7 @@
     </transition>
 
     <!-- Filtres et recherche -->
-    <div class="rounded-3 border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
+    <div class="rounded-3 border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] space-y-3">
       <div class="flex flex-col sm:flex-row gap-4">
         <!-- Barre de recherche -->
         <div class="flex-1">
@@ -110,6 +110,9 @@
           </div>
         </div>
       </div>
+
+      <!-- Date range filter -->
+      <DateRangeFilter @change="onDateRangeChange" />
     </div>
 
     <!-- Liste des documents -->
@@ -182,6 +185,7 @@ import DocumentViewerModal from './DocumentViewerModal.vue'
 import DocumentEditModal from './DocumentEditModal.vue'
 import DocumentShareModal from './DocumentShareModal.vue'
 import DocumentVersionModal from './DocumentVersionModal.vue'
+import DateRangeFilter from '@/components/common/DateRangeFilter.vue'
 
 const props = defineProps({
   documentableType: {
@@ -214,6 +218,11 @@ const {
 const searchQuery = ref('')
 const filterType = ref('')
 const viewMode = ref('grid')
+const dateRange = ref({ from: null, to: null })
+
+const onDateRangeChange = ({ from, to }) => {
+  dateRange.value = { from, to }
+}
 const showStats = ref(false)
 const showUploadModal = ref(false)
 const selectedDocument = ref(null)
@@ -255,6 +264,17 @@ const filteredDocuments = computed(() => {
           return true
       }
     })
+  }
+
+  // Filtre par plage de dates (created_at)
+  if (dateRange.value.from) {
+    const from = new Date(dateRange.value.from)
+    filtered = filtered.filter(doc => doc.created_at && new Date(doc.created_at) >= from)
+  }
+  if (dateRange.value.to) {
+    const to = new Date(dateRange.value.to)
+    to.setHours(23, 59, 59, 999)
+    filtered = filtered.filter(doc => doc.created_at && new Date(doc.created_at) <= to)
   }
 
   return filtered

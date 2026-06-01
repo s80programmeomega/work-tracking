@@ -2,6 +2,10 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useDraggable } from '@/composables/useDraggable'
+
+const { dialogRef, handleRef, dragStyle, attachHandle } = useDraggable()
+onMounted(attachHandle)
 import { 
   XIcon, 
   ChevronRightIcon, 
@@ -181,13 +185,13 @@ onMounted(() => {
 <!-- Le template reste identique, juste quelques ajustements pour debug -->
 <template>
   <Teleport to="body">
-    <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      <div
+    <div class="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
+      <div ref="dialogRef" :style="dragStyle"
         class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 max-w-2xl w-full max-h-[90vh] overflow-hidden"
         @click.stop
       >
         <!-- Header -->
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div ref="handleRef" class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 cursor-move select-none">
           <div class="flex items-center gap-3">
             <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
               Détails du membre

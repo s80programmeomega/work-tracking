@@ -66,11 +66,15 @@
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
         Membres assignés ({{ tache.assignees.length }})
       </h3>
-      
-      <div 
-        v-for="assignee in tache.assignees" 
+
+      <div
+        ref="staggerRef"
+        class="space-y-3"
+      >
+      <div
+        v-for="assignee in tache.assignees"
         :key="assignee.id"
-        class="bg-white dark:bg-gray-800 rounded-3 p-4 border-2 border-gray-200 dark:border-gray-700 hover:border-brand-500 transition-colors"
+        class="stagger-item bg-white dark:bg-gray-800 rounded-3 p-4 border-2 border-gray-200 dark:border-gray-700 hover:border-brand-500 transition-colors"
       >
         <div class="flex items-center gap-4">
           <!-- Avatar -->
@@ -154,6 +158,7 @@
           </div>
         </div>
       </div>
+      </div>
     </div>
 
     <!-- État vide -->
@@ -166,7 +171,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, watch, onMounted, nextTick } from 'vue';
+import { useStagger } from '@/composables/useAnimations';
 import api from '@/api/axios';
 import { useNotifications } from '@/composables/useNotifications';
 
@@ -184,9 +190,15 @@ const props = defineProps({
 const emit = defineEmits(['refresh']);
 
 const { showSuccess, showError } = useNotifications();
+const { staggerRef, applyStagger } = useStagger(50);
 const selectedUserId = ref('');
 const availableUsers = ref([]);
 const loading = ref(false);
+
+watch(() => props.tache?.assignees, async () => {
+  await nextTick();
+  applyStagger();
+}, { immediate: true });
 
 const assignUser = async () => {
   if (!selectedUserId.value || loading.value) return;

@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="flex items-center justify-between">
       <h3 class="text-base font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-        <i class="fas fa-list-check text-brand-600"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-brand-600"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
         Sous-tâches
         <span dusk="soustache-count" class="px-2 py-0.5 rounded-full text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium">
           {{ sousTaches.length }}
@@ -16,14 +16,14 @@
         @click="showForm = true"
         class="px-3 py-1.5 text-xs bg-brand-600 text-white rounded-3 hover:bg-brand-700 transition-colors flex items-center gap-1"
       >
-        <i class="fas fa-plus"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
         Ajouter
       </button>
     </div>
 
     <!-- Loading -->
     <div v-if="loading" class="flex items-center justify-center py-8">
-      <i class="fas fa-spinner fa-spin text-2xl text-brand-600"></i>
+      <svg class="animate-spin h-6 w-6 text-brand-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
     </div>
 
     <!-- Error -->
@@ -51,7 +51,7 @@
 
       <!-- Empty state -->
       <div v-if="sousTaches.length === 0 && !showForm" class="text-center py-8 text-gray-500 dark:text-gray-400">
-        <i class="fas fa-list-check text-3xl mb-2 opacity-30"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 mb-2 opacity-30"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
         <p class="text-sm">Aucune sous-tâche pour l'instant.</p>
         <button
           v-if="canCreate"
@@ -63,11 +63,11 @@
       </div>
 
       <!-- Sous-tâche items -->
-      <div class="space-y-2">
+      <div ref="listRef" class="space-y-2">
         <div
           v-for="st in orderedSousTaches"
           :key="st.id"
-          class="bg-white dark:bg-gray-900 rounded-3 border border-gray-200 dark:border-gray-700 p-4 transition-all"
+          class="stagger-item bg-white dark:bg-gray-900 rounded-3 border border-gray-200 dark:border-gray-700 p-4 transition-all"
           :class="{
             'border-l-4 border-l-red-400': st.statut === 'en_retard',
             'border-l-4 border-l-green-400': st.statut === 'termine',
@@ -87,7 +87,7 @@
                   ? 'bg-green-500 border-green-500 text-white'
                   : 'border-gray-400 dark:border-gray-600 hover:border-brand-500'"
               >
-                <i v-if="st.statut === 'termine'" class="fas fa-check text-xs"></i>
+                <svg v-if="st.statut === 'termine'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
               </button>
               <div v-else class="mt-0.5 shrink-0 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center">
                 <i v-if="st.statut === 'termine'" class="fas fa-check text-xs text-green-500"></i>
@@ -234,7 +234,7 @@
                     :class="canEdit ? 'cursor-pointer hover:text-brand-600 dark:hover:text-brand-400' : ''"
                     :title="canEdit ? 'Cliquer pour modifier l\'échéance' : ''"
                   >
-                    <i class="fas fa-calendar-alt text-gray-400"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3 text-gray-400"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
                     <span v-if="st.date_echeance" :class="{ 'text-red-600 font-medium': st.is_overdue }">
                       {{ formatDate(st.date_echeance) }}
                     </span>
@@ -243,7 +243,7 @@
 
                   <!-- Blocking badge -->
                   <span v-if="st.bloque_progression && st.statut !== 'termine'" class="text-xs text-orange-600 dark:text-orange-400 flex items-center gap-1">
-                    <i class="fas fa-lock text-xs"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25z"/></svg>
                     Bloquante
                   </span>
                 </div>
@@ -256,7 +256,7 @@
                 @click.stop="toggleMenu(st.id)"
                 class="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300 p-1"
               >
-                <i class="fas fa-ellipsis-v text-xs"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5zM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5zM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5z"/></svg>
               </button>
 
               <div
@@ -268,7 +268,7 @@
                   @click="confirmDelete(st)"
                   class="w-full px-3 py-2 text-left text-red-600 hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2"
                 >
-                  <i class="fas fa-trash-alt w-4"></i>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
                   Supprimer
                 </button>
               </div>
@@ -299,7 +299,7 @@
                 @click.stop="toggleIntervenantMenu(st.id)"
                 class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border border-dashed border-gray-400 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-brand-500 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
               >
-                <i class="fas fa-user-plus text-xs"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766z"/></svg>
                 Ajouter
               </button>
 
@@ -325,9 +325,9 @@
                     :disabled="(st.intervenants ?? []).some(i => i.id === m.id) || assigningId === m.id"
                     class="w-full px-3 py-1.5 text-left hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 text-xs"
                   >
-                    <i v-if="assigningId === m.id" class="fas fa-spinner fa-spin text-gray-400"></i>
-                    <i v-else-if="(st.intervenants ?? []).some(i => i.id === m.id)" class="fas fa-check text-green-500"></i>
-                    <i v-else class="fas fa-user text-gray-400 w-3"></i>
+                    <svg v-if="assigningId === m.id" class="animate-spin h-3 w-3 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    <svg v-else-if="(st.intervenants ?? []).some(i => i.id === m.id)" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3 text-green-500"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3 text-gray-400"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
                     {{ m.nom || m.name }}
                   </button>
                   <div v-if="filteredMembers.length === 0" class="px-3 py-2 text-xs text-gray-400">
@@ -363,6 +363,7 @@ import '@vuepic/vue-datepicker/dist/main.css'
 import SousTacheForm from './SousTacheForm.vue'
 import { useSousTaches } from '@/composables/useSousTaches'
 import { useAuthStore } from '@/stores/authStore'
+import { useStagger } from '@/composables/useAnimations'
 
 const props = defineProps({
     tacheId: { type: Number, required: true },
@@ -391,7 +392,9 @@ const {
     removeIntervenant,
 } = useSousTaches(props.tacheId)
 
-fetchSousTaches()
+const { staggerRef: listRef, applyStagger } = useStagger(50)
+
+fetchSousTaches().then(applyStagger)
 
 const showForm = ref(false)
 const creating = ref(false)
@@ -570,6 +573,7 @@ const getStatutLabel = (statut) => {
         en_retard: 'En retard',
         termine: 'Terminé',
         a_refaire: 'À refaire',
+        en_attente: 'En attente',
         annule: 'Annulé',
     }
     return labels[statut] ?? statut
@@ -582,7 +586,8 @@ const getStatutClass = (statut) => {
         en_retard: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
         termine: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
         a_refaire: 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300',
-        annule: 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400',
+        en_attente: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+        annule: 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400 line-through',
     }
     return classes[statut] ?? classes.a_faire
 }

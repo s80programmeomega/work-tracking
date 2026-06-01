@@ -16,18 +16,29 @@
 
 ## Current Session
 
-**Date:** 2026-05-29
-**Session goal:** Static analysis cleanup — replace abandoned larastan, add @property/@mixin/@responseField annotations to all 16 resources, fix 154 → 0 PHPStan errors
-**Branch:** `chore/test-coverage-expansion`
-**Status:** Complete — PHPStan level 5 clean, 627 tests passing.
+**Date:** 2026-05-31
+**Session goal:** Frontend alignment — stagger animations, stats toggles, notification polish
+**Branch:** `feature/frontend-alignment-phase-1`
+**Status:** Complete — build passing. Awaiting commit + push.
 
 ---
 
 ## Current Task
 
-**Task:** Document management polish + notification fixes
-**Branch:** `feature/design-system-v1`
-**Status:** Complete — awaiting push.
+**Task:** Frontend Alignment — animations, stats toggles, notification fixes
+**Branch:** `feature/frontend-alignment-phase-1`
+**Status:** Complete — build passing (17.38s). Awaiting commit + push.
+
+**What was done this session:**
+- Stagger animations: added `useStagger` + `.stagger-item` to ProjetDetail (activities + members tbody), ProjetDashboard (recentActivities + recentProjects), TacheCommentsTab, TacheAssigneesTab, TacheActivityTab, TacheAttachmentsTab, TacheLinksTab, TacheResultsTab, PendingValidationsModal, ActivityDetail (tasks + members)
+- Stats toggle button: added to MesActivites.vue, evaluations/PendingValidations.vue, MesValidationsEnAttente.vue — each replaces always-visible grid with `showStats` ref + `<transition>` + dedicated stats component
+- New stats components: MesActivitesStats.vue, PendingValidationsStats.vue (evaluations/), MesValidationsStats.vue (evaluations/)
+- Notification fixes: useNotifications.js icon/color/type maps cover all real notification types; NotificationItem rewritten with correct field names; NotificationDetailModal updated with all real type handlers
+
+**What to do next:**
+1. Commit all changes on `feature/frontend-alignment-phase-1`
+2. Push to origin (and client when applicable)
+3. Phase 4: Dusk happy-path tests for the pages that got fixes
 
 **What was done this session:**
 - Replaced abandoned `nunomaduro/larastan` with `larastan/larastan` v2.11; updated `phpstan.neon` extension path

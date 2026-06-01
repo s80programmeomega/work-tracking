@@ -1,11 +1,11 @@
 <template>
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 "
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4"
        @click.self="$emit('close')">
-    
-    <div class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-lg">
-      
+
+    <div ref="dialogRef" :style="dragStyle" class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-lg">
+
       <!-- Header -->
-      <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+      <div ref="handleRef" class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 cursor-move select-none">
           <div class="flex items-center gap-3">
           <div class="w-12 h-12 bg-white/20 rounded-3 flex items-center justify-center">
             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -106,7 +106,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useDraggable } from '@/composables/useDraggable'
+
+const { dialogRef, handleRef, dragStyle, attachHandle } = useDraggable()
+onMounted(attachHandle)
 import api from '@/api/axios'
 
 const props = defineProps({

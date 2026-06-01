@@ -1,7 +1,7 @@
 <!-- resources/js/pages/workspaces/Show.vue -->
 <template>
   <AdminLayout>
-    <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div class="bg-gray-100 dark:bg-gray-900">
       <!-- Loading State -->
       <div v-if="loading" class="flex items-center justify-center h-screen">
         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -44,7 +44,7 @@
                           ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                           : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
                       ]">
-                        {{ workspace.is_active ? 'Actif' : 'Inactif' }}
+                        {{ workspace.is_active ? $t('workspace_show.status_active') : $t('workspace_show.status_inactive') }}
                       </span>
                     </div>
                   </div>
@@ -53,16 +53,27 @@
 
               <div class="flex items-center gap-2">
 
+                <!-- Bouton Statistiques -->
+                <button
+                  @click="showStats = !showStats"
+                  class="inline-flex items-center gap-2 rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                  {{ $t('workspace_show.statistics') }}
+                </button>
+
                 <!-- Bouton Paramètres avec vérification de permission -->
                 <button v-if="canManageSettings"
                   @click="navigateToSettings"
                   class="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-3 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                  :title="canManageSettings ? 'Gérer les paramètres' : 'Permission requise'">
+                  :title="canManageSettings ? $t('workspace_show.manage_settings_title') : $t('workspace_show.permission_required')">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                   </svg>
-                  Paramètres
+                  {{ $t('workspace_show.settings') }}
                 </button>
 
                 <!-- Menu déroulant pour plus d'options -->
@@ -72,7 +83,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"/>
                     </svg>
-                    Plus d'options
+                    {{ $t('workspace_show.more_options') }}
                   </button>
 
                   <!-- Menu déroulant -->
@@ -85,16 +96,16 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
-                        Nouveau projet
+                        {{ $t('workspace_show.new_project') }}
                       </button>
-                      
+
                       <button v-else
                         @click="showPermissionDenied('create_projects')"
                         class="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-500 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-not-allowed">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
-                        Nouveau projet 
+                        {{ $t('workspace_show.new_project') }}
                       </button>
 
                       <!-- Séparateur -->
@@ -107,7 +118,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
                         </svg>
-                        Gérer les membres
+                        {{ $t('workspace_show.manage_members') }}
                       </button>
 
                       <!-- Option pour archiver le workspace (seulement propriétaire) -->
@@ -117,7 +128,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
                         </svg>
-                        Archiver le workspace
+                        {{ $t('workspace_show.archive_workspace') }}
                       </button>
                     </div>
                   </div>
@@ -133,74 +144,24 @@
 
         <!-- Main Content -->
         <div class="container mx-auto px-6 py-6">
-          <!-- Statistics Cards -->
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white dark:bg-gray-800 rounded-3 p-4 border border-gray-200 dark:border-gray-700">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Projets</p>
-                  <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ statistics.total_projets || 0 }}</p>
-                </div>
-                <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-3 flex items-center justify-center">
-                  <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-                  </svg>
-                </div>
-              </div>
-              <div class="mt-2">
-                <span class="text-xs text-green-600 dark:text-green-400 font-medium">
-                  {{ statistics.projets_actifs || 0 }} actifs
-                </span>
-              </div>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 rounded-3 p-4 border border-gray-200 dark:border-gray-700">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Tâches</p>
-                  <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ statistics.total_taches || 0 }}</p>
-                </div>
-                <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-3 flex items-center justify-center">
-                  <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-                  </svg>
-                </div>
-              </div>
-              <div class="mt-2">
-                <span class="text-xs text-green-600 dark:text-green-400 font-medium">
-                  {{ statistics.taux_completion || 0 }}% complétées
-                </span>
-              </div>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 rounded-3 p-4 border border-gray-200 dark:border-gray-700">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Activités</p>
-                  <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ statistics.total_activites || 0 }}</p>
-                </div>
-                <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-3 flex items-center justify-center">
-                  <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 rounded-3 p-4 border border-gray-200 dark:border-gray-700">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Membres</p>
-                  <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ workspace.member_count || 0 }}</p>
-                </div>
-                <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900 rounded-3 flex items-center justify-center">
-                  <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </div>
+          <!-- Panneau statistiques -->
+          <transition
+            enter-active-class="transition-all duration-300 ease-out"
+            enter-from-class="opacity-0 -translate-y-4"
+            enter-to-class="opacity-100 translate-y-0"
+            leave-active-class="transition-all duration-200 ease-in"
+            leave-from-class="opacity-100 translate-y-0"
+            leave-to-class="opacity-0 -translate-y-4"
+          >
+            <WorkspaceStats
+              v-if="showStats"
+              :statistics="statistics"
+              :member-count="workspace.member_count || 0"
+              :loading="false"
+              @close="showStats = false"
+              class="mb-6"
+            />
+          </transition>
 
           <!-- Content Tabs -->
           <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 mb-6">
@@ -225,7 +186,7 @@
                 <!-- Recent Projects -->
                 <div>
                   <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Projets récents</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $t('workspace_show.recent_projects') }}</h3>
                     <div class="flex gap-2">
                       <button v-if="canCreateProjects"
                         @click="showCreateProjectModal = true"
@@ -233,11 +194,11 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
-                        Nouveau projet 
+                        {{ $t('workspace_show.new_project') }}
                       </button>
                       <button @click="activeTab = 'projects'"
                         class="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium">
-                        Voir tous les projets
+                        {{ $t('workspace_show.view_all_projects') }}
                       </button>
                     </div>
                   </div>
@@ -249,14 +210,14 @@
               <!-- Projects Tab -->
               <div v-if="activeTab === 'projects'">
                 <div class="flex items-center justify-between mb-4">
-                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Tous les projets</h3>
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $t('workspace_show.all_projects') }}</h3>
                   <button v-if="canCreateProjects"
                     @click="showCreateProjectModal = true"
                     class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-3 hover:bg-blue-700 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
-                    Nouveau projet  
+                    {{ $t('workspace_show.new_project') }}
                   </button>
                 </div>
                 <ProjetList ref="allProjetsList" :workspace-id="workspace.id" @view-projet="navigateToProject"/>
@@ -279,16 +240,16 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z"/>
             </svg>
           </div>
-          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Workspace introuvable</h3>
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">{{ $t('workspace_show.not_found_title') }}</h3>
           <p class="text-gray-500 dark:text-gray-400 mb-6">
-            Le workspace demandé n'existe pas ou vous n'y avez pas accès.
+            {{ $t('workspace_show.not_found_desc') }}
           </p>
           <router-link to="/workspaces"
             class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-3 hover:bg-blue-700 transition-colors font-medium">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
-            Retour aux workspaces
+            {{ $t('workspace_show.back_to_workspaces') }}
           </router-link>
         </div>
       </div>
@@ -359,15 +320,18 @@
 
 <script setup>
 import { ref, onMounted, nextTick, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useWorkspace } from '@/composables/useWorkspace'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 import ProjetList from '@/components/projets/ProjetList.vue'
 import WorkspaceMemberManagement from '@/components/workspaces/WorkspaceMemberManagement.vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
+import WorkspaceStats from '@/components/workspaces/WorkspaceStats.vue'
 import CreateProjectModal from '@/components/projets/ProjetFormModal.vue'
 import ConfirmModal from '@/components/common/ConfirmModal.vue'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const { fetchWorkspace, fetchStatistics, archiveWorkspace: archiveWorkspaceService } = useWorkspace()
@@ -375,6 +339,7 @@ const { fetchWorkspace, fetchStatistics, archiveWorkspace: archiveWorkspaceServi
 const workspace = ref(null)
 const statistics = ref({})
 const loading = ref(true)
+const showStats = ref(false)
 const showWorkspaceMenu = ref(false)
 const showCreateProjectModal = ref(false)
 const showArchiveModal = ref(false)
@@ -393,11 +358,11 @@ const notification = ref({
 })
 
 // Tabs
-const tabs = [
-  { id: 'overview', label: 'Tableau de bord' },
-  { id: 'projects', label: 'Projets' },
-  { id: 'members', label: 'Membres' },
-]
+const tabs = computed(() => [
+  { id: 'overview', label: t('workspace_show.tab_overview') },
+  { id: 'projects', label: t('workspace_show.tab_projects') },
+  { id: 'members', label: t('workspace_show.tab_members') },
+])
 
 // Initialize permissions
 const {

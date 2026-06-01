@@ -2,7 +2,7 @@
 <template>
   <AdminLayout>
     <div
-      class="min-h-screen bg-gray-100 dark:bg-gray-900 p-6 transition-colors duration-300">
+      class="bg-gray-100 dark:bg-gray-900 p-6 transition-colors duration-300">
       <!-- Header avec navigation workspace et membre -->
       <div class="mb-8">
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
@@ -13,10 +13,10 @@
             </div>
             <div>
               <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                Tableau de Bord
+                {{ $t('navigation.dashboard') }}
               </h1>
               <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                {{ currentWorkspaceName || 'Vue d\'ensemble de vos projets et performances' }}
+                {{ currentWorkspaceName || $t('dashboard.overview') }}
               </p>
             </div>
           </div>
@@ -26,7 +26,7 @@
             <div class="relative group">
               <select v-model="selectedWorkspace" @change="onWorkspaceChange"
                 class="appearance-none rounded-[4px] border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 pl-10 pr-8 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-colors duration-200 cursor-pointer">
-                <option value="all">Tous les workspaces</option>
+                <option value="all">{{ $t('sidebar.all_workspaces') }}</option>
                 <option v-for="workspace in workspaces" :key="workspace.id" :value="workspace.id">
                   {{ workspace.nom }}
                 </option>
@@ -52,10 +52,10 @@
             <div class="relative">
               <select v-model="selectedPeriod" @change="loadDashboardData"
                 class="rounded-[4px] border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 pr-8 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-colors duration-200 cursor-pointer">
-                <option value="week">Cette semaine</option>
-                <option value="month">Ce mois</option>
-                <option value="quarter">Ce trimestre</option>
-                <option value="year">Cette année</option>
+                <option value="week">{{ $t('dashboard.period.week') }}</option>
+                <option value="month">{{ $t('dashboard.period.month') }}</option>
+                <option value="quarter">{{ $t('dashboard.period.quarter') }}</option>
+                <option value="year">{{ $t('dashboard.period.year') }}</option>
               </select>
             </div>
 
@@ -63,7 +63,7 @@
             <button @click="loadDashboardData"
               class="rounded-[4px] bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-all duration-200 flex items-center gap-2">
               <RefreshIcon class="w-4 h-4" :class="{ 'animate-spin': loading }" />
-              Actualiser
+              {{ $t('common.refresh') }}
             </button>
           </div>
         </div>
@@ -73,50 +73,43 @@
           <div class="relative">
             <select v-model="filters.projectStatus" @change="loadDashboardData"
               class="rounded-[4px] border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-colors duration-200 cursor-pointer">
-              <option value="all">Tous les statuts</option>
-              <option value="active">Projets actifs</option>
-              <option value="completed">Projets terminés</option>
-              <option value="archived">Projets archivés</option>
+              <option value="all">{{ $t('dashboard.filter.all_statuses') }}</option>
+              <option value="active">{{ $t('dashboard.filter.active_projects') }}</option>
+              <option value="completed">{{ $t('dashboard.filter.completed_projects') }}</option>
+              <option value="archived">{{ $t('dashboard.filter.archived_projects') }}</option>
             </select>
           </div>
 
           <div class="relative">
             <select v-model="filters.priority" @change="loadDashboardData"
               class="rounded-[4px] border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-colors duration-200 cursor-pointer">
-              <option value="all">Toutes priorités</option>
-              <option value="high">Priorité élevée</option>
-              <option value="medium">Priorité moyenne</option>
-              <option value="low">Priorité faible</option>
+              <option value="all">{{ $t('dashboard.filter.all_priorities') }}</option>
+              <option value="high">{{ $t('priorites.elevee') }}</option>
+              <option value="medium">{{ $t('priorites.moyenne') }}</option>
+              <option value="low">{{ $t('priorites.faible') }}</option>
             </select>
           </div>
 
           <button v-if="hasActiveFilters" @click="resetFilters"
             class="rounded-[4px] border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 flex items-center gap-1">
             <XIcon class="w-3 h-3" />
-            Réinitialiser
+            {{ $t('common.reset') }}
           </button>
         </div>
       </div>
 
       <!-- Loading State -->
-      <div v-if="loading" class="flex items-center justify-center py-20">
-        <div class="text-center">
-          <div class="relative">
-            <div class="w-16 h-16 border-4 border-brand-200 dark:border-brand-800 rounded-full animate-spin"></div>
-            <div
-              class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 border-4 border-transparent border-t-brand-600 rounded-full animate-spin">
-            </div>
-          </div>
-          <p class="mt-4 text-gray-600 dark:text-gray-400 font-medium">Chargement des données...</p>
-        </div>
+      <div v-if="loading" class="space-y-8">
+        <SkeletonLoader type="stats" :cols="4" grid-class="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" />
+        <SkeletonLoader type="cards" :rows="3" :card-height="200" grid-class="grid-cols-1 lg:grid-cols-3" />
       </div>
 
       <!-- Dashboard Content -->
       <div v-else class="space-y-8">
         <!-- Stats Cards -->
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div ref="statsRef" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           <div v-for="(stat, index) in statsCards" :key="index"
-            class="group bg-white dark:bg-gray-800 rounded-3 p-5 border border-gray-200 dark:border-gray-700 hover:border-brand-300 dark:hover:border-brand-600 transition-colors duration-200">
+            class="stagger-item group bg-white dark:bg-gray-800 rounded-3 p-5 border border-gray-200 dark:border-gray-700 hover:border-brand-300 dark:hover:border-brand-600 transition-colors duration-200">
 
             <div class="flex items-start justify-between">
               <div class="flex-1">
@@ -137,7 +130,7 @@
                     <TrendingDownIcon v-else class="mr-1 h-4 w-4" />
                     {{ stat.change }}
                   </span>
-                  <span class="ml-2 text-xs text-gray-500 dark:text-gray-400">vs mois dernier</span>
+                  <span class="ml-2 text-xs text-gray-500 dark:text-gray-400">{{ $t('dashboard.stats.vs_last_month') }}</span>
                 </div>
               </div>
               <div :class="['rounded-3 p-2.5', stat.lightColor]">
@@ -156,12 +149,12 @@
               class="rounded-3 bg-white dark:bg-gray-800 p-6 border border-gray-200 dark:border-gray-700">
               <div class="flex items-center justify-between mb-6">
                 <div>
-                  <h2 class="text-xl font-bold text-gray-900 dark:text-white">Vue Kanban des Projets</h2>
-                  <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Organisez vos projets par statut</p>
+                  <h2 class="text-xl font-bold text-gray-900 dark:text-white">{{ $t('dashboard.kanban.title') }}</h2>
+                  <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ $t('dashboard.kanban.subtitle') }}</p>
                 </div>
                 <router-link to="/projets/mes-projets"
                   class="group flex items-center gap-2 text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 transition-all duration-200 font-semibold text-sm">
-                  Voir tout
+                  {{ $t('common.view') }}
                   <ArrowRightIcon
                     class="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-200" />
                 </router-link>
@@ -181,8 +174,8 @@
               class="rounded-3 bg-white dark:bg-gray-800 p-6 border border-gray-200 dark:border-gray-700">
               <div class="flex items-center justify-between mb-6">
                 <div>
-                  <h2 class="text-xl font-bold text-gray-900 dark:text-white">Progression Mensuelle</h2>
-                  <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Évolution des projets et tâches</p>
+                  <h2 class="text-xl font-bold text-gray-900 dark:text-white">{{ $t('dashboard.monthly_progress.title') }}</h2>
+                  <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ $t('dashboard.monthly_progress.subtitle') }}</p>
                 </div>
                 <div class="flex items-center gap-4 text-sm">
                   <div v-for="legend in chartLegends" :key="legend.label" class="flex items-center gap-2">
@@ -203,7 +196,7 @@
             <div
               class="rounded-3 bg-white dark:bg-gray-800 p-6 border border-gray-200 dark:border-gray-700">
               <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-bold text-gray-900 dark:text-white">Mes Tâches</h2>
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white">{{ $t('tasks.my_tasks') }}</h2>
                 <span
                   class="rounded-1 bg-brand-50 dark:bg-brand-500/15 px-2 py-0.5 text-[11px] font-semibold text-brand-500 dark:text-brand-400 border border-brand-200 dark:border-brand-500/30">
                   {{ myTasks.length }}
@@ -239,8 +232,8 @@
 
                 <div v-if="myTasks.length === 0" class="text-center py-8">
                   <CheckCircleIcon class="mx-auto h-12 w-12 text-green-500 dark:text-green-400 mb-3" />
-                  <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Aucune tâche assignée</p>
-                  <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Vous êtes à jour !</p>
+                  <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">{{ $t('dashboard.my_tasks.empty') }}</p>
+                  <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ $t('dashboard.my_tasks.up_to_date') }}</p>
                 </div>
               </div>
             </div>
@@ -248,7 +241,7 @@
             <!-- Membres de l'équipe -->
             <div
               class="rounded-3 bg-white dark:bg-gray-800 p-6 border border-gray-200 dark:border-gray-700">
-              <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Membres de l'équipe</h2>
+              <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">{{ $t('dashboard.team_members.title') }}</h2>
               <div class="space-y-3">
                 <div v-for="member in teamMembers" :key="member.id"
                   class="flex items-center gap-3 p-3 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 group">
@@ -277,15 +270,15 @@
                       {{ member.taches_count || 0 }}
                     </div>
                     <div class="text-xs text-gray-500 dark:text-gray-400">
-                      tâches
+                      {{ $t('dashboard.team_members.tasks_label') }}
                     </div>
                   </div>
                 </div>
 
                 <div v-if="teamMembers.length === 0" class="text-center py-8">
                   <UsersIcon class="mx-auto h-12 w-12 text-gray-400 mb-3" />
-                  <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Aucun membre</p>
-                  <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Les membres de l'équipe apparaîtront ici</p>
+                  <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">{{ $t('dashboard.team_members.empty') }}</p>
+                  <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ $t('dashboard.team_members.empty_hint') }}</p>
                 </div>
               </div>
             </div>
@@ -299,6 +292,7 @@
 <script setup>
 import { ref, onMounted, nextTick, computed, onBeforeUnmount, markRaw } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import api from '@/api/axios'
 import Chart from 'chart.js/auto'
 import AdminLayout from '../components/layout/AdminLayout.vue'
@@ -320,9 +314,13 @@ import {
   XIcon
 } from '@/icons'
 import { useWorkspace } from '@/composables/useWorkspace'
+import { useStagger } from '@/composables/useAnimations'
+import SkeletonLoader from '@/components/common/SkeletonLoader.vue'
 
 const router = useRouter()
+const { t } = useI18n()
 const loading = ref(true)
+const { staggerRef: statsRef, applyStagger: applyStatsStagger } = useStagger(60)
 const selectedPeriod = ref('month')
 const selectedWorkspace = ref('all')
 const selectedMember = ref('all')
@@ -357,10 +355,10 @@ const dashboardData = ref({
 // Computed
 const currentWorkspaceName = computed(() => {
   if (selectedWorkspace.value === 'all') {
-    return 'Tous les workspaces'
+    return t('sidebar.all_workspaces')
   }
   const workspace = workspaces.value.find(w => w.id === selectedWorkspace.value)
-  return workspace?.nom || 'Vue d\'ensemble'
+  return workspace?.nom || t('dashboard.overview')
 })
 
 const hasActiveFilters = computed(() => {
@@ -379,25 +377,24 @@ const teamMembers = computed(() => {
 })
 
 // Colonnes Kanban
-const kanbanColumns = ref([
-    {
+const kanbanColumns = computed(() => [
+  {
     status: 'pending',
-    title: 'En attente',
+    title: t('statuts.en_attente'),
     color: 'bg-yellow-500',
     textColor: 'text-yellow-700 dark:text-yellow-400',
     bgColor: 'bg-yellow-50 dark:bg-yellow-900/20'
   },
   {
     status: 'active',
-    title: 'En cours',
+    title: t('statuts.en_cours'),
     color: 'bg-green-500',
     textColor: 'text-green-700 dark:text-green-400',
     bgColor: 'bg-green-50 dark:bg-green-900/20'
   },
-
   {
     status: 'completed',
-    title: 'Terminés',
+    title: t('statuts.termine'),
     color: 'bg-blue-500',
     textColor: 'text-blue-700 dark:text-blue-400',
     bgColor: 'bg-blue-50 dark:bg-blue-900/20'
@@ -406,53 +403,20 @@ const kanbanColumns = ref([
 
 // Cartes de statistiques — markRaw() évite la proxification réactive
 // des composants d'icônes (Vue émet sinon un avertissement).
-const statsCards = ref([
-  {
-    title: 'Projets Actifs',
-    value: 0,
-    change: '+0%',
-    trend: 'up',
-    icon: markRaw(FolderKanbanIcon),
-    lightColor: 'bg-blue-50 dark:bg-blue-900/20 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30',
-    textColor: 'text-blue-600 dark:text-blue-400',
-    hoverColor: '#3b82f6'
-  },
-  {
-    title: 'Mes Tâches',
-    value: 0,
-    change: '+0%',
-    trend: 'up',
-    icon: markRaw(ListTodoIcon),
-    lightColor: 'bg-purple-50 dark:bg-purple-900/20 group-hover:bg-purple-100 dark:group-hover:bg-purple-900/30',
-    textColor: 'text-purple-600 dark:text-purple-400',
-    hoverColor: '#8b5cf6'
-  },
-  {
-    title: 'Taux Complétion',
-    value: '0%',
-    change: '+0%',
-    trend: 'up',
-    icon: markRaw(TargetIcon),
-    lightColor: 'bg-green-50 dark:bg-green-900/20 group-hover:bg-green-100 dark:group-hover:bg-green-900/30',
-    textColor: 'text-green-600 dark:text-green-400',
-    hoverColor: '#10b981'
-  },
-  {
-    title: 'En Retard',
-    value: 0,
-    change: '0%',
-    trend: 'down',
-    icon: markRaw(AlertCircleIcon),
-    lightColor: 'bg-red-50 dark:bg-red-900/20 group-hover:bg-red-100 dark:group-hover:bg-red-900/30',
-    textColor: 'text-red-600 dark:text-red-400',
-    hoverColor: '#ef4444'
-  }
+const statsCardsBase = ref([
+  { key: 0, value: 0, change: '+0%', trend: 'up', icon: markRaw(FolderKanbanIcon), lightColor: 'bg-blue-50 dark:bg-blue-900/20 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30', textColor: 'text-blue-600 dark:text-blue-400', hoverColor: '#3b82f6', titleKey: 'dashboard.stats.active_projects' },
+  { key: 1, value: 0, change: '+0%', trend: 'up', icon: markRaw(ListTodoIcon), lightColor: 'bg-purple-50 dark:bg-purple-900/20 group-hover:bg-purple-100 dark:group-hover:bg-purple-900/30', textColor: 'text-purple-600 dark:text-purple-400', hoverColor: '#8b5cf6', titleKey: 'dashboard.stats.my_tasks' },
+  { key: 2, value: '0%', change: '+0%', trend: 'up', icon: markRaw(TargetIcon), lightColor: 'bg-green-50 dark:bg-green-900/20 group-hover:bg-green-100 dark:group-hover:bg-green-900/30', textColor: 'text-green-600 dark:text-green-400', hoverColor: '#10b981', titleKey: 'dashboard.stats.completion_rate' },
+  { key: 3, value: 0, change: '0%', trend: 'down', icon: markRaw(AlertCircleIcon), lightColor: 'bg-red-50 dark:bg-red-900/20 group-hover:bg-red-100 dark:group-hover:bg-red-900/30', textColor: 'text-red-600 dark:text-red-400', hoverColor: '#ef4444', titleKey: 'dashboard.stats.overdue' },
 ])
+const statsCards = computed(() =>
+  statsCardsBase.value.map(card => ({ ...card, title: t(card.titleKey) }))
+)
 
-const chartLegends = ref([
-  { label: 'Projets', color: '#6366f1' },
-  { label: 'Tâches totales', color: '#f59e0b' },
-  { label: 'Complétées', color: '#10b981' }
+const chartLegends = computed(() => [
+  { label: t('dashboard.chart.projects'), color: '#6366f1' },
+  { label: t('dashboard.chart.total_tasks'), color: '#f59e0b' },
+  { label: t('dashboard.chart.completed'), color: '#10b981' },
 ])
 
 // Méthodes
@@ -473,6 +437,7 @@ const loadDashboardData = async () => {
     updateStatsCards()
     await nextTick()
     createCharts()
+    applyStatsStagger()
   } catch (error) {
     console.error('Error loading dashboard data:', error)
   } finally {
@@ -512,26 +477,26 @@ const updateStatsCards = () => {
   console.log('Dashboard', dashboardData);
   console.log('Dashboard value', dashboardData.value);
   
-  statsCards.value[0].value = stats.projets_actifs?.value || 0
-  statsCards.value[0].change = stats.projets_actifs?.change || '+0%'
-  statsCards.value[0].trend = stats.projets_actifs?.trend || 'up'
+  statsCardsBase.value[0].value = stats.projets_actifs?.value || 0
+  statsCardsBase.value[0].change = stats.projets_actifs?.change || '+0%'
+  statsCardsBase.value[0].trend = stats.projets_actifs?.trend || 'up'
 
   // 2️⃣ Mes tâches (count uniquement)
   const myTasksCount = Array.isArray(dashboardData.value.my_tasks)
     ? dashboardData.value.my_tasks.length
     : 0
 
-  statsCards.value[1].value = myTasksCount
-  statsCards.value[1].change = '+0%'          // ou calcul personnalisé
-  statsCards.value[1].trend = 'neutral'        // ou "up/down"
+  statsCardsBase.value[1].value = myTasksCount
+  statsCardsBase.value[1].change = '+0%'
+  statsCardsBase.value[1].trend = 'neutral'
 
-  statsCards.value[2].value = (stats.taux_completion?.value || 0) + '%'
-  statsCards.value[2].change = stats.taux_completion?.change || '+0%'
-  statsCards.value[2].trend = stats.taux_completion?.trend || 'up'
+  statsCardsBase.value[2].value = (stats.taux_completion?.value || 0) + '%'
+  statsCardsBase.value[2].change = stats.taux_completion?.change || '+0%'
+  statsCardsBase.value[2].trend = stats.taux_completion?.trend || 'up'
 
-  statsCards.value[3].value = stats.taches_en_retard?.value || 0
-  statsCards.value[3].change = stats.taches_en_retard?.change || '0%'
-  statsCards.value[3].trend = stats.taches_en_retard?.trend || 'down'
+  statsCardsBase.value[3].value = stats.taches_en_retard?.value || 0
+  statsCardsBase.value[3].change = stats.taches_en_retard?.change || '0%'
+  statsCardsBase.value[3].trend = stats.taches_en_retard?.trend || 'down'
 }
 
 const getProjectsByStatus = (status) => {

@@ -22,6 +22,7 @@ use App\Permissions\ContextualPermissionGate;
 use App\Permissions\Permission;
 use App\Services\PermissionService;
 use App\Services\TacheService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
@@ -62,6 +63,8 @@ class TacheController extends Controller
             'week_number',
             'year',
             'validation_status',
+            'date_from',
+            'date_to',
         ]);
 
         $taches = $this->tacheService->getAllTaches($request->user(), $filters);
@@ -776,6 +779,7 @@ class TacheController extends Controller
 
                     return [
                         'can_update' => $user->can('update', $tache),
+                        'can_inline_edit' => $gate->userCan($user, Permission::TACHES_INLINE_EDIT, $tache),
                         'can_delete' => $user->can('delete', $tache),
                         'can_validate_n1' => $user->can('validateN1', $tache),
                         'can_validate_n2' => $user->can('validateN2', $tache),
@@ -2208,7 +2212,7 @@ class TacheController extends Controller
         $report = $this->tacheService->getWeeklyReport($user, $weekNumber, $year);
 
         // Générer PDF avec DomPDF ou Laravel Snappy
-        $pdf = PDF::loadView('reports.weekly-tasks', [
+        $pdf = Pdf::loadView('reports.weekly-tasks', [
             'report' => $report,
             'user' => $user,
         ]);
@@ -2275,6 +2279,15 @@ class TacheController extends Controller
             $query->whereHas('assignees', fn ($q) => $q->where('users.id', $request->integer('assignee_id')));
         }
 
+        // Filtre par plage de dates (écheance)
+        if ($request->filled('date_from')) {
+            $query->where('echeance', '>=', $request->string('date_from'));
+        }
+
+        if ($request->filled('date_to')) {
+            $query->where('echeance', '<=', $request->string('date_to'));
+        }
+
         $taches = $query
             ->orderBy('echeance', 'asc')
             ->paginate($request->integer('per_page', 25));
@@ -2282,7 +2295,7 @@ class TacheController extends Controller
         Log::info('Vue globale des tâches consultée', [
             'user_id' => $user->id,
             'workspace_id' => $workspace?->id,
-            'filters' => $request->only(['projet_id', 'activite_id', 'statut', 'assignee_id']),
+            'filters' => $request->only(['projet_id', 'activite_id', 'statut', 'assignee_id', 'date_from', 'date_to']),
         ]);
 
         return response()->json([

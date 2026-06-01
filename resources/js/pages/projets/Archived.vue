@@ -1,26 +1,26 @@
 <!-- resources/js/pages/projets/ArchivedProjects.vue -->
 <template>
   <AdminLayout>
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div class="bg-gray-50 dark:bg-gray-900">
       <!-- Header Section - Trello Style -->
       <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div class="max-w-full mx-auto px-4 py-4">
-          <div class="flex items-center justify-between">
+          <div class="flex flex-wrap items-center justify-between gap-3">
             <!-- Left Side -->
-            <div class="flex items-center gap-4">
+            <div class="flex min-w-0 items-center gap-4">
               <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
                   {{ pageTitle }}
                 </h1>
                 <p class="text-gray-500 dark:text-gray-400 flex items-center gap-2 text-sm mt-1">
                   <ArchiveIcon class="w-4 h-4" />
-                  {{ filteredProjets.length }} projet(s) archivé(s) dans {{ currentWorkspaceName || 'le workspace actuel' }}
+                  {{ $t('projets_archived.subtitle', { count: filteredProjets.length, workspace: currentWorkspaceName || $t('projets_archived.subtitle_default_ws') }) }}
                 </p>
               </div>
             </div>
 
             <!-- Right Side -->
-            <div class="flex items-center gap-3">
+            <div class="flex flex-wrap items-center gap-3">
               <!-- Workspace Selector -->
               <div v-if="hasWorkspaces" class="relative">
                 <select v-model="selectedWorkspaceId" @change="onWorkspaceChange"
@@ -43,30 +43,30 @@
                   : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
               ]">
                 <ArchiveIcon class="w-4 h-4" />
-                {{ displayMode === 'all-archived' ? 'Tous les projets archivés' : 'Mes projets archivés' }}
+                {{ displayMode === 'all-archived' ? $t('projets_archived.btn_all_archived') : $t('projets_archived.btn_my_archived') }}
               </button>
 
               <!-- Bulk Actions -->
               <div class="relative" v-if="selectedProjets.length > 0">
-                <button @click="showBulkActions = !showBulkActions"
+                <button dusk="bulk-actions-btn" @click="showBulkActions = !showBulkActions"
                   class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-3 hover:bg-blue-700 transition-colors font-medium">
                   <ArchiveIcon class="w-4 h-4" />
-                  Actions groupées ({{ selectedProjets.length }})
+                  {{ $t('projets_archived.btn_bulk_actions', { count: selectedProjets.length }) }}
                   <ChevronDownIcon class="w-4 h-4" />
                 </button>
 
                 <!-- Bulk Actions Dropdown -->
-                <div v-if="showBulkActions" v-click-outside="() => showBulkActions = false"
+                <div dusk="bulk-actions-dropdown" v-if="showBulkActions" v-click-outside="() => showBulkActions = false"
                   class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-3 border border-gray-200 dark:border-gray-600 z-10">
                   <button @click="bulkUnarchive"
                     class="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-t-lg transition-colors">
                     <ArchiveBoxArrowUpIcon class="w-4 h-4" />
-                    Désarchiver
+                    {{ $t('projets_archived.bulk_unarchive') }}
                   </button>
                   <button @click="bulkDelete"
                     class="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-b-lg transition-colors">
                     <TrashIcon class="w-4 h-4" />
-                    Supprimer
+                    {{ $t('projets_archived.bulk_delete') }}
                   </button>
                 </div>
               </div>
@@ -87,7 +87,7 @@
                     {{ stats.total_archives || 0 }}
                   </p>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
-                    Projets archivés
+                    {{ $t('projets_archived.stat_archived_projects') }}
                   </p>
                 </div>
                 <div class="p-2 bg-gray-100 dark:bg-gray-700 rounded-3">
@@ -96,10 +96,10 @@
               </div>
               <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 dark:border-gray-600">
                 <span class="text-xs font-medium text-blue-600 dark:text-blue-400">
-                  {{ stats.archives_termines || 0 }} terminés
+                  {{ $t('projets_archived.stat_archived_completed', { count: stats.archives_termines || 0 }) }}
                 </span>
                 <span class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ stats.archives_actifs || 0 }} actifs avant archivage
+                  {{ $t('projets_archived.stat_archived_active_before', { count: stats.archives_actifs || 0 }) }}
                 </span>
               </div>
             </div>
@@ -112,7 +112,7 @@
                     {{ stats.duree_moyenne_archivage || 0 }}
                   </p>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
-                    Jours d'archivage
+                    {{ $t('projets_archived.stat_archive_days') }}
                   </p>
                 </div>
                 <div class="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-3">
@@ -121,7 +121,7 @@
               </div>
               <div class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-600">
                 <span class="text-xs text-gray-500 dark:text-gray-400">
-                  Durée moyenne
+                  {{ $t('projets_archived.stat_avg_duration') }}
                 </span>
               </div>
             </div>
@@ -134,7 +134,7 @@
                     {{ stats.taux_completion_archives || 0 }}%
                   </p>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
-                    Complétion moyenne
+                    {{ $t('projets_archived.stat_avg_completion') }}
                   </p>
                 </div>
                 <div class="p-2 bg-green-100 dark:bg-green-900/30 rounded-3">
@@ -143,10 +143,10 @@
               </div>
               <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 dark:border-gray-600">
                 <span class="text-xs font-medium text-green-600 dark:text-green-400">
-                  {{ stats.archives_100_percent || 0 }} à 100%
+                  {{ $t('projets_archived.stat_at_100', { count: stats.archives_100_percent || 0 }) }}
                 </span>
                 <span class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ stats.archives_incomplets || 0 }} incomplets
+                  {{ $t('projets_archived.stat_incomplete', { count: stats.archives_incomplets || 0 }) }}
                 </span>
               </div>
             </div>
@@ -159,7 +159,7 @@
                     {{ stats.archives_recentes || 0 }}
                   </p>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
-                    Archivés récemment
+                    {{ $t('projets_archived.stat_recently_archived') }}
                   </p>
                 </div>
                 <div class="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-3">
@@ -170,7 +170,7 @@
                 <span class="text-xs font-medium" :class="
                   (stats.archives_anciennes || 0) > 10 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'
                 ">
-                  {{ stats.archives_anciennes || 0 }} > 1 an
+                  {{ $t('projets_archived.stat_over_1_year', { count: stats.archives_anciennes || 0 }) }}
                 </span>
               </div>
             </div>
@@ -186,7 +186,7 @@
             <!-- Search Bar -->
             <div class="relative mb-4">
               <SearchIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input v-model="searchTerm" type="text" placeholder="Rechercher dans les archives..."
+              <input v-model="searchTerm" type="text" :placeholder="$t('projets_archived.search_placeholder')"
                 class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
             </div>
 
@@ -195,37 +195,37 @@
               <!-- Date d'archivage Filter -->
               <select v-model="filters.archived_period"
                 class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-all">
-                <option value="all">Toutes périodes</option>
-                <option value="today">Aujourd'hui</option>
-                <option value="week">Cette semaine</option>
-                <option value="month">Ce mois</option>
-                <option value="year">Cette année</option>
-                <option value="old">Plus d'un an</option>
+                <option value="all">{{ $t('projets_archived.filter_period') }}</option>
+                <option value="today">{{ $t('projets_archived.filter_today') }}</option>
+                <option value="week">{{ $t('projets_archived.filter_week') }}</option>
+                <option value="month">{{ $t('projets_archived.filter_month') }}</option>
+                <option value="year">{{ $t('projets_archived.filter_year') }}</option>
+                <option value="old">{{ $t('projets_archived.filter_old') }}</option>
               </select>
 
               <!-- Statut avant archivage -->
               <select v-model="filters.pre_archive_status"
                 class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-all">
-                <option value="all">Tous les statuts</option>
-                <option value="completed">Terminés avant archivage</option>
-                <option value="active">Actifs avant archivage</option>
+                <option value="all">{{ $t('projets_archived.filter_all_statuses') }}</option>
+                <option value="completed">{{ $t('projets_archived.filter_completed_before') }}</option>
+                <option value="active">{{ $t('projets_archived.filter_active_before') }}</option>
               </select>
 
               <!-- Complétion Filter -->
               <select v-model="filters.completion"
                 class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-all">
-                <option value="all">Tous les taux</option>
-                <option value="100">100% complétés</option>
-                <option value="75-99">75-99% complétés</option>
-                <option value="50-74">50-74% complétés</option>
-                <option value="0-49">0-49% complétés</option>
+                <option value="all">{{ $t('projets_archived.filter_all_rates') }}</option>
+                <option value="100">{{ $t('projets_archived.filter_100') }}</option>
+                <option value="75-99">{{ $t('projets_archived.filter_75_99') }}</option>
+                <option value="50-74">{{ $t('projets_archived.filter_50_74') }}</option>
+                <option value="0-49">{{ $t('projets_archived.filter_0_49') }}</option>
               </select>
 
               <!-- Reset Filters -->
               <button v-if="hasActiveFilters" @click="resetFilters"
                 class="inline-flex items-center gap-2 px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
                 <XIcon class="w-4 h-4" />
-                Réinitialiser
+                {{ $t('projets_archived.btn_reset') }}
               </button>
             </div>
           </div>
@@ -236,11 +236,11 @@
               <div class="flex items-center gap-3">
                 <CheckCircleIcon class="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 <span class="text-sm font-medium text-blue-800 dark:text-blue-300">
-                  {{ selectedProjets.length }} projet(s) sélectionné(s)
+                  {{ $t('projets_archived.selection_count', { count: selectedProjets.length }) }}
                 </span>
               </div>
               <button @click="clearSelection" class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200">
-                Tout désélectionner
+                {{ $t('projets_archived.btn_clear_selection') }}
               </button>
             </div>
           </div>
@@ -263,25 +263,25 @@
               <ArchiveBoxIcon class="w-8 h-8 text-gray-400" />
             </div>
             <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              Aucun projet archivé
+              {{ $t('projets_archived.empty_title') }}
             </h3>
             <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
               {{ searchTerm || hasActiveFilters
-                ? 'Aucun projet ne correspond à vos critères de recherche'
-                : 'Les projets archivés apparaîtront ici. Archivez des projets pour les conserver sans les afficher dans la liste principale.'
+                ? $t('projets_archived.empty_filtered')
+                : $t('projets_archived.empty_hint')
               }}
             </p>
             <button v-if="!searchTerm && !hasActiveFilters" @click="goToActiveProjects"
               class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-3 hover:bg-blue-700 transition-colors font-medium">
               <ArrowLeftIcon class="w-5 h-5" />
-              Voir les projets actifs
+              {{ $t('projets_archived.btn_view_active') }}
             </button>
           </div>
 
           <!-- Archived Projects Grid -->
-          <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div v-else ref="gridRef" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <div v-for="projet in filteredProjets" :key="projet.id"
-              class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 transition-shadow overflow-hidden"
+              class="stagger-item bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 transition-shadow overflow-hidden"
               :class="{
                 'ring-2 ring-blue-500': isSelected(projet.id),
                 'opacity-75': projet.status === 'archived'
@@ -307,7 +307,7 @@
                       </span>
                       <span v-if="projet.responsable_id === currentUserId"
                         class="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded">
-                        Propriétaire
+                        {{ $t('projets_archived.badge_owner') }}
                       </span>
                     </div>
                     <h3 @click="viewProjet(projet.id)"
@@ -335,22 +335,22 @@
                         <button @click.stop="viewProjet(projet.id)"
                           class="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-t-lg transition-colors">
                           <EyeIcon class="w-4 h-4" />
-                          Voir détails
+                          {{ $t('projets_archived.menu_view') }}
                         </button>
                         <button @click.stop="unarchiveProjet(projet)"
                           class="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
                           <ArchiveBoxArrowUpIcon class="w-4 h-4" />
-                          Désarchiver
+                          {{ $t('projets_archived.menu_unarchive') }}
                         </button>
                         <button @click.stop="duplicateProjet(projet)"
                           class="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
                           <CopyIcon class="w-4 h-4" />
-                          Dupliquer
+                          {{ $t('projets_archived.menu_duplicate') }}
                         </button>
                         <button v-if="projet.responsable_id === currentUserId" @click.stop="deleteProjet(projet)"
                           class="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-b-lg transition-colors">
                           <TrashIcon class="w-4 h-4" />
-                          Supprimer définitivement
+                          {{ $t('projets_archived.menu_delete') }}
                         </button>
                       </div>
                     </div>
@@ -359,20 +359,20 @@
 
                 <!-- Description -->
                 <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3 min-h-[2.5rem]">
-                  {{ projet.description || 'Aucune description' }}
+                  {{ projet.description || $t('projets_archived.no_description') }}
                 </p>
 
                 <!-- Archive Info -->
                 <div class="flex items-center gap-2 mb-3">
                   <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
                     <ArchiveIcon class="w-3 h-3" />
-                    Archivé le {{ formatArchiveDate(projet.archived_at) }}
+                    {{ $t('projets_archived.archived_on', { date: formatArchiveDate(projet.archived_at) }) }}
                   </span>
                   
                   <span v-if="getArchiveDuration(projet) > 365"
                     class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400">
                     <ClockIcon class="w-3 h-3" />
-                    Ancien
+                    {{ $t('projets_archived.badge_old') }}
                   </span>
                 </div>
 
@@ -380,7 +380,7 @@
                 <div class="mb-3">
                   <div class="flex items-center justify-between mb-1">
                     <span class="text-xs font-medium text-gray-600 dark:text-gray-400">
-                      Progression finale
+                      {{ $t('projets_archived.stat_final_progression') }}
                     </span>
                     <span class="text-xs font-bold text-gray-900 dark:text-white">
                       {{ projet.progression }}%
@@ -401,7 +401,7 @@
                       {{ getProjectActivitiesCount(projet) }}
                     </div>
                     <div class="text-xs text-gray-500 dark:text-gray-400">
-                      Activités
+                      {{ $t('projets_archived.stat_activities') }}
                     </div>
                   </div>
                   <div class="text-center">
@@ -409,7 +409,7 @@
                       {{ getProjectTasksCount(projet) }}
                     </div>
                     <div class="text-xs text-gray-500 dark:text-gray-400">
-                      Tâches
+                      {{ $t('projets_archived.stat_tasks') }}
                     </div>
                   </div>
                   <div class="text-center">
@@ -417,7 +417,7 @@
                       {{ projet.member_count || 0 }}
                     </div>
                     <div class="text-xs text-gray-500 dark:text-gray-400">
-                      Membres
+                      {{ $t('projets_archived.stat_members') }}
                     </div>
                   </div>
                 </div>
@@ -442,16 +442,16 @@
           <div v-if="pagination.last_page > 1"
             class="flex items-center justify-between bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-4 mt-4">
             <div class="text-sm text-gray-700 dark:text-gray-400">
-              Affichage de <span class="font-medium">{{ (pagination.current_page - 1) * pagination.per_page + 1
-                }}</span> à
-              <span class="font-medium">{{ Math.min(pagination.current_page * pagination.per_page, pagination.total)
-                }}</span>
-              sur <span class="font-medium">{{ pagination.total }}</span> projets archivés
+              {{ $t('projets_archived.pagination_showing', {
+                from: (pagination.current_page - 1) * pagination.per_page + 1,
+                to: Math.min(pagination.current_page * pagination.per_page, pagination.total),
+                total: pagination.total
+              }) }}
             </div>
             <div class="flex gap-1">
               <button @click="changePage(pagination.current_page - 1)" :disabled="pagination.current_page === 1"
                 class="px-3 py-2 rounded border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm">
-                Précédent
+                {{ $t('projets_archived.btn_previous') }}
               </button>
               <button v-for="page in paginationButtons" :key="page" @click="changePage(page)" :disabled="page === '...'"
                 :class="[
@@ -467,7 +467,7 @@
               <button @click="changePage(pagination.current_page + 1)"
                 :disabled="pagination.current_page === pagination.last_page"
                 class="px-3 py-2 rounded border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm">
-                Suivant
+                {{ $t('projets_archived.btn_next') }}
               </button>
             </div>
           </div>
@@ -476,14 +476,14 @@
     </div>
 
     <!-- Modals -->
-    <ConfirmModal v-if="showDeleteModal" title="Supprimer le projet archivé"
-      :message="`Êtes-vous sûr de vouloir supprimer définitivement le projet ${projetToDelete?.nom} ? Cette action est irréversible.`"
-      confirm-text="Supprimer définitivement" confirm-class="bg-red-600 hover:bg-red-700" @confirm="confirmDelete"
+    <ConfirmModal v-if="showDeleteModal" :title="$t('projets_archived.delete_modal_title')"
+      :message="$t('projets_archived.delete_modal_message', { nom: projetToDelete?.nom })"
+      :confirm-text="$t('projets_archived.delete_modal_confirm')" confirm-class="bg-red-600 hover:bg-red-700" @confirm="confirmDelete"
       @cancel="showDeleteModal = false" />
 
-    <ConfirmModal v-if="showBulkDeleteModal" title="Supprimer les projets archivés"
-      :message="`Êtes-vous sûr de vouloir supprimer définitivement ${selectedProjets.length} projet(s) archivé(s) ? Cette action est irréversible.`"
-      confirm-text="Supprimer définitivement" confirm-class="bg-red-600 hover:bg-red-700" @confirm="confirmBulkDelete"
+    <ConfirmModal v-if="showBulkDeleteModal" :title="$t('projets_archived.bulk_delete_modal_title')"
+      :message="$t('projets_archived.bulk_delete_modal_message', { count: selectedProjets.length })"
+      :confirm-text="$t('projets_archived.delete_modal_confirm')" confirm-class="bg-red-600 hover:bg-red-700" @confirm="confirmBulkDelete"
       @cancel="showBulkDeleteModal = false" />
   </AdminLayout>
 </template>
@@ -491,9 +491,11 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useProjets } from '@/composables/useProjets'
 import { useWorkspace } from '@/composables/useWorkspace'
 import { useAuthStore } from '@/stores/authStore'
+import { useStagger } from '@/composables/useAnimations'
 import AdminLayout from "@/components/layout/AdminLayout.vue"
 import ConfirmModal from '@/components/common/ConfirmModal.vue'
 import {
@@ -504,6 +506,7 @@ import {
   ArchiveBoxIcon, ArchiveBoxArrowUpIcon, CalendarIcon, ArrowLeftIcon
 } from '@/icons'
 
+const { t } = useI18n()
 const router = useRouter()
 const authStore = useAuthStore()
 
@@ -532,6 +535,8 @@ const {
   fetchWorkspaces
 } = useWorkspace()
 
+const { staggerRef, applyStagger } = useStagger(60)
+
 // State
 const searchTerm = ref('')
 const activeMenuId = ref(null)
@@ -556,10 +561,10 @@ const currentUserId = computed(() => authStore.user?.id)
 const pageTitle = computed(() => {
   if (isSuperAdmin.value && displayMode.value === 'all-archived') {
     return selectedWorkspaceId.value
-      ? `Tous les projets archivés - ${currentWorkspaceName.value}`
-      : 'Tous les projets archivés (Global)'
+      ? t('projets_archived.title_all_ws', { workspace: currentWorkspaceName.value })
+      : t('projets_archived.title_all_global')
   }
-  return 'Projets Archivés'
+  return t('projets_archived.title_mine')
 })
 
 const hasActiveFilters = computed(() => {
@@ -680,6 +685,7 @@ const loadData = async () => {
 
   // Charger les workspaces
   await fetchWorkspaces()
+  applyStagger()
 
   // Set selected workspace to current workspace
   if (currentWorkspaceId.value && !selectedWorkspaceId.value) {
@@ -878,7 +884,7 @@ const formatDate = (date) => {
 }
 
 const formatArchiveDate = (date) => {
-  if (!date) return 'date inconnue'
+  if (!date) return t('projets_archived.unknown_date')
   return new Date(date).toLocaleDateString('fr-FR')
 }
 

@@ -1,28 +1,28 @@
 <!-- resources/js/pages/users/Invitations.vue -->
 <template>
   <AdminLayout>
-    <PageBreadcrumb 
-      :pageTitle="'Gestion des invitations'" 
+    <PageBreadcrumb
+      :pageTitle="$t('invitations.page_title')"
       :breadcrumbs="[
-        { label: 'Utilisateurs', path: '/users' },
-        { label: 'Invitations', path: '/users/invitations' }
-      ]" 
+        { label: $t('invitations.breadcrumb_users'), path: '/users' },
+        { label: $t('invitations.breadcrumb_invitations'), path: '/users/invitations' }
+      ]"
     />
     
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div class="bg-gray-50 dark:bg-gray-900 py-8">
       <div class="container mx-auto px-4">
         <!-- Header -->
         <div class="mb-8">
-          <div class="flex items-center justify-between">
-            <div>
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div class="min-w-0">
               <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
-                Invitations en attente
+                {{ $t('invitations.title') }}
               </h1>
               <p class="text-gray-600 dark:text-gray-400 mt-2">
-                Gérez toutes les invitations en attente de réponse
+                {{ $t('invitations.subtitle') }}
               </p>
             </div>
-            <div class="flex items-center gap-4">
+            <div class="flex flex-wrap items-center gap-4">
               <!-- Global Stats -->
               <div class="flex items-center gap-6">
                 <div class="text-center">
@@ -30,7 +30,7 @@
                     {{ statistics.total_invitations || 0 }}
                   </div>
                   <div class="text-sm text-gray-500 dark:text-gray-400">
-                    Total
+                    {{ $t('invitations.stat_total') }}
                   </div>
                 </div>
                 <div class="text-center">
@@ -38,7 +38,7 @@
                     {{ statistics.pending_invitations || 0 }}
                   </div>
                   <div class="text-sm text-gray-500 dark:text-gray-400">
-                    En attente
+                    {{ $t('invitations.stat_pending') }}
                   </div>
                 </div>
                 <div class="text-center">
@@ -46,7 +46,7 @@
                     {{ statistics.accepted_invitations || 0 }}
                   </div>
                   <div class="text-sm text-gray-500 dark:text-gray-400">
-                    Acceptées
+                    {{ $t('invitations.stat_accepted') }}
                   </div>
                 </div>
               </div>
@@ -63,7 +63,7 @@
               <input
                 v-model="filters.search"
                 type="text"
-                placeholder="Rechercher par email, workspace..."
+                :placeholder="$t('invitations.search_placeholder')"
                 class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               />
             </div>
@@ -73,11 +73,11 @@
               v-model="filters.status"
               class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500"
             >
-              <option value="all">Tous les statuts</option>
-              <option value="pending">En attente</option>
-              <option value="accepted">Acceptées</option>
-              <option value="expired">Expirées</option>
-              <option value="cancelled">Annulées</option>
+              <option value="all">{{ $t('invitations.filter_all_statuses') }}</option>
+              <option value="pending">{{ $t('invitations.filter_pending') }}</option>
+              <option value="accepted">{{ $t('invitations.filter_accepted') }}</option>
+              <option value="expired">{{ $t('invitations.filter_expired') }}</option>
+              <option value="cancelled">{{ $t('invitations.filter_cancelled') }}</option>
             </select>
 
             <!-- Workspace Filter -->
@@ -85,7 +85,7 @@
               v-model="filters.workspace_id"
               class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500"
             >
-              <option value="all">Tous les workspaces</option>
+              <option value="all">{{ $t('invitations.filter_all_workspaces') }}</option>
               <option 
                 v-for="workspace in accessibleWorkspaces" 
                 :key="workspace.id" 
@@ -115,21 +115,21 @@
         <div v-else-if="filteredInvitations.length === 0" class="text-center py-16 bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700">
           <MailIcon class="mx-auto h-16 w-16 text-gray-400" />
           <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">
-            Aucune invitation trouvée
+            {{ $t('invitations.empty_title') }}
           </h3>
           <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-            {{ filters.search || filters.status !== 'all' || filters.workspace_id !== 'all' 
-              ? 'Aucune invitation ne correspond à vos critères de recherche' 
-              : 'Toutes les invitations ont été traitées' }}
+            {{ filters.search || filters.status !== 'all' || filters.workspace_id !== 'all'
+              ? $t('invitations.empty_filtered')
+              : $t('invitations.empty_all_done') }}
           </p>
         </div>
 
         <!-- Invitations List -->
-        <div v-else class="space-y-4">
+        <div v-else ref="listRef" class="space-y-4">
           <div
             v-for="invitation in filteredInvitations"
             :key="invitation.id"
-            class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-6 transition-shadow"
+            class="stagger-item bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-6 transition-shadow"
           >
             <div class="flex items-start justify-between">
               <!-- Left Section -->
@@ -170,19 +170,19 @@
 
                   <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                     <div>
-                      <span class="text-gray-500 dark:text-gray-400">Workspace:</span>
+                      <span class="text-gray-500 dark:text-gray-400">{{ $t('invitations.label_workspace') }}</span>
                       <span class="ml-2 font-medium text-gray-900 dark:text-white">
                         {{ invitation.workspace?.nom }}
                       </span>
                     </div>
                     <div>
-                      <span class="text-gray-500 dark:text-gray-400">Invité par:</span>
+                      <span class="text-gray-500 dark:text-gray-400">{{ $t('invitations.label_invited_by') }}</span>
                       <span class="ml-2 font-medium text-gray-900 dark:text-white">
                         {{ invitation.invited_by?.nom }}
                       </span>
                     </div>
                     <div>
-                      <span class="text-gray-500 dark:text-gray-400">Expire le:</span>
+                      <span class="text-gray-500 dark:text-gray-400">{{ $t('invitations.label_expires') }}</span>
                       <span class="ml-2 font-medium text-gray-900 dark:text-white">
                         {{ formatDate(invitation.expires_at) }}
                       </span>
@@ -201,15 +201,15 @@
                     <div class="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                       <span v-if="invitation.permissions.can_create_projects" class="flex items-center gap-1">
                         <CheckCircleIcon class="w-4 h-4 text-green-500" />
-                        Créer projets
+                        {{ $t('invitations.perm_create_projects') }}
                       </span>
                       <span v-if="invitation.permissions.can_invite_members" class="flex items-center gap-1">
                         <CheckCircleIcon class="w-4 h-4 text-green-500" />
-                        Inviter membres
+                        {{ $t('invitations.perm_invite_members') }}
                       </span>
                       <span v-if="invitation.permissions.can_manage_settings" class="flex items-center gap-1">
                         <CheckCircleIcon class="w-4 h-4 text-green-500" />
-                        Gérer paramètres
+                        {{ $t('invitations.perm_manage_settings') }}
                       </span>
                     </div>
                   </div>
@@ -223,7 +223,7 @@
                   v-if="canManageWorkspace(invitation.workspace_id)"
                   @click="viewWorkspace(invitation.workspace_id)"
                   class="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-3 transition-colors"
-                  title="Voir le workspace"
+                  :title="$t('invitations.btn_view_workspace')"
                 >
                   <EyeIcon class="w-4 h-4" />
                 </button>
@@ -234,7 +234,7 @@
                   @click="resendInvitation(invitation)"
                   :disabled="resending === invitation.id"
                   class="p-2 text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-3 transition-colors"
-                  title="Renvoyer l'invitation"
+                  :title="$t('invitations.btn_resend')"
                 >
                   <RefreshIcon v-if="resending === invitation.id" class="w-4 h-4 animate-spin" />
                   <MailIcon v-else class="w-4 h-4" />
@@ -246,7 +246,7 @@
                   @click="cancelInvitation(invitation)"
                   :disabled="cancelling === invitation.id"
                   class="p-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-3 transition-colors"
-                  title="Annuler l'invitation"
+                  :title="$t('invitations.btn_cancel')"
                 >
                   <XIcon v-if="cancelling === invitation.id" class="w-4 h-4 animate-spin" />
                   <XIcon v-else class="w-4 h-4" />
@@ -257,7 +257,7 @@
                   v-if="invitation.status === 'pending'"
                   @click="copyInvitationLink(invitation)"
                   class="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-3 transition-colors"
-                  title="Copier le lien d'invitation"
+                  :title="$t('invitations.btn_copy_link')"
                 > 
                 </button>
               </div>
@@ -268,7 +268,7 @@
         <!-- Pagination -->
         <div v-if="pagination && pagination.total > pagination.per_page" class="mt-8 flex items-center justify-between">
           <div class="text-sm text-gray-700 dark:text-gray-300">
-            Affichage de {{ pagination.from }} à {{ pagination.to }} sur {{ pagination.total }} invitations
+            {{ $t('invitations.pagination_showing', { from: pagination.from, to: pagination.to, total: pagination.total }) }}
           </div>
           <div class="flex gap-2">
             <button
@@ -276,14 +276,14 @@
               :disabled="!pagination.prev_page_url"
               class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Précédent
+              {{ $t('invitations.btn_previous') }}
             </button>
             <button
               @click="changePage(pagination.current_page + 1)"
               :disabled="!pagination.next_page_url"
               class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Suivant
+              {{ $t('invitations.btn_next') }}
             </button>
           </div>
         </div>
@@ -294,8 +294,10 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useWorkspace } from '@/composables/useWorkspace'
+import { useStagger } from '@/composables/useAnimations'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import {
@@ -307,8 +309,10 @@ import {
   CheckCircleIcon
 } from '@/icons'
 
+const { t } = useI18n()
 const router = useRouter()
 const { fetchAllInvitations, resendInvitation, cancelInvitation, getRoleLabel, getRoleColor } = useWorkspace()
+const { staggerRef: listRef, applyStagger } = useStagger(60)
 
 const loading = ref(false)
 const invitations = ref([])
@@ -353,10 +357,10 @@ const filteredInvitations = computed(() => {
 
 const getStatusLabel = (status) => {
   const labels = {
-    pending: 'En attente',
-    accepted: 'Acceptée',
-    expired: 'Expirée',
-    cancelled: 'Annulée'
+    pending: t('invitations.status_pending'),
+    accepted: t('invitations.status_accepted'),
+    expired: t('invitations.status_expired'),
+    cancelled: t('invitations.status_cancelled')
   }
   return labels[status] || status
 }
@@ -427,7 +431,7 @@ const handleResendInvitation = async (invitation) => {
 }
 
 const handleCancelInvitation = async (invitation) => {
-  if (!confirm('Êtes-vous sûr de vouloir annuler cette invitation ?')) {
+  if (!confirm(t('invitations.confirm_cancel'))) {
     return
   }
 
@@ -460,6 +464,7 @@ const loadData = async () => {
     
     // Données mockées pour le moment
     invitations.value = []
+    applyStagger()
     statistics.value = {
       total_invitations: 0,
       pending_invitations: 0,

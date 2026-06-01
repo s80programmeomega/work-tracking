@@ -1,0 +1,106 @@
+/* ============================================================
+   Animations globales — Work Tracking
+   Import dans app.js après app.css
+   ============================================================ */
+
+/* ----------------------------------------------------------
+   1. Fade + slide-up à l'entrée des pages
+   Appliquer .page-enter sur le conteneur de contenu principal
+   ---------------------------------------------------------- */
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-enter {
+  animation: fadeSlideUp 0.35s ease-out both;
+}
+
+/* ----------------------------------------------------------
+   2. Skeleton loader pulse
+   Utilisé par SkeletonLoader.vue
+   ---------------------------------------------------------- */
+@keyframes skeletonPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.skeleton {
+  animation: skeletonPulse 1.6s ease-in-out infinite;
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-base, #e5e7eb) 0%,
+    var(--skeleton-highlight, #f3f4f6) 50%,
+    var(--skeleton-base, #e5e7eb) 100%
+  );
+  background-size: 200% 100%;
+  border-radius: 0.375rem;
+}
+
+.dark .skeleton {
+  --skeleton-base: #374151;
+  --skeleton-highlight: #4b5563;
+}
+
+/* ----------------------------------------------------------
+   3. Stagger list — chaque .stagger-item s'anime en décalé
+   Le délai est piloté par la variable CSS --stagger-delay
+   définie inline par useAnimations.js
+   ---------------------------------------------------------- */
+@keyframes staggerFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stagger-item {
+  animation: staggerFadeUp 0.28s ease-out both;
+  animation-delay: var(--stagger-delay, 0ms);
+}
+
+/* ----------------------------------------------------------
+   4. Counter pop — chiffre qui "rebondit" légèrement à l'arrivée
+   ---------------------------------------------------------- */
+@keyframes counterPop {
+  0%   { transform: scale(0.85); opacity: 0; }
+  70%  { transform: scale(1.06); opacity: 1; }
+  100% { transform: scale(1);    opacity: 1; }
+}
+
+.counter-pop {
+  animation: counterPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* ----------------------------------------------------------
+   5. Micro-interactions boutons — appliquées globalement
+   ---------------------------------------------------------- */
+button,
+[role="button"],
+a.btn {
+  transition: transform 0.1s ease, box-shadow 0.15s ease, background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+}
+
+button:active:not(:disabled),
+[role="button"]:active:not([aria-disabled="true"]) {
+  transform: scale(0.96);
+}
+
+/* Transition fluide sur tous les liens de navigation */
+a {
+  transition: color 0.15s ease, opacity 0.15s ease;
+}
