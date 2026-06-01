@@ -22,6 +22,12 @@ class Kernel extends ConsoleKernel
             ->withoutOverlapping(20)
             ->onOneServer()
             ->runInBackground();
+
+        // Purge des tokens Sanctum expirés (correctif F1 — alignement expiration serveur/client)
+        $schedule->command('sanctum:prune-expired', ['--hours=24'])
+            ->daily()
+            ->onOneServer()
+            ->runInBackground();
     }
 
     /**

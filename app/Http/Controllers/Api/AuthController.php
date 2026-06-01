@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Services\AuthService;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Resources\UserResource;
+use App\Models\User;
+use App\Services\AuthService;
+use App\Services\MfaService;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -14,12 +17,12 @@ use Illuminate\Support\Facades\Log;
 class AuthController extends Controller
 {
     public function __construct(
-        private AuthService $authService
-    ) {
-    }
-  
+        private AuthService $authService,
+        private MfaService $mfaService,
+    ) {}
+
     public function register(RegisterRequest $request): JsonResponse
-    { 
+    {
         try {
             $user = $this->authService->register($request->validated());
 
@@ -28,21 +31,21 @@ class AuthController extends Controller
                 'user' => new UserResource($user),
             ], 201);
 
-        } catch (\Illuminate\Database\QueryException $e) {
-            Log::error('Registration database error: ' . $e->getMessage());
+        } catch (QueryException $e) {
+            Log::error('Registration database error: '.$e->getMessage());
+
             return response()->json([
                 'message' => __('auth.registration_failed'),
             ], 500);
 
         } catch (\Exception $e) {
-            Log::error('Registration error: ' . $e->getMessage());
+            Log::error('Registration error: '.$e->getMessage());
+
             return response()->json([
                 'message' => __('auth.registration_failed'),
             ], 500);
         }
     }
-
-    
 
     public function login(LoginRequest $request): JsonResponse
     {
@@ -52,13 +55,30 @@ class AuthController extends Controller
                 $request->boolean('remember')
             );
 
+            /** @var User $user */
+            $user = $result['user'];
+
+            // Si l'utilisateur a un facteur 2FA actif, émettre un challenge temporaire
+            if ($this->mfaService->hasFactor($user)) {
+                $challengeToken = $this->mfaService->createChallengeToken($user);
+
+                return response()->json([
+                    'two_factor' => true,
+                    'challenge_token' => $challengeToken,
+                    'email_otp_available' => $user->email_otp_enabled,
+                ]);
+            }
+
+            // Pas de MFA — émettre le token Sanctum directement
+            $tokenData = $this->authService->issueToken($user);
+
             return response()->json([
                 'message' => 'Login successful',
                 'data' => [
-                    'user' => new UserResource($result['user']),
-                    'token' => $result['token'],
-                    'token_type' => $result['token_type'],
-                    'expires_at' => $result['expires_at'],
+                    'user' => new UserResource($user),
+                    'token' => $tokenData['token'],
+                    'token_type' => $tokenData['token_type'],
+                    'expires_at' => $tokenData['expires_at'],
                 ],
             ]);
         } catch (\Exception $e) {
@@ -125,12 +145,104 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Vérifie le code TOTP ou email-OTP lors du challenge MFA post-login.
+     * Retourne le token Sanctum définitif si le code est valide.
+     */
+    public function twoFactorChallenge(Request $request): JsonResponse
+    {
+        $request->validate([
+            'challenge_token' => 'required|string',
+            'code' => 'required|string',
+            'type' => 'required|in:totp,recovery,email',
+        ]);
+
+        $user = $this->mfaService->resolveChallenge($request->challenge_token);
+
+        if (! $user) {
+            return response()->json(['message' => __('auth.mfa.challenge_expired')], 422);
+        }
+
+        $verified = match ($request->type) {
+            'totp', 'recovery' => $this->mfaService->verifyTotp($user, $request->code),
+            'email' => $this->mfaService->verifyEmailOtp($user, $request->code),
+            default => false,
+        };
+
+        if (! $verified) {
+            return response()->json(['message' => __('auth.mfa.invalid_code')], 422);
+        }
+
+        $this->mfaService->consumeChallenge($request->challenge_token);
+
+        $result = $this->authService->issueToken($user);
+
+        Log::info('Challenge MFA validé', ['user_id' => $user->id, 'type' => $request->type]);
+
+        return response()->json([
+            'message' => 'Login successful',
+            'data' => [
+                'user' => new UserResource($user->load('roles', 'permissions', 'currentWorkspace')),
+                'token' => $result['token'],
+                'token_type' => $result['token_type'],
+                'expires_at' => $result['expires_at'],
+            ],
+        ]);
+    }
+
+    /**
+     * Envoie un code OTP par email pour le challenge MFA.
+     * Soumis avec le challenge_token provisoire.
+     */
+    public function twoFactorEmailSend(Request $request): JsonResponse
+    {
+        $request->validate(['challenge_token' => 'required|string']);
+
+        $user = $this->mfaService->resolveChallenge($request->challenge_token);
+
+        if (! $user) {
+            return response()->json(['message' => __('auth.mfa.challenge_expired')], 422);
+        }
+
+        if (! $user->email_otp_enabled) {
+            return response()->json(['message' => __('auth.mfa.email_otp_not_enabled')], 403);
+        }
+
+        $sent = $this->mfaService->sendEmailOtp($user);
+
+        if (! $sent) {
+            return response()->json(['message' => __('auth.mfa.email_otp_cooldown')], 429);
+        }
+
+        return response()->json(['message' => __('auth.mfa.email_otp_sent')]);
+    }
+
+    /**
+     * Active ou désactive l'OTP email comme second facteur pour l'utilisateur connecté.
+     */
+    public function toggleEmailOtp(Request $request): JsonResponse
+    {
+        $request->validate(['enabled' => 'required|boolean']);
+
+        $user = $request->user();
+
+        // L'OTP email ne peut pas être le seul facteur : exige TOTP confirmé si on active seul
+        if ($request->boolean('enabled') && ! $user->two_factor_confirmed_at) {
+            return response()->json(['message' => __('auth.mfa.email_otp_requires_totp')], 422);
+        }
+
+        $user->update(['email_otp_enabled' => $request->boolean('enabled')]);
+
+        return response()->json([
+            'message' => $request->boolean('enabled')
+                ? __('auth.mfa.email_otp_enabled')
+                : __('auth.mfa.email_otp_disabled'),
+            'email_otp_enabled' => $user->email_otp_enabled,
+        ]);
+    }
 
     /**
      * Met à jour la langue de l'utilisateur
-     * 
-     * @param Request $request
-     * @return JsonResponse
      */
     public function updateLanguage(Request $request): JsonResponse
     {
@@ -153,7 +265,7 @@ class AuthController extends Controller
 
         } catch (\Exception $e) {
             // Log l'erreur pour le débogage
-            Log::error('Language update error: ' . $e->getMessage());
+            Log::error('Language update error: '.$e->getMessage());
 
             return response()->json([
                 'message' => __('Failed to update language'),

@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -40,6 +41,10 @@ use Spatie\Permission\Traits\HasRoles;
  * @property Carbon|null $last_login_at
  * @property Carbon|null $last_activity_at
  * @property Carbon|null $email_verified_at
+ * @property Carbon|null $two_factor_confirmed_at
+ * @property string|null $two_factor_secret
+ * @property string|null $two_factor_recovery_codes
+ * @property bool $email_otp_enabled
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
@@ -49,7 +54,7 @@ use Spatie\Permission\Traits\HasRoles;
  */
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, HasRoles, LogsActivity, Notifiable, SoftDeletes;
+    use HasApiTokens, HasFactory, HasRoles, LogsActivity, Notifiable, SoftDeletes, TwoFactorAuthenticatable;
 
     // Force Spatie to always use 'web' guard for role/permission lookups
     // regardless of which guard (sanctum, web) authenticated the request
@@ -81,6 +86,7 @@ class User extends Authenticatable
         'last_login_at',
         'last_login_ip',
         'is_super_admin',
+        'email_otp_enabled',
     ];
 
     /**
@@ -106,6 +112,7 @@ class User extends Authenticatable
         'two_factor_confirmed_at' => 'datetime',
         'last_login_at' => 'datetime',
         'is_active' => 'boolean',
+        'email_otp_enabled' => 'boolean',
         'notification_preferences' => 'array',
         'password' => 'hashed',
         'is_super_admin' => 'boolean',

@@ -61,21 +61,29 @@ class AuthService
             'last_login_ip' => request()->ip(),
         ]);
 
-        // ✅ Générer le token Sanctum
-        // $token = $user->createToken('auth_token', ['*'], now()->addDays(7))->plainTextToken;
-        $token = $user->createToken('auth_token', ['*'])->plainTextToken;
-
-        // ✅ Log d'activité
         activity()
             ->performedOn($user)
             ->causedBy($user)
             ->withProperties([
                 'workspace_id' => $user->current_workspace_id,
                 'ip' => request()->ip(),
-            ])->log('User logged in');
+            ])->log('Connexion réussie');
 
         return [
             'user' => $user->load('roles', 'permissions', 'currentWorkspace'),
+            'requires_mfa' => false, // positionné à true par AuthController si un facteur est actif
+        ];
+    }
+
+    /**
+     * Émet un token Sanctum 7 jours pour l'utilisateur donné.
+     * Appelé après authentification réussie (sans MFA ou après challenge MFA validé).
+     */
+    public function issueToken(User $user): array
+    {
+        $token = $user->createToken('auth_token', ['*'], now()->addDays(7))->plainTextToken;
+
+        return [
             'token' => $token,
             'token_type' => 'Bearer',
             'expires_at' => now()->addDays(7)->toISOString(),

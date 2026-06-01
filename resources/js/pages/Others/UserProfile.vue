@@ -48,6 +48,7 @@
           <!-- Sécurité Tab -->
           <div v-if="activeTab === 'security'" class="space-y-6">
             <session-settings />
+            <two-factor-settings />
 
             <!-- Danger Zone: account deletion -->
             <div class="p-5 border border-red-200 dark:border-red-800/50 rounded-3 bg-red-50/50 dark:bg-red-900/10">
@@ -139,6 +140,7 @@ import ProfileCard from '../../components/profile/ProfileCard.vue'
 import PersonalInfoCard from '../../components/profile/PersonalInfoCard.vue'
 import AddressCard from '../../components/profile/AddressCard.vue'
 import SessionSettings from '@/components/settings/SessionSettings.vue'
+import TwoFactorSettings from '@/components/auth/TwoFactorSettings.vue'
 import NotificationSettings from '@/components/settings/NotificationSettings.vue'
 import PreferencesSettings from '@/components/settings/PreferencesSettings.vue'
 import ActivityLog from '@/components/profile/ActivityLog.vue'

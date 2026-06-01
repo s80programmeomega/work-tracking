@@ -44,6 +44,12 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
+
+    // Challenge MFA post-login (pas encore authentifié — jeton de challenge provisoire)
+    Route::post('/two-factor-challenge', [AuthController::class, 'twoFactorChallenge'])
+        ->middleware('throttle:10,1');
+    Route::post('/two-factor-email-send', [AuthController::class, 'twoFactorEmailSend'])
+        ->middleware('throttle:3,1');
 });
 
 // Routes publiques pour les invitations (pas besoin d'authentification)
@@ -74,6 +80,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/refresh', [AuthController::class, 'refresh']);
         Route::post('/verify-email', [AuthController::class, 'verifyEmail']);
         Route::put('/language', [AuthController::class, 'updateLanguage']);
+        // Activation/désactivation de l'OTP email comme facteur de secours
+        Route::post('/email-otp-toggle', [AuthController::class, 'toggleEmailOtp']);
     });
 
     // ========================================  PLATFORM ADMIN  ========================================
