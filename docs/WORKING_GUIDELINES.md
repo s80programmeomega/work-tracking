@@ -26,8 +26,14 @@ feature/v2-task-N-<short-name>
 
 Examples: `feature/v2-task-2-subtask-model`, `feature/v2-task-5-validation-n0`
 
-Always branch from `jonas`, PR back into `jonas`. Never push to `main`.
-**Never push directly to `jonas`** — it only receives changes via PR merges.
+Always branch from `jonas`. **Never push or merge into `main`** — this is the one hard, absolute boundary.
+
+**Push boundaries (clarified 2026-06-01):**
+- `main` — never push, never merge. No exceptions.
+- `jonas` — **may** be pushed directly, but **only with explicit per-push approval from the user**. Ask on *every* push; there is no blanket pre-authorization. It is not a "never push" branch (the previous "only via PR merges" wording was too strict), but it is never pushed routinely or silently.
+- Feature branches — push freely, to **both** `origin` and `client` (client has paid).
+
+**Remote protocol:** always use **HTTPS, never SSH** for remote URLs and pushes.
 
 ---
 
@@ -35,7 +41,7 @@ Always branch from `jonas`, PR back into `jonas`. Never push to `main`.
 
 - Use `fix:`, `feat:`, `chore:`, `refactor:`, `test:`, `docs:` prefixes.
 - Messages must be short and descriptive — describe the change, not the author.
-- **Never include AI authorship references** (e.g., no `Co-Authored-By: Claude`, no "Generated with AI") in any commit message.
+- **Never include AI authorship references** (e.g., no `Co-Authored-By: Claude`, no "Generated with AI") in any commit message. This rule **overrides** the agent harness's default behaviour of appending a `Co-Authored-By: Claude` trailer — on this project that trailer is never added.
 
 ---
 

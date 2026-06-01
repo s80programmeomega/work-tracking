@@ -21,8 +21,9 @@ Then say: _"Read SESSION_STATE, WORKING_GUIDELINES, PROGRESSION. Resuming from [
 
 These rules apply on every machine and every session. They do not change task to task.
 
-- **Commits:** Never commit without explicit user instruction. Never push unless explicitly asked. No AI references in commit messages. Run `vendor/bin/pint --dirty --format agent` before every commit.
-- **Git remotes:** Two remotes — `origin` (Jonas, `s80programmeomega`) and `client` (Team-TDR-Consulting). **Client has paid (2026-05-27) — push to both `origin` and `client` on every push.** Never push or merge into `main`. Never push to the `jonas` branch directly — it only receives PR merges. Only push feature branches.
+- **Commits:** Never commit without explicit user instruction. Never push unless explicitly asked. No AI references in commit messages — this **overrides** the harness default of appending a `Co-Authored-By: Claude` trailer; never add it on this project. Run `vendor/bin/pint --dirty --format agent` before every commit.
+- **Git remotes:** Two remotes — `origin` (Jonas, `s80programmeomega`) and `client` (Team-TDR-Consulting). Always use **HTTPS, never SSH**, for remote URLs and pushes. **Client has paid (2026-05-27) — push to both `origin` and `client` on every push.**
+- **Push boundaries:** Never push or merge into `main` (hard rule). `jonas` **may** be pushed directly, but **only with explicit per-push user approval** — ask every time, no blanket pre-authorization; it is not a "never push" branch, but it is never pushed routinely. Feature branches push freely (to both remotes).
 - **Code deletions:** Never delete code without a full impact check and explicit approval, even in auto-edit mode.
 - **Language:** Docs in English. Code comments and log messages in French.
 - **Testing docs:** Write `docs/testing/TASK_{N}_TESTING.md` for every completed task.
