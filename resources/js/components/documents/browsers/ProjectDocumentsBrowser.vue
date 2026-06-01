@@ -8,7 +8,7 @@
         <input
           v-model="searchQuery"
           type="text"
-          placeholder="Rechercher un projet..."
+          :placeholder="$t('documents_page.project_browser.search_placeholder')"
           class="w-full rounded-3 border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
         />
       </div>
@@ -18,7 +18,7 @@
         v-model="selectedWorkspaceId"
         class="rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
       >
-        <option value="">Tous les workspaces</option>
+        <option value="">{{ $t('documents_page.project_browser.filter_all_workspaces') }}</option>
         <option
           v-for="workspace in workspaces"
           :key="workspace.id"
@@ -33,10 +33,10 @@
         v-model="statusFilter"
         class="rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
       >
-        <option value="">Tous les statuts</option>
-        <option value="active">Actifs</option>
-        <option value="completed">Complétés</option>
-        <option value="archived">Archivés</option>
+        <option value="">{{ $t('documents_page.project_browser.filter_all_statuses') }}</option>
+        <option value="active">{{ $t('documents_page.project_browser.filter_active') }}</option>
+        <option value="completed">{{ $t('documents_page.project_browser.filter_completed') }}</option>
+        <option value="archived">{{ $t('documents_page.project_browser.filter_archived') }}</option>
       </select>
     </div>
 
@@ -96,7 +96,7 @@
           <div class="mb-4 flex items-center gap-2">
             <FolderIcon class="h-4 w-4 text-gray-400" />
             <span class="truncate text-xs text-gray-600 dark:text-gray-400">
-              {{ project.workspace?.nom || 'Sans workspace' }}
+              {{ project.workspace?.nom || $t('documents_page.project_browser.no_workspace') }}
             </span>
           </div>
 
@@ -107,7 +107,7 @@
                 {{ project.documents_count || 0 }}
               </p>
               <p class="text-xs text-gray-500 dark:text-gray-400">
-                Docs
+                {{ $t('documents_page.project_browser.stat_docs') }}
               </p>
             </div>
             <div class="text-center">
@@ -115,7 +115,7 @@
                 {{ project.activities_count || 0 }}
               </p>
               <p class="text-xs text-gray-500 dark:text-gray-400">
-                Activités
+                {{ $t('documents_page.project_browser.stat_activities') }}
               </p>
             </div>
             <div class="text-center">
@@ -123,7 +123,7 @@
                 {{ project.progression || 0 }}%
               </p>
               <p class="text-xs text-gray-500 dark:text-gray-400">
-                Progrès
+                {{ $t('documents_page.project_browser.stat_progress') }}
               </p>
             </div>
           </div>
@@ -148,10 +148,10 @@
     <div v-else class="rounded-3 border-2 border-dashed border-gray-300 bg-gray-50 p-12 text-center dark:border-gray-700 dark:bg-gray-800/50">
       <BriefcaseIcon class="mx-auto h-12 w-12 text-gray-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">
-        Aucun projet trouvé
+        {{ $t('documents_page.project_browser.empty_title') }}
       </h3>
       <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        {{ searchQuery ? 'Essayez une autre recherche' : 'Vous n\'avez accès à aucun projet' }}
+        {{ searchQuery ? $t('documents_page.project_browser.empty_search') : $t('documents_page.project_browser.empty_default') }}
       </p>
     </div>
   </div>
@@ -159,6 +159,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useStagger } from '@/composables/useAnimations'
 import {
   BriefcaseIcon,
@@ -169,6 +170,7 @@ import api from '@/api/axios'
 
 defineEmits(['select'])
 
+const { t } = useI18n()
 const { staggerRef, applyStagger } = useStagger(50)
 
 const projects = ref([])
@@ -202,12 +204,8 @@ const filteredProjects = computed(() => {
 })
 
 const getStatusLabel = (status) => {
-  const labels = {
-    active: 'Actif',
-    completed: 'Complété',
-    archived: 'Archivé'
-  }
-  return labels[status] || status
+  const key = `documents_page.project_browser.status_${status}`
+  return t(key, status)
 }
 
 const getStatusBadgeClass = (status) => {

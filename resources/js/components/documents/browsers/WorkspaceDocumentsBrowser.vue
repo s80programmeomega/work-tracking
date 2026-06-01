@@ -7,7 +7,7 @@
       <input
         v-model="searchQuery"
         type="text"
-        placeholder="Rechercher un workspace..."
+        :placeholder="$t('documents_page.workspace_browser.search_placeholder')"
         class="w-full rounded-3 border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
       />
     </div>
@@ -76,7 +76,7 @@
               {{ workspace.documents_count || 0 }}
             </p>
             <p class="text-xs text-gray-500 dark:text-gray-400">
-              Documents
+              {{ $t('documents_page.workspace_browser.stat_documents') }}
             </p>
           </div>
           <div class="text-center">
@@ -84,7 +84,7 @@
               {{ workspace.projects_count || 0 }}
             </p>
             <p class="text-xs text-gray-500 dark:text-gray-400">
-              Projets
+              {{ $t('documents_page.workspace_browser.stat_projects') }}
             </p>
           </div>
           <div class="text-center">
@@ -92,7 +92,7 @@
               {{ workspace.members_count || 0 }}
             </p>
             <p class="text-xs text-gray-500 dark:text-gray-400">
-              Membres
+              {{ $t('documents_page.workspace_browser.stat_members') }}
             </p>
           </div>
         </div>
@@ -106,10 +106,10 @@
     <div v-else class="rounded-3 border-2 border-dashed border-gray-300 bg-gray-50 p-12 text-center dark:border-gray-700 dark:bg-gray-800/50">
       <FolderIcon class="mx-auto h-12 w-12 text-gray-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">
-        Aucun workspace trouvé
+        {{ $t('documents_page.workspace_browser.empty_title') }}
       </h3>
       <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        {{ searchQuery ? 'Essayez une autre recherche' : 'Vous n\'avez accès à aucun workspace' }}
+        {{ searchQuery ? $t('documents_page.workspace_browser.empty_search') : $t('documents_page.workspace_browser.empty_default') }}
       </p>
     </div>
   </div>
@@ -117,12 +117,14 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useStagger } from '@/composables/useAnimations'
 import { FolderIcon, MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
 import { useWorkspace } from '@/composables/useWorkspace'
 
 defineEmits(['select'])
 
+const { t } = useI18n()
 const { workspaces, loading, fetchWorkspaces } = useWorkspace()
 const { staggerRef, applyStagger } = useStagger(50)
 const searchQuery = ref('')
@@ -139,13 +141,8 @@ const filteredWorkspaces = computed(() => {
 })
 
 const getRoleLabel = (role) => {
-  const labels = {
-    owner: 'Propriétaire',
-    admin: 'Admin',
-    member: 'Membre',
-    viewer: 'Lecteur'
-  }
-  return labels[role] || role
+  const key = `documents_page.workspace_browser.role_${role}`
+  return t(key, role)
 }
 
 const getRoleBadgeClass = (role) => {

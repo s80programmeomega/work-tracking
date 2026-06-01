@@ -8,7 +8,7 @@
         <input
           v-model="searchQuery"
           type="text"
-          placeholder="Rechercher une activité..."
+          :placeholder="$t('documents_page.activity_browser.search_placeholder')"
           class="w-full rounded-3 border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
         />
       </div>
@@ -18,7 +18,7 @@
         v-model="selectedProjectId"
         class="rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
       >
-        <option value="">Tous les projets</option>
+        <option value="">{{ $t('documents_page.activity_browser.filter_all_projects') }}</option>
         <option
           v-for="project in projects"
           :key="project.id"
@@ -33,9 +33,9 @@
         v-model="statusFilter"
         class="rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
       >
-        <option value="">Tous les statuts</option>
-        <option value="active">Actives</option>
-        <option value="archived">Archivées</option>
+        <option value="">{{ $t('documents_page.activity_browser.filter_all_statuses') }}</option>
+        <option value="active">{{ $t('documents_page.activity_browser.filter_active') }}</option>
+        <option value="archived">{{ $t('documents_page.activity_browser.filter_archived') }}</option>
       </select>
     </div>
 
@@ -85,7 +85,7 @@
                     : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
                 ]"
               >
-                {{ activity.status === 'active' ? 'Active' : 'Archivée' }}
+                {{ activity.status === 'active' ? $t('documents_page.activity_browser.status_active') : $t('documents_page.activity_browser.status_archived') }}
               </span>
             </div>
 
@@ -93,7 +93,7 @@
             <div class="mt-2 flex items-center gap-2">
               <BriefcaseIcon class="h-4 w-4 text-gray-400" />
               <span class="truncate text-xs text-gray-600 dark:text-gray-400">
-                {{ activity.projet?.nom || 'Sans projet' }}
+                {{ activity.projet?.nom || $t('documents_page.activity_browser.no_project') }}
               </span>
             </div>
 
@@ -104,7 +104,7 @@
                 <span class="text-sm font-medium text-gray-900 dark:text-white">
                   {{ activity.documents_count || 0 }}
                 </span>
-                <span class="text-xs text-gray-500 dark:text-gray-400">docs</span>
+                <span class="text-xs text-gray-500 dark:text-gray-400">{{ $t('documents_page.activity_browser.stat_docs') }}</span>
               </div>
 
               <div class="flex items-center gap-1.5">
@@ -112,7 +112,7 @@
                 <span class="text-sm font-medium text-gray-900 dark:text-white">
                   {{ activity.tasks_count || 0 }}
                 </span>
-                <span class="text-xs text-gray-500 dark:text-gray-400">tâches</span>
+                <span class="text-xs text-gray-500 dark:text-gray-400">{{ $t('documents_page.activity_browser.stat_tasks') }}</span>
               </div>
 
               <div class="flex items-center gap-1.5">
@@ -120,7 +120,7 @@
                 <span class="text-sm font-medium text-gray-900 dark:text-white">
                   {{ activity.members_count || 0 }}
                 </span>
-                <span class="text-xs text-gray-500 dark:text-gray-400">membres</span>
+                <span class="text-xs text-gray-500 dark:text-gray-400">{{ $t('documents_page.activity_browser.stat_members') }}</span>
               </div>
 
               <!-- Progress -->
@@ -148,10 +148,10 @@
     <div v-else class="rounded-3 border-2 border-dashed border-gray-300 bg-gray-50 p-12 text-center dark:border-gray-700 dark:bg-gray-800/50">
       <RectangleStackIcon class="mx-auto h-12 w-12 text-gray-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">
-        Aucune activité trouvée
+        {{ $t('documents_page.activity_browser.empty_title') }}
       </h3>
       <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        {{ searchQuery ? 'Essayez une autre recherche' : 'Vous n\'avez accès à aucune activité' }}
+        {{ searchQuery ? $t('documents_page.activity_browser.empty_search') : $t('documents_page.activity_browser.empty_default') }}
       </p>
     </div>
   </div>
@@ -159,6 +159,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useStagger } from '@/composables/useAnimations'
 import {
   RectangleStackIcon,
@@ -173,6 +174,7 @@ import api from '@/api/axios'
 
 defineEmits(['select'])
 
+const { t } = useI18n()
 const { staggerRef, applyStagger } = useStagger(50)
 
 const activities = ref([])

@@ -4,10 +4,10 @@
     <div class="flex items-center justify-between">
       <div>
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-          Documents Partagés avec Moi
+          {{ $t('documents_page.shared_list.title') }}
         </h3>
         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Documents que d'autres utilisateurs ont partagés avec vous
+          {{ $t('documents_page.shared_list.subtitle') }}
         </p>
       </div>
 
@@ -16,10 +16,10 @@
         v-model="permissionFilter"
         class="rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
       >
-        <option value="">Toutes les permissions</option>
-        <option value="view">Lecture seule</option>
-        <option value="download">Téléchargement</option>
-        <option value="edit">Modification</option>
+        <option value="">{{ $t('documents_page.shared_list.filter_all_permissions') }}</option>
+        <option value="view">{{ $t('documents_page.shared_list.filter_read') }}</option>
+        <option value="download">{{ $t('documents_page.shared_list.filter_download') }}</option>
+        <option value="edit">{{ $t('documents_page.shared_list.filter_edit') }}</option>
       </select>
     </div>
 
@@ -65,28 +65,28 @@
                   class="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
                 >
                   <EyeIcon class="mr-1 h-3 w-3" />
-                  Lecture
+                  {{ $t('documents_page.shared_list.perm_read') }}
                 </span>
                 <span
                   v-if="document.permission?.can_download"
                   class="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400"
                 >
                   <ArrowDownTrayIcon class="mr-1 h-3 w-3" />
-                  Télécharger
+                  {{ $t('documents_page.shared_list.perm_download') }}
                 </span>
                 <span
                   v-if="document.permission?.can_edit"
                   class="inline-flex items-center rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-800 dark:bg-purple-900/30 dark:text-purple-400"
                 >
                   <PencilIcon class="mr-1 h-3 w-3" />
-                  Modifier
+                  {{ $t('documents_page.shared_list.perm_edit') }}
                 </span>
                 <span
                   v-if="document.permission?.can_share"
                   class="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-800 dark:bg-orange-900/30 dark:text-orange-400"
                 >
                   <ShareIcon class="mr-1 h-3 w-3" />
-                  Partager
+                  {{ $t('documents_page.shared_list.perm_share') }}
                 </span>
               </div>
             </div>
@@ -98,14 +98,14 @@
                   {{ getInitials(document.user?.nom) }}
                 </div>
                 <span class="text-xs text-gray-600 dark:text-gray-400">
-                  Partagé par <span class="font-medium">{{ document.user?.nom }}</span>
+                  {{ $t('documents_page.shared_list.shared_by') }} <span class="font-medium">{{ document.user?.nom }}</span>
                 </span>
               </div>
 
               <!-- Expiration Warning -->
               <div v-if="document.permission?.expires_at" class="flex items-center gap-1 text-xs text-orange-600 dark:text-orange-400">
                 <ClockIcon class="h-3 w-3" />
-                Expire {{ formatExpirationDate(document.permission.expires_at) }}
+                {{ $t('documents_page.shared_list.expires') }} {{ formatExpirationDate(document.permission.expires_at) }}
               </div>
             </div>
           </div>
@@ -116,7 +116,7 @@
               v-if="document.permission?.can_download"
               @click.stop="handleDownload(document)"
               class="rounded-3 p-2 text-gray-400 hover:bg-gray-100 hover:text-blue-600 dark:hover:bg-gray-800"
-              title="Télécharger"
+              :title="$t('documents_page.shared_list.btn_download')"
             >
               <ArrowDownTrayIcon class="h-5 w-5" />
             </button>
@@ -124,7 +124,7 @@
               v-if="document.permission?.can_share"
               @click.stop="handleShare(document)"
               class="rounded-3 p-2 text-gray-400 hover:bg-gray-100 hover:text-purple-600 dark:hover:bg-gray-800"
-              title="Partager"
+              :title="$t('documents_page.shared_list.btn_share')"
             >
               <ShareIcon class="h-5 w-5" />
             </button>
@@ -137,10 +137,10 @@
     <div v-else class="rounded-3 border-2 border-dashed border-gray-300 bg-gray-50 p-12 text-center dark:border-gray-700 dark:bg-gray-800/50">
       <UserGroupIcon class="mx-auto h-12 w-12 text-gray-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">
-        Aucun document partagé
+        {{ $t('documents_page.shared_list.empty_title') }}
       </h3>
       <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        Les documents que d'autres partagent avec vous apparaîtront ici
+        {{ $t('documents_page.shared_list.empty_subtitle') }}
       </p>
     </div>
 
@@ -162,6 +162,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useStagger } from '@/composables/useAnimations'
 import {
   UserGroupIcon,
@@ -182,6 +183,7 @@ import DocumentViewerModal from '@/components/documents/DocumentViewerModal.vue'
 import DocumentShareModal from '@/components/documents/DocumentShareModal.vue'
 import api from '@/api/axios'
 
+const { t } = useI18n()
 const { downloadDocument } = useDocuments()
 const { staggerRef, applyStagger } = useStagger(40)
 
@@ -222,14 +224,15 @@ const getFileIcon = (document) => {
 }
 
 const getEntityLabel = (type) => {
-  const labels = {
-    'App\\Models\\Workspace': 'Workspace',
-    'App\\Models\\Projet': 'Projet',
-    'App\\Models\\Activite': 'Activité',
-    'App\\Models\\Tache': 'Tâche',
-    'App\\Models\\TacheResultat': 'Résultat'
+  const map = {
+    'App\\Models\\Workspace': 'workspace',
+    'App\\Models\\Projet': 'project',
+    'App\\Models\\Activite': 'activity',
+    'App\\Models\\Tache': 'task',
+    'App\\Models\\TacheResultat': 'result'
   }
-  return labels[type] || 'Document'
+  const key = map[type]
+  return key ? t(`documents_page.entity_labels.${key}`) : t('documents_page.entity_labels.document')
 }
 
 const getInitials = (name) => {
@@ -245,7 +248,7 @@ const getInitials = (name) => {
 const formatDate = (dateString) => {
   if (!dateString) return '-'
   const date = new Date(dateString)
-  return date.toLocaleDateString('fr-FR', {
+  return date.toLocaleDateString(undefined, {
     day: 'numeric',
     month: 'short',
     year: 'numeric'
@@ -258,11 +261,11 @@ const formatExpirationDate = (dateString) => {
   const now = new Date()
   const diffDays = Math.ceil((date - now) / (1000 * 60 * 60 * 24))
 
-  if (diffDays < 0) return 'expiré'
-  if (diffDays === 0) return 'aujourd\'hui'
-  if (diffDays === 1) return 'demain'
-  if (diffDays < 7) return `dans ${diffDays} jours`
-  return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+  if (diffDays < 0) return t('documents_page.shared_list.expired')
+  if (diffDays === 0) return t('documents_page.shared_list.expires_today')
+  if (diffDays === 1) return t('documents_page.shared_list.expires_tomorrow')
+  if (diffDays < 7) return t('documents_page.shared_list.expires_in_days', { days: diffDays })
+  return date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })
 }
 
 const handleView = (document) => {

@@ -5,7 +5,7 @@
       <div class="rounded-3 border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Total</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('documents_page.my_documents.stat_total') }}</p>
             <p class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
               {{ stats.total }}
             </p>
@@ -17,7 +17,7 @@
       <div class="rounded-3 border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Partagés</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('documents_page.my_documents.stat_shared') }}</p>
             <p class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
               {{ stats.shared }}
             </p>
@@ -29,7 +29,7 @@
       <div class="rounded-3 border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Téléchargements</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('documents_page.my_documents.stat_downloads') }}</p>
             <p class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
               {{ stats.downloads }}
             </p>
@@ -41,7 +41,7 @@
       <div class="rounded-3 border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Espace</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('documents_page.my_documents.stat_storage') }}</p>
             <p class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
               {{ formatBytes(stats.totalSize) }}
             </p>
@@ -59,7 +59,7 @@
         <input
           v-model="searchQuery"
           type="text"
-          placeholder="Rechercher dans mes documents..."
+          :placeholder="$t('documents_page.my_documents.search_placeholder')"
           class="w-full rounded-3 border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
         />
       </div>
@@ -71,13 +71,13 @@
           v-model="typeFilter"
           class="rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
         >
-          <option value="">Tous les types</option>
-          <option value="image">Images</option>
-          <option value="pdf">PDF</option>
-          <option value="document">Documents</option>
-          <option value="video">Vidéos</option>
-          <option value="audio">Audio</option>
-          <option value="archive">Archives</option>
+          <option value="">{{ $t('documents_page.my_documents.filter_all_types') }}</option>
+          <option value="image">{{ $t('documents_page.my_documents.filter_images') }}</option>
+          <option value="pdf">{{ $t('documents_page.my_documents.filter_pdf') }}</option>
+          <option value="document">{{ $t('documents_page.my_documents.filter_documents') }}</option>
+          <option value="video">{{ $t('documents_page.my_documents.filter_videos') }}</option>
+          <option value="audio">{{ $t('documents_page.my_documents.filter_audio') }}</option>
+          <option value="archive">{{ $t('documents_page.my_documents.filter_archives') }}</option>
         </select>
 
         <!-- Entity Filter -->
@@ -85,12 +85,12 @@
           v-model="entityFilter"
           class="rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
         >
-          <option value="">Tous les niveaux</option>
-          <option value="App\Models\Workspace">Workspaces</option>
-          <option value="App\Models\Projet">Projets</option>
-          <option value="App\Models\Activite">Activités</option>
-          <option value="App\Models\Tache">Tâches</option>
-          <option value="App\Models\TacheResultat">Résultats</option>
+          <option value="">{{ $t('documents_page.my_documents.filter_all_levels') }}</option>
+          <option value="App\Models\Workspace">{{ $t('documents_page.my_documents.entity_workspace') }}</option>
+          <option value="App\Models\Projet">{{ $t('documents_page.my_documents.entity_project') }}</option>
+          <option value="App\Models\Activite">{{ $t('documents_page.my_documents.entity_activity') }}</option>
+          <option value="App\Models\Tache">{{ $t('documents_page.my_documents.entity_task') }}</option>
+          <option value="App\Models\TacheResultat">{{ $t('documents_page.my_documents.entity_result') }}</option>
         </select>
 
         <!-- View Mode -->
@@ -172,6 +172,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import {
   DocumentIcon,
   ShareIcon,
@@ -189,6 +190,7 @@ import DocumentShareModal from '@/components/documents/DocumentShareModal.vue'
 import DocumentVersionModal from '@/components/documents/DocumentVersionModal.vue'
 import api from '@/api/axios'
 
+const { t } = useI18n()
 const { downloadDocument, deleteDocument } = useDocuments()
 
 const documents = ref([])
@@ -277,7 +279,7 @@ const handleEdit = (document) => {
 }
 
 const handleDelete = async (document) => {
-  if (!confirm(`Êtes-vous sûr de vouloir supprimer "${document.nom}" ?`)) {
+  if (!confirm(t('documents_page.my_documents.confirm_delete', { name: document.nom }))) {
     return
   }
 
