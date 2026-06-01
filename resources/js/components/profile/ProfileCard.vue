@@ -33,7 +33,7 @@
             <!-- Upload Button -->
             <label
               class="absolute bottom-1 right-1 flex items-center justify-center w-10 h-10 bg-blue-600 hover:bg-blue-700 rounded-full cursor-pointer transition-all duration-300 "
-              title="Changer l'avatar"
+              :title="$t('profile_card.change_avatar')"
             >
               <input
                 type="file"
@@ -60,7 +60,7 @@
               {{ user.nom }}
             </h4>
             <div class="flex flex-col items-center gap-1 xl:flex-row xl:gap-3">
-              <p class="text-sm text-gray-500 dark:text-gray-400">{{ user.fonction || user.bio || 'Non renseigné' }}</p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">{{ user.fonction || user.bio || $t('profile_card.not_set') }}</p>
               <div v-if="user.adresse" class="hidden h-3.5 w-px bg-gray-300 dark:bg-gray-700 xl:block"></div>
               <p v-if="user.adresse" class="text-sm text-gray-500 dark:text-gray-400">{{ user.adresse }}</p>
             </div>
@@ -76,15 +76,15 @@
           <div class="flex items-center order-2 gap-4 grow xl:order-3 xl:justify-end">
             <div class="text-center">
               <div class="text-2xl font-bold text-gray-800 dark:text-white/90">12</div>
-              <div class="text-xs text-gray-500 dark:text-gray-400">Projets</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">{{ $t('profile_card.stat_projects') }}</div>
             </div>
             <div class="text-center">
               <div class="text-2xl font-bold text-gray-800 dark:text-white/90">47</div>
-              <div class="text-xs text-gray-500 dark:text-gray-400">Tâches</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">{{ $t('profile_card.stat_tasks') }}</div>
             </div>
             <div class="text-center">
               <div class="text-2xl font-bold text-gray-800 dark:text-white/90">89%</div>
-              <div class="text-xs text-gray-500 dark:text-gray-400">Efficacité</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">{{ $t('profile_card.stat_efficiency') }}</div>
             </div>
           </div>
         </div>
@@ -100,37 +100,37 @@
         <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
         </svg>
-        <span>Modifier le profil</span>
+        <span>{{ $t('profile_card.action_edit') }}</span>
       </button>
-      
-      <button 
+
+      <button
         @click="downloadProfile"
         class="flex items-center justify-center gap-2 p-4 bg-white border border-gray-200 rounded-3 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
       >
         <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
-        <span>Exporter données</span>
+        <span>{{ $t('profile_card.action_export') }}</span>
       </button>
-      
-      <button 
+
+      <button
         @click="shareProfile"
         class="flex items-center justify-center gap-2 p-4 bg-white border border-gray-200 rounded-3 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
       >
         <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
         </svg>
-        <span>Partager profil</span>
+        <span>{{ $t('profile_card.action_share') }}</span>
       </button>
-      
-      <button 
+
+      <button
         @click="printProfile"
         class="flex items-center justify-center gap-2 p-4 bg-white border border-gray-200 rounded-3 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
       >
         <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
         </svg>
-        <span>Imprimer profil</span>
+        <span>{{ $t('profile_card.action_print') }}</span>
       </button>
     </div>
   </div>
@@ -147,6 +147,7 @@
 
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
 import EditProfileModal from './EditProfileModal.vue'
 import { useUsers } from '@/composables/useUsers'
 import { useNotifications } from '@/composables/useNotifications'
@@ -161,6 +162,7 @@ const props = defineProps({
 
 const emit = defineEmits(['refresh'])
 
+const { t } = useI18n()
 const { updateProfile } = useUsers()
 const { showSuccess, showError } = useNotifications()
 
@@ -205,12 +207,12 @@ const handleAvatarChange = async (event) => {
 
   // Validation
   if (!file.type.startsWith('image/')) {
-    showError('Veuillez sélectionner une image valide (JPG, PNG, GIF)')
+    showError(t('profile_card.avatar_invalid'))
     return
   }
 
   if (file.size > 5 * 1024 * 1024) {
-    showError('La taille de l\'image ne doit pas dépasser 5 MB')
+    showError(t('profile_card.avatar_too_large'))
     return
   }
 
@@ -229,16 +231,16 @@ const handleAvatarChange = async (event) => {
     formData.append('_method', 'PUT')
 
     await updateProfile(formData)
-    showSuccess('Avatar mis à jour avec succès')
+    showSuccess(t('profile_card.avatar_success'))
     emit('refresh')
-    
+
     // Reset preview after successful upload
     setTimeout(() => {
       avatarPreview.value = null
     }, 2000)
   } catch (error) {
     console.error('Error uploading avatar:', error)
-    showError(error.response?.data?.message || 'Erreur lors du téléchargement de l\'avatar')
+    showError(error.response?.data?.message || t('profile_card.avatar_error'))
     avatarPreview.value = null
   } finally {
     uploadingAvatar.value = false
@@ -255,17 +257,16 @@ const openEditModal = () => {
 const handleSaveProfile = async (data) => {
   try {
     await updateProfile(data)
-    showSuccess('Profil mis à jour avec succès')
+    showSuccess(t('profile_card.profile_save_success'))
     showEditModal.value = false
     emit('refresh')
   } catch (error) {
-    showError(error.response?.data?.message || 'Erreur lors de la mise à jour')
+    showError(error.response?.data?.message || t('profile_card.profile_save_error'))
   }
 }
 
 const downloadProfile = () => {
-  // Implementation for profile download
-  showSuccess('Téléchargement démarré')
+  showSuccess(t('profile_card.download_started'))
 }
 
 const shareProfile = () => {
@@ -276,8 +277,7 @@ const shareProfile = () => {
       url: window.location.href,
     })
   } else {
-    showSuccess('Lien copié dans le presse-papier')
-    // Fallback copy to clipboard
+    showSuccess(t('profile_card.link_copied'))
   }
 }
 

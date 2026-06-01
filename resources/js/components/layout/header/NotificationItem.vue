@@ -2,18 +2,28 @@
 <template>
   <div
     dusk="notification-item"
-    class="group relative flex gap-3 border-b border-gray-100 dark:border-gray-800 p-4 cursor-pointer transition-colors duration-150 hover:bg-gray-50 dark:hover:bg-gray-800/50"
-    :class="{ 'border-l-2 border-l-brand-500': !notification.read_at }"
+    class="group relative flex gap-3 border-b border-gray-100 dark:border-gray-800 p-4 cursor-pointer transition-colors duration-150"
+    :class="notification.read_at
+      ? 'bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+      : 'bg-brand-50 dark:bg-brand-500/5 hover:bg-brand-100/60 dark:hover:bg-brand-500/10'"
     @click="handleClick"
   >
-    <!-- Icône de type -->
+    <!-- Icône envelope lecture / non-lu -->
     <div class="shrink-0 relative mt-0.5">
-      <div class="w-10 h-10 rounded-3 flex items-center justify-center" :class="iconBgClass">
-        <i :class="['fas', icon, 'text-white text-sm']"></i>
+      <div class="w-9 h-9 rounded-3 flex items-center justify-center transition-colors"
+        :class="notification.read_at ? 'bg-gray-100 dark:bg-gray-800' : 'bg-brand-100 dark:bg-brand-500/20'">
+        <!-- Enveloppe fermée = non lu -->
+        <svg v-if="!notification.read_at" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-brand-600 dark:text-brand-400" fill="currentColor" viewBox="0 0 24 24">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M3.5 8.187V17.25C3.5 17.664 3.836 18 4.25 18h15.5c.414 0 .75-.336.75-.75V8.187l-7.213 5.03a1.75 1.75 0 0 1-2-.001L3.5 8.187ZM20.5 6.23v.013l-8 5.557a.25.25 0 0 1-.286 0L3.601 6.429A.25.25 0 0 1 3.736 6h16.528a.25.25 0 0 1 .236.23ZM2 6.256V17.25A2.25 2.25 0 0 0 4.25 19.5h15.5A2.25 2.25 0 0 0 22 17.25V6.256A2.25 2.25 0 0 0 19.764 4.5H4.236A2.25 2.25 0 0 0 2 6.256Z"/>
+        </svg>
+        <!-- Enveloppe ouverte = lu -->
+        <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 9v.906a2.25 2.25 0 0 1-1.183 1.981l-6.478 3.488M2.25 9v.906a2.25 2.25 0 0 0 1.183 1.981l6.478 3.488m8.839 2.51-4.66-2.51m0 0-1.023-.55a2.25 2.25 0 0 0-2.134 0l-1.022.55m0 0-4.661 2.51m16.5 1.615a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V8.844a2.25 2.25 0 0 1 1.183-1.981l7.5-4.04a2.25 2.25 0 0 1 2.134 0l7.5 4.04a2.25 2.25 0 0 1 1.183 1.98V19.5Z"/>
+        </svg>
       </div>
-      <div v-if="isUrgent"
-        class="absolute -top-1 -right-1 w-4 h-4 bg-error-500 rounded-full flex items-center justify-center">
-        <i class="fas fa-exclamation text-white" style="font-size: 8px;"></i>
+      <!-- Point rouge urgent -->
+      <div v-if="isUrgent && !notification.read_at"
+        class="absolute -top-1 -right-1 w-3 h-3 bg-error-500 rounded-full border-2 border-white dark:border-gray-900">
       </div>
     </div>
 
@@ -39,20 +49,24 @@
       <!-- Métadonnées secondaires -->
       <div class="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-gray-400 dark:text-gray-500">
         <span class="flex items-center gap-1">
-          <i class="far fa-clock"></i>
+          <!-- horloge -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 7v5l3 3"/></svg>
           {{ notification.time_ago }}
         </span>
         <span v-if="taskName" class="flex items-center gap-1 text-gray-500 dark:text-gray-400 font-medium max-w-40 truncate">
-          <i class="fas fa-tasks text-[10px]"></i>
+          <!-- tâche -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2"/></svg>
           {{ taskName }}
         </span>
         <span v-if="projectName" class="flex items-center gap-1 text-gray-500 dark:text-gray-400 max-w-32 truncate">
-          <i class="fas fa-project-diagram text-[10px]"></i>
+          <!-- projet -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776"/></svg>
           {{ projectName }}
         </span>
         <span v-if="d.taux_realisation != null"
           class="flex items-center gap-1 text-success-600 dark:text-success-400 font-semibold">
-          <i class="fas fa-chart-bar text-[10px]"></i>
+          <!-- graphe -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg>
           {{ d.taux_realisation }}%
         </span>
       </div>
@@ -63,12 +77,12 @@
       <button v-if="!notification.read_at" type="button"
         class="p-1.5 rounded-3 hover:bg-success-50 dark:hover:bg-success-500/10 text-success-600 dark:text-success-400 transition-colors"
         @click.stop="emit('mark-read', notification.id)" title="Marquer comme lu">
-        <i class="fas fa-check text-xs"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
       </button>
       <button type="button"
         class="p-1.5 rounded-3 hover:bg-error-50 dark:hover:bg-error-500/10 text-error-600 dark:text-error-400 transition-colors"
         @click.stop="confirmDelete" title="Supprimer">
-        <i class="fas fa-trash-alt text-xs"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
       </button>
     </div>
   </div>
@@ -76,16 +90,14 @@
 
 <script setup>
 import { computed } from 'vue';
-import { useRouter } from 'vue-router';
 import { useNotifications } from '@/composables/useNotifications';
 
 const props = defineProps({
   notification: { type: Object, required: true },
 });
 
-const emit = defineEmits(['click', 'mark-read', 'delete', 'open-resultat-modal']);
+const emit = defineEmits(['click', 'mark-read', 'delete']);
 
-const router = useRouter();
 const { getNotificationIcon, getNotificationColor } = useNotifications();
 
 // Le type vient de notification.type (déjà extrait de data.type par formatNotification côté API)
@@ -278,13 +290,6 @@ const projectName = computed(() => {
   return d.value.projet_nom || d.value.project_name || null;
 });
 
-const RESULTAT_TYPES = new Set([
-  'resultat_soumis', 'resultat_soumis_n0', 'resultat_attente_n2',
-  'resultat_valide_n1', 'resultat_valide_n2', 'resultat_rejete',
-  'resultat_validation_complete', 'resultat_rejete_n2_info',
-  'resultat_approuve_n0', 'resultat_renvoye_n0', 'resultat_transmis_auto',
-  'validation_n1_confirmee', 'validation_n2_confirmee', 'rejet_confirme',
-]);
 
 const confirmDelete = () => {
   if (confirm('Supprimer cette notification ?')) {
@@ -293,54 +298,7 @@ const confirmDelete = () => {
 };
 
 const handleClick = () => {
-  if (!props.notification.read_at) {
-    emit('mark-read', props.notification.id);
-  }
-
-  const t = type.value;
-  const data = d.value;
-
-  // Résultats → ouvrir le modal ResultatDetail
-  if (RESULTAT_TYPES.has(t)) {
-    const resultatId = data.resultat_id || data.tache_resultat_id;
-    if (resultatId) {
-      emit('open-resultat-modal', resultatId);
-      return;
-    }
-  }
-
-  // Invitation workspace → action_url
-  if (t === 'workspace_invitation' && data.action_url) {
-    const path = data.action_url.startsWith('http') ? new URL(data.action_url).pathname : data.action_url;
-    router.push(path);
-    return;
-  }
-
-  // Invitation projet → token
-  if (t === 'projet_invitation' && data.token) {
-    router.push(`/invitations/projet/${data.token}`);
-    return;
-  }
-
-  // Tâche → page tâche
-  if (data.tache_id && !['document_uploaded', 'document_deleted', 'document_shared'].includes(t)) {
-    router.push(`/taches/${data.tache_id}`);
-    return;
-  }
-
-  // URL générique dans les données
-  const url = data.url || props.notification.url;
-  if (url) {
-    const match = url.match(/\/resultats\/(\d+)/);
-    if (match) {
-      emit('open-resultat-modal', parseInt(match[1]));
-    } else {
-      router.push(url);
-    }
-    return;
-  }
-
-  // Fallback → ouvrir le modal de détail
+  // Ouvrir le modal de détail — la navigation se fait depuis le modal
   emit('click', props.notification);
 };
 </script>

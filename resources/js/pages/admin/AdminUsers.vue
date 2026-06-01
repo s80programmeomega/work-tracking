@@ -6,17 +6,17 @@
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 dusk="admin-users-title" class="text-2xl font-semibold text-gray-900 dark:text-white">
-            User Management
+            {{ $t('admin.users.title') }}
           </h1>
           <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            All platform users, their workspaces and last login.
+            {{ $t('admin.users.subtitle') }}
           </p>
         </div>
         <router-link
           to="/admin/dashboard"
           class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
         >
-          <i class="fas fa-arrow-left"></i> Back to dashboard
+          <i class="fas fa-arrow-left"></i> {{ $t('admin.users.back') }}
         </router-link>
       </div>
 
@@ -26,7 +26,7 @@
           v-model="search"
           @input="debouncedFetch"
           type="text"
-          placeholder="Search by name or email..."
+          :placeholder="$t('admin.users.search_placeholder')"
           class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 w-72"
         />
       </div>
@@ -46,18 +46,18 @@
         <table class="w-full text-sm">
           <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500 dark:text-gray-400 uppercase">
             <tr>
-              <th class="px-4 py-3 text-left">Name</th>
-              <th class="px-4 py-3 text-left">Email</th>
-              <th class="px-4 py-3 text-left">Role</th>
-              <th class="px-4 py-3 text-left">Current Workspace</th>
-              <th class="px-4 py-3 text-left">Last Login</th>
-              <th class="px-4 py-3 text-left">Registered</th>
-              <th class="px-4 py-3 text-left">Actions</th>
+              <th class="px-4 py-3 text-left">{{ $t('admin.users.col_name') }}</th>
+              <th class="px-4 py-3 text-left">{{ $t('admin.users.col_email') }}</th>
+              <th class="px-4 py-3 text-left">{{ $t('admin.users.col_role') }}</th>
+              <th class="px-4 py-3 text-left">{{ $t('admin.users.col_workspace') }}</th>
+              <th class="px-4 py-3 text-left">{{ $t('admin.users.col_last_login') }}</th>
+              <th class="px-4 py-3 text-left">{{ $t('admin.users.col_registered') }}</th>
+              <th class="px-4 py-3 text-left">{{ $t('admin.users.col_actions') }}</th>
             </tr>
           </thead>
           <tbody ref="tbodyRef" class="divide-y divide-gray-100 dark:divide-gray-700">
             <tr v-if="!users.length">
-              <td colspan="7" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">No users found.</td>
+              <td colspan="7" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">{{ $t('admin.users.no_users') }}</td>
             </tr>
             <tr
               v-for="user in users"
@@ -104,12 +104,12 @@
               @click="page--; fetchUsers()"
               :disabled="pagination.current_page <= 1"
               class="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded disabled:opacity-40"
-            >Prev</button>
+            >{{ $t('common.previous') }}</button>
             <button
               @click="page++; fetchUsers()"
               :disabled="pagination.current_page >= pagination.last_page"
               class="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded disabled:opacity-40"
-            >Next</button>
+            >{{ $t('common.next') }}</button>
           </div>
         </div>
       </div>
@@ -157,10 +157,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import AdminLayout from '@/components/layout/AdminLayout.vue';
 import { useStagger } from '@/composables/useAnimations';
 import api from '@/api/axios';
 
+const { t } = useI18n();
 const users = ref([]);
 const pagination = ref(null);
 const loading = ref(false);

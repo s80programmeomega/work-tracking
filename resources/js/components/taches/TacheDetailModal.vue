@@ -1,13 +1,13 @@
 <!-- resources/js/components/taches/TacheDetailModal.vue -->
 <template>
-  <div dusk="tache-detail-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 "
+  <div dusk="tache-detail-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4"
        @click.self="$emit('close')">
 
-    <div class="bg-white dark:bg-gray-800 rounded-3 w-full overflow-hidden flex flex-col transition-all duration-300"
+    <div ref="dialogRef" :style="dragStyle" class="bg-white dark:bg-gray-800 rounded-3 w-full overflow-hidden flex flex-col transition-all duration-300"
          :class="modalSizeClass">
 
       <!-- Header unifié -->
-      <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700">
+      <div ref="handleRef" class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 cursor-move select-none">
           <div class="flex justify-between items-start">
           <!-- Titre et badges -->
           <div class="flex-1 mr-4">
@@ -514,6 +514,10 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useDraggable } from '@/composables/useDraggable'
+
+const { dialogRef, handleRef, dragStyle, attachHandle } = useDraggable()
+onMounted(attachHandle)
 import { useTaches } from '@/composables/useTaches'
 import api from '@/api/axios'
 import DatePicker from '@vuepic/vue-datepicker'

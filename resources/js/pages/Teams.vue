@@ -1,6 +1,6 @@
 <template>
   <AdminLayout>
-    <PageBreadcrumb :pageTitle="'Équipes de Collaboration'" />
+    <PageBreadcrumb :pageTitle="$t('teams_page.title')" />
 
     <div class="rounded-3 border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
       <!-- Header with Actions -->
@@ -11,7 +11,7 @@
             <input
               v-model="searchQuery"
               type="text"
-              placeholder="Rechercher une équipe..."
+              :placeholder="$t('teams_page.search_placeholder')"
               class="pl-10 pr-4 py-2.5 w-80 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
             />
             <svg class="absolute left-3 top-3 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -24,16 +24,16 @@
             v-model="visibilityFilter"
             class="px-4 py-2.5 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500"
           >
-            <option value="">Toutes les visibilités</option>
-            <option value="public">🌍 Public</option>
-            <option value="private">🔒 Privé</option>
-            <option value="secret">🕵️ Secret</option>
+            <option value="">{{ $t('teams_page.all_visibilities') }}</option>
+            <option value="public">🌍 {{ $t('teams_page.vis_public') }}</option>
+            <option value="private">🔒 {{ $t('teams_page.vis_private') }}</option>
+            <option value="secret">🕵️ {{ $t('teams_page.vis_secret') }}</option>
           </select>
 
           <!-- Stats -->
           <div v-if="teams.length > 0" class="flex items-center gap-3 ml-4">
             <div class="px-4 py-2 bg-brand-50 dark:bg-brand-900/20 rounded-3">
-              <span class="text-sm font-semibold text-brand-600 dark:text-brand-400">{{ filteredTeams.length }} équipe(s)</span>
+              <span class="text-sm font-semibold text-brand-600 dark:text-brand-400">{{ $t('teams_page.teams_count', { count: filteredTeams.length }) }}</span>
             </div>
           </div>
         </div>
@@ -48,7 +48,7 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
-            Créer une équipe
+            {{ $t('teams_page.create_team') }}
           </button>
         </div>
       </div>
@@ -66,7 +66,7 @@
           </svg>
         </div>
         <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-          Erreur de chargement
+          {{ $t('teams_page.loading_error') }}
         </h3>
         <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
           {{ error }}
@@ -78,7 +78,7 @@
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
-          Réessayer
+          {{ $t('common.retry') }}
         </button>
       </div>
 
@@ -90,10 +90,10 @@
           </svg>
         </div>
         <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-          Aucune équipe pour le moment
+          {{ $t('teams_page.empty_title') }}
         </h3>
         <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
-          Créez votre première équipe pour commencer à collaborer avec vos collègues en temps réel
+          {{ $t('teams_page.empty_desc') }}
         </p>
         <button
           @click="showCreateModal = true"
@@ -102,7 +102,7 @@
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
-          Créer ma première équipe
+          {{ $t('teams_page.create_first_team') }}
         </button>
       </div>
 
@@ -112,10 +112,10 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
-          Aucun résultat trouvé
+          {{ $t('teams_page.no_results_title') }}
         </h3>
         <p class="text-gray-500 dark:text-gray-400">
-          Essayez de modifier vos critères de recherche
+          {{ $t('teams_page.no_results_desc') }}
         </p>
       </div>
 
@@ -163,7 +163,7 @@
                 {{ team.name }}
               </h3>
               <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                {{ team.description || 'Aucune description' }}
+                {{ team.description || $t('teams_page.no_description') }}
               </p>
             </div>
           </div>
@@ -182,7 +182,7 @@
                   </div>
                 </div>
                 <span class="text-sm font-medium text-gray-600 dark:text-gray-400">
-                  {{ team.members_count || 0 }} membre{{ (team.members_count || 0) > 1 ? 's' : '' }}
+                  {{ $t('teams_page.members_count', { count: team.members_count || 0 }) }}
                 </span>
               </div>
             </div>
@@ -199,7 +199,7 @@
           <div v-if="team.is_active" class="absolute bottom-4 left-4">
             <span class="inline-flex items-center px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 rounded">
               <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5 animate-pulse"></span>
-              Actif
+              {{ $t('teams_page.active') }}
             </span>
           </div>
         </div>
@@ -219,8 +219,8 @@
                 </svg>
               </div>
               <div>
-                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Créer une équipe</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Commencez à collaborer avec vos collègues</p>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('teams_page.modal_create_title') }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('teams_page.modal_create_subtitle') }}</p>
               </div>
             </div>
             <button type="button" @click="showCreateModal = false" class="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300 transition-colors">
@@ -237,14 +237,14 @@
             <!-- Team Name -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Nom de l'équipe <span class="text-red-500">*</span>
+                {{ $t('teams_page.team_name_label') }} <span class="text-red-500">*</span>
               </label>
               <input
                 v-model="newTeam.name"
                 type="text"
                 required
                 dusk="team-form-name"
-                placeholder="Ex: Équipe Marketing, Développement..."
+                :placeholder="$t('teams_page.team_name_placeholder')"
                 class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
               />
             </div>
@@ -252,12 +252,12 @@
             <!-- Description -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Description
+                {{ $t('teams_page.description_label') }}
               </label>
               <textarea
                 v-model="newTeam.description"
                 rows="3"
-                placeholder="Décrivez l'objectif de cette équipe..."
+                :placeholder="$t('teams_page.description_placeholder')"
                 class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all resize-none"
               ></textarea>
             </div>
@@ -265,7 +265,7 @@
             <!-- Visibility -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                Visibilité
+                {{ $t('teams_page.visibility_label') }}
               </label>
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <label
@@ -302,7 +302,7 @@
             @click="showCreateModal = false"
             class="px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all"
           >
-            Annuler
+            {{ $t('common.cancel') }}
           </button>
           <button
             type="button"
@@ -315,7 +315,7 @@
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            {{ creating ? 'Création...' : 'Créer l\'équipe' }}
+            {{ creating ? $t('teams_page.creating') : $t('teams_page.create_team') }}
           </button>
         </div>
       </div>
@@ -325,12 +325,14 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useTeams } from '@/composables/useTeams'
 import { useStagger } from '@/composables/useAnimations'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 
+const { t } = useI18n()
 const router = useRouter()
 const { teams, loading, error, fetchMyTeams, createTeam: createTeamApi } = useTeams()
 const { staggerRef: gridRef, applyStagger } = useStagger(55)
@@ -346,26 +348,26 @@ const newTeam = ref({
   visibility: 'private'
 })
 
-const visibilityOptions = [
+const visibilityOptions = computed(() => [
   {
     value: 'public',
-    label: 'Public',
+    label: t('teams_page.vis_public'),
     icon: '🌍',
-    description: 'Visible par tous'
+    description: t('teams_page.vis_public_desc')
   },
   {
     value: 'private',
-    label: 'Privé',
+    label: t('teams_page.vis_private'),
     icon: '🔒',
-    description: 'Sur invitation'
+    description: t('teams_page.vis_private_desc')
   },
   {
     value: 'secret',
-    label: 'Secret',
+    label: t('teams_page.vis_secret'),
     icon: '🕵️',
-    description: 'Totalement privé'
+    description: t('teams_page.vis_secret_desc')
   }
-]
+])
 
 const filteredTeams = computed(() => {
   let filtered = teams.value || []
@@ -396,9 +398,9 @@ const getInitials = (name) => {
 
 const getVisibilityLabel = (visibility) => {
   const labels = {
-    public: 'Public',
-    private: 'Privé',
-    secret: 'Secret'
+    public: t('teams_page.vis_public'),
+    private: t('teams_page.vis_private'),
+    secret: t('teams_page.vis_secret')
   }
   return labels[visibility] || visibility
 }

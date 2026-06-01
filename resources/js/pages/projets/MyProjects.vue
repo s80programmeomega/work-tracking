@@ -14,7 +14,7 @@
                 </h1>
                 <p class="text-gray-500 dark:text-gray-400 flex items-center gap-2 text-sm mt-1">
                   <FolderIcon class="w-4 h-4" />
-                  {{ filteredProjets.length }} projet(s) dans {{ currentWorkspaceName || 'le workspace actuel' }}
+                  {{ $t('my_projects.count_in_workspace', { count: filteredProjets.length, workspace: currentWorkspaceName || $t('my_projects.current_workspace') }) }}
                 </p>
               </div>
             </div>
@@ -43,7 +43,7 @@
                   : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
               ]">
                 <FolderIcon class="w-4 h-4" />
-                {{ displayMode === 'all-projects' ? 'Tous les projets' : 'Mes projets' }}
+                {{ displayMode === 'all-projects' ? $t('my_projects.toggle_all') : $t('my_projects.toggle_mine') }}
               </button>
 
               <!-- Bouton Statistiques -->
@@ -55,14 +55,14 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
-                Statistiques
+                {{ $t('my_projects.statistics_btn') }}
               </button>
 
               <!-- Create Project Button -->
               <button dusk="create-projet-btn" @click="openCreateModal"
                 class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-3 hover:bg-blue-700 transition-colors font-medium">
                 <PlusIcon class="w-4 h-4" />
-                Nouveau projet
+                {{ $t('my_projects.new_project') }}
               </button>
             </div>
           </div>
@@ -96,7 +96,7 @@
             <!-- Search Bar -->
             <div class="relative mb-4">
               <SearchIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input v-model="searchTerm" type="text" placeholder="Rechercher par nom, code ou description..."
+              <input v-model="searchTerm" type="text" :placeholder="$t('my_projects.search_placeholder')"
                 class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
             </div>
 
@@ -105,10 +105,10 @@
               <!-- Status Filter -->
               <select v-model="filters.status"
                 class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-all">
-                <option value="all">Tous les statuts</option>
-                <option value="active">Actifs</option>
-                <option value="completed">Terminés</option>
-                <option value="archived">Archivés</option>
+                <option value="all">{{ $t('my_projects.filter_all_statuses') }}</option>
+                <option value="active">{{ $t('my_projects.filter_active') }}</option>
+                <option value="completed">{{ $t('my_projects.filter_completed') }}</option>
+                <option value="archived">{{ $t('my_projects.filter_archived') }}</option>
               </select>
 
               <!-- Favorites Button -->
@@ -120,7 +120,7 @@
               ]">
                 <StarIcon :class="filters.favorites ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400'"
                   class="w-4 h-4" />
-                Favoris
+                {{ $t('my_projects.filter_favorites') }}
               </button>
 
               <!-- Overdue Button -->
@@ -131,14 +131,14 @@
                   : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
               ]">
                 <AlertCircleIcon class="w-4 h-4" />
-                En retard
+                {{ $t('my_projects.filter_overdue') }}
               </button>
 
               <!-- Reset Filters -->
               <button v-if="hasActiveFilters" @click="resetFilters"
                 class="inline-flex items-center gap-2 px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
                 <XIcon class="w-4 h-4" />
-                Réinitialiser
+                {{ $t('my_projects.reset_filters') }}
               </button>
             </div>
           </div>
@@ -161,18 +161,18 @@
               <FolderOpenIcon class="w-8 h-8 text-gray-400" />
             </div>
             <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              Aucun projet trouvé
+              {{ $t('my_projects.empty_title') }}
             </h3>
             <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
               {{ searchTerm || hasActiveFilters
-                ? 'Essayez de modifier vos critères de recherche ou de filtrage'
-                : 'Commencez par créer votre premier projet ou attendez d\'être invité à collaborer'
+                ? $t('my_projects.empty_with_filter')
+                : $t('my_projects.empty_no_filter')
               }}
             </p>
             <button v-if="!searchTerm && !hasActiveFilters" @click="openCreateModal"
               class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-3 hover:bg-blue-700 transition-colors font-medium">
               <PlusIcon class="w-5 h-5" />
-              Créer mon premier projet
+              {{ $t('my_projects.create_first') }}
             </button>
           </div>
 
@@ -195,7 +195,7 @@
                       </span>
                       <span v-if="projet.responsable_id === currentUserId"
                         class="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded">
-                        Propriétaire
+                        {{ $t('my_projects.owner_badge') }}
                       </span>
                     </div>
                     <h3 class="text-lg font-bold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors line-clamp-1">
@@ -222,28 +222,28 @@
                         <button @click.stop="viewProjet(projet.id)"
                           class="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-t-lg transition-colors">
                           <EyeIcon class="w-4 h-4" />
-                          Voir détails
+                          {{ $t('my_projects.menu_view') }}
                         </button>
                         <button v-if="projet.responsable_id === currentUserId" @click.stop="editProjet(projet)"
                           class="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
                           <PencilIcon class="w-4 h-4" />
-                          Modifier
+                          {{ $t('my_projects.menu_edit') }}
                         </button>
                         <button @click.stop="duplicateProjet(projet)"
                           class="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
                           <CopyIcon class="w-4 h-4" />
-                          Dupliquer
+                          {{ $t('my_projects.menu_duplicate') }}
                         </button>
                         <button v-if="projet.status === 'active' && projet.responsable_id === currentUserId"
                           @click.stop="archiveProjet(projet)"
                           class="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
                           <ArchiveIcon class="w-4 h-4" />
-                          Archiver
+                          {{ $t('my_projects.menu_archive') }}
                         </button>
                         <button v-if="projet.responsable_id === currentUserId" @click.stop="deleteProjet(projet)"
                           class="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-b-lg transition-colors">
                           <TrashIcon class="w-4 h-4" />
-                          Supprimer
+                          {{ $t('my_projects.menu_delete') }}
                         </button>
                       </div>
                     </div>
@@ -252,7 +252,7 @@
 
                 <!-- Description -->
                 <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3 min-h-[2.5rem]">
-                  {{ projet.description || 'Aucune description' }}
+                  {{ projet.description || $t('my_projects.no_description') }}
                 </p>
 
                 <!-- Status Badges -->
@@ -268,7 +268,7 @@
                   <span v-if="projet.is_overdue && projet.status === 'active'"
                     class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
                     <AlertCircleIcon class="w-3 h-3" />
-                    En retard
+                    {{ $t('my_projects.overdue_badge') }}
                   </span>
                 </div>
 
@@ -276,7 +276,7 @@
                 <div class="mb-3">
                   <div class="flex items-center justify-between mb-1">
                     <span class="text-xs font-medium text-gray-600 dark:text-gray-400">
-                      Progression
+                      {{ $t('my_projects.progression') }}
                     </span>
                     <span class="text-xs font-bold text-gray-900 dark:text-white">
                       {{ projet.progression }}%
@@ -297,7 +297,7 @@
                       {{ getProjectActivitiesCount(projet) }}
                     </div>
                     <div class="text-xs text-gray-500 dark:text-gray-400">
-                      Activités
+                      {{ $t('my_projects.activities') }}
                     </div>
                   </div>
                   <div class="text-center">
@@ -305,7 +305,7 @@
                       {{ getProjectTasksCount(projet) }}
                     </div>
                     <div class="text-xs text-gray-500 dark:text-gray-400">
-                      Tâches
+                      {{ $t('my_projects.tasks') }}
                     </div>
                   </div>
                   <div class="text-center">
@@ -313,7 +313,7 @@
                       {{ projet.member_count || 0 }}
                     </div>
                     <div class="text-xs text-gray-500 dark:text-gray-400">
-                      Membres
+                      {{ $t('my_projects.members') }}
                     </div>
                   </div>
                 </div>
@@ -346,16 +346,16 @@
           <div v-if="pagination.last_page > 1"
             class="flex items-center justify-between bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-4 mt-4">
             <div class="text-sm text-gray-700 dark:text-gray-400">
-              Affichage de <span class="font-medium">{{ (pagination.current_page - 1) * pagination.per_page + 1
-                }}</span> à
-              <span class="font-medium">{{ Math.min(pagination.current_page * pagination.per_page, pagination.total)
-                }}</span>
-              sur <span class="font-medium">{{ pagination.total }}</span> projets
+              {{ $t('my_projects.pagination_showing', {
+                from: (pagination.current_page - 1) * pagination.per_page + 1,
+                to: Math.min(pagination.current_page * pagination.per_page, pagination.total),
+                total: pagination.total
+              }) }}
             </div>
             <div class="flex gap-1">
               <button @click="changePage(pagination.current_page - 1)" :disabled="pagination.current_page === 1"
                 class="px-3 py-2 rounded border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm">
-                Précédent
+                {{ $t('common.previous') }}
               </button>
               <button v-for="page in paginationButtons" :key="page" @click="changePage(page)" :disabled="page === '...'"
                 :class="[
@@ -371,7 +371,7 @@
               <button @click="changePage(pagination.current_page + 1)"
                 :disabled="pagination.current_page === pagination.last_page"
                 class="px-3 py-2 rounded border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm">
-                Suivant
+                {{ $t('common.next') }}
               </button>
             </div>
           </div>
@@ -382,9 +382,9 @@
     <!-- Modals -->
     <ProjetFormModal v-if="showFormModal" :projet="selectedProjet" @close="closeFormModal" @saved="handleProjetSaved" />
 
-    <ConfirmModal v-if="showDeleteModal" title="Supprimer le projet"
-      :message="`Êtes-vous sûr de vouloir supprimer le projet ${projetToDelete?.nom} ? Cette action est irréversible.`"
-      confirm-text="Supprimer" confirm-class="bg-red-600 hover:bg-red-700" @confirm="confirmDelete"
+    <ConfirmModal v-if="showDeleteModal" :title="$t('my_projects.delete_modal_title')"
+      :message="`${$t('projects.delete_confirm')} ${projetToDelete?.nom} ?`"
+      :confirm-text="$t('common.delete')" confirm-class="bg-red-600 hover:bg-red-700" @confirm="confirmDelete"
       @cancel="showDeleteModal = false" />
   </AdminLayout>
 </template>
@@ -392,6 +392,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useProjets } from '@/composables/useProjets'
 import { useWorkspace } from '@/composables/useWorkspace'
 import { useAuthStore } from '@/stores/authStore'
@@ -408,6 +409,7 @@ import {
 } from '@/icons'
 
 const router = useRouter()
+const { t } = useI18n()
 const showStats = ref(false)
 const authStore = useAuthStore()
 
@@ -462,10 +464,10 @@ const currentUserId = computed(() => authStore.user?.id)
 const pageTitle = computed(() => {
   if (isSuperAdmin.value && displayMode.value === 'all-projects') {
     return selectedWorkspaceId.value
-      ? `Tous les projets - ${currentWorkspaceName.value}`
-      : 'Tous les projets (Global)'
+      ? `${t('my_projects.all_projects')} - ${currentWorkspaceName.value}`
+      : t('my_projects.all_projects_global')
   }
-  return 'Mes Projets'
+  return t('my_projects.my_projects')
 })
 
 const hasActiveFilters = computed(() => {
@@ -752,13 +754,13 @@ const getStatusColor = (status) => {
 }
 
 const getStatusLabel = (status) => {
-  const labels = {
-    active: 'Actif',
-    completed: 'Terminé',
-    archived: 'Archivé',
-    pending: 'En attente'
+  const map = {
+    active: 'my_projects.status_active',
+    completed: 'my_projects.status_completed',
+    archived: 'my_projects.status_archived',
+    pending: 'my_projects.status_pending',
   }
-  return labels[status] || status
+  return map[status] ? t(map[status]) : status
 }
 
 const getStatusIcon = (status) => {

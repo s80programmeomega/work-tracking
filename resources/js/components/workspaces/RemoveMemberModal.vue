@@ -1,12 +1,12 @@
 <template>
   <Teleport to="body">
-    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div
+    <div class="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
+      <div ref="dialogRef" :style="dragStyle"
         class="bg-white dark:bg-gray-800 rounded-3 max-w-3xl w-full max-h-[90vh] overflow-y-auto"
         @click.stop
       >
         <!-- Header -->
-        <div class="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 z-10">
+        <div ref="handleRef" class="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 z-10 cursor-move select-none">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div class="p-2 bg-red-100 dark:bg-red-900/30 rounded-3">
@@ -388,6 +388,10 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useDraggable } from '@/composables/useDraggable'
+
+const { dialogRef, handleRef, dragStyle, attachHandle } = useDraggable()
+onMounted(attachHandle)
 import { useMemberRemoval } from '@/composables/useMemberRemoval'
 import { useWorkspace } from '@/composables/useWorkspace'
 import { 

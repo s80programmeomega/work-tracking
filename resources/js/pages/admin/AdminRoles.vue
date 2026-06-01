@@ -6,17 +6,17 @@
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 dusk="admin-roles-title" class="text-2xl font-semibold text-gray-900 dark:text-white">
-            Roles & Permissions
+            {{ $t('admin.roles.title') }}
           </h1>
           <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Manage what each role can do across the platform.
+            {{ $t('admin.roles.subtitle') }}
           </p>
         </div>
         <router-link
           to="/admin/dashboard"
           class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
         >
-          <i class="fas fa-arrow-left"></i> Back to dashboard
+          <i class="fas fa-arrow-left"></i> {{ $t('admin.roles.back') }}
         </router-link>
       </div>
 
@@ -42,7 +42,7 @@
               @click="showRoleList = !showRoleList"
               class="w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3 text-sm font-medium text-gray-900 dark:text-white"
             >
-              <span>{{ selectedRole ? formatRoleName(selectedRole.name) : 'Sélectionner un rôle' }}</span>
+              <span>{{ selectedRole ? formatRoleName(selectedRole.name) : $t('admin.roles.select_role') }}</span>
               <svg
                 class="w-4 h-4 text-gray-400 transition-transform"
                 :class="{ 'rotate-180': showRoleList }"
@@ -115,7 +115,7 @@
           <div v-if="!selectedRole" class="flex items-center justify-center h-48 text-gray-400 dark:text-gray-500">
             <div class="text-center">
               <i class="fas fa-shield-alt text-4xl mb-3 block"></i>
-              <p>Select a role to manage its permissions</p>
+              <p>{{ $t('admin.roles.select_role') }}</p>
             </div>
           </div>
 
@@ -197,9 +197,11 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import AdminLayout from '@/components/layout/AdminLayout.vue';
 import api from '@/api/axios';
 
+const { t } = useI18n();
 const rolesData = ref(null);
 const selectedRole = ref(null);
 const activeFilter = ref('all');

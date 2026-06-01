@@ -5,10 +5,10 @@
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">
-            Validations en attente
+            {{ $t('evaluations.pending_validations.title') }}
           </h1>
           <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Résultats en attente d'action N1 ou N2, triés par échéance.
+            {{ $t('evaluations.pending_validations.subtitle') }}
           </p>
         </div>
         <div class="flex items-center gap-3">
@@ -19,7 +19,7 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
-            Statistiques
+            {{ $t('evaluations.pending_validations.statistics') }}
           </button>
           <button
             @click="refresh"
@@ -28,7 +28,7 @@
             class="px-4 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700 disabled:opacity-50"
           >
             <i class="fas fa-sync-alt mr-2" :class="{ 'animate-spin': loading }"></i>
-            Rafraîchir
+            {{ $t('evaluations.pending_validations.refresh') }}
           </button>
         </div>
       </div>
@@ -58,13 +58,13 @@
       <!-- N1 list -->
       <section dusk="pending-n1-section">
         <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-3">
-          En attente N1 ({{ counts.n1 }})
+          {{ $t('evaluations.pending_validations.n1_title', { count: counts.n1 }) }}
         </h2>
         <div v-if="loading && !rows.pending_n1.length" class="text-center py-8 text-gray-500 dark:text-gray-400">
-          Chargement…
+          {{ $t('evaluations.pending_validations.loading') }}
         </div>
         <div v-else-if="!rows.pending_n1.length" class="text-center py-8 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded">
-          Aucun résultat en attente N1
+          {{ $t('evaluations.pending_validations.empty_n1') }}
         </div>
         <div v-else ref="n1Ref" class="space-y-2">
           <PendingRow
@@ -81,13 +81,13 @@
       <!-- N2 list -->
       <section dusk="pending-n2-section">
         <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-3">
-          En attente N2 ({{ counts.n2 }})
+          {{ $t('evaluations.pending_validations.n2_title', { count: counts.n2 }) }}
         </h2>
         <div v-if="loading && !rows.pending_n2.length" class="text-center py-8 text-gray-500 dark:text-gray-400">
-          Chargement…
+          {{ $t('evaluations.pending_validations.loading') }}
         </div>
         <div v-else-if="!rows.pending_n2.length" class="text-center py-8 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded">
-          Aucun résultat en attente N2
+          {{ $t('evaluations.pending_validations.empty_n2') }}
         </div>
         <div v-else ref="n2Ref" class="space-y-2">
           <PendingRow
@@ -106,6 +106,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PendingRow from './PendingRow.vue'
@@ -113,6 +114,7 @@ import PendingValidationsStats from '@/components/evaluations/PendingValidations
 import { useStagger } from '@/composables/useAnimations'
 import api from '@/api/axios'
 
+const { t } = useI18n()
 const router = useRouter()
 const loading = ref(false)
 const showStats = ref(false)

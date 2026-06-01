@@ -18,6 +18,9 @@ export function useStagger(stepMs = 50, maxItems = 20) {
       const items = staggerRef.value.querySelectorAll('.stagger-item')
       items.forEach((el, i) => {
         el.style.setProperty('--stagger-delay', `${Math.min(i, maxItems) * stepMs}ms`)
+        el.style.animation = 'none'
+        void el.offsetHeight
+        el.style.animation = ''
       })
     })
   }

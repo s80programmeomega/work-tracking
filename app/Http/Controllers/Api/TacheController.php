@@ -22,6 +22,7 @@ use App\Permissions\ContextualPermissionGate;
 use App\Permissions\Permission;
 use App\Services\PermissionService;
 use App\Services\TacheService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
@@ -2211,7 +2212,7 @@ class TacheController extends Controller
         $report = $this->tacheService->getWeeklyReport($user, $weekNumber, $year);
 
         // Générer PDF avec DomPDF ou Laravel Snappy
-        $pdf = PDF::loadView('reports.weekly-tasks', [
+        $pdf = Pdf::loadView('reports.weekly-tasks', [
             'report' => $report,
             'user' => $user,
         ]);

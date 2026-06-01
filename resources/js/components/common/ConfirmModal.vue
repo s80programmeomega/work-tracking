@@ -1,13 +1,13 @@
 <!-- resources/js/components/common/ConfirmModal.vue -->
 <template>
   <Teleport to="body">
-    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div
+    <div class="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
+      <div ref="dialogRef" :style="dragStyle"
         class="bg-white dark:bg-gray-800 rounded-3 max-w-md w-full"
         @click.stop
       >
         <!-- Header -->
-        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+        <div ref="handleRef" class="p-6 border-b border-gray-200 dark:border-gray-700 cursor-move select-none">
           <div class="flex items-center gap-3">
             <div
               :class="[
@@ -59,7 +59,12 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue'
 import { AlertCircleIcon } from '@/icons'
+import { useDraggable } from '@/composables/useDraggable'
+
+const { dialogRef, handleRef, dragStyle, attachHandle } = useDraggable()
+onMounted(attachHandle)
 
 defineProps({
   title: {

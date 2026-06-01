@@ -6,17 +6,17 @@
         :to="{ name: 'Projects' }"
         class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
       >
-        Projets
+        {{ $t('document_pages.projects') }}
       </router-link>
       <ChevronRightIcon class="h-4 w-4 text-gray-400" />
       <router-link
         :to="{ name: 'projets.show', params: { id: projetId } }"
         class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
       >
-        {{ projet?.nom || 'Projet' }}
+        {{ projet?.nom || $t('document_pages.projects') }}
       </router-link>
       <ChevronRightIcon class="h-4 w-4 text-gray-400" />
-      <span class="font-medium text-gray-900 dark:text-white">Documents</span>
+      <span class="font-medium text-gray-900 dark:text-white">{{ $t('document_pages.documents') }}</span>
     </nav>
 
     <!-- Project Info Card -->

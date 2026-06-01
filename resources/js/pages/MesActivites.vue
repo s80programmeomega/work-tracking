@@ -6,7 +6,7 @@
       <WorkspaceSelector @workspace-changed="onWorkspaceChanged" />
     </div>
 
-    <PageBreadcrumb :pageTitle="'Mes Activités'" />
+    <PageBreadcrumb :pageTitle="$t('mes_activites.title')" />
 
     <div class="rounded-3 border border-gray-200 bg-white dark:bg-gray-800 p-7.5 shadow-default">
       <!-- Stats panel -->
@@ -31,7 +31,7 @@
       <div class="mb-6 bg-gray-50 dark:bg-gray-900 rounded-3 p-4">
         <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div class="flex-1">
-            <input v-model="filters.search" type="text" placeholder="Rechercher une activité..."
+            <input v-model="filters.search" type="text" :placeholder="$t('mes_activites.search_placeholder')"
               class="w-full max-w-md rounded-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
               @input="debouncedSearch" />
           </div>
@@ -40,7 +40,7 @@
             <select v-model="filters.projet_id"
               class="rounded-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm text-gray-900 dark:text-white"
               @change="loadActivites">
-              <option value="">Tous les projets</option>
+              <option value="">{{ $t('mes_activites.all_projects') }}</option>
               <option v-for="projet in accessibleProjets" :key="projet.id" :value="projet.id">
                 {{ projet.nom }}
               </option>
@@ -49,14 +49,14 @@
             <select v-model="filters.status"
               class="rounded-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm text-gray-900 dark:text-white"
               @change="loadActivites">
-              <option value="">Tous les statuts</option>
-              <option value="active">Actives</option>
-              <option value="archived">Archivées</option>
+              <option value="">{{ $t('mes_activites.all_statuses') }}</option>
+              <option value="active">{{ $t('mes_activites.active') }}</option>
+              <option value="archived">{{ $t('mes_activites.archived') }}</option>
             </select>
 
             <button @click="resetFilters"
               class="rounded-3 border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
-              Réinitialiser
+              {{ $t('common.reset') }}
             </button>
 
             <button
@@ -66,14 +66,14 @@
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
-              Statistiques
+              {{ $t('common.statistics') }}
             </button>
 
              <button
                 v-if="canCreateActivity"
                 @click="showCreateForm = true"
                 class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700 transition-colors" >
-                + Nouvelle activité
+                {{ $t('mes_activites.new_activity') }}
               </button>
 
           </div>
@@ -83,7 +83,7 @@
       <!-- Loading -->
       <div v-if="loading" class="flex items-center justify-center py-12">
         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-        <span class="ml-2 text-gray-500 dark:text-gray-400">Chargement...</span>
+        <span class="ml-2 text-gray-500 dark:text-gray-400">{{ $t('common.loading') }}</span>
       </div>
 
       <!-- Empty State -->
@@ -92,7 +92,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
         </svg>
-        <p class="text-gray-500 dark:text-gray-400 mb-2">Aucune activité trouvée</p>
+        <p class="text-gray-500 dark:text-gray-400 mb-2">{{ $t('mes_activites.no_activities') }}</p>
       </div>
 
       <!-- Activities Table -->
@@ -101,14 +101,14 @@
           <table class="w-full text-sm text-left">
             <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
               <tr>
-                <th class="px-6 py-3">Activité</th>
-                <th class="px-6 py-3">Projet</th>
-                <th class="px-6 py-3">Responsable</th>
-                <th class="px-6 py-3">Équipe</th>
-                <th class="px-6 py-3">Statut</th>
-                <th class="px-6 py-3">Progression</th>
-                <th class="px-6 py-3">Date fin</th>
-                <th class="px-6 py-3">Actions</th>
+                <th class="px-6 py-3">{{ $t('mes_activites.col_activity') }}</th>
+                <th class="px-6 py-3">{{ $t('mes_activites.col_project') }}</th>
+                <th class="px-6 py-3">{{ $t('mes_activites.col_responsible') }}</th>
+                <th class="px-6 py-3">{{ $t('mes_activites.col_team') }}</th>
+                <th class="px-6 py-3">{{ $t('mes_activites.col_status') }}</th>
+                <th class="px-6 py-3">{{ $t('mes_activites.col_progress') }}</th>
+                <th class="px-6 py-3">{{ $t('mes_activites.col_end_date') }}</th>
+                <th class="px-6 py-3">{{ $t('mes_activites.col_actions') }}</th>
               </tr>
             </thead>
             <tbody ref="staggerRef">
@@ -150,14 +150,14 @@
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
-                    {{ activite.membres_count || 0 }} membre(s)
+                    {{ $t('mes_activites.members_count', { count: activite.membres_count || 0 }) }}
                   </button>
                   <div v-else class="flex items-center gap-2 px-3 py-1.5 text-xs text-gray-500 dark:text-gray-400">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
-                    {{ activite.membres_count || 0 }} membre(s)
+                    {{ $t('mes_activites.members_count', { count: activite.membres_count || 0 }) }}
                   </div>
                 </td>
 
@@ -189,7 +189,7 @@
                 <td class="px-6 py-4">
                   <div class="flex items-center gap-2">
                     <button @click="viewActivityDetail(activite)"
-                      class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-3" title="Voir">
+                      class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-3" :title="$t('common.view')">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -200,7 +200,7 @@
 
                     <button v-if="getPermissions(activite).canEdit" @click="editActivite(activite)"
                       class="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-3"
-                      title="Modifier">
+                      :title="$t('common.edit')">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -209,7 +209,7 @@
 
                     <!-- Bouton Supprimer - Seulement si permission -->
                     <button v-if="getPermissions(activite).canDelete" @click="deleteActivite(activite)"
-                      class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-3" title="Supprimer">
+                      class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-3" :title="$t('common.delete')">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -218,7 +218,7 @@
                     <!-- Indicateur si aucune action disponible -->
                     <span v-if="!getPermissions(activite).canEdit && !getPermissions(activite).canDelete"
                       class="text-xs text-gray-400 px-2">
-                      Lecture seule
+                      {{ $t('mes_activites.read_only') }}
                     </span>
                   </div>
                 </td>
@@ -231,19 +231,17 @@
         <div v-if="pagination.last_page > 1"
           class="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-700">
           <div class="text-sm text-gray-500 dark:text-gray-400">
-            Affichage de {{ (pagination.current_page - 1) * pagination.per_page + 1 }}
-            à {{ Math.min(pagination.current_page * pagination.per_page, pagination.total) }}
-            sur {{ pagination.total }} activités
+            {{ $t('mes_activites.pagination', { from: (pagination.current_page - 1) * pagination.per_page + 1, to: Math.min(pagination.current_page * pagination.per_page, pagination.total), total: pagination.total }) }}
           </div>
           <div class="flex gap-1">
             <button @click="changePage(pagination.current_page - 1)" :disabled="pagination.current_page === 1"
               class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-700 rounded-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
-              Précédent
+              {{ $t('common.previous') }}
             </button>
             <button @click="changePage(pagination.current_page + 1)"
               :disabled="pagination.current_page === pagination.last_page"
               class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-700 rounded-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
-              Suivant
+              {{ $t('common.next') }}
             </button>
           </div>
         </div>
@@ -279,6 +277,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useStagger } from '@/composables/useAnimations'
 import { useRouter } from 'vue-router'
 import { useActivites } from '@/composables/useActivites'
@@ -287,6 +286,8 @@ import { useWorkspace } from '@/composables/useWorkspace'
 
 import { useAuthStore } from '@/stores/authStore'
 const authStore = useAuthStore()
+
+const { t } = useI18n()
 
 
 // Components
@@ -498,7 +499,7 @@ const viewActivityDetail = (activite) => {
 const editActivite = (activite) => {
   // Vérifier une dernière fois les permissions avant d'ouvrir le modal
   if (!getPermissions(activite).canEdit) {
-    alert('Vous n\'avez pas la permission de modifier cette activité')
+    alert(t('mes_activites.no_permission_edit'))
     return
   }
 
@@ -515,14 +516,14 @@ const deleteActivite = async (activite) => {
     await deleteAct(activite.id)
     await loadActivites()
   } catch (error) {
-    alert('Erreur lors de la suppression')
+    alert(t('mes_activites.delete_error'))
   }
 }
 
 // ✅ GESTION DES MEMBRES
 const openMembersModal = (activite) => {
   if (!getPermissions(activite).canManageMembers) {
-    alert('Vous n\'avez pas la permission de gérer les membres de cette activité')
+    alert(t('mes_activites.no_permission_members'))
     return
   }
 

@@ -11,9 +11,9 @@
             </div>
             <div>
               <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                Mes Tâches en Responsabilité
+                {{ $t('taches_responsable.title') }}
               </h1>
-              <p class="text-gray-500 dark:text-gray-400">Tâches dont vous êtes le responsable avec pleins pouvoirs</p>
+              <p class="text-gray-500 dark:text-gray-400">{{ $t('taches_responsable.subtitle') }}</p>
             </div>
           </div>
 
@@ -26,15 +26,15 @@
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
-              Statistiques
+              {{ $t('taches_responsable.statistics') }}
             </button>
 
             <!-- Bouton refresh -->
             <button
-              @click="loadResponsableTasks" 
-              :disabled="loading" 
-              class="p-2 rounded-3 border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" 
-              title="Actualiser"
+              @click="loadResponsableTasks"
+              :disabled="loading"
+              class="p-2 rounded-3 border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              :title="$t('taches_responsable.refresh')"
             >
               <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" :class="{ 'animate-spin': loading }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -52,7 +52,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
                 </svg>
-                Kanban
+                {{ $t('taches_responsable.view_kanban') }}
               </button>
               <button
                 dusk="view-grouped-btn"
@@ -63,7 +63,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
-                Par Activité
+                {{ $t('taches_responsable.view_grouped') }}
               </button>
             </div>
           </div>
@@ -93,11 +93,11 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <div class="text-sm text-purple-700 dark:text-purple-300">
-              <p class="font-semibold mb-1">En tant que responsable, vous avez :</p>
+              <p class="font-semibold mb-1">{{ $t('taches_responsable.info_title') }}</p>
               <ul class="space-y-1 list-disc list-inside ml-2">
-                <li>Tous les droits de gestion (édition, validation, suppression)</li>
-                <li>La responsabilité du pilotage et de la coordination</li>
-                <li>La capacité de valider les résultats des intervenants</li>
+                <li>{{ $t('taches_responsable.info_rights') }}</li>
+                <li>{{ $t('taches_responsable.info_responsibility') }}</li>
+                <li>{{ $t('taches_responsable.info_validation') }}</li>
               </ul>
             </div>
           </div>
@@ -110,10 +110,11 @@
       </div>
 
       <!-- Vue Kanban -->
-      <div dusk="view-kanban-panel" v-if="currentView === 'kanban' && !loading" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div dusk="view-kanban-panel" v-if="currentView === 'kanban' && !loading" ref="kanbanRef" class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <KanbanColumnResponsable
           v-for="column in kanbanColumns"
           :key="column.statut"
+          class="stagger-item"
           :title="column.title"
           :statut="column.statut"
           :taches="getTasksByStatus(column.statut)"
@@ -127,7 +128,7 @@
 
       <!-- Vue groupée -->
       <div dusk="view-grouped-panel" v-else-if="currentView === 'grouped' && !loading" ref="listRef" class="space-y-6">
-        <p v-if="tasksByActivite.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">Aucune tâche</p>
+        <p v-if="tasksByActivite.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">{{ $t('taches_responsable.no_tasks') }}</p>
         
         <div v-for="group in tasksByActivite" :key="group.activite.id" class="stagger-item rounded-3 border bg-white dark:bg-gray-800 overflow-hidden">
           <div class="px-6 py-4 bg-purple-50 dark:bg-purple-900/20 border-b">
@@ -163,7 +164,7 @@
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          <p class="text-gray-600 dark:text-gray-400">Chargement...</p>
+          <p class="text-gray-600 dark:text-gray-400">{{ $t('taches_responsable.loading') }}</p>
         </div>
       </div>
     </div>
@@ -188,6 +189,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import TachesResponsableStats from '@/components/taches/TachesResponsableStats.vue'
 import KanbanColumnResponsable from '@/components/taches/KanbanColumnResponsable.vue'
@@ -197,8 +199,10 @@ import { useStagger } from '@/composables/useAnimations'
 import api from '@/api/axios'
 import { useToast } from 'vue-toastification'
 
+const { t } = useI18n()
 const toast = useToast()
 const { staggerRef: listRef, applyStagger } = useStagger(55)
+const { staggerRef: kanbanRef, applyStagger: applyKanbanStagger } = useStagger(80)
 
 const taches = ref([])
 const loading = ref(false)
@@ -209,11 +213,11 @@ const showStats = ref(false)
 const showEditModal = ref(false)
 const currentTache = ref(null)
 
-const kanbanColumns = [
-  { statut: 'a_faire', title: 'À faire', color: '#6B7280', icon: '📋' },
-  { statut: 'en_cours', title: 'En cours', color: '#3B82F6', icon: '🔄' },
-  { statut: 'termine', title: 'Terminé', color: '#10B981', icon: '✅' }
-]
+const kanbanColumns = computed(() => [
+  { statut: 'a_faire', title: t('taches_responsable.kanban_col_a_faire'), color: '#6B7280', icon: '📋' },
+  { statut: 'en_cours', title: t('taches_responsable.kanban_col_en_cours'), color: '#3B82F6', icon: '🔄' },
+  { statut: 'termine', title: t('taches_responsable.kanban_col_termine'), color: '#10B981', icon: '✅' }
+])
 
 const stats = computed(() => ({
   total: taches.value.length,
@@ -255,12 +259,13 @@ async function loadResponsableTasks() {
   try {
     const { data } = await api.get('/taches/my-tasks-as-responsable')
     taches.value = data.data || []
-    applyStagger()
   } catch (err) {
-    error.value = err.response?.data?.message || 'Erreur de chargement'
+    error.value = err.response?.data?.message || t('taches_responsable.load_error')
     toast.error(error.value)
   } finally {
     loading.value = false
+    applyStagger()
+    applyKanbanStagger()
   }
 }
 
@@ -268,9 +273,9 @@ async function handleMoveCard({ tache, newStatut }) {
   try {
     await api.put(`/taches/${tache.id}`, { statut: newStatut })
     await loadResponsableTasks()
-    toast.success("Tâche mise à jour !")
+    toast.success(t('taches_responsable.task_updated'))
   } catch (err) {
-    toast.error('Erreur lors du déplacement')
+    toast.error(t('taches_responsable.move_error'))
     await loadResponsableTasks()
   }
 }
@@ -281,7 +286,7 @@ async function handleViewTask(tache) {
     currentTache.value = data.data
     showViewModal.value = true
   } catch (err) {
-    toast.error('Erreur de chargement')
+    toast.error(t('taches_responsable.view_error'))
   }
 }
 
@@ -293,7 +298,7 @@ function handleEditTask(tache) {
 async function handleTaskSaved() {
   showEditModal.value = false
   await loadResponsableTasks()
-  toast.success("Tâche enregistrée !")
+  toast.success(t('taches_responsable.task_saved'))
 }
 
 onMounted(() => {

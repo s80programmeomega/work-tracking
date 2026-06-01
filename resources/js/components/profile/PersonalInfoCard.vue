@@ -5,37 +5,35 @@
       <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <h4 class="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
-             Information Personnelle
+            {{ $t('personal_info.title') }}
           </h4>
 
           <div class="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
             <div>
-              <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Prénom</p>
-              <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ prenom || 'Non renseigné' }}</p>
+              <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">{{ $t('personal_info.field_first_name') }}</p>
+              <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ prenom || $t('personal_info.not_set') }}</p>
             </div>
 
             <div>
-              <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Nom</p>
-              <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ nom || 'Non renseigné' }}</p>
+              <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">{{ $t('personal_info.field_last_name') }}</p>
+              <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ nom || $t('personal_info.not_set') }}</p>
             </div>
 
             <div>
-              <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Email address
-              </p>
+              <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">{{ $t('personal_info.field_email') }}</p>
               <p class="text-sm font-medium text-gray-800 dark:text-white/90">
                 {{ user.email }}
               </p>
             </div>
 
             <div>
-              <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Phone</p>
-              <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ user.numero_telephone || 'Non renseigné' }}</p>
+              <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">{{ $t('personal_info.field_phone') }}</p>
+              <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ user.numero_telephone || $t('personal_info.not_set') }}</p>
             </div>
 
             <div>
-              <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Bio</p>
-              <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ user.bio || 'Non renseigné' }}</p>
+              <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">{{ $t('personal_info.field_bio') }}</p>
+              <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ user.bio || $t('personal_info.not_set') }}</p>
             </div>
           </div>
         </div>
@@ -88,17 +86,17 @@
           </button>
           <div class="px-2 pr-14">
             <h4 class="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
-              Editer les Informations Personnelle
+              {{ $t('personal_info.modal_title') }}
             </h4>
-            <p class="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7"> 
-              Mettre à jour les details d'informations.
+            <p class="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
+              {{ $t('personal_info.modal_subtitle') }}
             </p>
           </div>
           <form class="flex flex-col">
             <div class="custom-scrollbar h-[458px] overflow-y-auto p-2">
               <div class="mt-0">
                 <h5 class="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
-                   Information Personnelle
+                  {{ $t('personal_info.title') }}
                 </h5>
 
                 <div class="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
@@ -106,7 +104,7 @@
                     <label
                       class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
                     >
-                      Prénom
+                      {{ $t('personal_info.field_first_name') }}
                     </label>
                     <input
                       type="text"
@@ -119,7 +117,7 @@
                     <label
                       class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
                     >
-                      Nom
+                      {{ $t('personal_info.field_last_name') }}
                     </label>
                     <input
                       type="text"
@@ -133,7 +131,7 @@
                     <label
                       class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
                     >
-                      Email Address
+                      {{ $t('personal_info.field_email') }}
                     </label>
                     <input
                       type="text"
@@ -146,7 +144,7 @@
                     <label
                       class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
                     >
-                      Téléphone
+                      {{ $t('personal_info.field_phone') }}
                     </label>
                     <input
                       type="text"
@@ -159,7 +157,7 @@
                     <label
                       class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
                     >
-                      Bio
+                      {{ $t('personal_info.field_bio') }}
                     </label>
                     <input
                       type="text"
@@ -176,7 +174,7 @@
                 type="button"
                 class="flex w-full justify-center rounded-3 border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] sm:w-auto"
               >
-                Close
+                {{ $t('personal_info.btn_close') }}
               </button>
               <button
                 @click="saveProfile"
@@ -184,7 +182,7 @@
                 dusk="profile-form-save"
                 class="flex w-full justify-center rounded-3 bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 sm:w-auto"
               >
-                Save Changes
+                {{ $t('personal_info.btn_save') }}
               </button>
             </div>
           </form>
@@ -196,10 +194,12 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import Modal from './Modal.vue'
 import { useToast } from "vue-toastification"
 import { useUsers } from '../../composables/useUsers'
 
+const { t } = useI18n()
 const toast = useToast()
 const { updateProfile } = useUsers()
 
@@ -241,11 +241,11 @@ watch(() => props.user, (newUser) => {
 const saveProfile = async () => {
   try {
     await updateProfile(formData.value)
-    toast.success('Profil mis à jour avec succès')
+    toast.success(t('personal_info.save_success'))
     isProfileInfoModal.value = false
     emit('refresh')
   } catch (error) {
-    toast.error(error.response?.data?.message || 'Erreur lors de la mise à jour du profil')
+    toast.error(error.response?.data?.message || t('personal_info.save_error'))
   }
 }
 </script>

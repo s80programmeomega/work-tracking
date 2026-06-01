@@ -1,6 +1,6 @@
 <template>
   <AdminLayout>
-    <PageBreadcrumb :pageTitle="'Gestion des Projets'" />
+    <PageBreadcrumb :pageTitle="$t('projets_page.page_title')" />
 
     <div class="rounded-3 border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
       <!-- Navigation Tabs -->
@@ -17,7 +17,7 @@
               'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
             ]"
           >
-            Dashboard
+            {{ $t('projets_page.tab_dashboard') }}
           </button>
           <button
             dusk="tab-list"
@@ -29,7 +29,7 @@
               'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
             ]"
           >
-            Liste des projets
+            {{ $t('projets_page.tab_list') }}
           </button>
           <button
             v-if="selectedProjetId"
@@ -41,7 +41,7 @@
               'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
             ]"
           >
-            Détail projet
+            {{ $t('projets_page.tab_detail') }}
           </button>
         </nav>
       </div>

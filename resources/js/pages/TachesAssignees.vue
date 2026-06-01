@@ -15,8 +15,8 @@
               </svg>
             </div>
             <div>
-              <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Mes Tâches Assignées</h1>
-              <p class="text-gray-500 dark:text-gray-400">Gérez votre avancement personnel de manière indépendante</p>
+              <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('taches_assignees.title') }}</h1>
+              <p class="text-gray-500 dark:text-gray-400">{{ $t('taches_assignees.subtitle') }}</p>
             </div>
           </div>
 
@@ -29,13 +29,13 @@
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
-              Statistiques
+              {{ $t('taches_assignees.btn_stats') }}
             </button>
 
             <!-- Bouton refresh -->
             <button @click="loadAssignedTasks" :disabled="loading"
               class="p-2 rounded-3 border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              title="Actualiser">
+              :title="$t('taches_assignees.btn_refresh')">
               <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" :class="{ 'animate-spin': loading }" fill="none"
                 stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -52,7 +52,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
                 </svg>
-                Kanban
+                {{ $t('taches_assignees.view_kanban') }}
               </button>
               <button dusk="view-grouped-btn" @click="currentView = 'grouped'"
                 :class="['px-3 py-2 rounded-md transition-all flex items-center gap-2 text-sm',
@@ -61,7 +61,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
-                Par Activité
+                {{ $t('taches_assignees.view_grouped') }}
               </button>
             </div>
           </div>
@@ -98,8 +98,8 @@
       </div>
 
       <!-- Vue Kanban Personnel -->
-      <div dusk="view-kanban-panel" v-if="currentView === 'kanban' && !loading" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <KanbanColumnPersonal v-for="column in kanbanColumns" :key="column.statut" :title="column.title"
+      <div dusk="view-kanban-panel" v-if="currentView === 'kanban' && !loading" ref="kanbanRef" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <KanbanColumnPersonal v-for="column in kanbanColumns" :key="column.statut" :title="column.title" class="stagger-item"
           :statut="column.statut" :taches="getMyTasksByStatus(column.statut)" :status-color="column.color"
           :status-icon="column.icon" @move-card="handleMoveMyCard" @view-task="handleViewTask"
           @submit-result="handleSubmitResult" @edit-task="handleEditTask" />
@@ -108,7 +108,7 @@
       <!-- Vue groupée par activité -->
       <div dusk="view-grouped-panel" v-else-if="currentView === 'grouped' && !loading" ref="listRef" class="space-y-6">
         <div v-if="tasksByActivite.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">
-          Aucune tâche assignée pour le moment
+          {{ $t('taches_assignees.empty_grouped') }}
         </div>
 
         <div v-for="group in tasksByActivite" :key="group.activite.id"
@@ -131,7 +131,7 @@
               </div>
               <span
                 class="px-3 py-1 text-sm font-medium bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 rounded-full">
-                {{ group.taches.length }} tâche{{ group.taches.length > 1 ? 's' : '' }}
+                {{ $t('taches_assignees.tache_count', group.taches.length) }}
               </span>
             </div>
           </div>
@@ -162,7 +162,7 @@
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          <p class="text-gray-600 dark:text-gray-400">Chargement de vos tâches...</p>
+          <p class="text-gray-600 dark:text-gray-400">{{ $t('taches_assignees.loading') }}</p>
         </div>
       </div>
     </div>
@@ -196,7 +196,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import TachesAssigneesStats from '@/components/taches/TachesAssigneesStats.vue'
 import KanbanColumnPersonal from '@/components/taches/KanbanColumnPersonal.vue'
@@ -208,8 +209,10 @@ import { useStagger } from '@/composables/useAnimations'
 import api from '@/api/axios'
 import { useToast } from 'vue-toastification'
 
+const { t } = useI18n()
 const toast = useToast()
 const { staggerRef: listRef, applyStagger } = useStagger(55)
+const { staggerRef: kanbanRef, applyStagger: applyKanbanStagger } = useStagger(80)
 
 // State
 const taches = ref([])
@@ -223,11 +226,11 @@ const showEditModal = ref(false)
 const currentTache = ref(null)
 
 // Colonnes Kanban
-const kanbanColumns = [
-  { statut: 'a_faire', title: 'À faire', color: '#6B7280', icon: '📋' },
-  { statut: 'en_cours', title: 'En cours', color: '#3B82F6', icon: '🔄' },
-  { statut: 'termine', title: 'Terminé', color: '#10B981', icon: '✅' }
-]
+const kanbanColumns = computed(() => [
+  { statut: 'a_faire', title: t('taches_assignees.col_a_faire'), color: '#6B7280', icon: '📋' },
+  { statut: 'en_cours', title: t('taches_assignees.col_en_cours'), color: '#3B82F6', icon: '🔄' },
+  { statut: 'termine', title: t('taches_assignees.col_termine'), color: '#10B981', icon: '✅' }
+])
 
 // Computed
 const stats = computed(() => {
@@ -275,7 +278,10 @@ async function loadAssignedTasks() {
   try {
     const { data } = await api.get('/taches/assignees')
     taches.value = data.data || []
-    applyStagger()
+    nextTick(() => {
+      applyStagger()
+      applyKanbanStagger()
+    })
     console.log('✅ Tâches assignées chargées:', {
       total: taches.value.length,
       sample: taches.value.slice(0, 2).map(t => ({
@@ -288,7 +294,7 @@ async function loadAssignedTasks() {
     })
   } catch (err) {
     console.error('❌ Erreur chargement:', err)
-    error.value = err.response?.data?.message || 'Impossible de charger les tâches assignées'
+    error.value = err.response?.data?.message || t('taches_assignees.error_load')
     toast.error(error.value)
   } finally {
     loading.value = false
@@ -314,10 +320,10 @@ async function handleMoveMyCard({ tache, newStatut, progression, notes }) {
 
     await loadAssignedTasks()
 
-    toast.success("Carte mise à jour avec succès !")
+    toast.success(t('taches_assignees.toast_card_updated'))
   } catch (err) {
     console.error('❌ Erreur déplacement:', err)
-    error.value = err.response?.data?.message || 'Erreur lors du déplacement'
+    error.value = err.response?.data?.message || t('taches_assignees.error_move')
     toast.error(error.value)
 
     await loadAssignedTasks()
@@ -334,7 +340,7 @@ async function handleResultSubmitted() {
   await loadAssignedTasks()
   error.value = null
 
-  toast.success("Résultat soumis avec succès !")
+  toast.success(t('taches_assignees.toast_result_submitted'))
 }
 
 async function handleViewTask(tache) {
@@ -344,7 +350,7 @@ async function handleViewTask(tache) {
     showViewModal.value = true
   } catch (err) {
     console.error('Erreur:', err)
-    error.value = 'Erreur lors du chargement de la tâche'
+    error.value = t('taches_assignees.error_view')
     toast.error(error.value)
   }
 }
@@ -358,7 +364,7 @@ async function handleEditTask(tache) {
     showEditModal.value = true
   } catch (err) {
     console.error('Erreur:', err)
-    toast.error('Erreur lors du chargement de la tâche')
+    toast.error(t('taches_assignees.error_view'))
   }
 }
 
@@ -367,7 +373,7 @@ async function handleTaskSaved() {
   showEditModal.value = false
   currentTache.value = null
   await loadAssignedTasks()
-  toast.success("Tâche modifiée avec succès !")
+  toast.success(t('taches_assignees.toast_task_saved'))
 }
 
 function handleTaskUpdated() {
@@ -375,6 +381,14 @@ function handleTaskUpdated() {
 }
 
 // Lifecycle
+watch(currentView, (view) => {
+  if (view === 'grouped') {
+    nextTick(() => applyStagger())
+  } else if (view === 'kanban') {
+    nextTick(() => applyKanbanStagger())
+  }
+})
+
 onMounted(() => {
   loadAssignedTasks()
 })

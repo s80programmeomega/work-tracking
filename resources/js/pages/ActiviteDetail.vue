@@ -1,7 +1,7 @@
 <!-- resources/js/pages/ActiviteDetail.vue - VERSION CORRIGÉE AVEC PERMISSIONS -->
 <template>
   <AdminLayout>
-    <PageBreadcrumb :pageTitle="'Détail de l\'activité'" />
+    <PageBreadcrumb :pageTitle="$t('activite_detail.page_title')" />
     <div class="py-6">
       <div>
         <div class="space-y-6" v-if="!loading && activite">
@@ -14,7 +14,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
-                <span>Activités</span> 
+                <span>{{ $t('activite_detail.breadcrumb_activities') }}</span>
               </button>
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -64,7 +64,7 @@
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
-                  Statistiques
+                  {{ $t('activite_detail.btn_statistics') }}
                 </button>
 
                 <!-- A.10: Voir toutes les tâches de cette activité -->
@@ -76,7 +76,7 @@
                   <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                   </svg>
-                  Voir toutes les tâches
+                  {{ $t('activite_detail.btn_view_all_tasks') }}
                 </router-link>
 
                 <button
@@ -88,7 +88,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
-                  Modifier
+                  {{ $t('activite_detail.btn_edit') }}
                 </button>
                
                 <button v-if="canManageMembers" 
@@ -99,7 +99,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
-                  Gérer l'équipe 
+                  {{ $t('activite_detail.btn_manage_team') }}
                 </button>
               </div> 
             </div>
@@ -133,10 +133,10 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  Description
+                  {{ $t('activite_detail.section_description') }}
                 </h3>
                 <p class="text-gray-600 dark:text-gray-300 leading-relaxed">
-                  {{ activite.description || 'Aucune description fournie.' }}
+                  {{ activite.description || $t('activite_detail.no_description') }}
                 </p>
               </div>
 
@@ -147,14 +147,14 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
-                  Progression globale
+                  {{ $t('activite_detail.section_progression') }}
                 </h3>
 
                 <div class="space-y-6">
                   <!-- Barre de progression principale -->
                   <div class="space-y-2">
                     <div class="flex items-center justify-between">
-                      <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Avancement</span>
+                      <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('activite_detail.label_advancement') }}</span>
                       <span class="text-2xl font-bold text-blue-600">{{ stats.progression }}%</span>
                     </div>
                     <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4">
@@ -173,30 +173,30 @@
                     <div
                       class="text-center p-4 border border-gray-200 dark:border-gray-700 rounded-3 bg-red-50 dark:bg-red-900/10">
                       <div class="text-3xl font-bold text-red-600">{{ stats.tachesAFaire }}</div>
-                      <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">À faire</div>
+                      <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ $t('activite_detail.stat_a_faire') }}</div>
                     </div>
 
                     <div
                       class="text-center p-4 border border-gray-200 dark:border-gray-700 rounded-3 bg-blue-50 dark:bg-blue-900/10">
                       <div class="text-3xl font-bold text-blue-600">{{ stats.tachesEnCours }}</div>
-                      <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">En cours</div>
+                      <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ $t('activite_detail.stat_en_cours') }}</div>
                     </div>
 
                     <div
                       class="text-center p-4 border border-gray-200 dark:border-gray-700 rounded-3 bg-green-50 dark:bg-green-900/10">
                       <div class="text-3xl font-bold text-green-600">{{ stats.tachesTerminees }}</div>
-                      <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Terminées</div>
+                      <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ $t('activite_detail.stat_terminees') }}</div>
                     </div>
                   </div>
 
                   <!-- Taux de complétion -->
                   <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-3">
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Taux de complétion
+                      {{ $t('activite_detail.label_completion_rate') }}
                     </span>
                     <span class="text-lg font-bold"
                       :class="stats.progression >= 80 ? 'text-green-600' : stats.progression >= 50 ? 'text-blue-600' : 'text-orange-600'">
-                      {{ stats.tachesTerminees }}/{{ stats.totalTaches }} tâches
+                      {{ $t('activite_detail.completion_count', { done: stats.tachesTerminees, total: stats.totalTaches }) }}
                     </span>
                   </div>
                 </div>
@@ -212,7 +212,7 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
           d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
       </svg>
-      Tâches récentes
+      {{ $t('activite_detail.section_recent_tasks') }}
     </h3>
     <div class="flex items-center gap-2">
       <!-- Bouton Vue Kanban -->
@@ -224,7 +224,7 @@
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
         </svg>
-        {{ showKanbanView ? 'Liste' : 'Kanban' }}
+        {{ showKanbanView ? $t('activite_detail.btn_list_view') : $t('activite_detail.btn_kanban_view') }}
       </button>
       
       <button
@@ -236,7 +236,7 @@
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
         </svg>
-        Nouvelle tâche
+        {{ $t('activite_detail.btn_new_task') }}
       </button>
     </div>
   </div>
@@ -279,7 +279,7 @@
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
-            {{ tache.assignees?.map(a => a.nom).join(', ') || 'Non assignée' }}
+            {{ tache.assignees?.map(a => a.nom).join(', ') || $t('activite_detail.task_unassigned') }}
           </div>
           
           <!-- Progression -->
@@ -308,7 +308,7 @@
         <div class="flex items-center gap-3">
           <!-- Date d'échéance -->
           <div v-if="tache.echeance" class="text-right">
-            <div class="text-xs text-gray-500 dark:text-gray-400">Échéance</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400">{{ $t('activite_detail.label_echeance') }}</div>
             <div 
               class="text-sm font-medium"
               :class="tache.is_overdue ? 'text-red-600' : 'text-gray-900 dark:text-white'"
@@ -345,8 +345,8 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
           d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
       </svg>
-      <p class="font-medium text-lg">Aucune tâche</p>
-      <p class="text-sm mt-1">Créez votre première tâche pour commencer</p>
+      <p class="font-medium text-lg">{{ $t('activite_detail.empty_tasks_title') }}</p>
+      <p class="text-sm mt-1">{{ $t('activite_detail.empty_tasks_hint') }}</p>
       
       <!-- Message si viewer -->
       <div v-if="userRole === 'viewer'" class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-3 max-w-md mx-auto">
@@ -354,19 +354,19 @@
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          Vous êtes observateur : accès en lecture seule
+          {{ $t('activite_detail.viewer_notice') }}
         </p>
       </div>
-      
-      <button 
-        v-if="canCreateTasks" 
-        @click="openCreateTaskForm" 
+
+      <button
+        v-if="canCreateTasks"
+        @click="openCreateTaskForm"
         class="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-3 hover:bg-blue-700 transition-colors"
       >
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
         </svg>
-        Créer une tâche
+        {{ $t('activite_detail.btn_create_task') }}
       </button>
     </div>
   </div>
@@ -383,19 +383,19 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  Informations
+                  {{ $t('activite_detail.section_info') }}
                 </h3>
 
                 <div class="space-y-4">
                   <div class="flex items-center justify-between">
-                    <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Projet</span>
+                    <span class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ $t('activite_detail.label_project') }}</span>
                     <span class="text-sm font-medium text-gray-900 dark:text-white">
                       {{ activite.projet?.nom }}
                     </span>
                   </div>
 
                   <div class="flex items-center justify-between">
-                    <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Responsable</span>
+                    <span class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ $t('activite_detail.label_manager') }}</span>
                     <div class="flex items-center space-x-2">
                       <div
                         class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold">
@@ -408,14 +408,14 @@
                   </div>
 
                   <div class="flex items-center justify-between">
-                    <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Date début</span>
+                    <span class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ $t('activite_detail.label_start_date') }}</span>
                     <span class="text-sm text-gray-900 dark:text-white">
                       {{ formatDate(activite.date_debut) }}
                     </span>
                   </div>
 
                   <div class="flex items-center justify-between">
-                    <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Date fin</span>
+                    <span class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ $t('activite_detail.label_end_date') }}</span>
                     <span class="text-sm font-medium"
                       :class="isOverdue ? 'text-red-600' : 'text-gray-900 dark:text-white'">
                       {{ formatDate(activite.date_fin) }}
@@ -428,7 +428,7 @@
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
                     </svg>
-                    <span class="text-sm font-medium">En retard</span>
+                    <span class="text-sm font-medium">{{ $t('activite_detail.badge_overdue') }}</span>
                   </div>
                 </div>
               </div>
@@ -441,7 +441,7 @@
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
-                    Équipe ({{ activite.membres?.length || 0 }})
+                    {{ $t('activite_detail.section_team', { count: activite.membres?.length || 0 }) }}
                   </h3>
                   <button 
                     v-if="canManageMembers" 
@@ -454,7 +454,7 @@
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    Gérer
+                    {{ $t('activite_detail.btn_manage') }}
                   </button>
                 </div>
 
@@ -474,7 +474,7 @@
                         {{ activite.responsable?.nom }}
                       </div>
                       <div class="text-xs text-orange-600 dark:text-orange-400 font-medium">
-                        Responsable
+                        {{ $t('activite_detail.role_responsable') }}
                       </div>
                     </div>
                   </div>
@@ -502,17 +502,17 @@
                             <span v-if="member.permissions.can_create_tasks"
                               class="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300"
                               title="Peut créer des tâches">
-                              Créer
+                              {{ $t('activite_detail.perm_create') }}
                             </span>
                             <span v-if="member.permissions.can_edit_tasks"
                               class="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300"
                               title="Peut modifier des tâches">
-                              Éditer
+                              {{ $t('activite_detail.perm_edit') }}
                             </span>
                             <span v-if="member.permissions.can_validate_results"
                               class="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300"
                               title="Peut valider les résultats N1">
-                              Valider
+                              {{ $t('activite_detail.perm_validate') }}
                             </span>
                           </div>
                         </div>
@@ -538,23 +538,23 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
-                  <p class="text-sm font-medium mb-2">Aucun membre assigné</p>
-                  <button 
-                    v-if="canManageMembers" 
+                  <p class="text-sm font-medium mb-2">{{ $t('activite_detail.empty_no_members') }}</p>
+                  <button
+                    v-if="canManageMembers"
                     @click="openMembersModal"
                     class="inline-flex items-center px-3 py-1.5 text-sm bg-blue-600 text-white rounded-3 hover:bg-blue-700 transition-colors"
                   >
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
-                    Ajouter des membres
+                    {{ $t('activite_detail.btn_add_members') }}
                   </button>
                 </div>
               </div>
 
               <!-- Actions rapides -->
               <div class="bg-white dark:bg-gray-800 rounded-3 p-6 border border-gray-200 dark:border-gray-700">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Actions rapides</h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ $t('activite_detail.section_quick_actions') }}</h3>
 
                 <div class="space-y-3">
                   <button 
@@ -568,7 +568,7 @@
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
                       </div>
-                      <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Créer une tâche</span>
+                      <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('activite_detail.action_create_task') }}</span>
                     </div>
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -585,7 +585,7 @@
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
                       </div>
-                      <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Voir toutes les tâches</span>
+                      <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('activite_detail.action_view_all_tasks') }}</span>
                     </div>
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -605,7 +605,7 @@
                             d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
                       </div>
-                      <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Gérer les membres</span>
+                      <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('activite_detail.action_manage_members') }}</span>
                     </div>
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -618,7 +618,7 @@
                       <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      Vous êtes observateur : accès en lecture seule
+                      {{ $t('activite_detail.viewer_notice') }}
                     </p>
                   </div>
                 </div>
@@ -631,7 +631,7 @@
         <div v-else-if="loading" class="flex items-center justify-center min-h-[400px]">
           <div class="text-center">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p class="mt-4 text-gray-500 dark:text-gray-400">Chargement de l'activité...</p>
+            <p class="mt-4 text-gray-500 dark:text-gray-400">{{ $t('activite_detail.loading') }}</p>
           </div>
         </div>
 
@@ -642,9 +642,9 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M12 8v4m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
-            <p class="text-gray-900 dark:text-white font-medium text-lg">Activité introuvable</p>
+            <p class="text-gray-900 dark:text-white font-medium text-lg">{{ $t('activite_detail.error_not_found') }}</p>
             <button @click="$router.back()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-3 hover:bg-blue-700">
-              Retour
+              {{ $t('activite_detail.btn_back') }}
             </button>
           </div>
         </div>
@@ -726,6 +726,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import api from '@/api/axios'
 import { useAuthStore } from '@/stores/authStore'
 import { useStagger } from '@/composables/useAnimations'
@@ -744,6 +745,7 @@ import KanbanBoard from '@/components/taches/KanbanBoardSimple.vue'
 import { useTaches } from '@/composables/useTaches'
 
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore() 
@@ -871,11 +873,11 @@ const getStatusDotClass = (status) => {
 
 const getStatusLabel = (status) => {
   const labels = {
-    'active': 'Active',
-    'archived': 'Archivée',
-    'planifiee': 'Planifiée',
-    'en_cours': 'En cours',
-    'terminee': 'Terminée'
+    'active': t('activite_detail.activite_status_active'),
+    'archived': t('activite_detail.activite_status_archived'),
+    'planifiee': t('activite_detail.activite_status_planifiee'),
+    'en_cours': t('activite_detail.activite_status_en_cours'),
+    'terminee': t('activite_detail.activite_status_terminee')
   }
   return labels[status] || status
 }
@@ -895,13 +897,13 @@ const getTaskStatusClasses = (status) => {
 
 const getTaskStatusLabel = (status) => {
   const labels = {
-    'a_faire': 'À faire',
-    'en_attente': 'En attente',
-    'en_cours': 'En cours',
-    'termine': 'Terminé',
-    'en_retard': 'En retard',
-    'a_refaire': 'À refaire',
-    'annule': 'Annulé'
+    'a_faire': t('activite_detail.task_status_a_faire'),
+    'en_attente': t('activite_detail.task_status_en_attente'),
+    'en_cours': t('activite_detail.task_status_en_cours'),
+    'termine': t('activite_detail.task_status_termine'),
+    'en_retard': t('activite_detail.task_status_en_retard'),
+    'a_refaire': t('activite_detail.task_status_a_refaire'),
+    'annule': t('activite_detail.task_status_annule')
   }
   return labels[status] || status
 }
@@ -917,15 +919,15 @@ const getRoleBadgeClass = (role) => {
 
 const getRoleLabel = (role) => {
   const labels = {
-    'responsable': 'Responsable',
-    'collaborator': 'Collaborateur',
-    'viewer': 'Observateur'
+    'responsable': t('activite_detail.role_responsable'),
+    'collaborator': t('activite_detail.role_collaborator'),
+    'viewer': t('activite_detail.role_viewer')
   }
   return labels[role] || role
 }
 
 const formatDate = (dateString) => {
-  if (!dateString) return 'Non définie'
+  if (!dateString) return t('activite_detail.date_undefined')
   return new Date(dateString).toLocaleDateString('fr-FR', {
     day: 'numeric',
     month: 'long',
@@ -1005,7 +1007,7 @@ const viewTaskDetails = async (tache) => {
     showTaskDetail.value = true
   } catch (error) {
     console.error('Erreur lors du chargement des détails de la tâche:', error)
-    alert('Erreur lors du chargement des détails de la tâche')
+    alert(t('activite_detail.alert_load_task_error'))
   }
 }
 
@@ -1036,7 +1038,7 @@ const handleTaskMoved = async ({ tache, newStatut, newOrdre }) => {
     await loadKanban()
   } catch (error) {
     console.error('Erreur lors du déplacement de la tâche:', error)
-    alert('Erreur lors du déplacement de la tâche')
+    alert(t('activite_detail.alert_move_task_error'))
   }
 }
 
@@ -1079,9 +1081,9 @@ const formatTaskDate = (date) => {
   const today = new Date()
   const diffDays = Math.ceil((d - today) / (1000 * 60 * 60 * 24))
 
-  if (diffDays === 0) return "Aujourd'hui"
-  if (diffDays === 1) return 'Demain'
-  if (diffDays === -1) return 'Hier'
+  if (diffDays === 0) return t('activite_detail.date_today')
+  if (diffDays === 1) return t('activite_detail.date_tomorrow')
+  if (diffDays === -1) return t('activite_detail.date_yesterday')
 
   return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
 }
@@ -1126,7 +1128,7 @@ const removeMember = async (member) => {
     return
   }
 
-  if (!confirm(`Êtes-vous sûr de vouloir retirer ${member.nom} de cette activité ?`)) {
+  if (!confirm(t('activite_detail.confirm_remove_member', { nom: member.nom }))) {
     return
   }
 
@@ -1135,7 +1137,7 @@ const removeMember = async (member) => {
     await loadActivite()
   } catch (error) {
     console.error('Erreur lors du retrait du membre:', error)
-    alert('Erreur lors du retrait du membre')
+    alert(t('activite_detail.alert_remove_member_error'))
   }
 }
 
@@ -1147,7 +1149,7 @@ const handleValidation = async (level, tache, commentaire = '') => {
     : (r) => r.valide_par_n1 && !r.valide_par_n2
   const pending = (tache.all_results ?? []).filter(matcher)
   if (!pending.length) {
-    alert('Aucun résultat en attente de validation à ce niveau.')
+    alert(t('activite_detail.alert_no_pending'))
     return
   }
   try {
@@ -1167,10 +1169,10 @@ const handleValidation = async (level, tache, commentaire = '') => {
       selectedTask.value = null
     }
     
-    alert(`Tâche validée avec succès (${level.toUpperCase()})`)
+    alert(t('activite_detail.alert_validated', { level: level.toUpperCase() }))
   } catch (error) {
     console.error(`Erreur lors de la validation ${level}:`, error)
-    alert(error.response?.data?.message || `Erreur lors de la validation ${level}`)
+    alert(error.response?.data?.message || t('activite_detail.alert_validate_error', { level }))
   }
 }
 

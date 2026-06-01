@@ -1,13 +1,13 @@
 <!-- resources/js/components/projets/AddMemberModal.vue -->
 <template>
   <Teleport to="body">
-    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div
+    <div class="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
+      <div ref="dialogRef" :style="dragStyle"
         class="bg-white dark:bg-gray-800 rounded-3 max-w-2xl w-full max-h-[90vh] overflow-hidden"
         @click.stop
       >
         <!-- Header -->
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div ref="handleRef" class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 cursor-move select-none">
           <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
             Ajouter un membre au projet
           </h2>
@@ -241,6 +241,10 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+import { useDraggable } from '@/composables/useDraggable'
+
+const { dialogRef, handleRef, dragStyle, attachHandle } = useDraggable()
+onMounted(attachHandle)
 import { useProjets } from '@/composables/useProjets'
 import { useWorkspace } from '@/composables/useWorkspace'
 import { XIcon, SearchIcon, UsersIcon, CheckIcon, AlertCircleIcon } from '@/icons'

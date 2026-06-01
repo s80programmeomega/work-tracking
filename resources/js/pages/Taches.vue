@@ -1,7 +1,7 @@
 <!-- resources/js/pages/Taches.vue - VERSION FINALE CORRIGÉE -->
 <template>
   <AdminLayout>
-    <PageBreadcrumb :pageTitle="'Gestion des Tâches'" />
+    <PageBreadcrumb :pageTitle="$t('taches_page.page_title')" />
 
     <div class="rounded-3 border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
       
@@ -17,7 +17,7 @@
                 @change="handleActiviteChange"
                 class="w-full px-4 py-2.5 pl-10 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
               >
-                <option value="">📋 Toutes les activités</option>
+                <option value="">📋 {{ $t('taches_page.all_activities') }}</option>
                 <option v-for="activite in activites" :key="activite.id" :value="activite.id">
                   {{ activite.nom }} ({{ activite.projet?.nom }})
                 </option>
@@ -42,7 +42,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18M10 3v18M6 3h12a3 3 0 013 3v12a3 3 0 01-3 3H6a3 3 0 01-3-3V6a3 3 0 013-3z" />
                 </svg>
-                Tableau
+                {{ $t('taches_page.view_table') }}
               </button>
               <button
                 dusk="view-kanban-btn"
@@ -57,7 +57,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
                 </svg>
-                Kanban
+                {{ $t('taches_page.view_kanban') }}
               </button>
               <button
                 dusk="view-list-btn"
@@ -72,7 +72,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                 </svg>
-                Liste
+                {{ $t('taches_page.view_list') }}
               </button>
             </div>
 
@@ -82,8 +82,8 @@
               dusk="filter-assignee"
               class="w-full sm:w-auto px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
             >
-              <option value="me">Mes tâches</option>
-              <option value="all">Toutes les tâches</option>
+              <option value="me">{{ $t('taches_page.filter_my_tasks') }}</option>
+              <option value="all">{{ $t('taches_page.filter_all_tasks') }}</option>
             </select>
           </div>
 
@@ -98,7 +98,7 @@
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
-              Statistiques
+              {{ $t('taches_page.btn_statistics') }}
             </button>
 
             <!-- Validations en attente -->
@@ -110,7 +110,7 @@
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              Validations
+              {{ $t('taches_page.btn_validations') }}
               <span class="absolute -top-2 -right-2 px-2 py-0.5 bg-amber-500 text-white text-xs font-bold rounded-full">
                 {{ pendingValidationsCount }}
               </span>
@@ -129,7 +129,7 @@
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
               </svg>
-              {{ showArchived ? 'Masquer archivées' : 'Voir archivées' }}
+              {{ showArchived ? $t('taches_page.btn_hide_archived') : $t('taches_page.btn_show_archived') }}
             </button>
 
             <!-- Nouvelle tâche -->
@@ -141,7 +141,7 @@
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
               </svg>
-              Nouvelle tâche
+              {{ $t('taches_page.btn_new_task') }}
             </button>
           </div>
         </div>
@@ -183,7 +183,7 @@
       <div v-if="loading" class="flex justify-center items-center h-64">
         <div class="text-center">
           <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500 mx-auto mb-4"></div>
-          <p class="text-gray-600 dark:text-gray-400">Chargement des tâches...</p>
+          <p class="text-gray-600 dark:text-gray-400">{{ $t('taches_page.loading') }}</p>
         </div>
       </div>
 
@@ -205,10 +205,10 @@
           </svg>
         </div>
         <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
-          Sélectionnez une activité
+          {{ $t('taches_page.empty_select_activity') }}
         </h3>
         <p class="text-gray-500 dark:text-gray-400 mb-6">
-          Choisissez une activité pour voir et gérer ses tâches
+          {{ $t('taches_page.empty_select_activity_hint') }}
         </p>
       </div>
 
@@ -221,7 +221,7 @@
               <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
               </svg>
-              Tâches Archivées
+              {{ $t('taches_page.archived_title') }}
               <span class="text-sm font-normal text-gray-500 dark:text-gray-400">({{ archivedTasks.length }})</span>
             </h3>
           </div>
@@ -230,7 +230,7 @@
             <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
             </svg>
-            <p>Aucune tâche archivée</p>
+            <p>{{ $t('taches_page.empty_archived') }}</p>
           </div>
 
           <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -277,15 +277,15 @@
         </div>
 
         <!-- Active Tasks - List View -->
-        <div dusk="view-list-panel" v-else-if="currentView === 'list'" class="space-y-2">
+        <div dusk="view-list-panel" v-else-if="currentView === 'list'" ref="listRef" class="space-y-2">
           <div v-if="filteredTasks.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">
             <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
-            <p>Aucune tâche pour cette activité</p>
+            <p>{{ $t('taches_page.empty_no_tasks') }}</p>
           </div>
-          
-          <div v-else v-for="tache in filteredTasks" :key="tache.id">
+
+          <div v-else v-for="tache in filteredTasks" :key="tache.id" class="stagger-item">
             <TacheCard
               :tache="tache"
               @view="handleViewTask"
@@ -341,7 +341,9 @@
 <script setup>
 import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useTaches } from '@/composables/useTaches'
+import { useStagger } from '@/composables/useAnimations'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import TachesStats from '@/components/taches/TachesStats.vue'
@@ -354,7 +356,9 @@ import TacheDetailModal from '@/components/taches/TacheDetailModal.vue'
 import PendingValidationsModal from '@/components/taches/PendingValidationsModal.vue'
 import api from '@/api/axios'
 
+const { t } = useI18n()
 const route = useRoute()
+const { staggerRef: listRef, applyStagger } = useStagger(45)
 
 const {
   kanban: storeKanban,
@@ -476,7 +480,7 @@ const loadActivites = async () => {
     }
   } catch (err) {
     console.error('❌ Erreur chargement activités:', err)
-    error.value = 'Impossible de charger les activités'
+    error.value = t('taches_page.error_load_activities')
   }
 }
 
@@ -489,6 +493,7 @@ const handleActiviteChange = async () => {
   try {
     await fetchKanbanForActivite(selectedActiviteId.value)
     console.log('✅ Kanban chargé:', kanban.value)
+    applyStagger()
   } catch (err) {
     console.error('❌ Erreur chargement kanban:', err)
   }
@@ -521,7 +526,7 @@ const loadPendingValidations = async () => {
 
 const openCreateForm = () => {
   if (!selectedActiviteId.value) {
-    alert('Veuillez sélectionner une activité')
+    alert(t('taches_page.alert_select_activity'))
     return
   }
   showViewModal.value = false
@@ -546,7 +551,7 @@ const handleViewTask = async (tache) => {
     showViewModal.value = true
   } catch (err) {
     console.error('Error loading task details:', err)
-    alert('Erreur lors du chargement des détails de la tâche')
+    alert(t('taches_page.alert_load_task_error'))
   }
 }
 
@@ -563,19 +568,19 @@ const handleEditFromDetail = (tache) => {
 }
 
 const handleDuplicateTask = async (tache) => {
-  if (!confirm('Voulez-vous dupliquer cette tâche ?')) return
+  if (!confirm(t('taches_page.confirm_duplicate'))) return
 
   try {
     await duplicateTache(tache.id)
     await fetchKanbanForActivite(selectedActiviteId.value)
   } catch (err) {
     console.error('Error duplicating task:', err)
-    alert('Erreur lors de la duplication de la tâche')
+    alert(t('taches_page.alert_duplicate_error'))
   }
 }
 
 const handleArchiveTask = async (tache) => {
-  if (!confirm('Voulez-vous archiver cette tâche ?')) return
+  if (!confirm(t('taches_page.confirm_archive'))) return
 
   try {
     await archiveTache(tache.id)
@@ -583,12 +588,12 @@ const handleArchiveTask = async (tache) => {
     await loadArchivedTasks()
   } catch (err) {
     console.error('Error archiving task:', err)
-    alert('Erreur lors de l\'archivage de la tâche')
+    alert(t('taches_page.alert_archive_error'))
   }
 }
 
 const handleUnarchiveTask = async (tache) => {
-  if (!confirm('Voulez-vous désarchiver cette tâche ?')) return
+  if (!confirm(t('taches_page.confirm_unarchive'))) return
 
   try {
     await api.post(`/taches/${tache.id}/unarchive`)
@@ -596,12 +601,12 @@ const handleUnarchiveTask = async (tache) => {
     await loadArchivedTasks()
   } catch (err) {
     console.error('Error unarchiving task:', err)
-    alert('Erreur lors du désarchivage de la tâche')
+    alert(t('taches_page.alert_unarchive_error'))
   }
 }
 
 const handleDeleteTask = async (tache) => {
-  if (!confirm('Êtes-vous sûr de vouloir supprimer cette tâche ?')) return
+  if (!confirm(t('taches_page.confirm_delete'))) return
 
   try {
     await deleteTache(tache.id)
@@ -609,7 +614,7 @@ const handleDeleteTask = async (tache) => {
     if (showArchived.value) await loadArchivedTasks()
   } catch (err) {
     console.error('Error deleting task:', err)
-    alert('Erreur lors de la suppression de la tâche')
+    alert(t('taches_page.alert_delete_error'))
   }
 }
 
@@ -636,7 +641,7 @@ async function validateAllPendingForLevel(tache, level, commentaire) {
     : (r) => r.valide_par_n1 && !r.valide_par_n2
   const pending = (fresh.all_results ?? []).filter(matcher)
   if (!pending.length) {
-    alert('Aucun résultat en attente de validation à ce niveau.')
+    alert(t('taches_page.alert_no_pending'))
     return false
   }
   await Promise.all(pending.map((r) =>
@@ -646,7 +651,7 @@ async function validateAllPendingForLevel(tache, level, commentaire) {
 }
 
 const handleValidateN1 = async (tache) => {
-  const commentaire = prompt('Commentaire de validation (optionnel):')
+  const commentaire = prompt(t('taches_page.prompt_n1_comment'))
   if (commentaire === null) return
 
   try {
@@ -659,12 +664,12 @@ const handleValidateN1 = async (tache) => {
     }
   } catch (err) {
     console.error('Error validating N1:', err)
-    alert(err.response?.data?.message || 'Erreur lors de la validation')
+    alert(err.response?.data?.message || t('taches_page.alert_validate_error'))
   }
 }
 
 const handleValidateN2 = async (tache) => {
-  const commentaire = prompt('Commentaire de validation finale (optionnel):')
+  const commentaire = prompt(t('taches_page.prompt_n2_comment'))
   if (commentaire === null) return
 
   try {
@@ -677,7 +682,7 @@ const handleValidateN2 = async (tache) => {
     }
   } catch (err) {
     console.error('Error validating N2:', err)
-    alert(err.response?.data?.message || 'Erreur lors de la validation')
+    alert(err.response?.data?.message || t('taches_page.alert_validate_error'))
   }
 }
 
@@ -687,7 +692,7 @@ const handleTaskMoved = async ({ tache, newStatut, newOrdre }) => {
     await fetchKanbanForActivite(selectedActiviteId.value)
   } catch (err) {
     console.error('Error moving task:', err)
-    alert('Erreur lors du déplacement de la tâche')
+    alert(t('taches_page.alert_move_error'))
     await fetchKanbanForActivite(selectedActiviteId.value)
   }
 }

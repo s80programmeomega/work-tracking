@@ -6,10 +6,10 @@
       <div class="flex items-center justify-between">
         <div>
           <h1 dusk="admin-dashboard-title" class="text-2xl font-semibold text-gray-900 dark:text-white">
-            Platform Dashboard
+            {{ $t('admin.dashboard.title') }}
           </h1>
           <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Global overview of all workspaces, users, tasks and subscriptions.
+            {{ $t('admin.dashboard.subtitle') }}
           </p>
         </div>
         <button
@@ -18,7 +18,7 @@
           class="px-4 py-2 bg-brand-600 text-white rounded-3 text-sm hover:bg-brand-700 disabled:opacity-50 flex items-center gap-2"
         >
           <i class="fas fa-sync-alt" :class="{ 'animate-spin': loading }"></i>
-          Refresh
+          {{ $t('admin.dashboard.refresh') }}
         </button>
       </div>
 
@@ -35,7 +35,7 @@
       <template v-if="stats">
         <!-- Workspace stats -->
         <section>
-          <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Workspaces</h2>
+          <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">{{ $t('admin.dashboard.workspaces') }}</h2>
           <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             <StatCard title="Total" :value="stats.workspaces.total" icon="building" color="blue" />
             <StatCard title="Active" :value="stats.workspaces.active" icon="check-circle" color="green" />
@@ -48,7 +48,7 @@
 
         <!-- User stats -->
         <section>
-          <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Users</h2>
+          <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">{{ $t('admin.dashboard.users') }}</h2>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <StatCard title="Total users" :value="stats.users.total" icon="users" color="blue" />
             <StatCard title="Active (30 d)" :value="stats.users.active_last_30_days" icon="user-check" color="green" />
@@ -59,7 +59,7 @@
 
         <!-- Task stats -->
         <section>
-          <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Tasks & Projects</h2>
+          <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">{{ $t('admin.dashboard.tasks_projects') }}</h2>
           <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             <StatCard title="Total tasks" :value="stats.tasks.total" icon="tasks" color="blue" />
             <StatCard title="In progress" :value="stats.tasks.by_status?.en_cours ?? 0" icon="play-circle" color="blue" />
@@ -222,27 +222,29 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import AdminLayout from '@/components/layout/AdminLayout.vue';
 import StatCard from '@/components/common/StatCard.vue';
 import SubscriptionBadge from '@/components/admin/SubscriptionBadge.vue';
 import { useStagger } from '@/composables/useAnimations';
 import api from '@/api/axios';
 
+const { t } = useI18n();
 const stats = ref(null);
 const loading = ref(false);
 const error = ref(null);
 const { staggerRef: growthRef, applyStagger: applyGrowthStagger } = useStagger(40);
 const { staggerRef: recentRef, applyStagger: applyRecentStagger } = useStagger(40);
 
-const statusLabels = {
-  a_faire: 'To do',
-  en_cours: 'In progress',
-  en_attente: 'Waiting',
-  termine: 'Done',
-  en_retard: 'Overdue',
-  a_refaire: 'Redo',
-  annule: 'Cancelled',
-};
+const statusLabels = computed(() => ({
+  a_faire: t('statuts.a_faire'),
+  en_cours: t('statuts.en_cours'),
+  en_attente: t('statuts.en_attente'),
+  termine: t('statuts.termine'),
+  en_retard: t('statuts.en_retard'),
+  a_refaire: t('statuts.a_refaire'),
+  annule: t('statuts.annule'),
+}));
 
 const statusColors = {
   a_faire: 'bg-gray-400',

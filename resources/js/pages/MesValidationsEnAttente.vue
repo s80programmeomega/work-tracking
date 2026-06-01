@@ -21,9 +21,9 @@
                 </div>
               </div>
               <div>
-                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Mes validations en attente</h1>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ $t('mes_validations.title') }}</h1>
                 <p class="text-gray-600 dark:text-gray-400 mt-2 text-lg">
-                  Résultats que vous avez soumis et qui attendent une réponse
+                  {{ $t('mes_validations.subtitle') }}
                 </p>
               </div>
             </div>
@@ -36,11 +36,11 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
-                Statistiques
+                {{ $t('common.statistics') }}
               </button>
               <button @click="loadData" :disabled="loading"
                 class="p-3 rounded-3 border border-gray-300/80 dark:border-gray-700/80 bg-white/80 dark:bg-gray-800/80 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 disabled:opacity-50"
-                title="Actualiser">
+                :title="$t('mes_validations.refresh')">
                 <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" :class="{ 'animate-spin': loading }"
                   fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -93,7 +93,7 @@
         <div v-if="loading" class="flex justify-center items-center h-64">
           <div class="text-center">
             <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto mb-4"></div>
-            <p class="text-gray-600 dark:text-gray-400">Chargement...</p>
+            <p class="text-gray-600 dark:text-gray-400">{{ $t('common.loading') }}</p>
           </div>
         </div>
 
@@ -110,8 +110,8 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Aucun résultat en attente</h3>
-          <p class="text-gray-600 dark:text-gray-400">Tous vos résultats soumis ont été traités.</p>
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">{{ $t('mes_validations.empty_title') }}</h3>
+          <p class="text-gray-600 dark:text-gray-400">{{ $t('mes_validations.empty_desc') }}</p>
         </div>
 
         <!-- Results list -->
@@ -129,7 +129,7 @@
                   {{ resultat.tache?.activite?.nom }} &middot; {{ resultat.tache?.activite?.projet?.nom }}
                 </p>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  Soumis {{ formatDate(resultat.soumis_le) }}
+                  {{ $t('mes_validations.submitted') }} {{ formatDate(resultat.soumis_le) }}
                 </p>
               </div>
 
@@ -163,6 +163,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import MesValidationsStats from '@/components/evaluations/MesValidationsStats.vue'
 import { useStagger } from '@/composables/useAnimations'
@@ -170,6 +171,7 @@ import api from '@/api/axios'
 import { useToast } from 'vue-toastification'
 import { useRealtimeRefresh } from '@/composables/useRealtimeRefresh'
 
+const { t } = useI18n()
 const toast = useToast()
 const { staggerRef: listRef, applyStagger } = useStagger(50)
 const showStats = ref(false)
@@ -183,13 +185,13 @@ const activeTab = ref('n1')
 const tabs = computed(() => [
   {
     id: 'n1',
-    label: 'En attente N1',
+    label: t('mes_validations.tab_n1'),
     count: counts.value.en_validation_n1,
     activeClass: 'bg-warning-500',
   },
   {
     id: 'n2',
-    label: 'En attente N2',
+    label: t('mes_validations.tab_n2'),
     count: counts.value.en_validation_n2,
     activeClass: 'bg-brand-500',
   },
@@ -223,8 +225,8 @@ function formatDate(iso) {
 
 function statutLabel(statut) {
   const labels = {
-    en_validation_n1: 'En attente N1',
-    en_validation_n2: 'En attente N2',
+    en_validation_n1: t('mes_validations.tab_n1'),
+    en_validation_n2: t('mes_validations.tab_n2'),
   }
   return labels[statut] ?? statut
 }

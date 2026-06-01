@@ -4,26 +4,24 @@
     <div class="p-5 border border-gray-200 rounded-3 dark:border-gray-800 lg:p-6">
       <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <h4 class="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">Address</h4>
+          <h4 class="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">{{ $t('address_card.title') }}</h4>
 
           <div class="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
             <div class="col-span-2">
-              <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Adresse complète</p>
-              <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ user.adresse || 'Non renseigné' }}</p>
+              <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">{{ $t('address_card.field_address') }}</p>
+              <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ user.adresse || $t('address_card.not_set') }}</p>
             </div>
 
             <div>
-              <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Langue</p>
+              <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">{{ $t('address_card.field_language') }}</p>
               <p class="text-sm font-medium text-gray-800 dark:text-white/90">
-                {{ user.language === 'fr' ? 'Français' : user.language === 'en' ? 'English' : 'Non renseigné' }}
+                {{ user.language === 'fr' ? 'Français' : user.language === 'en' ? 'English' : $t('address_card.not_set') }}
               </p>
             </div>
 
             <div>
-              <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Fuseau horaire
-              </p>
-              <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ user.timezone || 'Non renseigné' }}</p>
+              <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">{{ $t('address_card.field_timezone') }}</p>
+              <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ user.timezone || $t('address_card.not_set') }}</p>
             </div>
           </div>
         </div>
@@ -47,7 +45,7 @@
               fill=""
             />
           </svg>
-          Edit
+          {{ $t('address_card.btn_edit') }}
         </button>
       </div>
     </div>
@@ -79,17 +77,18 @@
           </button>
           <div class="px-2 pr-14">
             <h4 class="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
-              Edit Address
+              {{ $t('address_card.modal_title') }}
             </h4>
             <p class="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
-              Update your details to keep your profile up-</p>
+              {{ $t('address_card.modal_subtitle') }}
+            </p>
           </div>
           <form class="flex flex-col">
             <div class="px-2 overflow-y-auto custom-scrollbar">
               <div class="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                 <div class="col-span-2">
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                    Adresse complète
+                    {{ $t('address_card.field_address') }}
                   </label>
                   <textarea
                     v-model="formData.adresse"
@@ -100,7 +99,7 @@
 
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                    Langue
+                    {{ $t('address_card.field_language') }}
                   </label>
                   <select
                     v-model="formData.language"
@@ -113,7 +112,7 @@
 
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                    Fuseau horaire
+                    {{ $t('address_card.field_timezone') }}
                   </label>
                   <input
                     type="text"
@@ -129,14 +128,14 @@
                 type="button"
                 class="flex w-full justify-center rounded-3 border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] sm:w-auto"
               >
-                Close
+                {{ $t('address_card.btn_close') }}
               </button>
               <button
                 @click="saveProfile"
                 type="button"
                 class="flex w-full justify-center rounded-3 bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 sm:w-auto"
               >
-                Save Changes
+                {{ $t('address_card.btn_save') }}
               </button>
             </div>
           </form>
@@ -148,7 +147,10 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import Modal from './Modal.vue'
+
+const { t } = useI18n()
 
 const props = defineProps({
   user: {

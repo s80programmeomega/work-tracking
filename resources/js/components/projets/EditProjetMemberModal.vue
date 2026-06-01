@@ -1,11 +1,11 @@
 <!-- resources\js\components\projets\EditProjetMemberModal.vue -->
 <template>
   <Teleport to="body">
-    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div class="bg-white dark:bg-gray-800 rounded-3 max-w-2xl w-full max-h-[90vh] overflow-hidden"
+    <div class="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
+      <div ref="dialogRef" :style="dragStyle" class="bg-white dark:bg-gray-800 rounded-3 max-w-2xl w-full max-h-[90vh] overflow-hidden"
         @click.stop>
         <!-- Header -->
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div ref="handleRef" class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 cursor-move select-none">
           <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
             Modifier les permissions de {{ membre.nom }}
           </h2>
@@ -445,6 +445,10 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue'
 import { useProjets } from '@/composables/useProjets'
+import { useDraggable } from '@/composables/useDraggable'
+
+const { dialogRef, handleRef, dragStyle, attachHandle } = useDraggable()
+onMounted(attachHandle)
 import { XIcon } from '@/icons'
 import api from '@/api/axios'
 

@@ -8,13 +8,13 @@
     <!-- Error -->
     <div v-else-if="error" class="container mx-auto px-4 py-8">
       <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-3 p-6">
-        <h3 class="text-lg font-semibold text-red-900 dark:text-red-200">Erreur de chargement</h3>
+        <h3 class="text-lg font-semibold text-red-900 dark:text-red-200">{{ $t('projets_page.load_error') }}</h3>
         <p class="mt-1 text-red-700 dark:text-red-300">{{ error }}</p>
         <button
           @click="goBack"
           class="mt-4 px-4 py-2 bg-red-600 text-white rounded-3 hover:bg-red-700 transition-colors"
         >
-          Retour
+          {{ $t('projets_page.back') }}
         </button>
       </div>
     </div>
@@ -29,7 +29,7 @@
 
     <!-- Not found fallback -->
     <div v-else class="container mx-auto px-4 py-8 text-center text-gray-600 dark:text-gray-400">
-      Projet introuvable.
+      {{ $t('projets_page.not_found') }}
     </div>
   </AdminLayout>
 </template>

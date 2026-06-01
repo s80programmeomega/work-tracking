@@ -1,7 +1,7 @@
 <!-- resources\js\pages\Activites.vue -->
 <template>
   <AdminLayout>
-    <PageBreadcrumb :pageTitle="'Gestion des Activités'" />
+    <PageBreadcrumb :pageTitle="$t('activites.page_title')" />
 
     <div class="rounded-3 border border-gray-200 bg-white p-7.5 shadow-default dark:border-gray-700 dark:bg-gray-800 xl:p-12.5">
       <ActiviteList />

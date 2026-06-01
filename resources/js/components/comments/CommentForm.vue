@@ -28,14 +28,14 @@
                 :key="index"
                 class="attachment-preview badge badge-secondary p-2"
               >
-                <i class="fas fa-paperclip mr-1"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-1"><path stroke-linecap="round" stroke-linejoin="round" d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13"/></svg>
                 {{ file.name }}
                 <button
                   type="button"
                   class="btn btn-sm btn-link text-white p-0 ml-2"
                   @click="removeAttachment(index)"
                 >
-                  <i class="fas fa-times"></i>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
                 </button>
               </div>
             </div>
@@ -46,7 +46,7 @@
             <div>
               <!-- File upload -->
               <label class="btn btn-sm btn-outline-secondary mb-0 cursor-pointer">
-                <i class="fas fa-paperclip"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13"/></svg>
                 Joindre un fichier
                 <input
                   ref="fileInput"
@@ -64,7 +64,7 @@
                 class="btn btn-sm btn-outline-secondary ml-2"
                 @click="insertMention"
               >
-                <i class="fas fa-at"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0zm0 0c0 1.657 1.007 3 2.25 3S21 13.657 21 12a9 9 0 1 0-2.636 6.364M16.5 12V8.25"/></svg>
                 Mentionner
               </button>
             </div>
@@ -83,7 +83,7 @@
                 class="btn btn-sm btn-primary"
                 :disabled="!canSubmit || loading"
               >
-                <i v-if="loading" class="fas fa-spinner fa-spin mr-1"></i>
+                <svg v-if="loading" class="animate-spin h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
                 {{ submitLabel }}
               </button>
             </div>

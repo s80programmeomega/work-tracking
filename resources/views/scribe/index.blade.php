@@ -988,7 +988,7 @@ Affiche uniquement ce que l'utilisateur peut réellement valider</a>
     </ul>
 
     <ul class="toc-footer" id="last-updated">
-        <li>Dernière mise à jour : 29 May 2026</li>
+        <li>Dernière mise à jour : 01 June 2026</li>
     </ul>
 </div>
 
@@ -5422,7 +5422,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --form "settings_array[notify_on_task_assigned]="\
     --form "settings_array[notify_on_deadline_approaching]="\
     --form "settings_array[weekly_digest]=1"\
-    --form "logo=@/tmp/php39g3told8c0r4Oqf10v" </code></pre></div>
+    --form "logo=@/tmp/phpj1idk8ohgniv61wyzgv" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -5545,7 +5545,7 @@ $response = $client-&gt;post(
             ],
             [
                 'name' =&gt; 'logo',
-                'contents' =&gt; fopen('/tmp/php39g3told8c0r4Oqf10v', 'r')
+                'contents' =&gt; fopen('/tmp/phpj1idk8ohgniv61wyzgv', 'r')
             ],
         ],
     ]
@@ -5675,7 +5675,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value=""
                data-component="body">
     <br>
-<p>Must be an image. Must not be greater than 2048 kilobytes. Example: <code>/tmp/php39g3told8c0r4Oqf10v</code></p>
+<p>Must be an image. Must not be greater than 2048 kilobytes. Example: <code>/tmp/phpj1idk8ohgniv61wyzgv</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>settings</code></b>&nbsp;&nbsp;
@@ -6347,7 +6347,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --form "settings_array[notify_on_task_assigned]="\
     --form "settings_array[notify_on_deadline_approaching]="\
     --form "settings_array[weekly_digest]=1"\
-    --form "logo=@/tmp/php87m9mned8osqdwqqSuP" </code></pre></div>
+    --form "logo=@/tmp/phppg668hqsj39b3SStqfM" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -6480,7 +6480,7 @@ $response = $client-&gt;put(
             ],
             [
                 'name' =&gt; 'logo',
-                'contents' =&gt; fopen('/tmp/php87m9mned8osqdwqqSuP', 'r')
+                'contents' =&gt; fopen('/tmp/phppg668hqsj39b3SStqfM', 'r')
             ],
         ],
     ]
@@ -6623,7 +6623,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value=""
                data-component="body">
     <br>
-<p>Must be an image. Must not be greater than 2048 kilobytes. Example: <code>/tmp/php87m9mned8osqdwqqSuP</code></p>
+<p>Must be an image. Must not be greater than 2048 kilobytes. Example: <code>/tmp/phppg668hqsj39b3SStqfM</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>is_active</code></b>&nbsp;&nbsp;
@@ -9565,7 +9565,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --data "{
     \"subscription_mode\": \"trial\",
     \"trial_duration_days\": 22,
-    \"trial_started_at\": \"2026-05-29T18:44:19\"
+    \"trial_started_at\": \"2026-06-01T00:06:16\"
 }"
 </code></pre></div>
 
@@ -9584,7 +9584,7 @@ const headers = {
 let body = {
     "subscription_mode": "trial",
     "trial_duration_days": 22,
-    "trial_started_at": "2026-05-29T18:44:19"
+    "trial_started_at": "2026-06-01T00:06:16"
 };
 
 fetch(url, {
@@ -9608,7 +9608,7 @@ $response = $client-&gt;patch(
         'json' =&gt; [
             'subscription_mode' =&gt; 'trial',
             'trial_duration_days' =&gt; 22,
-            'trial_started_at' =&gt; '2026-05-29T18:44:19',
+            'trial_started_at' =&gt; '2026-06-01T00:06:16',
         ],
     ]
 );
@@ -9749,10 +9749,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="trial_started_at"                data-endpoint="PATCHapi-workspaces--workspace_id--subscription"
-               value="2026-05-29T18:44:19"
+               value="2026-06-01T00:06:16"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-05-29T18:44:19</code></p>
+<p>Must be a valid date. Example: <code>2026-06-01T00:06:16</code></p>
         </div>
         </form>
 
@@ -11814,8 +11814,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"nom\": \"n\",
     \"code\": \"g\",
     \"description\": \"Eius et animi quos velit et.\",
-    \"date_debut\": \"2026-05-29T18:44:20\",
-    \"date_fin\": \"2052-06-21\",
+    \"date_debut\": \"2026-06-01T00:06:17\",
+    \"date_fin\": \"2052-06-24\",
     \"responsable_id\": \"architecto\",
     \"status\": \"archived\",
     \"visibility\": \"public\",
@@ -11852,8 +11852,8 @@ let body = {
     "nom": "n",
     "code": "g",
     "description": "Eius et animi quos velit et.",
-    "date_debut": "2026-05-29T18:44:20",
-    "date_fin": "2052-06-21",
+    "date_debut": "2026-06-01T00:06:17",
+    "date_fin": "2052-06-24",
     "responsable_id": "architecto",
     "status": "archived",
     "visibility": "public",
@@ -11895,8 +11895,8 @@ $response = $client-&gt;post(
             'nom' =&gt; 'n',
             'code' =&gt; 'g',
             'description' =&gt; 'Eius et animi quos velit et.',
-            'date_debut' =&gt; '2026-05-29T18:44:20',
-            'date_fin' =&gt; '2052-06-21',
+            'date_debut' =&gt; '2026-06-01T00:06:17',
+            'date_fin' =&gt; '2052-06-24',
             'responsable_id' =&gt; 'architecto',
             'status' =&gt; 'archived',
             'visibility' =&gt; 'public',
@@ -12057,10 +12057,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_debut"                data-endpoint="POSTapi-projets"
-               value="2026-05-29T18:44:20"
+               value="2026-06-01T00:06:17"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-05-29T18:44:20</code></p>
+<p>Must be a valid date. Example: <code>2026-06-01T00:06:17</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>date_fin</code></b>&nbsp;&nbsp;
@@ -12069,10 +12069,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_fin"                data-endpoint="POSTapi-projets"
-               value="2052-06-21"
+               value="2052-06-24"
                data-component="body">
     <br>
-<p>Must be a valid date. Must be a date after <code>date_debut</code>. Example: <code>2052-06-21</code></p>
+<p>Must be a valid date. Must be a date after <code>date_debut</code>. Example: <code>2052-06-24</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>responsable_id</code></b>&nbsp;&nbsp;
@@ -13143,8 +13143,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Accept: application/json" \
     --data "{
     \"nom\": \"b\",
-    \"date_debut\": \"2026-05-29T18:44:20\",
-    \"date_fin\": \"2052-06-21\"
+    \"date_debut\": \"2026-06-01T00:06:17\",
+    \"date_fin\": \"2052-06-24\"
 }"
 </code></pre></div>
 
@@ -13162,8 +13162,8 @@ const headers = {
 
 let body = {
     "nom": "b",
-    "date_debut": "2026-05-29T18:44:20",
-    "date_fin": "2052-06-21"
+    "date_debut": "2026-06-01T00:06:17",
+    "date_fin": "2052-06-24"
 };
 
 fetch(url, {
@@ -13186,8 +13186,8 @@ $response = $client-&gt;post(
         ],
         'json' =&gt; [
             'nom' =&gt; 'b',
-            'date_debut' =&gt; '2026-05-29T18:44:20',
-            'date_fin' =&gt; '2052-06-21',
+            'date_debut' =&gt; '2026-06-01T00:06:17',
+            'date_fin' =&gt; '2052-06-24',
         ],
     ]
 );
@@ -13314,10 +13314,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_debut"                data-endpoint="POSTapi-projets--projet_id--clone"
-               value="2026-05-29T18:44:20"
+               value="2026-06-01T00:06:17"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-05-29T18:44:20</code></p>
+<p>Must be a valid date. Example: <code>2026-06-01T00:06:17</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>date_fin</code></b>&nbsp;&nbsp;
@@ -13326,10 +13326,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_fin"                data-endpoint="POSTapi-projets--projet_id--clone"
-               value="2052-06-21"
+               value="2052-06-24"
                data-component="body">
     <br>
-<p>Must be a valid date. Must be a date after <code>date_debut</code>. Example: <code>2052-06-21</code></p>
+<p>Must be a valid date. Must be a date after <code>date_debut</code>. Example: <code>2052-06-24</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>responsable_id</code></b>&nbsp;&nbsp;
@@ -15962,8 +15962,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"start_date\": \"2026-05-29T18:44:20\",
-    \"end_date\": \"2052-06-21\"
+    \"start_date\": \"2026-06-01T00:06:18\",
+    \"end_date\": \"2052-06-24\"
 }"
 </code></pre></div>
 
@@ -15980,8 +15980,8 @@ const headers = {
 };
 
 let body = {
-    "start_date": "2026-05-29T18:44:20",
-    "end_date": "2052-06-21"
+    "start_date": "2026-06-01T00:06:18",
+    "end_date": "2052-06-24"
 };
 
 fetch(url, {
@@ -16003,8 +16003,8 @@ $response = $client-&gt;get(
             'Accept' =&gt; 'application/json',
         ],
         'json' =&gt; [
-            'start_date' =&gt; '2026-05-29T18:44:20',
-            'end_date' =&gt; '2052-06-21',
+            'start_date' =&gt; '2026-06-01T00:06:18',
+            'end_date' =&gt; '2052-06-24',
         ],
     ]
 );
@@ -16136,10 +16136,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="start_date"                data-endpoint="GETapi-projets--projet_id--performance-report"
-               value="2026-05-29T18:44:20"
+               value="2026-06-01T00:06:18"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-05-29T18:44:20</code></p>
+<p>Must be a valid date. Example: <code>2026-06-01T00:06:18</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>end_date</code></b>&nbsp;&nbsp;
@@ -16148,10 +16148,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="end_date"                data-endpoint="GETapi-projets--projet_id--performance-report"
-               value="2052-06-21"
+               value="2052-06-24"
                data-component="body">
     <br>
-<p>Must be a valid date. Must be a date after or equal to <code>start_date</code>. Example: <code>2052-06-21</code></p>
+<p>Must be a valid date. Must be a date after or equal to <code>start_date</code>. Example: <code>2052-06-24</code></p>
         </div>
         </form>
 
@@ -17874,8 +17874,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"nom\": \"n\",
     \"description\": \"Eius et animi quos velit et.\",
     \"responsable_id\": \"architecto\",
-    \"date_debut\": \"2026-05-29T18:44:20\",
-    \"date_fin\": \"2052-06-21\",
+    \"date_debut\": \"2026-06-01T00:06:18\",
+    \"date_fin\": \"2052-06-24\",
     \"status\": \"archived\",
     \"progression\": 7,
     \"couleur\": \"#fEEeDb\",
@@ -17911,8 +17911,8 @@ let body = {
     "nom": "n",
     "description": "Eius et animi quos velit et.",
     "responsable_id": "architecto",
-    "date_debut": "2026-05-29T18:44:20",
-    "date_fin": "2052-06-21",
+    "date_debut": "2026-06-01T00:06:18",
+    "date_fin": "2052-06-24",
     "status": "archived",
     "progression": 7,
     "couleur": "#fEEeDb",
@@ -17953,8 +17953,8 @@ $response = $client-&gt;post(
             'nom' =&gt; 'n',
             'description' =&gt; 'Eius et animi quos velit et.',
             'responsable_id' =&gt; 'architecto',
-            'date_debut' =&gt; '2026-05-29T18:44:20',
-            'date_fin' =&gt; '2052-06-21',
+            'date_debut' =&gt; '2026-06-01T00:06:18',
+            'date_fin' =&gt; '2052-06-24',
             'status' =&gt; 'archived',
             'progression' =&gt; 7,
             'couleur' =&gt; '#fEEeDb',
@@ -18110,10 +18110,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_debut"                data-endpoint="POSTapi-activites"
-               value="2026-05-29T18:44:20"
+               value="2026-06-01T00:06:18"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-05-29T18:44:20</code></p>
+<p>Must be a valid date. Example: <code>2026-06-01T00:06:18</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>date_fin</code></b>&nbsp;&nbsp;
@@ -18122,10 +18122,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_fin"                data-endpoint="POSTapi-activites"
-               value="2052-06-21"
+               value="2052-06-24"
                data-component="body">
     <br>
-<p>Must be a valid date. Must be a date after or equal to <code>date_debut</code>. Example: <code>2052-06-21</code></p>
+<p>Must be a valid date. Must be a date after or equal to <code>date_debut</code>. Example: <code>2052-06-24</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>status</code></b>&nbsp;&nbsp;
@@ -18543,8 +18543,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --data "{
     \"nom\": \"b\",
     \"description\": \"Eius et animi quos velit et.\",
-    \"date_debut\": \"2026-05-29T18:44:20\",
-    \"date_fin\": \"2052-06-21\",
+    \"date_debut\": \"2026-06-01T00:06:18\",
+    \"date_fin\": \"2052-06-24\",
     \"status\": \"archived\",
     \"progression\": 7,
     \"couleur\": \"#fEEeDb\"
@@ -18566,8 +18566,8 @@ const headers = {
 let body = {
     "nom": "b",
     "description": "Eius et animi quos velit et.",
-    "date_debut": "2026-05-29T18:44:20",
-    "date_fin": "2052-06-21",
+    "date_debut": "2026-06-01T00:06:18",
+    "date_fin": "2052-06-24",
     "status": "archived",
     "progression": 7,
     "couleur": "#fEEeDb"
@@ -18594,8 +18594,8 @@ $response = $client-&gt;put(
         'json' =&gt; [
             'nom' =&gt; 'b',
             'description' =&gt; 'Eius et animi quos velit et.',
-            'date_debut' =&gt; '2026-05-29T18:44:20',
-            'date_fin' =&gt; '2052-06-21',
+            'date_debut' =&gt; '2026-06-01T00:06:18',
+            'date_fin' =&gt; '2052-06-24',
             'status' =&gt; 'archived',
             'progression' =&gt; 7,
             'couleur' =&gt; '#fEEeDb',
@@ -18749,10 +18749,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_debut"                data-endpoint="PUTapi-activites--activite-"
-               value="2026-05-29T18:44:20"
+               value="2026-06-01T00:06:18"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-05-29T18:44:20</code></p>
+<p>Must be a valid date. Example: <code>2026-06-01T00:06:18</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>date_fin</code></b>&nbsp;&nbsp;
@@ -18761,10 +18761,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_fin"                data-endpoint="PUTapi-activites--activite-"
-               value="2052-06-21"
+               value="2052-06-24"
                data-component="body">
     <br>
-<p>Must be a valid date. Must be a date after or equal to <code>date_debut</code>. Example: <code>2052-06-21</code></p>
+<p>Must be a valid date. Must be a date after or equal to <code>date_debut</code>. Example: <code>2052-06-24</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>status</code></b>&nbsp;&nbsp;
@@ -21577,9 +21577,9 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --form "indicateurs_resultats=architecto"\
     --form "statut=a_faire"\
     --form "priorite=elevee"\
-    --form "echeance=2026-05-29"\
-    --form "date_debut=2026-05-29"\
-    --form "date_fin_reelle=2026-05-29"\
+    --form "echeance=2026-06-01"\
+    --form "date_debut=2026-06-01"\
+    --form "date_fin_reelle=2026-06-01"\
     --form "estimated_hours=16"\
     --form "actual_hours=17"\
     --form "taux_realisation=15"\
@@ -21589,8 +21589,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --form "validation_n1_required=1"\
     --form "validation_n2_required="\
     --form "external_links=["architecto","architecto"]"\
-    --form "uploaded_files[]=@/tmp/php5mqui0859ocj1aKcJoU" \
-    --form "cover_image=@/tmp/php0clk0fkir5j1b80LGxi" </code></pre></div>
+    --form "uploaded_files[]=@/tmp/phprjc76gc3umpu5yB5dyj" \
+    --form "cover_image=@/tmp/phps7j588mtr4ib4Qt6kv4" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -21612,9 +21612,9 @@ body.append('objectif', 'architecto');
 body.append('indicateurs_resultats', 'architecto');
 body.append('statut', 'a_faire');
 body.append('priorite', 'elevee');
-body.append('echeance', '2026-05-29');
-body.append('date_debut', '2026-05-29');
-body.append('date_fin_reelle', '2026-05-29');
+body.append('echeance', '2026-06-01');
+body.append('date_debut', '2026-06-01');
+body.append('date_fin_reelle', '2026-06-01');
 body.append('estimated_hours', '16');
 body.append('actual_hours', '17');
 body.append('taux_realisation', '15');
@@ -21676,15 +21676,15 @@ $response = $client-&gt;post(
             ],
             [
                 'name' =&gt; 'echeance',
-                'contents' =&gt; '2026-05-29'
+                'contents' =&gt; '2026-06-01'
             ],
             [
                 'name' =&gt; 'date_debut',
-                'contents' =&gt; '2026-05-29'
+                'contents' =&gt; '2026-06-01'
             ],
             [
                 'name' =&gt; 'date_fin_reelle',
-                'contents' =&gt; '2026-05-29'
+                'contents' =&gt; '2026-06-01'
             ],
             [
                 'name' =&gt; 'estimated_hours',
@@ -21724,11 +21724,11 @@ $response = $client-&gt;post(
             ],
             [
                 'name' =&gt; 'uploaded_files[]',
-                'contents' =&gt; fopen('/tmp/php5mqui0859ocj1aKcJoU', 'r')
+                'contents' =&gt; fopen('/tmp/phprjc76gc3umpu5yB5dyj', 'r')
             ],
             [
                 'name' =&gt; 'cover_image',
-                'contents' =&gt; fopen('/tmp/php0clk0fkir5j1b80LGxi', 'r')
+                'contents' =&gt; fopen('/tmp/phps7j588mtr4ib4Qt6kv4', 'r')
             ],
         ],
     ]
@@ -21931,10 +21931,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="echeance"                data-endpoint="POSTapi-taches"
-               value="2026-05-29"
+               value="2026-06-01"
                data-component="body">
     <br>
-<p>✅ Dates avec format flexible. Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-05-29</code></p>
+<p>✅ Dates avec format flexible. Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-01</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>date_debut</code></b>&nbsp;&nbsp;
@@ -21943,10 +21943,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_debut"                data-endpoint="POSTapi-taches"
-               value="2026-05-29"
+               value="2026-06-01"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-05-29</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-01</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>date_fin_reelle</code></b>&nbsp;&nbsp;
@@ -21955,10 +21955,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_fin_reelle"                data-endpoint="POSTapi-taches"
-               value="2026-05-29"
+               value="2026-06-01"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-05-29</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-01</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>estimated_hours</code></b>&nbsp;&nbsp;
@@ -22102,7 +22102,7 @@ Must be one of:
                value=""
                data-component="body">
     <br>
-<p>✅ CORRECTION 2: Validation de l'image de couverture. Must be a file. Must be an image. Must not be greater than 2048 kilobytes. Example: <code>/tmp/php0clk0fkir5j1b80LGxi</code></p>
+<p>✅ CORRECTION 2: Validation de l'image de couverture. Must be a file. Must be an image. Must not be greater than 2048 kilobytes. Example: <code>/tmp/phps7j588mtr4ib4Qt6kv4</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>external_links</code></b>&nbsp;&nbsp;
@@ -23519,7 +23519,7 @@ Must be one of:
     --form "solutions_envisagees=architecto"\
     --form "observations=architecto"\
     --form "documents_to_delete[]=16"\
-    --form "documents[]=@/tmp/phpu30bp9bdoj8q6u7RNUS" </code></pre></div>
+    --form "documents[]=@/tmp/phpqetnl2jd8nu8dYS1BGO" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -23592,7 +23592,7 @@ $response = $client-&gt;post(
             ],
             [
                 'name' =&gt; 'documents[]',
-                'contents' =&gt; fopen('/tmp/phpu30bp9bdoj8q6u7RNUS', 'r')
+                'contents' =&gt; fopen('/tmp/phpqetnl2jd8nu8dYS1BGO', 'r')
             ],
         ],
     ]
@@ -24506,9 +24506,9 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --form "indicateurs_resultats=architecto"\
     --form "statut=en_cours"\
     --form "priorite=elevee"\
-    --form "echeance=2026-05-29"\
-    --form "date_debut=2026-05-29"\
-    --form "date_fin_reelle=2026-05-29"\
+    --form "echeance=2026-06-01"\
+    --form "date_debut=2026-06-01"\
+    --form "date_fin_reelle=2026-06-01"\
     --form "taux_realisation=16"\
     --form "estimated_hours=17"\
     --form "actual_hours=15"\
@@ -24518,8 +24518,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --form "validation_n1_required=1"\
     --form "validation_n2_required="\
     --form "external_links=["architecto","architecto"]"\
-    --form "uploaded_files[]=@/tmp/phpb0nt3r7lil696VfqO2g" \
-    --form "cover_image=@/tmp/php93vkmti1lnra738Jghh" </code></pre></div>
+    --form "uploaded_files[]=@/tmp/phpqcpfdsbv3lsq6SMyfyX" \
+    --form "cover_image=@/tmp/phpi4keuf2shkpvbS3r6QO" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -24540,9 +24540,9 @@ body.append('objectif', 'architecto');
 body.append('indicateurs_resultats', 'architecto');
 body.append('statut', 'en_cours');
 body.append('priorite', 'elevee');
-body.append('echeance', '2026-05-29');
-body.append('date_debut', '2026-05-29');
-body.append('date_fin_reelle', '2026-05-29');
+body.append('echeance', '2026-06-01');
+body.append('date_debut', '2026-06-01');
+body.append('date_fin_reelle', '2026-06-01');
 body.append('taux_realisation', '16');
 body.append('estimated_hours', '17');
 body.append('actual_hours', '15');
@@ -24600,15 +24600,15 @@ $response = $client-&gt;put(
             ],
             [
                 'name' =&gt; 'echeance',
-                'contents' =&gt; '2026-05-29'
+                'contents' =&gt; '2026-06-01'
             ],
             [
                 'name' =&gt; 'date_debut',
-                'contents' =&gt; '2026-05-29'
+                'contents' =&gt; '2026-06-01'
             ],
             [
                 'name' =&gt; 'date_fin_reelle',
-                'contents' =&gt; '2026-05-29'
+                'contents' =&gt; '2026-06-01'
             ],
             [
                 'name' =&gt; 'taux_realisation',
@@ -24648,11 +24648,11 @@ $response = $client-&gt;put(
             ],
             [
                 'name' =&gt; 'uploaded_files[]',
-                'contents' =&gt; fopen('/tmp/phpb0nt3r7lil696VfqO2g', 'r')
+                'contents' =&gt; fopen('/tmp/phpqcpfdsbv3lsq6SMyfyX', 'r')
             ],
             [
                 'name' =&gt; 'cover_image',
-                'contents' =&gt; fopen('/tmp/php93vkmti1lnra738Jghh', 'r')
+                'contents' =&gt; fopen('/tmp/phpi4keuf2shkpvbS3r6QO', 'r')
             ],
         ],
     ]
@@ -24844,10 +24844,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="echeance"                data-endpoint="PUTapi-taches--tache_id-"
-               value="2026-05-29"
+               value="2026-06-01"
                data-component="body">
     <br>
-<p>Dates. Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-05-29</code></p>
+<p>Dates. Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-01</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>date_debut</code></b>&nbsp;&nbsp;
@@ -24856,10 +24856,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_debut"                data-endpoint="PUTapi-taches--tache_id-"
-               value="2026-05-29"
+               value="2026-06-01"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-05-29</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-01</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>date_fin_reelle</code></b>&nbsp;&nbsp;
@@ -24868,10 +24868,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_fin_reelle"                data-endpoint="PUTapi-taches--tache_id-"
-               value="2026-05-29"
+               value="2026-06-01"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-05-29</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-01</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>taux_realisation</code></b>&nbsp;&nbsp;
@@ -25015,7 +25015,7 @@ Must be one of:
                value=""
                data-component="body">
     <br>
-<p>✅ CORRECTION: Même validation de l'image. Must be a file. Must be an image. Must not be greater than 2048 kilobytes. Example: <code>/tmp/php93vkmti1lnra738Jghh</code></p>
+<p>✅ CORRECTION: Même validation de l'image. Must be a file. Must be an image. Must not be greater than 2048 kilobytes. Example: <code>/tmp/phpi4keuf2shkpvbS3r6QO</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>external_links</code></b>&nbsp;&nbsp;
@@ -25095,9 +25095,9 @@ Must be one of:
     --form "indicateurs_resultats=architecto"\
     --form "statut=en_cours"\
     --form "priorite=elevee"\
-    --form "echeance=2026-05-29"\
-    --form "date_debut=2026-05-29"\
-    --form "date_fin_reelle=2026-05-29"\
+    --form "echeance=2026-06-01"\
+    --form "date_debut=2026-06-01"\
+    --form "date_fin_reelle=2026-06-01"\
     --form "taux_realisation=16"\
     --form "estimated_hours=17"\
     --form "actual_hours=15"\
@@ -25107,8 +25107,8 @@ Must be one of:
     --form "validation_n1_required=1"\
     --form "validation_n2_required="\
     --form "external_links=["architecto","architecto"]"\
-    --form "uploaded_files[]=@/tmp/php89rcbhj3c0n3csbld40" \
-    --form "cover_image=@/tmp/phpo8hgpap2k9ri7D4VoLl" </code></pre></div>
+    --form "uploaded_files[]=@/tmp/php85bjlsnrnu3v0l8eb2e" \
+    --form "cover_image=@/tmp/phprge3eqegt14lf113K8K" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -25129,9 +25129,9 @@ body.append('objectif', 'architecto');
 body.append('indicateurs_resultats', 'architecto');
 body.append('statut', 'en_cours');
 body.append('priorite', 'elevee');
-body.append('echeance', '2026-05-29');
-body.append('date_debut', '2026-05-29');
-body.append('date_fin_reelle', '2026-05-29');
+body.append('echeance', '2026-06-01');
+body.append('date_debut', '2026-06-01');
+body.append('date_fin_reelle', '2026-06-01');
 body.append('taux_realisation', '16');
 body.append('estimated_hours', '17');
 body.append('actual_hours', '15');
@@ -25189,15 +25189,15 @@ $response = $client-&gt;patch(
             ],
             [
                 'name' =&gt; 'echeance',
-                'contents' =&gt; '2026-05-29'
+                'contents' =&gt; '2026-06-01'
             ],
             [
                 'name' =&gt; 'date_debut',
-                'contents' =&gt; '2026-05-29'
+                'contents' =&gt; '2026-06-01'
             ],
             [
                 'name' =&gt; 'date_fin_reelle',
-                'contents' =&gt; '2026-05-29'
+                'contents' =&gt; '2026-06-01'
             ],
             [
                 'name' =&gt; 'taux_realisation',
@@ -25237,11 +25237,11 @@ $response = $client-&gt;patch(
             ],
             [
                 'name' =&gt; 'uploaded_files[]',
-                'contents' =&gt; fopen('/tmp/php89rcbhj3c0n3csbld40', 'r')
+                'contents' =&gt; fopen('/tmp/php85bjlsnrnu3v0l8eb2e', 'r')
             ],
             [
                 'name' =&gt; 'cover_image',
-                'contents' =&gt; fopen('/tmp/phpo8hgpap2k9ri7D4VoLl', 'r')
+                'contents' =&gt; fopen('/tmp/phprge3eqegt14lf113K8K', 'r')
             ],
         ],
     ]
@@ -25433,10 +25433,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="echeance"                data-endpoint="PATCHapi-taches--tache_id-"
-               value="2026-05-29"
+               value="2026-06-01"
                data-component="body">
     <br>
-<p>Dates. Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-05-29</code></p>
+<p>Dates. Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-01</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>date_debut</code></b>&nbsp;&nbsp;
@@ -25445,10 +25445,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_debut"                data-endpoint="PATCHapi-taches--tache_id-"
-               value="2026-05-29"
+               value="2026-06-01"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-05-29</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-01</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>date_fin_reelle</code></b>&nbsp;&nbsp;
@@ -25457,10 +25457,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_fin_reelle"                data-endpoint="PATCHapi-taches--tache_id-"
-               value="2026-05-29"
+               value="2026-06-01"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-05-29</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-01</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>taux_realisation</code></b>&nbsp;&nbsp;
@@ -25604,7 +25604,7 @@ Must be one of:
                value=""
                data-component="body">
     <br>
-<p>✅ CORRECTION: Même validation de l'image. Must be a file. Must be an image. Must not be greater than 2048 kilobytes. Example: <code>/tmp/phpo8hgpap2k9ri7D4VoLl</code></p>
+<p>✅ CORRECTION: Même validation de l'image. Must be a file. Must be an image. Must not be greater than 2048 kilobytes. Example: <code>/tmp/phprge3eqegt14lf113K8K</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>external_links</code></b>&nbsp;&nbsp;
@@ -27115,7 +27115,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --data "{
     \"titre\": \"b\",
     \"description\": \"Eius et animi quos velit et.\",
-    \"date_echeance\": \"2026-05-29T18:44:20\",
+    \"date_echeance\": \"2026-06-01T00:06:20\",
     \"poids\": 1,
     \"ordre\": 42,
     \"validation_n0_required\": false,
@@ -27139,7 +27139,7 @@ const headers = {
 let body = {
     "titre": "b",
     "description": "Eius et animi quos velit et.",
-    "date_echeance": "2026-05-29T18:44:20",
+    "date_echeance": "2026-06-01T00:06:20",
     "poids": 1,
     "ordre": 42,
     "validation_n0_required": false,
@@ -27168,7 +27168,7 @@ $response = $client-&gt;post(
         'json' =&gt; [
             'titre' =&gt; 'b',
             'description' =&gt; 'Eius et animi quos velit et.',
-            'date_echeance' =&gt; '2026-05-29T18:44:20',
+            'date_echeance' =&gt; '2026-06-01T00:06:20',
             'poids' =&gt; 1,
             'ordre' =&gt; 42,
             'validation_n0_required' =&gt; false,
@@ -27324,10 +27324,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_echeance"                data-endpoint="POSTapi-taches--tache_id--sous-taches"
-               value="2026-05-29T18:44:20"
+               value="2026-06-01T00:06:20"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-05-29T18:44:20</code></p>
+<p>Must be a valid date. Example: <code>2026-06-01T00:06:20</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>poids</code></b>&nbsp;&nbsp;
@@ -27439,7 +27439,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
     --header "Content-Type: multipart/form-data" \
     --header "Accept: application/json" \
-    --form "files[]=@/tmp/phpap9i74kteb7s9WRjOCy" </code></pre></div>
+    --form "files[]=@/tmp/php0si2cbpedvt43m2y3a9" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -27477,7 +27477,7 @@ $response = $client-&gt;post(
         'multipart' =&gt; [
             [
                 'name' =&gt; 'files[]',
-                'contents' =&gt; fopen('/tmp/phpap9i74kteb7s9WRjOCy', 'r')
+                'contents' =&gt; fopen('/tmp/php0si2cbpedvt43m2y3a9', 'r')
             ],
         ],
     ]
@@ -28514,7 +28514,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"description\": \"Eius et animi quos velit et.\",
     \"statut\": \"termine\",
     \"progression\": 1,
-    \"date_echeance\": \"2026-05-29T18:44:20\",
+    \"date_echeance\": \"2026-06-01T00:06:20\",
     \"poids\": 5,
     \"ordre\": 9,
     \"validation_n0_required\": false,
@@ -28540,7 +28540,7 @@ let body = {
     "description": "Eius et animi quos velit et.",
     "statut": "termine",
     "progression": 1,
-    "date_echeance": "2026-05-29T18:44:20",
+    "date_echeance": "2026-06-01T00:06:20",
     "poids": 5,
     "ordre": 9,
     "validation_n0_required": false,
@@ -28571,7 +28571,7 @@ $response = $client-&gt;put(
             'description' =&gt; 'Eius et animi quos velit et.',
             'statut' =&gt; 'termine',
             'progression' =&gt; 1,
-            'date_echeance' =&gt; '2026-05-29T18:44:20',
+            'date_echeance' =&gt; '2026-06-01T00:06:20',
             'poids' =&gt; 5,
             'ordre' =&gt; 9,
             'validation_n0_required' =&gt; false,
@@ -28753,10 +28753,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_echeance"                data-endpoint="PUTapi-sous-taches--sousTache_id-"
-               value="2026-05-29T18:44:20"
+               value="2026-06-01T00:06:20"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-05-29T18:44:20</code></p>
+<p>Must be a valid date. Example: <code>2026-06-01T00:06:20</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>poids</code></b>&nbsp;&nbsp;
@@ -29601,7 +29601,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --form "difficultes_rencontrees=architecto"\
     --form "solutions_envisagees=architecto"\
     --form "observations=architecto"\
-    --form "documents[]=@/tmp/php58orf0s9jo8l80VvyOJ" </code></pre></div>
+    --form "documents[]=@/tmp/phpcfl79j89tla66znF44j" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -29669,7 +29669,7 @@ $response = $client-&gt;post(
             ],
             [
                 'name' =&gt; 'documents[]',
-                'contents' =&gt; fopen('/tmp/php58orf0s9jo8l80VvyOJ', 'r')
+                'contents' =&gt; fopen('/tmp/phpcfl79j89tla66znF44j', 'r')
             ],
         ],
     ]
@@ -29890,7 +29890,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --form "difficultes_rencontrees=architecto"\
     --form "solutions_envisagees=architecto"\
     --form "observations=architecto"\
-    --form "documents[]=@/tmp/phpd7rgknanlv9ma5hPH8k" </code></pre></div>
+    --form "documents[]=@/tmp/phpv7k7i3ra7v243RiBdfX" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -29958,7 +29958,7 @@ $response = $client-&gt;put(
             ],
             [
                 'name' =&gt; 'documents[]',
-                'contents' =&gt; fopen('/tmp/phpd7rgknanlv9ma5hPH8k', 'r')
+                'contents' =&gt; fopen('/tmp/phpv7k7i3ra7v243RiBdfX', 'r')
             ],
         ],
     ]
@@ -34522,8 +34522,8 @@ adds the target's identity for the UI header.</p>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"start\": \"2026-05-29\",
-    \"end\": \"2052-06-21\"
+    \"start\": \"2026-06-01\",
+    \"end\": \"2052-06-24\"
 }"
 </code></pre></div>
 
@@ -34540,8 +34540,8 @@ const headers = {
 };
 
 let body = {
-    "start": "2026-05-29",
-    "end": "2052-06-21"
+    "start": "2026-06-01",
+    "end": "2052-06-24"
 };
 
 fetch(url, {
@@ -34563,8 +34563,8 @@ $response = $client-&gt;get(
             'Accept' =&gt; 'application/json',
         ],
         'json' =&gt; [
-            'start' =&gt; '2026-05-29',
-            'end' =&gt; '2052-06-21',
+            'start' =&gt; '2026-06-01',
+            'end' =&gt; '2052-06-24',
         ],
     ]
 );
@@ -34696,10 +34696,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="start"                data-endpoint="GETapi-evaluations-personnel--user_id--score"
-               value="2026-05-29"
+               value="2026-06-01"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-05-29</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-01</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>end</code></b>&nbsp;&nbsp;
@@ -34708,10 +34708,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="end"                data-endpoint="GETapi-evaluations-personnel--user_id--score"
-               value="2052-06-21"
+               value="2052-06-24"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start</code>. Example: <code>2052-06-21</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start</code>. Example: <code>2052-06-24</code></p>
         </div>
         </form>
 
@@ -34744,8 +34744,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Accept: application/json" \
     --data "{
     \"section\": \"directed_tasks\",
-    \"start\": \"2026-05-29\",
-    \"end\": \"2052-06-21\",
+    \"start\": \"2026-06-01\",
+    \"end\": \"2052-06-24\",
     \"statut\": \"architecto\",
     \"projet_id\": 16,
     \"activite_id\": 16,
@@ -34767,8 +34767,8 @@ const headers = {
 
 let body = {
     "section": "directed_tasks",
-    "start": "2026-05-29",
-    "end": "2052-06-21",
+    "start": "2026-06-01",
+    "end": "2052-06-24",
     "statut": "architecto",
     "projet_id": 16,
     "activite_id": 16,
@@ -34795,8 +34795,8 @@ $response = $client-&gt;get(
         ],
         'json' =&gt; [
             'section' =&gt; 'directed_tasks',
-            'start' =&gt; '2026-05-29',
-            'end' =&gt; '2052-06-21',
+            'start' =&gt; '2026-06-01',
+            'end' =&gt; '2052-06-24',
             'statut' =&gt; 'architecto',
             'projet_id' =&gt; 16,
             'activite_id' =&gt; 16,
@@ -34946,10 +34946,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="start"                data-endpoint="GETapi-evaluations-personnel--user_id--historique"
-               value="2026-05-29"
+               value="2026-06-01"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-05-29</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-01</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>end</code></b>&nbsp;&nbsp;
@@ -34958,10 +34958,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="end"                data-endpoint="GETapi-evaluations-personnel--user_id--historique"
-               value="2052-06-21"
+               value="2052-06-24"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start</code>. Example: <code>2052-06-21</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start</code>. Example: <code>2052-06-24</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>statut</code></b>&nbsp;&nbsp;
@@ -35033,8 +35033,8 @@ Query params: start, end (Y-m-d)</p>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"start\": \"2026-05-29\",
-    \"end\": \"2052-06-21\"
+    \"start\": \"2026-06-01\",
+    \"end\": \"2052-06-24\"
 }"
 </code></pre></div>
 
@@ -35051,8 +35051,8 @@ const headers = {
 };
 
 let body = {
-    "start": "2026-05-29",
-    "end": "2052-06-21"
+    "start": "2026-06-01",
+    "end": "2052-06-24"
 };
 
 fetch(url, {
@@ -35074,8 +35074,8 @@ $response = $client-&gt;get(
             'Accept' =&gt; 'application/json',
         ],
         'json' =&gt; [
-            'start' =&gt; '2026-05-29',
-            'end' =&gt; '2052-06-21',
+            'start' =&gt; '2026-06-01',
+            'end' =&gt; '2052-06-24',
         ],
     ]
 );
@@ -35207,10 +35207,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="start"                data-endpoint="GETapi-evaluations-personnel--user_id--export-pdf"
-               value="2026-05-29"
+               value="2026-06-01"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-05-29</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-01</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>end</code></b>&nbsp;&nbsp;
@@ -35219,10 +35219,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="end"                data-endpoint="GETapi-evaluations-personnel--user_id--export-pdf"
-               value="2052-06-21"
+               value="2052-06-24"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start</code>. Example: <code>2052-06-21</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start</code>. Example: <code>2052-06-24</code></p>
         </div>
         </form>
 
@@ -40024,7 +40024,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"can_edit\": false,
     \"can_delete\": true,
     \"can_share\": true,
-    \"expires_at\": \"2022-06-23\"
+    \"expires_at\": \"2022-06-25\"
 }"
 </code></pre></div>
 
@@ -40047,7 +40047,7 @@ let body = {
     "can_edit": false,
     "can_delete": true,
     "can_share": true,
-    "expires_at": "2022-06-23"
+    "expires_at": "2022-06-25"
 };
 
 fetch(url, {
@@ -40075,7 +40075,7 @@ $response = $client-&gt;post(
             'can_edit' =&gt; false,
             'can_delete' =&gt; true,
             'can_share' =&gt; true,
-            'expires_at' =&gt; '2022-06-23',
+            'expires_at' =&gt; '2022-06-25',
         ],
     ]
 );
@@ -40312,10 +40312,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="expires_at"                data-endpoint="POSTapi-documents--document_id--permissions-grant"
-               value="2022-06-23"
+               value="2022-06-25"
                data-component="body">
     <br>
-<p>Must be a valid date. Must be a date after <code>today</code>. Must be a date before <code>+5 years</code>. Example: <code>2022-06-23</code></p>
+<p>Must be a valid date. Must be a date after <code>today</code>. Must be a date before <code>+5 years</code>. Example: <code>2022-06-25</code></p>
         </div>
         </form>
 
@@ -40525,7 +40525,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
         \"can_delete\": true,
         \"can_share\": false
     },
-    \"expires_at\": \"2052-06-22\"
+    \"expires_at\": \"2052-06-24\"
 }"
 </code></pre></div>
 
@@ -40549,7 +40549,7 @@ let body = {
         "can_delete": true,
         "can_share": false
     },
-    "expires_at": "2052-06-22"
+    "expires_at": "2052-06-24"
 };
 
 fetch(url, {
@@ -40572,7 +40572,7 @@ $response = $client-&gt;post(
         ],
         'json' =&gt; [
             'permissions' =&gt; ['can_view' =&gt; true, 'can_download' =&gt; true, 'can_edit' =&gt; false, 'can_delete' =&gt; true, 'can_share' =&gt; false],
-            'expires_at' =&gt; '2052-06-22',
+            'expires_at' =&gt; '2052-06-24',
         ],
     ]
 );
@@ -40823,10 +40823,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="expires_at"                data-endpoint="POSTapi-documents--document_id--share"
-               value="2052-06-22"
+               value="2052-06-24"
                data-component="body">
     <br>
-<p>Must be a valid date. Must be a date after <code>now</code>. Example: <code>2052-06-22</code></p>
+<p>Must be a valid date. Must be a date after <code>now</code>. Example: <code>2052-06-24</code></p>
         </div>
         </form>
 
@@ -41574,7 +41574,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --form "social_links[linkedin]=http://www.baumbach.org/et-modi-ipsum-nostrum-omnis-autem-et-consequatur"\
     --form "social_links[twitter]=http://leffler.com/"\
     --form "social_links[github]=http://vonrueden.com/"\
-    --form "avatar=@/tmp/php3lsc52oah8jf9Kic9tL" </code></pre></div>
+    --form "avatar=@/tmp/phpkv4d6d98b3c85ya1w0s" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -41672,7 +41672,7 @@ $response = $client-&gt;put(
             ],
             [
                 'name' =&gt; 'avatar',
-                'contents' =&gt; fopen('/tmp/php3lsc52oah8jf9Kic9tL', 'r')
+                'contents' =&gt; fopen('/tmp/phpkv4d6d98b3c85ya1w0s', 'r')
             ],
         ],
     ]
@@ -41888,7 +41888,7 @@ Must be one of:
                value=""
                data-component="body">
     <br>
-<p>Must be an image. Must not be greater than 5120 kilobytes. Example: <code>/tmp/php3lsc52oah8jf9Kic9tL</code></p>
+<p>Must be an image. Must not be greater than 5120 kilobytes. Example: <code>/tmp/phpkv4d6d98b3c85ya1w0s</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
         <details>
@@ -41970,7 +41970,7 @@ Must be one of:
     --form "social_links[linkedin]=http://www.baumbach.org/et-modi-ipsum-nostrum-omnis-autem-et-consequatur"\
     --form "social_links[twitter]=http://leffler.com/"\
     --form "social_links[github]=http://vonrueden.com/"\
-    --form "avatar=@/tmp/phpq4498560v4mb5kGIDyu" </code></pre></div>
+    --form "avatar=@/tmp/php243jsh8grp3cejgMwUw" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -42068,7 +42068,7 @@ $response = $client-&gt;post(
             ],
             [
                 'name' =&gt; 'avatar',
-                'contents' =&gt; fopen('/tmp/phpq4498560v4mb5kGIDyu', 'r')
+                'contents' =&gt; fopen('/tmp/php243jsh8grp3cejgMwUw', 'r')
             ],
         ],
     ]
@@ -42284,7 +42284,7 @@ Must be one of:
                value=""
                data-component="body">
     <br>
-<p>Must be an image. Must not be greater than 5120 kilobytes. Example: <code>/tmp/phpq4498560v4mb5kGIDyu</code></p>
+<p>Must be an image. Must not be greater than 5120 kilobytes. Example: <code>/tmp/php243jsh8grp3cejgMwUw</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
         <details>
@@ -42704,8 +42704,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"nom\": \"w\",
-    \"email\": \"rau.brant@example.net\",
+    \"nom\": \"b\",
+    \"email\": \"zbailey@example.net\",
     \"password\": \"architecto\",
     \"role\": \"responsable_n2\",
     \"fonction\": \"g\",
@@ -42730,8 +42730,8 @@ const headers = {
 };
 
 let body = {
-    "nom": "w",
-    "email": "rau.brant@example.net",
+    "nom": "b",
+    "email": "zbailey@example.net",
     "password": "architecto",
     "role": "responsable_n2",
     "fonction": "g",
@@ -42761,8 +42761,8 @@ $response = $client-&gt;post(
             'Accept' =&gt; 'application/json',
         ],
         'json' =&gt; [
-            'nom' =&gt; 'w',
-            'email' =&gt; 'rau.brant@example.net',
+            'nom' =&gt; 'b',
+            'email' =&gt; 'zbailey@example.net',
             'password' =&gt; 'architecto',
             'role' =&gt; 'responsable_n2',
             'fonction' =&gt; 'g',
@@ -42872,10 +42872,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="nom"                data-endpoint="POSTapi-users"
-               value="w"
+               value="b"
                data-component="body">
     <br>
-<p>Must not be greater than 255 characters. Example: <code>w</code></p>
+<p>Must not be greater than 255 characters. Example: <code>b</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>email</code></b>&nbsp;&nbsp;
@@ -42884,10 +42884,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="email"                data-endpoint="POSTapi-users"
-               value="rau.brant@example.net"
+               value="zbailey@example.net"
                data-component="body">
     <br>
-<p>The email address must be valid. Example: <code>rau.brant@example.net</code></p>
+<p>The email address must be valid. Example: <code>zbailey@example.net</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>password</code></b>&nbsp;&nbsp;
@@ -48503,7 +48503,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --form "commentable_type=architecto"\
     --form "commentable_id=16"\
     --form "content=n"\
-    --form "attachments[]=@/tmp/phppla5pqk3jms5e96ugqx" </code></pre></div>
+    --form "attachments[]=@/tmp/php8js3qtska3tn2sY03ce" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -48556,7 +48556,7 @@ $response = $client-&gt;post(
             ],
             [
                 'name' =&gt; 'attachments[]',
-                'contents' =&gt; fopen('/tmp/phppla5pqk3jms5e96ugqx', 'r')
+                'contents' =&gt; fopen('/tmp/php8js3qtska3tn2sY03ce', 'r')
             ],
         ],
     ]
@@ -48730,7 +48730,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://127.0.0.1:8000/api/comments/16" \
+    --get "http://127.0.0.1:8000/api/comments/1" \
     --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -48738,7 +48738,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://127.0.0.1:8000/api/comments/16"
+    "http://127.0.0.1:8000/api/comments/1"
 );
 
 const headers = {
@@ -48756,7 +48756,7 @@ fetch(url, {
 
 <div class="php-example">
     <pre><code class="language-php">$client = new \GuzzleHttp\Client();
-$url = 'http://127.0.0.1:8000/api/comments/16';
+$url = 'http://127.0.0.1:8000/api/comments/1';
 $response = $client-&gt;get(
     $url,
     [
@@ -48882,10 +48882,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="comment_id"                data-endpoint="GETapi-comments--comment_id-"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the comment. Example: <code>16</code></p>
+<p>The ID of the comment. Example: <code>1</code></p>
             </div>
                     </form>
 
@@ -48903,7 +48903,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://127.0.0.1:8000/api/comments/16" \
+    "http://127.0.0.1:8000/api/comments/1" \
     --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -48915,7 +48915,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://127.0.0.1:8000/api/comments/16"
+    "http://127.0.0.1:8000/api/comments/1"
 );
 
 const headers = {
@@ -48937,7 +48937,7 @@ fetch(url, {
 
 <div class="php-example">
     <pre><code class="language-php">$client = new \GuzzleHttp\Client();
-$url = 'http://127.0.0.1:8000/api/comments/16';
+$url = 'http://127.0.0.1:8000/api/comments/1';
 $response = $client-&gt;put(
     $url,
     [
@@ -49049,10 +49049,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="comment_id"                data-endpoint="PUTapi-comments--comment_id-"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the comment. Example: <code>16</code></p>
+<p>The ID of the comment. Example: <code>1</code></p>
             </div>
                             <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
         <div style=" padding-left: 28px;  clear: unset;">
@@ -49083,7 +49083,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://127.0.0.1:8000/api/comments/16" \
+    "http://127.0.0.1:8000/api/comments/1" \
     --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -49091,7 +49091,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://127.0.0.1:8000/api/comments/16"
+    "http://127.0.0.1:8000/api/comments/1"
 );
 
 const headers = {
@@ -49109,7 +49109,7 @@ fetch(url, {
 
 <div class="php-example">
     <pre><code class="language-php">$client = new \GuzzleHttp\Client();
-$url = 'http://127.0.0.1:8000/api/comments/16';
+$url = 'http://127.0.0.1:8000/api/comments/1';
 $response = $client-&gt;delete(
     $url,
     [
@@ -49218,10 +49218,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="comment_id"                data-endpoint="DELETEapi-comments--comment_id-"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the comment. Example: <code>16</code></p>
+<p>The ID of the comment. Example: <code>1</code></p>
             </div>
                     </form>
 
@@ -49239,7 +49239,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://127.0.0.1:8000/api/comments/16/reactions" \
+    "http://127.0.0.1:8000/api/comments/1/reactions" \
     --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -49251,7 +49251,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://127.0.0.1:8000/api/comments/16/reactions"
+    "http://127.0.0.1:8000/api/comments/1/reactions"
 );
 
 const headers = {
@@ -49273,7 +49273,7 @@ fetch(url, {
 
 <div class="php-example">
     <pre><code class="language-php">$client = new \GuzzleHttp\Client();
-$url = 'http://127.0.0.1:8000/api/comments/16/reactions';
+$url = 'http://127.0.0.1:8000/api/comments/1/reactions';
 $response = $client-&gt;post(
     $url,
     [
@@ -49385,10 +49385,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="comment_id"                data-endpoint="POSTapi-comments--comment_id--reactions"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the comment. Example: <code>16</code></p>
+<p>The ID of the comment. Example: <code>1</code></p>
             </div>
                             <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
         <div style=" padding-left: 28px;  clear: unset;">
@@ -49419,16 +49419,16 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://127.0.0.1:8000/api/comments/16/attachments" \
+    "http://127.0.0.1:8000/api/comments/1/attachments" \
     --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
     --header "Content-Type: multipart/form-data" \
     --header "Accept: application/json" \
-    --form "file=@/tmp/php1vvhlppt4kahffzcJ2n" </code></pre></div>
+    --form "file=@/tmp/phpp0v1jnoi30vm3T7avWd" </code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://127.0.0.1:8000/api/comments/16/attachments"
+    "http://127.0.0.1:8000/api/comments/1/attachments"
 );
 
 const headers = {
@@ -49449,7 +49449,7 @@ fetch(url, {
 
 <div class="php-example">
     <pre><code class="language-php">$client = new \GuzzleHttp\Client();
-$url = 'http://127.0.0.1:8000/api/comments/16/attachments';
+$url = 'http://127.0.0.1:8000/api/comments/1/attachments';
 $response = $client-&gt;post(
     $url,
     [
@@ -49461,7 +49461,7 @@ $response = $client-&gt;post(
         'multipart' =&gt; [
             [
                 'name' =&gt; 'file',
-                'contents' =&gt; fopen('/tmp/php1vvhlppt4kahffzcJ2n', 'r')
+                'contents' =&gt; fopen('/tmp/phpp0v1jnoi30vm3T7avWd', 'r')
             ],
         ],
     ]
@@ -49564,10 +49564,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="comment_id"                data-endpoint="POSTapi-comments--comment_id--attachments"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the comment. Example: <code>16</code></p>
+<p>The ID of the comment. Example: <code>1</code></p>
             </div>
                             <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
         <div style=" padding-left: 28px;  clear: unset;">
@@ -49580,7 +49580,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value=""
                data-component="body">
     <br>
-<p>Must be a file. Must not be greater than 10240 kilobytes. Example: <code>/tmp/php1vvhlppt4kahffzcJ2n</code></p>
+<p>Must be a file. Must not be greater than 10240 kilobytes. Example: <code>/tmp/phpp0v1jnoi30vm3T7avWd</code></p>
         </div>
         </form>
 
@@ -49598,7 +49598,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://127.0.0.1:8000/api/comments/16/attachments/16" \
+    "http://127.0.0.1:8000/api/comments/1/attachments/16" \
     --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -49606,7 +49606,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://127.0.0.1:8000/api/comments/16/attachments/16"
+    "http://127.0.0.1:8000/api/comments/1/attachments/16"
 );
 
 const headers = {
@@ -49624,7 +49624,7 @@ fetch(url, {
 
 <div class="php-example">
     <pre><code class="language-php">$client = new \GuzzleHttp\Client();
-$url = 'http://127.0.0.1:8000/api/comments/16/attachments/16';
+$url = 'http://127.0.0.1:8000/api/comments/1/attachments/16';
 $response = $client-&gt;delete(
     $url,
     [
@@ -49733,10 +49733,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="comment_id"                data-endpoint="DELETEapi-comments--comment_id--attachments--attachment_id-"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the comment. Example: <code>16</code></p>
+<p>The ID of the comment. Example: <code>1</code></p>
             </div>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>attachment_id</code></b>&nbsp;&nbsp;
@@ -50793,8 +50793,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"start_date\": \"2026-05-29T18:44:21\",
-    \"end_date\": \"2052-06-21\",
+    \"start_date\": \"2026-06-01T00:06:24\",
+    \"end_date\": \"2052-06-24\",
     \"per_page\": 22
 }"
 </code></pre></div>
@@ -50812,8 +50812,8 @@ const headers = {
 };
 
 let body = {
-    "start_date": "2026-05-29T18:44:21",
-    "end_date": "2052-06-21",
+    "start_date": "2026-06-01T00:06:24",
+    "end_date": "2052-06-24",
     "per_page": 22
 };
 
@@ -50836,8 +50836,8 @@ $response = $client-&gt;get(
             'Accept' =&gt; 'application/json',
         ],
         'json' =&gt; [
-            'start_date' =&gt; '2026-05-29T18:44:21',
-            'end_date' =&gt; '2052-06-21',
+            'start_date' =&gt; '2026-06-01T00:06:24',
+            'end_date' =&gt; '2052-06-24',
             'per_page' =&gt; 22,
         ],
     ]
@@ -50957,10 +50957,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="start_date"                data-endpoint="GETapi-activities-date-range"
-               value="2026-05-29T18:44:21"
+               value="2026-06-01T00:06:24"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-05-29T18:44:21</code></p>
+<p>Must be a valid date. Example: <code>2026-06-01T00:06:24</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>end_date</code></b>&nbsp;&nbsp;
@@ -50969,10 +50969,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="end_date"                data-endpoint="GETapi-activities-date-range"
-               value="2052-06-21"
+               value="2052-06-24"
                data-component="body">
     <br>
-<p>Must be a valid date. Must be a date after or equal to <code>start_date</code>. Example: <code>2052-06-21</code></p>
+<p>Must be a valid date. Must be a date after or equal to <code>start_date</code>. Example: <code>2052-06-24</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>per_page</code></b>&nbsp;&nbsp;
@@ -51007,8 +51007,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"start_date\": \"2026-05-29T18:44:21\",
-    \"end_date\": \"2052-06-21\"
+    \"start_date\": \"2026-06-01T00:06:24\",
+    \"end_date\": \"2052-06-24\"
 }"
 </code></pre></div>
 
@@ -51025,8 +51025,8 @@ const headers = {
 };
 
 let body = {
-    "start_date": "2026-05-29T18:44:21",
-    "end_date": "2052-06-21"
+    "start_date": "2026-06-01T00:06:24",
+    "end_date": "2052-06-24"
 };
 
 fetch(url, {
@@ -51048,8 +51048,8 @@ $response = $client-&gt;get(
             'Accept' =&gt; 'application/json',
         ],
         'json' =&gt; [
-            'start_date' =&gt; '2026-05-29T18:44:21',
-            'end_date' =&gt; '2052-06-21',
+            'start_date' =&gt; '2026-06-01T00:06:24',
+            'end_date' =&gt; '2052-06-24',
         ],
     ]
 );
@@ -51168,10 +51168,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="start_date"                data-endpoint="GETapi-activities-stats"
-               value="2026-05-29T18:44:21"
+               value="2026-06-01T00:06:24"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-05-29T18:44:21</code></p>
+<p>Must be a valid date. Example: <code>2026-06-01T00:06:24</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>end_date</code></b>&nbsp;&nbsp;
@@ -51180,10 +51180,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="end_date"                data-endpoint="GETapi-activities-stats"
-               value="2052-06-21"
+               value="2052-06-24"
                data-component="body">
     <br>
-<p>Must be a valid date. Must be a date after or equal to <code>start_date</code>. Example: <code>2052-06-21</code></p>
+<p>Must be a valid date. Must be a date after or equal to <code>start_date</code>. Example: <code>2052-06-24</code></p>
         </div>
         </form>
 
@@ -52632,11 +52632,11 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"document_uploaded_email\": true,
     \"document_uploaded_push\": false,
     \"digest_frequency\": \"none\",
-    \"digest_time\": \"18:44:21\",
+    \"digest_time\": \"00:06:25\",
     \"digest_day_of_week\": 1,
     \"quiet_hours_enabled\": true,
-    \"quiet_hours_start\": \"18:44:21\",
-    \"quiet_hours_end\": \"18:44:21\"
+    \"quiet_hours_start\": \"00:06:25\",
+    \"quiet_hours_end\": \"00:06:25\"
 }"
 </code></pre></div>
 
@@ -52681,11 +52681,11 @@ let body = {
     "document_uploaded_email": true,
     "document_uploaded_push": false,
     "digest_frequency": "none",
-    "digest_time": "18:44:21",
+    "digest_time": "00:06:25",
     "digest_day_of_week": 1,
     "quiet_hours_enabled": true,
-    "quiet_hours_start": "18:44:21",
-    "quiet_hours_end": "18:44:21"
+    "quiet_hours_start": "00:06:25",
+    "quiet_hours_end": "00:06:25"
 };
 
 fetch(url, {
@@ -52735,11 +52735,11 @@ $response = $client-&gt;put(
             'document_uploaded_email' =&gt; true,
             'document_uploaded_push' =&gt; false,
             'digest_frequency' =&gt; 'none',
-            'digest_time' =&gt; '18:44:21',
+            'digest_time' =&gt; '00:06:25',
             'digest_day_of_week' =&gt; 1,
             'quiet_hours_enabled' =&gt; true,
-            'quiet_hours_start' =&gt; '18:44:21',
-            'quiet_hours_end' =&gt; '18:44:21',
+            'quiet_hours_start' =&gt; '00:06:25',
+            'quiet_hours_end' =&gt; '00:06:25',
         ],
     ]
 );
@@ -53449,10 +53449,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="digest_time"                data-endpoint="PUTapi-notification-preferences"
-               value="18:44:21"
+               value="00:06:25"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>H:i:s</code>. Example: <code>18:44:21</code></p>
+<p>Must be a valid date in the format <code>H:i:s</code>. Example: <code>00:06:25</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>digest_day_of_week</code></b>&nbsp;&nbsp;
@@ -53495,10 +53495,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="quiet_hours_start"                data-endpoint="PUTapi-notification-preferences"
-               value="18:44:21"
+               value="00:06:25"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>H:i:s</code>. Example: <code>18:44:21</code></p>
+<p>Must be a valid date in the format <code>H:i:s</code>. Example: <code>00:06:25</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>quiet_hours_end</code></b>&nbsp;&nbsp;
@@ -53507,10 +53507,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="quiet_hours_end"                data-endpoint="PUTapi-notification-preferences"
-               value="18:44:21"
+               value="00:06:25"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>H:i:s</code>. Example: <code>18:44:21</code></p>
+<p>Must be a valid date in the format <code>H:i:s</code>. Example: <code>00:06:25</code></p>
         </div>
         </form>
 
@@ -55664,7 +55664,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
     --header "Content-Type: multipart/form-data" \
     --header "Accept: application/json" \
-    --form "avatar=@/tmp/phpqhrso1i3psvgeMZvEuJ" </code></pre></div>
+    --form "avatar=@/tmp/phpfg43sliteajt8RVqwlu" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -55702,7 +55702,7 @@ $response = $client-&gt;post(
         'multipart' =&gt; [
             [
                 'name' =&gt; 'avatar',
-                'contents' =&gt; fopen('/tmp/phpqhrso1i3psvgeMZvEuJ', 'r')
+                'contents' =&gt; fopen('/tmp/phpfg43sliteajt8RVqwlu', 'r')
             ],
         ],
     ]
@@ -55821,7 +55821,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value=""
                data-component="body">
     <br>
-<p>Must be an image. Must not be greater than 2048 kilobytes. Example: <code>/tmp/phpqhrso1i3psvgeMZvEuJ</code></p>
+<p>Must be an image. Must not be greater than 2048 kilobytes. Example: <code>/tmp/phpfg43sliteajt8RVqwlu</code></p>
         </div>
         </form>
 
@@ -59793,8 +59793,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"title\": \"b\",
     \"description\": \"Eius et animi quos velit et.\",
     \"type\": \"deadline\",
-    \"start_date\": \"2026-05-29T18:44:21\",
-    \"end_date\": \"2052-06-21\",
+    \"start_date\": \"2026-06-01T00:06:25\",
+    \"end_date\": \"2052-06-24\",
     \"location\": \"n\"
 }"
 </code></pre></div>
@@ -59815,8 +59815,8 @@ let body = {
     "title": "b",
     "description": "Eius et animi quos velit et.",
     "type": "deadline",
-    "start_date": "2026-05-29T18:44:21",
-    "end_date": "2052-06-21",
+    "start_date": "2026-06-01T00:06:25",
+    "end_date": "2052-06-24",
     "location": "n"
 };
 
@@ -59842,8 +59842,8 @@ $response = $client-&gt;post(
             'title' =&gt; 'b',
             'description' =&gt; 'Eius et animi quos velit et.',
             'type' =&gt; 'deadline',
-            'start_date' =&gt; '2026-05-29T18:44:21',
-            'end_date' =&gt; '2052-06-21',
+            'start_date' =&gt; '2026-06-01T00:06:25',
+            'end_date' =&gt; '2052-06-24',
             'location' =&gt; 'n',
         ],
     ]
@@ -59997,10 +59997,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="start_date"                data-endpoint="POSTapi-teams--uuid--events"
-               value="2026-05-29T18:44:21"
+               value="2026-06-01T00:06:25"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-05-29T18:44:21</code></p>
+<p>Must be a valid date. Example: <code>2026-06-01T00:06:25</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>end_date</code></b>&nbsp;&nbsp;
@@ -60009,10 +60009,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="end_date"                data-endpoint="POSTapi-teams--uuid--events"
-               value="2052-06-21"
+               value="2052-06-24"
                data-component="body">
     <br>
-<p>Must be a valid date. Must be a date after <code>start_date</code>. Example: <code>2052-06-21</code></p>
+<p>Must be a valid date. Must be a date after <code>start_date</code>. Example: <code>2052-06-24</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>location</code></b>&nbsp;&nbsp;
@@ -60249,8 +60249,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"title\": \"b\",
     \"description\": \"Eius et animi quos velit et.\",
     \"type\": \"deadline\",
-    \"start_date\": \"2026-05-29T18:44:21\",
-    \"end_date\": \"2052-06-21\",
+    \"start_date\": \"2026-06-01T00:06:25\",
+    \"end_date\": \"2052-06-24\",
     \"location\": \"n\"
 }"
 </code></pre></div>
@@ -60271,8 +60271,8 @@ let body = {
     "title": "b",
     "description": "Eius et animi quos velit et.",
     "type": "deadline",
-    "start_date": "2026-05-29T18:44:21",
-    "end_date": "2052-06-21",
+    "start_date": "2026-06-01T00:06:25",
+    "end_date": "2052-06-24",
     "location": "n"
 };
 
@@ -60298,8 +60298,8 @@ $response = $client-&gt;put(
             'title' =&gt; 'b',
             'description' =&gt; 'Eius et animi quos velit et.',
             'type' =&gt; 'deadline',
-            'start_date' =&gt; '2026-05-29T18:44:21',
-            'end_date' =&gt; '2052-06-21',
+            'start_date' =&gt; '2026-06-01T00:06:25',
+            'end_date' =&gt; '2052-06-24',
             'location' =&gt; 'n',
         ],
     ]
@@ -60465,10 +60465,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="start_date"                data-endpoint="PUTapi-teams--uuid--events--event-"
-               value="2026-05-29T18:44:21"
+               value="2026-06-01T00:06:25"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-05-29T18:44:21</code></p>
+<p>Must be a valid date. Example: <code>2026-06-01T00:06:25</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>end_date</code></b>&nbsp;&nbsp;
@@ -60477,10 +60477,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="end_date"                data-endpoint="PUTapi-teams--uuid--events--event-"
-               value="2052-06-21"
+               value="2052-06-24"
                data-component="body">
     <br>
-<p>Must be a valid date. Must be a date after <code>start_date</code>. Example: <code>2052-06-21</code></p>
+<p>Must be a valid date. Must be a date after <code>start_date</code>. Example: <code>2052-06-24</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>location</code></b>&nbsp;&nbsp;

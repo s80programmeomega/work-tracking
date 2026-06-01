@@ -6,17 +6,17 @@
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 dusk="admin-workspaces-title" class="text-2xl font-semibold text-gray-900 dark:text-white">
-            Workspace Management
+            {{ $t('admin.workspaces.title') }}
           </h1>
           <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Manage all workspaces, subscriptions and trial periods.
+            {{ $t('admin.workspaces.subtitle') }}
           </p>
         </div>
         <router-link
           to="/admin/dashboard"
           class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
         >
-          <i class="fas fa-arrow-left"></i> Back to dashboard
+          <i class="fas fa-arrow-left"></i> {{ $t('admin.workspaces.back') }}
         </router-link>
       </div>
 
@@ -26,7 +26,7 @@
           v-model="search"
           @input="debouncedFetch"
           type="text"
-          placeholder="Search workspace..."
+          :placeholder="$t('admin.workspaces.search_placeholder')"
           class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 w-56"
         />
         <select
@@ -34,18 +34,18 @@
           @change="fetchWorkspaces"
           class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
         >
-          <option value="">All modes</option>
-          <option value="trial">Trial</option>
-          <option value="paid">Paid</option>
+          <option value="">{{ $t('admin.workspaces.filter_all_modes') }}</option>
+          <option value="trial">{{ $t('admin.workspaces.filter_trial') }}</option>
+          <option value="paid">{{ $t('admin.workspaces.filter_paid') }}</option>
         </select>
         <select
           v-model="filters.is_active"
           @change="fetchWorkspaces"
           class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
         >
-          <option value="">All statuses</option>
-          <option value="1">Active</option>
-          <option value="0">Suspended</option>
+          <option value="">{{ $t('admin.workspaces.filter_all_statuses') }}</option>
+          <option value="1">{{ $t('admin.workspaces.filter_active') }}</option>
+          <option value="0">{{ $t('admin.workspaces.filter_suspended') }}</option>
         </select>
       </div>
 
@@ -75,7 +75,7 @@
           </thead>
           <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
             <tr v-if="!workspaces.length">
-              <td colspan="7" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">No workspaces found.</td>
+              <td colspan="7" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">{{ $t('admin.workspaces.no_workspaces') }}</td>
             </tr>
             <tr
               v-for="ws in workspaces"
@@ -148,12 +148,12 @@
               @click="page--; fetchWorkspaces()"
               :disabled="pagination.current_page <= 1"
               class="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded disabled:opacity-40"
-            >Prev</button>
+            >{{ $t('common.previous') }}</button>
             <button
               @click="page++; fetchWorkspaces()"
               :disabled="pagination.current_page >= pagination.last_page"
               class="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded disabled:opacity-40"
-            >Next</button>
+            >{{ $t('common.next') }}</button>
           </div>
         </div>
       </div>
@@ -215,11 +215,13 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import AdminLayout from '@/components/layout/AdminLayout.vue';
 import SubscriptionBadge from '@/components/admin/SubscriptionBadge.vue';
 import { useStagger } from '@/composables/useAnimations';
 import api from '@/api/axios';
 
+const { t } = useI18n();
 const workspaces = ref([]);
 const pagination = ref(null);
 const loading = ref(false);

@@ -38,6 +38,7 @@
         :class="[isApplicationMenuOpen ? 'flex' : 'hidden']"
         class="items-center justify-between w-full gap-4 px-5 py-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 lg:flex lg:justify-end lg:px-0 lg:bg-transparent dark:lg:bg-transparent lg:border-b-0">
         <div class="flex items-center gap-2 2xsm:gap-3">
+          <LanguageSwitcher />
           <ThemeToggler />
           <NotificationMenu />
         </div>
@@ -51,6 +52,7 @@
 import { ref } from 'vue'
 import { useSidebar } from '@/composables/useSidebar'
 import ThemeToggler from '../common/ThemeToggler.vue'
+import LanguageSwitcher from './header/LanguageSwitcher.vue'
 import SearchBar from './header/SearchBar.vue'
 import HeaderLogo from './header/HeaderLogo.vue'
 import NotificationMenu from './header/NotificationMenu.vue'

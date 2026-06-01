@@ -9,10 +9,10 @@
         <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-              Gestion des Documents
+              {{ $t('documents_page.title') }}
             </h1>
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Gérez tous vos documents par niveau hiérarchique
+              {{ $t('documents_page.subtitle') }}
             </p>
           </div>
 
@@ -20,7 +20,7 @@
           <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
             <div class="rounded-3 bg-blue-50 px-4 py-3 dark:bg-blue-900/20">
               <p class="text-xs font-medium text-blue-600 dark:text-blue-400">
-                Workspaces
+                {{ $t('documents_page.stat_workspaces') }}
               </p>
               <p class="mt-1 text-2xl font-bold text-blue-900 dark:text-blue-300">
                 {{ stats.workspaces || 0 }}
@@ -28,7 +28,7 @@
             </div>
             <div class="rounded-3 bg-green-50 px-4 py-3 dark:bg-green-900/20">
               <p class="text-xs font-medium text-green-600 dark:text-green-400">
-                Projets
+                {{ $t('documents_page.stat_projects') }}
               </p>
               <p class="mt-1 text-2xl font-bold text-green-900 dark:text-green-300">
                 {{ stats.projects || 0 }}
@@ -36,7 +36,7 @@
             </div>
             <div class="rounded-3 bg-purple-50 px-4 py-3 dark:bg-purple-900/20">
               <p class="text-xs font-medium text-purple-600 dark:text-purple-400">
-                Documents
+                {{ $t('documents_page.stat_documents') }}
               </p>
               <p class="mt-1 text-2xl font-bold text-purple-900 dark:text-purple-300">
                 {{ stats.documents || 0 }}
@@ -44,7 +44,7 @@
             </div>
             <div class="rounded-3 bg-orange-50 px-4 py-3 dark:bg-orange-900/20">
               <p class="text-xs font-medium text-orange-600 dark:text-orange-400">
-                Espace
+                {{ $t('documents_page.stat_storage') }}
               </p>
               <p class="mt-1 text-2xl font-bold text-orange-900 dark:text-orange-300">
                 {{ formatBytes(stats.totalSize || 0) }}
@@ -147,6 +147,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
@@ -169,9 +170,10 @@ import {
 } from '@heroicons/vue/24/outline'
 import api from '@/api/axios'
 
+const { t } = useI18n()
 const route = useRoute()
 const validTabs = ['workspaces', 'projects', 'activities', 'tasks', 'recent', 'shared', 'my-documents']
-const currentPageTitle = ref('Documents')
+const currentPageTitle = computed(() => t('documents_page.page_title'))
 const activeTab = ref(validTabs.includes(route.query.tab) ? route.query.tab : 'workspaces')
 const selectedEntity = ref(null)
 const stats = ref({
@@ -184,44 +186,44 @@ const stats = ref({
 })
 
 const tabs = computed(() => [
-  { 
-    id: 'workspaces', 
-    name: 'Workspaces', 
+  {
+    id: 'workspaces',
+    name: t('documents_page.tab_workspaces'),
     icon: FolderIcon,
-    count: stats.value.workspaces 
+    count: stats.value.workspaces
   },
-  { 
-    id: 'projects', 
-    name: 'Projets', 
+  {
+    id: 'projects',
+    name: t('documents_page.tab_projects'),
     icon: BriefcaseIcon,
-    count: stats.value.projects 
+    count: stats.value.projects
   },
-  { 
-    id: 'activities', 
-    name: 'Activités', 
+  {
+    id: 'activities',
+    name: t('documents_page.tab_activities'),
     icon: RectangleStackIcon,
-    count: stats.value.activities 
+    count: stats.value.activities
   },
-  { 
-    id: 'tasks', 
-    name: 'Tâches', 
+  {
+    id: 'tasks',
+    name: t('documents_page.tab_tasks'),
     icon: CheckCircleIcon,
-    count: stats.value.tasks 
+    count: stats.value.tasks
   },
-  { 
-    id: 'recent', 
-    name: 'Récents', 
-    icon: ClockIcon 
+  {
+    id: 'recent',
+    name: t('documents_page.tab_recent'),
+    icon: ClockIcon
   },
-  { 
-    id: 'shared', 
-    name: 'Partagés', 
-    icon: UserGroupIcon 
+  {
+    id: 'shared',
+    name: t('documents_page.tab_shared'),
+    icon: UserGroupIcon
   },
-  { 
-    id: 'my-documents', 
-    name: 'Mes Documents', 
-    icon: DocumentIcon 
+  {
+    id: 'my-documents',
+    name: t('documents_page.tab_my_documents'),
+    icon: DocumentIcon
   }
 ])
 

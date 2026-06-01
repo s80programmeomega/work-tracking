@@ -10,7 +10,7 @@
           {{ workspace?.nom || 'Workspace' }}
         </router-link>
         <ChevronRightIcon class="h-4 w-4 text-gray-400" />
-        <span class="font-medium text-gray-900 dark:text-white">Documents</span>
+        <span class="font-medium text-gray-900 dark:text-white">{{ $t('document_pages.documents') }}</span>
       </nav>
 
       <!-- Workspace Info Card -->
@@ -40,7 +40,7 @@
       >
         <LockClosedIcon class="mx-auto h-10 w-10 text-red-500" />
         <p class="mt-3 text-sm font-medium text-red-700 dark:text-red-400">
-          Vous n'avez pas accès aux documents de ce workspace.
+          {{ $t('document_pages.access_denied') }}
         </p>
       </div>
 

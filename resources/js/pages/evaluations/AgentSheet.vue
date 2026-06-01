@@ -4,7 +4,7 @@
       <!-- ── Header: identité de l'agent + score global + indicateurs ───── -->
       <div class="bg-white dark:bg-gray-900 rounded-3 p-6 border border-gray-200 dark:border-gray-800">
         <div v-if="loading && !sheet" class="text-center py-8 text-gray-500 dark:text-gray-400">
-          <i class="fas fa-spinner fa-spin mr-2"></i>Chargement de la fiche…
+          <i class="fas fa-spinner fa-spin mr-2"></i>{{ $t('evaluations.agent_sheet.loading') }}
         </div>
 
         <div v-else-if="error" dusk="sheet-error" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded">
@@ -22,7 +22,7 @@
               </h1>
               <p class="text-sm text-gray-500 dark:text-gray-400">{{ sheet.user.email }}</p>
               <p class="text-xs text-gray-400 mt-1">
-                Période: {{ sheet.periode_start }} → {{ sheet.periode_end }}
+                {{ $t('evaluations.agent_sheet.period') }} {{ sheet.periode_start }} → {{ sheet.periode_end }}
               </p>
             </div>
           </div>
@@ -33,7 +33,7 @@
               <div dusk="sheet-score-global" class="text-4xl font-bold" :class="scoreColor(sheet.score_global)">
                 {{ Math.round(sheet.score_global * 100) }}%
               </div>
-              <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-1">Score global</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-1">{{ $t('evaluations.agent_sheet.global_score') }}</p>
             </div>
 
             <!-- Badge escalades abusives -->
@@ -43,7 +43,7 @@
               class="px-3 py-2 rounded-3 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm font-medium"
             >
               <i class="fas fa-exclamation-triangle mr-1"></i>
-              Escalades abusives
+              {{ $t('evaluations.agent_sheet.abusive_escalations') }}
             </div>
 
             <!-- Alerte renvois injustifiés -->
@@ -53,7 +53,7 @@
               class="px-3 py-2 rounded-3 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-sm font-medium"
             >
               <i class="fas fa-flag mr-1"></i>
-              Renvois injustifiés: {{ Math.round(sheet.indicators.unjustified_return_rate * 100) }}%
+              {{ $t('evaluations.agent_sheet.unjustified_returns') }} {{ Math.round(sheet.indicators.unjustified_return_rate * 100) }}%
             </div>
 
             <button
@@ -62,7 +62,7 @@
               @click="exportSheet"
               class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-3 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm"
             >
-              <i class="fas fa-download mr-2"></i>Exporter
+              <i class="fas fa-download mr-2"></i>{{ $t('evaluations.agent_sheet.export') }}
             </button>
           </div>
         </div>
@@ -72,7 +72,7 @@
       <div v-if="sheet" class="bg-white dark:bg-gray-900 rounded-3 p-4 border border-gray-200 dark:border-gray-800">
         <div class="flex items-end gap-4 flex-wrap">
           <div>
-            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Du</label>
+            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{{ $t('evaluations.agent_sheet.from') }}</label>
             <input
               v-model="filters.start"
               type="date"
@@ -81,7 +81,7 @@
             />
           </div>
           <div>
-            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Au</label>
+            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{{ $t('evaluations.agent_sheet.to') }}</label>
             <input
               v-model="filters.end"
               type="date"
@@ -96,10 +96,10 @@
               dusk="sheet-filter-statut"
               class="px-3 py-2 rounded-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm"
             >
-              <option value="">Tous</option>
-              <option value="a_faire">À faire</option>
-              <option value="en_cours">En cours</option>
-              <option value="termine">Terminé</option>
+              <option value="">{{ $t('statuts.all') }}</option>
+              <option value="a_faire">{{ $t('statuts.a_faire') }}</option>
+              <option value="en_cours">{{ $t('statuts.en_cours') }}</option>
+              <option value="termine">{{ $t('statuts.termine') }}</option>
             </select>
           </div>
           <button
@@ -107,13 +107,13 @@
             dusk="sheet-apply-filters"
             class="px-4 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700 text-sm"
           >
-            <i class="fas fa-filter mr-2"></i>Appliquer
+            <i class="fas fa-filter mr-2"></i>{{ $t('common.filter') }}
           </button>
           <button
             @click="resetFilters"
             class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-3 text-sm"
           >
-            Réinitialiser
+            {{ $t('common.reset') }}
           </button>
         </div>
       </div>
@@ -292,7 +292,7 @@
                 dusk="section-prev"
                 class="px-3 py-1 rounded border border-gray-300 dark:border-gray-700 disabled:opacity-50"
               >
-                Précédent
+                {{ $t('common.previous') }}
               </button>
               <button
                 @click="loadSection(sectionMeta.current_page + 1)"
@@ -300,7 +300,7 @@
                 dusk="section-next"
                 class="px-3 py-1 rounded border border-gray-300 dark:border-gray-700 disabled:opacity-50"
               >
-                Suivant
+                {{ $t('common.next') }}
               </button>
             </div>
           </div>
@@ -352,9 +352,12 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import api from '@/api/axios'
+
+const { t } = useI18n()
 
 const route = useRoute()
 const userId = computed(() => route.params.id)
@@ -380,13 +383,13 @@ function defaultEnd() {
 }
 
 // Sections
-const sections = [
-  { id: 'directed_tasks', label: 'Tâches dirigées', icon: 'fa-user-tie' },
-  { id: 'directed_subtasks', label: 'Sous-tâches dirigées', icon: 'fa-list-check' },
-  { id: 'assignee_tasks', label: 'Tâches assignées', icon: 'fa-tasks' },
-  { id: 'assignee_subtasks', label: 'Sous-tâches assignées', icon: 'fa-clipboard-list' },
-  { id: 'submitted_results', label: 'Résultats soumis', icon: 'fa-paper-plane' },
-]
+const sections = computed(() => [
+  { id: 'directed_tasks', label: t('agent_sheet_sections.directed_tasks'), icon: 'fa-user-tie' },
+  { id: 'directed_subtasks', label: t('agent_sheet_sections.directed_subtasks'), icon: 'fa-list-check' },
+  { id: 'assignee_tasks', label: t('agent_sheet_sections.assignee_tasks'), icon: 'fa-tasks' },
+  { id: 'assignee_subtasks', label: t('agent_sheet_sections.assignee_subtasks'), icon: 'fa-clipboard-list' },
+  { id: 'submitted_results', label: t('agent_sheet_sections.submitted_results'), icon: 'fa-paper-plane' },
+])
 const activeSection = ref('directed_tasks')
 const sectionItems = ref([])
 const sectionMeta = ref({ current_page: 1, last_page: 1, total: 0 })

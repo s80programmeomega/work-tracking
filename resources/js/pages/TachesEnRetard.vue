@@ -11,8 +11,8 @@
               </svg>
             </div>
             <div>
-              <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Tâches en Retard</h1>
-              <p class="text-gray-500 dark:text-gray-400">Tâches dont l'échéance est dépassée</p>
+              <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('taches_en_retard.title') }}</h1>
+              <p class="text-gray-500 dark:text-gray-400">{{ $t('taches_en_retard.subtitle') }}</p>
             </div>
           </div>
 
@@ -20,7 +20,7 @@
             @click="loadTaches"
             :disabled="loading"
             class="p-2 rounded-3 border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            title="Actualiser"
+            :title="$t('taches_en_retard.refresh')"
           >
             <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" :class="{ 'animate-spin': loading }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -30,7 +30,7 @@
 
         <!-- Stat -->
         <div class="inline-flex items-center gap-2 bg-red-50 dark:bg-red-900/20 px-4 py-2 rounded-3 border border-red-200 dark:border-red-800">
-          <span class="text-sm font-semibold text-red-700 dark:text-red-300">{{ taches.length }} tâche(s) en retard</span>
+          <span class="text-sm font-semibold text-red-700 dark:text-red-300">{{ $t('taches_en_retard.count', { count: taches.length }) }}</span>
         </div>
       </div>
 
@@ -56,8 +56,8 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
-        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Aucune tâche en retard</h3>
-        <p class="text-gray-500 dark:text-gray-400">Toutes vos tâches sont dans les délais.</p>
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">{{ $t('taches_en_retard.empty_title') }}</h3>
+        <p class="text-gray-500 dark:text-gray-400">{{ $t('taches_en_retard.empty_desc') }}</p>
       </div>
 
       <!-- Task List -->
@@ -77,7 +77,7 @@
             </div>
             <div class="flex items-center gap-2 flex-shrink-0">
               <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
-                Échéance : {{ formatDate(tache.echeance) }}
+                {{ $t('taches_en_retard.deadline', { date: formatDate(tache.echeance) }) }}
               </span>
             </div>
           </div>

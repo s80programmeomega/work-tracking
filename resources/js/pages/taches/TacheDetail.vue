@@ -11,7 +11,7 @@
     <div v-else-if="error" class="flex items-center justify-center min-h-screen">
       <div class="text-center">
         <i class="fas fa-exclamation-triangle text-6xl text-red-500 mb-4"></i>
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Erreur</h2>
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ $t('tache_detail.error_title') }}</h2>
         <p class="text-gray-600 dark:text-gray-400 mb-4">{{ error }}</p>
         <button @click="$router.back()" class="px-6 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700">
           Retour
@@ -62,7 +62,7 @@
                 @click="startHeaderEdit('titre', tache.titre)"
                 class="text-3xl font-bold text-gray-900 dark:text-white"
                 :class="permissions.can_inline_edit ? 'cursor-pointer hover:text-brand-600 dark:hover:text-brand-400' : ''"
-                :title="permissions.can_inline_edit ? 'Cliquer pour modifier' : ''"
+                :title="permissions.can_inline_edit ? $t('tache_detail.click_to_edit') : ''"
               >{{ tache.titre }}</h1>
 
               <!-- Statut inline editable -->
@@ -75,18 +75,18 @@
                 autofocus
                 class="px-3 py-1 text-xs font-bold rounded-full border border-brand-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
               >
-                <option value="a_faire">À faire</option>
-                <option value="en_cours">En cours</option>
-                <option value="termine">Terminé</option>
-                <option value="en_retard">En retard</option>
-                <option value="a_refaire">À refaire</option>
+                <option value="a_faire">{{ $t('statuts.a_faire') }}</option>
+                <option value="en_cours">{{ $t('statuts.en_cours') }}</option>
+                <option value="termine">{{ $t('statuts.termine') }}</option>
+                <option value="en_retard">{{ $t('statuts.en_retard') }}</option>
+                <option value="a_refaire">{{ $t('statuts.a_refaire') }}</option>
               </select>
               <span
                 v-else
                 @click="startHeaderEdit('statut', tache.statut)"
                 class="px-3 py-1 rounded-full text-xs font-bold"
                 :class="[getStatutClass(tache.statut), permissions.can_inline_edit ? 'cursor-pointer hover:opacity-80' : '']"
-                :title="permissions.can_inline_edit ? 'Cliquer pour modifier' : ''"
+                :title="permissions.can_inline_edit ? $t('tache_detail.click_to_edit') : ''"
               >
                 {{ getStatutLabel(tache.statut) }}
               </span>
@@ -101,17 +101,17 @@
                 autofocus
                 class="px-3 py-1 text-xs font-bold rounded-full border border-brand-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
               >
-                <option value="faible">Faible</option>
-                <option value="moyenne">Moyenne</option>
-                <option value="elevee">Élevée</option>
-                <option value="critique">Critique</option>
+                <option value="faible">{{ $t('priorites.faible') }}</option>
+                <option value="moyenne">{{ $t('priorites.moyenne') }}</option>
+                <option value="elevee">{{ $t('priorites.elevee') }}</option>
+                <option value="critique">{{ $t('priorites.critique') }}</option>
               </select>
               <span
                 v-else-if="tache.priorite"
                 @click="startHeaderEdit('priorite', tache.priorite)"
                 class="px-3 py-1 rounded-full text-xs font-bold"
                 :class="[getPrioriteClass(tache.priorite), permissions.can_inline_edit ? 'cursor-pointer hover:opacity-80' : '']"
-                :title="permissions.can_inline_edit ? 'Cliquer pour modifier' : ''"
+                :title="permissions.can_inline_edit ? $t('tache_detail.click_to_edit') : ''"
               >
                 {{ tache.priorite_label || tache.priorite }}
               </span>
@@ -121,19 +121,19 @@
             <div class="flex items-center gap-6 text-sm flex-wrap">
               <div class="flex items-center gap-2">
                 <i class="fas fa-users text-gray-400"></i>
-                <span class="text-gray-600 dark:text-gray-400">{{ stats.assignees_count }} assigné(s)</span>
+                <span class="text-gray-600 dark:text-gray-400">{{ $t('tache_detail.assignees_count', { count: stats.assignees_count }) }}</span>
               </div>
               <div class="flex items-center gap-2">
                 <i class="fas fa-paperclip text-gray-400"></i>
-                <span class="text-gray-600 dark:text-gray-400">{{ stats.attachments_count }} fichier(s)</span>
+                <span class="text-gray-600 dark:text-gray-400">{{ $t('tache_detail.attachments_count', { count: stats.attachments_count }) }}</span>
               </div>
               <div class="flex items-center gap-2">
                 <i class="fas fa-link text-gray-400"></i>
-                <span class="text-gray-600 dark:text-gray-400">{{ stats.links_count }} lien(s)</span>
+                <span class="text-gray-600 dark:text-gray-400">{{ $t('tache_detail.links_count', { count: stats.links_count }) }}</span>
               </div>
               <div class="flex items-center gap-2">
                 <i class="fas fa-comment text-gray-400"></i>
-                <span class="text-gray-600 dark:text-gray-400">{{ stats.comments_count }} commentaire(s)</span>
+                <span class="text-gray-600 dark:text-gray-400">{{ $t('tache_detail.comments_count', { count: stats.comments_count }) }}</span>
               </div>
               <!-- Écheance inline editable -->
               <div class="flex items-center gap-2" :class="{ 'text-red-600': stats.is_overdue }">
@@ -146,7 +146,7 @@
                   :format="'dd-MM-yyyy'"
                   :locale="'fr'"
                   :dark="isDark"
-                  placeholder="Sélectionner une date"
+                  :placeholder="$t('tache_detail.select_date')"
                   @update:model-value="saveHeaderEdit"
                   @keydown.escape="cancelHeaderEdit"
                   inline
@@ -155,13 +155,13 @@
                   v-else-if="tache.echeance"
                   @click="startHeaderEdit('echeance', tache.echeance)"
                   :class="permissions.can_inline_edit ? 'cursor-pointer hover:opacity-80' : ''"
-                  :title="permissions.can_inline_edit ? 'Cliquer pour modifier' : ''"
+                  :title="permissions.can_inline_edit ? $t('tache_detail.click_to_edit') : ''"
                 >{{ formatDate(tache.echeance) }}</span>
                 <span
                   v-else-if="permissions.can_inline_edit"
                   @click="startHeaderEdit('echeance', null)"
                   class="cursor-pointer text-gray-400 hover:text-brand-600 dark:hover:text-brand-400"
-                >+ Échéance</span>
+                >{{ $t('tache_detail.add_deadline') }}</span>
               </div>
             </div>
           </div>
@@ -170,7 +170,7 @@
           <div class="flex items-center gap-2">
             <button @click="$router.back()"
               class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-3 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">
-              <i class="fas fa-arrow-left mr-2"></i>Retour
+              <i class="fas fa-arrow-left mr-2"></i>{{ $t('tache_detail.back') }}
             </button>
           </div>
         </div>
@@ -262,6 +262,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, onBeforeUnmount, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import api from '@/api/axios';
 import DatePicker from '@vuepic/vue-datepicker';
@@ -279,6 +280,7 @@ import TacheActivityTab from '@/components/taches/tacheDetail/TacheActivityTab.v
 import SousTacheList from '@/components/taches/SousTacheList.vue';
 import DocumentManager from '@/components/documents/DocumentManager.vue';
 
+const { t } = useI18n();
 const route = useRoute();
 const tache = ref(null);
 const loading = ref(true);
@@ -328,15 +330,15 @@ const saveHeaderEdit = async () => {
 }
 
 const tabs = computed(() => [
-  { id: 'details', label: 'Détails', icon: 'fa-info-circle' },
-  { id: 'sous-taches', label: 'Sous-tâches', icon: 'fa-list-check', count: stats.value.sous_taches_count },
-  { id: 'assignees', label: 'Assignés', icon: 'fa-users', count: stats.value.assignees_count },
-  { id: 'attachments', label: 'Fichiers', icon: 'fa-paperclip', count: stats.value.attachments_count },
-  { id: 'documents', label: 'Documents', icon: 'fa-folder-open' },
-  { id: 'links', label: 'Liens', icon: 'fa-link', count: stats.value.links_count },
-  { id: 'results', label: 'Résultats', icon: 'fa-check-circle', count: stats.value.resultats_count },
-  { id: 'comments', label: 'Commentaires', icon: 'fa-comment', count: stats.value.comments_count },
-  { id: 'activity', label: 'Activité', icon: 'fa-history' },
+  { id: 'details', label: t('tache_detail.tabs.details'), icon: 'fa-info-circle' },
+  { id: 'sous-taches', label: t('tache_detail.tabs.subtasks'), icon: 'fa-list-check', count: stats.value.sous_taches_count },
+  { id: 'assignees', label: t('tache_detail.tabs.assignees'), icon: 'fa-users', count: stats.value.assignees_count },
+  { id: 'attachments', label: t('tache_detail.tabs.attachments'), icon: 'fa-paperclip', count: stats.value.attachments_count },
+  { id: 'documents', label: t('tache_detail.tabs.documents'), icon: 'fa-folder-open' },
+  { id: 'links', label: t('tache_detail.tabs.links'), icon: 'fa-link', count: stats.value.links_count },
+  { id: 'results', label: t('tache_detail.tabs.results'), icon: 'fa-check-circle', count: stats.value.resultats_count },
+  { id: 'comments', label: t('tache_detail.tabs.comments'), icon: 'fa-comment', count: stats.value.comments_count },
+  { id: 'activity', label: t('tache_detail.tabs.activity'), icon: 'fa-history' },
 ]);
 
 const fetchTache = async () => {
@@ -368,12 +370,9 @@ const getStatutClass = (statut) => {
 };
 
 const getStatutLabel = (statut) => {
-  const labels = {
-    'a_faire': 'À faire',
-    'en_cours': 'En cours',
-    'termine': 'Terminé',
-  };
-  return labels[statut] || statut;
+  const key = `statuts.${statut}`
+  const label = t(key)
+  return label !== key ? label : statut
 };
 
 const getPrioriteClass = (priorite) => {

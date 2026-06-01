@@ -1,13 +1,13 @@
 <!-- resources\js\components\settings\SessionSettings.vue -->
 <template>
     <div class="session-settings">
-        <h3 class="settings-title">Paramètres de session</h3>
-        
+        <h3 class="settings-title">{{ $t('session_settings.title') }}</h3>
+
         <div class="settings-group">
             <label class="setting-label">
-                <span class="label-text">Délai de déconnexion automatique</span>
+                <span class="label-text">{{ $t('session_settings.timeout_label') }}</span>
                 <span class="label-description">
-                    Durée d'inactivité avant déconnexion automatique
+                    {{ $t('session_settings.timeout_desc') }}
                 </span>
             </label>
             
@@ -24,8 +24,8 @@
             </div>
             
             <div class="custom-timeout" v-if="showCustomInput">
-                <input 
-                    type="number" 
+                <input
+                    type="number"
                     v-model="customTimeout"
                     min="5"
                     max="480"
@@ -33,50 +33,50 @@
                     class="custom-input"
                 />
                 <button @click="setCustomTimeout" class="custom-btn">
-                    Appliquer
+                    {{ $t('session_settings.btn_apply') }}
                 </button>
             </div>
-            
-            <button 
+
+            <button
                 v-if="!showCustomInput"
                 @click="showCustomInput = true"
                 class="custom-toggle"
             >
-                Personnaliser...
+                {{ $t('session_settings.btn_customize') }}
             </button>
         </div>
         
         <div class="session-info">
-            <h4>Informations de session</h4>
+            <h4>{{ $t('session_settings.info_title') }}</h4>
             <div class="info-grid">
                 <div class="info-item">
-                    <span class="info-label">Déconnexion dans :</span>
+                    <span class="info-label">{{ $t('session_settings.info_logout_in') }}</span>
                     <span class="info-value">{{ timeUntilLogout }}</span>
                 </div>
                 <div class="info-item">
-                    <span class="info-label">Dernière activité :</span>
+                    <span class="info-label">{{ $t('session_settings.info_last_activity') }}</span>
                     <span class="info-value">{{ formatTime(lastActivity) }}</span>
                 </div>
                 <div class="info-item">
-                    <span class="info-label">Session active depuis :</span>
+                    <span class="info-label">{{ $t('session_settings.info_active_since') }}</span>
                     <span class="info-value">{{ formatDuration(sessionDuration) }}</span>
                 </div>
             </div>
         </div>
-        
+
         <div class="settings-actions">
             <button @click="refreshSession" class="action-btn refresh">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
-                Rafraîchir la session
+                {{ $t('session_settings.btn_refresh') }}
             </button>
-            
+
             <button @click="logoutAll" class="action-btn logout-all">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
-                Déconnexion de tous les appareils
+                {{ $t('session_settings.btn_logout_all') }}
             </button>
         </div>
     </div>
@@ -84,21 +84,23 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/authStore'
 
+const { t } = useI18n()
 const authStore = useAuthStore()
 const showCustomInput = ref(false)
 const customTimeout = ref(60)
 const timerInterval = ref(null)
 
-const timeoutOptions = [
-    { label: '15 minutes', value: 15 },
-    { label: '30 minutes', value: 30 },
-    { label: '1 heure', value: 60 },
-    { label: '2 heures', value: 120 },
-    { label: '4 heures', value: 240 },
-    { label: 'Jamais', value: 0 }
-]
+const timeoutOptions = computed(() => [
+    { label: t('session_settings.opt_15min'), value: 15 },
+    { label: t('session_settings.opt_30min'), value: 30 },
+    { label: t('session_settings.opt_1h'), value: 60 },
+    { label: t('session_settings.opt_2h'), value: 120 },
+    { label: t('session_settings.opt_4h'), value: 240 },
+    { label: t('session_settings.opt_never'), value: 0 }
+])
 
 const selectedTimeout = computed(() => {
     return authStore.getTimeoutDuration()
@@ -113,7 +115,7 @@ const timeUntilLogout = computed(() => {
     const inactiveTime = now - authStore.lastActivity
     const timeLeft = authStore.inactivityTimeout - inactiveTime
     
-    if (timeLeft <= 0) return 'Maintenant'
+    if (timeLeft <= 0) return t('session_settings.now')
     if (timeLeft < 60000) return `${Math.floor(timeLeft / 1000)} sec`
     
     const minutes = Math.floor(timeLeft / 60000)
@@ -144,7 +146,7 @@ const refreshSession = () => {
 }
 
 const logoutAll = async () => {
-    if (confirm('Êtes-vous sûr de vouloir vous déconnecter de tous les appareils ?')) {
+    if (confirm(t('session_settings.confirm_logout_all'))) {
         await authStore.logoutAllDevices()
     }
 }

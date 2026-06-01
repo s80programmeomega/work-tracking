@@ -5,14 +5,14 @@
       <div class="py-6 flex flex-wrap items-center justify-between gap-3">
         <div class="min-w-0">
           <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Workspaces</h1>
-          <p class="text-gray-600 dark:text-gray-400 mt-1">Tous vos espaces de travail en un seul endroit</p>
+          <p class="text-gray-600 dark:text-gray-400 mt-1">{{ $t('workspaces_index.subtitle') }}</p>
         </div>
         <div class="flex flex-wrap items-center gap-3">
           <div class="relative">
             <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            <input v-model="searchQuery" type="text" placeholder="Rechercher des workspaces..."
+            <input v-model="searchQuery" type="text" :placeholder="$t('workspaces_index.search_placeholder')"
               class="pl-10 pr-4 py-2 w-64 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
           </div>
           <button @click="$router.push({ name: 'workspaces.create' })"
@@ -20,7 +20,7 @@
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
-            Nouveau workspace
+            {{ $t('workspaces_index.new_workspace') }}
           </button>
         </div>
       </div>
@@ -52,7 +52,7 @@
               </svg>
             </div>
             <div>
-              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Projets</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">{{ $t('workspaces_index.stat_projects') }}</p>
               <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.totalProjects }}</p>
             </div>
           </div>
@@ -66,7 +66,7 @@
               </svg>
             </div>
             <div>
-              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Membres</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">{{ $t('workspaces_index.stat_members') }}</p>
               <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.totalMembers }}</p>
             </div>
           </div>
@@ -80,7 +80,7 @@
               </svg>
             </div>
             <div>
-              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Actifs</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">{{ $t('workspaces_index.stat_active') }}</p>
               <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.active }}</p>
             </div>
           </div>
@@ -92,27 +92,27 @@
         <div class="flex items-center space-x-2">
           <button @click="viewMode = 'grid'" :class="[
             'px-4 py-2 rounded-3 text-sm font-medium transition-colors',
-            viewMode === 'grid' 
+            viewMode === 'grid'
               ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
               : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
           ]">
-            Grille
+            {{ $t('workspaces_index.grid') }}
           </button>
           <button @click="viewMode = 'list'" :class="[
             'px-4 py-2 rounded-3 text-sm font-medium transition-colors',
-            viewMode === 'list' 
+            viewMode === 'list'
               ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
               : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
           ]">
-            Liste
+            {{ $t('workspaces_index.list') }}
           </button>
         </div>
         
         <select v-model="filterActive"
           class="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-          <option value="all">Tous les workspaces</option>
-          <option value="active">Actifs seulement</option>
-          <option value="inactive">Inactifs seulement</option>
+          <option value="all">{{ $t('workspaces_index.all_workspaces') }}</option>
+          <option value="active">{{ $t('workspaces_index.active_only') }}</option>
+          <option value="inactive">{{ $t('workspaces_index.inactive_only') }}</option>
         </select>
       </div>
 
@@ -120,7 +120,7 @@
       <div v-if="loading" class="flex items-center justify-center py-20">
         <div class="text-center">
           <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p class="text-gray-600 dark:text-gray-400">Chargement des workspaces...</p>
+          <p class="text-gray-600 dark:text-gray-400">{{ $t('workspaces_index.loading') }}</p>
         </div>
       </div>
 
@@ -133,17 +133,17 @@
             </svg>
           </div>
           <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-            {{ searchQuery ? 'Aucun workspace trouvé' : 'Aucun workspace pour le moment' }}
+            {{ searchQuery ? $t('workspaces_index.empty_title_search') : $t('workspaces_index.empty_title') }}
           </h3>
           <p class="text-gray-600 dark:text-gray-400 mb-6">
-            {{ searchQuery ? 'Essayez une autre recherche' : 'Créez votre premier workspace pour commencer' }}
+            {{ searchQuery ? $t('workspaces_index.empty_desc_search') : $t('workspaces_index.empty_desc') }}
           </p>
           <button v-if="!searchQuery" @click="$router.push({ name: 'workspaces.create' })"
             class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-3 transition-colors font-medium">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
-            Créer un workspace
+            {{ $t('workspaces_index.create_btn') }}
           </button>
         </div>
       </div>
@@ -191,7 +191,7 @@
                       ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
                       : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
                   ]">
-                    {{ workspace.is_active ? '● Actif' : '● Inactif' }}
+                    {{ workspace.is_active ? `● ${$t('workspaces_index.status_active')}` : `● ${$t('workspaces_index.status_inactive')}` }}
                   </span>
                   <span class="text-xs text-gray-500 dark:text-gray-400">
                     {{ formatDate(workspace.created_at) }}
@@ -202,7 +202,7 @@
 
             <!-- Description -->
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 line-clamp-2">
-              {{ workspace.description || 'Aucune description' }}
+              {{ workspace.description || $t('workspaces_index.no_description') }}
             </p>
 
             <!-- Stats -->
@@ -216,11 +216,11 @@
                     </svg>
                   </div>
                   <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Projets</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('workspaces_index.projects') }}</p>
                     <p class="text-sm font-medium text-gray-900 dark:text-white">{{ workspace.projets_count || 0 }}</p>
                   </div>
                 </div>
-                
+
                 <!-- Members -->
                 <div class="flex items-center space-x-1.5">
                   <div class="w-8 h-8 rounded-md bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center">
@@ -229,7 +229,7 @@
                     </svg>
                   </div>
                   <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Membres</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('workspaces_index.members') }}</p>
                     <p class="text-sm font-medium text-gray-900 dark:text-white">{{ workspace.member_count || 0 }}</p>
                   </div>
                 </div>
@@ -299,17 +299,17 @@
                           ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
                           : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
                       ]">
-                        {{ workspace.is_active ? 'Actif' : 'Inactif' }}
+                        {{ workspace.is_active ? $t('workspaces_index.status_active') : $t('workspaces_index.status_inactive') }}
                       </span>
                     </div>
                     
                     <p class="text-sm text-gray-600 dark:text-gray-400 truncate">
-                      {{ workspace.description || 'Aucune description' }}
+                      {{ workspace.description || $t('workspaces_index.no_description') }}
                     </p>
-                    
+
                     <div class="flex items-center space-x-4 mt-2">
                       <span class="text-xs text-gray-500 dark:text-gray-400">
-                        Créé le {{ formatDate(workspace.created_at) }}
+                        {{ $t('workspaces_index.created_on') }} {{ formatDate(workspace.created_at) }}
                       </span>
                     </div>
                   </div>
@@ -319,11 +319,11 @@
                 <div class="hidden md:flex items-center space-x-6 mr-8">
                   <div class="text-center">
                     <p class="text-sm font-medium text-gray-900 dark:text-white">{{ workspace.projets_count || 0 }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Projets</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('workspaces_index.projects') }}</p>
                   </div>
                   <div class="text-center">
                     <p class="text-sm font-medium text-gray-900 dark:text-white">{{ workspace.member_count || 0 }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Membres</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('workspaces_index.members') }}</p>
                   </div>
                 </div>
                 

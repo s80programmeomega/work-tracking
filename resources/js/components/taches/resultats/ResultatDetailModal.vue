@@ -1,15 +1,15 @@
 <template>
   <div dusk="resultat-detail-modal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <!-- Backdrop -->
-    <div class="fixed inset-0 bg-gray-900/75 transition-opacity" @click="$emit('close')"></div>
+    <div class="fixed inset-0 bg-black/30 transition-opacity" @click="$emit('close')"></div>
 
     <!-- Modal -->
     <div class="flex min-h-screen items-center justify-center p-4">
-      <div
+      <div ref="dialogRef" :style="dragStyle"
         class="relative bg-white dark:bg-gray-900 rounded-3 w-full max-w-5xl max-h-[90vh] overflow-hidden transform transition-all">
         <!-- Header amélioré -->
-        <div
-          class="sticky top-0 z-20 p-6 border-b border-gray-200 dark:border-gray-700 ">
+        <div ref="handleRef"
+          class="sticky top-0 z-20 p-6 border-b border-gray-200 dark:border-gray-700 cursor-move select-none">
           <div class="flex items-start justify-between">
             <div class="flex-1">
               <div class="flex items-center gap-2 mb-2">
@@ -719,6 +719,10 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, h } from 'vue'
+import { useDraggable } from '@/composables/useDraggable'
+
+const { dialogRef, handleRef, dragStyle, attachHandle } = useDraggable()
+onMounted(attachHandle)
 
 const props = defineProps({
   resultat: {

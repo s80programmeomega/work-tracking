@@ -67,10 +67,10 @@
                     <p
                         class="text-sm font-semibold text-gray-900 dark:text-white truncate"
                     >
-                        {{ currentWorkspace?.nom || "Mon Workspace" }}
+                        {{ currentWorkspace?.nom || $t('sidebar.my_workspace') }}
                     </p>
                     <p class="text-xs text-gray-500 dark:text-gray-400">
-                        {{ workspaceProjectCount }} projets
+                        {{ $t('workspaces.projects') }}: {{ workspaceProjectCount }}
                     </p>
                 </div>
                 <ChevronDownIcon
@@ -94,7 +94,7 @@
                         <p
                             class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2"
                         >
-                            Filtre Dashboard
+                            {{ $t('sidebar.dashboard_filter') }}
                         </p>
                         <button
                             @click="selectWorkspaceForDashboard('all')"
@@ -106,7 +106,7 @@
                             ]"
                         >
                             <GlobeIcon class="w-3 h-3" />
-                            <span>Tous les workspaces</span>
+                            <span>{{ $t('sidebar.all_workspaces') }}</span>
                             <CheckIcon
                                 v-if="selectedDashboardWorkspace === 'all'"
                                 class="w-3 h-3 ml-auto"
@@ -121,7 +121,7 @@
                         <p
                             class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase"
                         >
-                            Mes Workspaces
+                            {{ $t('sidebar.my_workspaces') }}
                         </p>
                     </div>
 
@@ -142,12 +142,12 @@
                                 <p
                                     class="text-sm font-medium text-gray-900 dark:text-white"
                                 >
-                                    {{ workspace?.nom || "Workspace inconnu" }}
+                                    {{ workspace?.nom || $t('sidebar.workspace_unknown') }}
                                 </p>
                                 <p
                                     class="text-xs text-gray-500 dark:text-gray-400"
                                 >
-                                    {{ workspace?.projets_count || 0 }} projets
+                                    {{ $t('workspaces.projects') }}: {{ workspace?.projets_count || 0 }}
                                 </p>
                             </div>
 
@@ -172,8 +172,8 @@
                                 ]"
                                 :title="
                                     selectedDashboardWorkspace === workspace?.id
-                                        ? 'Filtre actif'
-                                        : 'Filtrer le dashboard'
+                                        ? $t('sidebar.filter_active')
+                                        : $t('sidebar.filter_dashboard')
                                 "
                             >
                                 <FilterIcon class="w-3 h-3" />
@@ -190,7 +190,7 @@
                             class="flex items-center gap-2 text-sm text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 transition-colors"
                         >
                             <PlusIcon class="w-4 h-4" />
-                            Créer un workspace
+                            {{ $t('sidebar.create_workspace') }}
                         </router-link>
 
                         <!-- Indicateur filtre actif -->
@@ -202,11 +202,11 @@
                             class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/50 px-2 py-1 rounded"
                         >
                             <FilterIcon class="w-3 h-3" />
-                            <span>Dashboard filtré</span>
+                            <span>{{ $t('sidebar.dashboard_filtered') }}</span>
                             <button
                                 @click="clearDashboardFilter"
                                 class="ml-auto text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300"
-                                title="Effacer le filtre"
+                                :title="$t('sidebar.clear_filter')"
                             >
                                 <XIcon class="w-3 h-3" />
                             </button>
@@ -480,7 +480,7 @@
                     <SettingsIcon
                         class="menu-item-icon-inactive w-5 h-5 shrink-0"
                     />
-                    <span class="menu-item-text flex-1">Paramètres</span>
+                    <span class="menu-item-text flex-1">{{ $t('navigation.settings') }}</span>
                 </router-link>
                 <router-link
                     v-if="
@@ -511,7 +511,7 @@
                             d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
                         />
                     </svg>
-                    <span class="menu-item-text flex-1">Abonnement</span>
+                    <span class="menu-item-text flex-1">{{ $t('navigation.subscription') }}</span>
                 </router-link>
             </div>
         </div>
@@ -543,6 +543,7 @@ import TaskIcon from "@/icons/TaskIcon.vue";
 import ClipboardCheckIcon from "@/icons/ClipboardCheckIcon.vue";
 import UsersIcon from "@/icons/UsersIcon.vue";
 import ShieldIcon from "@/icons/ShieldIcon.vue";
+import { useI18n } from "vue-i18n";
 import { useSidebar } from "@/composables/useSidebar";
 import api from "@/api/axios";
 import { useAuthStore } from "@/stores/authStore";
@@ -554,6 +555,7 @@ const LogoDark = new URL("@/assets/images/logo/Logo-dark.jpg", import.meta.url)
 const Logo = new URL("@/assets/images/logo/Logo.png", import.meta.url).href;
 const Icon = new URL("@/assets/images/logo/icon.jpg", import.meta.url).href;
 
+const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const { isExpanded, isMobileOpen, isHovered, openSubmenu, toggleMobileSidebar } = useSidebar();
@@ -603,7 +605,7 @@ const filteredWorkspaces = computed(() => {
         .filter((workspace) => workspace && workspace.id)
         .map((workspace) => ({
             id: workspace.id,
-            nom: workspace.nom || "Workspace sans nom",
+            nom: workspace.nom || t('sidebar.workspace_unknown'),
             projets_count:
                 workspace.projets_count ?? workspace.projet_count ?? 0,
         }));
@@ -735,89 +737,60 @@ const handleWorkspaceChange = (event) => {
 
 const menuGroups = computed(() => [
     {
-        title: "Principal",
+        title: t('sidebar.principal'),
         items: [
             {
                 icon: GridIcon,
-                name: "Dashboard",
+                name: t('navigation.dashboard'),
                 path: "/",
             },
             {
                 icon: BoxCubeIcon,
-                name: "Workspaces",
+                name: t('navigation.workspaces'),
                 path: "/workspaces",
             },
         ],
     },
     {
-        title: "Gestion de Projets",
+        title: t('sidebar.project_management'),
         items: [
             {
                 icon: FolderIcon,
-                name: "Projets",
+                name: t('navigation.projects'),
                 subItems: [
                     {
-                        name: "Tableau de bord",
+                        name: t('sidebar.all_projects'),
                         path: "/projets/list/all",
                         superAdminOnly: true,
                     },
-                    { name: "Mes projets", path: "/projets/mes-projets", superAdminHidden: true },
-                    { name: "Projets archivés", path: "/projets/archives" },
+                    { name: t('sidebar.my_projects'), path: "/projets/mes-projets", superAdminHidden: true },
+                    { name: t('sidebar.archived_projects'), path: "/projets/archives" },
                 ],
             },
             {
                 icon: ListIcon,
-                name: "Activités",
+                name: t('navigation.activities'),
                 subItems: [
                     {
-                        name: "Toutes les activités",
+                        name: t('sidebar.all_activities'),
                         path: "/activites/all/activity",
                         superAdminOnly: true,
                     },
-                    { name: "Mes activités", path: "/activites/mes-activites", superAdminHidden: true },
+                    { name: t('sidebar.my_activities'), path: "/activites/mes-activites", superAdminHidden: true },
                 ],
             },
             // ==================== MISE À JOUR DE AppSidebar.vue ====================
 
             // {
             //     icon: TaskIcon,
-            //     name: 'Tâches',
+            //     name: t('navigation.tasks'),
             //     subItems: [
             //         {
-            //             name: 'Toutes les tâches',
+            //             name: t('sidebar.all_tasks'),
             //             path: '/taches',
             //             superAdminOnly: false
             //         },
-            //         {
-            //             name: 'Mes tâches assignées',
-            //             path: '/taches/assignees',
-            //             description: 'Tâches où je suis intervenant',
-            //             icon: '👤'
-            //         },
-            //         // ✅ NOUVEAU : Tâches où je suis responsable
-            //         {
-            //             name: 'Mes tâches en responsabilité',
-            //             path: '/taches/responsable',
-            //             description: 'Tâches dont je suis le responsable',
-            //             icon: '👑',
-            //             badge: 'new', // Optionnel : badge "nouveau"
-            //             badgeColor: 'purple'
-            //         },
-            //         {
-            //             name: 'Tâches en attente de validation',
-            //             path: '/taches/resultats/en-attente',
-            //             icon: '⏳'
-            //         },
-            //         {
-            //             name: 'En Attente de Collègues',
-            //             path: '/taches/waiting-colleagues',
-            //             icon: '🤝'
-            //         },
-            //         {
-            //             name: 'Vue Coordination',
-            //             path: '/taches/coordination',
-            //             icon: '🎯'
-            //         },
+            //         ...
             //     ],
             // },
 
@@ -825,83 +798,61 @@ const menuGroups = computed(() => [
 
             {
                 icon: TaskIcon,
-                name: "Tâches",
+                name: t('navigation.tasks'),
                 subItems: [
                     {
-                        name: "Toutes les tâches",
+                        name: t('sidebar.all_tasks'),
                         path: "/taches",
                         requiresPermission: "canViewAllTasks",
                     },
                     {
-                        name: "En tant que responsable",
+                        name: t('sidebar.as_responsible'),
                         path: "/taches/responsable",
                         icon: "👑",
                         badge: "new",
                         superAdminHidden: true,
                     },
                     {
-                        name: "En tant qu'intervenant",
+                        name: t('sidebar.as_intervenant'),
                         path: "/taches/assignees",
                         icon: "👤",
                         superAdminHidden: true,
                     },
                     {
-                        name: "Mes validations en attente",
+                        name: t('sidebar.my_pending_validations'),
                         path: "/mes-validations",
                         icon: "⏳",
                         requiresPermission: "canSubmitResult",
                         superAdminHidden: true,
                     },
-                    // {
-                    //     name: 'En attente de collègues',
-                    //     path: '/taches/waiting-colleagues',
-                    //     icon: '🤝'
-                    // },
-                    // {
-                    //     name: 'Vue coordination',
-                    //     path: '/taches/coordination',
-                    //     icon: '🎯'
-                    // },
                 ],
             },
         ],
     },
     {
-        title: "Évaluation & Validation",
+        title: t('sidebar.evaluation_validation'),
         items: [
-            // {
-            //     icon: ClipboardCheckIcon,
-            //     name: 'Validations',
-            //     badge: '8',
-            //     subItems: [
-            //         { name: 'En attente N1', path: '/validations/n1', count: 5 },
-            //         { name: 'En attente N2', path: '/validations/n2', count: 3 },
-            //         { name: 'Historique', path: '/validations/historique' },
-            //     ],
-            // },
             {
                 icon: ClipboardCheckIcon,
-                name: "Évaluations",
+                name: t('navigation.evaluations'),
                 subItems: [
                     {
-                        name: "Tableau de bord",
+                        name: t('sidebar.evaluation_dashboard'),
                         path: "/evaluations/tableau-de-bord",
                         requiresPermission: "canViewEvaluationDashboard",
                     },
                     {
-                        name: "Validations à traiter",
+                        name: t('sidebar.validations_to_process'),
                         path: "/validations/a-traiter",
                         requiresPermission: "canViewPendingValidations",
                     },
-                    // { name: 'Rapport hebdomadaire', path: '/evaluations/rapport-hebdomadaire' },
                     {
-                        name: "Fiches d'évaluation",
+                        name: t('sidebar.evaluation_sheets'),
                         path: "/evaluations/fiches",
                         requiresPermission: "canViewFicheEvaluation",
                     },
-                    // { name: 'Performance d\'équipe', path: '/evaluations/performance' },
                     {
-                        name: "Toutes les tâches",
+                        name: t('sidebar.workspace_tasks'),
                         path: "/workspace/taches",
                         requiresPermission: "canViewWorkspaceTaches",
                     },
@@ -910,76 +861,76 @@ const menuGroups = computed(() => [
         ],
     },
     {
-        title: "Collaboration",
+        title: t('sidebar.collaboration'),
         items: [
             {
                 icon: ChatIcon,
-                name: "Équipes",
+                name: t('navigation.teams'),
                 subItems: [
-                    { name: "Mes équipes", path: "/teams", superAdminHidden: true },
+                    { name: t('sidebar.my_teams'), path: "/teams", superAdminHidden: true },
                 ],
             },
             {
                 icon: UsersIcon,
-                name: "Utilisateurs",
+                name: t('navigation.users'),
                 subItems: [
-                    { name: "Invitations", path: "/users/invitations", superAdminHidden: true },
+                    { name: t('sidebar.invitations'), path: "/users/invitations", superAdminHidden: true },
                 ],
             },
             {
                 icon: MailIcon,
-                name: "Notifications",
+                name: t('navigation.notifications'),
                 path: "/notifications",
                 badge: "",
             },
         ],
     },
     {
-        title: "Documentation & Ressources",
+        title: t('sidebar.docs_resources'),
         items: [
             {
                 icon: FolderIcon,
-                name: "Documents",
-                subItems: [{ name: "Tous les Documents", path: "/documents" }],
+                name: t('navigation.documents'),
+                subItems: [{ name: t('sidebar.all_documents'), path: "/documents" }],
             },
         ],
     },
     {
-        title: "Administration",
+        title: t('sidebar.administration'),
         superAdminOnly: true,
         items: [
             {
                 icon: ShieldIcon,
-                name: "Platform Dashboard",
+                name: t('navigation.platform_dashboard'),
                 path: "/admin/dashboard",
                 superAdminOnly: true,
             },
             {
                 icon: UsersIcon,
-                name: "Workspaces",
+                name: t('navigation.workspaces'),
                 path: "/admin/workspaces",
                 superAdminOnly: true,
             },
             {
                 icon: UsersIcon,
-                name: "Utilisateurs",
+                name: t('navigation.users'),
                 path: "/admin/users",
                 superAdminOnly: true,
             },
             {
                 icon: ShieldIcon,
-                name: "Rôles & Permissions",
+                name: t('navigation.roles_permissions'),
                 path: "/admin/roles",
                 superAdminOnly: true,
             },
         ],
     },
     {
-        title: "Autres",
+        title: t('sidebar.other'),
         items: [
             {
                 icon: UserCircleIcon,
-                name: "Mon Profil",
+                name: t('navigation.profile'),
                 path: "/profile",
                 superAdminHidden: true,
             },

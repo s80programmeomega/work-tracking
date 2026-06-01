@@ -60,7 +60,7 @@
                 <LogoutIcon
                     class="text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200"
                 />
-                Sign out
+                {{ $t('user_menu.sign_out') }}
             </router-link>
         </div>
         <!-- Dropdown End -->
@@ -77,8 +77,10 @@ import {
 } from "@/icons";
 import { RouterLink, useRouter } from "vue-router";
 import { ref, onMounted, onUnmounted, computed } from "vue";
+import { useI18n } from "vue-i18n";
 import { useAuth } from "@/composables/useAuth";
 
+const { t } = useI18n();
 const router = useRouter();
 const { logout, user } = useAuth();
 
@@ -88,11 +90,11 @@ const dropdownRef = ref(null);
 const userName = computed(() => user.value?.nom || "Utilisateur");
 const userEmail = computed(() => user.value?.email || "");
 
-const menuItems = [
-    { href: "/profile", icon: UserCircleIcon, text: "Edit profile" },
-    { href: "/chat", icon: SettingsIcon, text: "Account settings" },
-    { href: "/profile", icon: InfoCircleIcon, text: "Support" },
-];
+const menuItems = computed(() => [
+    { href: "/profile", icon: UserCircleIcon, text: t('user_menu.edit_profile') },
+    { href: "/settings", icon: SettingsIcon, text: t('user_menu.account_settings') },
+    { href: "/profile", icon: InfoCircleIcon, text: t('user_menu.support') },
+]);
 
 const toggleDropdown = () => {
     dropdownOpen.value = !dropdownOpen.value;

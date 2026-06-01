@@ -1,11 +1,13 @@
 import { ref, computed } from 'vue';
 import api from '../api/axios';
 
+// État partagé entre toutes les instances du composable
+const notifications = ref([]);
+const unreadCount = ref(0);
+const loading = ref(false);
+const error = ref(null);
+
 export function useNotifications() {
-    const notifications = ref([]);
-    const unreadCount = ref(0);
-    const loading = ref(false);
-    const error = ref(null);
 
     const showNotification = (message, type = 'info', duration = 5000) => {
         const id = Date.now()

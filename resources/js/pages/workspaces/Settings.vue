@@ -23,7 +23,7 @@
                             </router-link>
                             <div>
                                 <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
-                                    Paramètres du workspace
+                                    {{ $t('ws_settings.title') }}
                                 </h1>
                                 <p class="text-gray-600 dark:text-gray-400 mt-1">
                                     {{ workspace.nom }}
@@ -62,47 +62,47 @@
                     <div v-if="activeTab === 'general'" class="space-y-6">
                         <div class="bg-white dark:bg-gray-800 rounded-3 shadow p-6">
                             <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">
-                                Paramètres généraux
+                                {{ $t('ws_settings.general.title') }}
                             </h2>
 
                             <div class="space-y-6">
                                 <!-- Workspace Visibility -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        Visibilité du workspace
+                                        {{ $t('ws_settings.general.visibility_label') }}
                                     </label>
                                     <select
                                         v-model="settings.visibility"
                                         class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-brand-500 dark:bg-gray-700 dark:text-white"
                                     >
-                                        <option value="private">Privé - Uniquement les membres invités</option>
-                                        <option value="internal">Interne - Tous les utilisateurs de l'organisation</option>
-                                        <option value="public">Public - Visible par tous</option>
+                                        <option value="private">{{ $t('ws_settings.general.visibility_private') }}</option>
+                                        <option value="internal">{{ $t('ws_settings.general.visibility_internal') }}</option>
+                                        <option value="public">{{ $t('ws_settings.general.visibility_public') }}</option>
                                     </select>
                                     <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                                        Contrôlez qui peut voir et accéder à ce workspace
+                                        {{ $t('ws_settings.general.visibility_hint') }}
                                     </p>
                                 </div>
 
                                 <!-- Default Project Settings -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        Visibilité par défaut des nouveaux projets
+                                        {{ $t('ws_settings.general.default_project_visibility') }}
                                     </label>
                                     <select
                                         v-model="settings.default_project_visibility"
                                         class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-brand-500 dark:bg-gray-700 dark:text-white"
                                     >
-                                        <option value="public">Public</option>
-                                        <option value="team">Équipe</option>
-                                        <option value="private">Privé</option>
+                                        <option value="public">{{ $t('ws_settings.general.visibility_public_short') }}</option>
+                                        <option value="team">{{ $t('ws_settings.general.visibility_team') }}</option>
+                                        <option value="private">{{ $t('ws_settings.general.visibility_private_short') }}</option>
                                     </select>
                                 </div>
 
                                 <!-- Time Zone -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        Fuseau horaire
+                                        {{ $t('ws_settings.general.timezone') }}
                                     </label>
                                     <select
                                         v-model="settings.timezone"
@@ -117,7 +117,7 @@
                                 <!-- Language -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        Langue par défaut
+                                        {{ $t('ws_settings.general.default_language') }}
                                     </label>
                                     <select
                                         v-model="settings.language"
@@ -135,7 +135,7 @@
                                     :disabled="saving"
                                     class="px-6 py-3 bg-brand-600 text-white rounded-3 hover:bg-brand-700 disabled:opacity-50 transition-colors"
                                 >
-                                    {{ saving ? 'Enregistrement...' : 'Enregistrer' }}
+                                    {{ saving ? $t('common.saving') : $t('common.save') }}
                                 </button>
                             </div>
                         </div>
@@ -145,7 +145,7 @@
                     <div v-if="activeTab === 'permissions'" class="space-y-6">
                         <div class="bg-white dark:bg-gray-800 rounded-3 shadow p-6">
                             <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">
-                                Permissions des membres
+                                {{ $t('ws_settings.permissions.title') }}
                             </h2>
 
                             <div class="space-y-4">
@@ -156,9 +156,9 @@
                                         class="mt-1 w-5 h-5 text-brand-600 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded focus:ring-brand-500"
                                     />
                                     <div class="flex-1">
-                                        <p class="font-medium text-gray-900 dark:text-white">Créer des projets</p>
+                                        <p class="font-medium text-gray-900 dark:text-white">{{ $t('ws_settings.permissions.create_projects') }}</p>
                                         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                            Permet aux membres de créer de nouveaux projets dans ce workspace
+                                            {{ $t('ws_settings.permissions.create_projects_hint') }}
                                         </p>
                                     </div>
                                 </label>
@@ -170,9 +170,9 @@
                                         class="mt-1 w-5 h-5 text-brand-600 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded focus:ring-brand-500"
                                     />
                                     <div class="flex-1">
-                                        <p class="font-medium text-gray-900 dark:text-white">Inviter des membres</p>
+                                        <p class="font-medium text-gray-900 dark:text-white">{{ $t('ws_settings.permissions.invite_members') }}</p>
                                         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                            Permet aux membres d'inviter d'autres utilisateurs au workspace
+                                            {{ $t('ws_settings.permissions.invite_members_hint') }}
                                         </p>
                                     </div>
                                 </label>
@@ -184,9 +184,9 @@
                                         class="mt-1 w-5 h-5 text-brand-600 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded focus:ring-brand-500"
                                     />
                                     <div class="flex-1">
-                                        <p class="font-medium text-gray-900 dark:text-white">Supprimer des projets</p>
+                                        <p class="font-medium text-gray-900 dark:text-white">{{ $t('ws_settings.permissions.delete_projects') }}</p>
                                         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                            Permet aux membres de supprimer des projets
+                                            {{ $t('ws_settings.permissions.delete_projects_hint') }}
                                         </p>
                                     </div>
                                 </label>
@@ -198,9 +198,9 @@
                                         class="mt-1 w-5 h-5 text-brand-600 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded focus:ring-brand-500"
                                     />
                                     <div class="flex-1">
-                                        <p class="font-medium text-gray-900 dark:text-white">Validation des tâches requise</p>
+                                        <p class="font-medium text-gray-900 dark:text-white">{{ $t('ws_settings.permissions.require_task_validation') }}</p>
                                         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                            Les tâches créées nécessitent une validation avant d'être actives
+                                            {{ $t('ws_settings.permissions.require_task_validation_hint') }}
                                         </p>
                                     </div>
                                 </label>
@@ -212,9 +212,9 @@
                                         class="mt-1 w-5 h-5 text-brand-600 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded focus:ring-brand-500"
                                     />
                                     <div class="flex-1">
-                                        <p class="font-medium text-gray-900 dark:text-white">Approbation des congés</p>
+                                        <p class="font-medium text-gray-900 dark:text-white">{{ $t('ws_settings.permissions.approve_time_off') }}</p>
                                         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                            Les demandes de congés nécessitent une approbation
+                                            {{ $t('ws_settings.permissions.approve_time_off_hint') }}
                                         </p>
                                     </div>
                                 </label>
@@ -226,7 +226,7 @@
                                     :disabled="saving"
                                     class="px-6 py-3 bg-brand-600 text-white rounded-3 hover:bg-brand-700 disabled:opacity-50 transition-colors"
                                 >
-                                    {{ saving ? 'Enregistrement...' : 'Enregistrer' }}
+                                    {{ saving ? $t('common.saving') : $t('common.save') }}
                                 </button>
                             </div>
                         </div>
@@ -236,7 +236,7 @@
                     <div v-if="activeTab === 'notifications'" class="space-y-6">
                         <div class="bg-white dark:bg-gray-800 rounded-3 shadow p-6">
                             <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">
-                                Paramètres de notification
+                                {{ $t('ws_settings.notifications.title') }}
                             </h2>
 
                             <div class="space-y-4">
@@ -247,9 +247,9 @@
                                         class="mt-1 w-5 h-5 text-brand-600 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded focus:ring-brand-500"
                                     />
                                     <div class="flex-1">
-                                        <p class="font-medium text-gray-900 dark:text-white">Nouveau membre</p>
+                                        <p class="font-medium text-gray-900 dark:text-white">{{ $t('ws_settings.notifications.new_member') }}</p>
                                         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                            Notifier tous les membres quand quelqu'un rejoint le workspace
+                                            {{ $t('ws_settings.notifications.new_member_hint') }}
                                         </p>
                                     </div>
                                 </label>
@@ -261,9 +261,9 @@
                                         class="mt-1 w-5 h-5 text-brand-600 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded focus:ring-brand-500"
                                     />
                                     <div class="flex-1">
-                                        <p class="font-medium text-gray-900 dark:text-white">Nouveau projet</p>
+                                        <p class="font-medium text-gray-900 dark:text-white">{{ $t('ws_settings.notifications.new_project') }}</p>
                                         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                            Notifier les membres quand un nouveau projet est créé
+                                            {{ $t('ws_settings.notifications.new_project_hint') }}
                                         </p>
                                     </div>
                                 </label>
@@ -275,9 +275,9 @@
                                         class="mt-1 w-5 h-5 text-brand-600 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded focus:ring-brand-500"
                                     />
                                     <div class="flex-1">
-                                        <p class="font-medium text-gray-900 dark:text-white">Tâche assignée</p>
+                                        <p class="font-medium text-gray-900 dark:text-white">{{ $t('ws_settings.notifications.task_assigned') }}</p>
                                         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                            Notifier quand une tâche est assignée
+                                            {{ $t('ws_settings.notifications.task_assigned_hint') }}
                                         </p>
                                     </div>
                                 </label>
@@ -289,9 +289,9 @@
                                         class="mt-1 w-5 h-5 text-brand-600 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded focus:ring-brand-500"
                                     />
                                     <div class="flex-1">
-                                        <p class="font-medium text-gray-900 dark:text-white">Échéance proche</p>
+                                        <p class="font-medium text-gray-900 dark:text-white">{{ $t('ws_settings.notifications.deadline_approaching') }}</p>
                                         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                            Notifier quand une échéance approche (24h avant)
+                                            {{ $t('ws_settings.notifications.deadline_approaching_hint') }}
                                         </p>
                                     </div>
                                 </label>
@@ -303,9 +303,9 @@
                                         class="mt-1 w-5 h-5 text-brand-600 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded focus:ring-brand-500"
                                     />
                                     <div class="flex-1">
-                                        <p class="font-medium text-gray-900 dark:text-white">Résumé hebdomadaire</p>
+                                        <p class="font-medium text-gray-900 dark:text-white">{{ $t('ws_settings.notifications.weekly_digest') }}</p>
                                         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                            Envoyer un résumé hebdomadaire de l'activité du workspace
+                                            {{ $t('ws_settings.notifications.weekly_digest_hint') }}
                                         </p>
                                     </div>
                                 </label>
@@ -317,7 +317,7 @@
                                     :disabled="saving"
                                     class="px-6 py-3 bg-brand-600 text-white rounded-3 hover:bg-brand-700 disabled:opacity-50 transition-colors"
                                 >
-                                    {{ saving ? 'Enregistrement...' : 'Enregistrer' }}
+                                    {{ saving ? $t('common.saving') : $t('common.save') }}
                                 </button>
                             </div>
                         </div>
@@ -327,7 +327,7 @@
                     <div v-if="activeTab === 'danger'" class="space-y-6">
                         <div class="bg-white dark:bg-gray-800 rounded-3 shadow border-2 border-red-200 dark:border-red-800 p-6">
                             <h2 class="text-xl font-semibold text-red-600 dark:text-red-400 mb-6">
-                                Zone dangereuse
+                                {{ $t('ws_settings.danger.title') }}
                             </h2>
 
                             <div class="space-y-6">
@@ -335,17 +335,17 @@
                                 <div class="flex items-start justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-3">
                                     <div class="flex-1">
                                         <h3 class="font-medium text-gray-900 dark:text-white">
-                                            Archiver le workspace
+                                            {{ $t('ws_settings.danger.archive_title') }}
                                         </h3>
                                         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                            Le workspace ne sera plus accessible mais les données seront conservées
+                                            {{ $t('ws_settings.danger.archive_desc') }}
                                         </p>
                                     </div>
                                     <button
                                         @click="showArchiveModal = true"
                                         class="px-4 py-2 bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400 rounded-3 hover:bg-yellow-200 dark:hover:bg-yellow-900/40 transition-colors"
                                     >
-                                        Archiver
+                                        {{ $t('common.archive') }}
                                     </button>
                                 </div>
 
@@ -353,17 +353,17 @@
                                 <div class="flex items-start justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-3">
                                     <div class="flex-1">
                                         <h3 class="font-medium text-gray-900 dark:text-white">
-                                            Transférer la propriété
+                                            {{ $t('ws_settings.danger.transfer_title') }}
                                         </h3>
                                         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                            Transférer la propriété du workspace à un autre membre
+                                            {{ $t('ws_settings.danger.transfer_desc') }}
                                         </p>
                                     </div>
                                     <button
                                         @click="showTransferModal = true"
                                         class="px-4 py-2 bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 rounded-3 hover:bg-blue-200 dark:hover:bg-blue-900/40 transition-colors"
                                     >
-                                        Transférer
+                                        {{ $t('ws_settings.danger.transfer_btn') }}
                                     </button>
                                 </div>
 
@@ -371,17 +371,17 @@
                                 <div class="flex items-start justify-between p-4 border border-red-200 dark:border-red-800 rounded-3 bg-red-50 dark:bg-red-900/10">
                                     <div class="flex-1">
                                         <h3 class="font-medium text-red-600 dark:text-red-400">
-                                            Supprimer le workspace
+                                            {{ $t('ws_settings.danger.delete_title') }}
                                         </h3>
                                         <p class="text-sm text-red-500 dark:text-red-400 mt-1">
-                                            Cette action est irréversible. Tous les projets, activités et tâches seront définitivement supprimés.
+                                            {{ $t('ws_settings.danger.delete_desc') }}
                                         </p>
                                     </div>
                                     <button
                                         @click="showDeleteModal = true"
                                         class="px-4 py-2 bg-red-600 text-white rounded-3 hover:bg-red-700 transition-colors"
                                     >
-                                        Supprimer
+                                        {{ $t('common.delete') }}
                                     </button>
                                 </div>
                             </div>
@@ -407,22 +407,22 @@
                         </div>
                         <div>
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                                Supprimer le workspace
+                                {{ $t('ws_settings.danger.delete_title') }}
                             </h3>
                         </div>
                     </div>
                     <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                        Êtes-vous absolument sûr ? Cette action est irréversible.
+                        {{ $t('ws_settings.danger.delete_confirm_msg') }}
                     </p>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Tapez <span class="font-mono text-red-600">{{ workspace?.nom }}</span> pour confirmer
+                            {{ $t('ws_settings.danger.delete_type_hint') }} <span class="font-mono text-red-600">{{ workspace?.nom }}</span>
                         </label>
                         <input
                             v-model="deleteConfirmation"
                             type="text"
                             class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white"
-                            placeholder="Nom du workspace"
+                            :placeholder="$t('ws_settings.danger.delete_placeholder')"
                         />
                     </div>
                     <div class="flex justify-end gap-3">
@@ -430,7 +430,7 @@
                             @click="showDeleteModal = false"
                             class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700"
                         >
-                            Annuler
+                            {{ $t('common.cancel') }}
                         </button>
                         <button
                             @click="handleDelete"
@@ -441,8 +441,8 @@
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            <span v-if="deleting">Suppression...</span>
-                            <span v-else>Supprimer définitivement</span>
+                            <span v-if="deleting">{{ $t('ws_settings.danger.deleting') }}</span>
+                            <span v-else>{{ $t('ws_settings.danger.delete_btn') }}</span>
                         </button>
                     </div>
                 </div>
@@ -456,23 +456,23 @@
             >
                 <div class="bg-white dark:bg-gray-800 rounded-3 max-w-md w-full mx-4 p-6">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                        Archiver le workspace
+                        {{ $t('ws_settings.danger.archive_title') }}
                     </h3>
                     <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
-                        Le workspace sera archivé et ne sera plus accessible. Vous pourrez le restaurer plus tard.
+                        {{ $t('ws_settings.danger.archive_modal_desc') }}
                     </p>
                     <div class="flex justify-end gap-3">
                         <button
                             @click="showArchiveModal = false"
                             class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700"
                         >
-                            Annuler
+                            {{ $t('common.cancel') }}
                         </button>
                         <button
                             @click="handleArchive"
                             class="px-4 py-2 bg-yellow-600 text-white rounded-3 hover:bg-yellow-700"
                         >
-                            Archiver
+                            {{ $t('common.archive') }}
                         </button>
                     </div>
                 </div>
@@ -486,17 +486,17 @@
             >
                 <div class="bg-white dark:bg-gray-800 rounded-3 max-w-md w-full mx-4 p-6">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                        Transférer la propriété
+                        {{ $t('ws_settings.danger.transfer_title') }}
                     </h3>
                     <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
-                        Fonctionnalité de transfert de propriété à implémenter
+                        {{ $t('ws_settings.danger.transfer_todo') }}
                     </p>
                     <div class="flex justify-end gap-3">
                         <button
                             @click="showTransferModal = false"
                             class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700"
                         >
-                            Annuler
+                            {{ $t('common.cancel') }}
                         </button>
                     </div>
                 </div>
@@ -507,13 +507,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useWorkspace } from '@/composables/useWorkspace';
 import AdminLayout from '@/components/layout/AdminLayout.vue';
-import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue';  
+import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue';
 import { useToast } from "vue-toastification"
 
+const { t } = useI18n()
 const toast = useToast()
 const route = useRoute();
 const router = useRouter();
@@ -532,12 +534,12 @@ const showArchiveModal = ref(false);
 const showTransferModal = ref(false);
 const deleteConfirmation = ref('');
 
-const settingsTabs = [
-    { id: 'general', label: 'Général' },
-    { id: 'permissions', label: 'Permissions' },
-    { id: 'notifications', label: 'Notifications' },
-    { id: 'danger', label: 'Zone dangereuse' },
-];
+const settingsTabs = computed(() => [
+    { id: 'general', label: t('ws_settings.tab_general') },
+    { id: 'permissions', label: t('ws_settings.tab_permissions') },
+    { id: 'notifications', label: t('ws_settings.tab_notifications') },
+    { id: 'danger', label: t('ws_settings.tab_danger') },
+]);
 
 const settings = ref({
     // General

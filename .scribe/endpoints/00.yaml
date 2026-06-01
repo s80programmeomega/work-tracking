@@ -2984,7 +2984,7 @@ endpoints:
         name: trial_started_at
         description: 'Must be a valid date.'
         required: false
-        example: '2026-05-29T18:44:19'
+        example: '2026-06-01T00:06:16'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -2993,7 +2993,7 @@ endpoints:
     cleanBodyParameters:
       subscription_mode: trial
       trial_duration_days: 22
-      trial_started_at: '2026-05-29T18:44:19'
+      trial_started_at: '2026-06-01T00:06:16'
     fileParameters: []
     responses: []
     responseFields: []
@@ -3709,7 +3709,7 @@ endpoints:
         name: date_debut
         description: 'Must be a valid date.'
         required: true
-        example: '2026-05-29T18:44:20'
+        example: '2026-06-01T00:06:17'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -3720,7 +3720,7 @@ endpoints:
         name: date_fin
         description: 'Must be a valid date. Must be a date after <code>date_debut</code>.'
         required: true
-        example: '2052-06-21'
+        example: '2052-06-24'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -3917,8 +3917,8 @@ endpoints:
       nom: 'n'
       code: g
       description: 'Eius et animi quos velit et.'
-      date_debut: '2026-05-29T18:44:20'
-      date_fin: '2052-06-21'
+      date_debut: '2026-06-01T00:06:17'
+      date_fin: '2052-06-24'
       responsable_id: architecto
       status: archived
       visibility: public
@@ -4239,7 +4239,7 @@ endpoints:
         name: date_debut
         description: 'Must be a valid date.'
         required: false
-        example: '2026-05-29T18:44:20'
+        example: '2026-06-01T00:06:17'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -4250,7 +4250,7 @@ endpoints:
         name: date_fin
         description: 'Must be a valid date. Must be a date after <code>date_debut</code>.'
         required: false
-        example: '2052-06-21'
+        example: '2052-06-24'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -4280,8 +4280,8 @@ endpoints:
         deprecated: false
     cleanBodyParameters:
       nom: b
-      date_debut: '2026-05-29T18:44:20'
-      date_fin: '2052-06-21'
+      date_debut: '2026-06-01T00:06:17'
+      date_fin: '2052-06-24'
     fileParameters: []
     responses: []
     responseFields: []
@@ -5298,7 +5298,7 @@ endpoints:
         name: start_date
         description: 'Must be a valid date.'
         required: false
-        example: '2026-05-29T18:44:20'
+        example: '2026-06-01T00:06:18'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -5309,15 +5309,15 @@ endpoints:
         name: end_date
         description: 'Must be a valid date. Must be a date after or equal to <code>start_date</code>.'
         required: false
-        example: '2052-06-21'
+        example: '2052-06-24'
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: true
         deprecated: false
     cleanBodyParameters:
-      start_date: '2026-05-29T18:44:20'
-      end_date: '2052-06-21'
+      start_date: '2026-06-01T00:06:18'
+      end_date: '2052-06-24'
     fileParameters: []
     responses:
       -
@@ -5941,7 +5941,7 @@ endpoints:
         name: date_debut
         description: 'Must be a valid date.'
         required: false
-        example: '2026-05-29T18:44:20'
+        example: '2026-06-01T00:06:18'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -5952,7 +5952,7 @@ endpoints:
         name: date_fin
         description: 'Must be a valid date. Must be a date after or equal to <code>date_debut</code>.'
         required: false
-        example: '2052-06-21'
+        example: '2052-06-24'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -6111,8 +6111,8 @@ endpoints:
       nom: 'n'
       description: 'Eius et animi quos velit et.'
       responsable_id: architecto
-      date_debut: '2026-05-29T18:44:20'
-      date_fin: '2052-06-21'
+      date_debut: '2026-06-01T00:06:18'
+      date_fin: '2052-06-24'
       status: archived
       progression: 7
       couleur: '#fEEeDb'
@@ -6266,7 +6266,7 @@ endpoints:
         name: date_debut
         description: 'Must be a valid date.'
         required: false
-        example: '2026-05-29T18:44:20'
+        example: '2026-06-01T00:06:18'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -6277,7 +6277,7 @@ endpoints:
         name: date_fin
         description: 'Must be a valid date. Must be a date after or equal to <code>date_debut</code>.'
         required: false
-        example: '2052-06-21'
+        example: '2052-06-24'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -6332,8 +6332,8 @@ endpoints:
     cleanBodyParameters:
       nom: b
       description: 'Eius et animi quos velit et.'
-      date_debut: '2026-05-29T18:44:20'
-      date_fin: '2052-06-21'
+      date_debut: '2026-06-01T00:06:18'
+      date_fin: '2052-06-24'
       status: archived
       progression: 7
       couleur: '#fEEeDb'
@@ -7425,7 +7425,7 @@ endpoints:
         name: echeance
         description: '✅ Dates avec format flexible. Must be a valid date in the format <code>Y-m-d</code>.'
         required: false
-        example: '2026-05-29'
+        example: '2026-06-01'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -7436,7 +7436,7 @@ endpoints:
         name: date_debut
         description: 'Must be a valid date in the format <code>Y-m-d</code>.'
         required: false
-        example: '2026-05-29'
+        example: '2026-06-01'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -7447,7 +7447,7 @@ endpoints:
         name: date_fin_reelle
         description: 'Must be a valid date in the format <code>Y-m-d</code>.'
         required: false
-        example: '2026-05-29'
+        example: '2026-06-01'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -7608,9 +7608,9 @@ endpoints:
       indicateurs_resultats: architecto
       statut: a_faire
       priorite: elevee
-      echeance: '2026-05-29'
-      date_debut: '2026-05-29'
-      date_fin_reelle: '2026-05-29'
+      echeance: '2026-06-01'
+      date_debut: '2026-06-01'
+      date_fin_reelle: '2026-06-01'
       estimated_hours: 16
       actual_hours: 17
       taux_realisation: 15
@@ -8520,7 +8520,7 @@ endpoints:
         name: echeance
         description: 'Dates. Must be a valid date in the format <code>Y-m-d</code>.'
         required: false
-        example: '2026-05-29'
+        example: '2026-06-01'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -8531,7 +8531,7 @@ endpoints:
         name: date_debut
         description: 'Must be a valid date in the format <code>Y-m-d</code>.'
         required: false
-        example: '2026-05-29'
+        example: '2026-06-01'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -8542,7 +8542,7 @@ endpoints:
         name: date_fin_reelle
         description: 'Must be a valid date in the format <code>Y-m-d</code>.'
         required: false
-        example: '2026-05-29'
+        example: '2026-06-01'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -8713,9 +8713,9 @@ endpoints:
       indicateurs_resultats: architecto
       statut: en_cours
       priorite: elevee
-      echeance: '2026-05-29'
-      date_debut: '2026-05-29'
-      date_fin_reelle: '2026-05-29'
+      echeance: '2026-06-01'
+      date_debut: '2026-06-01'
+      date_fin_reelle: '2026-06-01'
       taux_realisation: 16
       estimated_hours: 17
       actual_hours: 15
@@ -8854,7 +8854,7 @@ endpoints:
         name: echeance
         description: 'Dates. Must be a valid date in the format <code>Y-m-d</code>.'
         required: false
-        example: '2026-05-29'
+        example: '2026-06-01'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -8865,7 +8865,7 @@ endpoints:
         name: date_debut
         description: 'Must be a valid date in the format <code>Y-m-d</code>.'
         required: false
-        example: '2026-05-29'
+        example: '2026-06-01'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -8876,7 +8876,7 @@ endpoints:
         name: date_fin_reelle
         description: 'Must be a valid date in the format <code>Y-m-d</code>.'
         required: false
-        example: '2026-05-29'
+        example: '2026-06-01'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -9047,9 +9047,9 @@ endpoints:
       indicateurs_resultats: architecto
       statut: en_cours
       priorite: elevee
-      echeance: '2026-05-29'
-      date_debut: '2026-05-29'
-      date_fin_reelle: '2026-05-29'
+      echeance: '2026-06-01'
+      date_debut: '2026-06-01'
+      date_fin_reelle: '2026-06-01'
       taux_realisation: 16
       estimated_hours: 17
       actual_hours: 15
@@ -9633,7 +9633,7 @@ endpoints:
         name: date_echeance
         description: 'Must be a valid date.'
         required: false
-        example: '2026-05-29T18:44:20'
+        example: '2026-06-01T00:06:20'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -9697,7 +9697,7 @@ endpoints:
     cleanBodyParameters:
       titre: b
       description: 'Eius et animi quos velit et.'
-      date_echeance: '2026-05-29T18:44:20'
+      date_echeance: '2026-06-01T00:06:20'
       poids: 1
       ordre: 42
       validation_n0_required: false
@@ -10189,7 +10189,7 @@ endpoints:
         name: date_echeance
         description: 'Must be a valid date.'
         required: false
-        example: '2026-05-29T18:44:20'
+        example: '2026-06-01T00:06:20'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -10255,7 +10255,7 @@ endpoints:
       description: 'Eius et animi quos velit et.'
       statut: termine
       progression: 1
-      date_echeance: '2026-05-29T18:44:20'
+      date_echeance: '2026-06-01T00:06:20'
       poids: 5
       ordre: 9
       validation_n0_required: false
@@ -12342,7 +12342,7 @@ endpoints:
         name: start
         description: 'Must be a valid date in the format <code>Y-m-d</code>.'
         required: false
-        example: '2026-05-29'
+        example: '2026-06-01'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -12353,15 +12353,15 @@ endpoints:
         name: end
         description: 'Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start</code>.'
         required: false
-        example: '2052-06-21'
+        example: '2052-06-24'
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: true
         deprecated: false
     cleanBodyParameters:
-      start: '2026-05-29'
-      end: '2052-06-21'
+      start: '2026-06-01'
+      end: '2052-06-24'
     fileParameters: []
     responses:
       -
@@ -12448,7 +12448,7 @@ endpoints:
         name: start
         description: 'Must be a valid date in the format <code>Y-m-d</code>.'
         required: false
-        example: '2026-05-29'
+        example: '2026-06-01'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -12459,7 +12459,7 @@ endpoints:
         name: end
         description: 'Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start</code>.'
         required: false
-        example: '2052-06-21'
+        example: '2052-06-24'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -12511,8 +12511,8 @@ endpoints:
         deprecated: false
     cleanBodyParameters:
       section: directed_tasks
-      start: '2026-05-29'
-      end: '2052-06-21'
+      start: '2026-06-01'
+      end: '2052-06-24'
       statut: architecto
       projet_id: 16
       activite_id: 16
@@ -12579,7 +12579,7 @@ endpoints:
         name: start
         description: 'Must be a valid date in the format <code>Y-m-d</code>.'
         required: false
-        example: '2026-05-29'
+        example: '2026-06-01'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -12590,15 +12590,15 @@ endpoints:
         name: end
         description: 'Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start</code>.'
         required: false
-        example: '2052-06-21'
+        example: '2052-06-24'
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: true
         deprecated: false
     cleanBodyParameters:
-      start: '2026-05-29'
-      end: '2052-06-21'
+      start: '2026-06-01'
+      end: '2052-06-24'
     fileParameters: []
     responses:
       -
@@ -14369,7 +14369,7 @@ endpoints:
         name: expires_at
         description: 'Must be a valid date. Must be a date after <code>today</code>. Must be a date before <code>+5 years</code>.'
         required: false
-        example: '2022-06-23'
+        example: '2022-06-25'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -14382,7 +14382,7 @@ endpoints:
       can_edit: false
       can_delete: true
       can_share: true
-      expires_at: '2022-06-23'
+      expires_at: '2022-06-25'
     fileParameters: []
     responses: []
     responseFields: []
@@ -14570,7 +14570,7 @@ endpoints:
         name: expires_at
         description: 'Must be a valid date. Must be a date after <code>now</code>.'
         required: false
-        example: '2052-06-22'
+        example: '2052-06-24'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -14583,7 +14583,7 @@ endpoints:
         can_edit: false
         can_delete: true
         can_share: false
-      expires_at: '2052-06-22'
+      expires_at: '2052-06-24'
     fileParameters: []
     responses: []
     responseFields: []
@@ -15368,7 +15368,7 @@ endpoints:
         name: nom
         description: 'Must not be greater than 255 characters.'
         required: true
-        example: w
+        example: b
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -15379,7 +15379,7 @@ endpoints:
         name: email
         description: 'The email address must be valid.'
         required: true
-        example: rau.brant@example.net
+        example: zbailey@example.net
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -15493,8 +15493,8 @@ endpoints:
         nullable: true
         deprecated: false
     cleanBodyParameters:
-      nom: w
-      email: rau.brant@example.net
+      nom: b
+      email: zbailey@example.net
       password: architecto
       role: responsable_n2
       fonction: g
@@ -17512,14 +17512,14 @@ endpoints:
         name: comment_id
         description: 'The ID of the comment.'
         required: true
-        example: 16
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      comment_id: 16
+      comment_id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -17568,14 +17568,14 @@ endpoints:
         name: comment_id
         description: 'The ID of the comment.'
         required: true
-        example: 16
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      comment_id: 16
+      comment_id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -17627,14 +17627,14 @@ endpoints:
         name: comment_id
         description: 'The ID of the comment.'
         required: true
-        example: 16
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      comment_id: 16
+      comment_id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -17674,14 +17674,14 @@ endpoints:
         name: comment_id
         description: 'The ID of the comment.'
         required: true
-        example: 16
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      comment_id: 16
+      comment_id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -17733,14 +17733,14 @@ endpoints:
         name: comment_id
         description: 'The ID of the comment.'
         required: true
-        example: 16
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      comment_id: 16
+      comment_id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -17792,7 +17792,7 @@ endpoints:
         name: comment_id
         description: 'The ID of the comment.'
         required: true
-        example: 16
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
@@ -17810,7 +17810,7 @@ endpoints:
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      comment_id: 16
+      comment_id: 1
       attachment_id: 16
     queryParameters: []
     cleanQueryParameters: []
@@ -18211,7 +18211,7 @@ endpoints:
         name: start_date
         description: 'Must be a valid date.'
         required: true
-        example: '2026-05-29T18:44:21'
+        example: '2026-06-01T00:06:24'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -18222,7 +18222,7 @@ endpoints:
         name: end_date
         description: 'Must be a valid date. Must be a date after or equal to <code>start_date</code>.'
         required: true
-        example: '2052-06-21'
+        example: '2052-06-24'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -18240,8 +18240,8 @@ endpoints:
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      start_date: '2026-05-29T18:44:21'
-      end_date: '2052-06-21'
+      start_date: '2026-06-01T00:06:24'
+      end_date: '2052-06-24'
       per_page: 22
     fileParameters: []
     responses:
@@ -18291,7 +18291,7 @@ endpoints:
         name: start_date
         description: 'Must be a valid date.'
         required: true
-        example: '2026-05-29T18:44:21'
+        example: '2026-06-01T00:06:24'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -18302,15 +18302,15 @@ endpoints:
         name: end_date
         description: 'Must be a valid date. Must be a date after or equal to <code>start_date</code>.'
         required: true
-        example: '2052-06-21'
+        example: '2052-06-24'
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      start_date: '2026-05-29T18:44:21'
-      end_date: '2052-06-21'
+      start_date: '2026-06-01T00:06:24'
+      end_date: '2052-06-24'
     fileParameters: []
     responses:
       -
@@ -19054,7 +19054,7 @@ endpoints:
         name: digest_time
         description: 'Must be a valid date in the format <code>H:i:s</code>.'
         required: false
-        example: '18:44:21'
+        example: '00:06:25'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -19087,7 +19087,7 @@ endpoints:
         name: quiet_hours_start
         description: 'Must be a valid date in the format <code>H:i:s</code>.'
         required: false
-        example: '18:44:21'
+        example: '00:06:25'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -19098,7 +19098,7 @@ endpoints:
         name: quiet_hours_end
         description: 'Must be a valid date in the format <code>H:i:s</code>.'
         required: false
-        example: '18:44:21'
+        example: '00:06:25'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -19133,11 +19133,11 @@ endpoints:
       document_uploaded_email: true
       document_uploaded_push: false
       digest_frequency: none
-      digest_time: '18:44:21'
+      digest_time: '00:06:25'
       digest_day_of_week: 1
       quiet_hours_enabled: true
-      quiet_hours_start: '18:44:21'
-      quiet_hours_end: '18:44:21'
+      quiet_hours_start: '00:06:25'
+      quiet_hours_end: '00:06:25'
     fileParameters: []
     responses: []
     responseFields: []
@@ -21455,7 +21455,7 @@ endpoints:
         name: start_date
         description: 'Must be a valid date.'
         required: true
-        example: '2026-05-29T18:44:21'
+        example: '2026-06-01T00:06:25'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -21466,7 +21466,7 @@ endpoints:
         name: end_date
         description: 'Must be a valid date. Must be a date after <code>start_date</code>.'
         required: false
-        example: '2052-06-21'
+        example: '2052-06-24'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -21498,8 +21498,8 @@ endpoints:
       title: b
       description: 'Eius et animi quos velit et.'
       type: deadline
-      start_date: '2026-05-29T18:44:21'
-      end_date: '2052-06-21'
+      start_date: '2026-06-01T00:06:25'
+      end_date: '2052-06-24'
       location: 'n'
     fileParameters: []
     responses: []
@@ -21669,7 +21669,7 @@ endpoints:
         name: start_date
         description: 'Must be a valid date.'
         required: false
-        example: '2026-05-29T18:44:21'
+        example: '2026-06-01T00:06:25'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -21680,7 +21680,7 @@ endpoints:
         name: end_date
         description: 'Must be a valid date. Must be a date after <code>start_date</code>.'
         required: false
-        example: '2052-06-21'
+        example: '2052-06-24'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -21712,8 +21712,8 @@ endpoints:
       title: b
       description: 'Eius et animi quos velit et.'
       type: deadline
-      start_date: '2026-05-29T18:44:21'
-      end_date: '2052-06-21'
+      start_date: '2026-06-01T00:06:25'
+      end_date: '2052-06-24'
       location: 'n'
     fileParameters: []
     responses: []

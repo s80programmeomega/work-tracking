@@ -1,12 +1,12 @@
 <!-- resources/js/components/projets/ProjetFormModal.vue -->
 <template>
   <Teleport to="body">
-    <div dusk="projet-form-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div class="bg-white dark:bg-gray-800 rounded-3 max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+    <div dusk="projet-form-modal" class="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
+      <div ref="dialogRef" :style="dragStyle" class="bg-white dark:bg-gray-800 rounded-3 max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col"
         @click.stop>
 
         <!-- Header -->
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+        <div ref="handleRef" class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 shrink-0 cursor-move select-none">
           <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
             {{ isEdit ? 'Modifier le projet: ' + projet.nom : 'Créer un nouveau projet' }}
           </h2>
@@ -273,6 +273,10 @@
 
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { useDraggable } from '@/composables/useDraggable'
+
+const { dialogRef, handleRef, dragStyle, attachHandle } = useDraggable()
+onMounted(attachHandle)
 import { useProjets } from '@/composables/useProjets'
 import { useWorkspace } from '@/composables/useWorkspace'
 import { useAuthStore } from '@/stores/authStore'

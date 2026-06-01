@@ -8,10 +8,10 @@
             dusk="workspace-taches-title"
             class="text-2xl font-semibold text-gray-900 dark:text-white"
           >
-            Toutes les tâches
+            {{ $t('sidebar.workspace_tasks') }}
           </h1>
           <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Vue globale de toutes les tâches du workspace.
+            {{ $t('sidebar.all_tasks') }}
           </p>
         </div>
 
@@ -45,12 +45,12 @@
             dusk="filter-statut"
             class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
           >
-            <option value="">Tous les statuts</option>
-            <option value="a_faire">À faire</option>
-            <option value="en_cours">En cours</option>
-            <option value="termine">Terminé</option>
-            <option value="en_retard">En retard</option>
-            <option value="a_refaire">À refaire</option>
+            <option value="">{{ $t('statuts.all') }}</option>
+            <option value="a_faire">{{ $t('statuts.a_faire') }}</option>
+            <option value="en_cours">{{ $t('statuts.en_cours') }}</option>
+            <option value="termine">{{ $t('statuts.termine') }}</option>
+            <option value="en_retard">{{ $t('statuts.en_retard') }}</option>
+            <option value="a_refaire">{{ $t('statuts.a_refaire') }}</option>
           </select>
 
           <select
@@ -59,7 +59,7 @@
             dusk="filter-projet"
             class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
           >
-            <option value="">Tous les projets</option>
+            <option value="">{{ $t('projects.all_projects') }}</option>
             <option v-for="p in projets" :key="p.id" :value="p.id">{{ p.nom }}</option>
           </select>
 
@@ -69,7 +69,7 @@
             dusk="clear-filters-btn"
             class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
           >
-            <i class="fas fa-times mr-1"></i> Effacer
+            <i class="fas fa-times mr-1"></i> {{ $t('common.reset') }}
           </button>
         </div>
 
@@ -95,7 +95,7 @@
           class="text-center py-12 text-gray-500 dark:text-gray-400"
           dusk="no-tasks-message"
         >
-          Aucune tâche trouvée pour ces critères.
+          {{ $t('projects.empty.description_with_filter') }}
         </div>
 
         <div v-else class="overflow-x-auto">
@@ -181,7 +181,7 @@
             dusk="prev-page-btn"
             class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-3 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
-            Précédent
+            {{ $t('common.previous') }}
           </button>
           <button
             :disabled="meta.current_page >= meta.last_page"
@@ -189,7 +189,7 @@
             dusk="next-page-btn"
             class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-3 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
-            Suivant
+            {{ $t('common.next') }}
           </button>
         </div>
       </div>
@@ -199,6 +199,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import DateRangeFilter from '@/components/common/DateRangeFilter.vue'
@@ -206,6 +207,7 @@ import { useStagger } from '@/composables/useAnimations'
 import SkeletonLoader from '@/components/common/SkeletonLoader.vue'
 import api from '@/api/axios'
 
+const { t } = useI18n()
 const router = useRouter()
 const { staggerRef: tbodyRef, applyStagger } = useStagger(40)
 
@@ -296,16 +298,9 @@ function formatDate(date) {
 }
 
 function statutLabel(statut) {
-  const map = {
-    a_faire: 'À faire',
-    en_cours: 'En cours',
-    en_attente: 'En attente',
-    termine: 'Terminé',
-    en_retard: 'En retard',
-    a_refaire: 'À refaire',
-    annule: 'Annulé',
-  }
-  return map[statut] ?? statut
+  const key = `statuts.${statut}`
+  const label = t(key)
+  return label !== key ? label : statut
 }
 
 function statutBadge(statut) {

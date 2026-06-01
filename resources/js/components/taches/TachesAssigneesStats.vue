@@ -2,7 +2,7 @@
 <template>
   <div class="rounded-3 border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
     <div class="flex items-center justify-between mb-6">
-      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Statistiques — Tâches assignées</h3>
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $t('taches_assignees.stats_title') }}</h3>
       <button
         @click="$emit('close')"
         class="rounded-3 p-1 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
@@ -18,25 +18,25 @@
     <div v-else class="space-y-6">
       <div ref="staggerRef" class="grid grid-cols-2 md:grid-cols-5 gap-4">
         <div class="stagger-item">
-          <StatCard title="Total assignées" :value="stats.total" icon="clipboard-list" color="gray" />
+          <StatCard :title="$t('taches_assignees.stat_total')" :value="stats.total" icon="clipboard-list" color="gray" />
         </div>
         <div class="stagger-item">
-          <StatCard title="À faire" :value="stats.a_faire" icon="clock" color="slate" />
+          <StatCard :title="$t('taches_assignees.stat_a_faire')" :value="stats.a_faire" icon="clock" color="slate" />
         </div>
         <div class="stagger-item">
-          <StatCard title="En cours" :value="stats.en_cours" icon="play" color="blue" />
+          <StatCard :title="$t('taches_assignees.stat_en_cours')" :value="stats.en_cours" icon="play" color="blue" />
         </div>
         <div class="stagger-item">
-          <StatCard title="Terminées" :value="stats.termine" icon="check-circle" color="green" />
+          <StatCard :title="$t('taches_assignees.stat_termine')" :value="stats.termine" icon="check-circle" color="green" />
         </div>
         <div class="stagger-item">
-          <StatCard title="En retard" :value="stats.overdue" icon="exclamation" color="red" :alert="stats.overdue > 0" />
+          <StatCard :title="$t('taches_assignees.stat_overdue')" :value="stats.overdue" icon="exclamation" color="red" :alert="stats.overdue > 0" />
         </div>
       </div>
 
       <div class="rounded-3 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
         <div class="flex items-center justify-between mb-2">
-          <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Taux de complétion</span>
+          <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('taches_assignees.completion_rate') }}</span>
           <span class="text-sm font-bold text-brand-600 dark:text-brand-400 counter-pop">{{ completionRate }}%</span>
         </div>
         <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
@@ -52,9 +52,12 @@
 
 <script setup>
 import { computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import StatCard from '@/components/common/StatCard.vue'
 import SkeletonLoader from '@/components/common/SkeletonLoader.vue'
 import { useStagger } from '@/composables/useAnimations'
+
+const { t } = useI18n()
 
 const props = defineProps({
   stats: { type: Object, required: true },

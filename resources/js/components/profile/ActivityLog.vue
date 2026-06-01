@@ -3,17 +3,17 @@
   <div class="activity-log">
     <div class="mb-6">
       <h4 class="text-lg font-semibold text-gray-800 dark:text-white/90">
-        Journal d'activité
+        {{ $t('activity_log.title') }}
       </h4>
       <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        Historique de vos activités récentes
+        {{ $t('activity_log.subtitle') }}
       </p>
     </div>
 
     <!-- Loading State -->
     <div v-if="loading" class="p-8 text-center">
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      <p class="mt-2 text-gray-500 dark:text-gray-400">Chargement des activités...</p>
+      <p class="mt-2 text-gray-500 dark:text-gray-400">{{ $t('activity_log.loading') }}</p>
     </div>
 
     <!-- Activity Content -->
@@ -41,22 +41,22 @@
             v-model="selectedType"
             class="bg-white border border-gray-300 text-gray-700 text-sm rounded-3 focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           >
-            <option value="all">Tous les types</option>
-            <option value="task">Tâches</option>
-            <option value="project">Projets</option>
-            <option value="profile">Profil</option>
-            <option value="system">Système</option>
+            <option value="all">{{ $t('activity_log.type_all') }}</option>
+            <option value="task">{{ $t('activity_log.type_task') }}</option>
+            <option value="project">{{ $t('activity_log.type_project') }}</option>
+            <option value="profile">{{ $t('activity_log.type_profile') }}</option>
+            <option value="system">{{ $t('activity_log.type_system') }}</option>
           </select>
         </div>
         
         <div class="flex items-center ml-auto space-x-2">
           <span class="text-sm text-gray-600 dark:text-gray-400">
-            {{ filteredActivities.length }} activités
+            {{ $t('activity_log.count', { count: filteredActivities.length }) }}
           </span>
           <button
             @click="refreshActivities"
             class="p-2 text-gray-500 transition-colors rounded-3 hover:bg-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300"
-            title="Actualiser"
+            :title="$t('activity_log.btn_refresh')"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -65,7 +65,7 @@
           <button
             @click="exportActivities"
             class="p-2 text-gray-500 transition-colors rounded-3 hover:bg-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300"
-            title="Exporter"
+            :title="$t('activity_log.btn_export')"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -160,17 +160,17 @@
           </svg>
         </div>
         <h5 class="mb-2 text-lg font-medium text-gray-800 dark:text-white/90">
-          Aucune activité récente
+          {{ $t('activity_log.empty_title') }}
         </h5>
         <p class="text-gray-500 dark:text-gray-400">
-          Vos activités apparaîtront ici au fur et à mesure que vous utiliserez l'application
+          {{ $t('activity_log.empty_desc') }}
         </p>
       </div>
 
       <!-- Pagination -->
       <div v-if="filteredActivities.length > itemsPerPage" class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-800">
         <div class="text-sm text-gray-500 dark:text-gray-400">
-          Affichage {{ startIndex + 1 }}-{{ endIndex }} sur {{ filteredActivities.length }}
+          {{ $t('activity_log.pagination_showing', { start: startIndex + 1, end: endIndex, total: filteredActivities.length }) }}
         </div>
         <div class="flex gap-2">
           <button
@@ -178,7 +178,7 @@
             :disabled="currentPage === 1"
             class="px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-300 rounded-3 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
           >
-            Précédent
+            {{ $t('activity_log.btn_prev') }}
           </button>
           <div class="flex items-center space-x-1">
             <button
@@ -200,7 +200,7 @@
             :disabled="currentPage === totalPages"
             class="px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-300 rounded-3 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
           >
-            Suivant
+            {{ $t('activity_log.btn_next') }}
           </button>
         </div>
       </div>
@@ -210,6 +210,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import {
   CheckCircleIcon,
   DocumentTextIcon,
@@ -227,6 +228,7 @@ const props = defineProps({
   }
 })
 
+const { t } = useI18n()
 const loading = ref(true)
 const activities = ref([])
 const selectedTimeFilter = ref('today')
@@ -234,58 +236,57 @@ const selectedType = ref('all')
 const currentPage = ref(1)
 const itemsPerPage = ref(10)
 
-const timeFilters = [
-  { label: 'Aujourd\'hui', value: 'today' },
-  { label: 'Cette semaine', value: 'week' },
-  { label: 'Ce mois', value: 'month' },
-  { label: 'Tout', value: 'all' }
-]
+const timeFilters = computed(() => [
+  { label: t('activity_log.filter_today'), value: 'today' },
+  { label: t('activity_log.filter_week'), value: 'week' },
+  { label: t('activity_log.filter_month'), value: 'month' },
+  { label: t('activity_log.filter_all'), value: 'all' }
+])
 
-// Activity types with icons and colors
-const activityTypes = {
+const activityTypes = computed(() => ({
   task: {
-    label: 'Tâche',
+    label: t('activity_log.type_label_task'),
     icon: CheckCircleIcon,
     bgColor: 'bg-green-500',
     badgeColor: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
   },
   project: {
-    label: 'Projet',
+    label: t('activity_log.type_label_project'),
     icon: DocumentTextIcon,
     bgColor: 'bg-blue-500',
     badgeColor: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
   },
   profile: {
-    label: 'Profil',
+    label: t('activity_log.type_label_profile'),
     icon: UserIcon,
     bgColor: 'bg-purple-500',
     badgeColor: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300'
   },
   system: {
-    label: 'Système',
+    label: t('activity_log.type_label_system'),
     icon: CogIcon,
     bgColor: 'bg-gray-500',
     badgeColor: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300'
   },
   deadline: {
-    label: 'Délai',
+    label: t('activity_log.type_label_deadline'),
     icon: CalendarIcon,
     bgColor: 'bg-orange-500',
     badgeColor: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300'
   },
   login: {
-    label: 'Connexion',
+    label: t('activity_log.type_label_login'),
     icon: ClockIcon,
     bgColor: 'bg-indigo-500',
     badgeColor: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300'
   },
   error: {
-    label: 'Erreur',
+    label: t('activity_log.type_label_error'),
     icon: ExclamationTriangleIcon,
     bgColor: 'bg-red-500',
     badgeColor: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
   }
-}
+}))
 
 const loadActivities = async () => {
   loading.value = true
@@ -300,7 +301,7 @@ const loadActivities = async () => {
 
 const generateMockActivities = () => {
   const mockActivities = []
-  const types = Object.keys(activityTypes)
+  const types = Object.keys(activityTypes.value)
   
   for (let i = 0; i < 25; i++) {
     const type = types[Math.floor(Math.random() * types.length)]
@@ -400,19 +401,19 @@ const endIndex = computed(() => {
 })
 
 const getActivityIcon = (type) => {
-  return activityTypes[type]?.icon || CogIcon
+  return activityTypes.value[type]?.icon || CogIcon
 }
 
 const getActivityTypeClass = (type) => {
-  return activityTypes[type]?.bgColor || 'bg-gray-500'
+  return activityTypes.value[type]?.bgColor || 'bg-gray-500'
 }
 
 const getActivityTypeBadgeClass = (type) => {
-  return activityTypes[type]?.badgeColor || 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300'
+  return activityTypes.value[type]?.badgeColor || 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300'
 }
 
 const getActivityTypeLabel = (type) => {
-  return activityTypes[type]?.label || 'Système'
+  return activityTypes.value[type]?.label || t('activity_log.type_label_system')
 }
 
 const formatTime = (timestamp) => {
@@ -422,10 +423,10 @@ const formatTime = (timestamp) => {
   const diffHours = Math.floor(diffMins / 60)
   const diffDays = Math.floor(diffHours / 24)
   
-  if (diffMins < 1) return 'À l\'instant'
-  if (diffMins < 60) return `Il y a ${diffMins} min`
-  if (diffHours < 24) return `Il y a ${diffHours} h`
-  if (diffDays < 7) return `Il y a ${diffDays} j`
+  if (diffMins < 1) return t('activity_log.time_now')
+  if (diffMins < 60) return t('activity_log.time_mins_ago', { n: diffMins })
+  if (diffHours < 24) return t('activity_log.time_hours_ago', { n: diffHours })
+  if (diffDays < 7) return t('activity_log.time_days_ago', { n: diffDays })
   
   return timestamp.toLocaleDateString('fr-FR', {
     day: 'numeric',
