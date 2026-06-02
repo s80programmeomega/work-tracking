@@ -595,9 +595,11 @@ The Swagger view (`resources/views/scribe/swagger.blade.php`) reads `localStorag
 
 ---
 
-## Guide 21 — Larastan Static Analysis
+## Guide 21 — Larastan Static Analysis (pre-commit hard gate)
 
-[Larastan](https://github.com/larastan/larastan) (`larastan/larastan` v2.11) is installed and configured at **level 5**. Run it regularly — it catches type errors, wrong method signatures, and missing properties before tests do.
+**[Larastan](https://github.com/larastan/larastan)** (`larastan/larastan` v2.11) is installed and configured at **level 5**. It is **mandatory before every commit**, alongside Pint — both must pass with zero errors. Do not commit if Larastan reports errors; fix them first.
+
+**Important:** the binary is `vendor/bin/phpstan` but this IS Larastan — `phpstan.neon` loads the `larastan/larastan` extension which adds full Laravel awareness (Eloquent models, query builders, relations, facades, magic methods). Raw PHPStan without this extension would miss most Laravel-specific type errors. Never run PHPStan without the project's `phpstan.neon`.
 
 ### Running Larastan
 
@@ -606,6 +608,13 @@ php artisan clear-compiled && php -d memory_limit=1500M vendor/bin/phpstan analy
 ```
 
 Use `--memory-limit=1500M` — the 512 MB default is not enough on this codebase.
+
+### Pre-commit checklist order
+
+1. `vendor/bin/pint --dirty --format agent` — must output `"result":"passed"` or `"result":"fixed"` with no remaining issues
+2. `php artisan clear-compiled && php -d memory_limit=1500M vendor/bin/phpstan analyse --memory-limit=1500M` — must output `[OK] No errors`
+
+Only then commit.
 
 ### Suppressing false positives
 
