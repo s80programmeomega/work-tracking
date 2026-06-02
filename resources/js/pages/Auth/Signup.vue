@@ -24,9 +24,10 @@
                         <div>
                             <!-- Bouton Google -->
                             <div class="grid grid-cols-1 gap-3 sm:grid-cols-1 sm:gap-5">
-                                <button
-                                    class="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-3 px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
-                                    :disabled="loading">
+                                <a
+                                    :href="googleRedirectUrl"
+                                    dusk="google-signup-btn"
+                                    class="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-3 px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
                                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
                                         xmlns="http://www.w3.org/2000/svg">
                                         <path
@@ -43,7 +44,7 @@
                                             fill="#EB4335" />
                                     </svg>
                                     {{ $t('auth.signup_with_google') }}
-                                </button>
+                                </a>
                             </div>
 
                             <!-- Séparateur -->
@@ -393,6 +394,7 @@ const form = reactive({
 // Computed properties
 const loading = computed(() => authStore.loading);
 const authError = computed(() => authStore.error);
+const googleRedirectUrl = `${window.location.origin}/api/auth/google/redirect`;
 
 /**
  * Basculer la visibilité du mot de passe

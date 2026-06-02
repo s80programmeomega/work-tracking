@@ -718,6 +718,12 @@ const router = createRouter({
       },
     },
     {
+      path: '/auth/callback',
+      name: 'AuthCallback',
+      component: () => import('../pages/Auth/SocialCallback.vue'),
+      meta: { guest: true },
+    },
+    {
       path: '/signup',
       name: 'Signup',
       component: () => import('../pages/Auth/Signup.vue'),

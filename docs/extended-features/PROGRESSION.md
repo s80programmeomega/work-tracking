@@ -33,8 +33,8 @@
 | # | Phase | Branch | Status | Started | Completed | Notes |
 |---|---|---|---|---|---|---|
 | 0 | Security + perf baseline (audit) | `chore/security-perf-baseline` | ✅ | 2026-06-01 | 2026-06-01 | Docs-only, zero code change. Finding F1 (token expiry) folded into Phase 1. Merged into `jonas` `4493754`, pushed both remotes. |
-| 1 | MFA — TOTP/QR + recovery codes + email-OTP fallback | `feature/mfa-2fa` | ✅ | 2026-06-01 | 2026-06-01 | F1 token-expiry fixed; prune scheduled; 12 feature tests; 666 total passing. Awaiting commit + merge. |
-| 2 | Social auth (Google) | `feature/social-auth-google` | ⬜ | — | — | Socialite; `provider`/`provider_id` on users; link by verified email |
+| 1 | MFA — TOTP/QR + recovery codes + email-OTP fallback | `feature/mfa-2fa` | ✅ | 2026-06-01 | 2026-06-01 | Merged `7525a81`, pushed both remotes. 666 tests passing. |
+| 2 | Social auth (Google) | `feature/social-auth-google` | ✅ | 2026-06-02 | 2026-06-02 | Socialite installed; migration; SocialAuthController; SocialCallback.vue; 6 tests; 672 total passing. |
 | 3 | Technical contact + Help & Support | `feature/support-contact` | ⬜ | — | — | `SupportTicket` + notifications to super-admins/requester |
 | 4 | Super-admin app log & activity viewer | `feature/admin-activity-viewer` | ⬜ | — | — | Cross-app feed over `activity_log`; super_admin only |
 | 5 | Chat — real-time + @mentions + polish | `feature/chat-realtime` | ⬜ | — | — | Reverb broadcast events; implement @mention notif (TODO at `TeamMessageService.php:68`) |
@@ -91,8 +91,8 @@
 - [x] 12 feature tests in `tests/Feature/Mfa/MfaTest.php` — 666 total, all passing
 - [x] Build green (`npm run build`)
 - [x] `docs/extended-features/testing/MFA_TESTING.md` written
-- [ ] Commit + push feature branch
-- [ ] Merge into `jonas` (awaiting per-push approval)
+- [x] Commit + push feature branch (`779fef5`)
+- [x] Merge into `jonas` (`7525a81`) — pushed `origin` + `client`
 
 _(Checklists for Phases 2–10 added as each phase starts.)_
 
@@ -104,3 +104,4 @@ _(Checklists for Phases 2–10 added as each phase starts.)_
 |---|---|---|
 | 2026-06-01 | Roadmap planning; prep; Phase 0 | Approved 10-phase roadmap; committed/pushed `/documents` i18n; scaffolded `docs/extended-features/`; merged frontend-alignment into `jonas` (654 tests green); completed Phase 0 baseline (docs-only). Phase 1 next. |
 | 2026-06-01 | Phase 1 — MFA | TOTP + recovery codes + email-OTP implemented. F1 token-expiry fixed. `sanctum:prune-expired` scheduled. 12 feature tests + 666 total passing. Build green. |
+| 2026-06-02 | Phase 2 — Social auth | Socialite installed, `provider`/`provider_id` migration, `SocialAuthController` (redirect + stateless callback), `SocialCallback.vue`, Google buttons wired in Signin/Signup. 6 feature tests + 672 total passing. |

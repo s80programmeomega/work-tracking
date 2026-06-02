@@ -45,6 +45,8 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string|null $two_factor_secret
  * @property string|null $two_factor_recovery_codes
  * @property bool $email_otp_enabled
+ * @property string|null $provider
+ * @property string|null $provider_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
@@ -87,6 +89,8 @@ class User extends Authenticatable
         'last_login_ip',
         'is_super_admin',
         'email_otp_enabled',
+        'provider',
+        'provider_id',
     ];
 
     /**
