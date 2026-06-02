@@ -98,7 +98,9 @@
                             <!-- Boutons de connexion sociale -->
                             <div>
                                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-1 sm:gap-5">
-                                    <button
+                                    <a
+                                        :href="googleRedirectUrl"
+                                        dusk="google-signin-btn"
                                         class="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-3 px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
                                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
                                             xmlns="http://www.w3.org/2000/svg">
@@ -117,7 +119,7 @@
                                                 fill="#EB4335" />
                                         </svg>
                                         {{ $t('auth.signin_with_google') }}
-                                    </button>
+                                    </a>
                                     
                                 </div>
 
@@ -378,6 +380,9 @@ const route = useRoute();
 
 // Show success message when redirected from signup
 const registrationSuccess = computed(() => route.query.registered === '1');
+
+// URL de redirection Google OAuth (pointe vers le backend qui initie le flow)
+const googleRedirectUrl = `${window.location.origin}/api/auth/google/redirect`;
 const authStore = useAuthStore();
 
 // États réactifs
