@@ -109,7 +109,7 @@ class SupportTicketTest extends TestCase
     }
 
     /** @test */
-    public function super_admin_can_update_ticket_status(): void
+    public function super_admin_can_reply_and_update_ticket_status(): void
     {
         Notification::fake();
 
@@ -117,22 +117,29 @@ class SupportTicketTest extends TestCase
         $requester = User::factory()->create(['is_active' => true]);
         $ticket = SupportTicket::factory()->create(['user_id' => $requester->id, 'status' => 'open']);
 
-        $this->actingAs($admin)->patchJson("/api/admin/support/{$ticket->id}/status", [
+        $this->actingAs($admin)->postJson("/api/admin/support/{$ticket->id}/reply", [
+            'body' => 'Nous avons bien reçu votre ticket et le traitons.',
             'status' => 'in_progress',
         ])->assertOk();
 
         $ticket->refresh();
         $this->assertEquals('in_progress', $ticket->status);
+        $this->assertNotNull($ticket->first_responded_at);
+        $this->assertDatabaseHas('support_ticket_replies', [
+            'support_ticket_id' => $ticket->id,
+            'is_admin_reply' => true,
+        ]);
         Notification::assertSentTo($requester, SupportTicketStatusChangedNotification::class);
     }
 
     /** @test */
-    public function non_admin_cannot_update_ticket_status(): void
+    public function non_admin_cannot_reply_to_ticket(): void
     {
         $user = User::factory()->create(['is_active' => true]);
         $ticket = SupportTicket::factory()->create();
 
-        $this->actingAs($user)->patchJson("/api/admin/support/{$ticket->id}/status", [
+        $this->actingAs($user)->postJson("/api/admin/support/{$ticket->id}/reply", [
+            'body' => 'Tentative de réponse non autorisée.',
             'status' => 'resolved',
         ])->assertStatus(403);
     }

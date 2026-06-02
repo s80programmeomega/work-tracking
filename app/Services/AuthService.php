@@ -81,6 +81,10 @@ class AuthService
      */
     public function issueToken(User $user): array
     {
+        // Révocation des sessions existantes : une seule session active par utilisateur.
+        // Empêche deux onglets du même navigateur de maintenir des sessions parallèles.
+        $user->tokens()->where('name', 'auth_token')->delete();
+
         $token = $user->createToken('auth_token', ['*'], now()->addDays(7))->plainTextToken;
 
         return [

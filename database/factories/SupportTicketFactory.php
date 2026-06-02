@@ -25,7 +25,11 @@ class SupportTicketFactory extends Factory
             'subject' => $this->faker->sentence(6),
             'message' => $this->faker->paragraph(3),
             'status' => $this->faker->randomElement(['open', 'in_progress', 'resolved']),
-            'attachment' => null,
+            'reproducibility' => null,
+            'steps_to_reproduce' => null,
+            'sla_deadline' => now()->addHours(24),
+            'first_responded_at' => null,
+            'resolved_at' => null,
         ];
     }
 }

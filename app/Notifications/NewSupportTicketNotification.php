@@ -27,7 +27,7 @@ class NewSupportTicketNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject("[Support #{$this->ticket->id}] {$this->ticket->subject}")
+            ->subject("[Support #{$this->ticket->ticket_number}] {$this->ticket->subject}")
             ->greeting('Nouveau ticket de support')
             ->line("**De :** {$this->submitter->nom_complet} ({$this->submitter->email})")
             ->line("**Catégorie :** {$this->ticket->category}")

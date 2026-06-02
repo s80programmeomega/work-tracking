@@ -705,12 +705,6 @@ const router = createRouter({
       component: () => import('../pages/Support.vue'),
       meta: { requiresAuth: true },
     },
-    {
-      path: '/admin/support',
-      name: 'admin.support',
-      component: () => import('../pages/admin/AdminSupport.vue'),
-      meta: { requiresAuth: true, requiresSuperAdmin: true },
-    },
 
     {
       path: '/error-404',

@@ -113,11 +113,11 @@
         </p>
       </div>
 
-      <div v-if="recoveryCodes.length > 0" class="grid grid-cols-2 gap-1.5">
+      <div v-if="recoveryCodes.length > 0" ref="codesRef" class="grid grid-cols-2 gap-1.5">
         <code
           v-for="code in recoveryCodes"
           :key="code"
-          class="text-xs font-mono bg-gray-100 dark:bg-gray-800 rounded px-2 py-1 text-gray-900 dark:text-white text-center"
+          class="stagger-item text-xs font-mono bg-gray-100 dark:bg-gray-800 rounded px-2 py-1 text-gray-900 dark:text-white text-center"
         >
           {{ code }}
         </code>
@@ -188,13 +188,15 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/authStore'
+import { useStagger } from '@/composables/useAnimations'
 import api from '@/api/axios'
 
 const { t } = useI18n()
 const authStore = useAuthStore()
+const { staggerRef: codesRef, applyStagger: staggerCodes } = useStagger(40)
 
 const isTotpConfirmed = computed(() => !!authStore.user?.two_factor_confirmed_at)
 const emailOtpEnabled = ref(authStore.user?.email_otp_enabled ?? false)
@@ -263,6 +265,8 @@ const loadRecoveryCodes = async () => {
   try {
     const res = await api.get('/user/two-factor-recovery-codes')
     recoveryCodes.value = res.data
+    await nextTick()
+    staggerCodes()
   } catch {
     // Ignore
   } finally {

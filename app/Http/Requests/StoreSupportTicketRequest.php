@@ -20,7 +20,10 @@ class StoreSupportTicketRequest extends FormRequest
             'category' => ['required', 'string', 'in:bug,feature,billing,account,other'],
             'subject' => ['required', 'string', 'max:255'],
             'message' => ['required', 'string', 'max:5000'],
-            'attachment' => ['nullable', 'file', 'max:5120', 'mimes:pdf,doc,docx,jpg,jpeg,png,gif,zip'],
+            'reproducibility' => ['nullable', 'string', 'in:always,sometimes,rarely,not_reproducible,na'],
+            'steps_to_reproduce' => ['nullable', 'string', 'max:5000'],
+            'attachments' => ['nullable', 'array', 'max:5'],
+            'attachments.*' => ['file', 'max:5120', 'mimes:pdf,doc,docx,jpg,jpeg,png,gif,zip,webp'],
         ];
     }
 
@@ -30,7 +33,8 @@ class StoreSupportTicketRequest extends FormRequest
             'category.in' => __('support.validation.invalid_category'),
             'subject.required' => __('support.validation.subject_required'),
             'message.required' => __('support.validation.message_required'),
-            'attachment.max' => __('support.validation.attachment_too_large'),
+            'attachments.*.max' => __('support.validation.attachment_too_large'),
+            'reproducibility.in' => __('support.validation.invalid_reproducibility'),
         ];
     }
 }

@@ -929,12 +929,6 @@ const menuGroups = computed(() => [
                 path: "/admin/roles",
                 superAdminOnly: true,
             },
-            {
-                icon: SupportIcon,
-                name: t('sidebar.support'),
-                path: "/admin/support",
-                superAdminOnly: true,
-            },
         ],
     },
     {

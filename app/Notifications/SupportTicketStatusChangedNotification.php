@@ -33,12 +33,12 @@ class SupportTicketStatusChangedNotification extends Notification implements Sho
         $newLabel = $statusLabels[$this->ticket->status] ?? $this->ticket->status;
 
         return (new MailMessage)
-            ->subject("[Support #{$this->ticket->id}] Statut mis à jour : {$newLabel}")
+            ->subject("[Support #{$this->ticket->ticket_number}] Statut mis à jour : {$newLabel}")
             ->greeting("Bonjour {$notifiable->prenom},")
-            ->line("Le statut de votre ticket **#{$this->ticket->id}** a été mis à jour.")
+            ->line("Le statut de votre ticket **#{$this->ticket->ticket_number}** a été mis à jour.")
             ->line("**Sujet :** {$this->ticket->subject}")
             ->line("**Nouveau statut :** {$newLabel}")
-            ->action('Voir mon ticket', url('/support'));
+            ->action('Voir mon ticket', url('/support?ticket='.$this->ticket->id));
     }
 
     public function toArray(object $notifiable): array

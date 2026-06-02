@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSupportTicketRequest;
 use App\Models\SupportTicket;
+use App\Models\SupportTicketAttachment;
+use App\Models\SupportTicketReply;
 use App\Models\User;
 use App\Notifications\NewSupportTicketNotification;
 use App\Notifications\SupportTicketStatusChangedNotification;
@@ -16,30 +18,38 @@ class SupportTicketController extends Controller
 {
     /**
      * Soumet un nouveau ticket de support.
-     * Notifie tous les super-admins et l'équipe support.
+     * Calcule le délai SLA selon la catégorie et notifie les super-admins.
      */
     public function store(StoreSupportTicketRequest $request): JsonResponse
     {
-        $data = $request->validated();
-
-        // Traitement de la pièce jointe si présente
-        if ($request->hasFile('attachment')) {
-            $data['attachment'] = $request->file('attachment')
-                ->store('support-attachments', 'local');
-        }
-
+        $data = $request->safe()->except('attachments');
         $data['user_id'] = $request->user()->id;
         $data['workspace_id'] = $request->user()->current_workspace_id;
+        $data['sla_deadline'] = now()->addHours(SupportTicket::SLA_HOURS[$data['category']] ?? 24);
 
         $ticket = SupportTicket::create($data);
 
+        // Pièces jointes multiples
+        if ($request->hasFile('attachments')) {
+            foreach ($request->file('attachments') as $file) {
+                $ticket->attachments()->create([
+                    'uploaded_by' => $request->user()->id,
+                    'file_path' => $file->store('support-attachments', 'local'),
+                    'original_name' => $file->getClientOriginalName(),
+                    'mime_type' => $file->getMimeType() ?? 'application/octet-stream',
+                    'size_bytes' => $file->getSize(),
+                ]);
+            }
+        }
+
         Log::info('Nouveau ticket de support soumis', [
             'ticket_id' => $ticket->id,
+            'ticket_number' => $ticket->ticket_number,
             'user_id' => $request->user()->id,
             'category' => $ticket->category,
+            'sla_deadline' => $ticket->sla_deadline,
         ]);
 
-        // Notification aux super-admins
         $superAdmins = User::where('is_super_admin', true)->get();
         foreach ($superAdmins as $admin) {
             $admin->notify(new NewSupportTicketNotification($ticket, $request->user()));
@@ -49,17 +59,20 @@ class SupportTicketController extends Controller
             'message' => __('support.ticket_submitted'),
             'data' => [
                 'id' => $ticket->id,
+                'ticket_number' => $ticket->ticket_number,
                 'status' => $ticket->status,
+                'sla_deadline' => $ticket->sla_deadline?->toISOString(),
             ],
         ], 201);
     }
 
     /**
-     * Liste les tickets de l'utilisateur connecté.
+     * Liste les tickets de l'utilisateur connecté avec réponses et pièces jointes.
      */
     public function index(Request $request): JsonResponse
     {
-        $tickets = SupportTicket::where('user_id', $request->user()->id)
+        $tickets = SupportTicket::with(['replies.author', 'attachments'])
+            ->where('user_id', $request->user()->id)
             ->latest()
             ->paginate(20);
 
@@ -67,11 +80,11 @@ class SupportTicketController extends Controller
     }
 
     /**
-     * Liste tous les tickets (super-admin seulement).
+     * Liste tous les tickets — super-admin seulement.
      */
     public function adminIndex(Request $request): JsonResponse
     {
-        $query = SupportTicket::with('user')
+        $query = SupportTicket::with(['user', 'replies.author', 'attachments'])
             ->latest();
 
         if ($request->filled('status')) {
@@ -80,6 +93,11 @@ class SupportTicketController extends Controller
 
         if ($request->filled('category')) {
             $query->where('category', $request->category);
+        }
+
+        if ($request->boolean('sla_breached')) {
+            $query->where('sla_deadline', '<', now())
+                ->where('status', '!=', 'resolved');
         }
 
         if ($request->filled('search')) {
@@ -94,30 +112,106 @@ class SupportTicketController extends Controller
     }
 
     /**
-     * Met à jour le statut d'un ticket (super-admin seulement).
+     * Ajoute une réponse admin à un ticket et met à jour son statut (obligatoire).
+     * Enregistre first_responded_at si c'est la première réponse admin.
+     * Enregistre resolved_at si le statut passe à 'resolved'.
      */
-    public function updateStatus(Request $request, SupportTicket $ticket): JsonResponse
+    public function reply(Request $request, SupportTicket $ticket): JsonResponse
     {
         $request->validate([
+            'body' => ['required', 'string', 'max:5000'],
             'status' => ['required', 'string', 'in:open,in_progress,resolved'],
         ]);
 
         $oldStatus = $ticket->status;
-        $ticket->update(['status' => $request->status]);
 
-        Log::info('Statut de ticket de support mis à jour', [
-            'ticket_id' => $ticket->id,
-            'old_status' => $oldStatus,
-            'new_status' => $ticket->status,
-            'admin_id' => $request->user()->id,
+        $reply = SupportTicketReply::create([
+            'support_ticket_id' => $ticket->id,
+            'user_id' => $request->user()->id,
+            'body' => $request->body,
+            'is_admin_reply' => true,
         ]);
 
-        // Notifie le demandeur du changement de statut
-        $ticket->user->notify(new SupportTicketStatusChangedNotification($ticket, $oldStatus));
+        $updates = ['status' => $request->status];
+
+        // Première réponse admin — horodatage SLA
+        if (! $ticket->first_responded_at) {
+            $updates['first_responded_at'] = now();
+        }
+
+        // Résolution
+        if ($request->status === 'resolved' && ! $ticket->resolved_at) {
+            $updates['resolved_at'] = now();
+        } elseif ($request->status !== 'resolved') {
+            $updates['resolved_at'] = null;
+        }
+
+        $ticket->update($updates);
+
+        Log::info('Réponse admin ajoutée au ticket de support', [
+            'ticket_id' => $ticket->id,
+            'ticket_number' => $ticket->ticket_number,
+            'admin_id' => $request->user()->id,
+            'new_status' => $ticket->status,
+        ]);
+
+        if ($oldStatus !== $request->status) {
+            $ticket->user->notify(new SupportTicketStatusChangedNotification($ticket, $oldStatus));
+        }
 
         return response()->json([
-            'message' => __('support.status_updated'),
-            'data' => ['status' => $ticket->status],
+            'message' => __('support.reply_added'),
+            'data' => [
+                'reply' => $reply->load('author'),
+                'status' => $ticket->status,
+            ],
         ]);
+    }
+
+    /**
+     * Ajoute des pièces jointes à un ticket existant (accessible à l'auteur et aux admins).
+     */
+    public function addAttachments(Request $request, SupportTicket $ticket): JsonResponse
+    {
+        // Seul l'auteur ou un super-admin peut ajouter des pièces jointes
+        if ($ticket->user_id !== $request->user()->id && ! $request->user()->is_super_admin) {
+            return response()->json(['message' => __('support.unauthorized')], 403);
+        }
+
+        $request->validate([
+            'attachments' => ['required', 'array', 'max:5'],
+            'attachments.*' => ['file', 'max:5120', 'mimes:pdf,doc,docx,jpg,jpeg,png,gif,zip,webp'],
+        ]);
+
+        $added = [];
+        foreach ($request->file('attachments') as $file) {
+            $attachment = $ticket->attachments()->create([
+                'uploaded_by' => $request->user()->id,
+                'file_path' => $file->store('support-attachments', 'local'),
+                'original_name' => $file->getClientOriginalName(),
+                'mime_type' => $file->getMimeType() ?? 'application/octet-stream',
+                'size_bytes' => $file->getSize(),
+            ]);
+            $added[] = $attachment;
+        }
+
+        return response()->json(['data' => $added], 201);
+    }
+
+    /**
+     * Télécharge une pièce jointe (auteur ou super-admin).
+     */
+    public function downloadAttachment(Request $request, SupportTicketAttachment $attachment): mixed
+    {
+        $ticket = $attachment->ticket;
+
+        if ($ticket->user_id !== $request->user()->id && ! $request->user()->is_super_admin) {
+            return response()->json(['message' => __('support.unauthorized')], 403);
+        }
+
+        return response()->download(
+            storage_path('app/'.$attachment->file_path),
+            $attachment->original_name
+        );
     }
 }

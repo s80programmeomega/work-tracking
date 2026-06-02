@@ -29,6 +29,8 @@ These rules apply on every machine and every session. They do not change task to
 - **Testing docs:** Write `docs/testing/TASK_{N}_TESTING.md` for every completed task.
 - **State docs:** Update `docs/PROGRESSION.md` and `docs/SESSION_STATE.md` at the end of every task.
 - **Servers:** Stop any background server started (serve, vite, queue, reverb) before ending a turn.
+- **Stagger animations (Guide 23):** Every Vue component that renders a list, table, or grid of data MUST use `useStagger` from `@/composables/useAnimations`. Add `ref="staggerRef"` on the container and `class="stagger-item"` on each item. Call `applyStagger()` after data loads. Default delay: 50ms.
+- **Full integration (Guide 24):** A feature is only done when: backend + frontend + responsive UI + i18n + stagger + tests + build green + Larastan clean. All 8 boxes must be ticked before marking a task complete or committing.
 - **Memory sync:** When the user says _"Update CLAUDE.md with current memory"_ — read only the memory files for this project (the ones whose path corresponds to the current working directory), update the Persistent Rules section if anything has changed, and commit.
 
 ---
