@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\ProjetInvitationController;
 use App\Http\Controllers\Api\PushSubscriptionController;
 use App\Http\Controllers\Api\SocialAuthController;
 use App\Http\Controllers\Api\SousTacheController;
+use App\Http\Controllers\Api\SupportTicketController;
 use App\Http\Controllers\Api\TacheController;
 use App\Http\Controllers\Api\TacheResultatController;
 use App\Http\Controllers\Api\WorkspaceController;
@@ -89,6 +90,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/email-otp-toggle', [AuthController::class, 'toggleEmailOtp']);
     });
 
+    // ========================================  SUPPORT  ==========================================
+    Route::prefix('support')->group(function () {
+        Route::post('/', [SupportTicketController::class, 'store'])->name('support.store');
+        Route::get('/', [SupportTicketController::class, 'index'])->name('support.index');
+    });
+
     // ========================================  PLATFORM ADMIN  ========================================
     Route::prefix('admin')->middleware('super_admin')->group(function () {
         Route::get('/stats', [AdminController::class, 'stats'])->name('admin.stats');
@@ -100,6 +107,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/workspaces/{workspace}/reactivate', [AdminController::class, 'reactivateWorkspace'])->name('admin.workspaces.reactivate');
         Route::get('/roles', [AdminController::class, 'roles'])->name('admin.roles');
         Route::patch('/roles/{role}/permissions', [AdminController::class, 'syncRolePermissions'])->name('admin.roles.sync-permissions');
+        // Gestion des tickets de support
+        Route::get('/support', [SupportTicketController::class, 'adminIndex'])->name('admin.support.index');
+        Route::patch('/support/{ticket}/status', [SupportTicketController::class, 'updateStatus'])->name('admin.support.update-status');
     });
 
     // Dashboard routes

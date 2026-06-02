@@ -539,6 +539,7 @@ import {
 
 import BoxCubeIcon from "@/icons/BoxCubeIcon.vue";
 import FolderIcon from "@/icons/FolderIcon.vue";
+import SupportIcon from "@/icons/SupportIcon.vue";
 import TaskIcon from "@/icons/TaskIcon.vue";
 import ClipboardCheckIcon from "@/icons/ClipboardCheckIcon.vue";
 import UsersIcon from "@/icons/UsersIcon.vue";
@@ -883,6 +884,11 @@ const menuGroups = computed(() => [
                 path: "/notifications",
                 badge: "",
             },
+            {
+                icon: SupportIcon,
+                name: t('sidebar.support'),
+                path: "/support",
+            },
         ],
     },
     {
@@ -921,6 +927,12 @@ const menuGroups = computed(() => [
                 icon: ShieldIcon,
                 name: t('navigation.roles_permissions'),
                 path: "/admin/roles",
+                superAdminOnly: true,
+            },
+            {
+                icon: SupportIcon,
+                name: t('sidebar.support'),
+                path: "/admin/support",
                 superAdminOnly: true,
             },
         ],

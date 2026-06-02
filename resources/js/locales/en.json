@@ -122,6 +122,7 @@
     "collaboration": "Collaboration",
     "docs_resources": "Documentation & Resources",
     "administration": "Administration",
+    "support": "Help & Support",
     "other": "Other",
     "all_tasks": "All tasks",
     "as_responsible": "As responsible",
@@ -1936,6 +1937,50 @@
       "task": "Task",
       "result": "Result",
       "document": "Document"
+    }
+  },
+  "support": {
+    "page_title": "Help & Support",
+    "page_subtitle": "Need help? Send us a message and we'll get back to you shortly.",
+    "form_title": "Contact Support",
+    "category_label": "Category",
+    "category_placeholder": "Select a category",
+    "subject_label": "Subject",
+    "subject_placeholder": "Brief description of your issue",
+    "message_label": "Message",
+    "message_placeholder": "Describe your issue in detail...",
+    "attachment_label": "Attachment (optional)",
+    "attachment_hint": "PDF, Word, image or ZIP — max 5 MB",
+    "submit": "Send",
+    "submitting": "Sending...",
+    "success": "Your ticket has been submitted! We'll get back to you as soon as possible.",
+    "my_tickets_title": "My Tickets",
+    "no_tickets": "You have no support tickets yet.",
+    "categories": {
+      "bug": "Technical issue",
+      "feature": "Feature request",
+      "billing": "Billing",
+      "account": "Account",
+      "other": "Other"
+    },
+    "statuses": {
+      "open": "Open",
+      "in_progress": "In progress",
+      "resolved": "Resolved"
+    },
+    "admin": {
+      "page_title": "Support Tickets",
+      "filter_all_statuses": "All statuses",
+      "filter_all_categories": "All categories",
+      "search_placeholder": "Search tickets...",
+      "col_id": "#",
+      "col_user": "User",
+      "col_category": "Category",
+      "col_subject": "Subject",
+      "col_status": "Status",
+      "col_date": "Date",
+      "update_status": "Update status",
+      "empty": "No support tickets found."
     }
   },
   "profile_card": {

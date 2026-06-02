@@ -700,6 +700,19 @@ const router = createRouter({
     },
 
     {
+      path: '/support',
+      name: 'support',
+      component: () => import('../pages/Support.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/admin/support',
+      name: 'admin.support',
+      component: () => import('../pages/admin/AdminSupport.vue'),
+      meta: { requiresAuth: true, requiresSuperAdmin: true },
+    },
+
+    {
       path: '/error-404',
       name: '404 Error',
       component: () => import('../pages/Errors/FourZeroFour.vue'),
