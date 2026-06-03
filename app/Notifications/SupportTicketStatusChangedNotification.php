@@ -38,7 +38,7 @@ class SupportTicketStatusChangedNotification extends Notification implements Sho
             ->line("Le statut de votre ticket **#{$this->ticket->ticket_number}** a été mis à jour.")
             ->line("**Sujet :** {$this->ticket->subject}")
             ->line("**Nouveau statut :** {$newLabel}")
-            ->action('Voir mon ticket', url('/support?ticket='.$this->ticket->id));
+            ->action('Voir mon ticket', rtrim(config('app.frontend_url'), '/').'/support?ticket='.$this->ticket->id);
     }
 
     public function toArray(object $notifiable): array
@@ -49,6 +49,8 @@ class SupportTicketStatusChangedNotification extends Notification implements Sho
             'subject' => $this->ticket->subject,
             'old_status' => $this->oldStatus,
             'new_status' => $this->ticket->status,
+            'ticket_number' => $this->ticket->ticket_number,
+            'url' => '/support?ticket='.$this->ticket->id,
             'dedup_key' => "support_ticket_status:{$this->ticket->id}:{$this->ticket->status}",
         ];
     }

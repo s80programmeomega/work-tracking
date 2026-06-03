@@ -76,12 +76,12 @@
     <div class="shrink-0 flex items-start gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150 mt-0.5">
       <button v-if="!notification.read_at" type="button"
         class="p-1.5 rounded-3 hover:bg-success-50 dark:hover:bg-success-500/10 text-success-600 dark:text-success-400 transition-colors"
-        @click.stop="emit('mark-read', notification.id)" title="Marquer comme lu">
+        @click.stop="emit('mark-read', notification.id)" :title="$t('notifications.mark_read')">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
       </button>
       <button type="button"
         class="p-1.5 rounded-3 hover:bg-error-50 dark:hover:bg-error-500/10 text-error-600 dark:text-error-400 transition-colors"
-        @click.stop="confirmDelete" title="Supprimer">
+        @click.stop="confirmDelete" :title="$t('notifications.delete')">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
       </button>
     </div>
@@ -90,7 +90,10 @@
 
 <script setup>
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useNotifications } from '@/composables/useNotifications';
+
+const { t } = useI18n();
 
 const props = defineProps({
   notification: { type: Object, required: true },
@@ -203,9 +206,12 @@ const title = computed(() => {
     high_inaction_rate_alert:  `Taux d'inaction élevé — ${data.responsable_nom || 'Responsable'}`,
     unjustified_return_alert:  `Retours injustifiés — ${data.agent_nom || 'Agent'}`,
     deadline_approaching:      `Échéance proche — ${data.tache_titre || 'Tâche'}`,
+    support_ticket_new:        `Nouveau ticket #${data.ticket_number || '?'} — ${data.subject || data.submitter_name || ''}`,
+    support_ticket_reply:      `Réponse sur votre ticket #${data.ticket_number || '?'} — ${data.subject || ''}`,
+    support_ticket_status_changed: `Statut mis à jour — ticket #${data.ticket_number || '?'}`,
   };
 
-  return TITLES[t] || props.notification.title || 'Notification';
+  return TITLES[t] || props.notification.title || t;
 });
 
 // Ligne descriptive : qui a fait l'action
@@ -292,7 +298,7 @@ const projectName = computed(() => {
 
 
 const confirmDelete = () => {
-  if (confirm('Supprimer cette notification ?')) {
+  if (confirm(t('notifications.confirm_delete'))) {
     emit('delete', props.notification.id);
   }
 };

@@ -45,7 +45,7 @@ class SupportTicketReplyNotification extends Notification implements ShouldQueue
             ->line('**Réponse :**')
             ->line($this->reply->body)
             ->line("**Statut actuel :** {$statusLabel}")
-            ->action('Voir mon ticket', url('/support?ticket='.$this->ticket->id));
+            ->action('Voir mon ticket', rtrim(config('app.frontend_url'), '/').'/support?ticket='.$this->ticket->id);
     }
 
     public function toArray(object $notifiable): array
@@ -57,6 +57,7 @@ class SupportTicketReplyNotification extends Notification implements ShouldQueue
             'subject' => $this->ticket->subject,
             'reply_preview' => mb_substr($this->reply->body, 0, 100),
             'status' => $this->ticket->status,
+            'url' => '/support?ticket='.$this->ticket->id,
             'dedup_key' => "support_ticket_reply:{$this->reply->id}",
         ];
     }
