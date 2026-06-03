@@ -563,7 +563,8 @@ import TaskIcon from "@/icons/TaskIcon.vue";
 import ClipboardCheckIcon from "@/icons/ClipboardCheckIcon.vue";
 import UsersIcon from "@/icons/UsersIcon.vue";
 import ShieldIcon from "@/icons/ShieldIcon.vue";
-import { DocumentTextIcon } from "@heroicons/vue/24/outline";
+import BuildingOfficeIcon from "@/icons/BuildingOfficeIcon.vue";
+import DocsIcon from "@/icons/DocsIcon.vue";
 import { useI18n } from "vue-i18n";
 import { useSidebar } from "@/composables/useSidebar";
 import api from "@/api/axios";
@@ -932,7 +933,7 @@ const menuGroups = computed(() => [
                 superAdminOnly: true,
             },
             {
-                icon: UsersIcon,
+                icon: BuildingOfficeIcon,
                 name: t('navigation.workspaces'),
                 path: "/admin/workspaces",
                 superAdminOnly: true,
@@ -950,7 +951,7 @@ const menuGroups = computed(() => [
                 superAdminOnly: true,
             },
             {
-                icon: DocumentTextIcon,
+                icon: DocsIcon,
                 name: t('sidebar.log_viewer'),
                 // Lien externe : passe le token Sanctum en query param car le navigateur
                 // ne peut pas envoyer l'en-tête Authorization pour une navigation directe.
