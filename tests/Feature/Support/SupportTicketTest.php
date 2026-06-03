@@ -7,7 +7,7 @@ namespace Tests\Feature\Support;
 use App\Models\SupportTicket;
 use App\Models\User;
 use App\Notifications\NewSupportTicketNotification;
-use App\Notifications\SupportTicketStatusChangedNotification;
+use App\Notifications\SupportTicketReplyNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
@@ -129,7 +129,27 @@ class SupportTicketTest extends TestCase
             'support_ticket_id' => $ticket->id,
             'is_admin_reply' => true,
         ]);
-        Notification::assertSentTo($requester, SupportTicketStatusChangedNotification::class);
+        // La notification de réponse est toujours envoyée (même sans changement de statut)
+        Notification::assertSentTo($requester, SupportTicketReplyNotification::class);
+    }
+
+    /** @test */
+    public function reply_notifies_user_even_without_status_change(): void
+    {
+        Notification::fake();
+
+        $admin = User::factory()->create(['is_super_admin' => true, 'is_active' => true]);
+        $requester = User::factory()->create(['is_active' => true]);
+        // Ticket déjà en cours — l'admin répond sans changer le statut
+        $ticket = SupportTicket::factory()->create(['user_id' => $requester->id, 'status' => 'in_progress']);
+
+        $this->actingAs($admin)->postJson("/api/admin/support/{$ticket->id}/reply", [
+            'body' => 'Nous avons investigué, voici notre réponse.',
+            'status' => 'in_progress', // statut inchangé
+        ])->assertOk();
+
+        // L'utilisateur doit quand même être notifié
+        Notification::assertSentTo($requester, SupportTicketReplyNotification::class);
     }
 
     /** @test */

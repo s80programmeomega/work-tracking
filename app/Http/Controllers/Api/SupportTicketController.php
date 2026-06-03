@@ -9,7 +9,7 @@ use App\Models\SupportTicketAttachment;
 use App\Models\SupportTicketReply;
 use App\Models\User;
 use App\Notifications\NewSupportTicketNotification;
-use App\Notifications\SupportTicketStatusChangedNotification;
+use App\Notifications\SupportTicketReplyNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -155,9 +155,8 @@ class SupportTicketController extends Controller
             'new_status' => $ticket->status,
         ]);
 
-        if ($oldStatus !== $request->status) {
-            $ticket->user->notify(new SupportTicketStatusChangedNotification($ticket, $oldStatus));
-        }
+        // Toujours notifier le demandeur — il doit voir la réponse même sans changement de statut.
+        $ticket->user->notify(new SupportTicketReplyNotification($ticket, $reply));
 
         return response()->json([
             'message' => __('support.reply_added'),

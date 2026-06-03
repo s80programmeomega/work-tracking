@@ -105,7 +105,8 @@ class NotificationService
             'trial_expiring', 'trial_expired', 'subscription_limit_reached',
             'trial_extended', 'workspace_suspended',
             'document_shared',
-            'support_ticket_new', 'support_ticket_status_changed' => true,
+            'support_ticket_new', 'support_ticket_status_changed',
+            'support_ticket_reply' => true,
 
             // Low-signal — uniquement in-app
             'evaluation_sheet_ready', 'approuve_n0', 'score_updated' => false,
@@ -245,7 +246,8 @@ class NotificationService
             'trial_expiring', 'trial_expired', 'subscription_limit_reached',
             'trial_extended', 'workspace_suspended',
             'document_shared',
-            'support_ticket_new', 'support_ticket_status_changed' => true,
+            'support_ticket_new', 'support_ticket_status_changed',
+            'support_ticket_reply' => true,
             'approuve_n0', 'score_updated' => false,
             // Unknown event type — opt out of email by default to be safe.
             default => false,

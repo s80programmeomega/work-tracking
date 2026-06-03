@@ -1964,6 +1964,7 @@
     "my_tickets_title": "Mes tickets",
     "no_tickets": "Vous n'avez pas encore de tickets de support.",
     "ticket_number": "Ticket",
+    "reply_notification_title": "Nouvelle réponse sur votre ticket",
     "sla_label": "Délai de réponse",
     "sla_breached": "SLA dépassé",
     "first_response": "Première réponse",

@@ -1961,6 +1961,7 @@
     "my_tickets_title": "My Tickets",
     "no_tickets": "You have no support tickets yet.",
     "ticket_number": "Ticket",
+    "reply_notification_title": "New reply on your ticket",
     "sla_label": "Response deadline",
     "sla_breached": "SLA overdue",
     "first_response": "First response",
