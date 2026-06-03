@@ -28,27 +28,32 @@ class AppServiceProvider extends ServiceProvider
     {
         SousTache::observe(SousTacheObserver::class);
 
-        // Log Viewer — accès réservé aux super-admins.
+        // Log Viewer — contrôle d'accès.
         //
-        // Ce SPA utilise l'authentification par token Bearer (Sanctum), pas de session web.
-        // Le Gate standard ne fonctionne pas car auth()->user() renvoie null sans session.
-        // On utilise le callback LogViewer::auth() qui reçoit la Request complète et peut
-        // lire le token Bearer directement depuis l'en-tête Authorization.
-        LogViewer::auth(function ($request) {
-            // Accepte le token depuis l'en-tête Authorization (Axios SPA)
-            // OU depuis le paramètre de requête ?token=… (navigation directe dans le navigateur).
-            $token = $request->bearerToken() ?? $request->query('token');
-            if (! $token) {
-                return false;
-            }
-            $tokenRecord = PersonalAccessToken::findToken($token);
-            if (! $tokenRecord) {
-                return false;
-            }
-            $user = $tokenRecord->tokenable;
+        // En local/dev : aucun callback enregistré. Le middleware AuthorizeLogViewer
+        // du package laisse passer les requêtes non-production sans gate ni callback
+        // (comportement voulu par le package — outil développeur).
+        //
+        // En production : callback Bearer token. Le SPA stocke le token dans
+        // localStorage ; le navigateur NE peut PAS l'envoyer automatiquement
+        // lors d'une navigation directe (barre d'adresse). Deux chemins d'accès :
+        //   1. Lien sidebar → /log-viewer?token=<token>  (navigation SPA)
+        //   2. Header Authorization: Bearer <token>      (appel Axios)
+        if (app()->isProduction()) {
+            LogViewer::auth(function ($request) {
+                $token = $request->bearerToken() ?? $request->query('token');
+                if (! $token) {
+                    return false;
+                }
+                $tokenRecord = PersonalAccessToken::findToken($token);
+                if (! $tokenRecord) {
+                    return false;
+                }
+                $user = $tokenRecord->tokenable;
 
-            return $user instanceof User && $user->is_super_admin;
-        });
+                return $user instanceof User && $user->is_super_admin;
+            });
+        }
 
         // Enregistrer automatiquement la relation documents() sur tous les modèles
         Model::resolveRelationUsing('documents', function ($model) {
