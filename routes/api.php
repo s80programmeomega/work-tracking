@@ -127,6 +127,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/support', [SupportTicketController::class, 'adminIndex'])->name('admin.support.index');
         // Réponse obligatoire + changement de statut en une seule action
         Route::post('/support/{ticket}/reply', [SupportTicketController::class, 'reply'])->name('admin.support.reply');
+        // Journal d'activité cross-app (Spatie activity_log) — super-admin seulement
+        Route::get('/activity-log', [ActivityController::class, 'adminFeed'])->name('admin.activity-log');
     });
 
     // Dashboard routes

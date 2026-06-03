@@ -952,10 +952,8 @@ const menuGroups = computed(() => [
             },
             {
                 icon: DocsIcon,
-                name: t('sidebar.log_viewer'),
-                // Lien externe : passe le token Sanctum en query param car le navigateur
-                // ne peut pas envoyer l'en-tête Authorization pour une navigation directe.
-                href: () => `/log-viewer?token=${authStore.token ?? ''}`,
+                name: t('sidebar.logs'),
+                path: '/admin/logs',
                 superAdminOnly: true,
             },
         ],

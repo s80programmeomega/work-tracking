@@ -725,6 +725,12 @@ const router = createRouter({
       },
     },
     {
+      path: '/admin/logs',
+      name: 'admin.logs',
+      component: () => import('../pages/admin/AdminLogs.vue'),
+      meta: { requiresAuth: true, requiresSuperAdmin: true },
+    },
+    {
       path: '/auth/callback',
       name: 'AuthCallback',
       component: () => import('../pages/Auth/SocialCallback.vue'),

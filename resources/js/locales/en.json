@@ -123,7 +123,7 @@
     "docs_resources": "Documentation & Resources",
     "administration": "Administration",
     "support": "Help & Support",
-    "log_viewer": "Log Viewer",
+    "logs": "Logs",
     "other": "Other",
     "all_tasks": "All tasks",
     "as_responsible": "As responsible",
@@ -2015,6 +2015,23 @@
       "reply_submitting": "Sending...",
       "empty": "No support tickets found."
     }
+  },
+  "admin_logs": {
+    "page_title": "Logs & Activity",
+    "tab_activity": "Activity Log",
+    "tab_app_logs": "Application Logs",
+    "search_placeholder": "Search description or log name...",
+    "all_events": "All events",
+    "all_subjects": "All subjects",
+    "reset": "Reset",
+    "loading_viewer": "Loading log viewer...",
+    "empty": "No activity entries found.",
+    "total": "{total} entries",
+    "col_date": "Date",
+    "col_causer": "Author",
+    "col_event": "Event",
+    "col_subject": "Subject",
+    "col_description": "Description"
   },
   "profile_card": {
     "change_avatar": "Change avatar",
