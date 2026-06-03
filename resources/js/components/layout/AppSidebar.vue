@@ -323,6 +323,25 @@
                                     />
                                 </button>
 
+                                <!-- Lien externe (ouvre dans un nouvel onglet) -->
+                                <a
+                                    v-else-if="item.href"
+                                    :href="typeof item.href === 'function' ? item.href() : item.href"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    :class="[
+                                        'menu-item group menu-item-inactive',
+                                        !isExpanded && !isHovered ? 'lg:justify-center' : 'justify-start',
+                                    ]"
+                                >
+                                    <span class="menu-item-icon-inactive">
+                                        <component :is="item.icon" />
+                                    </span>
+                                    <span v-if="isExpanded || isHovered || isMobileOpen" class="menu-item-text flex-1">
+                                        {{ item.name }}
+                                    </span>
+                                </a>
+
                                 <!-- Simple link item -->
                                 <router-link
                                     v-else-if="item.path"
@@ -544,6 +563,7 @@ import TaskIcon from "@/icons/TaskIcon.vue";
 import ClipboardCheckIcon from "@/icons/ClipboardCheckIcon.vue";
 import UsersIcon from "@/icons/UsersIcon.vue";
 import ShieldIcon from "@/icons/ShieldIcon.vue";
+import { DocumentTextIcon } from "@heroicons/vue/24/outline";
 import { useI18n } from "vue-i18n";
 import { useSidebar } from "@/composables/useSidebar";
 import api from "@/api/axios";
@@ -927,6 +947,14 @@ const menuGroups = computed(() => [
                 icon: ShieldIcon,
                 name: t('navigation.roles_permissions'),
                 path: "/admin/roles",
+                superAdminOnly: true,
+            },
+            {
+                icon: DocumentTextIcon,
+                name: t('sidebar.log_viewer'),
+                // Lien externe : passe le token Sanctum en query param car le navigateur
+                // ne peut pas envoyer l'en-tête Authorization pour une navigation directe.
+                href: () => `/log-viewer?token=${authStore.token ?? ''}`,
                 superAdminOnly: true,
             },
         ],

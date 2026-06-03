@@ -28,6 +28,12 @@ class Kernel extends ConsoleKernel
             ->daily()
             ->onOneServer()
             ->runInBackground();
+
+        // Rotation journalière du browser.log (écrit par laravel-boost, non configurable via logging.php)
+        $schedule->command('logs:rotate-browser', ['--days=14'])
+            ->dailyAt('00:05')
+            ->onOneServer()
+            ->runInBackground();
     }
 
     /**
