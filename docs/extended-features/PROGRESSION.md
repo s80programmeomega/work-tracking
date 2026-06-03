@@ -34,8 +34,8 @@
 |---|---|---|---|---|---|---|
 | 0 | Security + perf baseline (audit) | `chore/security-perf-baseline` | ✅ | 2026-06-01 | 2026-06-01 | Docs-only, zero code change. Finding F1 (token expiry) folded into Phase 1. Merged into `jonas` `4493754`, pushed both remotes. |
 | 1 | MFA — TOTP/QR + recovery codes + email-OTP fallback | `feature/mfa-2fa` | ✅ | 2026-06-01 | 2026-06-01 | Merged `7525a81`, pushed both remotes. 666 tests passing. |
-| 2 | Social auth (Google) | `feature/social-auth-google` | ✅ | 2026-06-02 | 2026-06-02 | Socialite installed; migration; SocialAuthController; SocialCallback.vue; 6 tests; 672 total passing. |
-| 3 | Technical contact + Help & Support | `feature/support-contact` | ⬜ | — | — | `SupportTicket` + notifications to super-admins/requester |
+| 2 | Social auth (Google) | `feature/social-auth-google` | ✅ | 2026-06-02 | 2026-06-02 | Merged `19047fd`, pushed both remotes. 672 tests passing. |
+| 3 | Technical contact + Help & Support | `feature/support-contact` | ✅ | 2026-06-02 | 2026-06-03 | 682 tests passing. Committed `121dc75`. Awaiting merge into `jonas`. |
 | 4 | Super-admin app log & activity viewer | `feature/admin-activity-viewer` | ⬜ | — | — | Cross-app feed over `activity_log`; super_admin only |
 | 5 | Chat — real-time + @mentions + polish | `feature/chat-realtime` | ⬜ | — | — | Reverb broadcast events; implement @mention notif (TODO at `TeamMessageService.php:68`) |
 | 6 | Global search (Typesense + Scout, manager+) | `feature/global-search-typesense` | ⬜ | — | — | Typesense day one; `search.global` perm; workspace-scoped + gated |
@@ -94,7 +94,60 @@
 - [x] Commit + push feature branch (`779fef5`)
 - [x] Merge into `jonas` (`7525a81`) — pushed `origin` + `client`
 
-_(Checklists for Phases 2–10 added as each phase starts.)_
+### Phase 2 — Social auth (Google) ✅
+- [x] `laravel/socialite` installed
+- [x] `provider` + `provider_id` nullable columns on `users` (migration + `down()` safe)
+- [x] `config/services.php` Google block (env-driven `GOOGLE_CLIENT_ID/SECRET/REDIRECT`)
+- [x] `.env.example` Google placeholders
+- [x] `SocialAuthController` — `redirectToGoogle()` (stateless) + `handleGoogleCallback()` (resolves-or-creates user, links by verified email, no duplicates, issues Sanctum token via `AuthService::issueToken()`, redirects SPA with `?token=`)
+- [x] Routes: `GET /api/auth/google/redirect` + `GET /api/auth/google/callback`
+- [x] `SocialCallback.vue` page — reads `?token=` from URL, hydrates `authStore`, redirects to `/`
+- [x] Vue router entry `/auth/callback` (guest)
+- [x] Google buttons wired in `Signin.vue` + `Signup.vue` (was inert `<button>`, now `<a :href="googleRedirectUrl">`)
+- [x] Activity-logged on create + link
+- [x] 6 feature tests (`SocialAuthTest`) — 672 total passing
+- [x] Commit + push `feature/social-auth-google`
+- [x] Merged into `jonas` `19047fd` — pushed `origin` + `client`
+
+### Phase 3 — Technical contact + Help & Support ✅
+
+**Core feature:**
+- [x] `SupportTicket` model (category, subject, message, status, reproducibility, steps_to_reproduce, SLA columns) + migration + factory + seeder
+- [x] `SupportTicketReply` model + migration (`support_ticket_replies` — mandatory on every admin status change)
+- [x] `SupportTicketAttachment` model + migration (`support_ticket_attachments` — replaces single attachment column)
+- [x] `StoreSupportTicketRequest` — validates category, subject, message, reproducibility, steps, multi-file attachments (max 5 × 5 MB)
+- [x] `SupportTicketController`: `store` (any auth user, SLA auto-calculated), `index` (own tickets + replies + attachments), `adminIndex` (super-admin, filterable), `reply` (mandatory reply + status, sets `first_responded_at`/`resolved_at`), `addAttachments`, `downloadAttachment`
+- [x] `NewSupportTicketNotification` (ShouldQueue → all super-admins, in-app + email)
+- [x] `SupportTicketReplyNotification` (ShouldQueue → requester, **always** on admin reply regardless of status change — includes reply text in email)
+- [x] `NotificationService`: `support_ticket_new`, `support_ticket_reply`, `support_ticket_status_changed` registered as high-signal in `wantsEmail` + `wantsWebPush`
+- [x] All three notification `toArray()` responses include `url` field for modal clickable redirect
+- [x] Routes: `POST/GET /api/support`, `POST /api/support/{ticket}/attachments`, `GET /api/support/attachments/{id}/download`, `GET /api/admin/support`, `POST /api/admin/support/{ticket}/reply`
+- [x] `lang/{fr,en}/support.php` + `resources/js/locales/{en,fr}.json` support.* keys
+- [x] `Support.vue` — role-based: super-admin sees `AdminSupport` component; user sees contact form (reproducibility, steps, multi-file) + my-tickets list with reply thread + attachments
+- [x] `AdminSupport.vue` — mandatory reply panel (body + status required), SLA badge, reply thread with stagger, SLA-breached filter
+- [x] Single sidebar "Help & Support" entry (removed duplicate admin entry)
+- [x] 10 feature tests (`SupportTicketTest`) — 682 total passing, build green, Larastan clean
+- [x] `docs/extended-features/testing/SUPPORT_TESTING.md` written
+
+**MFA bug fix (Phase 1 regression — 405 error):**
+- [x] `TwoFactorManagementController` — API endpoints wrapping Fortify 2FA actions under `auth:sanctum`, bypassing Fortify's session-based routes
+- [x] Routes: `POST|DELETE /api/user/two-factor-authentication`, `POST /api/user/confirmed-two-factor-authentication`, `GET /api/user/two-factor-qr-code|secret-key|recovery-codes`, `POST /api/user/two-factor-recovery-codes`
+
+**Cross-cutting fixes:**
+- [x] Single-session enforcement: `AuthService::issueToken()` revokes existing `auth_token` tokens before issuing new one
+- [x] Notification modal: support ticket types wired into all lookup maps (TITLES, HEADER_COLORS, TYPE_LABEL_DISPLAY, actionLabel, modalTitle)
+- [x] Notification modal + `NotificationItem`: hardcoded French strings → `$t()` (mark_read, delete, confirm_delete, read, unread_label)
+- [x] Email links use `config('app.frontend_url')` + `APP_FRONTEND_URL` env var (fixes localhost vs 127.0.0.1 origin mismatch causing redirect to login)
+- [x] Laravel logging switched to `daily` channel (was `single`), 14-day retention
+- [x] `opcodesio/log-viewer` published + `LogViewer::auth()` callback (production only: super-admin Bearer token; local: open freely)
+- [x] Log viewer sidebar entry (super-admin, opens `/log-viewer?token=xxx` in new tab)
+- [x] `logs:rotate-browser` artisan command + scheduled daily at 00:05 (rotates Boost's `browser.log` which bypasses Laravel channels)
+- [x] `vite.config.js`: `cssMinify: 'lightningcss'` — eliminates the recurring Tailwind v4 `:is()` CSS warning
+- [x] Guide 23 (stagger animations mandatory) + Guide 24 (full integration checklist) added to `WORKING_GUIDELINES.md` + `CLAUDE.md` + auto-memory
+- [x] Commit + push `feature/support-contact` (`121dc75`)
+- [ ] Merge into `jonas` (awaiting per-push approval)
+
+_(Checklists for Phases 4–10 added as each phase starts.)_
 
 ---
 
@@ -104,4 +157,5 @@ _(Checklists for Phases 2–10 added as each phase starts.)_
 |---|---|---|
 | 2026-06-01 | Roadmap planning; prep; Phase 0 | Approved 10-phase roadmap; committed/pushed `/documents` i18n; scaffolded `docs/extended-features/`; merged frontend-alignment into `jonas` (654 tests green); completed Phase 0 baseline (docs-only). Phase 1 next. |
 | 2026-06-01 | Phase 1 — MFA | TOTP + recovery codes + email-OTP implemented. F1 token-expiry fixed. `sanctum:prune-expired` scheduled. 12 feature tests + 666 total passing. Build green. |
-| 2026-06-02 | Phase 2 — Social auth | Socialite installed, `provider`/`provider_id` migration, `SocialAuthController` (redirect + stateless callback), `SocialCallback.vue`, Google buttons wired in Signin/Signup. 6 feature tests + 672 total passing. |
+| 2026-06-02 | Phase 2 — Social auth | Socialite installed, `provider`/`provider_id` migration, `SocialAuthController` (redirect + stateless callback), `SocialCallback.vue`, Google buttons wired in Signin/Signup. 6 feature tests + 672 total passing. Merged into `jonas` `19047fd`. |
+| 2026-06-02–03 | Phase 3 — Support + bug fixes | Full support ticket system (SLA, mandatory admin reply, multi-attachments, reproducibility). MFA 405 fixed (`TwoFactorManagementController`). Single-session enforcement. Notification modal support types + translations. Email link origin fix (`APP_FRONTEND_URL`). Daily log rotation (Laravel + browser.log). Log viewer gated + sidebar link. Stagger + full-integration guidelines. 682 tests passing. |

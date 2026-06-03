@@ -16,29 +16,34 @@
 
 ## Current Session
 
-**Date:** 2026-05-31
-**Session goal:** Frontend alignment — stagger animations, stats toggles, notification polish
-**Branch:** `feature/frontend-alignment-phase-1`
-**Status:** Complete — build passing. Awaiting commit + push.
+**Date:** 2026-06-03
+**Session goal:** Extended features — Phase 3 (Support), bug fixes, log infrastructure
+**Branch:** `feature/support-contact`
+**Status:** Complete — 682 tests passing, build green, Larastan clean. Awaiting merge into `jonas`.
 
 ---
 
 ## Current Task
 
-**Task:** Frontend Alignment — animations, stats toggles, notification fixes
-**Branch:** `feature/frontend-alignment-phase-1`
-**Status:** Complete — build passing (17.38s). Awaiting commit + push.
+**Task:** Extended Features — Phase 3 complete + post-phase fixes
+**Branch:** `feature/support-contact`
+**Status:** Complete — committed + pushed both remotes (`121dc75`). Awaiting `jonas` merge approval.
 
-**What was done this session:**
-- Stagger animations: added `useStagger` + `.stagger-item` to ProjetDetail (activities + members tbody), ProjetDashboard (recentActivities + recentProjects), TacheCommentsTab, TacheAssigneesTab, TacheActivityTab, TacheAttachmentsTab, TacheLinksTab, TacheResultsTab, PendingValidationsModal, ActivityDetail (tasks + members)
-- Stats toggle button: added to MesActivites.vue, evaluations/PendingValidations.vue, MesValidationsEnAttente.vue — each replaces always-visible grid with `showStats` ref + `<transition>` + dedicated stats component
-- New stats components: MesActivitesStats.vue, PendingValidationsStats.vue (evaluations/), MesValidationsStats.vue (evaluations/)
-- Notification fixes: useNotifications.js icon/color/type maps cover all real notification types; NotificationItem rewritten with correct field names; NotificationDetailModal updated with all real type handlers
+**What was done (Phase 3 + fixes):**
+- Full support ticket system: `SupportTicket` + `SupportTicketReply` + `SupportTicketAttachment` models, SLA auto-calculation, mandatory admin replies, multi-file attachments, reproducibility field
+- `SupportTicketReplyNotification` — always notifies the requester on admin reply (regardless of status change)
+- `TwoFactorManagementController` — fixes MFA 405 error (Fortify 2FA endpoints exposed under `auth:sanctum`)
+- Single-session enforcement: `issueToken()` revokes old tokens
+- Notification modal: support ticket types wired; hardcoded French strings → `$t()`
+- `APP_FRONTEND_URL` config — email links use correct origin (fixes localhost vs 127.0.0.1 causing re-login)
+- Laravel logging → `daily` channel (14-day rotation); `browser.log` rotated via `logs:rotate-browser` command
+- `opcodesio/log-viewer` + super-admin sidebar link (`/log-viewer?token=xxx`); local env open, production token-gated
+- Guide 23 (stagger animations) + Guide 24 (full integration) added to guidelines + CLAUDE.md
+- `vite.config.js` → `lightningcss` (eliminates recurring CSS build warnings)
 
 **What to do next:**
-1. Commit all changes on `feature/frontend-alignment-phase-1`
-2. Push to origin (and client when applicable)
-3. Phase 4: Dusk happy-path tests for the pages that got fixes
+1. Merge `feature/support-contact` → `jonas` (needs per-push approval, then push both remotes)
+2. Start **Phase 4** — Super-admin app log & activity viewer (`feature/admin-activity-viewer`, branch from `jonas`)
 
 **What was done this session:**
 - Replaced abandoned `nunomaduro/larastan` with `larastan/larastan` v2.11; updated `phpstan.neon` extension path
@@ -263,27 +268,20 @@ Tests: 11 feature in `NotificationServiceTest` + 8 feature in `SendDailyDigestCo
 
 ---
 
-## Open PRs
+## Open PRs / Active Branches
 
-| Branch | Task | Status |
+| Branch | Phase / Task | Status |
 |---|---|---|
-| `feature/v2-task-1-queue-reverb` | Task 1 | Merged ✅ |
-| `feature/v2-task-2-subtask-model` | Task 2 | Merged ✅ |
-| `feature/v2-task-3-subtask-api` | Task 3 | Merged ✅ |
-| `feature/v2-task-4-subtask-ui` | Task 4 | Merged ✅ (recovered 2026-05-18) |
-| `feature/v2-task-5-validation-n0` | Task 5 | Merged ✅ (via `feature/v2-permission-architecture`) |
-| `feature/v2-task-6-bypass` | Task 6 | Merged ✅ |
-| `feature/v2-task-7-scores-dashboard` | Task 7 | Merged ✅ (commit `c891a6e`) |
-| `feature/v2-task-8-notifications` | Task 8 + 8b + 8c | Merged ✅ (into `jonas` 2026-05-26) |
-| `feature/v2-task-9-agent-sheet` | Task 9 | Merged ✅ (into `jonas` 2026-05-26) |
-| `feature/v2-task-10-dashboard` | Task 10 | Merged ✅ (into `jonas` 2026-05-26) |
-| `feature/v2-task-11-task-creation-ux` | Task 11 | Merged ✅ (into `jonas` 2026-05-26) |
-| `feature/v2-task-12-document-management` | Task 12 | Merged ✅ (into `jonas` 2026-05-26) |
-| `fix/cdc-hotfixes` | CDC Hotfixes | Merged ✅ (into `jonas` 2026-05-26) |
-| `feature/v2-task-13-subscription` | Task 13 | Complete — awaiting push 🔄 |
-| `feature/v2-task-14-platform-dashboard` | Task 14 | Complete — awaiting push 🔄 |
-| `feature/v2-task-15-task-list-ux` | Task 15 | Complete — awaiting push 🔄 |
-| `feature/v2-task-16-export` | Task 16 | Complete — awaiting push 🔄 |
+| `feature/support-contact` | Extended Phase 3 (Support + bug fixes) | Complete — awaiting `jonas` merge 🔄 |
+| `feature/admin-activity-viewer` | Extended Phase 4 | Not started ⬜ |
+
+**Previously merged into `jonas` (extended features):**
+- `chore/security-perf-baseline` → `jonas` `4493754` (Phase 0 — baseline docs)
+- `feature/mfa-2fa` → `jonas` `7525a81` (Phase 1 — MFA)
+- `feature/social-auth-google` → `jonas` `19047fd` (Phase 2 — Social auth)
+
+**Previously merged (v2 tasks):**
+Tasks 0–16, fix/cdc-hotfixes, fix/bug-batch, design-system-v1, chore/test-coverage-expansion — all merged into `jonas` (see PROGRESSION.md for full history).
 
 ---
 
