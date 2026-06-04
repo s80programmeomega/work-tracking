@@ -22,6 +22,7 @@
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_DRIVER" value="log"/>
         <env name="BROADCAST_CONNECTION" value="log"/>
+        <env name="SCOUT_DRIVER" value="collection"/>
         <env name="CACHE_DRIVER" value="array"/>
         <env name="DB_CONNECTION" value="mysql"/>
         <env name="DB_DATABASE" value="work-tracking-test"/>

@@ -82,6 +82,10 @@ export function useWorkspacePermissions(workspace = null) {
     // Task 8: Notifications
     const canManageNotificationPreferences = computed(() => isSuperAdmin.value || (perms.value.can_manage_notification_preferences ?? false))
 
+    // Phase 6: Recherche globale — manager et supérieur uniquement
+    // isDirecteur (workspace owner) inclus car le propriétaire a toujours search.global
+    const canSearchGlobal = computed(() => isSuperAdmin.value || isDirecteur.value || (perms.value.can_search_global ?? false))
+
     // G8: Sidebar gating helpers
     // canViewAllTasks: managers, owners and super_admins can see the full task list.
     const canViewAllTasks = computed(() => isSuperAdmin.value || isDirecteur.value || isManager.value || isCadre.value)
@@ -165,6 +169,9 @@ export function useWorkspacePermissions(workspace = null) {
 
         // Task 8
         canManageNotificationPreferences,
+
+        // Phase 6
+        canSearchGlobal,
 
         // G8
         canViewAllTasks,

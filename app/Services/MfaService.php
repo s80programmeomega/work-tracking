@@ -10,9 +10,12 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Laravel\Fortify\Contracts\TwoFactorAuthenticationProvider;
 
 class MfaService
 {
+    public function __construct(private TwoFactorAuthenticationProvider $totp) {}
+
     /** Durée de validité du code email-OTP (minutes) */
     private const EMAIL_OTP_TTL_MINUTES = 10;
 
@@ -77,7 +80,7 @@ class MfaService
     public function verifyTotp(User $user, string $code): bool
     {
         // Tentative code TOTP
-        if ($user->two_factor_confirmed_at && $user->validateTwoFactorCode($code)) {
+        if ($user->two_factor_confirmed_at && $this->totp->verify(decrypt($user->two_factor_secret), $code)) {
             return true;
         }
 

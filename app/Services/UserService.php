@@ -253,7 +253,9 @@ class UserService
      */
     public function searchUsers(string $query, int $limit = 10): Collection
     {
-        return User::search($query)
+        // Utilise scopeSearch (Eloquent) — User::search() est maintenant réservé à Scout.
+        return User::query()
+            ->search($query)
             ->active()
             ->limit($limit)
             ->get(['id', 'nom', 'email', 'avatar', 'fonction']);

@@ -17,28 +17,40 @@
 ## Current Session
 
 **Date:** 2026-06-04
-**Session goal:** Extended features — Phase 4 complete + merged; Phase 5 next
-**Branch:** `feature/support-contact` → merged into `jonas`
-**Status:** Merged ✅ — 688 tests passing, build green, Larastan clean. Pushed to both remotes.
+**Session goal:** Phase 6 complete — global search page, file content extraction, super-admin scope
+**Branch:** `feature/phase6-search`
+**Status:** Complete — 723 tests passing (15 new), build green, Larastan clean. Awaiting commit + merge.
 
 ---
 
 ## Current Task
 
-**Task:** Extended Features — Phase 5 (Chat: real-time + @mentions + polish)
-**Branch:** `feature/phase5-chat`
-**Status:** Complete — 700 tests passing (12 new), build green, Larastan clean. Awaiting commit + `jonas` merge approval.
+**Task:** Extended Features — Phase 6 complete (global search page, file content extraction, super-admin scope)
+**Branch:** `feature/phase6-search`
+**Status:** Complete — 723 tests passing (15 new), build green, Larastan clean. Awaiting commit + `jonas` merge approval.
 
-**What was done (Phase 3 + Phase 4, now merged):**
-- Phase 3: Full support ticket system, MFA fixes, single-session enforcement, notification UX, log infrastructure
-- Phase 4: Native admin logs page — `ValidationAuditLogResource` + endpoint, `useLogViewer.js`, `LogDetailDrawer.vue`, `ActivityLogTab.vue` (causer filter + drawer + date pickers), `AppLogsTab.vue` (native file picker / level chips / expand / download / delete), `ValidationAuditLogTab.vue` (action badges + date pickers), `AdminLogs.vue` refactored to 3-tab container; 34 i18n keys; 6 PHPUnit + 4 Dusk tests; PDF export button fix in AgentSheet; testing guide at `docs/extended-features/testing/TASK_PHASE4_TESTING.md`
+**What was done (Phase 6 Part B):**
+- Migrations: `workspace_id` on `teams` (backfilled from project chain) + `content_text` on `documents`
+- `DocumentTextExtractorService` — PDF/docx/xlsx/txt parsers, graceful null on failure
+- `ExtractDocumentTextJob` (ShouldQueue) — dispatched on document upload, re-indexes after extraction
+- `documents:extract-text` artisan command — backfills existing documents
+- Expanded `toSearchableArray()` on all 6 models — rich text + context names, hard exclusions for credentials/paths
+- `TeamMessage` made Searchable (6th model) — workspace-scoped via `team.workspace_id`
+- `SearchController` extended — super-admin global scope, Typesense highlights via `->raw()`, pagination, workspace_name attribution, `per_type`/`page` params
+- `SearchExport` (multi-sheet Excel) + `SearchExportJob` (queued large export → email) + `SearchExportReadyNotification`
+- `GET /api/search/export` (global) + `POST /api/search/export` (selective) routes
+- `pages/Search.vue` — full search page: type tabs with count badges, highlighted results with DOMPurify, read-only preview modals, export bar with cap dialog (500/1000/2000/Tout)
+- `TacheDetailModal.vue` — `readonly` prop hides all edit/action controls
+- `SearchBar.vue` — fixed position (Teleport → relative div), fixed field names (`description` → `excerpt`, `statut` → `meta.statut`), added `stripMark()` helper, "Voir tous les résultats" CTA
+- `WorkspaceController` — `can_search_global` added to all 3 `user_permissions` locations (was only in 1)
+- `useWorkspacePermissions.js` — `canSearchGlobal` now includes `isDirecteur.value`
+- Teams/Show.vue — `?message=` query param handler for search result deep-link
+- `docs/extended-features/INDEX.md` created; PHASE5_PLAN.md + PHASE6_SEARCH_PLAN.md added; PROGRESSION.md updated through Phase 6
 
-**What was done (Phase 5):**
-- 4 broadcast events: `MessageSent`, `MessageUpdated`, `MessageDeleted`, `ReactionChanged` (ShouldBroadcastNow, channel `team.{teamId}`)
-- `routes/channels.php` — `team.{teamId}` authorization against membership
-- Migration `add_last_read_at_to_team_members_table` — run ✅
-- `TeamMessageResource` — consistent API response shape with reactions, reply_to, attachments
-- `StoreTeamMessageRequest` + `UpdateTeamMessageRequest` form requests
+**What to do next:**
+1. Commit Phase 6 on `feature/phase6-search`
+2. Merge into `jonas` + push both remotes (per-push approval needed)
+3. Start **Phase 7** — Help Center (reader + author, no AI)
 - `TeamMessageController` — +5 methods: update, destroy, pinned, togglePin, removeReaction, markRead
 - `TeamMessageService` — events dispatched after each mutation; @mention TODO replaced with real `ChatMentionNotification`; `markTeamRead()` added
 - `ChatMentionNotification` — ShouldQueue, via channelsFor('chat_mention'), in-app + email
@@ -52,10 +64,44 @@
 - Dusk: 3 tests in `tests/Browser/Teams/TeamChatTest.php`
 - Testing guide: `docs/extended-features/testing/TASK_PHASE5_TESTING.md`
 
+**What was done (Phase 6):**
+- `laravel/scout` + `typesense/typesense-php` installed
+- `config/scout.php` — Typesense driver with 5 model-schemas (Projet, Activite, Tache, Document, User); collection driver default for tests; `SCOUT_DRIVER=collection` added to `phpunit.xml`
+- `.env.example` — Typesense vars + Podman startup command documented
+- `search.global` permission — full Guide 4+15 flow: Permission.php constant + all() + forRole(owner/manager), Permission.js, useWorkspacePermissions.js canSearchGlobal, WorkspaceController can_search_global (3 locations), PERMISSIONS_MATRIX.md updated
+- `Projet`, `Activite`, `Tache`, `Document`, `User` made Searchable: `toSearchableArray()` with workspace-scoped fields; `searchableAs()` returns collection name; `->query()` used in controller for workspace scoping (works with both collection and Typesense drivers)
+- `SearchController::search()` — `GET /api/search`, validates q/types/workspace_id/per_type, double-checks workspace membership, searches 5 types with Eloquent scope, returns grouped results
+- `UserService::searchUsers()` fixed — `User::search()` now resolves to Scout; renamed to `User::query()->search()` (Eloquent scope)
+- `SearchBar.vue` fully replaced — functional command palette: Cmd+K/Ctrl+K global shortcut, debounced 400ms, grouped results with emoji type icons, keyboard nav (↑↓/Enter/Esc), `Teleport` dropdown, hidden/disabled for non-managers
+- 8 i18n keys in `search` section (fr + en)
+- 8 PHPUnit tests in `tests/Feature/Search/SearchTest.php` — all green
+- Testing guide: `docs/extended-features/testing/TASK_PHASE6_TESTING.md`
+
+**What was done (Phase 6 Part B):**
+- 2 migrations: `workspace_id` on `teams` (+ backfill from project), `content_text` on `documents`
+- `DocumentTextExtractorService` — PDF/docx/xlsx/txt parsers (smalot/pdfparser, phpoffice)
+- `ExtractDocumentTextJob` (ShouldQueue, 2 tries, 120s timeout) dispatched on every upload
+- `documents:extract-text` artisan backfill command (--all, --sync flags)
+- Expanded `toSearchableArray()` on all 6 models: rich text fields + workspace_name + context names (no credentials/paths)
+- `TeamMessage` Searchable (6th model), `shouldBeSearchable()` guards workspace_id
+- `SearchController` fully rewritten: super-admin global scope, Typesense highlights via `->raw()`, pagination, `totals` per type, 6 model types
+- `SearchController::export()` (global, cap dialog) + `exportSelected()` (POST with IDs)
+- `SearchExport` + `MultiSheetSearchExport` + `SearchExportJob` + `SearchExportReadyNotification`
+- Export routes (GET + POST /api/search/export) + download route in web.php
+- `pages/Search.vue` — full search page: type tabs with counts, highlighted results, read-only preview modal, export bar with cap dialog, keyboard nav, stagger
+- `TacheDetailModal.vue` — `readonly` prop (hides QuickActionsPanel)
+- `SearchBar.vue` — "Voir tous les résultats" CTA → `/search?q=...`
+- Router `/search` route
+- `Teams/Show.vue` — `?message=` scroll + 3s highlight ring via `data-message-uuid`
+- 28 i18n keys (search_page + search.see_all)
+- 15 PHPUnit tests — all green; bug fix: `(bool) ($user->is_super_admin ?? false)` for nullable column
+- Testing guide: `docs/extended-features/testing/TASK_PHASE6_ENHANCED_TESTING.md`
+- Re-index note: `scout:flush` + `scout:import` per model after schema change (requires Typesense running)
+
 **What to do next:**
-1. Commit Phase 5 on `feature/phase5-chat`
-2. Merge `feature/phase5-chat` → `jonas` (needs per-push approval)
-3. Start **Phase 6** — Global search (Typesense + Scout)
+1. Commit Phase 6 Part B on `feature/phase6-search`
+2. Merge `feature/phase6-search` → `jonas` (per-push approval needed)
+3. Start **Phase 7** — Help Center (reader + author, no AI)
 
 **What was done this session:**
 - Replaced abandoned `nunomaduro/larastan` with `larastan/larastan` v2.11; updated `phpstan.neon` extension path
@@ -284,7 +330,7 @@ Tests: 11 feature in `NotificationServiceTest` + 8 feature in `SendDailyDigestCo
 
 | Branch | Phase / Task | Status |
 |---|---|---|
-| `feature/phase5-chat` | Extended Phase 5 (Chat real-time + @mentions) | Complete — awaiting commit + merge 🔄 |
+| `feature/phase6-search` | Extended Phase 6 (Global search) | Complete — awaiting commit + merge 🔄 |
 
 **Previously merged into `jonas` (extended features):**
 - `chore/security-perf-baseline` → `jonas` `4493754` (Phase 0 — baseline docs)
@@ -346,4 +392,6 @@ Tasks 0–16, fix/cdc-hotfixes, fix/bug-batch, design-system-v1, chore/test-cove
 | 2026-05-26 | UX Polish | Inline editing on all 3 task detail views + SousTacheList. Modal state machine fix. DatePicker for echeance everywhere. Escape cancels any active edit (global keydown). No new backend changes. |
 | 2026-05-28 | Document polish + notification fixes | Version manager UX, cadre upload fix, dark mode margin, share modal date fix, smart user filtering, activite role values fix, DocumentService grantPermission/revokePermission fix, DocumentPermissionGrantedNotification + push toWebPush, WebPushChannel fallback improved, Documents.vue tab from query param, expires_at 5-year cap. PHP ext-gmp installed for Web Push. |
 | 2026-06-04 | Phase 4 — native admin logs | ValidationAuditLogResource + endpoint, useLogViewer.js, LogDetailDrawer.vue, ActivityLogTab (causer filter + date pickers + drawer), AppLogsTab (native: file picker / level chips / expand / download / delete), ValidationAuditLogTab (action badges + date pickers + drawer), AdminLogs.vue refactored to 3-tab container. 34 i18n keys. 6 PHPUnit + 4 Dusk tests. PDF export button fix (AgentSheet). Merged into jonas, pushed both remotes. |
-| 2026-06-04 | Phase 5 — Chat real-time + @mentions | 4 broadcast events, team channel auth, ChatMentionNotification, TeamMessageResource, +5 controller methods, +7 routes, last_read_at migration, useTeamMessages.js rewrite (Echo + optimistic + whisper), Teams/Show.vue full UI overhaul, AppSidebar unread badge, 15 i18n keys, 12 PHPUnit + 3 Dusk tests. Uncommitted — awaiting merge approval. |
+| 2026-06-04 | Phase 5 — Chat real-time + @mentions | 4 broadcast events, team channel auth, ChatMentionNotification, TeamMessageResource, +5 controller methods, +7 routes, last_read_at migration, useTeamMessages.js rewrite (Echo + optimistic + whisper), Teams/Show.vue full UI overhaul, AppSidebar unread badge, 15 i18n keys, 12 PHPUnit + 3 Dusk tests. Merged into jonas. |
+| 2026-06-04 | Phase 6 Part A — command palette | Scout + Typesense installed, search.global permission, 5 Searchable models, SearchController, SearchBar.vue Cmd+K palette. 8 PHPUnit tests. Uncommitted. |
+| 2026-06-04 | Phase 6 Part B — full search page + file extraction | 6 migrations, DocumentTextExtractorService + jobs, TeamMessage Searchable (6th model), SearchController rewrite (super-admin, highlights, pagination), export pipeline (SearchExport+Job), Search.vue page, TacheDetailModal readonly, Teams/Show ?message= handler, 28 i18n keys, 15 PHPUnit tests. Awaiting commit + merge. |

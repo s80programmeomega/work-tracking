@@ -134,6 +134,10 @@ final class Permission
     /** Configure subscription mode and trial duration — super_admin only. */
     const SUBSCRIPTION_MANAGE = 'subscription.manage';
 
+    // ── Recherche globale (Phase 6) ───────────────────────────────────────
+    /** Recherche multi-modèle dans tout le workspace — manager et supérieur uniquement. */
+    const SEARCH_GLOBAL = 'search.global';
+
     // ── Users (platform admin) ────────────────────────────────────────────
     const USERS_VIEW = 'users.view';
 
@@ -208,6 +212,8 @@ final class Permission
 
             self::SUBSCRIPTION_MANAGE,
 
+            self::SEARCH_GLOBAL,
+
             self::USERS_VIEW,
             self::USERS_CREATE,
             self::USERS_UPDATE,
@@ -279,6 +285,8 @@ final class Permission
                 self::EVALUATIONS_VIEW_DASHBOARD,
                 // Task 10 — inline edit autorisé pour manager (même portée que TACHES_EDIT).
                 self::TACHES_INLINE_EDIT,
+                // Phase 6 — managers ont accès à la recherche globale.
+                self::SEARCH_GLOBAL,
                 // NOTIFICATIONS_MANAGE_PREFERENCES intentionally omitted — workspace-level
                 // notification policy is reserved for owner/directeur (granted via the
                 // owner contextual role's array_diff('all() except task-participant actions')).

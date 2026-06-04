@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\EvaluationController;
 use App\Http\Controllers\Api\ProjetController;
 use App\Http\Controllers\Api\ProjetInvitationController;
 use App\Http\Controllers\Api\PushSubscriptionController;
+use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\SocialAuthController;
 use App\Http\Controllers\Api\SousTacheController;
 use App\Http\Controllers\Api\SupportTicketController;
@@ -132,6 +133,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Journal d'audit de validation (N0/N1/bypass) — super-admin seulement
         Route::get('/validation-audit-log', [AdminController::class, 'validationAuditLog'])->name('admin.validation-audit-log');
     });
+
+    // Recherche globale (Phase 6) — manager et supérieur uniquement
+    Route::get('/search', [SearchController::class, 'search'])->name('search.global');
+    Route::get('/search/export', [SearchController::class, 'export'])->name('search.export');
+    Route::post('/search/export', [SearchController::class, 'exportSelected'])->name('search.export.selected');
 
     // Dashboard routes
     Route::get('/dashboard', [DashboardController::class, 'index']);

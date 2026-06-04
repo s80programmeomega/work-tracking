@@ -15,6 +15,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
+use Laravel\Scout\Searchable;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Permission\Traits\HasRoles;
@@ -46,7 +47,6 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string|null $two_factor_recovery_codes
  * @property bool $email_otp_enabled
  *
- * @method bool validateTwoFactorCode(string $code)
  * @method string twoFactorQrCodeSvg()
  * @method array recoveryCodes()
  *
@@ -61,7 +61,25 @@ use Spatie\Permission\Traits\HasRoles;
  */
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, HasRoles, LogsActivity, Notifiable, SoftDeletes, TwoFactorAuthenticatable;
+    use HasApiTokens, HasFactory, HasRoles, LogsActivity, Notifiable, Searchable, SoftDeletes, TwoFactorAuthenticatable;
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => (string) $this->id,
+            'nom' => $this->nom,
+            'prenom' => $this->prenom ?? '',
+            'nom_complet' => trim(($this->prenom ?? '').' '.$this->nom),
+            'email' => $this->email,
+            'fonction' => $this->fonction ?? '',
+            'created_at' => $this->created_at?->timestamp ?? 0,
+        ];
+    }
+
+    public function searchableAs(): string
+    {
+        return 'users';
+    }
 
     // Force Spatie to always use 'web' guard for role/permission lookups
     // regardless of which guard (sanctum, web) authenticated the request

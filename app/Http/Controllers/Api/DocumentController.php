@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\DocumentResource;
+use App\Jobs\ExtractDocumentTextJob;
 use App\Models\Activite;
 use App\Models\Document;
 use App\Models\Projet;
@@ -196,6 +197,8 @@ class DocumentController extends Controller
                 );
 
                 $this->notifyDocumentUploaded($document, $user);
+                // Extraction asynchrone du contenu textuel pour l'indexation Typesense
+                ExtractDocumentTextJob::dispatch($document);
 
                 return response()->json([
                     'success' => true,
@@ -215,6 +218,8 @@ class DocumentController extends Controller
 
             foreach ($documents as $doc) {
                 $this->notifyDocumentUploaded($doc, $user);
+                // Extraction asynchrone du contenu textuel pour l'indexation Typesense
+                ExtractDocumentTextJob::dispatch($doc);
             }
 
             return response()->json([

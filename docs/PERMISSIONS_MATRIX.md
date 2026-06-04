@@ -157,6 +157,16 @@ Assigned in: `workspace_members`, `projet_user`, `activite_user`, `tache_user`
 
 ---
 
+## Search Permissions
+
+> Added in Phase 6. Reserved for manager-and-above — never granted to cadre/collaborateur/stagiaire/observateur.
+
+| Permission | owner | manager | cadre | collaborateur | stagiaire | observateur |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| `search.global` — Recherche multi-modèle dans le workspace | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+
+---
+
 ## Changelog
 
 | Date | Task | Change |
@@ -173,3 +183,4 @@ Assigned in: `workspace_members`, `projet_user`, `activite_user`, `tache_user`
 | 2026-05-22 | Task 8b | No new permission strings — Web Push is gated by per-user `notification_preferences.push_enabled` (existing column) plus the presence of at least one active row in `push_subscriptions` (existing table). Permission to manage personal preferences was already covered by Task 8's "Manage personal notification preferences" row (granted to every authenticated role). No matrix row changes; this changelog entry documents the no-op for traceability. |
 | 2026-05-22 | Task 9 (perms) | `evaluations.view_fiche` + `evaluations.export_fiche` added to `Permission.php` and `Permission::all()`. Seeded in `forRole()`: VIEW for manager/cadre/collaborateur/stagiaire/observateur (own-scope for collaborateur+stagiaire+observateur, broader for cadre+manager — controller re-applies per-target scope); EXPORT only for manager/cadre (+ owner via the `all() minus exclusions` array_diff). Mirror in `Permission.js`. `canViewFicheEvaluation` + `canExportFicheEvaluation` in `useWorkspacePermissions.js`. `WorkspaceController.user_permissions` payload extended in 3 locations. `PermissionService::canViewFicheEvaluation/canExportFicheEvaluation` add the per-target scope check (own / cadre→assignees / manager→activity / owner→workspace). Matrix observateur changed from ❌ to ✅ (own only, read-only) for "View agent evaluation sheet" — aligns with the plan's read-only own clause. 132 tests still green. |
 | 2026-05-26 | Task 10 | `evaluations.view_dashboard` + `evaluations.view_workspace_taches` + `taches.inline_edit` added to `Permission.php`, `Permission::all()`, and `forRole()`. Dashboard: owner/manager/cadre (scoped); workspace tasks: owner only. Mirror in `Permission.js`. `canViewEvaluationDashboard` + `canViewWorkspaceTaches` + `canInlineEditTache` in `useWorkspacePermissions.js`. `WorkspaceController.user_permissions` payload extended in 3 locations. `PermissionService` gains 3 helpers. Matrix "View evaluation dashboard" cadre row corrected to ✅ (own activities); 2 new rows added (workspace-wide task list, inline edit). 216 tests green. |
+| 2026-06-04 | Phase 6 | `search.global` added to `Permission.php` + `Permission::all()` + `forRole('owner')` (via array_diff) + `forRole('manager')`. Mirror in `Permission.js`. `canSearchGlobal` in `useWorkspacePermissions.js`. `can_search_global` in `WorkspaceController.user_permissions` (3 locations). Matrix: new "Search Permissions" section. |

@@ -15,13 +15,18 @@
         "laravel/pulse": "^1.7",
         "laravel/reverb": "^1.10",
         "laravel/sanctum": "^3.3",
+        "laravel/scout": "^11.2",
         "laravel/socialite": "^5.27",
         "laravel/tinker": "^2.8",
         "maatwebsite/excel": "^3.1",
         "minishlink/web-push": "^10.0",
         "opcodesio/log-viewer": "^3.24",
+        "phpoffice/phpspreadsheet": "^1.30",
+        "phpoffice/phpword": "^1.4",
+        "smalot/pdfparser": "^2.12",
         "spatie/laravel-activitylog": "^4.10",
-        "spatie/laravel-permission": "^6.21"
+        "spatie/laravel-permission": "^6.21",
+        "typesense/typesense-php": "^6.0"
     },
     "require-dev": {
         "doctrine/dbal": "^3.10",
