@@ -616,6 +616,17 @@ const showWorkspaceSelector = ref(false);
 
 const selectedDashboardWorkspace = ref("all"); // 'all' ou workspace_id
 
+// Badge de messages non lus dans les équipes
+const totalUnreadChat = ref(0)
+const fetchUnreadChat = async () => {
+    try {
+        const { data } = await api.get('/teams/unread-total')
+        totalUnreadChat.value = data.total ?? 0
+    } catch {
+        totalUnreadChat.value = 0
+    }
+}
+
 // CORRECTION : Utiliser le getter isSuperAdmin du store
 const isSuperAdmin = computed(() => {
     return authStore.isSuperAdmin;
@@ -888,6 +899,7 @@ const menuGroups = computed(() => [
             {
                 icon: ChatIcon,
                 name: t('navigation.teams'),
+                badge: totalUnreadChat.value > 0 ? String(totalUnreadChat.value > 99 ? '99+' : totalUnreadChat.value) : '',
                 subItems: [
                     { name: t('sidebar.my_teams'), path: "/teams", superAdminHidden: true },
                 ],
@@ -1129,6 +1141,9 @@ onMounted(async () => {
 
         // Open the submenu matching the current route on initial load
         syncOpenSubmenuFromRoute();
+
+        // Charger le badge de messages non lus dans les équipes
+        fetchUnreadChat()
     } catch (error) {
         console.error("❌ Erreur lors de l'initialisation du sidebar:", error);
     }

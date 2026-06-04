@@ -26,16 +26,36 @@
 ## Current Task
 
 **Task:** Extended Features — Phase 5 (Chat: real-time + @mentions + polish)
-**Branch:** `feature/phase5-chat` (to be cut from `jonas`)
-**Status:** Not started ⬜
+**Branch:** `feature/phase5-chat`
+**Status:** Complete — 700 tests passing (12 new), build green, Larastan clean. Awaiting commit + `jonas` merge approval.
 
 **What was done (Phase 3 + Phase 4, now merged):**
 - Phase 3: Full support ticket system, MFA fixes, single-session enforcement, notification UX, log infrastructure
 - Phase 4: Native admin logs page — `ValidationAuditLogResource` + endpoint, `useLogViewer.js`, `LogDetailDrawer.vue`, `ActivityLogTab.vue` (causer filter + drawer + date pickers), `AppLogsTab.vue` (native file picker / level chips / expand / download / delete), `ValidationAuditLogTab.vue` (action badges + date pickers), `AdminLogs.vue` refactored to 3-tab container; 34 i18n keys; 6 PHPUnit + 4 Dusk tests; PDF export button fix in AgentSheet; testing guide at `docs/extended-features/testing/TASK_PHASE4_TESTING.md`
 
+**What was done (Phase 5):**
+- 4 broadcast events: `MessageSent`, `MessageUpdated`, `MessageDeleted`, `ReactionChanged` (ShouldBroadcastNow, channel `team.{teamId}`)
+- `routes/channels.php` — `team.{teamId}` authorization against membership
+- Migration `add_last_read_at_to_team_members_table` — run ✅
+- `TeamMessageResource` — consistent API response shape with reactions, reply_to, attachments
+- `StoreTeamMessageRequest` + `UpdateTeamMessageRequest` form requests
+- `TeamMessageController` — +5 methods: update, destroy, pinned, togglePin, removeReaction, markRead
+- `TeamMessageService` — events dispatched after each mutation; @mention TODO replaced with real `ChatMentionNotification`; `markTeamRead()` added
+- `ChatMentionNotification` — ShouldQueue, via channelsFor('chat_mention'), in-app + email
+- `NotificationService` — `chat_mention` added to wantsEmail() + wantsWebPush()
+- `GET /api/teams/unread-total` + `TeamController::totalUnread()` for sidebar badge
+- `useTeamMessages.js` — full rewrite: Echo subscription, live event handlers, optimistic send, edit/delete/reactions, typing whisper, markRead
+- `Teams/Show.vue` — chat tab overhauled: stagger, reactions, hover edit/delete, inline edit, reply-to banner, attachment input, typing indicator, optimistic visual
+- `AppSidebar.vue` — unread badge on Teams nav item
+- 15 new i18n keys in `team_show` section (fr + en)
+- PHPUnit: 12 tests in `tests/Feature/Chat/TeamChatBroadcastTest.php` — all green
+- Dusk: 3 tests in `tests/Browser/Teams/TeamChatTest.php`
+- Testing guide: `docs/extended-features/testing/TASK_PHASE5_TESTING.md`
+
 **What to do next:**
-1. Cut `feature/phase5-chat` from `jonas`
-2. Implement Phase 5 per `docs/extended-features/README.md` Phase 5 spec: broadcast events on `team.{teamId}`, @mention notification, typing indicator, unread badge, attachment UI, optimistic send
+1. Commit Phase 5 on `feature/phase5-chat`
+2. Merge `feature/phase5-chat` → `jonas` (needs per-push approval)
+3. Start **Phase 6** — Global search (Typesense + Scout)
 
 **What was done this session:**
 - Replaced abandoned `nunomaduro/larastan` with `larastan/larastan` v2.11; updated `phpstan.neon` extension path
@@ -264,7 +284,7 @@ Tests: 11 feature in `NotificationServiceTest` + 8 feature in `SendDailyDigestCo
 
 | Branch | Phase / Task | Status |
 |---|---|---|
-| `feature/phase5-chat` | Extended Phase 5 (Chat real-time + @mentions) | Not started ⬜ |
+| `feature/phase5-chat` | Extended Phase 5 (Chat real-time + @mentions) | Complete — awaiting commit + merge 🔄 |
 
 **Previously merged into `jonas` (extended features):**
 - `chore/security-perf-baseline` → `jonas` `4493754` (Phase 0 — baseline docs)
@@ -326,3 +346,4 @@ Tasks 0–16, fix/cdc-hotfixes, fix/bug-batch, design-system-v1, chore/test-cove
 | 2026-05-26 | UX Polish | Inline editing on all 3 task detail views + SousTacheList. Modal state machine fix. DatePicker for echeance everywhere. Escape cancels any active edit (global keydown). No new backend changes. |
 | 2026-05-28 | Document polish + notification fixes | Version manager UX, cadre upload fix, dark mode margin, share modal date fix, smart user filtering, activite role values fix, DocumentService grantPermission/revokePermission fix, DocumentPermissionGrantedNotification + push toWebPush, WebPushChannel fallback improved, Documents.vue tab from query param, expires_at 5-year cap. PHP ext-gmp installed for Web Push. |
 | 2026-06-04 | Phase 4 — native admin logs | ValidationAuditLogResource + endpoint, useLogViewer.js, LogDetailDrawer.vue, ActivityLogTab (causer filter + date pickers + drawer), AppLogsTab (native: file picker / level chips / expand / download / delete), ValidationAuditLogTab (action badges + date pickers + drawer), AdminLogs.vue refactored to 3-tab container. 34 i18n keys. 6 PHPUnit + 4 Dusk tests. PDF export button fix (AgentSheet). Merged into jonas, pushed both remotes. |
+| 2026-06-04 | Phase 5 — Chat real-time + @mentions | 4 broadcast events, team channel auth, ChatMentionNotification, TeamMessageResource, +5 controller methods, +7 routes, last_read_at migration, useTeamMessages.js rewrite (Echo + optimistic + whisper), Teams/Show.vue full UI overhaul, AppSidebar unread badge, 15 i18n keys, 12 PHPUnit + 3 Dusk tests. Uncommitted — awaiting merge approval. |
