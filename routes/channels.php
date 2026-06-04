@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Team;
 use App\Models\Workspace;
 use Illuminate\Support\Facades\Broadcast;
 
@@ -20,6 +21,13 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
 
 Broadcast::channel('workspace.{workspaceId}', function ($user, int $workspaceId) {
     return Workspace::find($workspaceId)
+        ?->members()
+        ->where('user_id', $user->id)
+        ->exists() ?? false;
+});
+
+Broadcast::channel('team.{teamId}', function ($user, int $teamId) {
+    return Team::find($teamId)
         ?->members()
         ->where('user_id', $user->id)
         ->exists() ?? false;

@@ -109,49 +109,16 @@
         <!-- Tab Content -->
         <div class="p-6">
           <!-- Chat Tab -->
-          <div v-if="activeTab === 'chat'" class="space-y-4">
-            <div
-              class="rounded-3 p-6 h-[600px] flex flex-col border border-gray-200 dark:border-gray-700">
-              <!-- Messages Container -->
-              <div ref="chatContainer" class="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
-                <div v-for="message in messages" :key="message.id" class="flex gap-3">
-                  <!-- Avatar -->
-                  <div class="flex-shrink-0">
-                    <div
-                      class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                      {{ getUserInitials(message.user) }}
-                    </div>
-                  </div>
+          <div v-if="activeTab === 'chat'" dusk="chat-tab" class="space-y-4">
+            <div class="rounded-3 p-4 h-[600px] flex flex-col border border-gray-200 dark:border-gray-700">
 
-                  <!-- Message Content -->
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-baseline gap-2 mb-1">
-                      <span class="font-semibold text-gray-900 dark:text-white">{{ message.user?.nom || 'Utilisateur'
-                        }}</span>
-                      <span class="text-xs text-gray-500 dark:text-gray-400">{{ formatDate(message.created_at) }}</span>
-                    </div>
-                    <div
-                      class="bg-white dark:bg-gray-800 rounded-3 px-4 py-2.5 border border-gray-200 dark:border-gray-700">
-                      <p class="text-gray-700 dark:text-gray-300">{{ message.content }}</p>
-                    </div>
-
-                    <!-- Reactions -->
-                    <div v-if="message.reactions && message.reactions.length > 0" class="flex gap-2 mt-2">
-                      <button v-for="reaction in getGroupedReactions(message.reactions)" :key="reaction.emoji"
-                        class="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                        <span>{{ reaction.emoji }}</span>
-                        <span class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ reaction.count }}</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
+              <!-- Messages Container (stagger Guide 23) -->
+              <div ref="chatContainer" class="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
 
                 <!-- Empty State -->
                 <div v-if="messages.length === 0" class="flex flex-col items-center justify-center h-full text-center">
-                  <div
-                    class="w-16 h-16 rounded-full bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center mb-4">
-                    <svg class="w-8 h-8 text-brand-600 dark:text-brand-400" fill="none" stroke="currentColor"
-                      viewBox="0 0 24 24">
+                  <div class="w-16 h-16 rounded-full bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center mb-4">
+                    <svg class="w-8 h-8 text-brand-600 dark:text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
@@ -159,17 +126,173 @@
                   <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">{{ $t('team_show.no_messages') }}</h3>
                   <p class="text-gray-500 dark:text-gray-400">{{ $t('team_show.be_first_message') }}</p>
                 </div>
+
+                <!-- Message rows -->
+                <div ref="chatMessagesRef">
+                  <div
+                    v-for="message in messages"
+                    :key="message.uuid || message.id"
+                    class="stagger-item group flex gap-3 py-1"
+                    :class="{ 'opacity-60': message._pending }"
+                    dusk="chat-message"
+                  >
+                    <!-- Avatar -->
+                    <div class="flex-shrink-0">
+                      <div class="w-9 h-9 rounded-full bg-brand-500 flex items-center justify-center text-white font-bold text-xs">
+                        {{ getUserInitials(message.user) }}
+                      </div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-baseline gap-2 mb-0.5">
+                        <span class="font-semibold text-sm text-gray-900 dark:text-white">{{ message.user?.nom || 'Utilisateur' }}</span>
+                        <span class="text-xs text-gray-400 dark:text-gray-500">{{ formatDate(message.created_at) }}</span>
+                        <span v-if="message.is_edited" class="text-xs text-gray-400 italic">{{ $t('team_show.message_edited') }}</span>
+                        <span v-if="message._pending" class="text-xs text-gray-400 animate-pulse">…</span>
+                      </div>
+
+                      <!-- Reply-to quote -->
+                      <div v-if="message.reply_to" class="mb-1 border-l-2 border-gray-300 dark:border-gray-600 pl-2 text-xs text-gray-500 dark:text-gray-400 truncate">
+                        <span class="font-medium">{{ message.reply_to.user_nom }}</span>: {{ message.reply_to.content_snippet }}
+                      </div>
+
+                      <!-- Inline edit OR read mode -->
+                      <div v-if="editingUuid === message.uuid">
+                        <textarea
+                          v-model="editContent"
+                          rows="2"
+                          class="w-full px-3 py-2 text-sm border border-blue-400 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none resize-none"
+                          @keydown.enter.exact.prevent="confirmEdit(message.uuid)"
+                          @keydown.esc="cancelEdit"
+                        />
+                        <div class="flex gap-2 mt-1">
+                          <button @click="confirmEdit(message.uuid)" class="px-3 py-1 text-xs bg-blue-600 text-white rounded-3 hover:bg-blue-700">{{ $t('common.save') }}</button>
+                          <button @click="cancelEdit" class="px-3 py-1 text-xs border border-gray-300 rounded-3 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800">{{ $t('common.cancel') }}</button>
+                        </div>
+                      </div>
+
+                      <div v-else class="bg-white dark:bg-gray-800 rounded-3 px-3 py-2 border border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-300">
+                        {{ message.content }}
+                        <!-- Attachment -->
+                        <div v-if="message.attachments && message.attachments.length" class="mt-2 flex flex-wrap gap-2">
+                          <a
+                            v-for="att in message.attachments"
+                            :key="att.url"
+                            :href="att.url"
+                            target="_blank"
+                            class="inline-flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                          >
+                            📎 {{ att.name }}
+                          </a>
+                        </div>
+                      </div>
+
+                      <!-- Reactions row -->
+                      <div class="flex flex-wrap gap-1 mt-1">
+                        <button
+                          v-for="reaction in (message.reactions || [])"
+                          :key="reaction.emoji"
+                          @click="toggleReaction(message.uuid, reaction.emoji, reaction.did_react)"
+                          :class="[
+                            'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs transition-colors',
+                            reaction.did_react
+                              ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-300 dark:border-blue-700'
+                              : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                          ]"
+                        >
+                          {{ reaction.emoji }} {{ reaction.count }}
+                        </button>
+
+                        <!-- Quick emoji picker (shown on hover) -->
+                        <div class="hidden group-hover:flex items-center gap-1 ml-1">
+                          <button
+                            v-for="emoji in quickEmojis"
+                            :key="emoji"
+                            @click="addReaction(message.uuid, emoji)"
+                            class="text-sm opacity-50 hover:opacity-100 transition-opacity"
+                          >{{ emoji }}</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Per-message actions (hover) -->
+                    <div class="hidden group-hover:flex items-start gap-1 flex-shrink-0 pt-1" v-if="!message._pending">
+                      <!-- Reply -->
+                      <button @click="startReply(message)" class="p-1 rounded text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" :title="$t('team_show.reply_to')">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
+                      </button>
+                      <!-- Edit (own messages only) -->
+                      <button
+                        v-if="message.user?.id === authStore.currentUser?.id"
+                        dusk="message-edit-btn"
+                        @click="startEdit(message)"
+                        class="p-1 rounded text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        :title="$t('team_show.edit_message')"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                      </button>
+                      <!-- Delete (own messages or team owner) -->
+                      <button
+                        v-if="message.user?.id === authStore.currentUser?.id || isTeamOwner"
+                        dusk="message-delete-btn"
+                        @click="confirmDeleteMessage(message.uuid)"
+                        class="p-1 rounded text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        :title="$t('team_show.delete_message')"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Typing indicator -->
+              <div v-if="typingUsers.length" class="px-1 py-1 text-xs text-gray-500 dark:text-gray-400 italic">
+                {{ typingUsers.map(u => u.nom).join(', ') }} {{ $t('team_show.typing_indicator') }}
+              </div>
+
+              <!-- Reply-to banner -->
+              <div v-if="replyingTo" class="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-3 text-sm">
+                <div class="flex-1 min-w-0">
+                  <span class="font-medium text-blue-700 dark:text-blue-400">{{ replyingTo.user?.nom }}</span>:
+                  <span class="text-gray-600 dark:text-gray-400 truncate">{{ replyingTo.content }}</span>
+                </div>
+                <button @click="replyingTo = null" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+
+              <!-- Attachment preview -->
+              <div v-if="attachmentFile" class="flex items-center gap-2 px-3 py-1 text-xs text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-3">
+                📎 {{ attachmentFile.name }}
+                <button @click="attachmentFile = null; attachmentInputRef && (attachmentInputRef.value = '')" class="text-gray-400 hover:text-red-500 ml-auto">✕</button>
               </div>
 
               <!-- Message Input -->
-              <form @submit.prevent="sendMessage" class="mt-4 flex gap-2">
-                <input v-model="newMessage" type="text" :placeholder="$t('team_show.message_placeholder')"
-                  class="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" />
-                <button type="submit" :disabled="!newMessage.trim()"
-                  class="px-6 py-3 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              <form @submit.prevent="sendMessage" class="mt-2 flex gap-2 items-end">
+                <!-- Attachment button -->
+                <label class="flex-shrink-0 cursor-pointer p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-3 transition-colors" :title="$t('team_show.attachment_btn')">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
+                  <input ref="attachmentInputRef" type="file" class="sr-only" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt" @change="onAttachmentChange" />
+                </label>
+
+                <input
+                  v-model="newMessage"
+                  type="text"
+                  dusk="chat-input"
+                  :placeholder="$t('team_show.message_placeholder')"
+                  class="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all text-sm"
+                  @keydown="onChatKeydown"
+                />
+                <button
+                  type="submit"
+                  dusk="chat-send-btn"
+                  :disabled="!newMessage.trim() && !attachmentFile"
+                  class="px-4 py-2.5 bg-brand-600 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:bg-brand-700 flex items-center gap-1.5 text-sm"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                   </svg>
                   {{ $t('team_show.send') }}
                 </button>
@@ -1289,7 +1412,13 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const { currentTeam: team, loading, fetchTeam, removeMember, updateTeam: updateTeamApi, deleteTeam: deleteTeamApi, addMember: addMemberApi } = useTeams()
-const { messages, sendMessage: sendMessageApi, fetchMessages } = useTeamMessages()
+const {
+  messages, loading: messagesLoading, error: messageError, typingUsers,
+  fetchMessages, sendMessage: sendMessageApi,
+  updateMessage: updateMessageApi, deleteMessage: deleteMessageApi,
+  addReaction, removeReaction, sendTyping, markRead,
+  subscribeToTeam, unsubscribeFromTeam,
+} = useTeamMessages()
 const { announcements, fetchAnnouncements, createAnnouncement, deleteAnnouncement } = useTeamAnnouncements()
 const { resources, fetchResources, createResource, deleteResource } = useTeamResources()
 const { activities, fetchActivities, getActivityIcon, getActivityLabel } = useTeamActivities()
@@ -1317,6 +1446,13 @@ const fetchUsers = async () => {
 const activeTab = ref('chat')
 const newMessage = ref('')
 const chatContainer = ref(null)
+const chatMessagesRef = ref(null)
+const replyingTo = ref(null)
+const editingUuid = ref(null)
+const editContent = ref('')
+const attachmentFile = ref(null)
+const attachmentInputRef = ref(null)
+const quickEmojis = ['👍', '❤️', '😂', '😮', '👏', '🎉']
 const showAddMemberModal = ref(false)
 const showEditModal = ref(false)
 const showAnnouncementModal = ref(false)
@@ -1478,26 +1614,84 @@ const formatDate = (date) => {
   })
 }
 
-const getGroupedReactions = (reactions) => {
-  const grouped = {}
-  reactions.forEach(r => {
-    if (!grouped[r.emoji]) grouped[r.emoji] = { emoji: r.emoji, count: 0 }
-    grouped[r.emoji].count++
-  })
-  return Object.values(grouped)
-}
+// ── Envoi de message ──────────────────────────────────────────────────────────
 
 const sendMessage = async () => {
-  if (!newMessage.value.trim()) return
+  const content = newMessage.value.trim()
+  if (!content && !attachmentFile.value) return
+
+  const data = new FormData()
+  data.append('content', content)
+  if (replyingTo.value) data.append('reply_to_id', replyingTo.value.id ?? '')
+  if (attachmentFile.value) data.append('attachment', attachmentFile.value)
+
+  newMessage.value = ''
+  replyingTo.value = null
+  attachmentFile.value = null
+  if (attachmentInputRef.value) attachmentInputRef.value.value = ''
 
   try {
-    await sendMessageApi(route.params.uuid, { content: newMessage.value })
-    newMessage.value = ''
+    await sendMessageApi(route.params.uuid, data)
     await nextTick()
     scrollToBottom()
-  } catch (error) {
-    console.error('Error sending message:', error)
+    markRead(route.params.uuid)
+  } catch {
+    /* erreur gérée dans le composable */
   }
+}
+
+// ── Édition inline ────────────────────────────────────────────────────────────
+
+const startEdit = (message) => {
+  editingUuid.value = message.uuid
+  editContent.value = message.content
+}
+
+const cancelEdit = () => {
+  editingUuid.value = null
+  editContent.value = ''
+}
+
+const confirmEdit = async (uuid) => {
+  if (!editContent.value.trim()) return
+  try {
+    await updateMessageApi(uuid, editContent.value.trim())
+  } catch { /* ignore */ }
+  cancelEdit()
+}
+
+// ── Suppression ───────────────────────────────────────────────────────────────
+
+const confirmDeleteMessage = async (uuid) => {
+  if (!confirm($t('team_show.confirm_delete_message'))) return
+  try {
+    await deleteMessageApi(uuid)
+  } catch { /* ignore */ }
+}
+
+// ── Réponse ───────────────────────────────────────────────────────────────────
+
+const startReply = (message) => {
+  replyingTo.value = message
+  newMessage.value = ''
+}
+
+// ── Réactions ─────────────────────────────────────────────────────────────────
+
+const toggleReaction = (uuid, emoji, didReact) => {
+  didReact ? removeReaction(uuid, emoji) : addReaction(uuid, emoji)
+}
+
+// ── Pièce jointe ──────────────────────────────────────────────────────────────
+
+const onAttachmentChange = (e) => {
+  attachmentFile.value = e.target.files?.[0] ?? null
+}
+
+// ── Indicateur de frappe ──────────────────────────────────────────────────────
+
+const onChatKeydown = () => {
+  if (team.value?.id) sendTyping(team.value.id)
 }
 
 const scrollToBottom = () => {
@@ -1667,58 +1861,35 @@ const deleteEventConfirm = async (event) => {
 }
 
 onMounted(async () => {
-  console.log('Team Show page mounted')
-  console.log('Team UUID from route:', route.params.uuid)
-  console.log('Token:', localStorage.getItem('auth_token') ? 'Present' : 'Missing')
-
   try {
-    console.log('Fetching team details...')
-    const teamData = await fetchTeam(route.params.uuid)
-    console.log('Team fetched successfully:', teamData)
+    await fetchTeam(route.params.uuid)
+    await Promise.all([
+      fetchMessages(route.params.uuid),
+      fetchAnnouncements(route.params.uuid),
+      fetchResources(route.params.uuid),
+      fetchActivities(route.params.uuid),
+      fetchPresences(route.params.uuid),
+      fetchEvents(route.params.uuid),
+      fetchUsers(),
+    ])
 
-    // Load all tab data
-    console.log('Fetching team messages...')
-    await fetchMessages(route.params.uuid)
-    console.log('Messages fetched successfully:', messages.value)
-
-    console.log('Fetching announcements...')
-    await fetchAnnouncements(route.params.uuid)
-    console.log('Announcements fetched successfully:', announcements.value)
-
-    console.log('Fetching resources...')
-    await fetchResources(route.params.uuid)
-    console.log('Resources fetched successfully:', resources.value)
-
-    console.log('Fetching activities...')
-    await fetchActivities(route.params.uuid)
-    console.log('Activities fetched successfully:', activities.value)
-
-    console.log('Fetching presences...')
-    await fetchPresences(route.params.uuid)
-    console.log('Presences fetched successfully:', presences.value)
-
-    console.log('Fetching calendar events...')
-    await fetchEvents(route.params.uuid)
-    console.log('Events fetched successfully:', events.value)
-
-    console.log('Fetching users for member selection...')
-    await fetchUsers()
-    console.log('Users fetched successfully')
-
-    // Start presence tracking (heartbeat every 30 seconds)
-    console.log('Starting presence tracking...')
     startPresenceTracking(route.params.uuid)
+
+    // S'abonner au canal Reverb de l'équipe pour le temps réel
+    if (team.value?.id) {
+      subscribeToTeam(team.value.id)
+      markRead(route.params.uuid)
+    }
 
     nextTick(scrollToBottom)
   } catch (error) {
-    console.error('Error loading team details:', error)
-    console.error('Error details:', error.response?.data || error.message)
+    console.error('Erreur lors du chargement de l\'équipe:', error.response?.data || error.message)
   }
 })
 
-// Stop presence tracking when leaving page
 onUnmounted(() => {
   stopPresenceTracking(route.params.uuid)
+  if (team.value?.id) unsubscribeFromTeam(team.value.id)
 })
 </script>
 

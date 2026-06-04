@@ -821,6 +821,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // List and my teams
         Route::get('/', [TeamController::class, 'index']);
         Route::get('/my-teams', [TeamController::class, 'myTeams']);
+        Route::get('/unread-total', [TeamController::class, 'totalUnread']);
 
         // CRUD
         Route::post('/', [TeamController::class, 'store']);
@@ -850,7 +851,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/{uuid}/messages', [TeamMessageController::class, 'index']);
         Route::get('/{uuid}/messages/pinned', [TeamMessageController::class, 'pinned']);
         Route::post('/{uuid}/messages', [TeamMessageController::class, 'store']);
+        Route::post('/{uuid}/read', [TeamMessageController::class, 'markRead']);
+        Route::patch('/messages/{uuid}', [TeamMessageController::class, 'update']);
+        Route::delete('/messages/{uuid}', [TeamMessageController::class, 'destroy']);
+        Route::post('/messages/{uuid}/pin', [TeamMessageController::class, 'togglePin']);
         Route::post('/messages/{uuid}/reactions', [TeamMessageController::class, 'addReaction']);
+        Route::delete('/messages/{uuid}/reactions', [TeamMessageController::class, 'removeReaction']);
 
         // Announcements
         Route::get('/{uuid}/announcements', [TeamAnnouncementController::class, 'index']);

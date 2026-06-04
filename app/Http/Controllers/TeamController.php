@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Services\TeamService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class TeamController extends Controller
@@ -398,6 +399,26 @@ class TeamController extends Controller
     /**
      * Update user presence in team
      */
+    /**
+     * Retourne le nombre total de messages non lus dans toutes les équipes de l'utilisateur.
+     */
+    public function totalUnread(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $total = (int) DB::table('team_members as tm')
+            ->join('team_messages as msg', 'msg.team_id', '=', 'tm.team_id')
+            ->whereNull('msg.deleted_at')
+            ->where('tm.user_id', $user->id)
+            ->where(function ($q) {
+                $q->whereNull('tm.last_read_at')
+                    ->orWhereColumn('msg.created_at', '>', 'tm.last_read_at');
+            })
+            ->count();
+
+        return response()->json(['total' => $total]);
+    }
+
     public function updatePresence(Request $request, string $uuid): JsonResponse
     {
         $validator = Validator::make($request->all(), [
