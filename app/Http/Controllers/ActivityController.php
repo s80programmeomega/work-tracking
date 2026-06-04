@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\ActivityLogService;
 use App\Http\Resources\ActivityResource;
-use Illuminate\Http\Request;
+use App\Services\ActivityLogService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Spatie\Activitylog\Models\Activity;
 
 class ActivityController extends Controller
 {
@@ -172,6 +173,73 @@ class ActivityController extends Controller
             $request->end_date,
             $request->get('per_page', 20)
         );
+
+        return response()->json([
+            'success' => true,
+            'data' => ActivityResource::collection($activities),
+            'meta' => [
+                'current_page' => $activities->currentPage(),
+                'last_page' => $activities->lastPage(),
+                'per_page' => $activities->perPage(),
+                'total' => $activities->total(),
+            ],
+        ]);
+    }
+
+    /**
+     * Journal d'activité cross-app pour le super-admin.
+     * Filtre par auteur, type de sujet, événement, plage de dates et texte libre.
+     */
+    public function adminFeed(Request $request): JsonResponse
+    {
+        $request->validate([
+            'search' => 'sometimes|string|max:255',
+            'causer_id' => 'sometimes|integer|exists:users,id',
+            'subject_type' => 'sometimes|string',
+            'event' => 'sometimes|string',
+            'date_from' => 'sometimes|date',
+            'date_to' => 'sometimes|date|after_or_equal:date_from',
+            'per_page' => 'sometimes|integer|min:1|max:100',
+        ]);
+
+        $query = Activity::query()
+            ->with(['causer', 'subject'])
+            ->latest();
+
+        if ($request->filled('causer_id')) {
+            $query->where('causer_id', $request->causer_id)
+                ->where('causer_type', 'App\\Models\\User');
+        }
+
+        if ($request->filled('subject_type')) {
+            // Accepte le nom court (ex: "Tache") ou le FQCN
+            $type = str_contains($request->subject_type, '\\')
+                ? $request->subject_type
+                : 'App\\Models\\'.$request->subject_type;
+            $query->where('subject_type', $type);
+        }
+
+        if ($request->filled('event')) {
+            $query->where('event', $request->event);
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        if ($request->filled('search')) {
+            $q = $request->search;
+            $query->where(function ($sub) use ($q) {
+                $sub->where('description', 'like', "%{$q}%")
+                    ->orWhere('log_name', 'like', "%{$q}%");
+            });
+        }
+
+        $activities = $query->paginate($request->integer('per_page', 25));
 
         return response()->json([
             'success' => true,

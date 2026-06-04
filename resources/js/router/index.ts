@@ -700,6 +700,13 @@ const router = createRouter({
     },
 
     {
+      path: '/support',
+      name: 'support',
+      component: () => import('../pages/Support.vue'),
+      meta: { requiresAuth: true },
+    },
+
+    {
       path: '/error-404',
       name: '404 Error',
       component: () => import('../pages/Errors/FourZeroFour.vue'),
@@ -716,6 +723,12 @@ const router = createRouter({
         title: 'Signin',
         guest: true,
       },
+    },
+    {
+      path: '/admin/logs',
+      name: 'admin.logs',
+      component: () => import('../pages/admin/AdminLogs.vue'),
+      meta: { requiresAuth: true, requiresSuperAdmin: true },
     },
     {
       path: '/auth/callback',

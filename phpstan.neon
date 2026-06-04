@@ -62,7 +62,9 @@ parameters:
           reportUnmatched: false
         - '#Method App\\Http\\Controllers\\Api\\TacheResultatController::notifyResponsablesOfResult\(\) is unused#'
         - '#Method App\\Http\\Controllers\\Api\\EvaluationController::generateRecommandations\(\) is unused#'
-        # PDF class: third-party or local helper loaded at runtime
-        - '#Call to static method loadView\(\) on an unknown class App\\Http\\Controllers\\Api\\PDF#'
+        # Socialite stateless() est disponible sur OAuth2Provider mais pas sur l'interface de base
+        - '#Call to an undefined method Laravel\\Socialite\\Contracts\\Provider::stateless\(\)#'
+        # MfaService::MAX_ATTEMPTS est utilisé via isExhausted() — faux positif PHPStan
+        - '#Constant App\\Services\\MfaService::MAX_ATTEMPTS is unused#'
         # LabelController collection: load() is available on Eloquent collections at runtime
         - '#Called .take. on Laravel collection, but could have been retrieved as a query#'

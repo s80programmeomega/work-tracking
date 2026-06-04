@@ -595,9 +595,11 @@ The Swagger view (`resources/views/scribe/swagger.blade.php`) reads `localStorag
 
 ---
 
-## Guide 21 — Larastan Static Analysis
+## Guide 21 — Larastan Static Analysis (pre-commit hard gate)
 
-[Larastan](https://github.com/larastan/larastan) (`larastan/larastan` v2.11) is installed and configured at **level 5**. Run it regularly — it catches type errors, wrong method signatures, and missing properties before tests do.
+**[Larastan](https://github.com/larastan/larastan)** (`larastan/larastan` v2.11) is installed and configured at **level 5**. It is **mandatory before every commit**, alongside Pint — both must pass with zero errors. Do not commit if Larastan reports errors; fix them first.
+
+**Important:** the binary is `vendor/bin/phpstan` but this IS Larastan — `phpstan.neon` loads the `larastan/larastan` extension which adds full Laravel awareness (Eloquent models, query builders, relations, facades, magic methods). Raw PHPStan without this extension would miss most Laravel-specific type errors. Never run PHPStan without the project's `phpstan.neon`.
 
 ### Running Larastan
 
@@ -606,6 +608,13 @@ php artisan clear-compiled && php -d memory_limit=1500M vendor/bin/phpstan analy
 ```
 
 Use `--memory-limit=1500M` — the 512 MB default is not enough on this codebase.
+
+### Pre-commit checklist order
+
+1. `vendor/bin/pint --dirty --format agent` — must output `"result":"passed"` or `"result":"fixed"` with no remaining issues
+2. `php artisan clear-compiled && php -d memory_limit=1500M vendor/bin/phpstan analyse --memory-limit=1500M` — must output `[OK] No errors`
+
+Only then commit.
 
 ### Suppressing false positives
 
@@ -663,3 +672,63 @@ class MyModelResource extends JsonResource
 - Before every commit (alongside Pint).
 - After any model, service, controller, or resource change.
 - After adding new routes (FormRequest route model binding may need `@var` assertions).
+
+
+---
+
+## Guide 23 — Stagger Animations on Data Lists (mandatory)
+
+Every component that renders a **list, table, or grid of data items** MUST apply the stagger entrance animation. This creates the polished, professional feel that is consistent across the whole application.
+
+### Pattern
+
+```javascript
+import { useStagger } from '@/composables/useAnimations'
+const { staggerRef, applyStagger } = useStagger(50) // delay in ms between items
+
+// After data loads:
+onMounted(async () => {
+  await loadData()
+  applyStagger()
+})
+
+// For reactive reloads (filters, search):
+watch(filters, async () => {
+  await loadData()
+  await nextTick()
+  applyStagger()
+})
+```
+
+Template:
+```html
+<div ref="staggerRef" class="space-y-3">
+  <div v-for="item in items" :key="item.id" class="stagger-item ...">
+```
+
+**Rules:**
+- `ref="staggerRef"` on the **container** element (the `v-for` parent)
+- `class="stagger-item"` (append to existing classes) on each **list item**
+- Call `applyStagger()` **after** data is assigned and after `nextTick()` when needed
+- Default delay: **50ms**; dense tables: **30–40ms**; heavy media cards: **60ms**
+- Multiple lists on one page: use separate `useStagger()` calls with different refs
+- Skipping stagger is only acceptable for single-item renders (e.g. a detail card, not a list)
+
+**What counts as a list:** any `v-for` that renders 2+ items for the user to scan — cards, table rows, notification items, ticket rows, recovery codes, etc.
+
+---
+
+## Guide 24 — Full Integration Before Marking Complete (mandatory)
+
+Every new feature MUST be 100% integrated and functional from backend through frontend before it is considered done. "Done" means:
+
+1. **Backend**: endpoint exists, is authenticated/authorized, validates input, returns correct responses
+2. **Frontend**: the Vue page/component calls the endpoint, handles success + error states, and displays real data (no hardcoded text, no `console.log` left in, no TODO comments)
+3. **UI responsiveness**: the component works correctly on both mobile (small screen) and desktop. Use Tailwind responsive prefixes (`sm:`, `md:`, `lg:`) where needed
+4. **i18n**: all user-visible strings use `$t()` — no hardcoded French or English text in templates
+5. **Stagger**: data lists use `useStagger` (Guide 23)
+6. **Tests**: at least one feature test covers the happy path. At least one Dusk test if the feature has a user-facing UI (Guide 18)
+7. **Build**: `npm run build` succeeds without new errors
+8. **Larastan**: `vendor/bin/phpstan analyse` reports zero errors (Guide 21)
+
+If any of these are missing, the feature is **not done** — do not commit, do not mark complete, do not move to the next phase.

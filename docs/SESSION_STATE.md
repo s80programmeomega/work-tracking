@@ -16,29 +16,26 @@
 
 ## Current Session
 
-**Date:** 2026-05-31
-**Session goal:** Frontend alignment — stagger animations, stats toggles, notification polish
-**Branch:** `feature/frontend-alignment-phase-1`
-**Status:** Complete — build passing. Awaiting commit + push.
+**Date:** 2026-06-04
+**Session goal:** Extended features — Phase 4 complete + merged; Phase 5 next
+**Branch:** `feature/support-contact` → merged into `jonas`
+**Status:** Merged ✅ — 688 tests passing, build green, Larastan clean. Pushed to both remotes.
 
 ---
 
 ## Current Task
 
-**Task:** Frontend Alignment — animations, stats toggles, notification fixes
-**Branch:** `feature/frontend-alignment-phase-1`
-**Status:** Complete — build passing (17.38s). Awaiting commit + push.
+**Task:** Extended Features — Phase 5 (Chat: real-time + @mentions + polish)
+**Branch:** `feature/phase5-chat` (to be cut from `jonas`)
+**Status:** Not started ⬜
 
-**What was done this session:**
-- Stagger animations: added `useStagger` + `.stagger-item` to ProjetDetail (activities + members tbody), ProjetDashboard (recentActivities + recentProjects), TacheCommentsTab, TacheAssigneesTab, TacheActivityTab, TacheAttachmentsTab, TacheLinksTab, TacheResultsTab, PendingValidationsModal, ActivityDetail (tasks + members)
-- Stats toggle button: added to MesActivites.vue, evaluations/PendingValidations.vue, MesValidationsEnAttente.vue — each replaces always-visible grid with `showStats` ref + `<transition>` + dedicated stats component
-- New stats components: MesActivitesStats.vue, PendingValidationsStats.vue (evaluations/), MesValidationsStats.vue (evaluations/)
-- Notification fixes: useNotifications.js icon/color/type maps cover all real notification types; NotificationItem rewritten with correct field names; NotificationDetailModal updated with all real type handlers
+**What was done (Phase 3 + Phase 4, now merged):**
+- Phase 3: Full support ticket system, MFA fixes, single-session enforcement, notification UX, log infrastructure
+- Phase 4: Native admin logs page — `ValidationAuditLogResource` + endpoint, `useLogViewer.js`, `LogDetailDrawer.vue`, `ActivityLogTab.vue` (causer filter + drawer + date pickers), `AppLogsTab.vue` (native file picker / level chips / expand / download / delete), `ValidationAuditLogTab.vue` (action badges + date pickers), `AdminLogs.vue` refactored to 3-tab container; 34 i18n keys; 6 PHPUnit + 4 Dusk tests; PDF export button fix in AgentSheet; testing guide at `docs/extended-features/testing/TASK_PHASE4_TESTING.md`
 
 **What to do next:**
-1. Commit all changes on `feature/frontend-alignment-phase-1`
-2. Push to origin (and client when applicable)
-3. Phase 4: Dusk happy-path tests for the pages that got fixes
+1. Cut `feature/phase5-chat` from `jonas`
+2. Implement Phase 5 per `docs/extended-features/README.md` Phase 5 spec: broadcast events on `team.{teamId}`, @mention notification, typing indicator, unread badge, attachment UI, optimistic send
 
 **What was done this session:**
 - Replaced abandoned `nunomaduro/larastan` with `larastan/larastan` v2.11; updated `phpstan.neon` extension path
@@ -263,27 +260,20 @@ Tests: 11 feature in `NotificationServiceTest` + 8 feature in `SendDailyDigestCo
 
 ---
 
-## Open PRs
+## Open PRs / Active Branches
 
-| Branch | Task | Status |
+| Branch | Phase / Task | Status |
 |---|---|---|
-| `feature/v2-task-1-queue-reverb` | Task 1 | Merged ✅ |
-| `feature/v2-task-2-subtask-model` | Task 2 | Merged ✅ |
-| `feature/v2-task-3-subtask-api` | Task 3 | Merged ✅ |
-| `feature/v2-task-4-subtask-ui` | Task 4 | Merged ✅ (recovered 2026-05-18) |
-| `feature/v2-task-5-validation-n0` | Task 5 | Merged ✅ (via `feature/v2-permission-architecture`) |
-| `feature/v2-task-6-bypass` | Task 6 | Merged ✅ |
-| `feature/v2-task-7-scores-dashboard` | Task 7 | Merged ✅ (commit `c891a6e`) |
-| `feature/v2-task-8-notifications` | Task 8 + 8b + 8c | Merged ✅ (into `jonas` 2026-05-26) |
-| `feature/v2-task-9-agent-sheet` | Task 9 | Merged ✅ (into `jonas` 2026-05-26) |
-| `feature/v2-task-10-dashboard` | Task 10 | Merged ✅ (into `jonas` 2026-05-26) |
-| `feature/v2-task-11-task-creation-ux` | Task 11 | Merged ✅ (into `jonas` 2026-05-26) |
-| `feature/v2-task-12-document-management` | Task 12 | Merged ✅ (into `jonas` 2026-05-26) |
-| `fix/cdc-hotfixes` | CDC Hotfixes | Merged ✅ (into `jonas` 2026-05-26) |
-| `feature/v2-task-13-subscription` | Task 13 | Complete — awaiting push 🔄 |
-| `feature/v2-task-14-platform-dashboard` | Task 14 | Complete — awaiting push 🔄 |
-| `feature/v2-task-15-task-list-ux` | Task 15 | Complete — awaiting push 🔄 |
-| `feature/v2-task-16-export` | Task 16 | Complete — awaiting push 🔄 |
+| `feature/phase5-chat` | Extended Phase 5 (Chat real-time + @mentions) | Not started ⬜ |
+
+**Previously merged into `jonas` (extended features):**
+- `chore/security-perf-baseline` → `jonas` `4493754` (Phase 0 — baseline docs)
+- `feature/mfa-2fa` → `jonas` `7525a81` (Phase 1 — MFA)
+- `feature/social-auth-google` → `jonas` `19047fd` (Phase 2 — Social auth)
+- `feature/support-contact` → `jonas` (Phase 3 + Phase 4 — support system + native admin logs)
+
+**Previously merged (v2 tasks):**
+Tasks 0–16, fix/cdc-hotfixes, fix/bug-batch, design-system-v1, chore/test-coverage-expansion — all merged into `jonas` (see PROGRESSION.md for full history).
 
 ---
 
@@ -335,3 +325,4 @@ Tests: 11 feature in `NotificationServiceTest` + 8 feature in `SendDailyDigestCo
 | 2026-05-26 | Task 16 | PDF export (GET /api/evaluations/personnel/{user}/export-pdf, Blade+DomPDF, A4 portrait, criteria bars), Excel export (GET /api/workspace/taches/export-excel, WorkspaceTachesExport, 10-col, blue header, filter-aware). AgentSheet.vue + WorkspaceTaches.vue buttons wired. 5 PHPUnit tests. 274 total, all green. |
 | 2026-05-26 | UX Polish | Inline editing on all 3 task detail views + SousTacheList. Modal state machine fix. DatePicker for echeance everywhere. Escape cancels any active edit (global keydown). No new backend changes. |
 | 2026-05-28 | Document polish + notification fixes | Version manager UX, cadre upload fix, dark mode margin, share modal date fix, smart user filtering, activite role values fix, DocumentService grantPermission/revokePermission fix, DocumentPermissionGrantedNotification + push toWebPush, WebPushChannel fallback improved, Documents.vue tab from query param, expires_at 5-year cap. PHP ext-gmp installed for Web Push. |
+| 2026-06-04 | Phase 4 — native admin logs | ValidationAuditLogResource + endpoint, useLogViewer.js, LogDetailDrawer.vue, ActivityLogTab (causer filter + date pickers + drawer), AppLogsTab (native: file picker / level chips / expand / download / delete), ValidationAuditLogTab (action badges + date pickers + drawer), AdminLogs.vue refactored to 3-tab container. 34 i18n keys. 6 PHPUnit + 4 Dusk tests. PDF export button fix (AgentSheet). Merged into jonas, pushed both remotes. |

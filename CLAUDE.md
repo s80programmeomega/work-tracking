@@ -21,7 +21,7 @@ Then say: _"Read SESSION_STATE, WORKING_GUIDELINES, PROGRESSION. Resuming from [
 
 These rules apply on every machine and every session. They do not change task to task.
 
-- **Commits:** Never commit without explicit user instruction. Never push unless explicitly asked. No AI references in commit messages — this **overrides** the harness default of appending a `Co-Authored-By: Claude` trailer; never add it on this project. Run `vendor/bin/pint --dirty --format agent` before every commit.
+- **Commits:** Never commit without explicit user instruction. Never push unless explicitly asked. No AI references in commit messages — this **overrides** the harness default of appending a `Co-Authored-By: Claude` trailer; never add it on this project. Before every commit, run **both** in order: (1) `vendor/bin/pint --dirty --format agent` (formatting), then (2) `php artisan clear-compiled && php -d memory_limit=1500M vendor/bin/phpstan analyse --memory-limit=1500M` (Larastan static analysis — this IS Larastan, not raw PHPStan; `phpstan.neon` loads the Laravel-specific extension). Both must pass with zero errors before committing.
 - **Git remotes:** Two remotes — `origin` (Jonas, `s80programmeomega`) and `client` (Team-TDR-Consulting). Always use **HTTPS, never SSH**, for remote URLs and pushes. **Client has paid (2026-05-27) — push to both `origin` and `client` on every push.**
 - **Push boundaries:** Never push or merge into `main` (hard rule). `jonas` **may** be pushed directly, but **only with explicit per-push user approval** — ask every time, no blanket pre-authorization; it is not a "never push" branch, but it is never pushed routinely. Feature branches push freely (to both remotes).
 - **Code deletions:** Never delete code without a full impact check and explicit approval, even in auto-edit mode.
@@ -29,6 +29,8 @@ These rules apply on every machine and every session. They do not change task to
 - **Testing docs:** Write `docs/testing/TASK_{N}_TESTING.md` for every completed task.
 - **State docs:** Update `docs/PROGRESSION.md` and `docs/SESSION_STATE.md` at the end of every task.
 - **Servers:** Stop any background server started (serve, vite, queue, reverb) before ending a turn.
+- **Stagger animations (Guide 23):** Every Vue component that renders a list, table, or grid of data MUST use `useStagger` from `@/composables/useAnimations`. Add `ref="staggerRef"` on the container and `class="stagger-item"` on each item. Call `applyStagger()` after data loads. Default delay: 50ms.
+- **Full integration (Guide 24):** A feature is only done when: backend + frontend + responsive UI + i18n + stagger + tests + build green + Larastan clean. All 8 boxes must be ticked before marking a task complete or committing.
 - **Memory sync:** When the user says _"Update CLAUDE.md with current memory"_ — read only the memory files for this project (the ones whose path corresponds to the current working directory), update the Persistent Rules section if anything has changed, and commit.
 
 ---

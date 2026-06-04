@@ -323,6 +323,25 @@
                                     />
                                 </button>
 
+                                <!-- Lien externe (ouvre dans un nouvel onglet) -->
+                                <a
+                                    v-else-if="item.href"
+                                    :href="typeof item.href === 'function' ? item.href() : item.href"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    :class="[
+                                        'menu-item group menu-item-inactive',
+                                        !isExpanded && !isHovered ? 'lg:justify-center' : 'justify-start',
+                                    ]"
+                                >
+                                    <span class="menu-item-icon-inactive">
+                                        <component :is="item.icon" />
+                                    </span>
+                                    <span v-if="isExpanded || isHovered || isMobileOpen" class="menu-item-text flex-1">
+                                        {{ item.name }}
+                                    </span>
+                                </a>
+
                                 <!-- Simple link item -->
                                 <router-link
                                     v-else-if="item.path"
@@ -539,10 +558,13 @@ import {
 
 import BoxCubeIcon from "@/icons/BoxCubeIcon.vue";
 import FolderIcon from "@/icons/FolderIcon.vue";
+import SupportIcon from "@/icons/SupportIcon.vue";
 import TaskIcon from "@/icons/TaskIcon.vue";
 import ClipboardCheckIcon from "@/icons/ClipboardCheckIcon.vue";
 import UsersIcon from "@/icons/UsersIcon.vue";
 import ShieldIcon from "@/icons/ShieldIcon.vue";
+import BuildingOfficeIcon from "@/icons/BuildingOfficeIcon.vue";
+import DocsIcon from "@/icons/DocsIcon.vue";
 import { useI18n } from "vue-i18n";
 import { useSidebar } from "@/composables/useSidebar";
 import api from "@/api/axios";
@@ -883,6 +905,11 @@ const menuGroups = computed(() => [
                 path: "/notifications",
                 badge: "",
             },
+            {
+                icon: SupportIcon,
+                name: t('sidebar.support'),
+                path: "/support",
+            },
         ],
     },
     {
@@ -906,7 +933,7 @@ const menuGroups = computed(() => [
                 superAdminOnly: true,
             },
             {
-                icon: UsersIcon,
+                icon: BuildingOfficeIcon,
                 name: t('navigation.workspaces'),
                 path: "/admin/workspaces",
                 superAdminOnly: true,
@@ -921,6 +948,12 @@ const menuGroups = computed(() => [
                 icon: ShieldIcon,
                 name: t('navigation.roles_permissions'),
                 path: "/admin/roles",
+                superAdminOnly: true,
+            },
+            {
+                icon: DocsIcon,
+                name: t('sidebar.logs'),
+                path: '/admin/logs',
                 superAdminOnly: true,
             },
         ],

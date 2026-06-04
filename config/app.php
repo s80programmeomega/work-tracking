@@ -67,6 +67,10 @@ return [
 
     'asset_url' => env('ASSET_URL'),
 
+    // URL du frontend SPA (peut différer de APP_URL en dev : localhost vs 127.0.0.1).
+    // Utilisée dans les liens des emails de notification.
+    'frontend_url' => env('APP_FRONTEND_URL', env('APP_URL', 'http://localhost')),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

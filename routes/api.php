@@ -12,8 +12,10 @@ use App\Http\Controllers\Api\ProjetInvitationController;
 use App\Http\Controllers\Api\PushSubscriptionController;
 use App\Http\Controllers\Api\SocialAuthController;
 use App\Http\Controllers\Api\SousTacheController;
+use App\Http\Controllers\Api\SupportTicketController;
 use App\Http\Controllers\Api\TacheController;
 use App\Http\Controllers\Api\TacheResultatController;
+use App\Http\Controllers\Api\TwoFactorManagementController;
 use App\Http\Controllers\Api\WorkspaceController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LabelController;
@@ -89,6 +91,27 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/email-otp-toggle', [AuthController::class, 'toggleEmailOtp']);
     });
 
+    // =====================================  2FA MANAGEMENT  =====================================
+    // Ces routes remplacent les endpoints Fortify qui utilisent le middleware 'web' (session),
+    // incompatible avec l'auth par token Sanctum de ce SPA.
+    Route::prefix('user')->group(function () {
+        Route::post('/two-factor-authentication', [TwoFactorManagementController::class, 'enable']);
+        Route::post('/confirmed-two-factor-authentication', [TwoFactorManagementController::class, 'confirm']);
+        Route::delete('/two-factor-authentication', [TwoFactorManagementController::class, 'disable']);
+        Route::get('/two-factor-qr-code', [TwoFactorManagementController::class, 'qrCode']);
+        Route::get('/two-factor-secret-key', [TwoFactorManagementController::class, 'secretKey']);
+        Route::get('/two-factor-recovery-codes', [TwoFactorManagementController::class, 'recoveryCodes']);
+        Route::post('/two-factor-recovery-codes', [TwoFactorManagementController::class, 'regenerateRecoveryCodes']);
+    });
+
+    // ========================================  SUPPORT  ==========================================
+    Route::prefix('support')->group(function () {
+        Route::post('/', [SupportTicketController::class, 'store'])->name('support.store');
+        Route::get('/', [SupportTicketController::class, 'index'])->name('support.index');
+        Route::post('/{ticket}/attachments', [SupportTicketController::class, 'addAttachments'])->name('support.attachments.add');
+        Route::get('/attachments/{attachment}/download', [SupportTicketController::class, 'downloadAttachment'])->name('support.attachments.download');
+    });
+
     // ========================================  PLATFORM ADMIN  ========================================
     Route::prefix('admin')->middleware('super_admin')->group(function () {
         Route::get('/stats', [AdminController::class, 'stats'])->name('admin.stats');
@@ -100,6 +123,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/workspaces/{workspace}/reactivate', [AdminController::class, 'reactivateWorkspace'])->name('admin.workspaces.reactivate');
         Route::get('/roles', [AdminController::class, 'roles'])->name('admin.roles');
         Route::patch('/roles/{role}/permissions', [AdminController::class, 'syncRolePermissions'])->name('admin.roles.sync-permissions');
+        // Gestion des tickets de support
+        Route::get('/support', [SupportTicketController::class, 'adminIndex'])->name('admin.support.index');
+        // Réponse obligatoire + changement de statut en une seule action
+        Route::post('/support/{ticket}/reply', [SupportTicketController::class, 'reply'])->name('admin.support.reply');
+        // Journal d'activité cross-app (Spatie activity_log) — super-admin seulement
+        Route::get('/activity-log', [ActivityController::class, 'adminFeed'])->name('admin.activity-log');
+        // Journal d'audit de validation (N0/N1/bypass) — super-admin seulement
+        Route::get('/validation-audit-log', [AdminController::class, 'validationAuditLog'])->name('admin.validation-audit-log');
     });
 
     // Dashboard routes

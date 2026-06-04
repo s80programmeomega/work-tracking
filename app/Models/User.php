@@ -45,6 +45,11 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string|null $two_factor_secret
  * @property string|null $two_factor_recovery_codes
  * @property bool $email_otp_enabled
+ *
+ * @method bool validateTwoFactorCode(string $code)
+ * @method string twoFactorQrCodeSvg()
+ * @method array recoveryCodes()
+ *
  * @property string|null $provider
  * @property string|null $provider_id
  * @property Carbon|null $created_at

@@ -283,13 +283,13 @@
                 class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-brand-100 text-brand-700 dark:bg-brand-500/20 dark:text-brand-400 border border-brand-300 dark:border-brand-700">
                 <!-- enveloppe fermée -->
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 animate-pulse" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M3.5 8.187V17.25C3.5 17.664 3.836 18 4.25 18h15.5c.414 0 .75-.336.75-.75V8.187l-7.213 5.03a1.75 1.75 0 0 1-2-.001L3.5 8.187ZM20.5 6.23v.013l-8 5.557a.25.25 0 0 1-.286 0L3.601 6.429A.25.25 0 0 1 3.736 6h16.528a.25.25 0 0 1 .236.23ZM2 6.256V17.25A2.25 2.25 0 0 0 4.25 19.5h15.5A2.25 2.25 0 0 0 22 17.25V6.256A2.25 2.25 0 0 0 19.764 4.5H4.236A2.25 2.25 0 0 0 2 6.256Z"/></svg>
-                Non lu
+                {{ $t('notifications.unread') }}
               </span>
               <span v-else
                 class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400 border border-gray-200 dark:border-gray-700">
                 <!-- enveloppe ouverte -->
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 9v.906a2.25 2.25 0 0 1-1.183 1.981l-6.478 3.488M2.25 9v.906a2.25 2.25 0 0 0 1.183 1.981l6.478 3.488m8.839 2.51-4.66-2.51m0 0-1.023-.55a2.25 2.25 0 0 0-2.134 0l-1.022.55m0 0-4.661 2.51m16.5 1.615a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V8.844a2.25 2.25 0 0 1 1.183-1.981l7.5-4.04a2.25 2.25 0 0 1 2.134 0l7.5 4.04a2.25 2.25 0 0 1 1.183 1.98V19.5Z"/></svg>
-                Lu
+                {{ $t('notifications.read') }}
               </span>
               <span v-if="typeLabel"
                 class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700">
@@ -305,12 +305,12 @@
               <button v-if="!notification.read_at" @click="emit('mark-read', notification.id)"
                 class="px-4 py-2 rounded-3 text-sm font-semibold text-white bg-success-500 hover:bg-success-600 transition-colors flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
-                Marquer comme lu
+                {{ $t('notifications.mark_read') }}
               </button>
               <button @click="handleDelete"
                 class="px-4 py-2 rounded-3 text-sm font-semibold bg-error-50 text-error-700 hover:bg-error-100 dark:bg-error-500/10 dark:text-error-400 dark:hover:bg-error-500/20 transition-colors flex items-center gap-2 border border-error-300 dark:border-error-700">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
-                Supprimer
+                {{ $t('notifications.delete') }}
               </button>
             </div>
             <button v-if="actionUrl" @click="handleGoToAction"
@@ -328,6 +328,7 @@
 <script setup>
 import { computed, defineComponent, h, nextTick, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useDraggable } from '@/composables/useDraggable';
 import { useNotifications } from '@/composables/useNotifications';
 
@@ -423,6 +424,8 @@ const ActionButton = defineComponent({
 });
 
 // ── Props / composable ────────────────────────────────────────────────────────
+
+const { t } = useI18n();
 
 const props = defineProps({
   isOpen:       { type: Boolean, required: true },
@@ -524,6 +527,9 @@ const HEADER_COLORS = {
   trial_extended: 'bg-success-500', subscription_limit_reached: 'bg-warning-600',
   workspace_suspended: 'bg-error-600',
   high_inaction_rate_alert: 'bg-error-500', unjustified_return_alert: 'bg-error-500',
+  support_ticket_new: 'bg-purple-500',
+  support_ticket_reply: 'bg-brand-500',
+  support_ticket_status_changed: 'bg-warning-500',
 };
 
 const headerColor = computed(() => HEADER_COLORS[type.value] || 'bg-gray-500');
@@ -560,6 +566,8 @@ const TYPE_LABEL_DISPLAY = {
   trial_expiring: 'Essai bientôt expiré', trial_expired: 'Essai expiré',
   trial_extended: 'Essai prolongé', workspace_suspended: 'Workspace suspendu',
   subscription_limit_reached: 'Limite atteinte',
+  support_ticket_new: 'Nouveau ticket', support_ticket_reply: 'Réponse ticket',
+  support_ticket_status_changed: 'Statut ticket',
 };
 const typeLabel = computed(() => TYPE_LABEL_DISPLAY[type.value] ?? null);
 
@@ -577,7 +585,10 @@ const modalTitle = computed(() => {
   if (t.startsWith('team_')) return d.value.team_name || 'Équipe';
   if (t.startsWith('trial_') || t === 'workspace_suspended' || t === 'subscription_limit_reached')
     return d.value.workspace_nom || 'Workspace';
-  return typeLabel.value || 'Notification';
+  if (t === 'support_ticket_new') return `#${d.value.ticket_number || '?'} — ${d.value.subject || 'Nouveau ticket'}`;
+  if (t === 'support_ticket_reply') return `#${d.value.ticket_number || '?'} — ${d.value.subject || 'Réponse'}`;
+  if (t === 'support_ticket_status_changed') return `#${d.value.ticket_number || '?'} — ${d.value.subject || 'Ticket'}`;
+  return typeLabel.value || t;
 });
 
 // ── Bouton d'action pied de page ─────────────────────────────────────────────
@@ -591,6 +602,8 @@ const actionUrl = computed(() => {
 const actionLabel = computed(() => {
   if (isResultatType.value) return 'Voir le résultat';
   if (['projet_invitation', 'workspace_invitation'].includes(type.value)) return "Voir l'invitation";
+  if (type.value === 'support_ticket_new') return 'Gérer les tickets';
+  if (['support_ticket_reply', 'support_ticket_status_changed'].includes(type.value)) return 'Voir mon ticket';
   return 'Voir plus';
 });
 
@@ -681,7 +694,7 @@ const goToUrl = (url) => {
 const close = () => emit('close');
 
 const handleDelete = () => {
-  if (confirm('Supprimer cette notification ?')) {
+  if (confirm(t('notifications.confirm_delete'))) {
     emit('delete', props.notification.id);
     close();
   }
