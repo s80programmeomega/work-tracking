@@ -16,34 +16,26 @@
 
 ## Current Session
 
-**Date:** 2026-06-03
-**Session goal:** Extended features — Phase 3 (Support), bug fixes, log infrastructure
-**Branch:** `feature/support-contact`
-**Status:** Complete — 682 tests passing, build green, Larastan clean. Awaiting merge into `jonas`.
+**Date:** 2026-06-04
+**Session goal:** Extended features — Phase 4 complete + merged; Phase 5 next
+**Branch:** `feature/support-contact` → merged into `jonas`
+**Status:** Merged ✅ — 688 tests passing, build green, Larastan clean. Pushed to both remotes.
 
 ---
 
 ## Current Task
 
-**Task:** Extended Features — Phase 3 complete + post-phase fixes
-**Branch:** `feature/support-contact`
-**Status:** Complete — committed + pushed both remotes (`121dc75`). Awaiting `jonas` merge approval.
+**Task:** Extended Features — Phase 5 (Chat: real-time + @mentions + polish)
+**Branch:** `feature/phase5-chat` (to be cut from `jonas`)
+**Status:** Not started ⬜
 
-**What was done (Phase 3 + fixes):**
-- Full support ticket system: `SupportTicket` + `SupportTicketReply` + `SupportTicketAttachment` models, SLA auto-calculation, mandatory admin replies, multi-file attachments, reproducibility field
-- `SupportTicketReplyNotification` — always notifies the requester on admin reply (regardless of status change)
-- `TwoFactorManagementController` — fixes MFA 405 error (Fortify 2FA endpoints exposed under `auth:sanctum`)
-- Single-session enforcement: `issueToken()` revokes old tokens
-- Notification modal: support ticket types wired; hardcoded French strings → `$t()`
-- `APP_FRONTEND_URL` config — email links use correct origin (fixes localhost vs 127.0.0.1 causing re-login)
-- Laravel logging → `daily` channel (14-day rotation); `browser.log` rotated via `logs:rotate-browser` command
-- `opcodesio/log-viewer` + super-admin sidebar link (`/log-viewer?token=xxx`); local env open, production token-gated
-- Guide 23 (stagger animations) + Guide 24 (full integration) added to guidelines + CLAUDE.md
-- `vite.config.js` → `lightningcss` (eliminates recurring CSS build warnings)
+**What was done (Phase 3 + Phase 4, now merged):**
+- Phase 3: Full support ticket system, MFA fixes, single-session enforcement, notification UX, log infrastructure
+- Phase 4: Native admin logs page — `ValidationAuditLogResource` + endpoint, `useLogViewer.js`, `LogDetailDrawer.vue`, `ActivityLogTab.vue` (causer filter + drawer + date pickers), `AppLogsTab.vue` (native file picker / level chips / expand / download / delete), `ValidationAuditLogTab.vue` (action badges + date pickers), `AdminLogs.vue` refactored to 3-tab container; 34 i18n keys; 6 PHPUnit + 4 Dusk tests; PDF export button fix in AgentSheet; testing guide at `docs/extended-features/testing/TASK_PHASE4_TESTING.md`
 
 **What to do next:**
-1. Merge `feature/support-contact` → `jonas` (needs per-push approval, then push both remotes)
-2. Start **Phase 4** — Super-admin app log & activity viewer (`feature/admin-activity-viewer`, branch from `jonas`)
+1. Cut `feature/phase5-chat` from `jonas`
+2. Implement Phase 5 per `docs/extended-features/README.md` Phase 5 spec: broadcast events on `team.{teamId}`, @mention notification, typing indicator, unread badge, attachment UI, optimistic send
 
 **What was done this session:**
 - Replaced abandoned `nunomaduro/larastan` with `larastan/larastan` v2.11; updated `phpstan.neon` extension path
@@ -272,13 +264,13 @@ Tests: 11 feature in `NotificationServiceTest` + 8 feature in `SendDailyDigestCo
 
 | Branch | Phase / Task | Status |
 |---|---|---|
-| `feature/support-contact` | Extended Phase 3 (Support + bug fixes) | Complete — awaiting `jonas` merge 🔄 |
-| `feature/admin-activity-viewer` | Extended Phase 4 | Not started ⬜ |
+| `feature/phase5-chat` | Extended Phase 5 (Chat real-time + @mentions) | Not started ⬜ |
 
 **Previously merged into `jonas` (extended features):**
 - `chore/security-perf-baseline` → `jonas` `4493754` (Phase 0 — baseline docs)
 - `feature/mfa-2fa` → `jonas` `7525a81` (Phase 1 — MFA)
 - `feature/social-auth-google` → `jonas` `19047fd` (Phase 2 — Social auth)
+- `feature/support-contact` → `jonas` (Phase 3 + Phase 4 — support system + native admin logs)
 
 **Previously merged (v2 tasks):**
 Tasks 0–16, fix/cdc-hotfixes, fix/bug-batch, design-system-v1, chore/test-coverage-expansion — all merged into `jonas` (see PROGRESSION.md for full history).
@@ -333,3 +325,4 @@ Tasks 0–16, fix/cdc-hotfixes, fix/bug-batch, design-system-v1, chore/test-cove
 | 2026-05-26 | Task 16 | PDF export (GET /api/evaluations/personnel/{user}/export-pdf, Blade+DomPDF, A4 portrait, criteria bars), Excel export (GET /api/workspace/taches/export-excel, WorkspaceTachesExport, 10-col, blue header, filter-aware). AgentSheet.vue + WorkspaceTaches.vue buttons wired. 5 PHPUnit tests. 274 total, all green. |
 | 2026-05-26 | UX Polish | Inline editing on all 3 task detail views + SousTacheList. Modal state machine fix. DatePicker for echeance everywhere. Escape cancels any active edit (global keydown). No new backend changes. |
 | 2026-05-28 | Document polish + notification fixes | Version manager UX, cadre upload fix, dark mode margin, share modal date fix, smart user filtering, activite role values fix, DocumentService grantPermission/revokePermission fix, DocumentPermissionGrantedNotification + push toWebPush, WebPushChannel fallback improved, Documents.vue tab from query param, expires_at 5-year cap. PHP ext-gmp installed for Web Push. |
+| 2026-06-04 | Phase 4 — native admin logs | ValidationAuditLogResource + endpoint, useLogViewer.js, LogDetailDrawer.vue, ActivityLogTab (causer filter + date pickers + drawer), AppLogsTab (native: file picker / level chips / expand / download / delete), ValidationAuditLogTab (action badges + date pickers + drawer), AdminLogs.vue refactored to 3-tab container. 34 i18n keys. 6 PHPUnit + 4 Dusk tests. PDF export button fix (AgentSheet). Merged into jonas, pushed both remotes. |

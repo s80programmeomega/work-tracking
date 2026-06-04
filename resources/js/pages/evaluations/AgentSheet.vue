@@ -60,9 +60,9 @@
               v-if="sheet.meta.can_export"
               dusk="sheet-export-btn"
               @click="exportSheet"
-              class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-3 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm"
+              class="inline-flex items-center gap-2 rounded-3 bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
             >
-              <i class="fas fa-download mr-2"></i>{{ $t('evaluations.agent_sheet.export') }}
+              <i class="fas fa-download"></i>{{ $t('evaluations.agent_sheet.export') }}
             </button>
           </div>
         </div>

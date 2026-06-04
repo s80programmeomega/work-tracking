@@ -6,10 +6,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\Role as RoleEnum;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ValidationAuditLogResource;
 use App\Models\Activite;
 use App\Models\Projet;
 use App\Models\Tache;
 use App\Models\User;
+use App\Models\ValidationAuditLog;
 use App\Models\Workspace;
 use App\Notifications\TrialExtendedNotification;
 use App\Notifications\WorkspaceSuspendedNotification;
@@ -341,6 +343,54 @@ class AdminController extends Controller
                 'permissions' => $role->fresh('permissions')->permissions->pluck('name')->values(),
             ],
             'message' => __('admin.roles.permissions_updated'),
+        ]);
+    }
+
+    /**
+     * Journal d'audit de validation cross-app pour le super-admin.
+     * Filtre par auteur, action, plage de dates.
+     */
+    public function validationAuditLog(Request $request): JsonResponse
+    {
+        $request->validate([
+            'actor_id' => 'sometimes|integer|exists:users,id',
+            'action' => 'sometimes|string|in:approuve,renvoye,timeout,bypass,n1_valide,n1_rejete,n2_valide,n2_rejete',
+            'date_from' => 'sometimes|date',
+            'date_to' => 'sometimes|date|after_or_equal:date_from',
+            'per_page' => 'sometimes|integer|min:1|max:100',
+        ]);
+
+        $query = ValidationAuditLog::query()
+            ->with(['actor', 'resultat.tache'])
+            ->latest('created_at');
+
+        if ($request->filled('actor_id')) {
+            $query->where('actor_id', $request->integer('actor_id'));
+        }
+
+        if ($request->filled('action')) {
+            $query->where('action', $request->string('action'));
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        $logs = $query->paginate($request->integer('per_page', 25));
+
+        return response()->json([
+            'success' => true,
+            'data' => ValidationAuditLogResource::collection($logs),
+            'meta' => [
+                'current_page' => $logs->currentPage(),
+                'last_page' => $logs->lastPage(),
+                'per_page' => $logs->perPage(),
+                'total' => $logs->total(),
+            ],
         ]);
     }
 

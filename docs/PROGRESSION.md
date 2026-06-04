@@ -39,6 +39,7 @@
 | — | CDC Hotfixes (R7 guard + audit-log endpoint + rate limiting + agent sheet §5) | `fix/cdc-hotfixes` | ✅ | 2026-05-26 | 2026-05-26 | Merged into `jonas` 2026-05-26. |
 | — | Document management polish + notification fixes | `feature/design-system-v1` | ✅ | 2026-05-28 | 2026-05-28 | Version manager UX, sharing fixes, push toWebPush, WebPushChannel fallback, cadre upload, role values, expires_at cap. |
 | — | PHPStan cleanup: larastan swap + 154 errors → 0 | `chore/test-coverage-expansion` | ✅ | 2026-05-29 | 2026-05-29 | nunomaduro→larastan, @property/@mixin on all 16 resources, @responseField annotations, 12+ real bugs fixed. 627 tests passing. |
+| — | Phase 4 — Native admin logs (replace iframe, validation audit tab, activity drawer) | `feature/support-contact` | ✅ | 2026-06-04 | 2026-06-04 | ValidationAuditLogResource + endpoint, useLogViewer.js, LogDetailDrawer, ActivityLogTab (causer filter + drawer + date pickers), AppLogsTab (native), ValidationAuditLogTab (date pickers), AdminLogs refactor, 34 i18n keys, 6 PHPUnit + 4 Dusk tests. 688 tests passing. Merged into jonas 2026-06-04. |
 
 ---
 

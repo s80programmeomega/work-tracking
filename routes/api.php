@@ -129,6 +129,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/support/{ticket}/reply', [SupportTicketController::class, 'reply'])->name('admin.support.reply');
         // Journal d'activité cross-app (Spatie activity_log) — super-admin seulement
         Route::get('/activity-log', [ActivityController::class, 'adminFeed'])->name('admin.activity-log');
+        // Journal d'audit de validation (N0/N1/bypass) — super-admin seulement
+        Route::get('/validation-audit-log', [AdminController::class, 'validationAuditLog'])->name('admin.validation-audit-log');
     });
 
     // Dashboard routes
