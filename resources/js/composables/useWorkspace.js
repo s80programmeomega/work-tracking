@@ -134,19 +134,14 @@ export function useWorkspace() {
         authStore.setCurrentWorkspace(newWorkspaceId);
         localStorage.setItem('current_workspace_id', newWorkspaceId);
 
-        // Notify backend of the switch
-        try {
-            await api.post(`/workspaces/switch/${newWorkspaceId}`);
-        } catch (err) {
-            toast.warning('Erreur lors du switch workspace côté serveur');
-        }
+        // Notify backend of the switch and fetch fresh workspace data in parallel
+        const [, detailRes] = await Promise.allSettled([
+            api.post(`/workspaces/switch/${newWorkspaceId}`),
+            api.get(`/workspaces/${newWorkspaceId}`),
+        ]);
 
-        // Rafraîchir les données complètes (permissions + subscription_summary) depuis le serveur
-        try {
-            const { data } = await api.get(`/workspaces/${newWorkspaceId}`);
-            authStore.currentWorkspace = data.data ?? data;
-        } catch (err) {
-            // On garde l'objet de la liste en cas d'erreur réseau
+        if (detailRes.status === 'fulfilled') {
+            authStore.currentWorkspace = detailRes.value.data.data ?? detailRes.value.data;
         }
 
         // Broadcast change to all listeners

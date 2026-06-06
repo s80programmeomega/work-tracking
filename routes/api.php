@@ -48,6 +48,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/refresh', [AuthController::class, 'refresh']);
 
     // Google OAuth — le redirect renvoie vers Google, le callback revient ici
     Route::get('/google/redirect', [SocialAuthController::class, 'redirectToGoogle'])->name('auth.google.redirect');
@@ -85,7 +86,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/me', [AuthController::class, 'me']);
-        Route::post('/refresh', [AuthController::class, 'refresh']);
         Route::post('/verify-email', [AuthController::class, 'verifyEmail']);
         Route::put('/language', [AuthController::class, 'updateLanguage']);
         // Activation/désactivation de l'OTP email comme facteur de secours

@@ -2,7 +2,9 @@
 
 use App\Models\Activite;
 use App\Models\Document;
+use App\Models\Notification;
 use App\Models\Projet;
+use App\Models\SousTache;
 use App\Models\Tache;
 use App\Models\TeamMessage;
 use App\Models\User;
@@ -308,6 +310,42 @@ return [
                     'default_sorting_field' => 'created_at',
                 ],
                 'search-parameters' => ['query_by' => 'content,user_nom,team_name'],
+            ],
+
+            SousTache::class => [
+                'collection-schema' => [
+                    'fields' => [
+                        ['name' => 'id', 'type' => 'string'],
+                        ['name' => 'titre', 'type' => 'string'],
+                        ['name' => 'description', 'type' => 'string', 'optional' => true],
+                        ['name' => 'statut', 'type' => 'string', 'optional' => true],
+                        ['name' => 'workspace_id', 'type' => 'int32'],
+                        ['name' => 'workspace_name', 'type' => 'string', 'optional' => true],
+                        ['name' => 'tache_id', 'type' => 'int32'],
+                        ['name' => 'tache_titre', 'type' => 'string', 'optional' => true],
+                        ['name' => 'projet_nom', 'type' => 'string', 'optional' => true],
+                        ['name' => 'created_at', 'type' => 'int64'],
+                    ],
+                    'default_sorting_field' => 'created_at',
+                ],
+                'search-parameters' => ['query_by' => 'titre,description,tache_titre'],
+            ],
+
+            Notification::class => [
+                'collection-schema' => [
+                    'fields' => [
+                        ['name' => 'id', 'type' => 'string'],
+                        ['name' => 'type', 'type' => 'string'],
+                        ['name' => 'event', 'type' => 'string', 'optional' => true],
+                        ['name' => 'content', 'type' => 'string', 'optional' => true],
+                        ['name' => 'notifiable_id', 'type' => 'int32'],
+                        ['name' => 'notifiable_type', 'type' => 'string'],
+                        ['name' => 'is_read', 'type' => 'bool'],
+                        ['name' => 'created_at', 'type' => 'int64'],
+                    ],
+                    'default_sorting_field' => 'created_at',
+                ],
+                'search-parameters' => ['query_by' => 'content,type,event'],
             ],
 
         ],

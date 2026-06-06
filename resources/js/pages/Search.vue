@@ -306,7 +306,7 @@ const isSuperAdmin = computed(() => authStore.isSuperAdmin)
 
 const queryInput = ref(route.query.q ?? '')
 const selectedWorkspaceId = ref('')
-const activeTypes = ref(['projets', 'activites', 'taches', 'documents', 'users', 'messages'])
+const activeTypes = ref(['projets', 'activites', 'taches', 'sous_taches', 'documents', 'users', 'messages', 'notifications'])
 const activeTab = ref('projets')
 const page = ref(1)
 const perPage = 10
@@ -316,12 +316,14 @@ const results = ref({})
 const totals = ref({})
 
 const allTypes = [
-  { key: 'projets', label: 'Projets', emoji: '📁' },
-  { key: 'activites', label: 'Activités', emoji: '🗂️' },
-  { key: 'taches', label: 'Tâches', emoji: '✅' },
-  { key: 'documents', label: 'Documents', emoji: '📄' },
-  { key: 'users', label: 'Membres', emoji: '👤' },
-  { key: 'messages', label: 'Messages', emoji: '💬' },
+  { key: 'projets',     label: t('search.type_projets'),     emoji: '📁' },
+  { key: 'activites',   label: t('search.type_activites'),   emoji: '🗂️' },
+  { key: 'taches',      label: t('search.type_taches'),      emoji: '✅' },
+  { key: 'sous_taches', label: t('search.type_sous_taches'), emoji: '📋' },
+  { key: 'documents',   label: t('search.type_documents'),   emoji: '📄' },
+  { key: 'users',         label: t('search.type_users'),         emoji: '👤' },
+  { key: 'messages',      label: t('search.type_messages'),      emoji: '💬' },
+  { key: 'notifications', label: t('search.type_notifications'), emoji: '🔔' },
 ]
 
 const tabs = computed(() => allTypes.filter((t) => activeTypes.value.includes(t.key)))
@@ -352,10 +354,13 @@ const doSearch = async () => {
   const q = queryInput.value.trim()
   if (q.length < 2) return
 
-  // Mettre à jour l'URL pour partageabilité
-  router.replace({ query: { q } })
-
-  await runSearch(q, 1)
+  // L'URL est la source de vérité : on met à jour ?q et le watch déclenche la recherche.
+  // Si le terme est identique, le routeur ne renavigue pas → on relance directement.
+  if ((route.query.q ?? '') === q) {
+    await runSearch(q, 1)
+  } else {
+    router.replace({ query: { q } })
+  }
 }
 
 const runSearch = async (q, p) => {
@@ -401,10 +406,30 @@ watch(activeTab, async () => {
   applyStagger()
 })
 
-// Lancer la recherche si q est dans l'URL au chargement
+// Réagir à tout changement du paramètre ?q dans l'URL — y compris quand on est déjà
+// sur /search et qu'on relance une recherche depuis la palette (le composant n'est
+// pas remonté, donc onMounted ne se déclenche pas). Sans ce watch, il fallait
+// recharger la page pour voir les nouveaux résultats.
+watch(
+  () => route.query.q,
+  (newQ) => {
+    const q = (newQ ?? '').toString().trim()
+    queryInput.value = newQ ?? ''
+    if (q.length >= 2) {
+      runSearch(q, 1)
+    } else {
+      results.value = {}
+      totals.value = {}
+      searched.value = false
+    }
+  }
+)
+
+// Lancer la recherche si q est déjà dans l'URL au montage initial
 onMounted(async () => {
   if (isSuperAdmin.value) await fetchWorkspaces()
-  if (queryInput.value.trim().length >= 2) await doSearch()
+  const q = queryInput.value.trim()
+  if (q.length >= 2) await runSearch(q, 1)
 })
 
 // ── Export ────────────────────────────────────────────────────────────────────
@@ -466,9 +491,11 @@ const typeBadgeClass = (type) => {
     projet: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
     activite: 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400',
     tache: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+    sous_tache: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
     document: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
     user: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
     message: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
+    notification: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
   }
   return map[type] ?? 'bg-gray-100 text-gray-600'
 }
@@ -478,9 +505,11 @@ const typeLabel = (type) => {
     projet: 'Projet',
     activite: 'Activité',
     tache: 'Tâche',
+    sous_tache: 'Sous-tâche',
     document: 'Document',
     user: 'Membre',
     message: 'Message',
+    notification: 'Notification',
   }
   return map[type] ?? type
 }

@@ -178,6 +178,245 @@ endpoints:
     custom: []
     httpMethods:
       - GET
+    uri: api/auth/google/redirect
+    metadata:
+      custom: []
+      groupName: Divers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: "Redirige vers la page d'autorisation Google."
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {VOTRE_TOKEN_SANCTUM}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 302
+        content: |-
+          <!DOCTYPE html>
+          <html>
+              <head>
+                  <meta charset="UTF-8" />
+                  <meta http-equiv="refresh" content="0;url='https://accounts.google.com/o/oauth2/auth?client_id=978026979086-8i7jf09i2c373o2gm1gel9elp1u6j8pt.apps.googleusercontent.com&amp;redirect_uri=http%3A%2F%2Flocalhost%3A8000%2Fapi%2Fauth%2Fgoogle%2Fcallback&amp;scope=openid+profile+email&amp;response_type=code'" />
+
+                  <title>Redirecting to https://accounts.google.com/o/oauth2/auth?client_id=978026979086-8i7jf09i2c373o2gm1gel9elp1u6j8pt.apps.googleusercontent.com&amp;redirect_uri=http%3A%2F%2Flocalhost%3A8000%2Fapi%2Fauth%2Fgoogle%2Fcallback&amp;scope=openid+profile+email&amp;response_type=code</title>
+              </head>
+              <body>
+                  Redirecting to <a href="https://accounts.google.com/o/oauth2/auth?client_id=978026979086-8i7jf09i2c373o2gm1gel9elp1u6j8pt.apps.googleusercontent.com&amp;redirect_uri=http%3A%2F%2Flocalhost%3A8000%2Fapi%2Fauth%2Fgoogle%2Fcallback&amp;scope=openid+profile+email&amp;response_type=code">https://accounts.google.com/o/oauth2/auth?client_id=978026979086-8i7jf09i2c373o2gm1gel9elp1u6j8pt.apps.googleusercontent.com&amp;redirect_uri=http%3A%2F%2Flocalhost%3A8000%2Fapi%2Fauth%2Fgoogle%2Fcallback&amp;scope=openid+profile+email&amp;response_type=code</a>.
+              </body>
+          </html>
+        headers:
+          cache-control: 'no-cache, private'
+          location: 'https://accounts.google.com/o/oauth2/auth?client_id=978026979086-8i7jf09i2c373o2gm1gel9elp1u6j8pt.apps.googleusercontent.com&redirect_uri=http%3A%2F%2Flocalhost%3A8000%2Fapi%2Fauth%2Fgoogle%2Fcallback&scope=openid+profile+email&response_type=code'
+          content-type: 'text/html; charset=utf-8'
+          x-ratelimit-limit: '60'
+          x-ratelimit-remaining: '55'
+          vary: Origin
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/auth/google/callback
+    metadata:
+      custom: []
+      groupName: Divers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: "Traite le callback Google après autorisation de l'utilisateur."
+      description: 'Crée ou lie le compte, émet un token Sanctum, redirige le SPA.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {VOTRE_TOKEN_SANCTUM}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 302
+        content: |-
+          <!DOCTYPE html>
+          <html>
+              <head>
+                  <meta charset="UTF-8" />
+                  <meta http-equiv="refresh" content="0;url='http://127.0.0.1:8000/signin?error=social_auth_failed'" />
+
+                  <title>Redirecting to http://127.0.0.1:8000/signin?error=social_auth_failed</title>
+              </head>
+              <body>
+                  Redirecting to <a href="http://127.0.0.1:8000/signin?error=social_auth_failed">http://127.0.0.1:8000/signin?error=social_auth_failed</a>.
+              </body>
+          </html>
+        headers:
+          cache-control: 'no-cache, private'
+          location: 'http://127.0.0.1:8000/signin?error=social_auth_failed'
+          content-type: 'text/html; charset=utf-8'
+          x-ratelimit-limit: '60'
+          x-ratelimit-remaining: '54'
+          vary: Origin
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/auth/two-factor-challenge
+    metadata:
+      custom: []
+      groupName: Divers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Vérifie le code TOTP ou email-OTP lors du challenge MFA post-login.'
+      description: 'Retourne le token Sanctum définitif si le code est valide.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {VOTRE_TOKEN_SANCTUM}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      challenge_token:
+        custom: []
+        name: challenge_token
+        description: ''
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      code:
+        custom: []
+        name: code
+        description: ''
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      type:
+        custom: []
+        name: type
+        description: ''
+        required: true
+        example: totp
+        type: string
+        enumValues:
+          - totp
+          - recovery
+          - email
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      challenge_token: architecto
+      code: architecto
+      type: totp
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/auth/two-factor-email-send
+    metadata:
+      custom: []
+      groupName: Divers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Envoie un code OTP par email pour le challenge MFA.'
+      description: 'Soumis avec le challenge_token provisoire.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {VOTRE_TOKEN_SANCTUM}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      challenge_token:
+        custom: []
+        name: challenge_token
+        description: ''
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      challenge_token: architecto
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
     uri: api/workspace-invitations/all
     metadata:
       custom: []
@@ -309,7 +548,7 @@ endpoints:
           cache-control: 'no-cache, private'
           content-type: application/json
           x-ratelimit-limit: '60'
-          x-ratelimit-remaining: '59'
+          x-ratelimit-remaining: '53'
           vary: Origin
         description: null
     responseFields: []
@@ -414,7 +653,7 @@ endpoints:
           cache-control: 'no-cache, private'
           content-type: application/json
           x-ratelimit-limit: '60'
-          x-ratelimit-remaining: '58'
+          x-ratelimit-remaining: '52'
           vary: Origin
         description: null
     responseFields: []
@@ -662,6 +901,619 @@ endpoints:
       language: en
     fileParameters: []
     responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/auth/email-otp-toggle
+    metadata:
+      custom: []
+      groupName: Divers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: "Active ou désactive l'OTP email comme second facteur pour l'utilisateur connecté."
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {VOTRE_TOKEN_SANCTUM}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      enabled:
+        custom: []
+        name: enabled
+        description: ''
+        required: true
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      enabled: true
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/user/two-factor-authentication
+    metadata:
+      custom: []
+      groupName: Divers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: "Active la 2FA TOTP pour l'utilisateur connecté."
+      description: 'Retourne le QR code SVG et la clé secrète pour la saisie manuelle.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {VOTRE_TOKEN_SANCTUM}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/user/confirmed-two-factor-authentication
+    metadata:
+      custom: []
+      groupName: Divers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Confirme la 2FA avec un code TOTP valide.'
+      description: 'Après confirmation, le facteur est considéré comme actif.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {VOTRE_TOKEN_SANCTUM}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      code:
+        custom: []
+        name: code
+        description: ''
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      code: architecto
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: api/user/two-factor-authentication
+    metadata:
+      custom: []
+      groupName: Divers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: "Désactive la 2FA pour l'utilisateur connecté."
+      description: |-
+        Efface le secret, les codes de récupération et la confirmation.
+        Désactive aussi l'OTP email car il requiert le TOTP actif.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {VOTRE_TOKEN_SANCTUM}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/user/two-factor-qr-code
+    metadata:
+      custom: []
+      groupName: Divers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: "Retourne le QR code SVG de l'utilisateur (doit avoir activé la 2FA)."
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {VOTRE_TOKEN_SANCTUM}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated.","error":"Non authentifi\u00e9"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: Origin
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/user/two-factor-secret-key
+    metadata:
+      custom: []
+      groupName: Divers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: "Retourne la clé secrète TOTP déchiffrée (pour saisie manuelle dans l'appli)."
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {VOTRE_TOKEN_SANCTUM}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated.","error":"Non authentifi\u00e9"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: Origin
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/user/two-factor-recovery-codes
+    metadata:
+      custom: []
+      groupName: Divers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: "Retourne les codes de récupération actuels de l'utilisateur."
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {VOTRE_TOKEN_SANCTUM}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated.","error":"Non authentifi\u00e9"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: Origin
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/user/two-factor-recovery-codes
+    metadata:
+      custom: []
+      groupName: Divers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Génère de nouveaux codes de récupération (invalide les anciens).'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {VOTRE_TOKEN_SANCTUM}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/support
+    metadata:
+      custom: []
+      groupName: Divers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Soumet un nouveau ticket de support.'
+      description: 'Calcule le délai SLA selon la catégorie et notifie les super-admins.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {VOTRE_TOKEN_SANCTUM}'
+      Content-Type: multipart/form-data
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      category:
+        custom: []
+        name: category
+        description: ''
+        required: true
+        example: bug
+        type: string
+        enumValues:
+          - bug
+          - feature
+          - billing
+          - account
+          - other
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      subject:
+        custom: []
+        name: subject
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: 'n'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      message:
+        custom: []
+        name: message
+        description: 'Must not be greater than 5000 characters.'
+        required: true
+        example: g
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      reproducibility:
+        custom: []
+        name: reproducibility
+        description: ''
+        required: false
+        example: always
+        type: string
+        enumValues:
+          - always
+          - sometimes
+          - rarely
+          - not_reproducible
+          - na
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      steps_to_reproduce:
+        custom: []
+        name: steps_to_reproduce
+        description: 'Must not be greater than 5000 characters.'
+        required: false
+        example: m
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      attachments:
+        custom: []
+        name: attachments
+        description: 'Must be a file. Must not be greater than 5120 kilobytes.'
+        required: false
+        example:
+          - null
+        type: 'file[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      category: bug
+      subject: 'n'
+      message: g
+      reproducibility: always
+      steps_to_reproduce: m
+    fileParameters:
+      attachments:
+        - null
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/support
+    metadata:
+      custom: []
+      groupName: Divers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: "Liste les tickets de l'utilisateur connecté avec réponses et pièces jointes."
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {VOTRE_TOKEN_SANCTUM}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated.","error":"Non authentifi\u00e9"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: Origin
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/support/{ticket_id}/attachments'
+    metadata:
+      custom: []
+      groupName: Divers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: "Ajoute des pièces jointes à un ticket existant (accessible à l'auteur et aux admins)."
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {VOTRE_TOKEN_SANCTUM}'
+      Content-Type: multipart/form-data
+      Accept: application/json
+    urlParameters:
+      ticket_id:
+        custom: []
+        name: ticket_id
+        description: 'The ID of the ticket.'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      ticket_id: 16
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      attachments:
+        custom: []
+        name: attachments
+        description: 'Must be a file. Must not be greater than 5120 kilobytes.'
+        required: false
+        example:
+          - null
+        type: 'file[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters: []
+    fileParameters:
+      attachments:
+        - null
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/support/attachments/{attachment_id}/download'
+    metadata:
+      custom: []
+      groupName: Divers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Télécharge une pièce jointe (auteur ou super-admin).'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {VOTRE_TOKEN_SANCTUM}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      attachment_id:
+        custom: []
+        name: attachment_id
+        description: 'The ID of the attachment.'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      attachment_id: 16
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated.","error":"Non authentifi\u00e9"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: Origin
+        description: null
     responseFields: []
     auth:
       - headers
@@ -1133,6 +1985,680 @@ endpoints:
     cleanBodyParameters:
       permissions:
         - architecto
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/admin/support
+    metadata:
+      custom: []
+      groupName: Divers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Liste tous les tickets — super-admin seulement.'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {VOTRE_TOKEN_SANCTUM}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated.","error":"Non authentifi\u00e9"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: Origin
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/admin/support/{ticket_id}/reply'
+    metadata:
+      custom: []
+      groupName: Divers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Ajoute une réponse admin à un ticket et met à jour son statut (obligatoire).'
+      description: |-
+        Enregistre first_responded_at si c'est la première réponse admin.
+        Enregistre resolved_at si le statut passe à 'resolved'.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {VOTRE_TOKEN_SANCTUM}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      ticket_id:
+        custom: []
+        name: ticket_id
+        description: 'The ID of the ticket.'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      ticket_id: 16
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      body:
+        custom: []
+        name: body
+        description: 'Must not be greater than 5000 characters.'
+        required: true
+        example: b
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      status:
+        custom: []
+        name: status
+        description: ''
+        required: true
+        example: open
+        type: string
+        enumValues:
+          - open
+          - in_progress
+          - resolved
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      body: b
+      status: open
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/admin/activity-log
+    metadata:
+      custom: []
+      groupName: Divers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: "Journal d'activité cross-app pour le super-admin."
+      description: 'Filtre par auteur, type de sujet, événement, plage de dates et texte libre.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {VOTRE_TOKEN_SANCTUM}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      search:
+        custom: []
+        name: search
+        description: 'Must not be greater than 255 characters.'
+        required: false
+        example: b
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      causer_id:
+        custom: []
+        name: causer_id
+        description: 'The <code>id</code> of an existing record in the users table.'
+        required: false
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      subject_type:
+        custom: []
+        name: subject_type
+        description: ''
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      event:
+        custom: []
+        name: event
+        description: ''
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      date_from:
+        custom: []
+        name: date_from
+        description: 'Must be a valid date.'
+        required: false
+        example: '2026-06-04T19:42:34'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      date_to:
+        custom: []
+        name: date_to
+        description: 'Must be a valid date. Must be a date after or equal to <code>date_from</code>.'
+        required: false
+        example: '2052-06-27'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      per_page:
+        custom: []
+        name: per_page
+        description: 'Must be at least 1. Must not be greater than 100.'
+        required: false
+        example: 22
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      search: b
+      causer_id: 16
+      subject_type: architecto
+      event: architecto
+      date_from: '2026-06-04T19:42:34'
+      date_to: '2052-06-27'
+      per_page: 22
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated.","error":"Non authentifi\u00e9"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: Origin
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/admin/validation-audit-log
+    metadata:
+      custom: []
+      groupName: Divers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: "Journal d'audit de validation cross-app pour le super-admin."
+      description: 'Filtre par auteur, action, plage de dates.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {VOTRE_TOKEN_SANCTUM}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      actor_id:
+        custom: []
+        name: actor_id
+        description: 'The <code>id</code> of an existing record in the users table.'
+        required: false
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      action:
+        custom: []
+        name: action
+        description: ''
+        required: false
+        example: bypass
+        type: string
+        enumValues:
+          - approuve
+          - renvoye
+          - timeout
+          - bypass
+          - n1_valide
+          - n1_rejete
+          - n2_valide
+          - n2_rejete
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      date_from:
+        custom: []
+        name: date_from
+        description: 'Must be a valid date.'
+        required: false
+        example: '2026-06-04T19:42:34'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      date_to:
+        custom: []
+        name: date_to
+        description: 'Must be a valid date. Must be a date after or equal to <code>date_from</code>.'
+        required: false
+        example: '2052-06-27'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      per_page:
+        custom: []
+        name: per_page
+        description: 'Must be at least 1. Must not be greater than 100.'
+        required: false
+        example: 22
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      actor_id: 16
+      action: bypass
+      date_from: '2026-06-04T19:42:34'
+      date_to: '2052-06-27'
+      per_page: 22
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated.","error":"Non authentifi\u00e9"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: Origin
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/search
+    metadata:
+      custom: []
+      groupName: Divers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Recherche multi-modèle dans le workspace courant (ou global pour super-admin).'
+      description: |-
+        Endpoint : GET /api/search?q=&types[]=&workspace_id=&page=&per_page=
+
+        Paramètres :
+         - q           : terme de recherche (min 2 chars)
+         - types[]     : filtre par type (projets, activites, taches, documents, users, messages)
+         - workspace_id: workspace cible (ignoré pour super-admin — scope global)
+         - page        : page courante (défaut 1)
+         - per_page    : résultats par type par page (défaut 10, max 50)
+
+        Autorisation :
+         - super_admin : scope global, tous les workspaces
+         - owner/manager : scope limité au workspace cible + vérification membership
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {VOTRE_TOKEN_SANCTUM}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      q:
+        custom: []
+        name: q
+        description: 'Must be at least 2 characters. Must not be greater than 255 characters.'
+        required: true
+        example: b
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      types:
+        custom: []
+        name: types
+        description: ''
+        required: false
+        example:
+          - documents
+        type: 'string[]'
+        enumValues:
+          - projets
+          - activites
+          - taches
+          - sous_taches
+          - documents
+          - users
+          - messages
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      workspace_id:
+        custom: []
+        name: workspace_id
+        description: 'The <code>id</code> of an existing record in the workspaces table.'
+        required: false
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      page:
+        custom: []
+        name: page
+        description: 'Must be at least 1.'
+        required: false
+        example: 22
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      per_page:
+        custom: []
+        name: per_page
+        description: 'Must be at least 1. Must not be greater than 50.'
+        required: false
+        example: 7
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      q: b
+      types:
+        - documents
+      workspace_id: 16
+      page: 22
+      per_page: 7
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated.","error":"Non authentifi\u00e9"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: Origin
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/search/export
+    metadata:
+      custom: []
+      groupName: Divers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: "Export global : relance la recherche sans limite (jusqu'au plafond choisi)."
+      description: |-
+        GET /api/search/export?q=&types[]=&workspace_id=&cap=500|1000|2000|all
+
+        Si cap=all, le job est mis en file d'attente et un email est envoyé.
+        Sinon, le fichier Excel est téléchargé directement.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {VOTRE_TOKEN_SANCTUM}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      q:
+        custom: []
+        name: q
+        description: 'Must be at least 2 characters. Must not be greater than 255 characters.'
+        required: true
+        example: b
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      types:
+        custom: []
+        name: types
+        description: ''
+        required: false
+        example:
+          - documents
+        type: 'string[]'
+        enumValues:
+          - projets
+          - activites
+          - taches
+          - sous_taches
+          - documents
+          - users
+          - messages
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      workspace_id:
+        custom: []
+        name: workspace_id
+        description: 'The <code>id</code> of an existing record in the workspaces table.'
+        required: false
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      cap:
+        custom: []
+        name: cap
+        description: ''
+        required: false
+        example: all
+        type: string
+        enumValues:
+          - '500'
+          - '1000'
+          - '2000'
+          - all
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      q: b
+      types:
+        - documents
+      workspace_id: 16
+      cap: all
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated.","error":"Non authentifi\u00e9"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: Origin
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/search/export
+    metadata:
+      custom: []
+      groupName: Divers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: "Export sélectif : exporte une liste d'IDs fournis par le frontend."
+      description: "POST /api/search/export  {ids: [...], type: 'taches', cap: '500'}"
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {VOTRE_TOKEN_SANCTUM}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      ids:
+        custom: []
+        name: ids
+        description: ''
+        required: false
+        example:
+          - 16
+        type: 'integer[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      type:
+        custom: []
+        name: type
+        description: ''
+        required: true
+        example: documents
+        type: string
+        enumValues:
+          - projets
+          - activites
+          - taches
+          - sous_taches
+          - documents
+          - users
+          - messages
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      q:
+        custom: []
+        name: q
+        description: ''
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      ids:
+        - 16
+      type: documents
+      q: architecto
     fileParameters: []
     responses: []
     responseFields: []
@@ -2986,7 +4512,7 @@ endpoints:
         name: trial_started_at
         description: 'Must be a valid date.'
         required: false
-        example: '2026-06-01T00:06:16'
+        example: '2026-06-04T19:42:35'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -2995,7 +4521,7 @@ endpoints:
     cleanBodyParameters:
       subscription_mode: trial
       trial_duration_days: 22
-      trial_started_at: '2026-06-01T00:06:16'
+      trial_started_at: '2026-06-04T19:42:35'
     fileParameters: []
     responses: []
     responseFields: []
@@ -3711,7 +5237,7 @@ endpoints:
         name: date_debut
         description: 'Must be a valid date.'
         required: true
-        example: '2026-06-01T00:06:17'
+        example: '2026-06-04T19:42:36'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -3722,7 +5248,7 @@ endpoints:
         name: date_fin
         description: 'Must be a valid date. Must be a date after <code>date_debut</code>.'
         required: true
-        example: '2052-06-24'
+        example: '2052-06-27'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -3919,8 +5445,8 @@ endpoints:
       nom: 'n'
       code: g
       description: 'Eius et animi quos velit et.'
-      date_debut: '2026-06-01T00:06:17'
-      date_fin: '2052-06-24'
+      date_debut: '2026-06-04T19:42:36'
+      date_fin: '2052-06-27'
       responsable_id: architecto
       status: archived
       visibility: public
@@ -4241,7 +5767,7 @@ endpoints:
         name: date_debut
         description: 'Must be a valid date.'
         required: false
-        example: '2026-06-01T00:06:17'
+        example: '2026-06-04T19:42:36'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -4252,7 +5778,7 @@ endpoints:
         name: date_fin
         description: 'Must be a valid date. Must be a date after <code>date_debut</code>.'
         required: false
-        example: '2052-06-24'
+        example: '2052-06-27'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -4282,8 +5808,8 @@ endpoints:
         deprecated: false
     cleanBodyParameters:
       nom: b
-      date_debut: '2026-06-01T00:06:17'
-      date_fin: '2052-06-24'
+      date_debut: '2026-06-04T19:42:36'
+      date_fin: '2052-06-27'
     fileParameters: []
     responses: []
     responseFields: []
@@ -5300,7 +6826,7 @@ endpoints:
         name: start_date
         description: 'Must be a valid date.'
         required: false
-        example: '2026-06-01T00:06:18'
+        example: '2026-06-04T19:42:36'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -5311,15 +6837,15 @@ endpoints:
         name: end_date
         description: 'Must be a valid date. Must be a date after or equal to <code>start_date</code>.'
         required: false
-        example: '2052-06-24'
+        example: '2052-06-27'
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: true
         deprecated: false
     cleanBodyParameters:
-      start_date: '2026-06-01T00:06:18'
-      end_date: '2052-06-24'
+      start_date: '2026-06-04T19:42:36'
+      end_date: '2052-06-27'
     fileParameters: []
     responses:
       -
@@ -5943,7 +7469,7 @@ endpoints:
         name: date_debut
         description: 'Must be a valid date.'
         required: false
-        example: '2026-06-01T00:06:18'
+        example: '2026-06-04T19:42:36'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -5954,7 +7480,7 @@ endpoints:
         name: date_fin
         description: 'Must be a valid date. Must be a date after or equal to <code>date_debut</code>.'
         required: false
-        example: '2052-06-24'
+        example: '2052-06-27'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -6113,8 +7639,8 @@ endpoints:
       nom: 'n'
       description: 'Eius et animi quos velit et.'
       responsable_id: architecto
-      date_debut: '2026-06-01T00:06:18'
-      date_fin: '2052-06-24'
+      date_debut: '2026-06-04T19:42:36'
+      date_fin: '2052-06-27'
       status: archived
       progression: 7
       couleur: '#fEEeDb'
@@ -6268,7 +7794,7 @@ endpoints:
         name: date_debut
         description: 'Must be a valid date.'
         required: false
-        example: '2026-06-01T00:06:18'
+        example: '2026-06-04T19:42:36'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -6279,7 +7805,7 @@ endpoints:
         name: date_fin
         description: 'Must be a valid date. Must be a date after or equal to <code>date_debut</code>.'
         required: false
-        example: '2052-06-24'
+        example: '2052-06-27'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -6334,8 +7860,8 @@ endpoints:
     cleanBodyParameters:
       nom: b
       description: 'Eius et animi quos velit et.'
-      date_debut: '2026-06-01T00:06:18'
-      date_fin: '2052-06-24'
+      date_debut: '2026-06-04T19:42:36'
+      date_fin: '2052-06-27'
       status: archived
       progression: 7
       couleur: '#fEEeDb'
@@ -7427,7 +8953,7 @@ endpoints:
         name: echeance
         description: '✅ Dates avec format flexible. Must be a valid date in the format <code>Y-m-d</code>.'
         required: false
-        example: '2026-06-01'
+        example: '2026-06-04'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -7438,7 +8964,7 @@ endpoints:
         name: date_debut
         description: 'Must be a valid date in the format <code>Y-m-d</code>.'
         required: false
-        example: '2026-06-01'
+        example: '2026-06-04'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -7449,7 +8975,7 @@ endpoints:
         name: date_fin_reelle
         description: 'Must be a valid date in the format <code>Y-m-d</code>.'
         required: false
-        example: '2026-06-01'
+        example: '2026-06-04'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -7610,9 +9136,9 @@ endpoints:
       indicateurs_resultats: architecto
       statut: a_faire
       priorite: elevee
-      echeance: '2026-06-01'
-      date_debut: '2026-06-01'
-      date_fin_reelle: '2026-06-01'
+      echeance: '2026-06-04'
+      date_debut: '2026-06-04'
+      date_fin_reelle: '2026-06-04'
       estimated_hours: 16
       actual_hours: 17
       taux_realisation: 15
@@ -8522,7 +10048,7 @@ endpoints:
         name: echeance
         description: 'Dates. Must be a valid date in the format <code>Y-m-d</code>.'
         required: false
-        example: '2026-06-01'
+        example: '2026-06-04'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -8533,7 +10059,7 @@ endpoints:
         name: date_debut
         description: 'Must be a valid date in the format <code>Y-m-d</code>.'
         required: false
-        example: '2026-06-01'
+        example: '2026-06-04'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -8544,7 +10070,7 @@ endpoints:
         name: date_fin_reelle
         description: 'Must be a valid date in the format <code>Y-m-d</code>.'
         required: false
-        example: '2026-06-01'
+        example: '2026-06-04'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -8715,9 +10241,9 @@ endpoints:
       indicateurs_resultats: architecto
       statut: en_cours
       priorite: elevee
-      echeance: '2026-06-01'
-      date_debut: '2026-06-01'
-      date_fin_reelle: '2026-06-01'
+      echeance: '2026-06-04'
+      date_debut: '2026-06-04'
+      date_fin_reelle: '2026-06-04'
       taux_realisation: 16
       estimated_hours: 17
       actual_hours: 15
@@ -8856,7 +10382,7 @@ endpoints:
         name: echeance
         description: 'Dates. Must be a valid date in the format <code>Y-m-d</code>.'
         required: false
-        example: '2026-06-01'
+        example: '2026-06-04'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -8867,7 +10393,7 @@ endpoints:
         name: date_debut
         description: 'Must be a valid date in the format <code>Y-m-d</code>.'
         required: false
-        example: '2026-06-01'
+        example: '2026-06-04'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -8878,7 +10404,7 @@ endpoints:
         name: date_fin_reelle
         description: 'Must be a valid date in the format <code>Y-m-d</code>.'
         required: false
-        example: '2026-06-01'
+        example: '2026-06-04'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -9049,9 +10575,9 @@ endpoints:
       indicateurs_resultats: architecto
       statut: en_cours
       priorite: elevee
-      echeance: '2026-06-01'
-      date_debut: '2026-06-01'
-      date_fin_reelle: '2026-06-01'
+      echeance: '2026-06-04'
+      date_debut: '2026-06-04'
+      date_fin_reelle: '2026-06-04'
       taux_realisation: 16
       estimated_hours: 17
       actual_hours: 15
@@ -9635,7 +11161,7 @@ endpoints:
         name: date_echeance
         description: 'Must be a valid date.'
         required: false
-        example: '2026-06-01T00:06:20'
+        example: '2026-06-04T19:42:37'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -9699,7 +11225,7 @@ endpoints:
     cleanBodyParameters:
       titre: b
       description: 'Eius et animi quos velit et.'
-      date_echeance: '2026-06-01T00:06:20'
+      date_echeance: '2026-06-04T19:42:37'
       poids: 1
       ordre: 42
       validation_n0_required: false
@@ -10191,7 +11717,7 @@ endpoints:
         name: date_echeance
         description: 'Must be a valid date.'
         required: false
-        example: '2026-06-01T00:06:20'
+        example: '2026-06-04T19:42:37'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -10257,7 +11783,7 @@ endpoints:
       description: 'Eius et animi quos velit et.'
       statut: termine
       progression: 1
-      date_echeance: '2026-06-01T00:06:20'
+      date_echeance: '2026-06-04T19:42:37'
       poids: 5
       ordre: 9
       validation_n0_required: false
@@ -12344,7 +13870,7 @@ endpoints:
         name: start
         description: 'Must be a valid date in the format <code>Y-m-d</code>.'
         required: false
-        example: '2026-06-01'
+        example: '2026-06-04'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -12355,15 +13881,15 @@ endpoints:
         name: end
         description: 'Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start</code>.'
         required: false
-        example: '2052-06-24'
+        example: '2052-06-27'
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: true
         deprecated: false
     cleanBodyParameters:
-      start: '2026-06-01'
-      end: '2052-06-24'
+      start: '2026-06-04'
+      end: '2052-06-27'
     fileParameters: []
     responses:
       -
@@ -12450,7 +13976,7 @@ endpoints:
         name: start
         description: 'Must be a valid date in the format <code>Y-m-d</code>.'
         required: false
-        example: '2026-06-01'
+        example: '2026-06-04'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -12461,7 +13987,7 @@ endpoints:
         name: end
         description: 'Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start</code>.'
         required: false
-        example: '2052-06-24'
+        example: '2052-06-27'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -12513,8 +14039,8 @@ endpoints:
         deprecated: false
     cleanBodyParameters:
       section: directed_tasks
-      start: '2026-06-01'
-      end: '2052-06-24'
+      start: '2026-06-04'
+      end: '2052-06-27'
       statut: architecto
       projet_id: 16
       activite_id: 16
@@ -12581,7 +14107,7 @@ endpoints:
         name: start
         description: 'Must be a valid date in the format <code>Y-m-d</code>.'
         required: false
-        example: '2026-06-01'
+        example: '2026-06-04'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -12592,15 +14118,15 @@ endpoints:
         name: end
         description: 'Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start</code>.'
         required: false
-        example: '2052-06-24'
+        example: '2052-06-27'
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: true
         deprecated: false
     cleanBodyParameters:
-      start: '2026-06-01'
-      end: '2052-06-24'
+      start: '2026-06-04'
+      end: '2052-06-27'
     fileParameters: []
     responses:
       -
@@ -14371,7 +15897,7 @@ endpoints:
         name: expires_at
         description: 'Must be a valid date. Must be a date after <code>today</code>. Must be a date before <code>+5 years</code>.'
         required: false
-        example: '2022-06-25'
+        example: '2022-06-29'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -14384,7 +15910,7 @@ endpoints:
       can_edit: false
       can_delete: true
       can_share: true
-      expires_at: '2022-06-25'
+      expires_at: '2022-06-29'
     fileParameters: []
     responses: []
     responseFields: []
@@ -14572,7 +16098,7 @@ endpoints:
         name: expires_at
         description: 'Must be a valid date. Must be a date after <code>now</code>.'
         required: false
-        example: '2052-06-24'
+        example: '2052-06-28'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -14585,7 +16111,7 @@ endpoints:
         can_edit: false
         can_delete: true
         can_share: false
-      expires_at: '2052-06-24'
+      expires_at: '2052-06-28'
     fileParameters: []
     responses: []
     responseFields: []
@@ -18213,7 +19739,7 @@ endpoints:
         name: start_date
         description: 'Must be a valid date.'
         required: true
-        example: '2026-06-01T00:06:24'
+        example: '2026-06-04T19:42:40'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -18224,7 +19750,7 @@ endpoints:
         name: end_date
         description: 'Must be a valid date. Must be a date after or equal to <code>start_date</code>.'
         required: true
-        example: '2052-06-24'
+        example: '2052-06-27'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -18242,8 +19768,8 @@ endpoints:
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      start_date: '2026-06-01T00:06:24'
-      end_date: '2052-06-24'
+      start_date: '2026-06-04T19:42:40'
+      end_date: '2052-06-27'
       per_page: 22
     fileParameters: []
     responses:
@@ -18293,7 +19819,7 @@ endpoints:
         name: start_date
         description: 'Must be a valid date.'
         required: true
-        example: '2026-06-01T00:06:24'
+        example: '2026-06-04T19:42:40'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -18304,15 +19830,15 @@ endpoints:
         name: end_date
         description: 'Must be a valid date. Must be a date after or equal to <code>start_date</code>.'
         required: true
-        example: '2052-06-24'
+        example: '2052-06-27'
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      start_date: '2026-06-01T00:06:24'
-      end_date: '2052-06-24'
+      start_date: '2026-06-04T19:42:40'
+      end_date: '2052-06-27'
     fileParameters: []
     responses:
       -
@@ -19056,7 +20582,7 @@ endpoints:
         name: digest_time
         description: 'Must be a valid date in the format <code>H:i:s</code>.'
         required: false
-        example: '00:06:25'
+        example: '19:42:40'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -19089,7 +20615,7 @@ endpoints:
         name: quiet_hours_start
         description: 'Must be a valid date in the format <code>H:i:s</code>.'
         required: false
-        example: '00:06:25'
+        example: '19:42:40'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -19100,7 +20626,7 @@ endpoints:
         name: quiet_hours_end
         description: 'Must be a valid date in the format <code>H:i:s</code>.'
         required: false
-        example: '00:06:25'
+        example: '19:42:40'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -19135,11 +20661,11 @@ endpoints:
       document_uploaded_email: true
       document_uploaded_push: false
       digest_frequency: none
-      digest_time: '00:06:25'
+      digest_time: '19:42:40'
       digest_day_of_week: 1
       quiet_hours_enabled: true
-      quiet_hours_start: '00:06:25'
-      quiet_hours_end: '00:06:25'
+      quiet_hours_start: '19:42:40'
+      quiet_hours_end: '19:42:40'
     fileParameters: []
     responses: []
     responseFields: []
@@ -19451,6 +20977,50 @@ endpoints:
       subgroup: ''
       subgroupDescription: ''
       title: 'Get teams for authenticated user'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {VOTRE_TOKEN_SANCTUM}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated.","error":"Non authentifi\u00e9"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: Origin
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/teams/unread-total
+    metadata:
+      custom: []
+      groupName: Divers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: "Retourne le nombre total de messages non lus dans toutes les équipes de l'utilisateur."
       description: ''
       authenticated: true
       deprecated: false
@@ -20111,7 +21681,7 @@ endpoints:
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 'Update user presence in team'
+      title: ''
       description: ''
       authenticated: true
       deprecated: false
@@ -20560,8 +22130,208 @@ endpoints:
   -
     custom: []
     httpMethods:
+      - GET
+    uri: 'api/teams/{uuid}/messages/pinned'
+    metadata:
+      custom: []
+      groupName: Divers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {VOTRE_TOKEN_SANCTUM}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      uuid:
+        custom: []
+        name: uuid
+        description: ''
+        required: true
+        example: 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      uuid: 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated.","error":"Non authentifi\u00e9"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: Origin
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
       - POST
     uri: 'api/teams/{uuid}/messages'
+    metadata:
+      custom: []
+      groupName: Divers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {VOTRE_TOKEN_SANCTUM}'
+      Content-Type: multipart/form-data
+      Accept: application/json
+    urlParameters:
+      uuid:
+        custom: []
+        name: uuid
+        description: ''
+        required: true
+        example: 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      uuid: 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      content:
+        custom: []
+        name: content
+        description: 'Must not be greater than 5000 characters.'
+        required: true
+        example: b
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      mentions:
+        custom: []
+        name: mentions
+        description: 'The <code>id</code> of an existing record in the users table.'
+        required: false
+        example:
+          - 16
+        type: 'integer[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      reply_to_id:
+        custom: []
+        name: reply_to_id
+        description: 'The <code>id</code> of an existing record in the team_messages table.'
+        required: false
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      attachment:
+        custom: []
+        name: attachment
+        description: 'Must be a file. Must not be greater than 10240 kilobytes.'
+        required: false
+        example: null
+        type: file
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      content: b
+      mentions:
+        - 16
+      reply_to_id: 16
+    fileParameters:
+      attachment: null
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/teams/{uuid}/read'
+    metadata:
+      custom: []
+      groupName: Divers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {VOTRE_TOKEN_SANCTUM}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      uuid:
+        custom: []
+        name: uuid
+        description: ''
+        required: true
+        example: 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      uuid: 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PATCH
+    uri: 'api/teams/messages/{uuid}'
     metadata:
       custom: []
       groupName: Divers
@@ -20596,38 +22366,63 @@ endpoints:
       content:
         custom: []
         name: content
-        description: ''
+        description: 'Must not be greater than 5000 characters.'
         required: true
-        example: architecto
+        example: b
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      mentions:
+    cleanBodyParameters:
+      content: b
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/teams/messages/{uuid}'
+    metadata:
+      custom: []
+      groupName: Divers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {VOTRE_TOKEN_SANCTUM}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      uuid:
         custom: []
-        name: mentions
+        name: uuid
         description: ''
-        required: false
-        example: null
-        type: object
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
-      reply_to_id:
-        custom: []
-        name: reply_to_id
-        description: 'The <code>id</code> of an existing record in the team_messages table.'
-        required: false
-        example: null
+        required: true
+        example: 6ff8f7f6-1eb3-3525-be4a-3932c805afed
         type: string
         enumValues: []
         exampleWasSpecified: false
-        nullable: true
+        nullable: false
         deprecated: false
-    cleanBodyParameters:
-      content: architecto
+    cleanUrlParameters:
+      uuid: 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
     fileParameters: []
     responses: []
     responseFields: []
@@ -20642,6 +22437,112 @@ endpoints:
     custom: []
     httpMethods:
       - POST
+    uri: 'api/teams/messages/{uuid}/pin'
+    metadata:
+      custom: []
+      groupName: Divers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {VOTRE_TOKEN_SANCTUM}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      uuid:
+        custom: []
+        name: uuid
+        description: ''
+        required: true
+        example: 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      uuid: 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/teams/messages/{uuid}/reactions'
+    metadata:
+      custom: []
+      groupName: Divers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {VOTRE_TOKEN_SANCTUM}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      uuid:
+        custom: []
+        name: uuid
+        description: ''
+        required: true
+        example: 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      uuid: 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      emoji:
+        custom: []
+        name: emoji
+        description: 'Must not be greater than 10 characters.'
+        required: true
+        example: bngzmi
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      emoji: bngzmi
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
     uri: 'api/teams/messages/{uuid}/reactions'
     metadata:
       custom: []
@@ -21457,7 +23358,7 @@ endpoints:
         name: start_date
         description: 'Must be a valid date.'
         required: true
-        example: '2026-06-01T00:06:25'
+        example: '2026-06-04T19:42:41'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -21468,7 +23369,7 @@ endpoints:
         name: end_date
         description: 'Must be a valid date. Must be a date after <code>start_date</code>.'
         required: false
-        example: '2052-06-24'
+        example: '2052-06-27'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -21500,8 +23401,8 @@ endpoints:
       title: b
       description: 'Eius et animi quos velit et.'
       type: deadline
-      start_date: '2026-06-01T00:06:25'
-      end_date: '2052-06-24'
+      start_date: '2026-06-04T19:42:41'
+      end_date: '2052-06-27'
       location: 'n'
     fileParameters: []
     responses: []
@@ -21671,7 +23572,7 @@ endpoints:
         name: start_date
         description: 'Must be a valid date.'
         required: false
-        example: '2026-06-01T00:06:25'
+        example: '2026-06-04T19:42:41'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -21682,7 +23583,7 @@ endpoints:
         name: end_date
         description: 'Must be a valid date. Must be a date after <code>start_date</code>.'
         required: false
-        example: '2052-06-24'
+        example: '2052-06-27'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -21714,8 +23615,8 @@ endpoints:
       title: b
       description: 'Eius et animi quos velit et.'
       type: deadline
-      start_date: '2026-06-01T00:06:25'
-      end_date: '2052-06-24'
+      start_date: '2026-06-04T19:42:41'
+      end_date: '2052-06-27'
       location: 'n'
     fileParameters: []
     responses: []

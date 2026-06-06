@@ -10,7 +10,9 @@ use App\Http\Controllers\Controller;
 use App\Jobs\SearchExportJob;
 use App\Models\Activite;
 use App\Models\Document;
+use App\Models\Notification;
 use App\Models\Projet;
+use App\Models\SousTache;
 use App\Models\Tache;
 use App\Models\TeamMessage;
 use App\Models\User;
@@ -19,6 +21,7 @@ use App\Permissions\ContextualPermissionGate;
 use App\Permissions\Permission;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Laravel\Scout\Builder;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -46,7 +49,7 @@ class SearchController extends Controller
         $request->validate([
             'q' => 'required|string|min:2|max:255',
             'types' => 'sometimes|array',
-            'types.*' => 'string|in:projets,activites,taches,documents,users,messages',
+            'types.*' => 'string|in:projets,activites,taches,sous_taches,documents,users,messages,notifications',
             'workspace_id' => 'sometimes|integer|exists:workspaces,id',
             'page' => 'sometimes|integer|min:1',
             'per_page' => 'sometimes|integer|min:1|max:50',
@@ -58,9 +61,14 @@ class SearchController extends Controller
         $page = $request->integer('page', 1);
         $isSuperAdmin = (bool) ($user->is_super_admin ?? false);
 
-        // Super-admin : portée globale, pas de filtre workspace
-        // Owner/manager : portée limitée au workspace cible
+        // ── Résolution du tier de recherche ──────────────────────────────────
+        // Tier 1 : super-admin → portée globale (tous workspaces)
+        // Tier 2 : owner/manager → portée workspace complète
+        // Tier 3 : cadre/collaborateur/stagiaire → ressources assignées uniquement
+        // Tier 4 : observateur/utilisateur → 403
         $workspace = null;
+        $tier = 'global'; // Tier 1 par défaut pour super-admin
+        $scopedIds = [];  // IDs accessibles pour Tier 3
 
         if (! $isSuperAdmin) {
             $workspaceId = $request->integer('workspace_id')
@@ -69,21 +77,26 @@ class SearchController extends Controller
             $workspace = Workspace::find($workspaceId);
             $gate = app(ContextualPermissionGate::class);
 
-            if (! $workspace || ! $gate->userCan($user, Permission::SEARCH_GLOBAL, $workspace)) {
+            if (! $workspace || ! $workspace->members()->where('user_id', $user->id)->exists()) {
                 return response()->json(['error' => 'Non autorisé'], 403);
             }
 
-            if (! $workspace->members()->where('user_id', $user->id)->exists()) {
+            if ($gate->userCan($user, Permission::SEARCH_GLOBAL, $workspace)) {
+                $tier = 'workspace'; // Tier 2 : owner/manager
+            } elseif ($gate->userCan($user, Permission::SEARCH_SCOPED, $workspace)) {
+                $tier = 'scoped';    // Tier 3 : cadre/collaborateur/stagiaire
+                $scopedIds = $this->resolveAccessibleIds($user->id, $workspace->id);
+            } else {
                 return response()->json(['error' => 'Non autorisé'], 403);
             }
         }
 
-        $types = $request->input('types', ['projets', 'activites', 'taches', 'documents', 'users', 'messages']);
+        $types = $request->input('types', ['projets', 'activites', 'taches', 'sous_taches', 'documents', 'users', 'messages', 'notifications']);
         $results = [];
         $totals = [];
 
         foreach ($types as $type) {
-            [$hits, $total] = $this->searchType($type, $query, $workspace, $isSuperAdmin, $page, $perPage);
+            [$hits, $total] = $this->searchType($type, $query, $workspace, $isSuperAdmin, $tier, $scopedIds, (int) $user->id, $page, $perPage);
             $results[$type] = $hits;
             $totals[$type] = $total;
         }
@@ -103,6 +116,7 @@ class SearchController extends Controller
     /**
      * Lance la recherche pour un type donné et retourne [hits[], total].
      *
+     * @param  array<string, array<int>>  $scopedIds  IDs accessibles par l'utilisateur (tier scoped uniquement)
      * @return array{0: array<int, array<string, mixed>>, 1: int}
      */
     private function searchType(
@@ -110,6 +124,9 @@ class SearchController extends Controller
         string $query,
         ?Workspace $workspace,
         bool $isSuperAdmin,
+        string $tier,
+        array $scopedIds,
+        int $userId,
         int $page,
         int $perPage,
     ): array {
@@ -119,14 +136,67 @@ class SearchController extends Controller
         $useRaw = config('scout.driver') === 'typesense';
 
         return match ($type) {
-            'projets' => $this->searchProjets($query, $workspace, $isSuperAdmin, $perPage, $offset, $useRaw),
-            'activites' => $this->searchActivites($query, $workspace, $isSuperAdmin, $perPage, $offset, $useRaw),
-            'taches' => $this->searchTaches($query, $workspace, $isSuperAdmin, $perPage, $offset, $useRaw),
-            'documents' => $this->searchDocuments($query, $workspace, $isSuperAdmin, $perPage, $offset, $useRaw),
-            'users' => $this->searchUsers($query, $workspace, $isSuperAdmin, $perPage, $offset),
-            'messages' => $this->searchMessages($query, $workspace, $isSuperAdmin, $perPage, $offset, $useRaw),
+            'projets' => $this->searchProjets($query, $workspace, $isSuperAdmin, $tier, $scopedIds, $perPage, $offset, $useRaw),
+            'activites' => $this->searchActivites($query, $workspace, $isSuperAdmin, $tier, $scopedIds, $perPage, $offset, $useRaw),
+            'taches' => $this->searchTaches($query, $workspace, $isSuperAdmin, $tier, $scopedIds, $perPage, $offset, $useRaw),
+            'sous_taches' => $this->searchSousTaches($query, $workspace, $isSuperAdmin, $tier, $scopedIds, $perPage, $offset, $useRaw),
+            'documents' => $this->searchDocuments($query, $workspace, $isSuperAdmin, $tier, $scopedIds, $perPage, $offset, $useRaw),
+            'users' => $this->searchUsers($query, $workspace, $isSuperAdmin, $tier, $scopedIds, $perPage, $offset),
+            'messages' => $this->searchMessages($query, $workspace, $isSuperAdmin, $tier, $scopedIds, $perPage, $offset, $useRaw),
+            'notifications' => $this->searchNotifications($query, $userId, $perPage, $offset, $useRaw),
             default => [[], 0],
         };
+    }
+
+    /**
+     * Résout les IDs de ressources accessibles pour un utilisateur en mode scoped (Tier 3).
+     * Utilisé pour filtrer les résultats après la recherche Scout.
+     *
+     * @return array<string, array<int>>
+     */
+    private function resolveAccessibleIds(int $userId, int $workspaceId): array
+    {
+        // Projets auxquels l'utilisateur est assigné dans ce workspace
+        $projetIds = DB::table('projet_user')
+            ->join('projets', 'projets.id', '=', 'projet_user.projet_id')
+            ->where('projet_user.user_id', $userId)
+            ->where('projets.workspace_id', $workspaceId)
+            ->pluck('projet_user.projet_id')
+            ->toArray();
+
+        // Tâches auxquelles l'utilisateur est assigné
+        $tacheIds = DB::table('tache_user')
+            ->join('taches', 'taches.id', '=', 'tache_user.tache_id')
+            ->join('activites', 'activites.id', '=', 'taches.activite_id')
+            ->join('projets', 'projets.id', '=', 'activites.projet_id')
+            ->where('tache_user.user_id', $userId)
+            ->where('projets.workspace_id', $workspaceId)
+            ->pluck('tache_user.tache_id')
+            ->toArray();
+
+        // Sous-tâches liées aux tâches accessibles
+        $sousTacheIds = $tacheIds
+            ? DB::table('sous_taches')
+                ->whereIn('tache_id', $tacheIds)
+                ->whereNull('deleted_at')
+                ->pluck('id')
+                ->toArray()
+            : [];
+
+        // Équipes dont l'utilisateur est membre dans ce workspace
+        $teamIds = DB::table('team_members')
+            ->join('teams', 'teams.id', '=', 'team_members.team_id')
+            ->where('team_members.user_id', $userId)
+            ->where('teams.workspace_id', $workspaceId)
+            ->pluck('team_members.team_id')
+            ->toArray();
+
+        return [
+            'projet_ids' => $projetIds,
+            'tache_ids' => $tacheIds,
+            'sous_tache_ids' => $sousTacheIds,
+            'team_ids' => $teamIds,
+        ];
     }
 
     // ── Recherches par type ───────────────────────────────────────────────────
@@ -136,14 +206,28 @@ class SearchController extends Controller
         string $query,
         ?Workspace $workspace,
         bool $isSuperAdmin,
+        string $tier,
+        array $scopedIds,
         int $perPage,
         int $offset,
         bool $useRaw,
     ): array {
         $builder = Projet::search($query);
 
-        if (! $isSuperAdmin && $workspace) {
-            $builder->query(fn ($q) => $q->where('workspace_id', $workspace->id));
+        // IMPORTANT : sous Typesense, le filtrage de portée DOIT se faire via les
+        // filtres natifs Scout (->where/->whereIn → filter_by) car ->raw() ignore
+        // les contraintes Eloquent ->query() (utilisées uniquement par le driver
+        // collection des tests). Sans cela, la portée workspace/tier fuit.
+        if ($tier === 'scoped') {
+            // Tier 3 : projets auxquels l'utilisateur est explicitement assigné
+            $ids = $scopedIds['projet_ids'] ?: [0];
+            $useRaw
+                ? $builder->whereIn('id', $ids)
+                : $builder->query(fn ($q) => $q->whereIn('id', $ids));
+        } elseif (! $isSuperAdmin && $workspace) {
+            $useRaw
+                ? $builder->where('workspace_id', $workspace->id)
+                : $builder->query(fn ($q) => $q->where('workspace_id', $workspace->id));
         }
 
         if ($useRaw) {
@@ -164,7 +248,7 @@ class SearchController extends Controller
                 'id' => $p->id,
                 'label' => $p->nom,
                 'excerpt' => $p->description ?? '',
-                'meta' => ['statut' => $p->statut ?? '', 'workspace_name' => $p->workspace?->nom ?? ''],
+                'meta' => ['statut' => $p->status ?? '', 'workspace_name' => $p->workspace?->nom ?? ''],
                 'url' => '/projets/'.$p->id,
             ]
         );
@@ -175,14 +259,24 @@ class SearchController extends Controller
         string $query,
         ?Workspace $workspace,
         bool $isSuperAdmin,
+        string $tier,
+        array $scopedIds,
         int $perPage,
         int $offset,
         bool $useRaw,
     ): array {
         $builder = Activite::search($query);
 
-        if (! $isSuperAdmin && $workspace) {
-            $builder->query(fn ($q) => $q->whereHas('projet', fn ($p) => $p->where('workspace_id', $workspace->id)));
+        if ($tier === 'scoped') {
+            // Tier 3 : activités appartenant aux projets accessibles
+            $ids = $scopedIds['projet_ids'] ?: [0];
+            $useRaw
+                ? $builder->whereIn('projet_id', $ids)
+                : $builder->query(fn ($q) => $q->whereIn('projet_id', $ids));
+        } elseif (! $isSuperAdmin && $workspace) {
+            $useRaw
+                ? $builder->where('workspace_id', $workspace->id)
+                : $builder->query(fn ($q) => $q->whereHas('projet', fn ($p) => $p->where('workspace_id', $workspace->id)));
         }
 
         if ($useRaw) {
@@ -214,14 +308,24 @@ class SearchController extends Controller
         string $query,
         ?Workspace $workspace,
         bool $isSuperAdmin,
+        string $tier,
+        array $scopedIds,
         int $perPage,
         int $offset,
         bool $useRaw,
     ): array {
         $builder = Tache::search($query);
 
-        if (! $isSuperAdmin && $workspace) {
-            $builder->query(fn ($q) => $q->whereHas('activite.projet', fn ($p) => $p->where('workspace_id', $workspace->id)));
+        if ($tier === 'scoped') {
+            // Tier 3 : tâches auxquelles l'utilisateur est explicitement assigné
+            $ids = $scopedIds['tache_ids'] ?: [0];
+            $useRaw
+                ? $builder->whereIn('id', $ids)
+                : $builder->query(fn ($q) => $q->whereIn('id', $ids));
+        } elseif (! $isSuperAdmin && $workspace) {
+            $useRaw
+                ? $builder->where('workspace_id', $workspace->id)
+                : $builder->query(fn ($q) => $q->whereHas('activite.projet', fn ($p) => $p->where('workspace_id', $workspace->id)));
         }
 
         if ($useRaw) {
@@ -262,18 +366,87 @@ class SearchController extends Controller
     }
 
     /** @return array{0: array<int, array<string, mixed>>, 1: int} */
+    private function searchSousTaches(
+        string $query,
+        ?Workspace $workspace,
+        bool $isSuperAdmin,
+        string $tier,
+        array $scopedIds,
+        int $perPage,
+        int $offset,
+        bool $useRaw,
+    ): array {
+        $builder = SousTache::search($query);
+
+        if ($tier === 'scoped') {
+            // Tier 3 : sous-tâches liées aux tâches accessibles
+            $ids = $scopedIds['sous_tache_ids'] ?: [0];
+            $useRaw
+                ? $builder->whereIn('id', $ids)
+                : $builder->query(fn ($q) => $q->whereIn('id', $ids));
+        } elseif (! $isSuperAdmin && $workspace) {
+            $useRaw
+                ? $builder->where('workspace_id', $workspace->id)
+                : $builder->query(fn ($q) => $q->whereHas(
+                    'tache.activite.projet',
+                    fn ($p) => $p->where('workspace_id', $workspace->id)
+                ));
+        }
+
+        if ($useRaw) {
+            return $this->fromRaw($builder, $perPage, $offset, fn ($doc, $hl) => [
+                'type' => 'sous_tache',
+                'id' => $doc['id'],
+                'label' => $hl['titre']['snippet'] ?? $doc['titre'] ?? '',
+                'excerpt' => $hl['description']['snippet'] ?? $hl['tache_titre']['snippet'] ?? $doc['tache_titre'] ?? '',
+                'meta' => [
+                    'statut' => $doc['statut'] ?? '',
+                    'tache_titre' => $doc['tache_titre'] ?? '',
+                    'projet_nom' => $doc['projet_nom'] ?? '',
+                    'workspace_name' => $doc['workspace_name'] ?? '',
+                ],
+                'url' => '/taches/'.$doc['tache_id'],
+            ]);
+        }
+
+        return $this->fromEloquent(
+            $builder->query(fn ($q) => $q->with('tache.activite.projet.workspace')),
+            $perPage, $offset,
+            fn (SousTache $s) => [
+                'type' => 'sous_tache',
+                'id' => $s->id,
+                'label' => $s->titre,
+                'excerpt' => $s->tache?->titre ?? '',
+                'meta' => [
+                    'statut' => $s->statut ?? '',
+                    'tache_titre' => $s->tache?->titre ?? '',
+                    'projet_nom' => $s->tache?->activite?->projet?->nom ?? '',
+                    'workspace_name' => $s->tache?->activite?->projet?->workspace?->nom ?? '',
+                ],
+                'url' => '/taches/'.$s->tache_id,
+            ]
+        );
+    }
+
+    /** @return array{0: array<int, array<string, mixed>>, 1: int} */
     private function searchDocuments(
         string $query,
         ?Workspace $workspace,
         bool $isSuperAdmin,
+        string $tier,
+        array $scopedIds,
         int $perPage,
         int $offset,
         bool $useRaw,
     ): array {
         $builder = Document::search($query);
 
-        if (! $isSuperAdmin && $workspace) {
-            $builder->query(fn ($q) => $q->where('workspace_id', $workspace->id));
+        // Documents : filtrés par workspace pour tous les tiers non-global
+        // (même scope pour manager et scoped — documents visibles à tous les membres du workspace)
+        if ($tier !== 'global' && $workspace) {
+            $useRaw
+                ? $builder->where('workspace_id', $workspace->id)
+                : $builder->query(fn ($q) => $q->where('workspace_id', $workspace->id));
         }
 
         if ($useRaw) {
@@ -307,13 +480,15 @@ class SearchController extends Controller
         string $query,
         ?Workspace $workspace,
         bool $isSuperAdmin,
+        string $tier,
+        array $scopedIds,
         int $perPage,
         int $offset,
     ): array {
         $builder = User::search($query);
 
-        if (! $isSuperAdmin && $workspace) {
-            // Filtrer aux membres du workspace cible
+        // Membres du workspace cible — identique pour tier workspace et scoped
+        if ($tier !== 'global' && $workspace) {
             $memberIds = $workspace->members()->pluck('users.id')->toArray();
             $builder->query(fn ($q) => $q->whereIn('id', $memberIds));
         }
@@ -336,14 +511,24 @@ class SearchController extends Controller
         string $query,
         ?Workspace $workspace,
         bool $isSuperAdmin,
+        string $tier,
+        array $scopedIds,
         int $perPage,
         int $offset,
         bool $useRaw,
     ): array {
         $builder = TeamMessage::search($query);
 
-        if (! $isSuperAdmin && $workspace) {
-            $builder->query(fn ($q) => $q->whereHas('team', fn ($t) => $t->where('workspace_id', $workspace->id)));
+        if ($tier === 'scoped') {
+            // Tier 3 : messages des équipes dont l'utilisateur est membre
+            $teamIds = $scopedIds['team_ids'] ?: [0];
+            $useRaw
+                ? $builder->whereIn('team_id', $teamIds)
+                : $builder->query(fn ($q) => $q->whereIn('team_id', $teamIds));
+        } elseif (! $isSuperAdmin && $workspace) {
+            $useRaw
+                ? $builder->where('workspace_id', $workspace->id)
+                : $builder->query(fn ($q) => $q->whereHas('team', fn ($t) => $t->where('workspace_id', $workspace->id)));
         }
 
         if ($useRaw) {
@@ -381,6 +566,64 @@ class SearchController extends Controller
         );
     }
 
+    /**
+     * Recherche dans les notifications — TOUJOURS limitée aux notifications de
+     * l'utilisateur courant, quel que soit le tier (y compris super-admin).
+     * Les notifications sont personnelles : aucun accès cross-utilisateur.
+     *
+     * @return array{0: array<int, array<string, mixed>>, 1: int}
+     */
+    private function searchNotifications(
+        string $query,
+        int $userId,
+        int $perPage,
+        int $offset,
+        bool $useRaw,
+    ): array {
+        // Portée stricte aux notifications de l'utilisateur courant — sous Typesense
+        // via filter_by (notifiable_id), sinon via contrainte Eloquent.
+        $builder = Notification::search($query);
+        $useRaw
+            ? $builder->where('notifiable_id', $userId)
+            : $builder->query(fn ($q) => $q
+                ->where('notifiable_id', $userId)
+                ->where('notifiable_type', User::class));
+
+        if ($useRaw) {
+            return $this->fromRaw($builder, $perPage, $offset, fn ($doc, $hl) => [
+                'type' => 'notification',
+                'id' => $doc['id'],
+                'label' => $doc['type'] ?? 'Notification',
+                'excerpt' => $hl['content']['snippet'] ?? mb_substr($doc['content'] ?? '', 0, 120),
+                'meta' => [
+                    'event' => $doc['event'] ?? '',
+                    'is_read' => $doc['is_read'] ?? false,
+                ],
+                'url' => '/notifications',
+            ]);
+        }
+
+        return $this->fromEloquent(
+            $builder, $perPage, $offset,
+            function (Notification $n) {
+                $data = is_array($n->data) ? $n->data : [];
+                $content = collect($data)->filter(fn ($v) => is_scalar($v))->map(fn ($v) => (string) $v)->implode(' ');
+
+                return [
+                    'type' => 'notification',
+                    'id' => $n->id,
+                    'label' => class_basename($n->type),
+                    'excerpt' => mb_substr($content, 0, 120),
+                    'meta' => [
+                        'event' => $data['type'] ?? '',
+                        'is_read' => $n->read_at !== null,
+                    ],
+                    'url' => '/notifications',
+                ];
+            }
+        );
+    }
+
     // ── Export ───────────────────────────────────────────────────────────────
 
     /**
@@ -395,7 +638,7 @@ class SearchController extends Controller
         $request->validate([
             'q' => 'required|string|min:2|max:255',
             'types' => 'sometimes|array',
-            'types.*' => 'string|in:projets,activites,taches,documents,users,messages',
+            'types.*' => 'string|in:projets,activites,taches,sous_taches,documents,users,messages,notifications',
             'workspace_id' => 'sometimes|integer|exists:workspaces,id',
             'cap' => 'sometimes|in:500,1000,2000,all',
         ]);
@@ -403,18 +646,29 @@ class SearchController extends Controller
         $user = $request->user();
         $cap = $request->input('cap', '500');
 
-        // Vérification d'autorisation (même logique que search())
+        // Vérification d'autorisation + résolution du tier (même logique que search())
         $isSuperAdmin = (bool) ($user->is_super_admin ?? false);
         $workspace = null;
+        $tier = 'global';
+        $scopedIds = [];
 
         if (! $isSuperAdmin) {
             $workspaceId = $request->integer('workspace_id') ?: ($user->current_workspace_id ?? 0);
             $workspace = Workspace::find($workspaceId);
             $gate = app(ContextualPermissionGate::class);
 
-            if (! $workspace || ! $gate->userCan($user, Permission::SEARCH_GLOBAL, $workspace)) {
+            if (! $workspace || ! $workspace->members()->where('user_id', $user->id)->exists()) {
                 return response()->json(['error' => 'Non autorisé'], 403);
             }
+
+            // L'export en masse est une action à privilège élevé : réservé à
+            // manager et supérieur (search.global). Les tiers scopés peuvent
+            // rechercher mais pas exporter.
+            if (! $gate->userCan($user, Permission::SEARCH_GLOBAL, $workspace)) {
+                return response()->json(['error' => 'Non autorisé'], 403);
+            }
+
+            $tier = 'workspace';
         }
 
         // Export asynchrone pour "all" — email envoyé au terme du job
@@ -430,11 +684,11 @@ class SearchController extends Controller
         // Export immédiat sous le plafond choisi
         $capInt = (int) $cap;
         $query = $request->string('q')->trim()->value();
-        $types = $request->input('types', ['projets', 'activites', 'taches', 'documents', 'users', 'messages']);
+        $types = $request->input('types', ['projets', 'activites', 'taches', 'sous_taches', 'documents', 'users', 'messages', 'notifications']);
         $sheets = [];
 
         foreach ($types as $type) {
-            [$hits] = $this->searchType($type, $query, $workspace, $isSuperAdmin, 1, $capInt);
+            [$hits] = $this->searchType($type, $query, $workspace, $isSuperAdmin, $tier, $scopedIds, (int) $user->id, 1, $capInt);
 
             if (! empty($hits)) {
                 $sheets[] = new SearchExport(collect($hits), $type);
@@ -462,7 +716,7 @@ class SearchController extends Controller
         $request->validate([
             'ids' => 'required|array|min:1|max:500',
             'ids.*' => 'integer',
-            'type' => 'required|string|in:projets,activites,taches,documents,users,messages',
+            'type' => 'required|string|in:projets,activites,taches,sous_taches,documents,users,messages',
             'q' => 'sometimes|string',
         ]);
 
@@ -475,6 +729,7 @@ class SearchController extends Controller
             $workspace = Workspace::find($workspaceId);
             $gate = app(ContextualPermissionGate::class);
 
+            // Export réservé à manager et supérieur (search.global)
             if (! $workspace || ! $gate->userCan($user, Permission::SEARCH_GLOBAL, $workspace)) {
                 return response()->json(['error' => 'Non autorisé'], 403);
             }
@@ -488,6 +743,7 @@ class SearchController extends Controller
             'projets' => Projet::class,
             'activites' => Activite::class,
             'taches' => Tache::class,
+            'sous_taches' => SousTache::class,
             'documents' => Document::class,
             'users' => User::class,
             'messages' => TeamMessage::class,

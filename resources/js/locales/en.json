@@ -102,7 +102,8 @@
     "settings": "Settings",
     "subscription": "Subscription",
     "platform_dashboard": "Platform Dashboard",
-    "roles_permissions": "Roles & Permissions"
+    "roles_permissions": "Roles & Permissions",
+    "search": "Search"
   },
   "sidebar": {
     "my_workspace": "My Workspace",
@@ -140,7 +141,8 @@
     "archived_projects": "Archived projects",
     "all_projects": "Dashboard",
     "all_activities": "All activities",
-    "my_activities": "My activities"
+    "my_activities": "My activities",
+    "search": "Global search"
   },
   "features": {
     "dashboard": {
@@ -2250,7 +2252,10 @@
     "type_documents": "Documents",
     "type_users": "Members",
     "hint_navigate": "↑↓ navigate · Enter to open",
-    "see_all": "See all results for"
+    "see_all": "See all results for",
+    "type_sous_taches": "Subtasks",
+    "type_messages": "Messages",
+    "type_notifications": "Notifications"
   },
   "search_page": {
     "title": "Global search",
@@ -2263,6 +2268,7 @@
     "type_documents": "Documents",
     "type_users": "Members",
     "type_messages": "Messages",
+    "type_sous_taches": "Subtasks",
     "no_results": "No results for this search.",
     "hint": "Enter a search term and press Enter.",
     "total_results": "result(s)",
@@ -2279,6 +2285,7 @@
     "cap_1000": "First 1,000 results",
     "cap_2000": "First 2,000 results",
     "cap_all": "All results",
-    "cap_all_note": "Background export — link sent by email"
+    "cap_all_note": "Background export — link sent by email",
+    "type_notifications": "Notifications"
   }
 }

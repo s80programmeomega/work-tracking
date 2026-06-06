@@ -84,8 +84,9 @@ export const Permission = Object.freeze({
     // Subscription (Task 13)
     SUBSCRIPTION_MANAGE: 'subscription.manage',
 
-    // Recherche globale (Phase 6)
+    // Recherche (Phase 6)
     SEARCH_GLOBAL: 'search.global',
+    SEARCH_SCOPED: 'search.scoped',
 
     // Users
     USERS_VIEW:                 'users.view',

@@ -10,12 +10,36 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Log;
+use Laravel\Scout\Searchable;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class SousTache extends Model
 {
-    use HasFactory, LogsActivity, SoftDeletes;
+    use HasFactory, LogsActivity, Searchable, SoftDeletes;
+
+    public function toSearchableArray(): array
+    {
+        $this->loadMissing('tache.activite.projet.workspace');
+
+        return [
+            'id' => (string) $this->id,
+            'titre' => $this->titre,
+            'description' => $this->description ?? '',
+            'statut' => $this->statut ?? '',
+            'workspace_id' => (int) ($this->tache?->activite?->projet?->workspace_id ?? 0),
+            'workspace_name' => $this->tache?->activite?->projet?->workspace?->nom ?? '',
+            'tache_id' => (int) $this->tache_id,
+            'tache_titre' => $this->tache?->titre ?? '',
+            'projet_nom' => $this->tache?->activite?->projet?->nom ?? '',
+            'created_at' => $this->created_at?->timestamp ?? 0,
+        ];
+    }
+
+    public function searchableAs(): string
+    {
+        return 'sous_taches';
+    }
 
     protected $fillable = [
         'tache_id',

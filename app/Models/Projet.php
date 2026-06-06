@@ -26,7 +26,7 @@ class Projet extends Model
             'nom' => $this->nom,
             'description' => $this->description ?? '',
             'code' => $this->code ?? '',
-            'statut' => $this->statut ?? '',
+            'status' => $this->status ?? '',
             'date_debut' => $this->date_debut?->toDateString() ?? '',
             'date_fin' => $this->date_fin?->toDateString() ?? '',
             'workspace_id' => (int) $this->workspace_id,

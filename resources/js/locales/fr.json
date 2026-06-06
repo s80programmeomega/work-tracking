@@ -102,7 +102,8 @@
     "settings": "Paramètres",
     "subscription": "Abonnement",
     "platform_dashboard": "Platform Dashboard",
-    "roles_permissions": "Rôles & Permissions"
+    "roles_permissions": "Rôles & Permissions",
+    "search": "Recherche"
   },
   "sidebar": {
     "my_workspace": "Mon Workspace",
@@ -140,7 +141,8 @@
     "archived_projects": "Projets archivés",
     "all_projects": "Tableau de bord",
     "all_activities": "Toutes les activités",
-    "my_activities": "Mes activités"
+    "my_activities": "Mes activités",
+    "search": "Recherche globale"
   },
   "features": {
     "dashboard": {
@@ -2253,7 +2255,10 @@
     "type_documents": "Documents",
     "type_users": "Membres",
     "hint_navigate": "↑↓ pour naviguer · Entrée pour ouvrir",
-    "see_all": "Voir tous les résultats pour"
+    "see_all": "Voir tous les résultats pour",
+    "type_sous_taches": "Sous-tâches",
+    "type_messages": "Messages",
+    "type_notifications": "Notifications"
   },
   "search_page": {
     "title": "Recherche globale",
@@ -2266,6 +2271,7 @@
     "type_documents": "Documents",
     "type_users": "Membres",
     "type_messages": "Messages",
+    "type_sous_taches": "Sous-tâches",
     "no_results": "Aucun résultat pour cette recherche.",
     "hint": "Saisissez un terme de recherche et appuyez sur Entrée.",
     "total_results": "résultat(s)",
@@ -2282,6 +2288,7 @@
     "cap_1000": "1 000 premiers résultats",
     "cap_2000": "2 000 premiers résultats",
     "cap_all": "Tous les résultats",
-    "cap_all_note": "Export en arrière-plan — lien envoyé par email"
+    "cap_all_note": "Export en arrière-plan — lien envoyé par email",
+    "type_notifications": "Notifications"
   }
 }

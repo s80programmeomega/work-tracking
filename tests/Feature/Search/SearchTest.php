@@ -62,6 +62,15 @@ class SearchTest extends TestCase
         return $cadre;
     }
 
+    private function addObservateur(Workspace $workspace): User
+    {
+        $observateur = User::factory()->create(['current_workspace_id' => $workspace->id]);
+        $roleId = Role::where('name', 'observateur')->where('guard_name', 'web')->value('id');
+        $workspace->members()->attach($observateur->id, ['role_id' => $roleId]);
+
+        return $observateur;
+    }
+
     // ── TC-01 : Manager 200 avec structure correcte ──────────────────────────
 
     public function test_manager_gets_200_with_grouped_results(): void
@@ -101,13 +110,27 @@ class SearchTest extends TestCase
             ->assertStatus(200);
     }
 
-    // ── TC-03 : Cadre → 403 ──────────────────────────────────────────────────
+    // ── TC-03 : Cadre → 200 (recherche scopée, Tier 3) ───────────────────────
 
-    public function test_cadre_gets_403(): void
+    public function test_cadre_gets_scoped_search(): void
     {
+        // Phase 6 tier-3 : cadre/collaborateur/stagiaire ont search.scoped
+        // → accès recherche limité à leurs ressources assignées (200, pas 403).
         [$workspace] = $this->createWorkspaceWithManager();
         $cadre = $this->addCadre($workspace);
         Sanctum::actingAs($cadre);
+
+        $this->getJson("/api/search?q=test&workspace_id={$workspace->id}")
+            ->assertStatus(200);
+    }
+
+    // ── TC-03b : Observateur (Tier 4) → 403 ──────────────────────────────────
+
+    public function test_observateur_gets_403(): void
+    {
+        [$workspace] = $this->createWorkspaceWithManager();
+        $observateur = $this->addObservateur($workspace);
+        Sanctum::actingAs($observateur);
 
         $this->getJson("/api/search?q=test&workspace_id={$workspace->id}")
             ->assertStatus(403);

@@ -79,6 +79,18 @@
                                                                                 <li class="tocify-item level-2" data-unique="divers-POSTapi-auth-login">
                                 <a href="#divers-POSTapi-auth-login">POST api/auth/login</a>
                             </li>
+                                                                                <li class="tocify-item level-2" data-unique="divers-GETapi-auth-google-redirect">
+                                <a href="#divers-GETapi-auth-google-redirect">Redirige vers la page d'autorisation Google.</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="divers-GETapi-auth-google-callback">
+                                <a href="#divers-GETapi-auth-google-callback">Traite le callback Google après autorisation de l'utilisateur.</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="divers-POSTapi-auth-two-factor-challenge">
+                                <a href="#divers-POSTapi-auth-two-factor-challenge">Vérifie le code TOTP ou email-OTP lors du challenge MFA post-login.</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="divers-POSTapi-auth-two-factor-email-send">
+                                <a href="#divers-POSTapi-auth-two-factor-email-send">Envoie un code OTP par email pour le challenge MFA.</a>
+                            </li>
                                                                                 <li class="tocify-item level-2" data-unique="divers-GETapi-workspace-invitations-all">
                                 <a href="#divers-GETapi-workspace-invitations-all">Get all invitations across workspaces (admin only)</a>
                             </li>
@@ -112,6 +124,42 @@
                                                                                 <li class="tocify-item level-2" data-unique="divers-PUTapi-auth-language">
                                 <a href="#divers-PUTapi-auth-language">Met à jour la langue de l'utilisateur</a>
                             </li>
+                                                                                <li class="tocify-item level-2" data-unique="divers-POSTapi-auth-email-otp-toggle">
+                                <a href="#divers-POSTapi-auth-email-otp-toggle">Active ou désactive l'OTP email comme second facteur pour l'utilisateur connecté.</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="divers-POSTapi-user-two-factor-authentication">
+                                <a href="#divers-POSTapi-user-two-factor-authentication">Active la 2FA TOTP pour l'utilisateur connecté.</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="divers-POSTapi-user-confirmed-two-factor-authentication">
+                                <a href="#divers-POSTapi-user-confirmed-two-factor-authentication">Confirme la 2FA avec un code TOTP valide.</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="divers-DELETEapi-user-two-factor-authentication">
+                                <a href="#divers-DELETEapi-user-two-factor-authentication">Désactive la 2FA pour l'utilisateur connecté.</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="divers-GETapi-user-two-factor-qr-code">
+                                <a href="#divers-GETapi-user-two-factor-qr-code">Retourne le QR code SVG de l'utilisateur (doit avoir activé la 2FA).</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="divers-GETapi-user-two-factor-secret-key">
+                                <a href="#divers-GETapi-user-two-factor-secret-key">Retourne la clé secrète TOTP déchiffrée (pour saisie manuelle dans l'appli).</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="divers-GETapi-user-two-factor-recovery-codes">
+                                <a href="#divers-GETapi-user-two-factor-recovery-codes">Retourne les codes de récupération actuels de l'utilisateur.</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="divers-POSTapi-user-two-factor-recovery-codes">
+                                <a href="#divers-POSTapi-user-two-factor-recovery-codes">Génère de nouveaux codes de récupération (invalide les anciens).</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="divers-POSTapi-support">
+                                <a href="#divers-POSTapi-support">Soumet un nouveau ticket de support.</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="divers-GETapi-support">
+                                <a href="#divers-GETapi-support">Liste les tickets de l'utilisateur connecté avec réponses et pièces jointes.</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="divers-POSTapi-support--ticket_id--attachments">
+                                <a href="#divers-POSTapi-support--ticket_id--attachments">Ajoute des pièces jointes à un ticket existant (accessible à l'auteur et aux admins).</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="divers-GETapi-support-attachments--attachment_id--download">
+                                <a href="#divers-GETapi-support-attachments--attachment_id--download">Télécharge une pièce jointe (auteur ou super-admin).</a>
+                            </li>
                                                                                 <li class="tocify-item level-2" data-unique="divers-GETapi-admin-stats">
                                 <a href="#divers-GETapi-admin-stats">Platform-wide aggregate statistics.</a>
                             </li>
@@ -138,6 +186,27 @@
                             </li>
                                                                                 <li class="tocify-item level-2" data-unique="divers-PATCHapi-admin-roles--role_id--permissions">
                                 <a href="#divers-PATCHapi-admin-roles--role_id--permissions">Sync the permissions assigned to a role.</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="divers-GETapi-admin-support">
+                                <a href="#divers-GETapi-admin-support">Liste tous les tickets — super-admin seulement.</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="divers-POSTapi-admin-support--ticket_id--reply">
+                                <a href="#divers-POSTapi-admin-support--ticket_id--reply">Ajoute une réponse admin à un ticket et met à jour son statut (obligatoire).</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="divers-GETapi-admin-activity-log">
+                                <a href="#divers-GETapi-admin-activity-log">Journal d'activité cross-app pour le super-admin.</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="divers-GETapi-admin-validation-audit-log">
+                                <a href="#divers-GETapi-admin-validation-audit-log">Journal d'audit de validation cross-app pour le super-admin.</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="divers-GETapi-search">
+                                <a href="#divers-GETapi-search">Recherche multi-modèle dans le workspace courant (ou global pour super-admin).</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="divers-GETapi-search-export">
+                                <a href="#divers-GETapi-search-export">Export global : relance la recherche sans limite (jusqu'au plafond choisi).</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="divers-POSTapi-search-export">
+                                <a href="#divers-POSTapi-search-export">Export sélectif : exporte une liste d'IDs fournis par le frontend.</a>
                             </li>
                                                                                 <li class="tocify-item level-2" data-unique="divers-GETapi-dashboard">
                                 <a href="#divers-GETapi-dashboard">Get dashboard data with member filtering</a>
@@ -881,6 +950,9 @@ Affiche uniquement ce que l'utilisateur peut réellement valider</a>
                                                                                 <li class="tocify-item level-2" data-unique="divers-GETapi-teams-my-teams">
                                 <a href="#divers-GETapi-teams-my-teams">Get teams for authenticated user</a>
                             </li>
+                                                                                <li class="tocify-item level-2" data-unique="divers-GETapi-teams-unread-total">
+                                <a href="#divers-GETapi-teams-unread-total">Retourne le nombre total de messages non lus dans toutes les équipes de l'utilisateur.</a>
+                            </li>
                                                                                 <li class="tocify-item level-2" data-unique="divers-POSTapi-teams">
                                 <a href="#divers-POSTapi-teams">Store a newly created team</a>
                             </li>
@@ -912,7 +984,7 @@ Affiche uniquement ce que l'utilisateur peut réellement valider</a>
                                 <a href="#divers-GETapi-teams--uuid--online-members">Get online members</a>
                             </li>
                                                                                 <li class="tocify-item level-2" data-unique="divers-POSTapi-teams--uuid--presence">
-                                <a href="#divers-POSTapi-teams--uuid--presence">Update user presence in team</a>
+                                <a href="#divers-POSTapi-teams--uuid--presence">POST api/teams/{uuid}/presence</a>
                             </li>
                                                                                 <li class="tocify-item level-2" data-unique="divers-POSTapi-teams--uuid--members">
                                 <a href="#divers-POSTapi-teams--uuid--members">Add member to team</a>
@@ -932,11 +1004,29 @@ Affiche uniquement ce que l'utilisateur peut réellement valider</a>
                                                                                 <li class="tocify-item level-2" data-unique="divers-GETapi-teams--uuid--messages">
                                 <a href="#divers-GETapi-teams--uuid--messages">GET api/teams/{uuid}/messages</a>
                             </li>
+                                                                                <li class="tocify-item level-2" data-unique="divers-GETapi-teams--uuid--messages-pinned">
+                                <a href="#divers-GETapi-teams--uuid--messages-pinned">GET api/teams/{uuid}/messages/pinned</a>
+                            </li>
                                                                                 <li class="tocify-item level-2" data-unique="divers-POSTapi-teams--uuid--messages">
                                 <a href="#divers-POSTapi-teams--uuid--messages">POST api/teams/{uuid}/messages</a>
                             </li>
+                                                                                <li class="tocify-item level-2" data-unique="divers-POSTapi-teams--uuid--read">
+                                <a href="#divers-POSTapi-teams--uuid--read">POST api/teams/{uuid}/read</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="divers-PATCHapi-teams-messages--uuid-">
+                                <a href="#divers-PATCHapi-teams-messages--uuid-">PATCH api/teams/messages/{uuid}</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="divers-DELETEapi-teams-messages--uuid-">
+                                <a href="#divers-DELETEapi-teams-messages--uuid-">DELETE api/teams/messages/{uuid}</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="divers-POSTapi-teams-messages--uuid--pin">
+                                <a href="#divers-POSTapi-teams-messages--uuid--pin">POST api/teams/messages/{uuid}/pin</a>
+                            </li>
                                                                                 <li class="tocify-item level-2" data-unique="divers-POSTapi-teams-messages--uuid--reactions">
                                 <a href="#divers-POSTapi-teams-messages--uuid--reactions">POST api/teams/messages/{uuid}/reactions</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="divers-DELETEapi-teams-messages--uuid--reactions">
+                                <a href="#divers-DELETEapi-teams-messages--uuid--reactions">DELETE api/teams/messages/{uuid}/reactions</a>
                             </li>
                                                                                 <li class="tocify-item level-2" data-unique="divers-GETapi-teams--uuid--announcements">
                                 <a href="#divers-GETapi-teams--uuid--announcements">GET api/teams/{uuid}/announcements</a>
@@ -988,7 +1078,7 @@ Affiche uniquement ce que l'utilisateur peut réellement valider</a>
     </ul>
 
     <ul class="toc-footer" id="last-updated">
-        <li>Dernière mise à jour : 01 June 2026</li>
+        <li>Dernière mise à jour : 04 June 2026</li>
     </ul>
 </div>
 
@@ -1449,6 +1539,714 @@ You can check the Dev Tools console for debugging information.</code></pre>
         </div>
         </form>
 
+                    <h2 id="divers-GETapi-auth-google-redirect">Redirige vers la page d&#039;autorisation Google.</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-GETapi-auth-google-redirect">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://127.0.0.1:8000/api/auth/google/redirect" \
+    --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://127.0.0.1:8000/api/auth/google/redirect"
+);
+
+const headers = {
+    "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+
+<div class="php-example">
+    <pre><code class="language-php">$client = new \GuzzleHttp\Client();
+$url = 'http://127.0.0.1:8000/api/auth/google/redirect';
+$response = $client-&gt;get(
+    $url,
+    [
+        'headers' =&gt; [
+            'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
+            'Content-Type' =&gt; 'application/json',
+            'Accept' =&gt; 'application/json',
+        ],
+    ]
+);
+$body = $response-&gt;getBody();
+print_r(json_decode((string) $body));</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-auth-google-redirect">
+            <blockquote>
+            <p>Example response (302):</p>
+        </blockquote>
+                <details class="annotation">
+            <summary style="cursor: pointer;">
+                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
+            </summary>
+            <pre><code class="language-http">cache-control: no-cache, private
+location: https://accounts.google.com/o/oauth2/auth?client_id=978026979086-8i7jf09i2c373o2gm1gel9elp1u6j8pt.apps.googleusercontent.com&amp;redirect_uri=http%3A%2F%2Flocalhost%3A8000%2Fapi%2Fauth%2Fgoogle%2Fcallback&amp;scope=openid+profile+email&amp;response_type=code
+content-type: text/html; charset=utf-8
+x-ratelimit-limit: 60
+x-ratelimit-remaining: 55
+vary: Origin
+ </code></pre></details>         <pre>
+
+<code class="language-json" style="max-height: 300px;">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;meta charset=&quot;UTF-8&quot; /&gt;
+        &lt;meta http-equiv=&quot;refresh&quot; content=&quot;0;url=&#039;https://accounts.google.com/o/oauth2/auth?client_id=978026979086-8i7jf09i2c373o2gm1gel9elp1u6j8pt.apps.googleusercontent.com&amp;amp;redirect_uri=http%3A%2F%2Flocalhost%3A8000%2Fapi%2Fauth%2Fgoogle%2Fcallback&amp;amp;scope=openid+profile+email&amp;amp;response_type=code&#039;&quot; /&gt;
+
+        &lt;title&gt;Redirecting to https://accounts.google.com/o/oauth2/auth?client_id=978026979086-8i7jf09i2c373o2gm1gel9elp1u6j8pt.apps.googleusercontent.com&amp;amp;redirect_uri=http%3A%2F%2Flocalhost%3A8000%2Fapi%2Fauth%2Fgoogle%2Fcallback&amp;amp;scope=openid+profile+email&amp;amp;response_type=code&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        Redirecting to &lt;a href=&quot;https://accounts.google.com/o/oauth2/auth?client_id=978026979086-8i7jf09i2c373o2gm1gel9elp1u6j8pt.apps.googleusercontent.com&amp;amp;redirect_uri=http%3A%2F%2Flocalhost%3A8000%2Fapi%2Fauth%2Fgoogle%2Fcallback&amp;amp;scope=openid+profile+email&amp;amp;response_type=code&quot;&gt;https://accounts.google.com/o/oauth2/auth?client_id=978026979086-8i7jf09i2c373o2gm1gel9elp1u6j8pt.apps.googleusercontent.com&amp;amp;redirect_uri=http%3A%2F%2Flocalhost%3A8000%2Fapi%2Fauth%2Fgoogle%2Fcallback&amp;amp;scope=openid+profile+email&amp;amp;response_type=code&lt;/a&gt;.
+    &lt;/body&gt;
+&lt;/html&gt;</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-auth-google-redirect" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-auth-google-redirect"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-auth-google-redirect"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-auth-google-redirect" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-auth-google-redirect">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-auth-google-redirect" data-method="GET"
+      data-path="api/auth/google/redirect"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-auth-google-redirect', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-auth-google-redirect"
+                    onclick="tryItOut('GETapi-auth-google-redirect');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-auth-google-redirect"
+                    onclick="cancelTryOut('GETapi-auth-google-redirect');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-auth-google-redirect"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/auth/google/redirect</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="GETapi-auth-google-redirect"
+               value="Bearer {VOTRE_TOKEN_SANCTUM}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {VOTRE_TOKEN_SANCTUM}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-auth-google-redirect"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-auth-google-redirect"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        </form>
+
+                    <h2 id="divers-GETapi-auth-google-callback">Traite le callback Google après autorisation de l&#039;utilisateur.</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Crée ou lie le compte, émet un token Sanctum, redirige le SPA.</p>
+
+<span id="example-requests-GETapi-auth-google-callback">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://127.0.0.1:8000/api/auth/google/callback" \
+    --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://127.0.0.1:8000/api/auth/google/callback"
+);
+
+const headers = {
+    "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+
+<div class="php-example">
+    <pre><code class="language-php">$client = new \GuzzleHttp\Client();
+$url = 'http://127.0.0.1:8000/api/auth/google/callback';
+$response = $client-&gt;get(
+    $url,
+    [
+        'headers' =&gt; [
+            'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
+            'Content-Type' =&gt; 'application/json',
+            'Accept' =&gt; 'application/json',
+        ],
+    ]
+);
+$body = $response-&gt;getBody();
+print_r(json_decode((string) $body));</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-auth-google-callback">
+            <blockquote>
+            <p>Example response (302):</p>
+        </blockquote>
+                <details class="annotation">
+            <summary style="cursor: pointer;">
+                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
+            </summary>
+            <pre><code class="language-http">cache-control: no-cache, private
+location: http://127.0.0.1:8000/signin?error=social_auth_failed
+content-type: text/html; charset=utf-8
+x-ratelimit-limit: 60
+x-ratelimit-remaining: 54
+vary: Origin
+ </code></pre></details>         <pre>
+
+<code class="language-json" style="max-height: 300px;">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;meta charset=&quot;UTF-8&quot; /&gt;
+        &lt;meta http-equiv=&quot;refresh&quot; content=&quot;0;url=&#039;http://127.0.0.1:8000/signin?error=social_auth_failed&#039;&quot; /&gt;
+
+        &lt;title&gt;Redirecting to http://127.0.0.1:8000/signin?error=social_auth_failed&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        Redirecting to &lt;a href=&quot;http://127.0.0.1:8000/signin?error=social_auth_failed&quot;&gt;http://127.0.0.1:8000/signin?error=social_auth_failed&lt;/a&gt;.
+    &lt;/body&gt;
+&lt;/html&gt;</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-auth-google-callback" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-auth-google-callback"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-auth-google-callback"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-auth-google-callback" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-auth-google-callback">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-auth-google-callback" data-method="GET"
+      data-path="api/auth/google/callback"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-auth-google-callback', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-auth-google-callback"
+                    onclick="tryItOut('GETapi-auth-google-callback');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-auth-google-callback"
+                    onclick="cancelTryOut('GETapi-auth-google-callback');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-auth-google-callback"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/auth/google/callback</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="GETapi-auth-google-callback"
+               value="Bearer {VOTRE_TOKEN_SANCTUM}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {VOTRE_TOKEN_SANCTUM}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-auth-google-callback"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-auth-google-callback"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        </form>
+
+                    <h2 id="divers-POSTapi-auth-two-factor-challenge">Vérifie le code TOTP ou email-OTP lors du challenge MFA post-login.</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Retourne le token Sanctum définitif si le code est valide.</p>
+
+<span id="example-requests-POSTapi-auth-two-factor-challenge">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://127.0.0.1:8000/api/auth/two-factor-challenge" \
+    --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"challenge_token\": \"architecto\",
+    \"code\": \"architecto\",
+    \"type\": \"totp\"
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://127.0.0.1:8000/api/auth/two-factor-challenge"
+);
+
+const headers = {
+    "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "challenge_token": "architecto",
+    "code": "architecto",
+    "type": "totp"
+};
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+
+<div class="php-example">
+    <pre><code class="language-php">$client = new \GuzzleHttp\Client();
+$url = 'http://127.0.0.1:8000/api/auth/two-factor-challenge';
+$response = $client-&gt;post(
+    $url,
+    [
+        'headers' =&gt; [
+            'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
+            'Content-Type' =&gt; 'application/json',
+            'Accept' =&gt; 'application/json',
+        ],
+        'json' =&gt; [
+            'challenge_token' =&gt; 'architecto',
+            'code' =&gt; 'architecto',
+            'type' =&gt; 'totp',
+        ],
+    ]
+);
+$body = $response-&gt;getBody();
+print_r(json_decode((string) $body));</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-auth-two-factor-challenge">
+</span>
+<span id="execution-results-POSTapi-auth-two-factor-challenge" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-auth-two-factor-challenge"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-auth-two-factor-challenge"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-auth-two-factor-challenge" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-auth-two-factor-challenge">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-auth-two-factor-challenge" data-method="POST"
+      data-path="api/auth/two-factor-challenge"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-auth-two-factor-challenge', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-auth-two-factor-challenge"
+                    onclick="tryItOut('POSTapi-auth-two-factor-challenge');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-auth-two-factor-challenge"
+                    onclick="cancelTryOut('POSTapi-auth-two-factor-challenge');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-auth-two-factor-challenge"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/auth/two-factor-challenge</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="POSTapi-auth-two-factor-challenge"
+               value="Bearer {VOTRE_TOKEN_SANCTUM}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {VOTRE_TOKEN_SANCTUM}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-auth-two-factor-challenge"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-auth-two-factor-challenge"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>challenge_token</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="challenge_token"                data-endpoint="POSTapi-auth-two-factor-challenge"
+               value="architecto"
+               data-component="body">
+    <br>
+<p>Example: <code>architecto</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>code</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="code"                data-endpoint="POSTapi-auth-two-factor-challenge"
+               value="architecto"
+               data-component="body">
+    <br>
+<p>Example: <code>architecto</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>type</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="type"                data-endpoint="POSTapi-auth-two-factor-challenge"
+               value="totp"
+               data-component="body">
+    <br>
+<p>Example: <code>totp</code></p>
+Must be one of:
+<ul style="list-style-type: square;"><li><code>totp</code></li> <li><code>recovery</code></li> <li><code>email</code></li></ul>
+        </div>
+        </form>
+
+                    <h2 id="divers-POSTapi-auth-two-factor-email-send">Envoie un code OTP par email pour le challenge MFA.</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Soumis avec le challenge_token provisoire.</p>
+
+<span id="example-requests-POSTapi-auth-two-factor-email-send">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://127.0.0.1:8000/api/auth/two-factor-email-send" \
+    --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"challenge_token\": \"architecto\"
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://127.0.0.1:8000/api/auth/two-factor-email-send"
+);
+
+const headers = {
+    "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "challenge_token": "architecto"
+};
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+
+<div class="php-example">
+    <pre><code class="language-php">$client = new \GuzzleHttp\Client();
+$url = 'http://127.0.0.1:8000/api/auth/two-factor-email-send';
+$response = $client-&gt;post(
+    $url,
+    [
+        'headers' =&gt; [
+            'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
+            'Content-Type' =&gt; 'application/json',
+            'Accept' =&gt; 'application/json',
+        ],
+        'json' =&gt; [
+            'challenge_token' =&gt; 'architecto',
+        ],
+    ]
+);
+$body = $response-&gt;getBody();
+print_r(json_decode((string) $body));</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-auth-two-factor-email-send">
+</span>
+<span id="execution-results-POSTapi-auth-two-factor-email-send" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-auth-two-factor-email-send"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-auth-two-factor-email-send"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-auth-two-factor-email-send" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-auth-two-factor-email-send">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-auth-two-factor-email-send" data-method="POST"
+      data-path="api/auth/two-factor-email-send"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-auth-two-factor-email-send', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-auth-two-factor-email-send"
+                    onclick="tryItOut('POSTapi-auth-two-factor-email-send');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-auth-two-factor-email-send"
+                    onclick="cancelTryOut('POSTapi-auth-two-factor-email-send');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-auth-two-factor-email-send"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/auth/two-factor-email-send</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="POSTapi-auth-two-factor-email-send"
+               value="Bearer {VOTRE_TOKEN_SANCTUM}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {VOTRE_TOKEN_SANCTUM}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-auth-two-factor-email-send"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-auth-two-factor-email-send"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>challenge_token</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="challenge_token"                data-endpoint="POSTapi-auth-two-factor-email-send"
+               value="architecto"
+               data-component="body">
+    <br>
+<p>Example: <code>architecto</code></p>
+        </div>
+        </form>
+
                     <h2 id="divers-GETapi-workspace-invitations-all">Get all invitations across workspaces (admin only)</h2>
 
 <p>
@@ -1836,7 +2634,7 @@ print_r(json_decode((string) $body));</code></pre></div>
             <pre><code class="language-http">cache-control: no-cache, private
 content-type: application/json
 x-ratelimit-limit: 60
-x-ratelimit-remaining: 59
+x-ratelimit-remaining: 53
 vary: Origin
  </code></pre></details>         <pre>
 
@@ -2166,7 +2964,7 @@ print_r(json_decode((string) $body));</code></pre></div>
             <pre><code class="language-http">cache-control: no-cache, private
 content-type: application/json
 x-ratelimit-limit: 60
-x-ratelimit-remaining: 58
+x-ratelimit-remaining: 52
 vary: Origin
  </code></pre></details>         <pre>
 
@@ -3186,6 +3984,2036 @@ Must be one of:
 <ul style="list-style-type: square;"><li><code>en</code></li> <li><code>fr</code></li></ul>
         </div>
         </form>
+
+                    <h2 id="divers-POSTapi-auth-email-otp-toggle">Active ou désactive l&#039;OTP email comme second facteur pour l&#039;utilisateur connecté.</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-POSTapi-auth-email-otp-toggle">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://127.0.0.1:8000/api/auth/email-otp-toggle" \
+    --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"enabled\": true
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://127.0.0.1:8000/api/auth/email-otp-toggle"
+);
+
+const headers = {
+    "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "enabled": true
+};
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+
+<div class="php-example">
+    <pre><code class="language-php">$client = new \GuzzleHttp\Client();
+$url = 'http://127.0.0.1:8000/api/auth/email-otp-toggle';
+$response = $client-&gt;post(
+    $url,
+    [
+        'headers' =&gt; [
+            'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
+            'Content-Type' =&gt; 'application/json',
+            'Accept' =&gt; 'application/json',
+        ],
+        'json' =&gt; [
+            'enabled' =&gt; true,
+        ],
+    ]
+);
+$body = $response-&gt;getBody();
+print_r(json_decode((string) $body));</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-auth-email-otp-toggle">
+</span>
+<span id="execution-results-POSTapi-auth-email-otp-toggle" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-auth-email-otp-toggle"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-auth-email-otp-toggle"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-auth-email-otp-toggle" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-auth-email-otp-toggle">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-auth-email-otp-toggle" data-method="POST"
+      data-path="api/auth/email-otp-toggle"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-auth-email-otp-toggle', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-auth-email-otp-toggle"
+                    onclick="tryItOut('POSTapi-auth-email-otp-toggle');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-auth-email-otp-toggle"
+                    onclick="cancelTryOut('POSTapi-auth-email-otp-toggle');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-auth-email-otp-toggle"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/auth/email-otp-toggle</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="POSTapi-auth-email-otp-toggle"
+               value="Bearer {VOTRE_TOKEN_SANCTUM}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {VOTRE_TOKEN_SANCTUM}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-auth-email-otp-toggle"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-auth-email-otp-toggle"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>enabled</code></b>&nbsp;&nbsp;
+<small>boolean</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <label data-endpoint="POSTapi-auth-email-otp-toggle" style="display: none">
+            <input type="radio" name="enabled"
+                   value="true"
+                   data-endpoint="POSTapi-auth-email-otp-toggle"
+                   data-component="body"             >
+            <code>true</code>
+        </label>
+        <label data-endpoint="POSTapi-auth-email-otp-toggle" style="display: none">
+            <input type="radio" name="enabled"
+                   value="false"
+                   data-endpoint="POSTapi-auth-email-otp-toggle"
+                   data-component="body"             >
+            <code>false</code>
+        </label>
+    <br>
+<p>Example: <code>true</code></p>
+        </div>
+        </form>
+
+                    <h2 id="divers-POSTapi-user-two-factor-authentication">Active la 2FA TOTP pour l&#039;utilisateur connecté.</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Retourne le QR code SVG et la clé secrète pour la saisie manuelle.</p>
+
+<span id="example-requests-POSTapi-user-two-factor-authentication">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://127.0.0.1:8000/api/user/two-factor-authentication" \
+    --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://127.0.0.1:8000/api/user/two-factor-authentication"
+);
+
+const headers = {
+    "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "POST",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+
+<div class="php-example">
+    <pre><code class="language-php">$client = new \GuzzleHttp\Client();
+$url = 'http://127.0.0.1:8000/api/user/two-factor-authentication';
+$response = $client-&gt;post(
+    $url,
+    [
+        'headers' =&gt; [
+            'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
+            'Content-Type' =&gt; 'application/json',
+            'Accept' =&gt; 'application/json',
+        ],
+    ]
+);
+$body = $response-&gt;getBody();
+print_r(json_decode((string) $body));</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-user-two-factor-authentication">
+</span>
+<span id="execution-results-POSTapi-user-two-factor-authentication" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-user-two-factor-authentication"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-user-two-factor-authentication"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-user-two-factor-authentication" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-user-two-factor-authentication">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-user-two-factor-authentication" data-method="POST"
+      data-path="api/user/two-factor-authentication"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-user-two-factor-authentication', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-user-two-factor-authentication"
+                    onclick="tryItOut('POSTapi-user-two-factor-authentication');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-user-two-factor-authentication"
+                    onclick="cancelTryOut('POSTapi-user-two-factor-authentication');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-user-two-factor-authentication"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/user/two-factor-authentication</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="POSTapi-user-two-factor-authentication"
+               value="Bearer {VOTRE_TOKEN_SANCTUM}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {VOTRE_TOKEN_SANCTUM}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-user-two-factor-authentication"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-user-two-factor-authentication"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        </form>
+
+                    <h2 id="divers-POSTapi-user-confirmed-two-factor-authentication">Confirme la 2FA avec un code TOTP valide.</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Après confirmation, le facteur est considéré comme actif.</p>
+
+<span id="example-requests-POSTapi-user-confirmed-two-factor-authentication">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://127.0.0.1:8000/api/user/confirmed-two-factor-authentication" \
+    --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"code\": \"architecto\"
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://127.0.0.1:8000/api/user/confirmed-two-factor-authentication"
+);
+
+const headers = {
+    "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "code": "architecto"
+};
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+
+<div class="php-example">
+    <pre><code class="language-php">$client = new \GuzzleHttp\Client();
+$url = 'http://127.0.0.1:8000/api/user/confirmed-two-factor-authentication';
+$response = $client-&gt;post(
+    $url,
+    [
+        'headers' =&gt; [
+            'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
+            'Content-Type' =&gt; 'application/json',
+            'Accept' =&gt; 'application/json',
+        ],
+        'json' =&gt; [
+            'code' =&gt; 'architecto',
+        ],
+    ]
+);
+$body = $response-&gt;getBody();
+print_r(json_decode((string) $body));</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-user-confirmed-two-factor-authentication">
+</span>
+<span id="execution-results-POSTapi-user-confirmed-two-factor-authentication" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-user-confirmed-two-factor-authentication"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-user-confirmed-two-factor-authentication"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-user-confirmed-two-factor-authentication" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-user-confirmed-two-factor-authentication">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-user-confirmed-two-factor-authentication" data-method="POST"
+      data-path="api/user/confirmed-two-factor-authentication"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-user-confirmed-two-factor-authentication', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-user-confirmed-two-factor-authentication"
+                    onclick="tryItOut('POSTapi-user-confirmed-two-factor-authentication');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-user-confirmed-two-factor-authentication"
+                    onclick="cancelTryOut('POSTapi-user-confirmed-two-factor-authentication');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-user-confirmed-two-factor-authentication"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/user/confirmed-two-factor-authentication</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="POSTapi-user-confirmed-two-factor-authentication"
+               value="Bearer {VOTRE_TOKEN_SANCTUM}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {VOTRE_TOKEN_SANCTUM}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-user-confirmed-two-factor-authentication"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-user-confirmed-two-factor-authentication"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>code</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="code"                data-endpoint="POSTapi-user-confirmed-two-factor-authentication"
+               value="architecto"
+               data-component="body">
+    <br>
+<p>Example: <code>architecto</code></p>
+        </div>
+        </form>
+
+                    <h2 id="divers-DELETEapi-user-two-factor-authentication">Désactive la 2FA pour l&#039;utilisateur connecté.</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Efface le secret, les codes de récupération et la confirmation.
+Désactive aussi l'OTP email car il requiert le TOTP actif.</p>
+
+<span id="example-requests-DELETEapi-user-two-factor-authentication">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request DELETE \
+    "http://127.0.0.1:8000/api/user/two-factor-authentication" \
+    --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://127.0.0.1:8000/api/user/two-factor-authentication"
+);
+
+const headers = {
+    "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "DELETE",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+
+<div class="php-example">
+    <pre><code class="language-php">$client = new \GuzzleHttp\Client();
+$url = 'http://127.0.0.1:8000/api/user/two-factor-authentication';
+$response = $client-&gt;delete(
+    $url,
+    [
+        'headers' =&gt; [
+            'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
+            'Content-Type' =&gt; 'application/json',
+            'Accept' =&gt; 'application/json',
+        ],
+    ]
+);
+$body = $response-&gt;getBody();
+print_r(json_decode((string) $body));</code></pre></div>
+
+</span>
+
+<span id="example-responses-DELETEapi-user-two-factor-authentication">
+</span>
+<span id="execution-results-DELETEapi-user-two-factor-authentication" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-DELETEapi-user-two-factor-authentication"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-DELETEapi-user-two-factor-authentication"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-DELETEapi-user-two-factor-authentication" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-DELETEapi-user-two-factor-authentication">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-DELETEapi-user-two-factor-authentication" data-method="DELETE"
+      data-path="api/user/two-factor-authentication"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('DELETEapi-user-two-factor-authentication', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-DELETEapi-user-two-factor-authentication"
+                    onclick="tryItOut('DELETEapi-user-two-factor-authentication');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-DELETEapi-user-two-factor-authentication"
+                    onclick="cancelTryOut('DELETEapi-user-two-factor-authentication');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-DELETEapi-user-two-factor-authentication"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-red">DELETE</small>
+            <b><code>api/user/two-factor-authentication</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="DELETEapi-user-two-factor-authentication"
+               value="Bearer {VOTRE_TOKEN_SANCTUM}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {VOTRE_TOKEN_SANCTUM}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="DELETEapi-user-two-factor-authentication"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="DELETEapi-user-two-factor-authentication"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        </form>
+
+                    <h2 id="divers-GETapi-user-two-factor-qr-code">Retourne le QR code SVG de l&#039;utilisateur (doit avoir activé la 2FA).</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-GETapi-user-two-factor-qr-code">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://127.0.0.1:8000/api/user/two-factor-qr-code" \
+    --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://127.0.0.1:8000/api/user/two-factor-qr-code"
+);
+
+const headers = {
+    "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+
+<div class="php-example">
+    <pre><code class="language-php">$client = new \GuzzleHttp\Client();
+$url = 'http://127.0.0.1:8000/api/user/two-factor-qr-code';
+$response = $client-&gt;get(
+    $url,
+    [
+        'headers' =&gt; [
+            'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
+            'Content-Type' =&gt; 'application/json',
+            'Accept' =&gt; 'application/json',
+        ],
+    ]
+);
+$body = $response-&gt;getBody();
+print_r(json_decode((string) $body));</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-user-two-factor-qr-code">
+            <blockquote>
+            <p>Example response (401):</p>
+        </blockquote>
+                <details class="annotation">
+            <summary style="cursor: pointer;">
+                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
+            </summary>
+            <pre><code class="language-http">cache-control: no-cache, private
+content-type: application/json
+vary: Origin
+ </code></pre></details>         <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;Unauthenticated.&quot;,
+    &quot;error&quot;: &quot;Non authentifi&eacute;&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-user-two-factor-qr-code" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-user-two-factor-qr-code"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-user-two-factor-qr-code"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-user-two-factor-qr-code" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-user-two-factor-qr-code">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-user-two-factor-qr-code" data-method="GET"
+      data-path="api/user/two-factor-qr-code"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-user-two-factor-qr-code', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-user-two-factor-qr-code"
+                    onclick="tryItOut('GETapi-user-two-factor-qr-code');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-user-two-factor-qr-code"
+                    onclick="cancelTryOut('GETapi-user-two-factor-qr-code');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-user-two-factor-qr-code"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/user/two-factor-qr-code</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="GETapi-user-two-factor-qr-code"
+               value="Bearer {VOTRE_TOKEN_SANCTUM}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {VOTRE_TOKEN_SANCTUM}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-user-two-factor-qr-code"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-user-two-factor-qr-code"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        </form>
+
+                    <h2 id="divers-GETapi-user-two-factor-secret-key">Retourne la clé secrète TOTP déchiffrée (pour saisie manuelle dans l&#039;appli).</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-GETapi-user-two-factor-secret-key">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://127.0.0.1:8000/api/user/two-factor-secret-key" \
+    --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://127.0.0.1:8000/api/user/two-factor-secret-key"
+);
+
+const headers = {
+    "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+
+<div class="php-example">
+    <pre><code class="language-php">$client = new \GuzzleHttp\Client();
+$url = 'http://127.0.0.1:8000/api/user/two-factor-secret-key';
+$response = $client-&gt;get(
+    $url,
+    [
+        'headers' =&gt; [
+            'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
+            'Content-Type' =&gt; 'application/json',
+            'Accept' =&gt; 'application/json',
+        ],
+    ]
+);
+$body = $response-&gt;getBody();
+print_r(json_decode((string) $body));</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-user-two-factor-secret-key">
+            <blockquote>
+            <p>Example response (401):</p>
+        </blockquote>
+                <details class="annotation">
+            <summary style="cursor: pointer;">
+                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
+            </summary>
+            <pre><code class="language-http">cache-control: no-cache, private
+content-type: application/json
+vary: Origin
+ </code></pre></details>         <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;Unauthenticated.&quot;,
+    &quot;error&quot;: &quot;Non authentifi&eacute;&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-user-two-factor-secret-key" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-user-two-factor-secret-key"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-user-two-factor-secret-key"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-user-two-factor-secret-key" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-user-two-factor-secret-key">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-user-two-factor-secret-key" data-method="GET"
+      data-path="api/user/two-factor-secret-key"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-user-two-factor-secret-key', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-user-two-factor-secret-key"
+                    onclick="tryItOut('GETapi-user-two-factor-secret-key');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-user-two-factor-secret-key"
+                    onclick="cancelTryOut('GETapi-user-two-factor-secret-key');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-user-two-factor-secret-key"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/user/two-factor-secret-key</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="GETapi-user-two-factor-secret-key"
+               value="Bearer {VOTRE_TOKEN_SANCTUM}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {VOTRE_TOKEN_SANCTUM}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-user-two-factor-secret-key"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-user-two-factor-secret-key"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        </form>
+
+                    <h2 id="divers-GETapi-user-two-factor-recovery-codes">Retourne les codes de récupération actuels de l&#039;utilisateur.</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-GETapi-user-two-factor-recovery-codes">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://127.0.0.1:8000/api/user/two-factor-recovery-codes" \
+    --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://127.0.0.1:8000/api/user/two-factor-recovery-codes"
+);
+
+const headers = {
+    "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+
+<div class="php-example">
+    <pre><code class="language-php">$client = new \GuzzleHttp\Client();
+$url = 'http://127.0.0.1:8000/api/user/two-factor-recovery-codes';
+$response = $client-&gt;get(
+    $url,
+    [
+        'headers' =&gt; [
+            'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
+            'Content-Type' =&gt; 'application/json',
+            'Accept' =&gt; 'application/json',
+        ],
+    ]
+);
+$body = $response-&gt;getBody();
+print_r(json_decode((string) $body));</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-user-two-factor-recovery-codes">
+            <blockquote>
+            <p>Example response (401):</p>
+        </blockquote>
+                <details class="annotation">
+            <summary style="cursor: pointer;">
+                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
+            </summary>
+            <pre><code class="language-http">cache-control: no-cache, private
+content-type: application/json
+vary: Origin
+ </code></pre></details>         <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;Unauthenticated.&quot;,
+    &quot;error&quot;: &quot;Non authentifi&eacute;&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-user-two-factor-recovery-codes" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-user-two-factor-recovery-codes"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-user-two-factor-recovery-codes"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-user-two-factor-recovery-codes" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-user-two-factor-recovery-codes">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-user-two-factor-recovery-codes" data-method="GET"
+      data-path="api/user/two-factor-recovery-codes"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-user-two-factor-recovery-codes', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-user-two-factor-recovery-codes"
+                    onclick="tryItOut('GETapi-user-two-factor-recovery-codes');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-user-two-factor-recovery-codes"
+                    onclick="cancelTryOut('GETapi-user-two-factor-recovery-codes');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-user-two-factor-recovery-codes"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/user/two-factor-recovery-codes</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="GETapi-user-two-factor-recovery-codes"
+               value="Bearer {VOTRE_TOKEN_SANCTUM}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {VOTRE_TOKEN_SANCTUM}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-user-two-factor-recovery-codes"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-user-two-factor-recovery-codes"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        </form>
+
+                    <h2 id="divers-POSTapi-user-two-factor-recovery-codes">Génère de nouveaux codes de récupération (invalide les anciens).</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-POSTapi-user-two-factor-recovery-codes">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://127.0.0.1:8000/api/user/two-factor-recovery-codes" \
+    --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://127.0.0.1:8000/api/user/two-factor-recovery-codes"
+);
+
+const headers = {
+    "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "POST",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+
+<div class="php-example">
+    <pre><code class="language-php">$client = new \GuzzleHttp\Client();
+$url = 'http://127.0.0.1:8000/api/user/two-factor-recovery-codes';
+$response = $client-&gt;post(
+    $url,
+    [
+        'headers' =&gt; [
+            'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
+            'Content-Type' =&gt; 'application/json',
+            'Accept' =&gt; 'application/json',
+        ],
+    ]
+);
+$body = $response-&gt;getBody();
+print_r(json_decode((string) $body));</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-user-two-factor-recovery-codes">
+</span>
+<span id="execution-results-POSTapi-user-two-factor-recovery-codes" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-user-two-factor-recovery-codes"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-user-two-factor-recovery-codes"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-user-two-factor-recovery-codes" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-user-two-factor-recovery-codes">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-user-two-factor-recovery-codes" data-method="POST"
+      data-path="api/user/two-factor-recovery-codes"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-user-two-factor-recovery-codes', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-user-two-factor-recovery-codes"
+                    onclick="tryItOut('POSTapi-user-two-factor-recovery-codes');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-user-two-factor-recovery-codes"
+                    onclick="cancelTryOut('POSTapi-user-two-factor-recovery-codes');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-user-two-factor-recovery-codes"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/user/two-factor-recovery-codes</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="POSTapi-user-two-factor-recovery-codes"
+               value="Bearer {VOTRE_TOKEN_SANCTUM}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {VOTRE_TOKEN_SANCTUM}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-user-two-factor-recovery-codes"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-user-two-factor-recovery-codes"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        </form>
+
+                    <h2 id="divers-POSTapi-support">Soumet un nouveau ticket de support.</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Calcule le délai SLA selon la catégorie et notifie les super-admins.</p>
+
+<span id="example-requests-POSTapi-support">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://127.0.0.1:8000/api/support" \
+    --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
+    --header "Content-Type: multipart/form-data" \
+    --header "Accept: application/json" \
+    --form "category=bug"\
+    --form "subject=n"\
+    --form "message=g"\
+    --form "reproducibility=always"\
+    --form "steps_to_reproduce=m"\
+    --form "attachments[]=@/tmp/phpmglgb7msvlos5kiN9np" </code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://127.0.0.1:8000/api/support"
+);
+
+const headers = {
+    "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
+    "Content-Type": "multipart/form-data",
+    "Accept": "application/json",
+};
+
+const body = new FormData();
+body.append('category', 'bug');
+body.append('subject', 'n');
+body.append('message', 'g');
+body.append('reproducibility', 'always');
+body.append('steps_to_reproduce', 'm');
+body.append('attachments[]', document.querySelector('input[name="attachments[]"]').files[0]);
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body,
+}).then(response =&gt; response.json());</code></pre></div>
+
+
+<div class="php-example">
+    <pre><code class="language-php">$client = new \GuzzleHttp\Client();
+$url = 'http://127.0.0.1:8000/api/support';
+$response = $client-&gt;post(
+    $url,
+    [
+        'headers' =&gt; [
+            'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
+            'Content-Type' =&gt; 'multipart/form-data',
+            'Accept' =&gt; 'application/json',
+        ],
+        'multipart' =&gt; [
+            [
+                'name' =&gt; 'category',
+                'contents' =&gt; 'bug'
+            ],
+            [
+                'name' =&gt; 'subject',
+                'contents' =&gt; 'n'
+            ],
+            [
+                'name' =&gt; 'message',
+                'contents' =&gt; 'g'
+            ],
+            [
+                'name' =&gt; 'reproducibility',
+                'contents' =&gt; 'always'
+            ],
+            [
+                'name' =&gt; 'steps_to_reproduce',
+                'contents' =&gt; 'm'
+            ],
+            [
+                'name' =&gt; 'attachments[]',
+                'contents' =&gt; fopen('/tmp/phpmglgb7msvlos5kiN9np', 'r')
+            ],
+        ],
+    ]
+);
+$body = $response-&gt;getBody();
+print_r(json_decode((string) $body));</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-support">
+</span>
+<span id="execution-results-POSTapi-support" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-support"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-support"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-support" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-support">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-support" data-method="POST"
+      data-path="api/support"
+      data-authed="1"
+      data-hasfiles="1"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-support', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-support"
+                    onclick="tryItOut('POSTapi-support');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-support"
+                    onclick="cancelTryOut('POSTapi-support');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-support"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/support</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="POSTapi-support"
+               value="Bearer {VOTRE_TOKEN_SANCTUM}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {VOTRE_TOKEN_SANCTUM}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-support"
+               value="multipart/form-data"
+               data-component="header">
+    <br>
+<p>Example: <code>multipart/form-data</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-support"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>category</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="category"                data-endpoint="POSTapi-support"
+               value="bug"
+               data-component="body">
+    <br>
+<p>Example: <code>bug</code></p>
+Must be one of:
+<ul style="list-style-type: square;"><li><code>bug</code></li> <li><code>feature</code></li> <li><code>billing</code></li> <li><code>account</code></li> <li><code>other</code></li></ul>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>subject</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="subject"                data-endpoint="POSTapi-support"
+               value="n"
+               data-component="body">
+    <br>
+<p>Must not be greater than 255 characters. Example: <code>n</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>message</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="message"                data-endpoint="POSTapi-support"
+               value="g"
+               data-component="body">
+    <br>
+<p>Must not be greater than 5000 characters. Example: <code>g</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>reproducibility</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="reproducibility"                data-endpoint="POSTapi-support"
+               value="always"
+               data-component="body">
+    <br>
+<p>Example: <code>always</code></p>
+Must be one of:
+<ul style="list-style-type: square;"><li><code>always</code></li> <li><code>sometimes</code></li> <li><code>rarely</code></li> <li><code>not_reproducible</code></li> <li><code>na</code></li></ul>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>steps_to_reproduce</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="steps_to_reproduce"                data-endpoint="POSTapi-support"
+               value="m"
+               data-component="body">
+    <br>
+<p>Must not be greater than 5000 characters. Example: <code>m</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>attachments</code></b>&nbsp;&nbsp;
+<small>file[]</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="file" style="display: none"
+                              name="attachments[0]"                data-endpoint="POSTapi-support"
+               data-component="body">
+        <input type="file" style="display: none"
+               name="attachments[1]"                data-endpoint="POSTapi-support"
+               data-component="body">
+    <br>
+<p>Must be a file. Must not be greater than 5120 kilobytes.</p>
+        </div>
+        </form>
+
+                    <h2 id="divers-GETapi-support">Liste les tickets de l&#039;utilisateur connecté avec réponses et pièces jointes.</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-GETapi-support">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://127.0.0.1:8000/api/support" \
+    --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://127.0.0.1:8000/api/support"
+);
+
+const headers = {
+    "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+
+<div class="php-example">
+    <pre><code class="language-php">$client = new \GuzzleHttp\Client();
+$url = 'http://127.0.0.1:8000/api/support';
+$response = $client-&gt;get(
+    $url,
+    [
+        'headers' =&gt; [
+            'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
+            'Content-Type' =&gt; 'application/json',
+            'Accept' =&gt; 'application/json',
+        ],
+    ]
+);
+$body = $response-&gt;getBody();
+print_r(json_decode((string) $body));</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-support">
+            <blockquote>
+            <p>Example response (401):</p>
+        </blockquote>
+                <details class="annotation">
+            <summary style="cursor: pointer;">
+                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
+            </summary>
+            <pre><code class="language-http">cache-control: no-cache, private
+content-type: application/json
+vary: Origin
+ </code></pre></details>         <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;Unauthenticated.&quot;,
+    &quot;error&quot;: &quot;Non authentifi&eacute;&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-support" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-support"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-support"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-support" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-support">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-support" data-method="GET"
+      data-path="api/support"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-support', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-support"
+                    onclick="tryItOut('GETapi-support');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-support"
+                    onclick="cancelTryOut('GETapi-support');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-support"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/support</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="GETapi-support"
+               value="Bearer {VOTRE_TOKEN_SANCTUM}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {VOTRE_TOKEN_SANCTUM}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-support"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-support"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        </form>
+
+                    <h2 id="divers-POSTapi-support--ticket_id--attachments">Ajoute des pièces jointes à un ticket existant (accessible à l&#039;auteur et aux admins).</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-POSTapi-support--ticket_id--attachments">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://127.0.0.1:8000/api/support/16/attachments" \
+    --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
+    --header "Content-Type: multipart/form-data" \
+    --header "Accept: application/json" \
+    --form "attachments[]=@/tmp/phpev4ai0713c8g8iA9srX" </code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://127.0.0.1:8000/api/support/16/attachments"
+);
+
+const headers = {
+    "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
+    "Content-Type": "multipart/form-data",
+    "Accept": "application/json",
+};
+
+const body = new FormData();
+body.append('attachments[]', document.querySelector('input[name="attachments[]"]').files[0]);
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body,
+}).then(response =&gt; response.json());</code></pre></div>
+
+
+<div class="php-example">
+    <pre><code class="language-php">$client = new \GuzzleHttp\Client();
+$url = 'http://127.0.0.1:8000/api/support/16/attachments';
+$response = $client-&gt;post(
+    $url,
+    [
+        'headers' =&gt; [
+            'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
+            'Content-Type' =&gt; 'multipart/form-data',
+            'Accept' =&gt; 'application/json',
+        ],
+        'multipart' =&gt; [
+            [
+                'name' =&gt; 'attachments[]',
+                'contents' =&gt; fopen('/tmp/phpev4ai0713c8g8iA9srX', 'r')
+            ],
+        ],
+    ]
+);
+$body = $response-&gt;getBody();
+print_r(json_decode((string) $body));</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-support--ticket_id--attachments">
+</span>
+<span id="execution-results-POSTapi-support--ticket_id--attachments" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-support--ticket_id--attachments"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-support--ticket_id--attachments"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-support--ticket_id--attachments" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-support--ticket_id--attachments">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-support--ticket_id--attachments" data-method="POST"
+      data-path="api/support/{ticket_id}/attachments"
+      data-authed="1"
+      data-hasfiles="1"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-support--ticket_id--attachments', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-support--ticket_id--attachments"
+                    onclick="tryItOut('POSTapi-support--ticket_id--attachments');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-support--ticket_id--attachments"
+                    onclick="cancelTryOut('POSTapi-support--ticket_id--attachments');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-support--ticket_id--attachments"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/support/{ticket_id}/attachments</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="POSTapi-support--ticket_id--attachments"
+               value="Bearer {VOTRE_TOKEN_SANCTUM}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {VOTRE_TOKEN_SANCTUM}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-support--ticket_id--attachments"
+               value="multipart/form-data"
+               data-component="header">
+    <br>
+<p>Example: <code>multipart/form-data</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-support--ticket_id--attachments"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>ticket_id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="ticket_id"                data-endpoint="POSTapi-support--ticket_id--attachments"
+               value="16"
+               data-component="url">
+    <br>
+<p>The ID of the ticket. Example: <code>16</code></p>
+            </div>
+                            <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>attachments</code></b>&nbsp;&nbsp;
+<small>file[]</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="file" style="display: none"
+                              name="attachments[0]"                data-endpoint="POSTapi-support--ticket_id--attachments"
+               data-component="body">
+        <input type="file" style="display: none"
+               name="attachments[1]"                data-endpoint="POSTapi-support--ticket_id--attachments"
+               data-component="body">
+    <br>
+<p>Must be a file. Must not be greater than 5120 kilobytes.</p>
+        </div>
+        </form>
+
+                    <h2 id="divers-GETapi-support-attachments--attachment_id--download">Télécharge une pièce jointe (auteur ou super-admin).</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-GETapi-support-attachments--attachment_id--download">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://127.0.0.1:8000/api/support/attachments/16/download" \
+    --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://127.0.0.1:8000/api/support/attachments/16/download"
+);
+
+const headers = {
+    "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+
+<div class="php-example">
+    <pre><code class="language-php">$client = new \GuzzleHttp\Client();
+$url = 'http://127.0.0.1:8000/api/support/attachments/16/download';
+$response = $client-&gt;get(
+    $url,
+    [
+        'headers' =&gt; [
+            'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
+            'Content-Type' =&gt; 'application/json',
+            'Accept' =&gt; 'application/json',
+        ],
+    ]
+);
+$body = $response-&gt;getBody();
+print_r(json_decode((string) $body));</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-support-attachments--attachment_id--download">
+            <blockquote>
+            <p>Example response (401):</p>
+        </blockquote>
+                <details class="annotation">
+            <summary style="cursor: pointer;">
+                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
+            </summary>
+            <pre><code class="language-http">cache-control: no-cache, private
+content-type: application/json
+vary: Origin
+ </code></pre></details>         <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;Unauthenticated.&quot;,
+    &quot;error&quot;: &quot;Non authentifi&eacute;&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-support-attachments--attachment_id--download" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-support-attachments--attachment_id--download"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-support-attachments--attachment_id--download"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-support-attachments--attachment_id--download" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-support-attachments--attachment_id--download">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-support-attachments--attachment_id--download" data-method="GET"
+      data-path="api/support/attachments/{attachment_id}/download"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-support-attachments--attachment_id--download', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-support-attachments--attachment_id--download"
+                    onclick="tryItOut('GETapi-support-attachments--attachment_id--download');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-support-attachments--attachment_id--download"
+                    onclick="cancelTryOut('GETapi-support-attachments--attachment_id--download');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-support-attachments--attachment_id--download"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/support/attachments/{attachment_id}/download</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="GETapi-support-attachments--attachment_id--download"
+               value="Bearer {VOTRE_TOKEN_SANCTUM}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {VOTRE_TOKEN_SANCTUM}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-support-attachments--attachment_id--download"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-support-attachments--attachment_id--download"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>attachment_id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="attachment_id"                data-endpoint="GETapi-support-attachments--attachment_id--download"
+               value="16"
+               data-component="url">
+    <br>
+<p>The ID of the attachment. Example: <code>16</code></p>
+            </div>
+                    </form>
 
                     <h2 id="divers-GETapi-admin-stats">Platform-wide aggregate statistics.</h2>
 
@@ -4734,6 +7562,1595 @@ You can check the Dev Tools console for debugging information.</code></pre>
         </div>
         </form>
 
+                    <h2 id="divers-GETapi-admin-support">Liste tous les tickets — super-admin seulement.</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-GETapi-admin-support">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://127.0.0.1:8000/api/admin/support" \
+    --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://127.0.0.1:8000/api/admin/support"
+);
+
+const headers = {
+    "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+
+<div class="php-example">
+    <pre><code class="language-php">$client = new \GuzzleHttp\Client();
+$url = 'http://127.0.0.1:8000/api/admin/support';
+$response = $client-&gt;get(
+    $url,
+    [
+        'headers' =&gt; [
+            'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
+            'Content-Type' =&gt; 'application/json',
+            'Accept' =&gt; 'application/json',
+        ],
+    ]
+);
+$body = $response-&gt;getBody();
+print_r(json_decode((string) $body));</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-admin-support">
+            <blockquote>
+            <p>Example response (401):</p>
+        </blockquote>
+                <details class="annotation">
+            <summary style="cursor: pointer;">
+                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
+            </summary>
+            <pre><code class="language-http">cache-control: no-cache, private
+content-type: application/json
+vary: Origin
+ </code></pre></details>         <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;Unauthenticated.&quot;,
+    &quot;error&quot;: &quot;Non authentifi&eacute;&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-admin-support" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-admin-support"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-admin-support"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-admin-support" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-admin-support">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-admin-support" data-method="GET"
+      data-path="api/admin/support"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-admin-support', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-admin-support"
+                    onclick="tryItOut('GETapi-admin-support');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-admin-support"
+                    onclick="cancelTryOut('GETapi-admin-support');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-admin-support"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/admin/support</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="GETapi-admin-support"
+               value="Bearer {VOTRE_TOKEN_SANCTUM}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {VOTRE_TOKEN_SANCTUM}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-admin-support"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-admin-support"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        </form>
+
+                    <h2 id="divers-POSTapi-admin-support--ticket_id--reply">Ajoute une réponse admin à un ticket et met à jour son statut (obligatoire).</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Enregistre first_responded_at si c'est la première réponse admin.
+Enregistre resolved_at si le statut passe à 'resolved'.</p>
+
+<span id="example-requests-POSTapi-admin-support--ticket_id--reply">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://127.0.0.1:8000/api/admin/support/16/reply" \
+    --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"body\": \"b\",
+    \"status\": \"open\"
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://127.0.0.1:8000/api/admin/support/16/reply"
+);
+
+const headers = {
+    "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "body": "b",
+    "status": "open"
+};
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+
+<div class="php-example">
+    <pre><code class="language-php">$client = new \GuzzleHttp\Client();
+$url = 'http://127.0.0.1:8000/api/admin/support/16/reply';
+$response = $client-&gt;post(
+    $url,
+    [
+        'headers' =&gt; [
+            'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
+            'Content-Type' =&gt; 'application/json',
+            'Accept' =&gt; 'application/json',
+        ],
+        'json' =&gt; [
+            'body' =&gt; 'b',
+            'status' =&gt; 'open',
+        ],
+    ]
+);
+$body = $response-&gt;getBody();
+print_r(json_decode((string) $body));</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-admin-support--ticket_id--reply">
+</span>
+<span id="execution-results-POSTapi-admin-support--ticket_id--reply" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-admin-support--ticket_id--reply"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-admin-support--ticket_id--reply"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-admin-support--ticket_id--reply" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-admin-support--ticket_id--reply">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-admin-support--ticket_id--reply" data-method="POST"
+      data-path="api/admin/support/{ticket_id}/reply"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-admin-support--ticket_id--reply', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-admin-support--ticket_id--reply"
+                    onclick="tryItOut('POSTapi-admin-support--ticket_id--reply');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-admin-support--ticket_id--reply"
+                    onclick="cancelTryOut('POSTapi-admin-support--ticket_id--reply');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-admin-support--ticket_id--reply"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/admin/support/{ticket_id}/reply</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="POSTapi-admin-support--ticket_id--reply"
+               value="Bearer {VOTRE_TOKEN_SANCTUM}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {VOTRE_TOKEN_SANCTUM}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-admin-support--ticket_id--reply"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-admin-support--ticket_id--reply"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>ticket_id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="ticket_id"                data-endpoint="POSTapi-admin-support--ticket_id--reply"
+               value="16"
+               data-component="url">
+    <br>
+<p>The ID of the ticket. Example: <code>16</code></p>
+            </div>
+                            <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>body</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="body"                data-endpoint="POSTapi-admin-support--ticket_id--reply"
+               value="b"
+               data-component="body">
+    <br>
+<p>Must not be greater than 5000 characters. Example: <code>b</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>status</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="status"                data-endpoint="POSTapi-admin-support--ticket_id--reply"
+               value="open"
+               data-component="body">
+    <br>
+<p>Example: <code>open</code></p>
+Must be one of:
+<ul style="list-style-type: square;"><li><code>open</code></li> <li><code>in_progress</code></li> <li><code>resolved</code></li></ul>
+        </div>
+        </form>
+
+                    <h2 id="divers-GETapi-admin-activity-log">Journal d&#039;activité cross-app pour le super-admin.</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Filtre par auteur, type de sujet, événement, plage de dates et texte libre.</p>
+
+<span id="example-requests-GETapi-admin-activity-log">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://127.0.0.1:8000/api/admin/activity-log" \
+    --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"search\": \"b\",
+    \"causer_id\": 16,
+    \"subject_type\": \"architecto\",
+    \"event\": \"architecto\",
+    \"date_from\": \"2026-06-04T19:42:34\",
+    \"date_to\": \"2052-06-27\",
+    \"per_page\": 22
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://127.0.0.1:8000/api/admin/activity-log"
+);
+
+const headers = {
+    "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "search": "b",
+    "causer_id": 16,
+    "subject_type": "architecto",
+    "event": "architecto",
+    "date_from": "2026-06-04T19:42:34",
+    "date_to": "2052-06-27",
+    "per_page": 22
+};
+
+fetch(url, {
+    method: "GET",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+
+<div class="php-example">
+    <pre><code class="language-php">$client = new \GuzzleHttp\Client();
+$url = 'http://127.0.0.1:8000/api/admin/activity-log';
+$response = $client-&gt;get(
+    $url,
+    [
+        'headers' =&gt; [
+            'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
+            'Content-Type' =&gt; 'application/json',
+            'Accept' =&gt; 'application/json',
+        ],
+        'json' =&gt; [
+            'search' =&gt; 'b',
+            'causer_id' =&gt; 16,
+            'subject_type' =&gt; 'architecto',
+            'event' =&gt; 'architecto',
+            'date_from' =&gt; '2026-06-04T19:42:34',
+            'date_to' =&gt; '2052-06-27',
+            'per_page' =&gt; 22,
+        ],
+    ]
+);
+$body = $response-&gt;getBody();
+print_r(json_decode((string) $body));</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-admin-activity-log">
+            <blockquote>
+            <p>Example response (401):</p>
+        </blockquote>
+                <details class="annotation">
+            <summary style="cursor: pointer;">
+                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
+            </summary>
+            <pre><code class="language-http">cache-control: no-cache, private
+content-type: application/json
+vary: Origin
+ </code></pre></details>         <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;Unauthenticated.&quot;,
+    &quot;error&quot;: &quot;Non authentifi&eacute;&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-admin-activity-log" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-admin-activity-log"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-admin-activity-log"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-admin-activity-log" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-admin-activity-log">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-admin-activity-log" data-method="GET"
+      data-path="api/admin/activity-log"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-admin-activity-log', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-admin-activity-log"
+                    onclick="tryItOut('GETapi-admin-activity-log');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-admin-activity-log"
+                    onclick="cancelTryOut('GETapi-admin-activity-log');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-admin-activity-log"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/admin/activity-log</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="GETapi-admin-activity-log"
+               value="Bearer {VOTRE_TOKEN_SANCTUM}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {VOTRE_TOKEN_SANCTUM}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-admin-activity-log"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-admin-activity-log"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>search</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="search"                data-endpoint="GETapi-admin-activity-log"
+               value="b"
+               data-component="body">
+    <br>
+<p>Must not be greater than 255 characters. Example: <code>b</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>causer_id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="causer_id"                data-endpoint="GETapi-admin-activity-log"
+               value="16"
+               data-component="body">
+    <br>
+<p>The <code>id</code> of an existing record in the users table. Example: <code>16</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>subject_type</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="subject_type"                data-endpoint="GETapi-admin-activity-log"
+               value="architecto"
+               data-component="body">
+    <br>
+<p>Example: <code>architecto</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>event</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="event"                data-endpoint="GETapi-admin-activity-log"
+               value="architecto"
+               data-component="body">
+    <br>
+<p>Example: <code>architecto</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>date_from</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="date_from"                data-endpoint="GETapi-admin-activity-log"
+               value="2026-06-04T19:42:34"
+               data-component="body">
+    <br>
+<p>Must be a valid date. Example: <code>2026-06-04T19:42:34</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>date_to</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="date_to"                data-endpoint="GETapi-admin-activity-log"
+               value="2052-06-27"
+               data-component="body">
+    <br>
+<p>Must be a valid date. Must be a date after or equal to <code>date_from</code>. Example: <code>2052-06-27</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>per_page</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="per_page"                data-endpoint="GETapi-admin-activity-log"
+               value="22"
+               data-component="body">
+    <br>
+<p>Must be at least 1. Must not be greater than 100. Example: <code>22</code></p>
+        </div>
+        </form>
+
+                    <h2 id="divers-GETapi-admin-validation-audit-log">Journal d&#039;audit de validation cross-app pour le super-admin.</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Filtre par auteur, action, plage de dates.</p>
+
+<span id="example-requests-GETapi-admin-validation-audit-log">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://127.0.0.1:8000/api/admin/validation-audit-log" \
+    --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"actor_id\": 16,
+    \"action\": \"bypass\",
+    \"date_from\": \"2026-06-04T19:42:34\",
+    \"date_to\": \"2052-06-27\",
+    \"per_page\": 22
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://127.0.0.1:8000/api/admin/validation-audit-log"
+);
+
+const headers = {
+    "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "actor_id": 16,
+    "action": "bypass",
+    "date_from": "2026-06-04T19:42:34",
+    "date_to": "2052-06-27",
+    "per_page": 22
+};
+
+fetch(url, {
+    method: "GET",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+
+<div class="php-example">
+    <pre><code class="language-php">$client = new \GuzzleHttp\Client();
+$url = 'http://127.0.0.1:8000/api/admin/validation-audit-log';
+$response = $client-&gt;get(
+    $url,
+    [
+        'headers' =&gt; [
+            'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
+            'Content-Type' =&gt; 'application/json',
+            'Accept' =&gt; 'application/json',
+        ],
+        'json' =&gt; [
+            'actor_id' =&gt; 16,
+            'action' =&gt; 'bypass',
+            'date_from' =&gt; '2026-06-04T19:42:34',
+            'date_to' =&gt; '2052-06-27',
+            'per_page' =&gt; 22,
+        ],
+    ]
+);
+$body = $response-&gt;getBody();
+print_r(json_decode((string) $body));</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-admin-validation-audit-log">
+            <blockquote>
+            <p>Example response (401):</p>
+        </blockquote>
+                <details class="annotation">
+            <summary style="cursor: pointer;">
+                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
+            </summary>
+            <pre><code class="language-http">cache-control: no-cache, private
+content-type: application/json
+vary: Origin
+ </code></pre></details>         <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;Unauthenticated.&quot;,
+    &quot;error&quot;: &quot;Non authentifi&eacute;&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-admin-validation-audit-log" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-admin-validation-audit-log"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-admin-validation-audit-log"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-admin-validation-audit-log" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-admin-validation-audit-log">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-admin-validation-audit-log" data-method="GET"
+      data-path="api/admin/validation-audit-log"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-admin-validation-audit-log', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-admin-validation-audit-log"
+                    onclick="tryItOut('GETapi-admin-validation-audit-log');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-admin-validation-audit-log"
+                    onclick="cancelTryOut('GETapi-admin-validation-audit-log');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-admin-validation-audit-log"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/admin/validation-audit-log</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="GETapi-admin-validation-audit-log"
+               value="Bearer {VOTRE_TOKEN_SANCTUM}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {VOTRE_TOKEN_SANCTUM}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-admin-validation-audit-log"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-admin-validation-audit-log"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>actor_id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="actor_id"                data-endpoint="GETapi-admin-validation-audit-log"
+               value="16"
+               data-component="body">
+    <br>
+<p>The <code>id</code> of an existing record in the users table. Example: <code>16</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>action</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="action"                data-endpoint="GETapi-admin-validation-audit-log"
+               value="bypass"
+               data-component="body">
+    <br>
+<p>Example: <code>bypass</code></p>
+Must be one of:
+<ul style="list-style-type: square;"><li><code>approuve</code></li> <li><code>renvoye</code></li> <li><code>timeout</code></li> <li><code>bypass</code></li> <li><code>n1_valide</code></li> <li><code>n1_rejete</code></li> <li><code>n2_valide</code></li> <li><code>n2_rejete</code></li></ul>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>date_from</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="date_from"                data-endpoint="GETapi-admin-validation-audit-log"
+               value="2026-06-04T19:42:34"
+               data-component="body">
+    <br>
+<p>Must be a valid date. Example: <code>2026-06-04T19:42:34</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>date_to</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="date_to"                data-endpoint="GETapi-admin-validation-audit-log"
+               value="2052-06-27"
+               data-component="body">
+    <br>
+<p>Must be a valid date. Must be a date after or equal to <code>date_from</code>. Example: <code>2052-06-27</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>per_page</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="per_page"                data-endpoint="GETapi-admin-validation-audit-log"
+               value="22"
+               data-component="body">
+    <br>
+<p>Must be at least 1. Must not be greater than 100. Example: <code>22</code></p>
+        </div>
+        </form>
+
+                    <h2 id="divers-GETapi-search">Recherche multi-modèle dans le workspace courant (ou global pour super-admin).</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Endpoint : GET /api/search?q=&amp;types[]=&amp;workspace_id=&amp;page=&amp;per_page=</p>
+<p>Paramètres :</p>
+<ul>
+<li>q           : terme de recherche (min 2 chars)</li>
+<li>types[]     : filtre par type (projets, activites, taches, documents, users, messages)</li>
+<li>workspace_id: workspace cible (ignoré pour super-admin — scope global)</li>
+<li>page        : page courante (défaut 1)</li>
+<li>per_page    : résultats par type par page (défaut 10, max 50)</li>
+</ul>
+<p>Autorisation :</p>
+<ul>
+<li>super_admin : scope global, tous les workspaces</li>
+<li>owner/manager : scope limité au workspace cible + vérification membership</li>
+</ul>
+
+<span id="example-requests-GETapi-search">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://127.0.0.1:8000/api/search" \
+    --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"q\": \"b\",
+    \"types\": [
+        \"documents\"
+    ],
+    \"workspace_id\": 16,
+    \"page\": 22,
+    \"per_page\": 7
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://127.0.0.1:8000/api/search"
+);
+
+const headers = {
+    "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "q": "b",
+    "types": [
+        "documents"
+    ],
+    "workspace_id": 16,
+    "page": 22,
+    "per_page": 7
+};
+
+fetch(url, {
+    method: "GET",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+
+<div class="php-example">
+    <pre><code class="language-php">$client = new \GuzzleHttp\Client();
+$url = 'http://127.0.0.1:8000/api/search';
+$response = $client-&gt;get(
+    $url,
+    [
+        'headers' =&gt; [
+            'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
+            'Content-Type' =&gt; 'application/json',
+            'Accept' =&gt; 'application/json',
+        ],
+        'json' =&gt; [
+            'q' =&gt; 'b',
+            'types' =&gt; ['documents'],
+            'workspace_id' =&gt; 16,
+            'page' =&gt; 22,
+            'per_page' =&gt; 7,
+        ],
+    ]
+);
+$body = $response-&gt;getBody();
+print_r(json_decode((string) $body));</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-search">
+            <blockquote>
+            <p>Example response (401):</p>
+        </blockquote>
+                <details class="annotation">
+            <summary style="cursor: pointer;">
+                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
+            </summary>
+            <pre><code class="language-http">cache-control: no-cache, private
+content-type: application/json
+vary: Origin
+ </code></pre></details>         <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;Unauthenticated.&quot;,
+    &quot;error&quot;: &quot;Non authentifi&eacute;&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-search" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-search"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-search"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-search" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-search">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-search" data-method="GET"
+      data-path="api/search"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-search', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-search"
+                    onclick="tryItOut('GETapi-search');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-search"
+                    onclick="cancelTryOut('GETapi-search');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-search"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/search</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="GETapi-search"
+               value="Bearer {VOTRE_TOKEN_SANCTUM}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {VOTRE_TOKEN_SANCTUM}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-search"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-search"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>q</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="q"                data-endpoint="GETapi-search"
+               value="b"
+               data-component="body">
+    <br>
+<p>Must be at least 2 characters. Must not be greater than 255 characters. Example: <code>b</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>types</code></b>&nbsp;&nbsp;
+<small>string[]</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="types[0]"                data-endpoint="GETapi-search"
+               data-component="body">
+        <input type="text" style="display: none"
+               name="types[1]"                data-endpoint="GETapi-search"
+               data-component="body">
+    <br>
+
+Must be one of:
+<ul style="list-style-type: square;"><li><code>projets</code></li> <li><code>activites</code></li> <li><code>taches</code></li> <li><code>sous_taches</code></li> <li><code>documents</code></li> <li><code>users</code></li> <li><code>messages</code></li></ul>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>workspace_id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="workspace_id"                data-endpoint="GETapi-search"
+               value="16"
+               data-component="body">
+    <br>
+<p>The <code>id</code> of an existing record in the workspaces table. Example: <code>16</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>page</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="page"                data-endpoint="GETapi-search"
+               value="22"
+               data-component="body">
+    <br>
+<p>Must be at least 1. Example: <code>22</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>per_page</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="per_page"                data-endpoint="GETapi-search"
+               value="7"
+               data-component="body">
+    <br>
+<p>Must be at least 1. Must not be greater than 50. Example: <code>7</code></p>
+        </div>
+        </form>
+
+                    <h2 id="divers-GETapi-search-export">Export global : relance la recherche sans limite (jusqu&#039;au plafond choisi).</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>GET /api/search/export?q=&amp;types[]=&amp;workspace_id=&amp;cap=500|1000|2000|all</p>
+<p>Si cap=all, le job est mis en file d'attente et un email est envoyé.
+Sinon, le fichier Excel est téléchargé directement.</p>
+
+<span id="example-requests-GETapi-search-export">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://127.0.0.1:8000/api/search/export" \
+    --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"q\": \"b\",
+    \"types\": [
+        \"documents\"
+    ],
+    \"workspace_id\": 16,
+    \"cap\": \"all\"
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://127.0.0.1:8000/api/search/export"
+);
+
+const headers = {
+    "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "q": "b",
+    "types": [
+        "documents"
+    ],
+    "workspace_id": 16,
+    "cap": "all"
+};
+
+fetch(url, {
+    method: "GET",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+
+<div class="php-example">
+    <pre><code class="language-php">$client = new \GuzzleHttp\Client();
+$url = 'http://127.0.0.1:8000/api/search/export';
+$response = $client-&gt;get(
+    $url,
+    [
+        'headers' =&gt; [
+            'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
+            'Content-Type' =&gt; 'application/json',
+            'Accept' =&gt; 'application/json',
+        ],
+        'json' =&gt; [
+            'q' =&gt; 'b',
+            'types' =&gt; ['documents'],
+            'workspace_id' =&gt; 16,
+            'cap' =&gt; 'all',
+        ],
+    ]
+);
+$body = $response-&gt;getBody();
+print_r(json_decode((string) $body));</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-search-export">
+            <blockquote>
+            <p>Example response (401):</p>
+        </blockquote>
+                <details class="annotation">
+            <summary style="cursor: pointer;">
+                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
+            </summary>
+            <pre><code class="language-http">cache-control: no-cache, private
+content-type: application/json
+vary: Origin
+ </code></pre></details>         <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;Unauthenticated.&quot;,
+    &quot;error&quot;: &quot;Non authentifi&eacute;&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-search-export" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-search-export"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-search-export"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-search-export" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-search-export">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-search-export" data-method="GET"
+      data-path="api/search/export"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-search-export', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-search-export"
+                    onclick="tryItOut('GETapi-search-export');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-search-export"
+                    onclick="cancelTryOut('GETapi-search-export');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-search-export"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/search/export</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="GETapi-search-export"
+               value="Bearer {VOTRE_TOKEN_SANCTUM}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {VOTRE_TOKEN_SANCTUM}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-search-export"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-search-export"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>q</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="q"                data-endpoint="GETapi-search-export"
+               value="b"
+               data-component="body">
+    <br>
+<p>Must be at least 2 characters. Must not be greater than 255 characters. Example: <code>b</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>types</code></b>&nbsp;&nbsp;
+<small>string[]</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="types[0]"                data-endpoint="GETapi-search-export"
+               data-component="body">
+        <input type="text" style="display: none"
+               name="types[1]"                data-endpoint="GETapi-search-export"
+               data-component="body">
+    <br>
+
+Must be one of:
+<ul style="list-style-type: square;"><li><code>projets</code></li> <li><code>activites</code></li> <li><code>taches</code></li> <li><code>sous_taches</code></li> <li><code>documents</code></li> <li><code>users</code></li> <li><code>messages</code></li></ul>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>workspace_id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="workspace_id"                data-endpoint="GETapi-search-export"
+               value="16"
+               data-component="body">
+    <br>
+<p>The <code>id</code> of an existing record in the workspaces table. Example: <code>16</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>cap</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="cap"                data-endpoint="GETapi-search-export"
+               value="all"
+               data-component="body">
+    <br>
+<p>Example: <code>all</code></p>
+Must be one of:
+<ul style="list-style-type: square;"><li><code>500</code></li> <li><code>1000</code></li> <li><code>2000</code></li> <li><code>all</code></li></ul>
+        </div>
+        </form>
+
+                    <h2 id="divers-POSTapi-search-export">Export sélectif : exporte une liste d&#039;IDs fournis par le frontend.</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>POST /api/search/export  {ids: [...], type: 'taches', cap: '500'}</p>
+
+<span id="example-requests-POSTapi-search-export">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://127.0.0.1:8000/api/search/export" \
+    --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"ids\": [
+        16
+    ],
+    \"type\": \"documents\",
+    \"q\": \"architecto\"
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://127.0.0.1:8000/api/search/export"
+);
+
+const headers = {
+    "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "ids": [
+        16
+    ],
+    "type": "documents",
+    "q": "architecto"
+};
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+
+<div class="php-example">
+    <pre><code class="language-php">$client = new \GuzzleHttp\Client();
+$url = 'http://127.0.0.1:8000/api/search/export';
+$response = $client-&gt;post(
+    $url,
+    [
+        'headers' =&gt; [
+            'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
+            'Content-Type' =&gt; 'application/json',
+            'Accept' =&gt; 'application/json',
+        ],
+        'json' =&gt; [
+            'ids' =&gt; [16],
+            'type' =&gt; 'documents',
+            'q' =&gt; 'architecto',
+        ],
+    ]
+);
+$body = $response-&gt;getBody();
+print_r(json_decode((string) $body));</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-search-export">
+</span>
+<span id="execution-results-POSTapi-search-export" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-search-export"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-search-export"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-search-export" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-search-export">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-search-export" data-method="POST"
+      data-path="api/search/export"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-search-export', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-search-export"
+                    onclick="tryItOut('POSTapi-search-export');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-search-export"
+                    onclick="cancelTryOut('POSTapi-search-export');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-search-export"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/search/export</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="POSTapi-search-export"
+               value="Bearer {VOTRE_TOKEN_SANCTUM}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {VOTRE_TOKEN_SANCTUM}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-search-export"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-search-export"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>ids</code></b>&nbsp;&nbsp;
+<small>integer[]</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="ids[0]"                data-endpoint="POSTapi-search-export"
+               data-component="body">
+        <input type="number" style="display: none"
+               name="ids[1]"                data-endpoint="POSTapi-search-export"
+               data-component="body">
+    <br>
+
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>type</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="type"                data-endpoint="POSTapi-search-export"
+               value="documents"
+               data-component="body">
+    <br>
+<p>Example: <code>documents</code></p>
+Must be one of:
+<ul style="list-style-type: square;"><li><code>projets</code></li> <li><code>activites</code></li> <li><code>taches</code></li> <li><code>sous_taches</code></li> <li><code>documents</code></li> <li><code>users</code></li> <li><code>messages</code></li></ul>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>q</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="q"                data-endpoint="POSTapi-search-export"
+               value="architecto"
+               data-component="body">
+    <br>
+<p>Example: <code>architecto</code></p>
+        </div>
+        </form>
+
                     <h2 id="divers-GETapi-dashboard">Get dashboard data with member filtering</h2>
 
 <p>
@@ -5422,7 +9839,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --form "settings_array[notify_on_task_assigned]="\
     --form "settings_array[notify_on_deadline_approaching]="\
     --form "settings_array[weekly_digest]=1"\
-    --form "logo=@/tmp/phpj1idk8ohgniv61wyzgv" </code></pre></div>
+    --form "logo=@/tmp/phpj2jt0keds7es6ESrkWN" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -5545,7 +9962,7 @@ $response = $client-&gt;post(
             ],
             [
                 'name' =&gt; 'logo',
-                'contents' =&gt; fopen('/tmp/phpj1idk8ohgniv61wyzgv', 'r')
+                'contents' =&gt; fopen('/tmp/phpj2jt0keds7es6ESrkWN', 'r')
             ],
         ],
     ]
@@ -5675,7 +10092,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value=""
                data-component="body">
     <br>
-<p>Must be an image. Must not be greater than 2048 kilobytes. Example: <code>/tmp/phpj1idk8ohgniv61wyzgv</code></p>
+<p>Must be an image. Must not be greater than 2048 kilobytes. Example: <code>/tmp/phpj2jt0keds7es6ESrkWN</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>settings</code></b>&nbsp;&nbsp;
@@ -6347,7 +10764,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --form "settings_array[notify_on_task_assigned]="\
     --form "settings_array[notify_on_deadline_approaching]="\
     --form "settings_array[weekly_digest]=1"\
-    --form "logo=@/tmp/phppg668hqsj39b3SStqfM" </code></pre></div>
+    --form "logo=@/tmp/phpkh61ss21imj36W7sxFo" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -6480,7 +10897,7 @@ $response = $client-&gt;put(
             ],
             [
                 'name' =&gt; 'logo',
-                'contents' =&gt; fopen('/tmp/phppg668hqsj39b3SStqfM', 'r')
+                'contents' =&gt; fopen('/tmp/phpkh61ss21imj36W7sxFo', 'r')
             ],
         ],
     ]
@@ -6623,7 +11040,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value=""
                data-component="body">
     <br>
-<p>Must be an image. Must not be greater than 2048 kilobytes. Example: <code>/tmp/phppg668hqsj39b3SStqfM</code></p>
+<p>Must be an image. Must not be greater than 2048 kilobytes. Example: <code>/tmp/phpkh61ss21imj36W7sxFo</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>is_active</code></b>&nbsp;&nbsp;
@@ -9565,7 +13982,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --data "{
     \"subscription_mode\": \"trial\",
     \"trial_duration_days\": 22,
-    \"trial_started_at\": \"2026-06-01T00:06:16\"
+    \"trial_started_at\": \"2026-06-04T19:42:35\"
 }"
 </code></pre></div>
 
@@ -9584,7 +14001,7 @@ const headers = {
 let body = {
     "subscription_mode": "trial",
     "trial_duration_days": 22,
-    "trial_started_at": "2026-06-01T00:06:16"
+    "trial_started_at": "2026-06-04T19:42:35"
 };
 
 fetch(url, {
@@ -9608,7 +14025,7 @@ $response = $client-&gt;patch(
         'json' =&gt; [
             'subscription_mode' =&gt; 'trial',
             'trial_duration_days' =&gt; 22,
-            'trial_started_at' =&gt; '2026-06-01T00:06:16',
+            'trial_started_at' =&gt; '2026-06-04T19:42:35',
         ],
     ]
 );
@@ -9749,10 +14166,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="trial_started_at"                data-endpoint="PATCHapi-workspaces--workspace_id--subscription"
-               value="2026-06-01T00:06:16"
+               value="2026-06-04T19:42:35"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-06-01T00:06:16</code></p>
+<p>Must be a valid date. Example: <code>2026-06-04T19:42:35</code></p>
         </div>
         </form>
 
@@ -11814,8 +16231,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"nom\": \"n\",
     \"code\": \"g\",
     \"description\": \"Eius et animi quos velit et.\",
-    \"date_debut\": \"2026-06-01T00:06:17\",
-    \"date_fin\": \"2052-06-24\",
+    \"date_debut\": \"2026-06-04T19:42:36\",
+    \"date_fin\": \"2052-06-27\",
     \"responsable_id\": \"architecto\",
     \"status\": \"archived\",
     \"visibility\": \"public\",
@@ -11852,8 +16269,8 @@ let body = {
     "nom": "n",
     "code": "g",
     "description": "Eius et animi quos velit et.",
-    "date_debut": "2026-06-01T00:06:17",
-    "date_fin": "2052-06-24",
+    "date_debut": "2026-06-04T19:42:36",
+    "date_fin": "2052-06-27",
     "responsable_id": "architecto",
     "status": "archived",
     "visibility": "public",
@@ -11895,8 +16312,8 @@ $response = $client-&gt;post(
             'nom' =&gt; 'n',
             'code' =&gt; 'g',
             'description' =&gt; 'Eius et animi quos velit et.',
-            'date_debut' =&gt; '2026-06-01T00:06:17',
-            'date_fin' =&gt; '2052-06-24',
+            'date_debut' =&gt; '2026-06-04T19:42:36',
+            'date_fin' =&gt; '2052-06-27',
             'responsable_id' =&gt; 'architecto',
             'status' =&gt; 'archived',
             'visibility' =&gt; 'public',
@@ -12057,10 +16474,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_debut"                data-endpoint="POSTapi-projets"
-               value="2026-06-01T00:06:17"
+               value="2026-06-04T19:42:36"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-06-01T00:06:17</code></p>
+<p>Must be a valid date. Example: <code>2026-06-04T19:42:36</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>date_fin</code></b>&nbsp;&nbsp;
@@ -12069,10 +16486,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_fin"                data-endpoint="POSTapi-projets"
-               value="2052-06-24"
+               value="2052-06-27"
                data-component="body">
     <br>
-<p>Must be a valid date. Must be a date after <code>date_debut</code>. Example: <code>2052-06-24</code></p>
+<p>Must be a valid date. Must be a date after <code>date_debut</code>. Example: <code>2052-06-27</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>responsable_id</code></b>&nbsp;&nbsp;
@@ -13143,8 +17560,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Accept: application/json" \
     --data "{
     \"nom\": \"b\",
-    \"date_debut\": \"2026-06-01T00:06:17\",
-    \"date_fin\": \"2052-06-24\"
+    \"date_debut\": \"2026-06-04T19:42:36\",
+    \"date_fin\": \"2052-06-27\"
 }"
 </code></pre></div>
 
@@ -13162,8 +17579,8 @@ const headers = {
 
 let body = {
     "nom": "b",
-    "date_debut": "2026-06-01T00:06:17",
-    "date_fin": "2052-06-24"
+    "date_debut": "2026-06-04T19:42:36",
+    "date_fin": "2052-06-27"
 };
 
 fetch(url, {
@@ -13186,8 +17603,8 @@ $response = $client-&gt;post(
         ],
         'json' =&gt; [
             'nom' =&gt; 'b',
-            'date_debut' =&gt; '2026-06-01T00:06:17',
-            'date_fin' =&gt; '2052-06-24',
+            'date_debut' =&gt; '2026-06-04T19:42:36',
+            'date_fin' =&gt; '2052-06-27',
         ],
     ]
 );
@@ -13314,10 +17731,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_debut"                data-endpoint="POSTapi-projets--projet_id--clone"
-               value="2026-06-01T00:06:17"
+               value="2026-06-04T19:42:36"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-06-01T00:06:17</code></p>
+<p>Must be a valid date. Example: <code>2026-06-04T19:42:36</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>date_fin</code></b>&nbsp;&nbsp;
@@ -13326,10 +17743,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_fin"                data-endpoint="POSTapi-projets--projet_id--clone"
-               value="2052-06-24"
+               value="2052-06-27"
                data-component="body">
     <br>
-<p>Must be a valid date. Must be a date after <code>date_debut</code>. Example: <code>2052-06-24</code></p>
+<p>Must be a valid date. Must be a date after <code>date_debut</code>. Example: <code>2052-06-27</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>responsable_id</code></b>&nbsp;&nbsp;
@@ -15962,8 +20379,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"start_date\": \"2026-06-01T00:06:18\",
-    \"end_date\": \"2052-06-24\"
+    \"start_date\": \"2026-06-04T19:42:36\",
+    \"end_date\": \"2052-06-27\"
 }"
 </code></pre></div>
 
@@ -15980,8 +20397,8 @@ const headers = {
 };
 
 let body = {
-    "start_date": "2026-06-01T00:06:18",
-    "end_date": "2052-06-24"
+    "start_date": "2026-06-04T19:42:36",
+    "end_date": "2052-06-27"
 };
 
 fetch(url, {
@@ -16003,8 +20420,8 @@ $response = $client-&gt;get(
             'Accept' =&gt; 'application/json',
         ],
         'json' =&gt; [
-            'start_date' =&gt; '2026-06-01T00:06:18',
-            'end_date' =&gt; '2052-06-24',
+            'start_date' =&gt; '2026-06-04T19:42:36',
+            'end_date' =&gt; '2052-06-27',
         ],
     ]
 );
@@ -16136,10 +20553,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="start_date"                data-endpoint="GETapi-projets--projet_id--performance-report"
-               value="2026-06-01T00:06:18"
+               value="2026-06-04T19:42:36"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-06-01T00:06:18</code></p>
+<p>Must be a valid date. Example: <code>2026-06-04T19:42:36</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>end_date</code></b>&nbsp;&nbsp;
@@ -16148,10 +20565,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="end_date"                data-endpoint="GETapi-projets--projet_id--performance-report"
-               value="2052-06-24"
+               value="2052-06-27"
                data-component="body">
     <br>
-<p>Must be a valid date. Must be a date after or equal to <code>start_date</code>. Example: <code>2052-06-24</code></p>
+<p>Must be a valid date. Must be a date after or equal to <code>start_date</code>. Example: <code>2052-06-27</code></p>
         </div>
         </form>
 
@@ -17874,8 +22291,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"nom\": \"n\",
     \"description\": \"Eius et animi quos velit et.\",
     \"responsable_id\": \"architecto\",
-    \"date_debut\": \"2026-06-01T00:06:18\",
-    \"date_fin\": \"2052-06-24\",
+    \"date_debut\": \"2026-06-04T19:42:36\",
+    \"date_fin\": \"2052-06-27\",
     \"status\": \"archived\",
     \"progression\": 7,
     \"couleur\": \"#fEEeDb\",
@@ -17911,8 +22328,8 @@ let body = {
     "nom": "n",
     "description": "Eius et animi quos velit et.",
     "responsable_id": "architecto",
-    "date_debut": "2026-06-01T00:06:18",
-    "date_fin": "2052-06-24",
+    "date_debut": "2026-06-04T19:42:36",
+    "date_fin": "2052-06-27",
     "status": "archived",
     "progression": 7,
     "couleur": "#fEEeDb",
@@ -17953,8 +22370,8 @@ $response = $client-&gt;post(
             'nom' =&gt; 'n',
             'description' =&gt; 'Eius et animi quos velit et.',
             'responsable_id' =&gt; 'architecto',
-            'date_debut' =&gt; '2026-06-01T00:06:18',
-            'date_fin' =&gt; '2052-06-24',
+            'date_debut' =&gt; '2026-06-04T19:42:36',
+            'date_fin' =&gt; '2052-06-27',
             'status' =&gt; 'archived',
             'progression' =&gt; 7,
             'couleur' =&gt; '#fEEeDb',
@@ -18110,10 +22527,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_debut"                data-endpoint="POSTapi-activites"
-               value="2026-06-01T00:06:18"
+               value="2026-06-04T19:42:36"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-06-01T00:06:18</code></p>
+<p>Must be a valid date. Example: <code>2026-06-04T19:42:36</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>date_fin</code></b>&nbsp;&nbsp;
@@ -18122,10 +22539,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_fin"                data-endpoint="POSTapi-activites"
-               value="2052-06-24"
+               value="2052-06-27"
                data-component="body">
     <br>
-<p>Must be a valid date. Must be a date after or equal to <code>date_debut</code>. Example: <code>2052-06-24</code></p>
+<p>Must be a valid date. Must be a date after or equal to <code>date_debut</code>. Example: <code>2052-06-27</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>status</code></b>&nbsp;&nbsp;
@@ -18543,8 +22960,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --data "{
     \"nom\": \"b\",
     \"description\": \"Eius et animi quos velit et.\",
-    \"date_debut\": \"2026-06-01T00:06:18\",
-    \"date_fin\": \"2052-06-24\",
+    \"date_debut\": \"2026-06-04T19:42:36\",
+    \"date_fin\": \"2052-06-27\",
     \"status\": \"archived\",
     \"progression\": 7,
     \"couleur\": \"#fEEeDb\"
@@ -18566,8 +22983,8 @@ const headers = {
 let body = {
     "nom": "b",
     "description": "Eius et animi quos velit et.",
-    "date_debut": "2026-06-01T00:06:18",
-    "date_fin": "2052-06-24",
+    "date_debut": "2026-06-04T19:42:36",
+    "date_fin": "2052-06-27",
     "status": "archived",
     "progression": 7,
     "couleur": "#fEEeDb"
@@ -18594,8 +23011,8 @@ $response = $client-&gt;put(
         'json' =&gt; [
             'nom' =&gt; 'b',
             'description' =&gt; 'Eius et animi quos velit et.',
-            'date_debut' =&gt; '2026-06-01T00:06:18',
-            'date_fin' =&gt; '2052-06-24',
+            'date_debut' =&gt; '2026-06-04T19:42:36',
+            'date_fin' =&gt; '2052-06-27',
             'status' =&gt; 'archived',
             'progression' =&gt; 7,
             'couleur' =&gt; '#fEEeDb',
@@ -18749,10 +23166,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_debut"                data-endpoint="PUTapi-activites--activite-"
-               value="2026-06-01T00:06:18"
+               value="2026-06-04T19:42:36"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-06-01T00:06:18</code></p>
+<p>Must be a valid date. Example: <code>2026-06-04T19:42:36</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>date_fin</code></b>&nbsp;&nbsp;
@@ -18761,10 +23178,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_fin"                data-endpoint="PUTapi-activites--activite-"
-               value="2052-06-24"
+               value="2052-06-27"
                data-component="body">
     <br>
-<p>Must be a valid date. Must be a date after or equal to <code>date_debut</code>. Example: <code>2052-06-24</code></p>
+<p>Must be a valid date. Must be a date after or equal to <code>date_debut</code>. Example: <code>2052-06-27</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>status</code></b>&nbsp;&nbsp;
@@ -21577,9 +25994,9 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --form "indicateurs_resultats=architecto"\
     --form "statut=a_faire"\
     --form "priorite=elevee"\
-    --form "echeance=2026-06-01"\
-    --form "date_debut=2026-06-01"\
-    --form "date_fin_reelle=2026-06-01"\
+    --form "echeance=2026-06-04"\
+    --form "date_debut=2026-06-04"\
+    --form "date_fin_reelle=2026-06-04"\
     --form "estimated_hours=16"\
     --form "actual_hours=17"\
     --form "taux_realisation=15"\
@@ -21589,8 +26006,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --form "validation_n1_required=1"\
     --form "validation_n2_required="\
     --form "external_links=["architecto","architecto"]"\
-    --form "uploaded_files[]=@/tmp/phprjc76gc3umpu5yB5dyj" \
-    --form "cover_image=@/tmp/phps7j588mtr4ib4Qt6kv4" </code></pre></div>
+    --form "uploaded_files[]=@/tmp/php9d5turnim2al7vQ1cdN" \
+    --form "cover_image=@/tmp/phpb5vrp39bbadu68Omb1M" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -21612,9 +26029,9 @@ body.append('objectif', 'architecto');
 body.append('indicateurs_resultats', 'architecto');
 body.append('statut', 'a_faire');
 body.append('priorite', 'elevee');
-body.append('echeance', '2026-06-01');
-body.append('date_debut', '2026-06-01');
-body.append('date_fin_reelle', '2026-06-01');
+body.append('echeance', '2026-06-04');
+body.append('date_debut', '2026-06-04');
+body.append('date_fin_reelle', '2026-06-04');
 body.append('estimated_hours', '16');
 body.append('actual_hours', '17');
 body.append('taux_realisation', '15');
@@ -21676,15 +26093,15 @@ $response = $client-&gt;post(
             ],
             [
                 'name' =&gt; 'echeance',
-                'contents' =&gt; '2026-06-01'
+                'contents' =&gt; '2026-06-04'
             ],
             [
                 'name' =&gt; 'date_debut',
-                'contents' =&gt; '2026-06-01'
+                'contents' =&gt; '2026-06-04'
             ],
             [
                 'name' =&gt; 'date_fin_reelle',
-                'contents' =&gt; '2026-06-01'
+                'contents' =&gt; '2026-06-04'
             ],
             [
                 'name' =&gt; 'estimated_hours',
@@ -21724,11 +26141,11 @@ $response = $client-&gt;post(
             ],
             [
                 'name' =&gt; 'uploaded_files[]',
-                'contents' =&gt; fopen('/tmp/phprjc76gc3umpu5yB5dyj', 'r')
+                'contents' =&gt; fopen('/tmp/php9d5turnim2al7vQ1cdN', 'r')
             ],
             [
                 'name' =&gt; 'cover_image',
-                'contents' =&gt; fopen('/tmp/phps7j588mtr4ib4Qt6kv4', 'r')
+                'contents' =&gt; fopen('/tmp/phpb5vrp39bbadu68Omb1M', 'r')
             ],
         ],
     ]
@@ -21931,10 +26348,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="echeance"                data-endpoint="POSTapi-taches"
-               value="2026-06-01"
+               value="2026-06-04"
                data-component="body">
     <br>
-<p>✅ Dates avec format flexible. Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-01</code></p>
+<p>✅ Dates avec format flexible. Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-04</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>date_debut</code></b>&nbsp;&nbsp;
@@ -21943,10 +26360,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_debut"                data-endpoint="POSTapi-taches"
-               value="2026-06-01"
+               value="2026-06-04"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-01</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-04</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>date_fin_reelle</code></b>&nbsp;&nbsp;
@@ -21955,10 +26372,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_fin_reelle"                data-endpoint="POSTapi-taches"
-               value="2026-06-01"
+               value="2026-06-04"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-01</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-04</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>estimated_hours</code></b>&nbsp;&nbsp;
@@ -22102,7 +26519,7 @@ Must be one of:
                value=""
                data-component="body">
     <br>
-<p>✅ CORRECTION 2: Validation de l'image de couverture. Must be a file. Must be an image. Must not be greater than 2048 kilobytes. Example: <code>/tmp/phps7j588mtr4ib4Qt6kv4</code></p>
+<p>✅ CORRECTION 2: Validation de l'image de couverture. Must be a file. Must be an image. Must not be greater than 2048 kilobytes. Example: <code>/tmp/phpb5vrp39bbadu68Omb1M</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>external_links</code></b>&nbsp;&nbsp;
@@ -23519,7 +27936,7 @@ Must be one of:
     --form "solutions_envisagees=architecto"\
     --form "observations=architecto"\
     --form "documents_to_delete[]=16"\
-    --form "documents[]=@/tmp/phpqetnl2jd8nu8dYS1BGO" </code></pre></div>
+    --form "documents[]=@/tmp/phpuipv3jj3ik536t0ECJS" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -23592,7 +28009,7 @@ $response = $client-&gt;post(
             ],
             [
                 'name' =&gt; 'documents[]',
-                'contents' =&gt; fopen('/tmp/phpqetnl2jd8nu8dYS1BGO', 'r')
+                'contents' =&gt; fopen('/tmp/phpuipv3jj3ik536t0ECJS', 'r')
             ],
         ],
     ]
@@ -24506,9 +28923,9 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --form "indicateurs_resultats=architecto"\
     --form "statut=en_cours"\
     --form "priorite=elevee"\
-    --form "echeance=2026-06-01"\
-    --form "date_debut=2026-06-01"\
-    --form "date_fin_reelle=2026-06-01"\
+    --form "echeance=2026-06-04"\
+    --form "date_debut=2026-06-04"\
+    --form "date_fin_reelle=2026-06-04"\
     --form "taux_realisation=16"\
     --form "estimated_hours=17"\
     --form "actual_hours=15"\
@@ -24518,8 +28935,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --form "validation_n1_required=1"\
     --form "validation_n2_required="\
     --form "external_links=["architecto","architecto"]"\
-    --form "uploaded_files[]=@/tmp/phpqcpfdsbv3lsq6SMyfyX" \
-    --form "cover_image=@/tmp/phpi4keuf2shkpvbS3r6QO" </code></pre></div>
+    --form "uploaded_files[]=@/tmp/phpjubk0t22ate88OTPHqj" \
+    --form "cover_image=@/tmp/phpfj7etoakmgorbSzOcfi" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -24540,9 +28957,9 @@ body.append('objectif', 'architecto');
 body.append('indicateurs_resultats', 'architecto');
 body.append('statut', 'en_cours');
 body.append('priorite', 'elevee');
-body.append('echeance', '2026-06-01');
-body.append('date_debut', '2026-06-01');
-body.append('date_fin_reelle', '2026-06-01');
+body.append('echeance', '2026-06-04');
+body.append('date_debut', '2026-06-04');
+body.append('date_fin_reelle', '2026-06-04');
 body.append('taux_realisation', '16');
 body.append('estimated_hours', '17');
 body.append('actual_hours', '15');
@@ -24600,15 +29017,15 @@ $response = $client-&gt;put(
             ],
             [
                 'name' =&gt; 'echeance',
-                'contents' =&gt; '2026-06-01'
+                'contents' =&gt; '2026-06-04'
             ],
             [
                 'name' =&gt; 'date_debut',
-                'contents' =&gt; '2026-06-01'
+                'contents' =&gt; '2026-06-04'
             ],
             [
                 'name' =&gt; 'date_fin_reelle',
-                'contents' =&gt; '2026-06-01'
+                'contents' =&gt; '2026-06-04'
             ],
             [
                 'name' =&gt; 'taux_realisation',
@@ -24648,11 +29065,11 @@ $response = $client-&gt;put(
             ],
             [
                 'name' =&gt; 'uploaded_files[]',
-                'contents' =&gt; fopen('/tmp/phpqcpfdsbv3lsq6SMyfyX', 'r')
+                'contents' =&gt; fopen('/tmp/phpjubk0t22ate88OTPHqj', 'r')
             ],
             [
                 'name' =&gt; 'cover_image',
-                'contents' =&gt; fopen('/tmp/phpi4keuf2shkpvbS3r6QO', 'r')
+                'contents' =&gt; fopen('/tmp/phpfj7etoakmgorbSzOcfi', 'r')
             ],
         ],
     ]
@@ -24844,10 +29261,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="echeance"                data-endpoint="PUTapi-taches--tache_id-"
-               value="2026-06-01"
+               value="2026-06-04"
                data-component="body">
     <br>
-<p>Dates. Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-01</code></p>
+<p>Dates. Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-04</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>date_debut</code></b>&nbsp;&nbsp;
@@ -24856,10 +29273,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_debut"                data-endpoint="PUTapi-taches--tache_id-"
-               value="2026-06-01"
+               value="2026-06-04"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-01</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-04</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>date_fin_reelle</code></b>&nbsp;&nbsp;
@@ -24868,10 +29285,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_fin_reelle"                data-endpoint="PUTapi-taches--tache_id-"
-               value="2026-06-01"
+               value="2026-06-04"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-01</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-04</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>taux_realisation</code></b>&nbsp;&nbsp;
@@ -25015,7 +29432,7 @@ Must be one of:
                value=""
                data-component="body">
     <br>
-<p>✅ CORRECTION: Même validation de l'image. Must be a file. Must be an image. Must not be greater than 2048 kilobytes. Example: <code>/tmp/phpi4keuf2shkpvbS3r6QO</code></p>
+<p>✅ CORRECTION: Même validation de l'image. Must be a file. Must be an image. Must not be greater than 2048 kilobytes. Example: <code>/tmp/phpfj7etoakmgorbSzOcfi</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>external_links</code></b>&nbsp;&nbsp;
@@ -25095,9 +29512,9 @@ Must be one of:
     --form "indicateurs_resultats=architecto"\
     --form "statut=en_cours"\
     --form "priorite=elevee"\
-    --form "echeance=2026-06-01"\
-    --form "date_debut=2026-06-01"\
-    --form "date_fin_reelle=2026-06-01"\
+    --form "echeance=2026-06-04"\
+    --form "date_debut=2026-06-04"\
+    --form "date_fin_reelle=2026-06-04"\
     --form "taux_realisation=16"\
     --form "estimated_hours=17"\
     --form "actual_hours=15"\
@@ -25107,8 +29524,8 @@ Must be one of:
     --form "validation_n1_required=1"\
     --form "validation_n2_required="\
     --form "external_links=["architecto","architecto"]"\
-    --form "uploaded_files[]=@/tmp/php85bjlsnrnu3v0l8eb2e" \
-    --form "cover_image=@/tmp/phprge3eqegt14lf113K8K" </code></pre></div>
+    --form "uploaded_files[]=@/tmp/phphkctj6o0qp6ldqpdILB" \
+    --form "cover_image=@/tmp/php9ik7q8o27mh22yn47Te" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -25129,9 +29546,9 @@ body.append('objectif', 'architecto');
 body.append('indicateurs_resultats', 'architecto');
 body.append('statut', 'en_cours');
 body.append('priorite', 'elevee');
-body.append('echeance', '2026-06-01');
-body.append('date_debut', '2026-06-01');
-body.append('date_fin_reelle', '2026-06-01');
+body.append('echeance', '2026-06-04');
+body.append('date_debut', '2026-06-04');
+body.append('date_fin_reelle', '2026-06-04');
 body.append('taux_realisation', '16');
 body.append('estimated_hours', '17');
 body.append('actual_hours', '15');
@@ -25189,15 +29606,15 @@ $response = $client-&gt;patch(
             ],
             [
                 'name' =&gt; 'echeance',
-                'contents' =&gt; '2026-06-01'
+                'contents' =&gt; '2026-06-04'
             ],
             [
                 'name' =&gt; 'date_debut',
-                'contents' =&gt; '2026-06-01'
+                'contents' =&gt; '2026-06-04'
             ],
             [
                 'name' =&gt; 'date_fin_reelle',
-                'contents' =&gt; '2026-06-01'
+                'contents' =&gt; '2026-06-04'
             ],
             [
                 'name' =&gt; 'taux_realisation',
@@ -25237,11 +29654,11 @@ $response = $client-&gt;patch(
             ],
             [
                 'name' =&gt; 'uploaded_files[]',
-                'contents' =&gt; fopen('/tmp/php85bjlsnrnu3v0l8eb2e', 'r')
+                'contents' =&gt; fopen('/tmp/phphkctj6o0qp6ldqpdILB', 'r')
             ],
             [
                 'name' =&gt; 'cover_image',
-                'contents' =&gt; fopen('/tmp/phprge3eqegt14lf113K8K', 'r')
+                'contents' =&gt; fopen('/tmp/php9ik7q8o27mh22yn47Te', 'r')
             ],
         ],
     ]
@@ -25433,10 +29850,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="echeance"                data-endpoint="PATCHapi-taches--tache_id-"
-               value="2026-06-01"
+               value="2026-06-04"
                data-component="body">
     <br>
-<p>Dates. Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-01</code></p>
+<p>Dates. Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-04</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>date_debut</code></b>&nbsp;&nbsp;
@@ -25445,10 +29862,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_debut"                data-endpoint="PATCHapi-taches--tache_id-"
-               value="2026-06-01"
+               value="2026-06-04"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-01</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-04</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>date_fin_reelle</code></b>&nbsp;&nbsp;
@@ -25457,10 +29874,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_fin_reelle"                data-endpoint="PATCHapi-taches--tache_id-"
-               value="2026-06-01"
+               value="2026-06-04"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-01</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-04</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>taux_realisation</code></b>&nbsp;&nbsp;
@@ -25604,7 +30021,7 @@ Must be one of:
                value=""
                data-component="body">
     <br>
-<p>✅ CORRECTION: Même validation de l'image. Must be a file. Must be an image. Must not be greater than 2048 kilobytes. Example: <code>/tmp/phprge3eqegt14lf113K8K</code></p>
+<p>✅ CORRECTION: Même validation de l'image. Must be a file. Must be an image. Must not be greater than 2048 kilobytes. Example: <code>/tmp/php9ik7q8o27mh22yn47Te</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>external_links</code></b>&nbsp;&nbsp;
@@ -27115,7 +31532,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --data "{
     \"titre\": \"b\",
     \"description\": \"Eius et animi quos velit et.\",
-    \"date_echeance\": \"2026-06-01T00:06:20\",
+    \"date_echeance\": \"2026-06-04T19:42:37\",
     \"poids\": 1,
     \"ordre\": 42,
     \"validation_n0_required\": false,
@@ -27139,7 +31556,7 @@ const headers = {
 let body = {
     "titre": "b",
     "description": "Eius et animi quos velit et.",
-    "date_echeance": "2026-06-01T00:06:20",
+    "date_echeance": "2026-06-04T19:42:37",
     "poids": 1,
     "ordre": 42,
     "validation_n0_required": false,
@@ -27168,7 +31585,7 @@ $response = $client-&gt;post(
         'json' =&gt; [
             'titre' =&gt; 'b',
             'description' =&gt; 'Eius et animi quos velit et.',
-            'date_echeance' =&gt; '2026-06-01T00:06:20',
+            'date_echeance' =&gt; '2026-06-04T19:42:37',
             'poids' =&gt; 1,
             'ordre' =&gt; 42,
             'validation_n0_required' =&gt; false,
@@ -27324,10 +31741,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_echeance"                data-endpoint="POSTapi-taches--tache_id--sous-taches"
-               value="2026-06-01T00:06:20"
+               value="2026-06-04T19:42:37"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-06-01T00:06:20</code></p>
+<p>Must be a valid date. Example: <code>2026-06-04T19:42:37</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>poids</code></b>&nbsp;&nbsp;
@@ -27439,7 +31856,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
     --header "Content-Type: multipart/form-data" \
     --header "Accept: application/json" \
-    --form "files[]=@/tmp/php0si2cbpedvt43m2y3a9" </code></pre></div>
+    --form "files[]=@/tmp/phpdeldvfieadp78Oqg5D9" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -27477,7 +31894,7 @@ $response = $client-&gt;post(
         'multipart' =&gt; [
             [
                 'name' =&gt; 'files[]',
-                'contents' =&gt; fopen('/tmp/php0si2cbpedvt43m2y3a9', 'r')
+                'contents' =&gt; fopen('/tmp/phpdeldvfieadp78Oqg5D9', 'r')
             ],
         ],
     ]
@@ -28514,7 +32931,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"description\": \"Eius et animi quos velit et.\",
     \"statut\": \"termine\",
     \"progression\": 1,
-    \"date_echeance\": \"2026-06-01T00:06:20\",
+    \"date_echeance\": \"2026-06-04T19:42:37\",
     \"poids\": 5,
     \"ordre\": 9,
     \"validation_n0_required\": false,
@@ -28540,7 +32957,7 @@ let body = {
     "description": "Eius et animi quos velit et.",
     "statut": "termine",
     "progression": 1,
-    "date_echeance": "2026-06-01T00:06:20",
+    "date_echeance": "2026-06-04T19:42:37",
     "poids": 5,
     "ordre": 9,
     "validation_n0_required": false,
@@ -28571,7 +32988,7 @@ $response = $client-&gt;put(
             'description' =&gt; 'Eius et animi quos velit et.',
             'statut' =&gt; 'termine',
             'progression' =&gt; 1,
-            'date_echeance' =&gt; '2026-06-01T00:06:20',
+            'date_echeance' =&gt; '2026-06-04T19:42:37',
             'poids' =&gt; 5,
             'ordre' =&gt; 9,
             'validation_n0_required' =&gt; false,
@@ -28753,10 +33170,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_echeance"                data-endpoint="PUTapi-sous-taches--sousTache_id-"
-               value="2026-06-01T00:06:20"
+               value="2026-06-04T19:42:37"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-06-01T00:06:20</code></p>
+<p>Must be a valid date. Example: <code>2026-06-04T19:42:37</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>poids</code></b>&nbsp;&nbsp;
@@ -29601,7 +34018,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --form "difficultes_rencontrees=architecto"\
     --form "solutions_envisagees=architecto"\
     --form "observations=architecto"\
-    --form "documents[]=@/tmp/phpcfl79j89tla66znF44j" </code></pre></div>
+    --form "documents[]=@/tmp/phpifi1hag1bkk53lpnck6" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -29669,7 +34086,7 @@ $response = $client-&gt;post(
             ],
             [
                 'name' =&gt; 'documents[]',
-                'contents' =&gt; fopen('/tmp/phpcfl79j89tla66znF44j', 'r')
+                'contents' =&gt; fopen('/tmp/phpifi1hag1bkk53lpnck6', 'r')
             ],
         ],
     ]
@@ -29890,7 +34307,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --form "difficultes_rencontrees=architecto"\
     --form "solutions_envisagees=architecto"\
     --form "observations=architecto"\
-    --form "documents[]=@/tmp/phpv7k7i3ra7v243RiBdfX" </code></pre></div>
+    --form "documents[]=@/tmp/php89hg75lgd8q4fPd7JMh" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -29958,7 +34375,7 @@ $response = $client-&gt;put(
             ],
             [
                 'name' =&gt; 'documents[]',
-                'contents' =&gt; fopen('/tmp/phpv7k7i3ra7v243RiBdfX', 'r')
+                'contents' =&gt; fopen('/tmp/php89hg75lgd8q4fPd7JMh', 'r')
             ],
         ],
     ]
@@ -34522,8 +38939,8 @@ adds the target's identity for the UI header.</p>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"start\": \"2026-06-01\",
-    \"end\": \"2052-06-24\"
+    \"start\": \"2026-06-04\",
+    \"end\": \"2052-06-27\"
 }"
 </code></pre></div>
 
@@ -34540,8 +38957,8 @@ const headers = {
 };
 
 let body = {
-    "start": "2026-06-01",
-    "end": "2052-06-24"
+    "start": "2026-06-04",
+    "end": "2052-06-27"
 };
 
 fetch(url, {
@@ -34563,8 +38980,8 @@ $response = $client-&gt;get(
             'Accept' =&gt; 'application/json',
         ],
         'json' =&gt; [
-            'start' =&gt; '2026-06-01',
-            'end' =&gt; '2052-06-24',
+            'start' =&gt; '2026-06-04',
+            'end' =&gt; '2052-06-27',
         ],
     ]
 );
@@ -34696,10 +39113,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="start"                data-endpoint="GETapi-evaluations-personnel--user_id--score"
-               value="2026-06-01"
+               value="2026-06-04"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-01</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-04</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>end</code></b>&nbsp;&nbsp;
@@ -34708,10 +39125,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="end"                data-endpoint="GETapi-evaluations-personnel--user_id--score"
-               value="2052-06-24"
+               value="2052-06-27"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start</code>. Example: <code>2052-06-24</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start</code>. Example: <code>2052-06-27</code></p>
         </div>
         </form>
 
@@ -34744,8 +39161,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Accept: application/json" \
     --data "{
     \"section\": \"directed_tasks\",
-    \"start\": \"2026-06-01\",
-    \"end\": \"2052-06-24\",
+    \"start\": \"2026-06-04\",
+    \"end\": \"2052-06-27\",
     \"statut\": \"architecto\",
     \"projet_id\": 16,
     \"activite_id\": 16,
@@ -34767,8 +39184,8 @@ const headers = {
 
 let body = {
     "section": "directed_tasks",
-    "start": "2026-06-01",
-    "end": "2052-06-24",
+    "start": "2026-06-04",
+    "end": "2052-06-27",
     "statut": "architecto",
     "projet_id": 16,
     "activite_id": 16,
@@ -34795,8 +39212,8 @@ $response = $client-&gt;get(
         ],
         'json' =&gt; [
             'section' =&gt; 'directed_tasks',
-            'start' =&gt; '2026-06-01',
-            'end' =&gt; '2052-06-24',
+            'start' =&gt; '2026-06-04',
+            'end' =&gt; '2052-06-27',
             'statut' =&gt; 'architecto',
             'projet_id' =&gt; 16,
             'activite_id' =&gt; 16,
@@ -34946,10 +39363,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="start"                data-endpoint="GETapi-evaluations-personnel--user_id--historique"
-               value="2026-06-01"
+               value="2026-06-04"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-01</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-04</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>end</code></b>&nbsp;&nbsp;
@@ -34958,10 +39375,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="end"                data-endpoint="GETapi-evaluations-personnel--user_id--historique"
-               value="2052-06-24"
+               value="2052-06-27"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start</code>. Example: <code>2052-06-24</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start</code>. Example: <code>2052-06-27</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>statut</code></b>&nbsp;&nbsp;
@@ -35033,8 +39450,8 @@ Query params: start, end (Y-m-d)</p>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"start\": \"2026-06-01\",
-    \"end\": \"2052-06-24\"
+    \"start\": \"2026-06-04\",
+    \"end\": \"2052-06-27\"
 }"
 </code></pre></div>
 
@@ -35051,8 +39468,8 @@ const headers = {
 };
 
 let body = {
-    "start": "2026-06-01",
-    "end": "2052-06-24"
+    "start": "2026-06-04",
+    "end": "2052-06-27"
 };
 
 fetch(url, {
@@ -35074,8 +39491,8 @@ $response = $client-&gt;get(
             'Accept' =&gt; 'application/json',
         ],
         'json' =&gt; [
-            'start' =&gt; '2026-06-01',
-            'end' =&gt; '2052-06-24',
+            'start' =&gt; '2026-06-04',
+            'end' =&gt; '2052-06-27',
         ],
     ]
 );
@@ -35207,10 +39624,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="start"                data-endpoint="GETapi-evaluations-personnel--user_id--export-pdf"
-               value="2026-06-01"
+               value="2026-06-04"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-01</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-06-04</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>end</code></b>&nbsp;&nbsp;
@@ -35219,10 +39636,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="end"                data-endpoint="GETapi-evaluations-personnel--user_id--export-pdf"
-               value="2052-06-24"
+               value="2052-06-27"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start</code>. Example: <code>2052-06-24</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start</code>. Example: <code>2052-06-27</code></p>
         </div>
         </form>
 
@@ -40024,7 +44441,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"can_edit\": false,
     \"can_delete\": true,
     \"can_share\": true,
-    \"expires_at\": \"2022-06-25\"
+    \"expires_at\": \"2022-06-29\"
 }"
 </code></pre></div>
 
@@ -40047,7 +44464,7 @@ let body = {
     "can_edit": false,
     "can_delete": true,
     "can_share": true,
-    "expires_at": "2022-06-25"
+    "expires_at": "2022-06-29"
 };
 
 fetch(url, {
@@ -40075,7 +44492,7 @@ $response = $client-&gt;post(
             'can_edit' =&gt; false,
             'can_delete' =&gt; true,
             'can_share' =&gt; true,
-            'expires_at' =&gt; '2022-06-25',
+            'expires_at' =&gt; '2022-06-29',
         ],
     ]
 );
@@ -40312,10 +44729,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="expires_at"                data-endpoint="POSTapi-documents--document_id--permissions-grant"
-               value="2022-06-25"
+               value="2022-06-29"
                data-component="body">
     <br>
-<p>Must be a valid date. Must be a date after <code>today</code>. Must be a date before <code>+5 years</code>. Example: <code>2022-06-25</code></p>
+<p>Must be a valid date. Must be a date after <code>today</code>. Must be a date before <code>+5 years</code>. Example: <code>2022-06-29</code></p>
         </div>
         </form>
 
@@ -40525,7 +44942,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
         \"can_delete\": true,
         \"can_share\": false
     },
-    \"expires_at\": \"2052-06-24\"
+    \"expires_at\": \"2052-06-28\"
 }"
 </code></pre></div>
 
@@ -40549,7 +44966,7 @@ let body = {
         "can_delete": true,
         "can_share": false
     },
-    "expires_at": "2052-06-24"
+    "expires_at": "2052-06-28"
 };
 
 fetch(url, {
@@ -40572,7 +44989,7 @@ $response = $client-&gt;post(
         ],
         'json' =&gt; [
             'permissions' =&gt; ['can_view' =&gt; true, 'can_download' =&gt; true, 'can_edit' =&gt; false, 'can_delete' =&gt; true, 'can_share' =&gt; false],
-            'expires_at' =&gt; '2052-06-24',
+            'expires_at' =&gt; '2052-06-28',
         ],
     ]
 );
@@ -40823,10 +45240,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="expires_at"                data-endpoint="POSTapi-documents--document_id--share"
-               value="2052-06-24"
+               value="2052-06-28"
                data-component="body">
     <br>
-<p>Must be a valid date. Must be a date after <code>now</code>. Example: <code>2052-06-24</code></p>
+<p>Must be a valid date. Must be a date after <code>now</code>. Example: <code>2052-06-28</code></p>
         </div>
         </form>
 
@@ -41574,7 +45991,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --form "social_links[linkedin]=http://www.baumbach.org/et-modi-ipsum-nostrum-omnis-autem-et-consequatur"\
     --form "social_links[twitter]=http://leffler.com/"\
     --form "social_links[github]=http://vonrueden.com/"\
-    --form "avatar=@/tmp/phpkv4d6d98b3c85ya1w0s" </code></pre></div>
+    --form "avatar=@/tmp/phpnsjestdi20qe442tI5g" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -41672,7 +46089,7 @@ $response = $client-&gt;put(
             ],
             [
                 'name' =&gt; 'avatar',
-                'contents' =&gt; fopen('/tmp/phpkv4d6d98b3c85ya1w0s', 'r')
+                'contents' =&gt; fopen('/tmp/phpnsjestdi20qe442tI5g', 'r')
             ],
         ],
     ]
@@ -41888,7 +46305,7 @@ Must be one of:
                value=""
                data-component="body">
     <br>
-<p>Must be an image. Must not be greater than 5120 kilobytes. Example: <code>/tmp/phpkv4d6d98b3c85ya1w0s</code></p>
+<p>Must be an image. Must not be greater than 5120 kilobytes. Example: <code>/tmp/phpnsjestdi20qe442tI5g</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
         <details>
@@ -41970,7 +46387,7 @@ Must be one of:
     --form "social_links[linkedin]=http://www.baumbach.org/et-modi-ipsum-nostrum-omnis-autem-et-consequatur"\
     --form "social_links[twitter]=http://leffler.com/"\
     --form "social_links[github]=http://vonrueden.com/"\
-    --form "avatar=@/tmp/php243jsh8grp3cejgMwUw" </code></pre></div>
+    --form "avatar=@/tmp/phpnfhgplippd2939rXEtT" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -42068,7 +46485,7 @@ $response = $client-&gt;post(
             ],
             [
                 'name' =&gt; 'avatar',
-                'contents' =&gt; fopen('/tmp/php243jsh8grp3cejgMwUw', 'r')
+                'contents' =&gt; fopen('/tmp/phpnfhgplippd2939rXEtT', 'r')
             ],
         ],
     ]
@@ -42284,7 +46701,7 @@ Must be one of:
                value=""
                data-component="body">
     <br>
-<p>Must be an image. Must not be greater than 5120 kilobytes. Example: <code>/tmp/php243jsh8grp3cejgMwUw</code></p>
+<p>Must be an image. Must not be greater than 5120 kilobytes. Example: <code>/tmp/phpnfhgplippd2939rXEtT</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
         <details>
@@ -48503,7 +52920,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --form "commentable_type=architecto"\
     --form "commentable_id=16"\
     --form "content=n"\
-    --form "attachments[]=@/tmp/php8js3qtska3tn2sY03ce" </code></pre></div>
+    --form "attachments[]=@/tmp/phpa9lf7t4e0ffaamzumwX" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -48556,7 +52973,7 @@ $response = $client-&gt;post(
             ],
             [
                 'name' =&gt; 'attachments[]',
-                'contents' =&gt; fopen('/tmp/php8js3qtska3tn2sY03ce', 'r')
+                'contents' =&gt; fopen('/tmp/phpa9lf7t4e0ffaamzumwX', 'r')
             ],
         ],
     ]
@@ -49423,7 +53840,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
     --header "Content-Type: multipart/form-data" \
     --header "Accept: application/json" \
-    --form "file=@/tmp/phpp0v1jnoi30vm3T7avWd" </code></pre></div>
+    --form "file=@/tmp/php5fdg4k1ksprf2gU770C" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -49461,7 +53878,7 @@ $response = $client-&gt;post(
         'multipart' =&gt; [
             [
                 'name' =&gt; 'file',
-                'contents' =&gt; fopen('/tmp/phpp0v1jnoi30vm3T7avWd', 'r')
+                'contents' =&gt; fopen('/tmp/php5fdg4k1ksprf2gU770C', 'r')
             ],
         ],
     ]
@@ -49580,7 +53997,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value=""
                data-component="body">
     <br>
-<p>Must be a file. Must not be greater than 10240 kilobytes. Example: <code>/tmp/phpp0v1jnoi30vm3T7avWd</code></p>
+<p>Must be a file. Must not be greater than 10240 kilobytes. Example: <code>/tmp/php5fdg4k1ksprf2gU770C</code></p>
         </div>
         </form>
 
@@ -50793,8 +55210,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"start_date\": \"2026-06-01T00:06:24\",
-    \"end_date\": \"2052-06-24\",
+    \"start_date\": \"2026-06-04T19:42:40\",
+    \"end_date\": \"2052-06-27\",
     \"per_page\": 22
 }"
 </code></pre></div>
@@ -50812,8 +55229,8 @@ const headers = {
 };
 
 let body = {
-    "start_date": "2026-06-01T00:06:24",
-    "end_date": "2052-06-24",
+    "start_date": "2026-06-04T19:42:40",
+    "end_date": "2052-06-27",
     "per_page": 22
 };
 
@@ -50836,8 +55253,8 @@ $response = $client-&gt;get(
             'Accept' =&gt; 'application/json',
         ],
         'json' =&gt; [
-            'start_date' =&gt; '2026-06-01T00:06:24',
-            'end_date' =&gt; '2052-06-24',
+            'start_date' =&gt; '2026-06-04T19:42:40',
+            'end_date' =&gt; '2052-06-27',
             'per_page' =&gt; 22,
         ],
     ]
@@ -50957,10 +55374,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="start_date"                data-endpoint="GETapi-activities-date-range"
-               value="2026-06-01T00:06:24"
+               value="2026-06-04T19:42:40"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-06-01T00:06:24</code></p>
+<p>Must be a valid date. Example: <code>2026-06-04T19:42:40</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>end_date</code></b>&nbsp;&nbsp;
@@ -50969,10 +55386,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="end_date"                data-endpoint="GETapi-activities-date-range"
-               value="2052-06-24"
+               value="2052-06-27"
                data-component="body">
     <br>
-<p>Must be a valid date. Must be a date after or equal to <code>start_date</code>. Example: <code>2052-06-24</code></p>
+<p>Must be a valid date. Must be a date after or equal to <code>start_date</code>. Example: <code>2052-06-27</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>per_page</code></b>&nbsp;&nbsp;
@@ -51007,8 +55424,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"start_date\": \"2026-06-01T00:06:24\",
-    \"end_date\": \"2052-06-24\"
+    \"start_date\": \"2026-06-04T19:42:40\",
+    \"end_date\": \"2052-06-27\"
 }"
 </code></pre></div>
 
@@ -51025,8 +55442,8 @@ const headers = {
 };
 
 let body = {
-    "start_date": "2026-06-01T00:06:24",
-    "end_date": "2052-06-24"
+    "start_date": "2026-06-04T19:42:40",
+    "end_date": "2052-06-27"
 };
 
 fetch(url, {
@@ -51048,8 +55465,8 @@ $response = $client-&gt;get(
             'Accept' =&gt; 'application/json',
         ],
         'json' =&gt; [
-            'start_date' =&gt; '2026-06-01T00:06:24',
-            'end_date' =&gt; '2052-06-24',
+            'start_date' =&gt; '2026-06-04T19:42:40',
+            'end_date' =&gt; '2052-06-27',
         ],
     ]
 );
@@ -51168,10 +55585,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="start_date"                data-endpoint="GETapi-activities-stats"
-               value="2026-06-01T00:06:24"
+               value="2026-06-04T19:42:40"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-06-01T00:06:24</code></p>
+<p>Must be a valid date. Example: <code>2026-06-04T19:42:40</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>end_date</code></b>&nbsp;&nbsp;
@@ -51180,10 +55597,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="end_date"                data-endpoint="GETapi-activities-stats"
-               value="2052-06-24"
+               value="2052-06-27"
                data-component="body">
     <br>
-<p>Must be a valid date. Must be a date after or equal to <code>start_date</code>. Example: <code>2052-06-24</code></p>
+<p>Must be a valid date. Must be a date after or equal to <code>start_date</code>. Example: <code>2052-06-27</code></p>
         </div>
         </form>
 
@@ -52632,11 +57049,11 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"document_uploaded_email\": true,
     \"document_uploaded_push\": false,
     \"digest_frequency\": \"none\",
-    \"digest_time\": \"00:06:25\",
+    \"digest_time\": \"19:42:40\",
     \"digest_day_of_week\": 1,
     \"quiet_hours_enabled\": true,
-    \"quiet_hours_start\": \"00:06:25\",
-    \"quiet_hours_end\": \"00:06:25\"
+    \"quiet_hours_start\": \"19:42:40\",
+    \"quiet_hours_end\": \"19:42:40\"
 }"
 </code></pre></div>
 
@@ -52681,11 +57098,11 @@ let body = {
     "document_uploaded_email": true,
     "document_uploaded_push": false,
     "digest_frequency": "none",
-    "digest_time": "00:06:25",
+    "digest_time": "19:42:40",
     "digest_day_of_week": 1,
     "quiet_hours_enabled": true,
-    "quiet_hours_start": "00:06:25",
-    "quiet_hours_end": "00:06:25"
+    "quiet_hours_start": "19:42:40",
+    "quiet_hours_end": "19:42:40"
 };
 
 fetch(url, {
@@ -52735,11 +57152,11 @@ $response = $client-&gt;put(
             'document_uploaded_email' =&gt; true,
             'document_uploaded_push' =&gt; false,
             'digest_frequency' =&gt; 'none',
-            'digest_time' =&gt; '00:06:25',
+            'digest_time' =&gt; '19:42:40',
             'digest_day_of_week' =&gt; 1,
             'quiet_hours_enabled' =&gt; true,
-            'quiet_hours_start' =&gt; '00:06:25',
-            'quiet_hours_end' =&gt; '00:06:25',
+            'quiet_hours_start' =&gt; '19:42:40',
+            'quiet_hours_end' =&gt; '19:42:40',
         ],
     ]
 );
@@ -53449,10 +57866,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="digest_time"                data-endpoint="PUTapi-notification-preferences"
-               value="00:06:25"
+               value="19:42:40"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>H:i:s</code>. Example: <code>00:06:25</code></p>
+<p>Must be a valid date in the format <code>H:i:s</code>. Example: <code>19:42:40</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>digest_day_of_week</code></b>&nbsp;&nbsp;
@@ -53495,10 +57912,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="quiet_hours_start"                data-endpoint="PUTapi-notification-preferences"
-               value="00:06:25"
+               value="19:42:40"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>H:i:s</code>. Example: <code>00:06:25</code></p>
+<p>Must be a valid date in the format <code>H:i:s</code>. Example: <code>19:42:40</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>quiet_hours_end</code></b>&nbsp;&nbsp;
@@ -53507,10 +57924,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="quiet_hours_end"                data-endpoint="PUTapi-notification-preferences"
-               value="00:06:25"
+               value="19:42:40"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>H:i:s</code>. Example: <code>00:06:25</code></p>
+<p>Must be a valid date in the format <code>H:i:s</code>. Example: <code>19:42:40</code></p>
         </div>
         </form>
 
@@ -54551,6 +58968,166 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="Accept"                data-endpoint="GETapi-teams-my-teams"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        </form>
+
+                    <h2 id="divers-GETapi-teams-unread-total">Retourne le nombre total de messages non lus dans toutes les équipes de l&#039;utilisateur.</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-GETapi-teams-unread-total">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://127.0.0.1:8000/api/teams/unread-total" \
+    --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://127.0.0.1:8000/api/teams/unread-total"
+);
+
+const headers = {
+    "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+
+<div class="php-example">
+    <pre><code class="language-php">$client = new \GuzzleHttp\Client();
+$url = 'http://127.0.0.1:8000/api/teams/unread-total';
+$response = $client-&gt;get(
+    $url,
+    [
+        'headers' =&gt; [
+            'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
+            'Content-Type' =&gt; 'application/json',
+            'Accept' =&gt; 'application/json',
+        ],
+    ]
+);
+$body = $response-&gt;getBody();
+print_r(json_decode((string) $body));</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-teams-unread-total">
+            <blockquote>
+            <p>Example response (401):</p>
+        </blockquote>
+                <details class="annotation">
+            <summary style="cursor: pointer;">
+                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
+            </summary>
+            <pre><code class="language-http">cache-control: no-cache, private
+content-type: application/json
+vary: Origin
+ </code></pre></details>         <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;Unauthenticated.&quot;,
+    &quot;error&quot;: &quot;Non authentifi&eacute;&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-teams-unread-total" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-teams-unread-total"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-teams-unread-total"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-teams-unread-total" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-teams-unread-total">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-teams-unread-total" data-method="GET"
+      data-path="api/teams/unread-total"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-teams-unread-total', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-teams-unread-total"
+                    onclick="tryItOut('GETapi-teams-unread-total');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-teams-unread-total"
+                    onclick="cancelTryOut('GETapi-teams-unread-total');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-teams-unread-total"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/teams/unread-total</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="GETapi-teams-unread-total"
+               value="Bearer {VOTRE_TOKEN_SANCTUM}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {VOTRE_TOKEN_SANCTUM}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-teams-unread-total"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-teams-unread-total"
                value="application/json"
                data-component="header">
     <br>
@@ -55664,7 +60241,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
     --header "Content-Type: multipart/form-data" \
     --header "Accept: application/json" \
-    --form "avatar=@/tmp/phpfg43sliteajt8RVqwlu" </code></pre></div>
+    --form "avatar=@/tmp/phprmdb0pkpidu7eAtS6Wm" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -55702,7 +60279,7 @@ $response = $client-&gt;post(
         'multipart' =&gt; [
             [
                 'name' =&gt; 'avatar',
-                'contents' =&gt; fopen('/tmp/phpfg43sliteajt8RVqwlu', 'r')
+                'contents' =&gt; fopen('/tmp/phprmdb0pkpidu7eAtS6Wm', 'r')
             ],
         ],
     ]
@@ -55821,7 +60398,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value=""
                data-component="body">
     <br>
-<p>Must be an image. Must not be greater than 2048 kilobytes. Example: <code>/tmp/phpfg43sliteajt8RVqwlu</code></p>
+<p>Must be an image. Must not be greater than 2048 kilobytes. Example: <code>/tmp/phprmdb0pkpidu7eAtS6Wm</code></p>
         </div>
         </form>
 
@@ -56344,7 +60921,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
             </div>
                     </form>
 
-                    <h2 id="divers-POSTapi-teams--uuid--presence">Update user presence in team</h2>
+                    <h2 id="divers-POSTapi-teams--uuid--presence">POST api/teams/{uuid}/presence</h2>
 
 <p>
 <small class="badge badge-darkred">requires authentication</small>
@@ -57630,6 +62207,179 @@ You can check the Dev Tools console for debugging information.</code></pre>
             </div>
                     </form>
 
+                    <h2 id="divers-GETapi-teams--uuid--messages-pinned">GET api/teams/{uuid}/messages/pinned</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-GETapi-teams--uuid--messages-pinned">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://127.0.0.1:8000/api/teams/6ff8f7f6-1eb3-3525-be4a-3932c805afed/messages/pinned" \
+    --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://127.0.0.1:8000/api/teams/6ff8f7f6-1eb3-3525-be4a-3932c805afed/messages/pinned"
+);
+
+const headers = {
+    "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+
+<div class="php-example">
+    <pre><code class="language-php">$client = new \GuzzleHttp\Client();
+$url = 'http://127.0.0.1:8000/api/teams/6ff8f7f6-1eb3-3525-be4a-3932c805afed/messages/pinned';
+$response = $client-&gt;get(
+    $url,
+    [
+        'headers' =&gt; [
+            'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
+            'Content-Type' =&gt; 'application/json',
+            'Accept' =&gt; 'application/json',
+        ],
+    ]
+);
+$body = $response-&gt;getBody();
+print_r(json_decode((string) $body));</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-teams--uuid--messages-pinned">
+            <blockquote>
+            <p>Example response (401):</p>
+        </blockquote>
+                <details class="annotation">
+            <summary style="cursor: pointer;">
+                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
+            </summary>
+            <pre><code class="language-http">cache-control: no-cache, private
+content-type: application/json
+vary: Origin
+ </code></pre></details>         <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;Unauthenticated.&quot;,
+    &quot;error&quot;: &quot;Non authentifi&eacute;&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-teams--uuid--messages-pinned" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-teams--uuid--messages-pinned"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-teams--uuid--messages-pinned"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-teams--uuid--messages-pinned" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-teams--uuid--messages-pinned">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-teams--uuid--messages-pinned" data-method="GET"
+      data-path="api/teams/{uuid}/messages/pinned"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-teams--uuid--messages-pinned', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-teams--uuid--messages-pinned"
+                    onclick="tryItOut('GETapi-teams--uuid--messages-pinned');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-teams--uuid--messages-pinned"
+                    onclick="cancelTryOut('GETapi-teams--uuid--messages-pinned');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-teams--uuid--messages-pinned"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/teams/{uuid}/messages/pinned</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="GETapi-teams--uuid--messages-pinned"
+               value="Bearer {VOTRE_TOKEN_SANCTUM}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {VOTRE_TOKEN_SANCTUM}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-teams--uuid--messages-pinned"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-teams--uuid--messages-pinned"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>uuid</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="uuid"                data-endpoint="GETapi-teams--uuid--messages-pinned"
+               value="6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+               data-component="url">
+    <br>
+<p>Example: <code>6ff8f7f6-1eb3-3525-be4a-3932c805afed</code></p>
+            </div>
+                    </form>
+
                     <h2 id="divers-POSTapi-teams--uuid--messages">POST api/teams/{uuid}/messages</h2>
 
 <p>
@@ -57646,12 +62396,12 @@ You can check the Dev Tools console for debugging information.</code></pre>
     <pre><code class="language-bash">curl --request POST \
     "http://127.0.0.1:8000/api/teams/6ff8f7f6-1eb3-3525-be4a-3932c805afed/messages" \
     --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
-    --header "Content-Type: application/json" \
+    --header "Content-Type: multipart/form-data" \
     --header "Accept: application/json" \
-    --data "{
-    \"content\": \"architecto\"
-}"
-</code></pre></div>
+    --form "content=b"\
+    --form "mentions[]=16"\
+    --form "reply_to_id=16"\
+    --form "attachment=@/tmp/phpmtvbp81t7p24ccntluG" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -57661,18 +62411,20 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 const headers = {
     "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
-    "Content-Type": "application/json",
+    "Content-Type": "multipart/form-data",
     "Accept": "application/json",
 };
 
-let body = {
-    "content": "architecto"
-};
+const body = new FormData();
+body.append('content', 'b');
+body.append('mentions[]', '16');
+body.append('reply_to_id', '16');
+body.append('attachment', document.querySelector('input[name="attachment"]').files[0]);
 
 fetch(url, {
     method: "POST",
     headers,
-    body: JSON.stringify(body),
+    body,
 }).then(response =&gt; response.json());</code></pre></div>
 
 
@@ -57684,11 +62436,26 @@ $response = $client-&gt;post(
     [
         'headers' =&gt; [
             'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
-            'Content-Type' =&gt; 'application/json',
+            'Content-Type' =&gt; 'multipart/form-data',
             'Accept' =&gt; 'application/json',
         ],
-        'json' =&gt; [
-            'content' =&gt; 'architecto',
+        'multipart' =&gt; [
+            [
+                'name' =&gt; 'content',
+                'contents' =&gt; 'b'
+            ],
+            [
+                'name' =&gt; 'mentions[]',
+                'contents' =&gt; '16'
+            ],
+            [
+                'name' =&gt; 'reply_to_id',
+                'contents' =&gt; '16'
+            ],
+            [
+                'name' =&gt; 'attachment',
+                'contents' =&gt; fopen('/tmp/phpmtvbp81t7p24ccntluG', 'r')
+            ],
         ],
     ]
 );
@@ -57717,7 +62484,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <form id="form-POSTapi-teams--uuid--messages" data-method="POST"
       data-path="api/teams/{uuid}/messages"
       data-authed="1"
-      data-hasfiles="0"
+      data-hasfiles="1"
       data-isarraybody="0"
       autocomplete="off"
       onsubmit="event.preventDefault(); executeTryOut('POSTapi-teams--uuid--messages', this);">
@@ -57765,10 +62532,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="Content-Type"                data-endpoint="POSTapi-teams--uuid--messages"
-               value="application/json"
+               value="multipart/form-data"
                data-component="header">
     <br>
-<p>Example: <code>application/json</code></p>
+<p>Example: <code>multipart/form-data</code></p>
             </div>
                                 <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
@@ -57803,36 +62570,698 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="content"                data-endpoint="POSTapi-teams--uuid--messages"
-               value="architecto"
+               value="b"
                data-component="body">
     <br>
-<p>Example: <code>architecto</code></p>
+<p>Must not be greater than 5000 characters. Example: <code>b</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>mentions</code></b>&nbsp;&nbsp;
-<small>object</small>&nbsp;
+<small>integer[]</small>&nbsp;
 <i>optional</i> &nbsp;
  &nbsp;
-                <input type="text" style="display: none"
-                              name="mentions"                data-endpoint="POSTapi-teams--uuid--messages"
-               value=""
+                <input type="number" style="display: none"
+               step="any"               name="mentions[0]"                data-endpoint="POSTapi-teams--uuid--messages"
+               data-component="body">
+        <input type="number" style="display: none"
+               name="mentions[1]"                data-endpoint="POSTapi-teams--uuid--messages"
                data-component="body">
     <br>
-
+<p>The <code>id</code> of an existing record in the users table.</p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>reply_to_id</code></b>&nbsp;&nbsp;
-<small>string</small>&nbsp;
+<small>integer</small>&nbsp;
 <i>optional</i> &nbsp;
  &nbsp;
-                <input type="text" style="display: none"
-                              name="reply_to_id"                data-endpoint="POSTapi-teams--uuid--messages"
+                <input type="number" style="display: none"
+               step="any"               name="reply_to_id"                data-endpoint="POSTapi-teams--uuid--messages"
+               value="16"
+               data-component="body">
+    <br>
+<p>The <code>id</code> of an existing record in the team_messages table. Example: <code>16</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>attachment</code></b>&nbsp;&nbsp;
+<small>file</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="file" style="display: none"
+                              name="attachment"                data-endpoint="POSTapi-teams--uuid--messages"
                value=""
                data-component="body">
     <br>
-<p>The <code>id</code> of an existing record in the team_messages table.</p>
+<p>Must be a file. Must not be greater than 10240 kilobytes. Example: <code>/tmp/phpmtvbp81t7p24ccntluG</code></p>
         </div>
         </form>
+
+                    <h2 id="divers-POSTapi-teams--uuid--read">POST api/teams/{uuid}/read</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-POSTapi-teams--uuid--read">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://127.0.0.1:8000/api/teams/6ff8f7f6-1eb3-3525-be4a-3932c805afed/read" \
+    --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://127.0.0.1:8000/api/teams/6ff8f7f6-1eb3-3525-be4a-3932c805afed/read"
+);
+
+const headers = {
+    "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "POST",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+
+<div class="php-example">
+    <pre><code class="language-php">$client = new \GuzzleHttp\Client();
+$url = 'http://127.0.0.1:8000/api/teams/6ff8f7f6-1eb3-3525-be4a-3932c805afed/read';
+$response = $client-&gt;post(
+    $url,
+    [
+        'headers' =&gt; [
+            'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
+            'Content-Type' =&gt; 'application/json',
+            'Accept' =&gt; 'application/json',
+        ],
+    ]
+);
+$body = $response-&gt;getBody();
+print_r(json_decode((string) $body));</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-teams--uuid--read">
+</span>
+<span id="execution-results-POSTapi-teams--uuid--read" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-teams--uuid--read"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-teams--uuid--read"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-teams--uuid--read" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-teams--uuid--read">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-teams--uuid--read" data-method="POST"
+      data-path="api/teams/{uuid}/read"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-teams--uuid--read', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-teams--uuid--read"
+                    onclick="tryItOut('POSTapi-teams--uuid--read');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-teams--uuid--read"
+                    onclick="cancelTryOut('POSTapi-teams--uuid--read');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-teams--uuid--read"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/teams/{uuid}/read</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="POSTapi-teams--uuid--read"
+               value="Bearer {VOTRE_TOKEN_SANCTUM}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {VOTRE_TOKEN_SANCTUM}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-teams--uuid--read"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-teams--uuid--read"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>uuid</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="uuid"                data-endpoint="POSTapi-teams--uuid--read"
+               value="6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+               data-component="url">
+    <br>
+<p>Example: <code>6ff8f7f6-1eb3-3525-be4a-3932c805afed</code></p>
+            </div>
+                    </form>
+
+                    <h2 id="divers-PATCHapi-teams-messages--uuid-">PATCH api/teams/messages/{uuid}</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-PATCHapi-teams-messages--uuid-">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request PATCH \
+    "http://127.0.0.1:8000/api/teams/messages/6ff8f7f6-1eb3-3525-be4a-3932c805afed" \
+    --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"content\": \"b\"
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://127.0.0.1:8000/api/teams/messages/6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+);
+
+const headers = {
+    "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "content": "b"
+};
+
+fetch(url, {
+    method: "PATCH",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+
+<div class="php-example">
+    <pre><code class="language-php">$client = new \GuzzleHttp\Client();
+$url = 'http://127.0.0.1:8000/api/teams/messages/6ff8f7f6-1eb3-3525-be4a-3932c805afed';
+$response = $client-&gt;patch(
+    $url,
+    [
+        'headers' =&gt; [
+            'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
+            'Content-Type' =&gt; 'application/json',
+            'Accept' =&gt; 'application/json',
+        ],
+        'json' =&gt; [
+            'content' =&gt; 'b',
+        ],
+    ]
+);
+$body = $response-&gt;getBody();
+print_r(json_decode((string) $body));</code></pre></div>
+
+</span>
+
+<span id="example-responses-PATCHapi-teams-messages--uuid-">
+</span>
+<span id="execution-results-PATCHapi-teams-messages--uuid-" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-PATCHapi-teams-messages--uuid-"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-PATCHapi-teams-messages--uuid-"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-PATCHapi-teams-messages--uuid-" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-PATCHapi-teams-messages--uuid-">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-PATCHapi-teams-messages--uuid-" data-method="PATCH"
+      data-path="api/teams/messages/{uuid}"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('PATCHapi-teams-messages--uuid-', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-PATCHapi-teams-messages--uuid-"
+                    onclick="tryItOut('PATCHapi-teams-messages--uuid-');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-PATCHapi-teams-messages--uuid-"
+                    onclick="cancelTryOut('PATCHapi-teams-messages--uuid-');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-PATCHapi-teams-messages--uuid-"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-purple">PATCH</small>
+            <b><code>api/teams/messages/{uuid}</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="PATCHapi-teams-messages--uuid-"
+               value="Bearer {VOTRE_TOKEN_SANCTUM}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {VOTRE_TOKEN_SANCTUM}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="PATCHapi-teams-messages--uuid-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="PATCHapi-teams-messages--uuid-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>uuid</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="uuid"                data-endpoint="PATCHapi-teams-messages--uuid-"
+               value="6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+               data-component="url">
+    <br>
+<p>Example: <code>6ff8f7f6-1eb3-3525-be4a-3932c805afed</code></p>
+            </div>
+                            <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>content</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="content"                data-endpoint="PATCHapi-teams-messages--uuid-"
+               value="b"
+               data-component="body">
+    <br>
+<p>Must not be greater than 5000 characters. Example: <code>b</code></p>
+        </div>
+        </form>
+
+                    <h2 id="divers-DELETEapi-teams-messages--uuid-">DELETE api/teams/messages/{uuid}</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-DELETEapi-teams-messages--uuid-">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request DELETE \
+    "http://127.0.0.1:8000/api/teams/messages/6ff8f7f6-1eb3-3525-be4a-3932c805afed" \
+    --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://127.0.0.1:8000/api/teams/messages/6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+);
+
+const headers = {
+    "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "DELETE",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+
+<div class="php-example">
+    <pre><code class="language-php">$client = new \GuzzleHttp\Client();
+$url = 'http://127.0.0.1:8000/api/teams/messages/6ff8f7f6-1eb3-3525-be4a-3932c805afed';
+$response = $client-&gt;delete(
+    $url,
+    [
+        'headers' =&gt; [
+            'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
+            'Content-Type' =&gt; 'application/json',
+            'Accept' =&gt; 'application/json',
+        ],
+    ]
+);
+$body = $response-&gt;getBody();
+print_r(json_decode((string) $body));</code></pre></div>
+
+</span>
+
+<span id="example-responses-DELETEapi-teams-messages--uuid-">
+</span>
+<span id="execution-results-DELETEapi-teams-messages--uuid-" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-DELETEapi-teams-messages--uuid-"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-DELETEapi-teams-messages--uuid-"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-DELETEapi-teams-messages--uuid-" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-DELETEapi-teams-messages--uuid-">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-DELETEapi-teams-messages--uuid-" data-method="DELETE"
+      data-path="api/teams/messages/{uuid}"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('DELETEapi-teams-messages--uuid-', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-DELETEapi-teams-messages--uuid-"
+                    onclick="tryItOut('DELETEapi-teams-messages--uuid-');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-DELETEapi-teams-messages--uuid-"
+                    onclick="cancelTryOut('DELETEapi-teams-messages--uuid-');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-DELETEapi-teams-messages--uuid-"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-red">DELETE</small>
+            <b><code>api/teams/messages/{uuid}</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="DELETEapi-teams-messages--uuid-"
+               value="Bearer {VOTRE_TOKEN_SANCTUM}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {VOTRE_TOKEN_SANCTUM}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="DELETEapi-teams-messages--uuid-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="DELETEapi-teams-messages--uuid-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>uuid</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="uuid"                data-endpoint="DELETEapi-teams-messages--uuid-"
+               value="6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+               data-component="url">
+    <br>
+<p>Example: <code>6ff8f7f6-1eb3-3525-be4a-3932c805afed</code></p>
+            </div>
+                    </form>
+
+                    <h2 id="divers-POSTapi-teams-messages--uuid--pin">POST api/teams/messages/{uuid}/pin</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-POSTapi-teams-messages--uuid--pin">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://127.0.0.1:8000/api/teams/messages/6ff8f7f6-1eb3-3525-be4a-3932c805afed/pin" \
+    --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://127.0.0.1:8000/api/teams/messages/6ff8f7f6-1eb3-3525-be4a-3932c805afed/pin"
+);
+
+const headers = {
+    "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "POST",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+
+<div class="php-example">
+    <pre><code class="language-php">$client = new \GuzzleHttp\Client();
+$url = 'http://127.0.0.1:8000/api/teams/messages/6ff8f7f6-1eb3-3525-be4a-3932c805afed/pin';
+$response = $client-&gt;post(
+    $url,
+    [
+        'headers' =&gt; [
+            'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
+            'Content-Type' =&gt; 'application/json',
+            'Accept' =&gt; 'application/json',
+        ],
+    ]
+);
+$body = $response-&gt;getBody();
+print_r(json_decode((string) $body));</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-teams-messages--uuid--pin">
+</span>
+<span id="execution-results-POSTapi-teams-messages--uuid--pin" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-teams-messages--uuid--pin"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-teams-messages--uuid--pin"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-teams-messages--uuid--pin" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-teams-messages--uuid--pin">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-teams-messages--uuid--pin" data-method="POST"
+      data-path="api/teams/messages/{uuid}/pin"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-teams-messages--uuid--pin', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-teams-messages--uuid--pin"
+                    onclick="tryItOut('POSTapi-teams-messages--uuid--pin');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-teams-messages--uuid--pin"
+                    onclick="cancelTryOut('POSTapi-teams-messages--uuid--pin');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-teams-messages--uuid--pin"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/teams/messages/{uuid}/pin</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="POSTapi-teams-messages--uuid--pin"
+               value="Bearer {VOTRE_TOKEN_SANCTUM}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {VOTRE_TOKEN_SANCTUM}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-teams-messages--uuid--pin"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-teams-messages--uuid--pin"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>uuid</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="uuid"                data-endpoint="POSTapi-teams-messages--uuid--pin"
+               value="6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+               data-component="url">
+    <br>
+<p>Example: <code>6ff8f7f6-1eb3-3525-be4a-3932c805afed</code></p>
+            </div>
+                    </form>
 
                     <h2 id="divers-POSTapi-teams-messages--uuid--reactions">POST api/teams/messages/{uuid}/reactions</h2>
 
@@ -58007,6 +63436,186 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="emoji"                data-endpoint="POSTapi-teams-messages--uuid--reactions"
+               value="bngzmi"
+               data-component="body">
+    <br>
+<p>Must not be greater than 10 characters. Example: <code>bngzmi</code></p>
+        </div>
+        </form>
+
+                    <h2 id="divers-DELETEapi-teams-messages--uuid--reactions">DELETE api/teams/messages/{uuid}/reactions</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-DELETEapi-teams-messages--uuid--reactions">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request DELETE \
+    "http://127.0.0.1:8000/api/teams/messages/6ff8f7f6-1eb3-3525-be4a-3932c805afed/reactions" \
+    --header "Authorization: Bearer {VOTRE_TOKEN_SANCTUM}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"emoji\": \"bngzmi\"
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://127.0.0.1:8000/api/teams/messages/6ff8f7f6-1eb3-3525-be4a-3932c805afed/reactions"
+);
+
+const headers = {
+    "Authorization": "Bearer {VOTRE_TOKEN_SANCTUM}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "emoji": "bngzmi"
+};
+
+fetch(url, {
+    method: "DELETE",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+
+<div class="php-example">
+    <pre><code class="language-php">$client = new \GuzzleHttp\Client();
+$url = 'http://127.0.0.1:8000/api/teams/messages/6ff8f7f6-1eb3-3525-be4a-3932c805afed/reactions';
+$response = $client-&gt;delete(
+    $url,
+    [
+        'headers' =&gt; [
+            'Authorization' =&gt; 'Bearer {VOTRE_TOKEN_SANCTUM}',
+            'Content-Type' =&gt; 'application/json',
+            'Accept' =&gt; 'application/json',
+        ],
+        'json' =&gt; [
+            'emoji' =&gt; 'bngzmi',
+        ],
+    ]
+);
+$body = $response-&gt;getBody();
+print_r(json_decode((string) $body));</code></pre></div>
+
+</span>
+
+<span id="example-responses-DELETEapi-teams-messages--uuid--reactions">
+</span>
+<span id="execution-results-DELETEapi-teams-messages--uuid--reactions" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-DELETEapi-teams-messages--uuid--reactions"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-DELETEapi-teams-messages--uuid--reactions"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-DELETEapi-teams-messages--uuid--reactions" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-DELETEapi-teams-messages--uuid--reactions">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-DELETEapi-teams-messages--uuid--reactions" data-method="DELETE"
+      data-path="api/teams/messages/{uuid}/reactions"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('DELETEapi-teams-messages--uuid--reactions', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-DELETEapi-teams-messages--uuid--reactions"
+                    onclick="tryItOut('DELETEapi-teams-messages--uuid--reactions');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-DELETEapi-teams-messages--uuid--reactions"
+                    onclick="cancelTryOut('DELETEapi-teams-messages--uuid--reactions');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-DELETEapi-teams-messages--uuid--reactions"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-red">DELETE</small>
+            <b><code>api/teams/messages/{uuid}/reactions</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="DELETEapi-teams-messages--uuid--reactions"
+               value="Bearer {VOTRE_TOKEN_SANCTUM}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {VOTRE_TOKEN_SANCTUM}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="DELETEapi-teams-messages--uuid--reactions"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="DELETEapi-teams-messages--uuid--reactions"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>uuid</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="uuid"                data-endpoint="DELETEapi-teams-messages--uuid--reactions"
+               value="6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+               data-component="url">
+    <br>
+<p>Example: <code>6ff8f7f6-1eb3-3525-be4a-3932c805afed</code></p>
+            </div>
+                            <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>emoji</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="emoji"                data-endpoint="DELETEapi-teams-messages--uuid--reactions"
                value="bngzmi"
                data-component="body">
     <br>
@@ -59793,8 +65402,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"title\": \"b\",
     \"description\": \"Eius et animi quos velit et.\",
     \"type\": \"deadline\",
-    \"start_date\": \"2026-06-01T00:06:25\",
-    \"end_date\": \"2052-06-24\",
+    \"start_date\": \"2026-06-04T19:42:41\",
+    \"end_date\": \"2052-06-27\",
     \"location\": \"n\"
 }"
 </code></pre></div>
@@ -59815,8 +65424,8 @@ let body = {
     "title": "b",
     "description": "Eius et animi quos velit et.",
     "type": "deadline",
-    "start_date": "2026-06-01T00:06:25",
-    "end_date": "2052-06-24",
+    "start_date": "2026-06-04T19:42:41",
+    "end_date": "2052-06-27",
     "location": "n"
 };
 
@@ -59842,8 +65451,8 @@ $response = $client-&gt;post(
             'title' =&gt; 'b',
             'description' =&gt; 'Eius et animi quos velit et.',
             'type' =&gt; 'deadline',
-            'start_date' =&gt; '2026-06-01T00:06:25',
-            'end_date' =&gt; '2052-06-24',
+            'start_date' =&gt; '2026-06-04T19:42:41',
+            'end_date' =&gt; '2052-06-27',
             'location' =&gt; 'n',
         ],
     ]
@@ -59997,10 +65606,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="start_date"                data-endpoint="POSTapi-teams--uuid--events"
-               value="2026-06-01T00:06:25"
+               value="2026-06-04T19:42:41"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-06-01T00:06:25</code></p>
+<p>Must be a valid date. Example: <code>2026-06-04T19:42:41</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>end_date</code></b>&nbsp;&nbsp;
@@ -60009,10 +65618,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="end_date"                data-endpoint="POSTapi-teams--uuid--events"
-               value="2052-06-24"
+               value="2052-06-27"
                data-component="body">
     <br>
-<p>Must be a valid date. Must be a date after <code>start_date</code>. Example: <code>2052-06-24</code></p>
+<p>Must be a valid date. Must be a date after <code>start_date</code>. Example: <code>2052-06-27</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>location</code></b>&nbsp;&nbsp;
@@ -60249,8 +65858,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"title\": \"b\",
     \"description\": \"Eius et animi quos velit et.\",
     \"type\": \"deadline\",
-    \"start_date\": \"2026-06-01T00:06:25\",
-    \"end_date\": \"2052-06-24\",
+    \"start_date\": \"2026-06-04T19:42:41\",
+    \"end_date\": \"2052-06-27\",
     \"location\": \"n\"
 }"
 </code></pre></div>
@@ -60271,8 +65880,8 @@ let body = {
     "title": "b",
     "description": "Eius et animi quos velit et.",
     "type": "deadline",
-    "start_date": "2026-06-01T00:06:25",
-    "end_date": "2052-06-24",
+    "start_date": "2026-06-04T19:42:41",
+    "end_date": "2052-06-27",
     "location": "n"
 };
 
@@ -60298,8 +65907,8 @@ $response = $client-&gt;put(
             'title' =&gt; 'b',
             'description' =&gt; 'Eius et animi quos velit et.',
             'type' =&gt; 'deadline',
-            'start_date' =&gt; '2026-06-01T00:06:25',
-            'end_date' =&gt; '2052-06-24',
+            'start_date' =&gt; '2026-06-04T19:42:41',
+            'end_date' =&gt; '2052-06-27',
             'location' =&gt; 'n',
         ],
     ]
@@ -60465,10 +66074,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="start_date"                data-endpoint="PUTapi-teams--uuid--events--event-"
-               value="2026-06-01T00:06:25"
+               value="2026-06-04T19:42:41"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-06-01T00:06:25</code></p>
+<p>Must be a valid date. Example: <code>2026-06-04T19:42:41</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>end_date</code></b>&nbsp;&nbsp;
@@ -60477,10 +66086,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="end_date"                data-endpoint="PUTapi-teams--uuid--events--event-"
-               value="2052-06-24"
+               value="2052-06-27"
                data-component="body">
     <br>
-<p>Must be a valid date. Must be a date after <code>start_date</code>. Example: <code>2052-06-24</code></p>
+<p>Must be a valid date. Must be a date after <code>start_date</code>. Example: <code>2052-06-27</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>location</code></b>&nbsp;&nbsp;

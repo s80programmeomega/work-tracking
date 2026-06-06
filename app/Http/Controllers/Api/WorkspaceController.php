@@ -85,6 +85,7 @@ class WorkspaceController extends Controller
                 'can_manage_subscription' => $workspace->isOwnerOrAdmin($user),
                 'can_submit_result' => $gate->userCan($user, Permission::TACHES_SUBMIT_RESULT, $workspace),
                 'can_search_global' => $gate->userCan($user, Permission::SEARCH_GLOBAL, $workspace),
+                'can_search_scoped' => $gate->userCan($user, Permission::SEARCH_SCOPED, $workspace),
             ];
 
             return $workspace;
@@ -734,6 +735,7 @@ class WorkspaceController extends Controller
                         'can_manage_subscription' => $workspace->isOwnerOrAdmin($user),
                         'can_submit_result' => $gate->userCan($user, Permission::TACHES_SUBMIT_RESULT, $workspace),
                         'can_search_global' => $gate->userCan($user, Permission::SEARCH_GLOBAL, $workspace),
+                        'can_search_scoped' => $gate->userCan($user, Permission::SEARCH_SCOPED, $workspace),
                     ],
                 ];
             })
@@ -1505,6 +1507,7 @@ class WorkspaceController extends Controller
                     'can_manage_subscription' => $workspace->isOwnerOrAdmin($user),
                     'can_submit_result' => $gate->userCan($user, Permission::TACHES_SUBMIT_RESULT, $workspace),
                     'can_search_global' => $gate->userCan($user, Permission::SEARCH_GLOBAL, $workspace),
+                    'can_search_scoped' => $gate->userCan($user, Permission::SEARCH_SCOPED, $workspace),
                 ],
                 'subscription_summary' => app(SubscriptionService::class)->summary($workspace),
             ]),

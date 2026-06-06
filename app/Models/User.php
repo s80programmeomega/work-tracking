@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -453,5 +454,18 @@ class User extends Authenticatable
         return $this->belongsToMany(Workspace::class, 'workspace_members')
             ->withPivot(['role_id', 'invited_at', 'invited_by'])
             ->withTimestamps();
+    }
+
+    /**
+     * Surcharge la relation notifications() du trait Notifiable pour utiliser
+     * App\Models\Notification (indexable Scout) au lieu du DatabaseNotification
+     * standard. Comme ce modèle étend DatabaseNotification, c'est un remplacement
+     * transparent : les lectures restent identiques et les nouvelles notifications
+     * (créées via cette relation par le DatabaseChannel) sont auto-indexées.
+     */
+    public function notifications(): MorphMany
+    {
+        return $this->morphMany(Notification::class, 'notifiable')
+            ->orderBy('created_at', 'desc');
     }
 }
