@@ -8,8 +8,10 @@ use App\Models\Projet;
 use App\Models\User;
 use App\Models\Workspace;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Queue;
 use Laravel\Sanctum\Sanctum;
+use Maatwebsite\Excel\Facades\Excel;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -304,5 +306,38 @@ class SearchTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonStructure(['results' => ['messages']]);
+    }
+
+    // ── Garde IDOR : exportSelected scope les IDs au workspace ────────────────
+
+    public function test_export_selected_blocks_cross_workspace_ids(): void
+    {
+        Excel::fake();
+        Carbon::setTestNow('2026-06-06 12:00:00');
+
+        [$workspaceA,, $managerA] = $this->createWorkspaceWithManager();
+        [$workspaceB] = $this->createWorkspaceWithManager();
+
+        $projetA = Projet::factory()->create(['workspace_id' => $workspaceA->id, 'nom' => 'ProjetA']);
+        $projetB = Projet::factory()->create(['workspace_id' => $workspaceB->id, 'nom' => 'ProjetB']);
+
+        Sanctum::actingAs($managerA);
+
+        // Le manager du workspace A forge l'ID d'un projet du workspace B
+        $this->postJson('/api/search/export', [
+            'type' => 'projets',
+            'ids' => [$projetA->id, $projetB->id],
+            'workspace_id' => $workspaceA->id,
+        ])->assertOk();
+
+        // L'export ne doit contenir QUE le projet du workspace A
+        Excel::assertDownloaded('selection-projets-2026-06-06-120000.xlsx', function ($export) use ($projetA, $projetB) {
+            $ids = $export->collection()->pluck('id')->all();
+
+            return in_array($projetA->id, $ids, true)
+                && ! in_array($projetB->id, $ids, true);
+        });
+
+        Carbon::setTestNow();
     }
 }

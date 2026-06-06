@@ -754,7 +754,27 @@ class SearchController extends Controller
             return response()->json(['error' => 'Type inconnu'], 422);
         }
 
-        $rows = $model::whereIn('id', $ids)->get()->map(fn ($item) => [
+        $query = $model::whereIn('id', $ids);
+
+        // Garde IDOR : un non-super-admin ne peut exporter que des ressources de
+        // SON workspace, même s'il forge des IDs d'un autre workspace. La portée
+        // est appliquée au niveau de la requête (l'export est déjà réservé à
+        // manager+, donc pas de tier scoped ici).
+        if (! $isSuperAdmin && $workspace) {
+            $wsId = $workspace->id;
+            $scope = match ($type) {
+                'projets', 'documents' => fn ($q) => $q->where('workspace_id', $wsId),
+                'activites' => fn ($q) => $q->whereHas('projet', fn ($p) => $p->where('workspace_id', $wsId)),
+                'taches' => fn ($q) => $q->whereHas('activite.projet', fn ($p) => $p->where('workspace_id', $wsId)),
+                'sous_taches' => fn ($q) => $q->whereHas('tache.activite.projet', fn ($p) => $p->where('workspace_id', $wsId)),
+                'messages' => fn ($q) => $q->whereHas('team', fn ($t) => $t->where('workspace_id', $wsId)),
+                'users' => fn ($q) => $q->whereIn('id', $workspace->members()->pluck('users.id')),
+                default => fn ($q) => $q,
+            };
+            $query = $scope($query);
+        }
+
+        $rows = $query->get()->map(fn ($item) => [
             'id' => $item->id,
             'label' => $item->nom ?? $item->titre ?? $item->name ?? '',
             'excerpt' => $item->description ?? $item->content ?? '',
