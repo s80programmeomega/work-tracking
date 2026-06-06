@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,6 +18,19 @@ use Illuminate\Support\Facades\Route;
 Route::get('/docs', function () {
     return view('docs.index');
 })->name('docs.portal');
+
+// Téléchargement des fichiers d'export de recherche générés par SearchExportJob
+Route::get('/exports/search/{file}', function (string $file) {
+    // Sécuriser le nom de fichier — jamais de traversée de répertoire
+    $safe = basename($file);
+    $path = 'exports/'.$safe;
+
+    if (! Storage::disk('local')->exists($path)) {
+        abort(404);
+    }
+
+    return Storage::disk('local')->download($path);
+})->middleware(['auth:sanctum'])->name('search.export.download');
 
 // Route de login minimal (pour éviter l'erreur)
 Route::get('/login', function () {

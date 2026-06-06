@@ -9,12 +9,45 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
-use Spatie\Activitylog\Traits\LogsActivity;
+use Laravel\Scout\Searchable;
 use Spatie\Activitylog\LogOptions;
 
 class Document extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, Searchable, SoftDeletes;
+
+    public function toSearchableArray(): array
+    {
+        $this->loadMissing(['user', 'workspace', 'documentable']);
+
+        // Nom du projet lié si le document est attaché à un projet ou une activité/tâche
+        $projetNom = '';
+        if ($this->documentable instanceof Projet) {
+            $projetNom = $this->documentable->nom ?? '';
+        } elseif ($this->documentable instanceof Activite) {
+            $projetNom = $this->documentable->projet?->nom ?? '';
+        }
+
+        return [
+            'id' => (string) $this->id,
+            'nom' => $this->nom,
+            'description' => $this->description ?? '',
+            // Contenu textuel extrait du fichier — tronqué à 5 000 chars pour Typesense
+            'content_text' => mb_substr($this->content_text ?? '', 0, 5_000),
+            'type' => $this->type ?? '',
+            'mime_type' => $this->mime_type ?? '',
+            'workspace_id' => (int) $this->workspace_id,
+            'workspace_name' => $this->workspace?->nom ?? '',
+            'uploader_nom' => $this->user?->nom ?? '',
+            'projet_nom' => $projetNom,
+            'created_at' => $this->created_at?->timestamp ?? 0,
+        ];
+    }
+
+    public function searchableAs(): string
+    {
+        return 'documents';
+    }
 
     protected $fillable = [
         'workspace_id',
@@ -87,7 +120,7 @@ class Document extends Model
     {
         return $this->morphTo();
     }
- 
+
     /**
      * Uploader of the document
      */
@@ -141,7 +174,7 @@ class Document extends Model
      */
     public function getThumbnailUrlAttribute(): ?string
     {
-        if (!$this->thumbnail_path) {
+        if (! $this->thumbnail_path) {
             return null;
         }
 
@@ -160,7 +193,7 @@ class Document extends Model
             $size /= 1024;
         }
 
-        return round($size, 2) . ' ' . $units[$i];
+        return round($size, 2).' '.$units[$i];
     }
 
     /**

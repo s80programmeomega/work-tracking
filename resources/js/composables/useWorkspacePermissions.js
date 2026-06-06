@@ -82,6 +82,15 @@ export function useWorkspacePermissions(workspace = null) {
     // Task 8: Notifications
     const canManageNotificationPreferences = computed(() => isSuperAdmin.value || (perms.value.can_manage_notification_preferences ?? false))
 
+    // Phase 6: Recherche globale — manager et supérieur (owner/directeur inclus)
+    const canSearchGlobal = computed(() => isSuperAdmin.value || isDirecteur.value || (perms.value.can_search_global ?? false))
+
+    // Phase 6: Recherche scopée — cadre, collaborateur, stagiaire (ressources assignées uniquement)
+    const canSearchScoped = computed(() => perms.value.can_search_scoped ?? false)
+
+    // Peut accéder à la recherche (toutes tiers confondus)
+    const canSearch = computed(() => canSearchGlobal.value || canSearchScoped.value)
+
     // G8: Sidebar gating helpers
     // canViewAllTasks: managers, owners and super_admins can see the full task list.
     const canViewAllTasks = computed(() => isSuperAdmin.value || isDirecteur.value || isManager.value || isCadre.value)
@@ -165,6 +174,11 @@ export function useWorkspacePermissions(workspace = null) {
 
         // Task 8
         canManageNotificationPreferences,
+
+        // Phase 6
+        canSearchGlobal,
+        canSearchScoped,
+        canSearch,
 
         // G8
         canViewAllTasks,

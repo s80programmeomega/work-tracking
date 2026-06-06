@@ -1096,54 +1096,42 @@ const handleNavClick = (event) => {
 };
 
 const startTransition = (el) => {
-    el.style.height = "auto";
     const height = el.scrollHeight;
-    el.style.height = "0px";
-    el.offsetHeight;
-    el.style.height = height + "px";
+    el.style.height = '0px';
+    requestAnimationFrame(() => {
+        el.style.height = height + 'px';
+    });
 };
 
 const endTransition = (el) => {
-    el.style.height = "";
+    el.style.height = '';
 };
 
 onMounted(async () => {
     console.log("🚀 Montage du Sidebar");
 
     try {
-        // Charger les workspaces
-        if (workspaces.value.length === 0) {
-            await fetchWorkspaces();
-        }
-
-        // Initialiser le workspace courant
+        // initializeCurrentWorkspace handles fetchWorkspaces internally if needed
         await initializeCurrentWorkspace();
 
-        // Rafraîchir le détail complet du workspace courant pour avoir les permissions à jour
+        // Refresh full workspace detail for up-to-date permissions (non-blocking)
         if (currentWorkspace.value?.id) {
-            try {
-                const fresh = await fetchWorkspace(currentWorkspace.value.id);
-                if (fresh) authStore.currentWorkspace = fresh;
-            } catch {
-                // Pas bloquant — on garde les données existantes
-            }
+            fetchWorkspace(currentWorkspace.value.id)
+                .then((fresh) => { if (fresh) authStore.currentWorkspace = fresh; })
+                .catch(() => {});
         }
 
-        // Écouter les changements
-        unsubscribeWorkspaceListener = onWorkspaceChanged(
-            handleWorkspaceChange,
-        );
+        unsubscribeWorkspaceListener = onWorkspaceChanged(handleWorkspaceChange);
 
         console.log(
             "✅ Sidebar initialisé, workspace courant:",
             currentWorkspace.value?.nom,
         );
 
-        // Open the submenu matching the current route on initial load
         syncOpenSubmenuFromRoute();
 
-        // Charger le badge de messages non lus dans les équipes
-        fetchUnreadChat()
+        // Non-blocking — don't delay render for unread badge
+        fetchUnreadChat();
     } catch (error) {
         console.error("❌ Erreur lors de l'initialisation du sidebar:", error);
     }

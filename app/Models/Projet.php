@@ -10,11 +10,36 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
+use Laravel\Scout\Searchable;
 use Spatie\Permission\Models\Role;
 
 class Projet extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, Searchable, SoftDeletes;
+
+    public function toSearchableArray(): array
+    {
+        $this->loadMissing(['workspace', 'responsable']);
+
+        return [
+            'id' => (string) $this->id,
+            'nom' => $this->nom,
+            'description' => $this->description ?? '',
+            'code' => $this->code ?? '',
+            'status' => $this->status ?? '',
+            'date_debut' => $this->date_debut?->toDateString() ?? '',
+            'date_fin' => $this->date_fin?->toDateString() ?? '',
+            'workspace_id' => (int) $this->workspace_id,
+            'workspace_name' => $this->workspace?->nom ?? '',
+            'responsable_nom' => $this->responsable?->nom ?? '',
+            'created_at' => $this->created_at?->timestamp ?? 0,
+        ];
+    }
+
+    public function searchableAs(): string
+    {
+        return 'projets';
+    }
 
     protected $fillable = [
         'workspace_id',

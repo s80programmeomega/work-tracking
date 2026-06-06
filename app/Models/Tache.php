@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Laravel\Scout\Searchable;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Permission\Models\Role;
 
@@ -63,7 +64,42 @@ use Spatie\Permission\Models\Role;
  */
 class Tache extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, Searchable, SoftDeletes;
+
+    public function toSearchableArray(): array
+    {
+        $this->loadMissing(['activite.projet.workspace', 'assignees']);
+
+        $assigneesNoms = $this->assignees
+            ->map(fn ($u) => $u->nom)
+            ->filter()
+            ->implode(', ');
+
+        return [
+            'id' => (string) $this->id,
+            'titre' => $this->titre,
+            'description' => $this->description ?? '',
+            'objectif' => $this->objectif ?? '',
+            'indicateurs_resultats' => $this->indicateurs_resultats ?? '',
+            'commentaire' => $this->commentaire ?? '',
+            'code' => $this->code ?? '',
+            'statut' => $this->statut instanceof \BackedEnum ? $this->statut->value : (string) $this->statut,
+            'priorite' => $this->priorite instanceof \BackedEnum ? $this->priorite->value : (string) $this->priorite,
+            'echeance' => $this->echeance?->toDateString() ?? '',
+            'workspace_id' => (int) ($this->activite?->projet?->workspace_id ?? 0),
+            'workspace_name' => $this->activite?->projet?->workspace?->nom ?? '',
+            'activite_id' => (int) $this->activite_id,
+            'activite_nom' => $this->activite?->nom ?? '',
+            'projet_nom' => $this->activite?->projet?->nom ?? '',
+            'assignees_noms' => $assigneesNoms,
+            'created_at' => $this->created_at?->timestamp ?? 0,
+        ];
+    }
+
+    public function searchableAs(): string
+    {
+        return 'taches';
+    }
 
     protected $fillable = [
         'responsable_id',

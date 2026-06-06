@@ -134,6 +134,13 @@ final class Permission
     /** Configure subscription mode and trial duration — super_admin only. */
     const SUBSCRIPTION_MANAGE = 'subscription.manage';
 
+    // ── Recherche (Phase 6) ───────────────────────────────────────────────
+    /** Recherche multi-modèle dans tout le workspace — manager et supérieur. */
+    const SEARCH_GLOBAL = 'search.global';
+
+    /** Recherche limitée aux ressources assignées — cadre, collaborateur, stagiaire. */
+    const SEARCH_SCOPED = 'search.scoped';
+
     // ── Users (platform admin) ────────────────────────────────────────────
     const USERS_VIEW = 'users.view';
 
@@ -208,6 +215,9 @@ final class Permission
 
             self::SUBSCRIPTION_MANAGE,
 
+            self::SEARCH_GLOBAL,
+            self::SEARCH_SCOPED,
+
             self::USERS_VIEW,
             self::USERS_CREATE,
             self::USERS_UPDATE,
@@ -279,6 +289,8 @@ final class Permission
                 self::EVALUATIONS_VIEW_DASHBOARD,
                 // Task 10 — inline edit autorisé pour manager (même portée que TACHES_EDIT).
                 self::TACHES_INLINE_EDIT,
+                // Phase 6 — managers ont accès à la recherche globale.
+                self::SEARCH_GLOBAL,
                 // NOTIFICATIONS_MANAGE_PREFERENCES intentionally omitted — workspace-level
                 // notification policy is reserved for owner/directeur (granted via the
                 // owner contextual role's array_diff('all() except task-participant actions')).
@@ -317,6 +329,8 @@ final class Permission
                 self::EVALUATIONS_VIEW_DASHBOARD,
                 // Task 10 — inline edit autorisé pour cadre (même portée que TACHES_EDIT).
                 self::TACHES_INLINE_EDIT,
+                // Phase 6 — cadres peuvent rechercher dans leurs ressources assignées.
+                self::SEARCH_SCOPED,
             ],
 
             'collaborateur' => [
@@ -337,6 +351,8 @@ final class Permission
                 // Task 9 — voient leur propre fiche (scope verrouillé en controller).
                 // Pas d'export: réservé au cadre/manager/owner.
                 self::EVALUATIONS_VIEW_FICHE,
+                // Phase 6 — collaborateurs peuvent rechercher dans leurs ressources assignées.
+                self::SEARCH_SCOPED,
             ],
 
             'stagiaire' => [
@@ -354,6 +370,8 @@ final class Permission
                 self::EVALUATIONS_VIEW_SCORE,
                 // Task 9 — fiche perso en lecture seule, pas d'export.
                 self::EVALUATIONS_VIEW_FICHE,
+                // Phase 6 — stagiaires peuvent rechercher dans leurs ressources assignées.
+                self::SEARCH_SCOPED,
             ],
 
             'observateur' => [

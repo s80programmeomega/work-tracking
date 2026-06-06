@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\EvaluationController;
 use App\Http\Controllers\Api\ProjetController;
 use App\Http\Controllers\Api\ProjetInvitationController;
 use App\Http\Controllers\Api\PushSubscriptionController;
+use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\SocialAuthController;
 use App\Http\Controllers\Api\SousTacheController;
 use App\Http\Controllers\Api\SupportTicketController;
@@ -47,6 +48,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/refresh', [AuthController::class, 'refresh']);
 
     // Google OAuth — le redirect renvoie vers Google, le callback revient ici
     Route::get('/google/redirect', [SocialAuthController::class, 'redirectToGoogle'])->name('auth.google.redirect');
@@ -84,7 +86,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/me', [AuthController::class, 'me']);
-        Route::post('/refresh', [AuthController::class, 'refresh']);
         Route::post('/verify-email', [AuthController::class, 'verifyEmail']);
         Route::put('/language', [AuthController::class, 'updateLanguage']);
         // Activation/désactivation de l'OTP email comme facteur de secours
@@ -132,6 +133,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Journal d'audit de validation (N0/N1/bypass) — super-admin seulement
         Route::get('/validation-audit-log', [AdminController::class, 'validationAuditLog'])->name('admin.validation-audit-log');
     });
+
+    // Recherche globale (Phase 6) — manager et supérieur uniquement
+    Route::get('/search', [SearchController::class, 'search'])->name('search.global');
+    Route::get('/search/export', [SearchController::class, 'export'])->name('search.export');
+    Route::post('/search/export', [SearchController::class, 'exportSelected'])->name('search.export.selected');
 
     // Dashboard routes
     Route::get('/dashboard', [DashboardController::class, 'index']);

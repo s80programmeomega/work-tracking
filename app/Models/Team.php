@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 class Team extends Model
@@ -20,6 +21,7 @@ class Team extends Model
         'description',
         'owner_id',
         'project_id',
+        'workspace_id',
         'visibility',
         'avatar',
         'settings',
@@ -50,6 +52,14 @@ class Team extends Model
     public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'owner_id');
+    }
+
+    /**
+     * Workspace auquel l'équipe appartient directement.
+     */
+    public function workspace(): BelongsTo
+    {
+        return $this->belongsTo(Workspace::class, 'workspace_id');
     }
 
     /**
@@ -185,7 +195,7 @@ class Team extends Model
      * Get all users who should be notified about team activities
      * Includes: team members + project members (if team is linked to a project)
      */
-    public function getNotifiableUsers(bool $includeProjectMembers = true): \Illuminate\Support\Collection
+    public function getNotifiableUsers(bool $includeProjectMembers = true): Collection
     {
         $users = collect();
 
@@ -205,9 +215,9 @@ class Team extends Model
     /**
      * Get all users who should be notified excluding specific user
      */
-    public function getNotifiableUsersExcept(int $excludeUserId, bool $includeProjectMembers = true): \Illuminate\Support\Collection
+    public function getNotifiableUsersExcept(int $excludeUserId, bool $includeProjectMembers = true): Collection
     {
         return $this->getNotifiableUsers($includeProjectMembers)
-            ->reject(fn($user) => $user->id === $excludeUserId);
+            ->reject(fn ($user) => $user->id === $excludeUserId);
     }
 }

@@ -132,7 +132,8 @@
                   <div
                     v-for="message in messages"
                     :key="message.uuid || message.id"
-                    class="stagger-item group flex gap-3 py-1"
+                    :data-message-uuid="message.uuid"
+                    class="stagger-item group flex gap-3 py-1 rounded transition-all duration-300"
                     :class="{ 'opacity-60': message._pending }"
                     dusk="chat-message"
                   >
@@ -1700,6 +1701,16 @@ const scrollToBottom = () => {
   }
 }
 
+// Faire défiler jusqu'à un message spécifique (depuis ?message= dans l'URL)
+// et le mettre brièvement en surbrillance pour le repérer visuellement.
+const scrollToMessage = (uuid) => {
+  const el = document.querySelector(`[data-message-uuid="${uuid}"]`)
+  if (!el) return
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  el.classList.add('ring-2', 'ring-blue-400', 'ring-offset-1')
+  setTimeout(() => el.classList.remove('ring-2', 'ring-blue-400', 'ring-offset-1'), 3000)
+}
+
 const removeMemberConfirm = async (member) => {
   if (confirm(`Retirer ${member.nom} de l'équipe ?`)) {
     try {
@@ -1881,7 +1892,13 @@ onMounted(async () => {
       markRead(route.params.uuid)
     }
 
-    nextTick(scrollToBottom)
+    nextTick(() => {
+      scrollToBottom()
+      // Faire défiler jusqu'au message ciblé si ?message= est dans l'URL (depuis la recherche)
+      if (route.query.message) {
+        scrollToMessage(String(route.query.message))
+      }
+    })
   } catch (error) {
     console.error('Erreur lors du chargement de l\'équipe:', error.response?.data || error.message)
   }

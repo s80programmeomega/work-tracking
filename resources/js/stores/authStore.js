@@ -886,64 +886,51 @@ export const useAuthStore = defineStore('auth', {
         // ==========================================
         // LANGUE
         // ==========================================
-        async setLanguage(language) {
-            if (!['fr', 'en'].includes(language)) {
-                console.warn(`⚠️ Langue non supportée: ${language}`);
-                return;
-            }
+        setLanguage(language) {
+            if (!['fr', 'en'].includes(language)) return;
 
             i18n.global.locale.value = language;
             this.language = language;
             localStorage.setItem('user_language', language);
             document.documentElement.lang = language;
-
-            if (this.isAuthenticated) {
-                try {
-                    await authAPI.updateLanguage({ language });
-
-                    if (this.user) {
-                        this.user.language = language;
-                        localStorage.setItem('user', JSON.stringify(this.user));
-                    }
-                } catch (error) {
-                    console.error('Erreur mise à jour langue:', error);
-                }
-            }
-
             window.dispatchEvent(new Event('languageChanged'));
+        },
+
+        async syncLanguageToServer(language) {
+            if (!this.isAuthenticated) return;
+            try {
+                await authAPI.updateLanguage({ language });
+                if (this.user) {
+                    this.user.language = language;
+                    localStorage.setItem('user', JSON.stringify(this.user));
+                }
+            } catch (error) {
+                console.error('Erreur mise à jour langue:', error);
+            }
         },
 
         // ==========================================
         // INITIALISATION
         // ==========================================
         initialize() {
-            console.log('🔧 Initialisation authStore...');
-
-            // Récupérer le timeout sauvegardé
-            const savedTimeout = localStorage.getItem('inactivity_timeout');
-            if (savedTimeout) {
-                this.inactivityTimeout = savedTimeout * 60 * 1000;
-            }
+            // Clear any corrupted inactivity_timeout value from older buggy code
+            localStorage.removeItem('inactivity_timeout');
 
             this.setAxiosToken(this.token);
 
             if (this.isAuthenticated) {
                 this.startTokenAutoRefresh();
 
-                // ⭐ Initialiser le timer d'inactivité
-                this.initializeInactivityTimer();
-
                 if (!this.user) {
-                    this.fetchUser().catch(err => {
-                        console.error('Erreur chargement utilisateur:', err);
-                    });
+                    this.fetchUser().catch(() => {});
                 }
+
+                // Defer inactivity timer — don't block initial render
+                setTimeout(() => this.initializeInactivityTimer(), 3000);
             }
 
             const savedLang = localStorage.getItem('user_language') || 'fr';
             this.setLanguage(savedLang);
-
-            console.log('✅ authStore initialisé - Timeout:', this.getTimeoutDuration(), 'minutes');
         },
 
         // ==========================================

@@ -8,11 +8,36 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Scout\Searchable;
 use Spatie\Permission\Models\Role;
 
 class Activite extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, Searchable, SoftDeletes;
+
+    public function toSearchableArray(): array
+    {
+        $this->loadMissing(['projet.workspace', 'responsable']);
+
+        return [
+            'id' => (string) $this->id,
+            'nom' => $this->nom,
+            'description' => $this->description ?? '',
+            'date_debut' => $this->date_debut?->toDateString() ?? '',
+            'date_fin' => $this->date_fin?->toDateString() ?? '',
+            'workspace_id' => (int) ($this->projet?->workspace_id ?? 0),
+            'workspace_name' => $this->projet?->workspace?->nom ?? '',
+            'projet_id' => (int) $this->projet_id,
+            'projet_nom' => $this->projet?->nom ?? '',
+            'responsable_nom' => $this->responsable?->nom ?? '',
+            'created_at' => $this->created_at?->timestamp ?? 0,
+        ];
+    }
+
+    public function searchableAs(): string
+    {
+        return 'activites';
+    }
 
     protected $fillable = [
         'projet_id',

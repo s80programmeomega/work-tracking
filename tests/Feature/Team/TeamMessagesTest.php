@@ -43,7 +43,10 @@ class TeamMessagesTest extends TestCase
             ->getJson("/api/teams/{$this->team->uuid}/messages")
             ->assertOk()
             ->assertJsonPath('success', true)
-            ->assertJsonStructure(['messages']);
+            ->assertJsonStructure([
+                'data',
+                'meta' => ['current_page', 'last_page', 'per_page', 'total'],
+            ]);
     }
 
     // =========================================================================

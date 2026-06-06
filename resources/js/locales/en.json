@@ -102,7 +102,8 @@
     "settings": "Settings",
     "subscription": "Subscription",
     "platform_dashboard": "Platform Dashboard",
-    "roles_permissions": "Roles & Permissions"
+    "roles_permissions": "Roles & Permissions",
+    "search": "Search"
   },
   "sidebar": {
     "my_workspace": "My Workspace",
@@ -140,7 +141,8 @@
     "archived_projects": "Archived projects",
     "all_projects": "Dashboard",
     "all_activities": "All activities",
-    "my_activities": "My activities"
+    "my_activities": "My activities",
+    "search": "Global search"
   },
   "features": {
     "dashboard": {
@@ -2240,5 +2242,50 @@
     "time_mins_ago": "{n} min ago",
     "time_hours_ago": "{n} h ago",
     "time_days_ago": "{n} d ago"
+  },
+  "search": {
+    "placeholder": "Search… (⌘K)",
+    "no_results": "No results for \"{q}\"",
+    "type_projets": "Projects",
+    "type_activites": "Activities",
+    "type_taches": "Tasks",
+    "type_documents": "Documents",
+    "type_users": "Members",
+    "hint_navigate": "↑↓ navigate · Enter to open",
+    "see_all": "See all results for",
+    "type_sous_taches": "Subtasks",
+    "type_messages": "Messages",
+    "type_notifications": "Notifications"
+  },
+  "search_page": {
+    "title": "Global search",
+    "placeholder": "Enter your search (min. 2 characters)…",
+    "search_btn": "Search",
+    "all_workspaces": "All workspaces",
+    "type_projets": "Projects",
+    "type_activites": "Activities",
+    "type_taches": "Tasks",
+    "type_documents": "Documents",
+    "type_users": "Members",
+    "type_messages": "Messages",
+    "type_sous_taches": "Subtasks",
+    "no_results": "No results for this search.",
+    "hint": "Enter a search term and press Enter.",
+    "total_results": "result(s)",
+    "selected": "selected",
+    "preview": "Preview",
+    "open_tab": "Open",
+    "excerpt": "Excerpt",
+    "export_selected": "Export selection",
+    "export_all": "Export all ({n})",
+    "export_all_queued": "Export in progress — you will receive an email with the link.",
+    "export_cap_title": "Number of results to export",
+    "export_btn": "Export",
+    "cap_500": "First 500 results",
+    "cap_1000": "First 1,000 results",
+    "cap_2000": "First 2,000 results",
+    "cap_all": "All results",
+    "cap_all_note": "Background export — link sent by email",
+    "type_notifications": "Notifications"
   }
 }

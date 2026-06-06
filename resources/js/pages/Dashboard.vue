@@ -634,19 +634,18 @@ let unsubscribeWorkspace = null
 onMounted(async () => {
   console.log('🚀 Montage du Dashboard')
   try {
-    // Charger les workspaces
-    await fetchWorkspaces()
-
-    // Si un workspace est sélectionné, charger ses membres
+    // Workspaces are already in Pinia from Sidebar init — no need to refetch
     if (currentWorkspace.value) {
       selectedWorkspace.value = currentWorkspace.value.id
-      await loadWorkspaceMembers()
     }
 
-    // Charger les données du dashboard
-    await loadDashboardData()
+    // Load dashboard data and workspace members in parallel
+    const promises = [loadDashboardData()]
+    if (selectedWorkspace.value !== 'all') {
+      promises.push(loadWorkspaceMembers())
+    }
+    await Promise.all(promises)
 
-    // Écouter les changements de workspace
     unsubscribeWorkspace = onWorkspaceChanged(handleWorkspaceChange)
 
     console.log('✅ Dashboard initialisé')

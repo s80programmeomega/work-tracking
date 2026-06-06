@@ -27,6 +27,19 @@ const router = createRouter({
 
 
     // ==========================================
+    // RECHERCHE GLOBALE (Phase 6)
+    // ==========================================
+    {
+      path: '/search',
+      name: 'search',
+      component: () => import('../pages/Search.vue'),
+      meta: {
+        title: 'Recherche globale',
+        requiresAuth: true,
+      },
+    },
+
+    // ==========================================
     // WORKSPACES
     // ==========================================
     {

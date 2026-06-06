@@ -10,11 +10,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
+use Laravel\Scout\Searchable;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Permission\Traits\HasRoles;
@@ -46,7 +48,6 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string|null $two_factor_recovery_codes
  * @property bool $email_otp_enabled
  *
- * @method bool validateTwoFactorCode(string $code)
  * @method string twoFactorQrCodeSvg()
  * @method array recoveryCodes()
  *
@@ -61,7 +62,25 @@ use Spatie\Permission\Traits\HasRoles;
  */
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, HasRoles, LogsActivity, Notifiable, SoftDeletes, TwoFactorAuthenticatable;
+    use HasApiTokens, HasFactory, HasRoles, LogsActivity, Notifiable, Searchable, SoftDeletes, TwoFactorAuthenticatable;
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => (string) $this->id,
+            'nom' => $this->nom,
+            'prenom' => $this->prenom ?? '',
+            'nom_complet' => trim(($this->prenom ?? '').' '.$this->nom),
+            'email' => $this->email,
+            'fonction' => $this->fonction ?? '',
+            'created_at' => $this->created_at?->timestamp ?? 0,
+        ];
+    }
+
+    public function searchableAs(): string
+    {
+        return 'users';
+    }
 
     // Force Spatie to always use 'web' guard for role/permission lookups
     // regardless of which guard (sanctum, web) authenticated the request
@@ -435,5 +454,18 @@ class User extends Authenticatable
         return $this->belongsToMany(Workspace::class, 'workspace_members')
             ->withPivot(['role_id', 'invited_at', 'invited_by'])
             ->withTimestamps();
+    }
+
+    /**
+     * Surcharge la relation notifications() du trait Notifiable pour utiliser
+     * App\Models\Notification (indexable Scout) au lieu du DatabaseNotification
+     * standard. Comme ce modèle étend DatabaseNotification, c'est un remplacement
+     * transparent : les lectures restent identiques et les nouvelles notifications
+     * (créées via cette relation par le DatabaseChannel) sont auto-indexées.
+     */
+    public function notifications(): MorphMany
+    {
+        return $this->morphMany(Notification::class, 'notifiable')
+            ->orderBy('created_at', 'desc');
     }
 }

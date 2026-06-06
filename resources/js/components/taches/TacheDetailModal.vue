@@ -292,8 +292,9 @@
 
             <!-- Sidebar -->
             <div class="space-y-6">
-              <!-- Actions rapides (sans bouton Modifier) -->
+              <!-- Actions rapides — masquées en mode lecture seule -->
               <QuickActionsPanel
+                v-if="!props.readonly"
                 :tache="localTache"
                 @validate-n1="$emit('validate-n1', localTache)"
                 @validate-n2="$emit('validate-n2', localTache)"
@@ -537,8 +538,14 @@ import SousTacheList from '@/components/taches/SousTacheList.vue'
 const props = defineProps({
   tache: {
     type: Object,
-    required: true
-  }
+    required: true,
+  },
+  // En mode lecture seule, toutes les actions d'édition/validation sont masquées.
+  // Utilisé par la page de recherche globale pour prévisualiser une tâche sans modifier.
+  readonly: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['close', 'edit', 'validate-n1', 'validate-n2', 'resultat-added', 'refresh'])
