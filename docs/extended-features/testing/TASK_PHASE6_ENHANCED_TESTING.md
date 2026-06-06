@@ -157,29 +157,43 @@ php artisan documents:extract-text --sync
 
 ---
 
-## TC-14 — Cadre/collaborateur cannot access search page
+## TC-14 — Role tiers (search.global vs search.scoped)
 
-- Log in as cadre, navigate to `/search`
-- **Expected:** Page loads BUT the search bar is disabled (cursor-not-allowed, grayed)
-- Try `GET /api/search?q=test&workspace_id={id}` via curl/Insomnia
-- **Expected:** 403 `Non autorisé`
+- **Manager/owner** (`search.global`): search bar + `/search` enabled; results span the **whole workspace**.
+- **Cadre / collaborateur / stagiaire** (`search.scoped`): search bar + `/search` enabled; results limited to **assigned resources only** (projects/activities/tasks/subtasks they're on, teams they belong to). Verify: a cadre searching a term matching a workspace project they are NOT assigned to → that project does NOT appear.
+- **Observateur / utilisateur** (no search permission): search bar disabled (grayed); `GET /api/search` → **403**.
+
+## TC-14b — Notification search is private (all tiers)
+
+- Log in as a user with notifications, open `/search`, select the **🔔 Notifications** tab, search a term in your notifications → only **your own** notifications appear.
+- As **super-admin** (with no personal notifications), search notifications → **0 results** (super-admin does NOT see other users' notifications — notification search is always self-scoped).
 
 ---
 
-## TC-15 — Workspace isolation (non-super-admin)
+## TC-15 — Workspace isolation (CRITICAL — Typesense path)
 
-- Log in as manager of Workspace A
-- Search for a term that only exists in Workspace B
-- **Expected:** Zero results; Workspace B data never appears
+- Log in as **manager of Workspace A** (Typesense driver active, not collection).
+- Search a term that matches projects in **both** Workspace A and Workspace B.
+- **Expected:** Only Workspace A results appear; the tab count (total) reflects A only. Workspace B data never appears.
+- (This guards the fixed `fromRaw` scoping leak — filter_by is applied at the Typesense level.)
+
+## TC-16 — Export IDOR guard (manager+)
+
+- As manager of Workspace A, `POST /api/search/export` with `type=projets` and `ids` that include a Workspace B project id.
+- **Expected:** The exported file contains only Workspace A rows; the forged Workspace B id is silently dropped.
+- As cadre, call any export endpoint → **403** (export is manager+ only).
 
 ---
 
 ## PHPUnit Verification
 
 ```bash
-php artisan test --compact --filter=SearchTest
-# Expected: 15 tests passing (runs with collection driver — no Typesense needed)
+php artisan test --compact tests/Feature/Search
+# Expected: 17 tests passing (collection driver — no Typesense needed)
 ```
+
+> Note: PHPUnit uses `SCOUT_DRIVER=collection` which respects `->query()`. The workspace/tier
+> leak only manifested under **Typesense** (`->raw()`); verify TC-15 manually against Typesense.
 
 ---
 
@@ -189,7 +203,10 @@ php artisan test --compact --filter=SearchTest
 |---|---|
 | Query < 2 chars | 422 |
 | Unauthenticated | 401 |
-| Cadre API call | 403 |
+| Observateur/utilisateur API call | 403 |
+| Cadre calls export endpoint | 403 (export is manager+) |
 | Non-member sending workspace_id | 403 |
 | Export with invalid cap value | 422 |
+| Manager exports forged cross-workspace ids | foreign ids dropped (only own workspace) |
+| Super-admin searches notifications | only own (0 if none) |
 | Team `?message=` with invalid UUID | Page loads, no highlight (graceful) |

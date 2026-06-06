@@ -16,18 +16,26 @@
 
 ## Current Session
 
-**Date:** 2026-06-04
-**Session goal:** Phase 6 complete — global search page, file content extraction, super-admin scope
-**Branch:** `feature/phase6-search`
-**Status:** Complete — 723 tests passing (15 new), build green, Larastan clean. Awaiting commit + merge.
+**Date:** 2026-06-06
+**Session goal:** Phase 6 finalized (role tiers, notifications searchable, security hardening) → merged; Phase 7 next
+**Branch:** `feature/phase6-search` → merged into `jonas`
+**Status:** ✅ Merged — 717 tests passing, build green, Larastan clean, pushed both remotes.
 
 ---
 
 ## Current Task
 
-**Task:** Extended Features — Phase 6 complete (global search page, file content extraction, super-admin scope)
-**Branch:** `feature/phase6-search`
-**Status:** Complete — 723 tests passing (15 new), build green, Larastan clean. Awaiting commit + `jonas` merge approval.
+**Task:** Extended Features — Phase 6 complete + merged (global search: tiers, notifications, file extraction, security hardening)
+**Branch:** `feature/phase6-search` → merged into `jonas`
+**Status:** ✅ Merged — 717 tests passing, build green, Larastan clean, pushed both remotes.
+
+**What was done (Phase 6 — role tiers, notifications, security):**
+- **Role-scoped search tiers** — `search.global` (super-admin/owner/manager: workspace-wide; super-admin = all workspaces) + new `search.scoped` (cadre/collaborateur/stagiaire: assigned resources only); observateur/utilisateur = none. Full Guide 4+15 flow; `PERMISSIONS_MATRIX.md` updated.
+- **`SousTache` searchable (7th model)** + **`Notification` searchable (8th model)** — `App\Models\Notification` extends `DatabaseNotification` + `Searchable`; `User::notifications()` overridden for auto-indexing; notification search **always user-scoped** (privacy — even super-admin only sees their own).
+- **Topbar search button** (`header/SearchPageButton.vue`) replaces the sidebar link.
+- **SECURITY — critical multi-tenant leak fixed:** under Typesense, `fromRaw` ignored the `->query()` Eloquent scoping, leaking cross-workspace results (and all users' notifications). Fixed by applying scope via Scout `->where()/->whereIn()` (Typesense `filter_by`) in the raw path, keeping `->query()` for the collection/test path.
+- **SECURITY — `exportSelected` IDOR fixed:** requested IDs now constrained to the caller's workspace; bulk export restricted to manager+ (`search.global`).
+- All 8 Scout collections reindexed (note: `SCOUT_QUEUE=true` → `scout:import` queues jobs; reindex was run with `SCOUT_QUEUE=false` to index synchronously — a queue worker is needed for live auto-indexing).
 
 **What was done (Phase 6 Part B):**
 - Migrations: `workspace_id` on `teams` (backfilled from project chain) + `content_text` on `documents`
@@ -48,23 +56,11 @@
 - `docs/extended-features/INDEX.md` created; PHASE5_PLAN.md + PHASE6_SEARCH_PLAN.md added; PROGRESSION.md updated through Phase 6
 
 **What to do next:**
-1. Commit Phase 6 on `feature/phase6-search`
-2. Merge into `jonas` + push both remotes (per-push approval needed)
-3. Start **Phase 7** — Help Center (reader + author, no AI)
-- `TeamMessageController` — +5 methods: update, destroy, pinned, togglePin, removeReaction, markRead
-- `TeamMessageService` — events dispatched after each mutation; @mention TODO replaced with real `ChatMentionNotification`; `markTeamRead()` added
-- `ChatMentionNotification` — ShouldQueue, via channelsFor('chat_mention'), in-app + email
-- `NotificationService` — `chat_mention` added to wantsEmail() + wantsWebPush()
-- `GET /api/teams/unread-total` + `TeamController::totalUnread()` for sidebar badge
-- `useTeamMessages.js` — full rewrite: Echo subscription, live event handlers, optimistic send, edit/delete/reactions, typing whisper, markRead
-- `Teams/Show.vue` — chat tab overhauled: stagger, reactions, hover edit/delete, inline edit, reply-to banner, attachment input, typing indicator, optimistic visual
-- `AppSidebar.vue` — unread badge on Teams nav item
-- 15 new i18n keys in `team_show` section (fr + en)
-- PHPUnit: 12 tests in `tests/Feature/Chat/TeamChatBroadcastTest.php` — all green
-- Dusk: 3 tests in `tests/Browser/Teams/TeamChatTest.php`
-- Testing guide: `docs/extended-features/testing/TASK_PHASE5_TESTING.md`
+1. Start **Phase 7** — Help Center (reader + author, no AI). Follow `docs/extended-features/HELP_CENTER_PLAN.md` Phases 1–3 + 6 (skip AI Phase 4). Branch `feature/phase7-help-center` from `jonas`.
 
-**What was done (Phase 6):**
+<details><summary>Earlier Phase 5/6 build detail (retained for reference)</summary>
+
+**Phase 6 (Part A):**
 - `laravel/scout` + `typesense/typesense-php` installed
 - `config/scout.php` — Typesense driver with 5 model-schemas (Projet, Activite, Tache, Document, User); collection driver default for tests; `SCOUT_DRIVER=collection` added to `phpunit.xml`
 - `.env.example` — Typesense vars + Podman startup command documented
@@ -96,14 +92,9 @@
 - 28 i18n keys (search_page + search.see_all)
 - 15 PHPUnit tests — all green; bug fix: `(bool) ($user->is_super_admin ?? false)` for nullable column
 - Testing guide: `docs/extended-features/testing/TASK_PHASE6_ENHANCED_TESTING.md`
-- Re-index note: `scout:flush` + `scout:import` per model after schema change (requires Typesense running)
+- Re-index note: `scout:flush` + `scout:import` per model after schema change (requires Typesense running, `SCOUT_QUEUE=false` for synchronous indexing)
 
-**What to do next:**
-1. Commit Phase 6 Part B on `feature/phase6-search`
-2. Merge `feature/phase6-search` → `jonas` (per-push approval needed)
-3. Start **Phase 7** — Help Center (reader + author, no AI)
-
-**What was done this session:**
+**Earlier session history (pre-Phase-3, retained for reference):**
 - Replaced abandoned `nunomaduro/larastan` with `larastan/larastan` v2.11; updated `phpstan.neon` extension path
 - Added `@property ModelClass $resource` + `@mixin ModelClass` to all 16 API Resource classes (fixes PHPStan proxy property errors)
 - Added `@responseField` annotations to each resource's `toArray()` for future Scribe API doc generation
@@ -138,6 +129,8 @@
 **What to do next:**
 1. Continue with next planned task or client feedback
 2. (Optional) Scribe API docs generation — resource annotations are now ready
+
+</details>
 
 ## Last Completed Task
 
@@ -330,13 +323,15 @@ Tests: 11 feature in `NotificationServiceTest` + 8 feature in `SendDailyDigestCo
 
 | Branch | Phase / Task | Status |
 |---|---|---|
-| `feature/phase6-search` | Extended Phase 6 (Global search) | Complete — awaiting commit + merge 🔄 |
+| `feature/phase7-help-center` | Extended Phase 7 (Help Center) | Not started ⬜ |
 
 **Previously merged into `jonas` (extended features):**
 - `chore/security-perf-baseline` → `jonas` `4493754` (Phase 0 — baseline docs)
 - `feature/mfa-2fa` → `jonas` `7525a81` (Phase 1 — MFA)
 - `feature/social-auth-google` → `jonas` `19047fd` (Phase 2 — Social auth)
 - `feature/support-contact` → `jonas` (Phase 3 + Phase 4 — support system + native admin logs)
+- `feature/phase5-chat` → `jonas` `cae2a7e` (Phase 5 — chat real-time + @mentions)
+- `feature/phase6-search` → `jonas` (Phase 6 — global search: tiers, notifications, file extraction, security hardening)
 
 **Previously merged (v2 tasks):**
 Tasks 0–16, fix/cdc-hotfixes, fix/bug-batch, design-system-v1, chore/test-coverage-expansion — all merged into `jonas` (see PROGRESSION.md for full history).
@@ -395,3 +390,4 @@ Tasks 0–16, fix/cdc-hotfixes, fix/bug-batch, design-system-v1, chore/test-cove
 | 2026-06-04 | Phase 5 — Chat real-time + @mentions | 4 broadcast events, team channel auth, ChatMentionNotification, TeamMessageResource, +5 controller methods, +7 routes, last_read_at migration, useTeamMessages.js rewrite (Echo + optimistic + whisper), Teams/Show.vue full UI overhaul, AppSidebar unread badge, 15 i18n keys, 12 PHPUnit + 3 Dusk tests. Merged into jonas. |
 | 2026-06-04 | Phase 6 Part A — command palette | Scout + Typesense installed, search.global permission, 5 Searchable models, SearchController, SearchBar.vue Cmd+K palette. 8 PHPUnit tests. Uncommitted. |
 | 2026-06-04 | Phase 6 Part B — full search page + file extraction | 6 migrations, DocumentTextExtractorService + jobs, TeamMessage Searchable (6th model), SearchController rewrite (super-admin, highlights, pagination), export pipeline (SearchExport+Job), Search.vue page, TacheDetailModal readonly, Teams/Show ?message= handler, 28 i18n keys, 15 PHPUnit tests. Awaiting commit + merge. |
+| 2026-06-06 | Phase 6 — tiers, notifications, security | search.scoped tier (cadre/collaborateur/stagiaire); SousTache (7th) + Notification (8th, user-scoped) Searchable; topbar SearchPageButton; **fixed critical Typesense fromRaw scoping leak (filter_by) + exportSelected IDOR**; export restricted to manager+; reindexed all 8 collections; TeamMessages list test shape fix. Full suite 717 green. Merged into jonas, pushed both remotes. |
