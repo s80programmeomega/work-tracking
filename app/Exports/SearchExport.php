@@ -35,6 +35,9 @@ class SearchExport implements FromCollection, ShouldAutoSize, WithHeadings, With
             'documents' => 'Documents',
             'users' => 'Membres',
             'messages' => 'Messages',
+            'help_articles' => "Articles d'aide",
+            'help_categories' => "Catégories d'aide",
+            'help_images' => "Images d'aide",
             default => ucfirst($this->type),
         };
     }
@@ -48,6 +51,9 @@ class SearchExport implements FromCollection, ShouldAutoSize, WithHeadings, With
             'documents' => ['ID', 'Nom', 'Type', 'Workspace', 'Uploadé par', 'URL'],
             'users' => ['ID', 'Nom complet', 'Email', 'Fonction', 'URL'],
             'messages' => ['ID', 'Équipe', 'Auteur', 'Extrait', 'Workspace', 'URL'],
+            'help_articles' => ['ID', 'Titre (FR)', 'Catégorie', 'Extrait', 'URL'],
+            'help_categories' => ['ID', 'Nom (FR)', 'Description', 'URL'],
+            'help_images' => ['ID', 'Nom de fichier', 'Article', 'Type', 'URL'],
             default => ['ID', 'Label', 'Extrait', 'URL'],
         };
     }
@@ -104,6 +110,26 @@ class SearchExport implements FromCollection, ShouldAutoSize, WithHeadings, With
                 $meta['user_nom'] ?? '',
                 strip_tags($row['excerpt'] ?? ''),
                 $meta['workspace_name'] ?? '',
+                config('app.frontend_url').$row['url'],
+            ],
+            'help_articles' => [
+                $row['id'] ?? '',
+                strip_tags($row['label'] ?? ''),
+                $meta['category'] ?? '',
+                strip_tags($row['excerpt'] ?? ''),
+                config('app.frontend_url').$row['url'],
+            ],
+            'help_categories' => [
+                $row['id'] ?? '',
+                strip_tags($row['label'] ?? ''),
+                strip_tags($row['excerpt'] ?? ''),
+                config('app.frontend_url').$row['url'],
+            ],
+            'help_images' => [
+                $row['id'] ?? '',
+                strip_tags($row['label'] ?? ''),
+                strip_tags($row['excerpt'] ?? ''),
+                $meta['mime'] ?? '',
                 config('app.frontend_url').$row['url'],
             ],
             default => [

@@ -88,6 +88,15 @@ export const Permission = Object.freeze({
     SEARCH_GLOBAL: 'search.global',
     SEARCH_SCOPED: 'search.scoped',
 
+    // Centre d'aide (Phase 7) — permissions granulaires par action
+    HELP_ARTICLES_READ:         'help_articles.read',
+    HELP_ARTICLES_CREATE:       'help_articles.create',
+    HELP_ARTICLES_EDIT:         'help_articles.edit',
+    HELP_ARTICLES_PUBLISH:      'help_articles.publish',
+    HELP_ARTICLES_DELETE:       'help_articles.delete',
+    HELP_ARTICLES_UPLOAD_IMAGE: 'help_articles.upload_image',
+    HELP_CATEGORIES_MANAGE:     'help_categories.manage',
+
     // Users
     USERS_VIEW:                 'users.view',
     USERS_CREATE:               'users.create',

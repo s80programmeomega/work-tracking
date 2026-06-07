@@ -306,7 +306,7 @@ const isSuperAdmin = computed(() => authStore.isSuperAdmin)
 
 const queryInput = ref(route.query.q ?? '')
 const selectedWorkspaceId = ref('')
-const activeTypes = ref(['projets', 'activites', 'taches', 'sous_taches', 'documents', 'users', 'messages', 'notifications'])
+const activeTypes = ref(['projets', 'activites', 'taches', 'sous_taches', 'documents', 'users', 'messages', 'notifications', 'help_articles', 'help_categories', 'help_images'])
 const activeTab = ref('projets')
 const page = ref(1)
 const perPage = 10
@@ -324,6 +324,9 @@ const allTypes = [
   { key: 'users',         label: t('search.type_users'),         emoji: '👤' },
   { key: 'messages',      label: t('search.type_messages'),      emoji: '💬' },
   { key: 'notifications', label: t('search.type_notifications'), emoji: '🔔' },
+  { key: 'help_articles',   label: t('search.type_help_articles'),   emoji: '📖' },
+  { key: 'help_categories', label: t('search.type_help_categories'), emoji: '🗂️' },
+  { key: 'help_images',     label: t('search.type_help_images'),     emoji: '🖼️' },
 ]
 
 const tabs = computed(() => allTypes.filter((t) => activeTypes.value.includes(t.key)))
@@ -496,6 +499,9 @@ const typeBadgeClass = (type) => {
     user: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
     message: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
     notification: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+    help_article: 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400',
+    help_category: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400',
+    help_image: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400',
   }
   return map[type] ?? 'bg-gray-100 text-gray-600'
 }
@@ -510,6 +516,9 @@ const typeLabel = (type) => {
     user: 'Membre',
     message: 'Message',
     notification: 'Notification',
+    help_article: t('search.type_help_articles'),
+    help_category: t('search.type_help_categories'),
+    help_image: t('search.type_help_images'),
   }
   return map[type] ?? type
 }

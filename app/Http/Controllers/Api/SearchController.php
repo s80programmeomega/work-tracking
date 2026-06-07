@@ -10,6 +10,9 @@ use App\Http\Controllers\Controller;
 use App\Jobs\SearchExportJob;
 use App\Models\Activite;
 use App\Models\Document;
+use App\Models\HelpArticle;
+use App\Models\HelpArticleImage;
+use App\Models\HelpCategory;
 use App\Models\Notification;
 use App\Models\Projet;
 use App\Models\SousTache;
@@ -49,7 +52,7 @@ class SearchController extends Controller
         $request->validate([
             'q' => 'required|string|min:2|max:255',
             'types' => 'sometimes|array',
-            'types.*' => 'string|in:projets,activites,taches,sous_taches,documents,users,messages,notifications',
+            'types.*' => 'string|in:projets,activites,taches,sous_taches,documents,users,messages,notifications,help_articles,help_categories,help_images',
             'workspace_id' => 'sometimes|integer|exists:workspaces,id',
             'page' => 'sometimes|integer|min:1',
             'per_page' => 'sometimes|integer|min:1|max:50',
@@ -91,7 +94,7 @@ class SearchController extends Controller
             }
         }
 
-        $types = $request->input('types', ['projets', 'activites', 'taches', 'sous_taches', 'documents', 'users', 'messages', 'notifications']);
+        $types = $request->input('types', ['projets', 'activites', 'taches', 'sous_taches', 'documents', 'users', 'messages', 'notifications', 'help_articles', 'help_categories', 'help_images']);
         $results = [];
         $totals = [];
 
@@ -144,6 +147,9 @@ class SearchController extends Controller
             'users' => $this->searchUsers($query, $workspace, $isSuperAdmin, $tier, $scopedIds, $perPage, $offset),
             'messages' => $this->searchMessages($query, $workspace, $isSuperAdmin, $tier, $scopedIds, $perPage, $offset, $useRaw),
             'notifications' => $this->searchNotifications($query, $userId, $perPage, $offset, $useRaw),
+            'help_articles' => $this->searchHelpArticles($query, $perPage, $offset, $useRaw),
+            'help_categories' => $this->searchHelpCategories($query, $perPage, $offset, $useRaw),
+            'help_images' => $this->searchHelpImages($query, $perPage, $offset, $useRaw),
             default => [[], 0],
         };
     }
@@ -624,6 +630,120 @@ class SearchController extends Controller
         );
     }
 
+    // ── Recherche du centre d'aide (contenu global, publié uniquement) ─────────
+
+    /**
+     * Articles d'aide publiés. Le contenu d'aide est global (non rattaché à un
+     * workspace) : aucune contrainte de workspace/tier. L'index n' inclut déjà
+     * que les articles publiés (shouldBeSearchable) ; on ajoute un filet de
+     * sécurité published() pour le driver collection (tests).
+     *
+     * @return array{0: array<int, array<string, mixed>>, 1: int}
+     */
+    private function searchHelpArticles(string $query, int $perPage, int $offset, bool $useRaw): array
+    {
+        $builder = HelpArticle::search($query);
+        if (! $useRaw) {
+            $builder->query(fn ($q) => $q->published());
+        }
+
+        if ($useRaw) {
+            return $this->fromRaw($builder, $perPage, $offset, fn ($doc, $hl) => [
+                'type' => 'help_article',
+                'id' => $doc['id'],
+                'label' => $hl['titre_fr']['snippet'] ?? ($doc['titre_fr'] ?? ''),
+                'excerpt' => $hl['body_plain_fr']['snippet']
+                    ?? $hl['body_plain_en']['snippet']
+                    ?? mb_substr($doc['body_plain_fr'] ?? '', 0, 120),
+                'meta' => [
+                    'category' => $doc['category_nom'] ?? '',
+                    'titre_en' => $doc['titre_en'] ?? '',
+                ],
+                'url' => '/help/a/'.($doc['slug'] ?? ''),
+            ]);
+        }
+
+        return $this->fromEloquent($builder, $perPage, $offset, fn (HelpArticle $a) => [
+            'type' => 'help_article',
+            'id' => $a->id,
+            'label' => $a->titre_fr,
+            'excerpt' => mb_substr($a->body_plain_fr ?? '', 0, 120),
+            'meta' => [
+                'category' => $a->category?->nom_fr ?? '',
+                'titre_en' => $a->titre_en,
+            ],
+            'url' => '/help/a/'.$a->slug,
+        ]);
+    }
+
+    /**
+     * Catégories d'aide publiées.
+     *
+     * @return array{0: array<int, array<string, mixed>>, 1: int}
+     */
+    private function searchHelpCategories(string $query, int $perPage, int $offset, bool $useRaw): array
+    {
+        $builder = HelpCategory::search($query);
+        if (! $useRaw) {
+            $builder->query(fn ($q) => $q->published());
+        }
+
+        if ($useRaw) {
+            return $this->fromRaw($builder, $perPage, $offset, fn ($doc, $hl) => [
+                'type' => 'help_category',
+                'id' => $doc['id'],
+                'label' => $hl['nom_fr']['snippet'] ?? ($doc['nom_fr'] ?? ''),
+                'excerpt' => $hl['description_fr']['snippet'] ?? mb_substr($doc['description_fr'] ?? '', 0, 120),
+                'meta' => ['nom_en' => $doc['nom_en'] ?? ''],
+                'url' => '/help/c/'.($doc['slug'] ?? ''),
+            ]);
+        }
+
+        return $this->fromEloquent($builder, $perPage, $offset, fn (HelpCategory $c) => [
+            'type' => 'help_category',
+            'id' => $c->id,
+            'label' => $c->nom_fr,
+            'excerpt' => mb_substr($c->description_fr ?? '', 0, 120),
+            'meta' => ['nom_en' => $c->nom_en],
+            'url' => '/help/c/'.$c->slug,
+        ]);
+    }
+
+    /**
+     * Images d'articles d'aide (n'indexe que celles d'articles publiés).
+     * Recherchables par nom de fichier + titre de l'article parent.
+     *
+     * @return array{0: array<int, array<string, mixed>>, 1: int}
+     */
+    private function searchHelpImages(string $query, int $perPage, int $offset, bool $useRaw): array
+    {
+        $builder = HelpArticleImage::search($query);
+        if (! $useRaw) {
+            // Filet de sécurité : uniquement les images d'articles publiés.
+            $builder->query(fn ($q) => $q->whereHas('article', fn ($a) => $a->published()));
+        }
+
+        if ($useRaw) {
+            return $this->fromRaw($builder, $perPage, $offset, fn ($doc, $hl) => [
+                'type' => 'help_image',
+                'id' => $doc['id'],
+                'label' => $hl['filename']['snippet'] ?? ($doc['filename'] ?? ''),
+                'excerpt' => $doc['article_titre_fr'] ?? '',
+                'meta' => ['mime' => $doc['mime'] ?? ''],
+                'url' => '/help/a/'.($doc['article_slug'] ?? ''),
+            ]);
+        }
+
+        return $this->fromEloquent($builder, $perPage, $offset, fn (HelpArticleImage $img) => [
+            'type' => 'help_image',
+            'id' => $img->id,
+            'label' => basename($img->path),
+            'excerpt' => $img->article?->titre_fr ?? '',
+            'meta' => ['mime' => $img->mime],
+            'url' => '/help/a/'.($img->article?->slug ?? ''),
+        ]);
+    }
+
     // ── Export ───────────────────────────────────────────────────────────────
 
     /**
@@ -638,7 +758,7 @@ class SearchController extends Controller
         $request->validate([
             'q' => 'required|string|min:2|max:255',
             'types' => 'sometimes|array',
-            'types.*' => 'string|in:projets,activites,taches,sous_taches,documents,users,messages,notifications',
+            'types.*' => 'string|in:projets,activites,taches,sous_taches,documents,users,messages,notifications,help_articles,help_categories,help_images',
             'workspace_id' => 'sometimes|integer|exists:workspaces,id',
             'cap' => 'sometimes|in:500,1000,2000,all',
         ]);
@@ -684,7 +804,7 @@ class SearchController extends Controller
         // Export immédiat sous le plafond choisi
         $capInt = (int) $cap;
         $query = $request->string('q')->trim()->value();
-        $types = $request->input('types', ['projets', 'activites', 'taches', 'sous_taches', 'documents', 'users', 'messages', 'notifications']);
+        $types = $request->input('types', ['projets', 'activites', 'taches', 'sous_taches', 'documents', 'users', 'messages', 'notifications', 'help_articles', 'help_categories', 'help_images']);
         $sheets = [];
 
         foreach ($types as $type) {
@@ -716,7 +836,7 @@ class SearchController extends Controller
         $request->validate([
             'ids' => 'required|array|min:1|max:500',
             'ids.*' => 'integer',
-            'type' => 'required|string|in:projets,activites,taches,sous_taches,documents,users,messages',
+            'type' => 'required|string|in:projets,activites,taches,sous_taches,documents,users,messages,help_articles,help_categories,help_images',
             'q' => 'sometimes|string',
         ]);
 
@@ -724,7 +844,15 @@ class SearchController extends Controller
         $isSuperAdmin = (bool) ($user->is_super_admin ?? false);
         $workspace = null;
 
-        if (! $isSuperAdmin) {
+        $type = $request->string('type')->value();
+        $ids = $request->input('ids');
+
+        // Le contenu d'aide est global (non rattaché à un workspace) et public :
+        // l'export d'aide est traité à part — réservé aux seuls contenus publiés,
+        // sans portée workspace ni restriction manager+ (juste un utilisateur authentifié).
+        $isHelpType = in_array($type, ['help_articles', 'help_categories', 'help_images'], true);
+
+        if (! $isHelpType && ! $isSuperAdmin) {
             $workspaceId = $request->integer('workspace_id') ?: ($user->current_workspace_id ?? 0);
             $workspace = Workspace::find($workspaceId);
             $gate = app(ContextualPermissionGate::class);
@@ -735,8 +863,9 @@ class SearchController extends Controller
             }
         }
 
-        $type = $request->string('type')->value();
-        $ids = $request->input('ids');
+        if ($isHelpType) {
+            return $this->exportSelectedHelp($type, $ids);
+        }
 
         // Reconstruire les lignes d'export depuis les IDs
         $model = match ($type) {
@@ -781,6 +910,50 @@ class SearchController extends Controller
             'meta' => [],
             'url' => '/'.$type.'/'.$item->id,
         ]);
+
+        $filename = 'selection-'.$type.'-'.now()->format('Y-m-d-His').'.xlsx';
+
+        return Excel::download(new SearchExport($rows, $type), $filename);
+    }
+
+    /**
+     * Export sélectif du contenu d'aide (global, publié uniquement).
+     * Pas de portée workspace : l'aide est commune. On ne renvoie QUE des
+     * contenus publiés pour ne pas exposer de brouillons via l'export.
+     *
+     * @param  array<int>  $ids
+     */
+    private function exportSelectedHelp(string $type, array $ids): BinaryFileResponse
+    {
+        $rows = match ($type) {
+            'help_articles' => HelpArticle::published()->with('category')->whereIn('id', $ids)->get()
+                ->map(fn (HelpArticle $a) => [
+                    'id' => $a->id,
+                    'label' => $a->titre_fr,
+                    'excerpt' => mb_substr($a->body_plain_fr ?? '', 0, 200),
+                    'meta' => ['category' => $a->category?->nom_fr ?? ''],
+                    'url' => '/help/a/'.$a->slug,
+                ]),
+            'help_categories' => HelpCategory::published()->whereIn('id', $ids)->get()
+                ->map(fn (HelpCategory $c) => [
+                    'id' => $c->id,
+                    'label' => $c->nom_fr,
+                    'excerpt' => mb_substr($c->description_fr ?? '', 0, 200),
+                    'meta' => [],
+                    'url' => '/help/c/'.$c->slug,
+                ]),
+            'help_images' => HelpArticleImage::whereIn('id', $ids)
+                ->whereHas('article', fn ($a) => $a->published())
+                ->with('article')->get()
+                ->map(fn (HelpArticleImage $img) => [
+                    'id' => $img->id,
+                    'label' => basename($img->path),
+                    'excerpt' => $img->article?->titre_fr ?? '',
+                    'meta' => ['mime' => $img->mime],
+                    'url' => '/help/a/'.($img->article?->slug ?? ''),
+                ]),
+            default => collect(),
+        };
 
         $filename = 'selection-'.$type.'-'.now()->format('Y-m-d-His').'.xlsx';
 

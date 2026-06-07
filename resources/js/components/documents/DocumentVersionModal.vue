@@ -12,9 +12,9 @@
             leave-from="opacity-100 translate-y-0 sm:scale-100"
             leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
-            <DialogPanel class="relative transform overflow-hidden rounded-3 bg-white text-left transition-all dark:bg-gray-900 sm:my-8 sm:w-full sm:max-w-lg">
+            <DialogPanel ref="dialogRef" :style="dragStyle" class="relative transform overflow-hidden rounded-3 border border-gray-200 dark:border-gray-700 bg-white text-left transition-all dark:bg-gray-900 sm:my-8 sm:w-full sm:max-w-lg">
               <!-- Header -->
-              <div class="border-b border-gray-200 bg-white px-6 py-4 dark:border-gray-800 dark:bg-gray-900">
+              <div ref="handleRef" class="border-b border-gray-200 bg-white px-6 py-4 dark:border-gray-800 dark:bg-gray-900 cursor-move select-none">
                 <div class="flex items-center justify-between">
                   <DialogTitle class="text-lg font-semibold text-gray-900 dark:text-white">
                     Gérer les versions
@@ -219,6 +219,10 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
+import { useDraggable } from '@/composables/useDraggable'
+
+// Modale déplaçable par son en-tête (panneau Headless UI).
+const { dialogRef, handleRef, dragStyle, attachHandle } = useDraggable()
 import {
   XMarkIcon,
   DocumentPlusIcon,
@@ -333,6 +337,7 @@ const formatDate = (dateString) => {
 }
 
 onMounted(() => {
+  attachHandle()
   loadVersions()
 })
 </script>

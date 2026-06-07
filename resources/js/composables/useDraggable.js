@@ -19,11 +19,21 @@ export function useDraggable() {
 
   const dragStyle = ref({})
 
+  // Résout l'élément DOM, que la ref pointe sur un nœud natif ou sur
+  // l'instance d'un composant (ex. Headless UI DialogPanel → $el).
+  function el(r) {
+    const v = r && r.value
+    if (!v) { return null }
+    return v instanceof HTMLElement ? v : (v.$el ?? null)
+  }
+
   function onMouseDown(e) {
     if (e.button !== 0) { return }
+    const dlg = el(dialogRef)
+    if (!dlg) { return }
     dragging.value = true
 
-    const rect = dialogRef.value.getBoundingClientRect()
+    const rect = dlg.getBoundingClientRect()
     offset.value = {
       x: e.clientX - rect.left,
       y: e.clientY - rect.top,
@@ -41,7 +51,7 @@ export function useDraggable() {
     const y = e.clientY - offset.value.y
 
     // Clamp so dialog never leaves the viewport
-    const dlg = dialogRef.value
+    const dlg = el(dialogRef)
     if (dlg) {
       const maxX = window.innerWidth - dlg.offsetWidth
       const maxY = window.innerHeight - dlg.offsetHeight
@@ -69,14 +79,16 @@ export function useDraggable() {
   }
 
   function attachHandle() {
-    if (handleRef.value) {
-      handleRef.value.addEventListener('mousedown', onMouseDown)
+    const h = el(handleRef)
+    if (h) {
+      h.addEventListener('mousedown', onMouseDown)
     }
   }
 
   function detachHandle() {
-    if (handleRef.value) {
-      handleRef.value.removeEventListener('mousedown', onMouseDown)
+    const h = el(handleRef)
+    if (h) {
+      h.removeEventListener('mousedown', onMouseDown)
     }
     document.removeEventListener('mousemove', onMouseMove)
     document.removeEventListener('mouseup', onMouseUp)

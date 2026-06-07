@@ -251,7 +251,7 @@
             </div>
 
             <!-- Right: delete action only (edit is now inline) -->
-            <div v-if="canDelete" class="relative shrink-0">
+            <div v-if="canDelete" class="relative shrink-0" v-click-outside="closeMenus">
               <button
                 @click.stop="toggleMenu(st.id)"
                 class="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300 p-1"
@@ -259,9 +259,9 @@
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5zM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5zM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5z"/></svg>
               </button>
 
+              <transition name="fade-pop">
               <div
                 v-if="openMenuId === st.id"
-                v-click-outside="closeMenus"
                 class="absolute right-0 mt-1 w-36 bg-white dark:bg-gray-700 rounded-3 z-20 py-1 text-sm"
               >
                 <button
@@ -272,6 +272,7 @@
                   Supprimer
                 </button>
               </div>
+              </transition>
             </div>
           </div>
 

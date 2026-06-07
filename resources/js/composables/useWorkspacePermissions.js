@@ -91,6 +91,29 @@ export function useWorkspacePermissions(workspace = null) {
     // Peut accéder à la recherche (toutes tiers confondus)
     const canSearch = computed(() => canSearchGlobal.value || canSearchScoped.value)
 
+    // Phase 7: Centre d'aide — lecture pour tous les rôles ; gestion granulaire par action
+    // (owner/directeur + super_admin par défaut).
+    const canReadHelpArticles        = computed(() => isSuperAdmin.value || (perms.value.can_help_articles_read ?? true))
+    const canCreateHelpArticles      = computed(() => isSuperAdmin.value || isDirecteur.value || (perms.value.can_help_articles_create ?? false))
+    const canEditHelpArticles        = computed(() => isSuperAdmin.value || isDirecteur.value || (perms.value.can_help_articles_edit ?? false))
+    const canPublishHelpArticles     = computed(() => isSuperAdmin.value || isDirecteur.value || (perms.value.can_help_articles_publish ?? false))
+    const canDeleteHelpArticles      = computed(() => isSuperAdmin.value || isDirecteur.value || (perms.value.can_help_articles_delete ?? false))
+    const canUploadHelpImages        = computed(() => isSuperAdmin.value || isDirecteur.value || (perms.value.can_help_articles_upload_image ?? false))
+    const canManageHelpCategories    = computed(() => isSuperAdmin.value || isDirecteur.value || (perms.value.can_help_categories_manage ?? false))
+
+    // Helper agrégé (PAS une permission backend) : sert uniquement à afficher/masquer
+    // le point d'entrée vers le back-office d'aide. Vrai dès que l'utilisateur détient
+    // au moins une permission de gestion granulaire. L'autorisation réelle de chaque
+    // action est vérifiée côté serveur par AdminHelpController (help_articles.create/
+    // edit/publish/delete/upload_image, help_categories.manage).
+    const canManageHelpArticles = computed(() =>
+        canCreateHelpArticles.value
+        || canEditHelpArticles.value
+        || canPublishHelpArticles.value
+        || canDeleteHelpArticles.value
+        || canManageHelpCategories.value
+    )
+
     // G8: Sidebar gating helpers
     // canViewAllTasks: managers, owners and super_admins can see the full task list.
     const canViewAllTasks = computed(() => isSuperAdmin.value || isDirecteur.value || isManager.value || isCadre.value)
@@ -179,6 +202,16 @@ export function useWorkspacePermissions(workspace = null) {
         canSearchGlobal,
         canSearchScoped,
         canSearch,
+
+        // Phase 7
+        canReadHelpArticles,
+        canCreateHelpArticles,
+        canEditHelpArticles,
+        canPublishHelpArticles,
+        canDeleteHelpArticles,
+        canUploadHelpImages,
+        canManageHelpCategories,
+        canManageHelpArticles,
 
         // G8
         canViewAllTasks,

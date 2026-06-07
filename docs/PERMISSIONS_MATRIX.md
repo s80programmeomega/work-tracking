@@ -168,6 +168,30 @@ Assigned in: `workspace_members`, `projet_user`, `activite_user`, `tache_user`
 
 ---
 
+## Help Center Permissions
+
+> Phase 7. Read is granted to every authenticated role (the help center is general documentation). Management is **action-based** (no single broad `manage`): create, edit, publish, delete, image upload, and category management are separate permissions. By default all management permissions go to `owner`/`directeur` (via `forRole('owner')` = `all()` minus task-participant exclusions) and `super_admin` (`['*']`); managers and below stay read-only. Each is enforced per-endpoint in `AdminHelpController` via `authorizeHelp()` / `authorizeHelpAny()` (super_admin, OR the permission held in any of the user's workspaces — help content is global, not per-workspace).
+
+| Permission | owner | manager | cadre | collaborateur | stagiaire | observateur |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| `help_articles.read` — Consulter le centre d'aide | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `help_articles.create` — Créer un brouillon | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `help_articles.edit` — Modifier un article | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `help_articles.publish` — Publier / dépublier | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `help_articles.delete` — Supprimer (corbeille) | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `help_articles.upload_image` — Téléverser / supprimer images | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `help_categories.manage` — Gérer les catégories (CRUD) | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+
+> **No `help_articles.manage` permission exists.** The frontend helper `canManageHelpArticles` (in `useWorkspacePermissions.js`) is **not** a permission — it is a pure OR-aggregate of the granular helpers, used only to decide whether to show the back-office entry link. Authorization for every action is enforced server-side per-endpoint.
+>
+> **Category management UI:** `/admin/help-categories` (list + create/edit/delete via `HelpCategoryModal.vue`), plus an inline "new category" modal in the article form — both gated by `help_categories.manage` (`canManageHelpCategories`).
+>
+> **Global search inclusion (Phase 7):** published help articles, categories, and images are indexed in Scout (`help_articles`, `help_categories`, `help_images` collections) and appear in `GET /api/search`. Only published content is indexed (`shouldBeSearchable`); drafts never appear, and images are indexed only while their parent article is published. Help content is global (no workspace/tier filter) but still requires an authenticated, search-eligible user.
+
+> The grants are intentionally splittable: a custom contextual role can hold, e.g., only `help_articles.create` (draft authoring) without `publish`/`delete`. The defaults above mirror the previous single-`manage` scope, just decomposed.
+
+---
+
 ## Changelog
 
 | Date | Task | Change |
@@ -185,3 +209,5 @@ Assigned in: `workspace_members`, `projet_user`, `activite_user`, `tache_user`
 | 2026-05-22 | Task 9 (perms) | `evaluations.view_fiche` + `evaluations.export_fiche` added to `Permission.php` and `Permission::all()`. Seeded in `forRole()`: VIEW for manager/cadre/collaborateur/stagiaire/observateur (own-scope for collaborateur+stagiaire+observateur, broader for cadre+manager — controller re-applies per-target scope); EXPORT only for manager/cadre (+ owner via the `all() minus exclusions` array_diff). Mirror in `Permission.js`. `canViewFicheEvaluation` + `canExportFicheEvaluation` in `useWorkspacePermissions.js`. `WorkspaceController.user_permissions` payload extended in 3 locations. `PermissionService::canViewFicheEvaluation/canExportFicheEvaluation` add the per-target scope check (own / cadre→assignees / manager→activity / owner→workspace). Matrix observateur changed from ❌ to ✅ (own only, read-only) for "View agent evaluation sheet" — aligns with the plan's read-only own clause. 132 tests still green. |
 | 2026-05-26 | Task 10 | `evaluations.view_dashboard` + `evaluations.view_workspace_taches` + `taches.inline_edit` added to `Permission.php`, `Permission::all()`, and `forRole()`. Dashboard: owner/manager/cadre (scoped); workspace tasks: owner only. Mirror in `Permission.js`. `canViewEvaluationDashboard` + `canViewWorkspaceTaches` + `canInlineEditTache` in `useWorkspacePermissions.js`. `WorkspaceController.user_permissions` payload extended in 3 locations. `PermissionService` gains 3 helpers. Matrix "View evaluation dashboard" cadre row corrected to ✅ (own activities); 2 new rows added (workspace-wide task list, inline edit). 216 tests green. |
 | 2026-06-04 | Phase 6 | `search.global` + `search.scoped` added to `Permission.php` + `Permission::all()` + `forRole()`. `search.global` → owner/manager; `search.scoped` → cadre/collaborateur/stagiaire. Mirror in `Permission.js`. `canSearchGlobal` + `canSearchScoped` + `canSearch` in `useWorkspacePermissions.js`. Both in `WorkspaceController.user_permissions` (3 locations). Matrix: new "Search Permissions" section with 2 rows. |
+| 2026-06-07 | Phase 7 | `help_articles.read` + `help_articles.manage` added to `Permission.php` + `Permission::all()` + `forRole()`. `read` → all contextual roles (owner via `all()`, manager/cadre/collaborateur/stagiaire/observateur explicit); `manage` → owner only (via `all()` minus task-participant exclusions) + super_admin (`['*']`). Mirror in `Permission.js`. `canReadHelpArticles` + `canManageHelpArticles` in `useWorkspacePermissions.js`. `can_help_articles_read` + `can_help_articles_manage` in `WorkspaceController.user_permissions` (3 locations). Server-side gate is `AdminHelpController::authorizeManage()` (super_admin OR `ownedWorkspaces()->exists()`). Matrix: new "Help Center Permissions" section with 2 rows. 15 PHPUnit tests green. |
+| 2026-06-07 | Phase 7 (granular) | Replaced the broad `help_articles.manage` with **6 action-based permissions**: `help_articles.create/edit/publish/delete/upload_image` + `help_categories.manage`. Updated `Permission.php` (consts + `all()`; owner still gets all via `all()` minus exclusions, read-only roles unchanged), `Permission.js`. `useWorkspacePermissions.js` gains `canCreate/Edit/Publish/Delete/UploadHelpImages` + `canManageHelpCategories` (+ aggregate `canManageHelpArticles`). `WorkspaceController.user_permissions` now exposes `can_help_articles_create/edit/publish/delete/upload_image` + `can_help_categories_manage` (3 locations). `AdminHelpController` checks per-action via `authorizeHelp()`/`authorizeHelpAny()` (renamed from `authorizeManage` to avoid clashing with the base `Controller::authorize()`), granting if super_admin OR the permission is held in any of the user's owned/joined workspaces. Frontend list page gates each action button (create/edit/publish/delete). Matrix Help section expanded to 6 rows. 18 PHPUnit tests green (3 new granularity tests). |

@@ -3,10 +3,12 @@
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\Api\ActiviteController;
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\AdminHelpController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\EvaluationController;
+use App\Http\Controllers\Api\HelpController;
 use App\Http\Controllers\Api\ProjetController;
 use App\Http\Controllers\Api\ProjetInvitationController;
 use App\Http\Controllers\Api\PushSubscriptionController;
@@ -138,6 +140,34 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/search', [SearchController::class, 'search'])->name('search.global');
     Route::get('/search/export', [SearchController::class, 'export'])->name('search.export');
     Route::post('/search/export', [SearchController::class, 'exportSelected'])->name('search.export.selected');
+
+    // ── Centre d'aide (Phase 7) ─────────────────────────────────────────────
+    // Lecture : tout utilisateur authentifié (contenu publié uniquement).
+    Route::prefix('help')->name('help.')->group(function () {
+        Route::get('/categories', [HelpController::class, 'categories'])->name('categories');
+        Route::get('/categories/{slug}', [HelpController::class, 'category'])->name('categories.show');
+        Route::get('/articles', [HelpController::class, 'articles'])->name('articles');
+        Route::get('/articles/{slug}', [HelpController::class, 'article'])->name('articles.show');
+    });
+
+    // Gestion : permissions granulaires par action (vérifiées dans le contrôleur).
+    Route::prefix('admin/help')->name('admin.help.')->group(function () {
+        Route::get('/categories', [AdminHelpController::class, 'indexCategories'])->name('categories.index');
+        Route::post('/categories', [AdminHelpController::class, 'storeCategory'])->name('categories.store');
+        Route::put('/categories/{category}', [AdminHelpController::class, 'updateCategory'])->name('categories.update');
+        Route::delete('/categories/{category}', [AdminHelpController::class, 'destroyCategory'])->name('categories.destroy');
+
+        Route::get('/articles', [AdminHelpController::class, 'indexArticles'])->name('articles.index');
+        Route::post('/articles', [AdminHelpController::class, 'storeArticle'])->name('articles.store');
+        Route::get('/articles/{article}', [AdminHelpController::class, 'showArticle'])->name('articles.show');
+        Route::put('/articles/{article}', [AdminHelpController::class, 'updateArticle'])->name('articles.update');
+        Route::post('/articles/{article}/publish', [AdminHelpController::class, 'publishArticle'])->name('articles.publish');
+        Route::post('/articles/{article}/unpublish', [AdminHelpController::class, 'unpublishArticle'])->name('articles.unpublish');
+        Route::delete('/articles/{article}', [AdminHelpController::class, 'destroyArticle'])->name('articles.destroy');
+
+        Route::post('/articles/{article}/images', [AdminHelpController::class, 'uploadImage'])->name('articles.images.store');
+        Route::delete('/article-images/{image}', [AdminHelpController::class, 'destroyImage'])->name('articles.images.destroy');
+    });
 
     // Dashboard routes
     Route::get('/dashboard', [DashboardController::class, 'index']);

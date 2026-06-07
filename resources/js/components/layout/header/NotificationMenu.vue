@@ -31,6 +31,7 @@
       </svg>
     </button>
 
+    <transition name="fade-pop">
     <div
       v-if="dropdownOpen"
       class="absolute -right-[240px] mt-[17px] flex h-[480px] w-[350px] flex-col rounded-3 border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-gray-900 sm:w-90.25 lg:right-0"
@@ -93,6 +94,7 @@
         {{ $t('notifications.view_all') }}
       </router-link>
     </div>
+    </transition>
 
     <!-- Notification Detail Modal -->
     <NotificationDetailModal

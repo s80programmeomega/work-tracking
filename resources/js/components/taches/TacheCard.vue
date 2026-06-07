@@ -49,7 +49,7 @@
       </div>
 
       <!-- Actions menu -->
-      <div class="relative">
+      <div class="relative" v-click-outside="() => showMenu = false">
         <button
           @click.stop="showMenu = !showMenu"
           class="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300"
@@ -60,9 +60,9 @@
         </button>
 
         <!-- Dropdown menu -->
+        <transition name="fade-pop">
         <div
           v-if="showMenu"
-          v-click-outside="() => showMenu = false"
           class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-3 z-10 py-1"
         >
           <button
@@ -116,6 +116,7 @@
             Supprimer
           </button>
         </div>
+        </transition>
       </div>
     </div>
 

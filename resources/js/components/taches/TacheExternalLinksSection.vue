@@ -40,7 +40,9 @@
     </div>
 
     <!-- Formulaire d'ajout -->
-    <div v-if="showAddForm" class="p-4 border-2 border-brand-500 rounded-3 bg-brand-50 dark:bg-brand-900/10 space-y-4">
+    <transition name="collapse">
+    <div v-if="showAddForm" class="collapse-inner">
+    <div class="p-4 border-2 border-brand-500 rounded-3 bg-brand-50 dark:bg-brand-900/10 space-y-4">
       <div class="flex items-center justify-between">
         <h4 class="font-semibold text-gray-900 dark:text-white">Nouveau lien</h4>
         <button @click="cancelAdd" class="text-gray-400 hover:text-gray-600 dark:text-gray-300">
@@ -146,6 +148,8 @@
         </div>
       </div>
     </div>
+    </div>
+    </transition>
 
     <!-- Liste des liens -->
     <div v-if="links.length > 0" class="space-y-2">

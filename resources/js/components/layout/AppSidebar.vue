@@ -397,10 +397,10 @@
                                 <transition
                                     @enter="startTransition"
                                     @after-enter="endTransition"
-                                    @before-leave="startTransition"
-                                    @after-leave="endTransition"
+                                    @leave="leaveTransition"
                                 >
                                     <div
+                                        class="submenu-collapse"
                                         v-show="
                                             isSubmenuOpen(groupIndex, index) &&
                                             (isExpanded ||
@@ -606,6 +606,7 @@ const {
     canSubmitResult,
     canViewEvaluationDashboard,
     canViewWorkspaceTaches,
+    canReadHelpArticles,
 } = useWorkspacePermissions(currentWorkspace);
 
 // Workspace management
@@ -930,7 +931,10 @@ const menuGroups = computed(() => [
             {
                 icon: FolderIcon,
                 name: t('navigation.documents'),
-                subItems: [{ name: t('sidebar.all_documents'), path: "/documents" }],
+                subItems: [
+                    { name: t('sidebar.all_documents'), path: "/documents" },
+                    { name: t('help.nav'), path: "/help" },
+                ],
             },
         ],
     },
@@ -1021,6 +1025,7 @@ const permissionMap = computed(() => ({
     canViewFicheEvaluation: canViewFicheEvaluation.value,
     canViewEvaluationDashboard: canViewEvaluationDashboard.value,
     canViewWorkspaceTaches: canViewWorkspaceTaches.value,
+    canReadHelpArticles: canReadHelpArticles.value,
     isSuperAdmin: isSuperAdmin.value,
 }));
 
@@ -1095,16 +1100,28 @@ const handleNavClick = (event) => {
     }
 };
 
+// Ouverture : 0 → hauteur réelle. La transition CSS (.submenu-collapse) anime.
 const startTransition = (el) => {
-    const height = el.scrollHeight;
     el.style.height = '0px';
     requestAnimationFrame(() => {
-        el.style.height = height + 'px';
+        el.style.height = el.scrollHeight + 'px';
     });
 };
 
+// Fin d'ouverture : libère la hauteur fixe (laisse le contenu se redimensionner).
 const endTransition = (el) => {
     el.style.height = '';
+};
+
+// Fermeture : hauteur réelle → 0 (sens inverse). On fige d'abord la hauteur
+// courante puis on la ramène à 0 au frame suivant pour que la transition CSS joue.
+const leaveTransition = (el, done) => {
+    el.style.height = el.scrollHeight + 'px';
+    requestAnimationFrame(() => {
+        el.style.height = '0px';
+    });
+    // Laisse la transition CSS (300ms) se terminer avant que Vue retire l'élément.
+    el.addEventListener('transitionend', done, { once: true });
 };
 
 onMounted(async () => {
@@ -1145,6 +1162,14 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+/* Sous-menu repliable : les hooks JS startTransition/endTransition règlent
+   la hauteur (0 → scrollHeight), mais sans transition CSS sur `height` le
+   changement était instantané. On anime donc explicitement la hauteur. */
+.submenu-collapse {
+    overflow: hidden;
+    transition: height 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 .fade-slide-enter-active,
 .fade-slide-leave-active {
     transition: all 0.2s ease;

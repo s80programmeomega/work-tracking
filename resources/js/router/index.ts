@@ -40,6 +40,48 @@ const router = createRouter({
     },
 
     // ==========================================
+    // CENTRE D'AIDE (Phase 7)
+    // ==========================================
+    {
+      path: '/help',
+      name: 'help.index',
+      component: () => import('../pages/help/HelpIndex.vue'),
+      meta: { title: 'Centre d\'aide', requiresAuth: true },
+    },
+    {
+      path: '/help/c/:slug',
+      name: 'help.category',
+      component: () => import('../pages/help/HelpCategory.vue'),
+      meta: { title: 'Catégorie d\'aide', requiresAuth: true },
+    },
+    {
+      path: '/help/a/:slug',
+      name: 'help.article',
+      component: () => import('../pages/help/HelpArticle.vue'),
+      meta: { title: 'Article d\'aide', requiresAuth: true },
+    },
+    // Gestion des articles (owner/directeur + super_admin) — gardée côté API.
+    {
+      path: '/admin/help-articles',
+      name: 'admin.help.articles',
+      component: () => import('../pages/admin/HelpArticlesList.vue'),
+      meta: { title: 'Gestion du centre d\'aide', requiresAuth: true },
+    },
+    {
+      path: '/admin/help-articles/create',
+      name: 'admin.help.articles.create',
+      component: () => import('../pages/admin/HelpArticleForm.vue'),
+      meta: { title: 'Créer un article', requiresAuth: true },
+    },
+    {
+      path: '/admin/help-articles/:id/edit',
+      name: 'admin.help.articles.edit',
+      component: () => import('../pages/admin/HelpArticleForm.vue'),
+      meta: { title: 'Modifier un article', requiresAuth: true },
+    },
+    // Catégories gérées dans l'onglet "Catégories" de la page articles (admin.help.articles).
+
+    // ==========================================
     // WORKSPACES
     // ==========================================
     {

@@ -141,6 +141,28 @@ final class Permission
     /** Recherche limitée aux ressources assignées — cadre, collaborateur, stagiaire. */
     const SEARCH_SCOPED = 'search.scoped';
 
+    // ── Centre d'aide (Phase 7) ────────────────────────────────────────────
+    /** Consulter les articles du centre d'aide — tous les rôles. */
+    const HELP_ARTICLES_READ = 'help_articles.read';
+
+    /** Créer un brouillon d'article — super_admin + owner/directeur. */
+    const HELP_ARTICLES_CREATE = 'help_articles.create';
+
+    /** Modifier un article (titre, corps, catégorie) — super_admin + owner/directeur. */
+    const HELP_ARTICLES_EDIT = 'help_articles.edit';
+
+    /** Publier / dépublier un article — super_admin + owner/directeur. */
+    const HELP_ARTICLES_PUBLISH = 'help_articles.publish';
+
+    /** Supprimer (corbeille) un article — super_admin + owner/directeur. */
+    const HELP_ARTICLES_DELETE = 'help_articles.delete';
+
+    /** Téléverser / supprimer des images d'article — super_admin + owner/directeur. */
+    const HELP_ARTICLES_UPLOAD_IMAGE = 'help_articles.upload_image';
+
+    /** Gérer les catégories du centre d'aide (CRUD) — super_admin + owner/directeur. */
+    const HELP_CATEGORIES_MANAGE = 'help_categories.manage';
+
     // ── Users (platform admin) ────────────────────────────────────────────
     const USERS_VIEW = 'users.view';
 
@@ -218,6 +240,14 @@ final class Permission
             self::SEARCH_GLOBAL,
             self::SEARCH_SCOPED,
 
+            self::HELP_ARTICLES_READ,
+            self::HELP_ARTICLES_CREATE,
+            self::HELP_ARTICLES_EDIT,
+            self::HELP_ARTICLES_PUBLISH,
+            self::HELP_ARTICLES_DELETE,
+            self::HELP_ARTICLES_UPLOAD_IMAGE,
+            self::HELP_CATEGORIES_MANAGE,
+
             self::USERS_VIEW,
             self::USERS_CREATE,
             self::USERS_UPDATE,
@@ -291,6 +321,8 @@ final class Permission
                 self::TACHES_INLINE_EDIT,
                 // Phase 6 — managers ont accès à la recherche globale.
                 self::SEARCH_GLOBAL,
+                // Phase 7 — consultation du centre d'aide (gestion réservée owner/directeur).
+                self::HELP_ARTICLES_READ,
                 // NOTIFICATIONS_MANAGE_PREFERENCES intentionally omitted — workspace-level
                 // notification policy is reserved for owner/directeur (granted via the
                 // owner contextual role's array_diff('all() except task-participant actions')).
@@ -331,6 +363,8 @@ final class Permission
                 self::TACHES_INLINE_EDIT,
                 // Phase 6 — cadres peuvent rechercher dans leurs ressources assignées.
                 self::SEARCH_SCOPED,
+                // Phase 7 — consultation du centre d'aide.
+                self::HELP_ARTICLES_READ,
             ],
 
             'collaborateur' => [
@@ -353,6 +387,8 @@ final class Permission
                 self::EVALUATIONS_VIEW_FICHE,
                 // Phase 6 — collaborateurs peuvent rechercher dans leurs ressources assignées.
                 self::SEARCH_SCOPED,
+                // Phase 7 — consultation du centre d'aide.
+                self::HELP_ARTICLES_READ,
             ],
 
             'stagiaire' => [
@@ -372,6 +408,8 @@ final class Permission
                 self::EVALUATIONS_VIEW_FICHE,
                 // Phase 6 — stagiaires peuvent rechercher dans leurs ressources assignées.
                 self::SEARCH_SCOPED,
+                // Phase 7 — consultation du centre d'aide.
+                self::HELP_ARTICLES_READ,
             ],
 
             'observateur' => [
@@ -384,6 +422,8 @@ final class Permission
                 self::EVALUATIONS_VIEW_SCORE,
                 // Task 9 — fiche perso en lecture seule, pas d'export.
                 self::EVALUATIONS_VIEW_FICHE,
+                // Phase 7 — consultation du centre d'aide.
+                self::HELP_ARTICLES_READ,
             ],
 
             // Virtual role — derived from tache_user.is_responsable = true

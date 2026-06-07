@@ -13,9 +13,10 @@
             enter-to="opacity-100 scale-100" leave="ease-in duration-200" leave-from="opacity-100 scale-100"
             leave-to="opacity-0 scale-95">
             <DialogPanel
-              class="w-full max-w-3xl transform overflow-hidden rounded-3 bg-white dark:bg-gray-800 transition-all">
+              ref="dialogRef" :style="dragStyle"
+              class="w-full max-w-3xl transform overflow-hidden rounded-3 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-all">
               <!-- Header -->
-              <div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+              <div ref="handleRef" class="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-6 py-4 cursor-move select-none">
                 <DialogTitle class="text-lg font-semibold text-gray-900 dark:text-white">
                   Ajouter des membres à l'activité
                 </DialogTitle>
@@ -239,8 +240,12 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
+import { useDraggable } from '@/composables/useDraggable'
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
 import api from '@/api/axios'
+
+// Modale déplaçable par son en-tête (panneau Headless UI).
+const { dialogRef, handleRef, dragStyle, attachHandle } = useDraggable()
 
 const props = defineProps({
   show: {
@@ -403,6 +408,7 @@ watch(() => props.show, (newValue) => {
 })
 
 onMounted(() => {
+  attachHandle()
   if (props.show) {
     fetchAvailableMembers()
   }

@@ -12,9 +12,9 @@
             leave-from="opacity-100 translate-y-0 sm:scale-100"
             leave-to="opacity-0 translate-y-4 sm:scale-95"
           >
-            <DialogPanel class="relative w-full max-w-7xl transform overflow-hidden rounded-3 bg-white transition-all dark:bg-gray-900">
+            <DialogPanel ref="dialogRef" :style="dragStyle" class="relative w-full max-w-7xl transform overflow-hidden rounded-3 border border-gray-200 dark:border-gray-700 bg-white transition-all dark:bg-gray-900">
               <!-- Header -->
-              <div class="border-b border-gray-200 bg-white px-6 py-4 dark:border-gray-800 dark:bg-gray-900">
+              <div ref="handleRef" class="border-b border-gray-200 bg-white px-6 py-4 dark:border-gray-800 dark:bg-gray-900 cursor-move select-none">
                 <div class="flex items-center justify-between">
                   <div class="flex items-center gap-3">
                     <component :is="getEntityIcon()" class="h-6 w-6 text-gray-400" />
@@ -55,8 +55,13 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
+import { useDraggable } from '@/composables/useDraggable'
+
+// Modale déplaçable par son en-tête (panneau Headless UI).
+const { dialogRef, handleRef, dragStyle, attachHandle } = useDraggable()
+onMounted(attachHandle)
 import {
   XMarkIcon,
   FolderIcon,
