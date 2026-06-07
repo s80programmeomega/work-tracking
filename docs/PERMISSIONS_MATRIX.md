@@ -168,6 +168,17 @@ Assigned in: `workspace_members`, `projet_user`, `activite_user`, `tache_user`
 
 ---
 
+## Help Center Permissions
+
+> Phase 7. Read is granted to every authenticated role (the help center is general documentation). Manage (create/edit/publish articles + categories + image upload) is reserved for `owner`/`directeur` and `super_admin`. The `manage` check is enforced server-side in `AdminHelpController::authorizeManage()` (super_admin OR owner of at least one workspace), independent of any single workspace context.
+
+| Permission | owner | manager | cadre | collaborateur | stagiaire | observateur |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| `help_articles.read` — Consulter le centre d'aide | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `help_articles.manage` — Créer / éditer / publier des articles | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+
+---
+
 ## Changelog
 
 | Date | Task | Change |
@@ -185,3 +196,4 @@ Assigned in: `workspace_members`, `projet_user`, `activite_user`, `tache_user`
 | 2026-05-22 | Task 9 (perms) | `evaluations.view_fiche` + `evaluations.export_fiche` added to `Permission.php` and `Permission::all()`. Seeded in `forRole()`: VIEW for manager/cadre/collaborateur/stagiaire/observateur (own-scope for collaborateur+stagiaire+observateur, broader for cadre+manager — controller re-applies per-target scope); EXPORT only for manager/cadre (+ owner via the `all() minus exclusions` array_diff). Mirror in `Permission.js`. `canViewFicheEvaluation` + `canExportFicheEvaluation` in `useWorkspacePermissions.js`. `WorkspaceController.user_permissions` payload extended in 3 locations. `PermissionService::canViewFicheEvaluation/canExportFicheEvaluation` add the per-target scope check (own / cadre→assignees / manager→activity / owner→workspace). Matrix observateur changed from ❌ to ✅ (own only, read-only) for "View agent evaluation sheet" — aligns with the plan's read-only own clause. 132 tests still green. |
 | 2026-05-26 | Task 10 | `evaluations.view_dashboard` + `evaluations.view_workspace_taches` + `taches.inline_edit` added to `Permission.php`, `Permission::all()`, and `forRole()`. Dashboard: owner/manager/cadre (scoped); workspace tasks: owner only. Mirror in `Permission.js`. `canViewEvaluationDashboard` + `canViewWorkspaceTaches` + `canInlineEditTache` in `useWorkspacePermissions.js`. `WorkspaceController.user_permissions` payload extended in 3 locations. `PermissionService` gains 3 helpers. Matrix "View evaluation dashboard" cadre row corrected to ✅ (own activities); 2 new rows added (workspace-wide task list, inline edit). 216 tests green. |
 | 2026-06-04 | Phase 6 | `search.global` + `search.scoped` added to `Permission.php` + `Permission::all()` + `forRole()`. `search.global` → owner/manager; `search.scoped` → cadre/collaborateur/stagiaire. Mirror in `Permission.js`. `canSearchGlobal` + `canSearchScoped` + `canSearch` in `useWorkspacePermissions.js`. Both in `WorkspaceController.user_permissions` (3 locations). Matrix: new "Search Permissions" section with 2 rows. |
+| 2026-06-07 | Phase 7 | `help_articles.read` + `help_articles.manage` added to `Permission.php` + `Permission::all()` + `forRole()`. `read` → all contextual roles (owner via `all()`, manager/cadre/collaborateur/stagiaire/observateur explicit); `manage` → owner only (via `all()` minus task-participant exclusions) + super_admin (`['*']`). Mirror in `Permission.js`. `canReadHelpArticles` + `canManageHelpArticles` in `useWorkspacePermissions.js`. `can_help_articles_read` + `can_help_articles_manage` in `WorkspaceController.user_permissions` (3 locations). Server-side gate is `AdminHelpController::authorizeManage()` (super_admin OR `ownedWorkspaces()->exists()`). Matrix: new "Help Center Permissions" section with 2 rows. 15 PHPUnit tests green. |

@@ -16,18 +16,34 @@
 
 ## Current Session
 
-**Date:** 2026-06-06
-**Session goal:** Phase 6 finalized (role tiers, notifications searchable, security hardening) → merged; Phase 7 next
-**Branch:** `feature/phase6-search` → merged into `jonas`
-**Status:** ✅ Merged — 717 tests passing, build green, Larastan clean, pushed both remotes.
+**Date:** 2026-06-07
+**Session goal:** Phase 7 — Help Center (reader + author UI, no AI). Backend + frontend built and committed.
+**Branch:** `feature/phase7-help-center` (from `jonas`)
+**Status:** 🚧 Committed `92c482a` (NOT merged, NOT pushed). 15 PHPUnit tests passing, Pint + Larastan clean, frontend build green.
 
 ---
 
 ## Current Task
 
-**Task:** Extended Features — Phase 6 complete + merged (global search: tiers, notifications, file extraction, security hardening)
-**Branch:** `feature/phase6-search` → merged into `jonas`
-**Status:** ✅ Merged — 717 tests passing, build green, Larastan clean, pushed both remotes.
+**Task:** Extended Features — Phase 7 Help Center (HELP_CENTER_PLAN.md Phases 1–3 + 6; AI + auto-screenshots skipped)
+**Branch:** `feature/phase7-help-center`
+**Status:** 🚧 Committed `92c482a` — docs being finalized; not yet merged/pushed (awaiting explicit per-push approval).
+
+**What was done (Phase 7):**
+- **Models** — `HelpCategory`, `HelpArticle` (Purifier sanitize-on-save via `help-article` allowlist + plain-text extraction + bilingual MySQL FULLTEXT `scopeSearch` in boolean/prefix mode), `HelpArticleImage` (public-disk URL accessor) + factories.
+- **Migrations** — `help_categories`, `help_articles` (+ FULLTEXT index on `titre_fr/en` + `body_plain_fr/en`, guarded for MySQL), `help_article_images`.
+- **Permissions** — `help_articles.read` (all roles) + `help_articles.manage` (owner/directeur + super_admin); full Guide 4+15 flow (Permission.php + all() + forRole(), Permission.js, `canReadHelpArticles`/`canManageHelpArticles`, `WorkspaceController.user_permissions` ×3). Server gate: `AdminHelpController::authorizeManage()`.
+- **Controllers/routes** — `HelpController` (4 read endpoints, published-only, view counter) + `AdminHelpController` (CRUD + publish/unpublish + image upload/delete) + 4 Form Requests; 17 routes.
+- **Reader UI** — `HelpIndex` (debounced FULLTEXT search + category grid), `HelpCategory`, `HelpArticle` (sanitized HTML in `prose` + related); routes `/help`, `/help/c/:slug`, `/help/a/:slug`; sidebar "Aide" entry; fr/en i18n.
+- **Author UI** — `HelpArticlesList`, `HelpArticleForm`, `HelpArticleEditor` (Tiptap WYSIWYG + image upload); admin routes. **Tiptap deps added (user-approved).**
+- **Tests** — `HelpCenterTest` (RefreshDatabase) + `HelpSearchTest` (DatabaseTruncation — InnoDB FULLTEXT can't see uncommitted rows). 15 passing.
+- **Fix** — reader pages used a doubled `/api` prefix (axios baseURL already includes `/api`); corrected to `/help/...` and `/admin/help/...`.
+- **Docs** — `PERMISSIONS_MATRIX.md` (new Help Center section + changelog), `testing/TASK_PHASE7_TESTING.md`, this file, PROGRESSION + INDEX updated.
+
+**What to do next:**
+1. Optional: live manual pass (`php artisan serve` + `npm run dev`) per `testing/TASK_PHASE7_TESTING.md`.
+2. When ready, ask for explicit per-push approval, then push `feature/phase7-help-center` to both remotes and merge into `jonas`.
+3. Then **Phase 8** — Subscription plans + payment gate.
 
 **What was done (Phase 6 — role tiers, notifications, security):**
 - **Role-scoped search tiers** — `search.global` (super-admin/owner/manager: workspace-wide; super-admin = all workspaces) + new `search.scoped` (cadre/collaborateur/stagiaire: assigned resources only); observateur/utilisateur = none. Full Guide 4+15 flow; `PERMISSIONS_MATRIX.md` updated.

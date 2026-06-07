@@ -17,7 +17,7 @@
 | 4 — Super-admin logs (activity + app + audit) | [PHASE4_PLAN.md](PHASE4_PLAN.md) | ✅ Merged | `feature/support-contact` |
 | 5 — Chat real-time + @mentions + unread | [PHASE5_PLAN.md](PHASE5_PLAN.md) | ✅ Merged | `feature/phase5-chat` |
 | 6 — Global search (Typesense + Scout + search page) | [PHASE6_SEARCH_PLAN.md](PHASE6_SEARCH_PLAN.md) | ✅ Merged | `feature/phase6-search` |
-| 7 — Help Center (reader + author, no AI) | [HELP_CENTER_PLAN.md](HELP_CENTER_PLAN.md) | ⬜ Not started | — |
+| 7 — Help Center (reader + author, no AI) | [HELP_CENTER_PLAN.md](HELP_CENTER_PLAN.md) | 🚧 Committed (not merged) | `feature/phase7-help-center` |
 | 8 — Subscription plans + payment gate | *(within README.md)* | ⬜ Not started | — |
 | 9 — Payment gateway (MTN MoMo + Orange Money) | *(within README.md)* | ⬜ Not started | — |
 | 10 — Perf + security hardening | *(within README.md)* | ⬜ Not started | — |
@@ -35,6 +35,7 @@
 | Chat real-time testing | Phase 5 | [testing/TASK_PHASE5_TESTING.md](testing/TASK_PHASE5_TESTING.md) |
 | Global search testing | Phase 6 (Part A) | [testing/TASK_PHASE6_TESTING.md](testing/TASK_PHASE6_TESTING.md) |
 | Enhanced search page testing | Phase 6 (Part B + tiers/notifications/security) | [testing/TASK_PHASE6_ENHANCED_TESTING.md](testing/TASK_PHASE6_ENHANCED_TESTING.md) |
+| Help Center testing | Phase 7 | [testing/TASK_PHASE7_TESTING.md](testing/TASK_PHASE7_TESTING.md) |
 
 ---
 
