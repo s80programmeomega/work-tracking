@@ -1,7 +1,7 @@
 <!-- resources\js\components\taches\TacheViewModal.vue --------->
 <template>
   <div class="fixed inset-0 z-990 flex items-center justify-center bg-black/30 p-4" @click.self="$emit('close')">
-    <div ref="dialogRef" :style="dragStyle" class="bg-white dark:bg-gray-800 rounded-3 w-full max-w-4xl max-h-[95vh] overflow-hidden flex flex-col">
+    <div ref="dialogRef" :style="dragStyle" class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 w-full max-w-4xl max-h-[95vh] overflow-hidden flex flex-col">
 
       <!-- Header -->
       <div ref="handleRef" class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 cursor-move select-none">

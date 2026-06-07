@@ -2,9 +2,9 @@
 <template>
   <Modal @close="$emit('close')">
     <template #body>
-      <div class="relative w-full max-w-2xl overflow-y-auto bg-white rounded-3 dark:bg-gray-900">
+      <div ref="dialogRef" :style="dragStyle" class="relative w-full max-w-2xl overflow-y-auto bg-white rounded-3 border border-gray-200 dark:border-gray-700 dark:bg-gray-900">
         <!-- Header -->
-        <div class="sticky top-0 z-10 flex items-center justify-between p-6 bg-white border-b dark:bg-gray-900 dark:border-gray-800">
+        <div ref="handleRef" class="sticky top-0 z-10 flex items-center justify-between p-6 bg-white border-b dark:bg-gray-900 dark:border-gray-800 cursor-move select-none">
           <div>
             <h3 class="text-xl font-bold text-gray-800 dark:text-white/90">
               Modifier le profil
@@ -277,7 +277,12 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, onMounted } from 'vue'
+import { useDraggable } from '@/composables/useDraggable'
+
+// Modale déplaçable par son en-tête.
+const { dialogRef, handleRef, dragStyle, attachHandle } = useDraggable()
+onMounted(attachHandle)
 import Modal from './Modal.vue'
 import api from '@/api/axios'
 

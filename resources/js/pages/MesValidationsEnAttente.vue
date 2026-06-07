@@ -8,7 +8,7 @@
             <div class="flex items-center gap-5">
               <div class="relative">
                 <div
-                  class="w-16 h-16 rounded-3 flex items-center justify-center shadow-blue-500/25">
+                  class="w-16 h-16 rounded-3 flex items-center justify-center bg-linear-to-br from-blue-500 to-blue-600 shadow-lg shadow-blue-500/25">
                   <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -16,7 +16,7 @@
                 </div>
                 <div
                   v-if="counts.total > 0"
-                  class="absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center ">
+                  class="absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center bg-red-500 ring-2 ring-white dark:ring-gray-900">
                   <span class="text-xs font-bold text-white">{{ counts.total }}</span>
                 </div>
               </div>

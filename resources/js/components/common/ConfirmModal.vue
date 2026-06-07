@@ -1,9 +1,9 @@
 <!-- resources/js/components/common/ConfirmModal.vue -->
 <template>
   <Teleport to="body">
-    <div class="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
+    <div class="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4" @click.self="$emit('cancel')">
       <div ref="dialogRef" :style="dragStyle"
-        class="bg-white dark:bg-gray-800 rounded-3 max-w-md w-full"
+        class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 max-w-md w-full"
         @click.stop
       >
         <!-- Header -->

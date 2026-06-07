@@ -3,7 +3,7 @@
     <div class="flex items-center justify-center min-h-screen px-4">
       <div class="fixed inset-0 bg-black/30"></div>
 
-      <div ref="dialogRef" :style="dragStyle" class="relative bg-white dark:bg-gray-800 rounded-3 max-w-3xl w-full p-6">
+      <div ref="dialogRef" :style="dragStyle" class="relative bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 max-w-3xl w-full p-6">
         <!-- Header -->
         <div ref="handleRef" class="flex items-center justify-between mb-6 cursor-move select-none">
           <h3 class="text-xl font-bold text-gray-900 dark:text-white">

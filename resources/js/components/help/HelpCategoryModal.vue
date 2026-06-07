@@ -2,8 +2,8 @@
      Utilisée par la page de gestion des catégories et par le formulaire d'article. -->
 <template>
   <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" @click.self="$emit('close')">
-    <div class="w-full max-w-lg rounded-3 border border-gray-200 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-900">
-      <h2 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+    <div ref="dialogRef" :style="dragStyle" class="w-full max-w-lg rounded-3 border border-gray-200 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-900">
+      <h2 ref="handleRef" class="mb-4 cursor-move select-none text-lg font-semibold text-gray-900 dark:text-white">
         {{ isEdit ? $t('help.admin.edit_category') : $t('help.admin.new_category') }}
       </h2>
 
@@ -103,9 +103,14 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useStagger } from '@/composables/useAnimations'
+import { useDraggable } from '@/composables/useDraggable'
 import api from '@/api/axios'
+
+// Modale déplaçable par son en-tête.
+const { dialogRef, handleRef, dragStyle, attachHandle } = useDraggable()
+onMounted(attachHandle)
 
 const props = defineProps({
   // Catégorie existante (édition) ou null (création).
