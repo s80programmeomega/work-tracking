@@ -606,6 +606,7 @@ const {
     canSubmitResult,
     canViewEvaluationDashboard,
     canViewWorkspaceTaches,
+    canReadHelpArticles,
 } = useWorkspacePermissions(currentWorkspace);
 
 // Workspace management
@@ -932,6 +933,11 @@ const menuGroups = computed(() => [
                 name: t('navigation.documents'),
                 subItems: [{ name: t('sidebar.all_documents'), path: "/documents" }],
             },
+            {
+                icon: DocsIcon,
+                name: t('help.nav'),
+                path: "/help",
+            },
         ],
     },
     {
@@ -1021,6 +1027,7 @@ const permissionMap = computed(() => ({
     canViewFicheEvaluation: canViewFicheEvaluation.value,
     canViewEvaluationDashboard: canViewEvaluationDashboard.value,
     canViewWorkspaceTaches: canViewWorkspaceTaches.value,
+    canReadHelpArticles: canReadHelpArticles.value,
     isSuperAdmin: isSuperAdmin.value,
 }));
 

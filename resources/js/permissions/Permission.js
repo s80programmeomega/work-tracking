@@ -88,6 +88,10 @@ export const Permission = Object.freeze({
     SEARCH_GLOBAL: 'search.global',
     SEARCH_SCOPED: 'search.scoped',
 
+    // Centre d'aide (Phase 7)
+    HELP_ARTICLES_READ:   'help_articles.read',
+    HELP_ARTICLES_MANAGE: 'help_articles.manage',
+
     // Users
     USERS_VIEW:                 'users.view',
     USERS_CREATE:               'users.create',

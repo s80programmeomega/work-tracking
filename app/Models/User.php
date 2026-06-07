@@ -457,6 +457,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Workspaces dont l'utilisateur est propriétaire (owner_id).
+     */
+    public function ownedWorkspaces(): HasMany
+    {
+        return $this->hasMany(Workspace::class, 'owner_id');
+    }
+
+    /**
      * Surcharge la relation notifications() du trait Notifiable pour utiliser
      * App\Models\Notification (indexable Scout) au lieu du DatabaseNotification
      * standard. Comme ce modèle étend DatabaseNotification, c'est un remplacement

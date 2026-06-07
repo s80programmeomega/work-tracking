@@ -91,6 +91,10 @@ export function useWorkspacePermissions(workspace = null) {
     // Peut accéder à la recherche (toutes tiers confondus)
     const canSearch = computed(() => canSearchGlobal.value || canSearchScoped.value)
 
+    // Phase 7: Centre d'aide — lecture pour tous les rôles, gestion pour owner/directeur + super_admin
+    const canReadHelpArticles   = computed(() => isSuperAdmin.value || (perms.value.can_help_articles_read ?? true))
+    const canManageHelpArticles = computed(() => isSuperAdmin.value || isDirecteur.value || (perms.value.can_help_articles_manage ?? false))
+
     // G8: Sidebar gating helpers
     // canViewAllTasks: managers, owners and super_admins can see the full task list.
     const canViewAllTasks = computed(() => isSuperAdmin.value || isDirecteur.value || isManager.value || isCadre.value)
@@ -179,6 +183,10 @@ export function useWorkspacePermissions(workspace = null) {
         canSearchGlobal,
         canSearchScoped,
         canSearch,
+
+        // Phase 7
+        canReadHelpArticles,
+        canManageHelpArticles,
 
         // G8
         canViewAllTasks,
