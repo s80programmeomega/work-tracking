@@ -105,6 +105,7 @@
             </div>
 
             <!-- Reaction picker -->
+            <transition name="fade-pop">
             <div v-if="showReactionPicker" class="reaction-picker">
               <button
                 v-for="emoji in availableEmojis"
@@ -115,6 +116,7 @@
                 {{ emoji }}
               </button>
             </div>
+            </transition>
           </div>
 
           <!-- Action buttons -->
@@ -128,7 +130,9 @@
           </div>
 
           <!-- Reply form -->
+          <transition name="collapse">
           <div v-if="showReplyForm" class="mt-3">
+            <div class="collapse-inner">
             <CommentForm
               :commentable-type="comment.commentable_type"
               :commentable-id="comment.commentable_id"
@@ -138,7 +142,9 @@
               @submit="handleReply"
               @cancel="toggleReply"
             />
+            </div>
           </div>
+          </transition>
 
           <!-- Nested replies -->
           <div v-if="comment.replies && comment.replies.length > 0" class="replies mt-3">

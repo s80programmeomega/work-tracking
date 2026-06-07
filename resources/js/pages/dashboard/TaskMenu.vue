@@ -1,6 +1,6 @@
 <!-- resources/js/pages/dashboard/TaskMenu.vue -->
 <template>
-  <div class="relative">
+  <div class="relative" v-click-outside="closeMenu">
     <button
       @click="toggleMenu"
       class="p-1 text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300 transition-colors rounded hover:bg-gray-100 dark:hover:bg-gray-600"
@@ -9,9 +9,9 @@
     </button>
 
     <!-- Dropdown Menu -->
+    <transition name="fade-pop">
     <div
       v-if="isOpen"
-      v-click-outside="closeMenu"
       class="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 z-50 py-1"
     >
       <!-- View Details -->
@@ -69,6 +69,7 @@
         Supprimer
       </button>
     </div>
+    </transition>
   </div>
 </template>
 

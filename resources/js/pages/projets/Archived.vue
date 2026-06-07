@@ -47,7 +47,7 @@
               </button>
 
               <!-- Bulk Actions -->
-              <div class="relative" v-if="selectedProjets.length > 0">
+              <div class="relative" v-if="selectedProjets.length > 0" v-click-outside="() => showBulkActions = false">
                 <button dusk="bulk-actions-btn" @click="showBulkActions = !showBulkActions"
                   class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-3 hover:bg-blue-700 transition-colors font-medium">
                   <ArchiveIcon class="w-4 h-4" />
@@ -56,7 +56,8 @@
                 </button>
 
                 <!-- Bulk Actions Dropdown -->
-                <div dusk="bulk-actions-dropdown" v-if="showBulkActions" v-click-outside="() => showBulkActions = false"
+                <transition name="fade-pop">
+                <div dusk="bulk-actions-dropdown" v-if="showBulkActions"
                   class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-3 border border-gray-200 dark:border-gray-600 z-10">
                   <button @click="bulkUnarchive"
                     class="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-t-lg transition-colors">
@@ -69,6 +70,7 @@
                     {{ $t('projets_archived.bulk_delete') }}
                   </button>
                 </div>
+                </transition>
               </div>
             </div>
           </div>
@@ -323,14 +325,15 @@
                         class="w-4 h-4" />
                     </button>
 
-                    <div class="relative">
+                    <div class="relative" v-click-outside="() => activeMenuId = null">
                       <button @click.stop="toggleMenu(projet.id)"
                         class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                         <HorizontalDots class="w-4 h-4 text-gray-500 dark:text-gray-400" />
                       </button>
 
                       <!-- Dropdown Menu -->
-                      <div v-if="activeMenuId === projet.id" v-click-outside="() => activeMenuId = null"
+                      <transition name="fade-pop">
+                      <div v-if="activeMenuId === projet.id"
                         class="absolute right-0 mt-1 w-48 bg-white dark:bg-gray-700 rounded-3 border border-gray-200 dark:border-gray-600 z-10">
                         <button @click.stop="viewProjet(projet.id)"
                           class="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-t-lg transition-colors">
@@ -353,6 +356,7 @@
                           {{ $t('projets_archived.menu_delete') }}
                         </button>
                       </div>
+                      </transition>
                     </div>
                   </div>
                 </div>

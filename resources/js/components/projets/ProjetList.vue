@@ -21,7 +21,10 @@
     </div> -->
 
    <!-- Filtres et recherche - Conditionnel -->
-    <div v-if="showFilters" class="bg-gray-50 dark:bg-gray-800/50 rounded-3 p-4 space-y-4">
+    <transition name="collapse">
+    <div v-if="showFilters">
+    <div class="collapse-inner">
+    <div class="bg-gray-50 dark:bg-gray-800/50 rounded-3 p-4 space-y-4">
       <!-- Barre de recherche -->
       <div class="relative">
         <SearchIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -126,6 +129,9 @@
         </button>
       </div>
     </div>
+    </div>
+    </div>
+    </transition>
 
     <!-- Loading -->
     <div v-if="loading" class="flex justify-center py-12">
@@ -195,17 +201,17 @@
                 />
               </button>
               
-              <div class="relative">
+              <div class="relative" v-click-outside="() => activeMenuId = null">
                 <button
                   @click.stop="toggleMenu(projet.id)"
                   class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700" >
                   <MoreVerticalIcon class="w-5 h-5 text-gray-500 dark:text-gray-400" />
                 </button>
-                
+
                 <!-- Dropdown Menu -->
+                <transition name="fade-pop">
                 <div
                   v-if="activeMenuId === projet.id"
-                  v-click-outside="() => activeMenuId = null"
                   class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-3 border border-gray-200 dark:border-gray-600 z-10" >
                   <button
                     @click.stop="editProjet(projet)"
@@ -243,6 +249,7 @@
                     Supprimer
                   </button>
                 </div>
+                </transition>
               </div>
             </div>
           </div>

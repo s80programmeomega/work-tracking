@@ -104,3 +104,57 @@ button:active:not(:disabled),
 a {
   transition: color 0.15s ease, opacity 0.15s ease;
 }
+
+/* ----------------------------------------------------------
+   6. Transitions Vue réutilisables (rollout global)
+   Utilisation : <transition name="collapse"> pour les blocs
+   qui s'ouvrent/se ferment en hauteur (panneaux, accordéons,
+   formulaires) ; <transition name="fade-pop"> pour les
+   popovers (menus flottants). Évite de dupliquer du <style>
+   scopé dans chaque composant.
+   ---------------------------------------------------------- */
+
+/* a) Collapse en hauteur — technique grid-template-rows 0fr→1fr
+   (anime la hauteur sans la connaître à l'avance). Le contenu
+   direct DOIT être enveloppé d'un wrapper overflow-hidden.
+   Durée allongée (400ms) pour un repli/déploiement bien visible. */
+.collapse-enter-active {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 400ms cubic-bezier(0.22, 1, 0.36, 1), opacity 400ms ease;
+}
+
+.collapse-leave-active {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 300ms ease, opacity 300ms ease;
+}
+
+.collapse-enter-from,
+.collapse-leave-to {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+
+/* Enveloppe interne requise par la technique grid-rows. */
+.collapse-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* b) Fade + zoom/glissement — pour les popovers / menus flottants.
+   Mouvement et durée accentués pour être nettement perceptibles ;
+   l'entrée utilise un léger dépassement (overshoot) pour un effet "pop". */
+.fade-pop-enter-active {
+  transition: opacity 260ms ease, transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.fade-pop-leave-active {
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.fade-pop-enter-from,
+.fade-pop-leave-to {
+  opacity: 0;
+  transform: scale(0.9) translateY(-10px);
+}

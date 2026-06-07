@@ -41,10 +41,10 @@
             <i :class="['fas', iconPickerOpen ? 'fa-chevron-up' : 'fa-chevron-down', 'text-gray-400']"></i>
           </button>
 
-          <!-- Grille repliée par défaut. Transition douce via grid-template-rows 0fr→1fr. -->
-          <transition name="icon-collapse">
-            <div v-if="iconPickerOpen" class="icon-collapse-wrap">
-              <div class="icon-collapse-inner">
+          <!-- Grille repliée par défaut. Transition "collapse" partagée (animations.css). -->
+          <transition name="collapse">
+            <div v-if="iconPickerOpen">
+              <div class="collapse-inner">
                 <div ref="iconGridRef" class="mt-2 grid grid-cols-8 gap-2 rounded-3 border border-gray-200 p-2 dark:border-gray-700">
                   <button
                     v-for="opt in iconOptions"
@@ -268,28 +268,3 @@ const save = async () => {
   }
 }
 </script>
-
-<style scoped>
-/* Repli/déploiement fluide de la grille d'icônes.
-   Technique grid-template-rows 0fr→1fr : anime la hauteur sans la connaître à l'avance. */
-.icon-collapse-wrap {
-  display: grid;
-  grid-template-rows: 1fr;
-}
-
-.icon-collapse-inner {
-  overflow: hidden;
-  min-height: 0;
-}
-
-.icon-collapse-enter-active,
-.icon-collapse-leave-active {
-  transition: grid-template-rows 280ms ease, opacity 280ms ease;
-}
-
-.icon-collapse-enter-from,
-.icon-collapse-leave-to {
-  grid-template-rows: 0fr;
-  opacity: 0;
-}
-</style>

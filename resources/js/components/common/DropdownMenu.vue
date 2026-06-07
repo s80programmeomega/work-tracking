@@ -21,32 +21,34 @@
       </slot>
     </button>
 
-    <!-- Dropdown Menu -->
-    <div v-if="open" :class="menuClass">
-      <slot name="menu">
-        <!-- Default menu items -->
-        <template v-for="(item, index) in menuItems">
-          <router-link
-            v-if="item.to"
-            :key="`router-${index}`"
-            :to="item.to"
-            @click.native="handleMenuItemClick(item.onClick)"
-            :class="itemClass"
-          >
-            {{ item.label }}
-          </router-link>
+    <!-- Dropdown Menu (popover : transition fondu + léger zoom, partagée) -->
+    <transition name="fade-pop">
+      <div v-if="open" :class="menuClass">
+        <slot name="menu">
+          <!-- Default menu items -->
+          <template v-for="(item, index) in menuItems">
+            <router-link
+              v-if="item.to"
+              :key="`router-${index}`"
+              :to="item.to"
+              @click.native="handleMenuItemClick(item.onClick)"
+              :class="itemClass"
+            >
+              {{ item.label }}
+            </router-link>
 
-          <button
-            v-else
-            :key="`button-${index}`"
-            @click="handleMenuItemClick(item.onClick)"
-            :class="itemClass"
-          >
-            {{ item.label }}
-          </button>
-        </template>
-      </slot>
-    </div>
+            <button
+              v-else
+              :key="`button-${index}`"
+              @click="handleMenuItemClick(item.onClick)"
+              :class="itemClass"
+            >
+              {{ item.label }}
+            </button>
+          </template>
+        </slot>
+      </div>
+    </transition>
   </div>
 </template>
 

@@ -36,6 +36,7 @@
             </button>
             
             <!-- Dropdown filtres -->
+            <transition name="fade-pop">
             <div v-if="showFilters" class="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 z-10">
               <div class="p-4 space-y-3">
                 <div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-2">
@@ -84,6 +85,7 @@
                 </div>
               </div>
             </div>
+            </transition>
           </div>
 
           <!-- Bouton ajouter -->
