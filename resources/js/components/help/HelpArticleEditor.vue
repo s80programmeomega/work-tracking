@@ -23,7 +23,10 @@
     </div>
 
     <!-- Zone d'édition -->
-    <editor-content :editor="editor" class="prose prose-sm max-w-none p-4 dark:prose-invert focus:outline-none" />
+    <editor-content
+      :editor="editor"
+      class="help-editor-content prose prose-sm min-h-45 max-w-none bg-white p-4 text-gray-900 dark:prose-invert dark:bg-gray-800 dark:text-white"
+    />
   </div>
 </template>
 
@@ -109,3 +112,21 @@ const onImageSelected = async (event) => {
 
 onBeforeUnmount(() => editor.value?.destroy())
 </script>
+
+<style scoped>
+/* La zone éditable ProseMirror : curseur visible + bonne hauteur dans les deux thèmes. */
+.help-editor-content :deep(.ProseMirror) {
+  min-height: 11.25rem; /* 180px — cohérent avec min-h-45 */
+  outline: none;
+  caret-color: currentColor; /* le curseur suit la couleur du texte (gris foncé clair / blanc sombre) */
+}
+
+/* Placeholder lisible quand l'éditeur est vide (StarterKit n'en ajoute pas par défaut). */
+.help-editor-content :deep(.ProseMirror p.is-editor-empty:first-child::before) {
+  color: rgb(156 163 175); /* gray-400 */
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+</style>

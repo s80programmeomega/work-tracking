@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
+use Laravel\Scout\Searchable;
 use Mews\Purifier\Facades\Purifier;
 
 /**
@@ -30,7 +31,7 @@ use Mews\Purifier\Facades\Purifier;
  */
 class HelpArticle extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, Searchable, SoftDeletes;
 
     protected $fillable = [
         'category_id',
@@ -66,6 +67,16 @@ class HelpArticle extends Model
                 $article->body_plain_en = self::toPlainText($article->body_en);
             }
         });
+
+        // Quand l'état de publication change, la visibilité des images rattachées
+        // change aussi (elles ne sont indexées que si l'article est publié).
+        // Scout ne resynchronise pas automatiquement les images sur un save de
+        // l'article : on force leur réindexation ici.
+        static::saved(function (HelpArticle $article) {
+            if ($article->wasChanged('published_at')) {
+                $article->images()->get()->each->searchable();
+            }
+        });
     }
 
     /**
@@ -78,6 +89,44 @@ class HelpArticle extends Model
         $withSpaces = preg_replace('/<[^>]+>/', ' ', $html) ?? '';
 
         return trim((string) preg_replace('/\s+/', ' ', html_entity_decode($withSpaces)));
+    }
+
+    /** Collection Scout dédiée. */
+    public function searchableAs(): string
+    {
+        return 'help_articles';
+    }
+
+    /**
+     * N'indexe que les articles publiés — les brouillons ne doivent jamais
+     * apparaître dans la recherche globale.
+     */
+    public function shouldBeSearchable(): bool
+    {
+        return $this->published_at !== null && $this->published_at->lte(now());
+    }
+
+    /**
+     * Données indexées : titres + texte brut bilingue, catégorie pour le contexte.
+     * On n'indexe PAS le HTML brut (body_*) ni de données sensibles.
+     *
+     * @return array<string, mixed>
+     */
+    public function toSearchableArray(): array
+    {
+        $this->loadMissing('category');
+
+        return [
+            'id' => (string) $this->id,
+            'slug' => $this->slug,
+            'titre_fr' => $this->titre_fr,
+            'titre_en' => $this->titre_en,
+            'body_plain_fr' => $this->body_plain_fr,
+            'body_plain_en' => $this->body_plain_en,
+            'category_id' => (int) $this->category_id,
+            'category_nom' => $this->category?->nom_fr ?? '',
+            'created_at' => $this->created_at?->timestamp ?? 0,
+        ];
     }
 
     public function category(): BelongsTo

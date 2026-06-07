@@ -14,15 +14,32 @@
 
       <!-- En-tête catégorie -->
       <div v-if="category" class="rounded-3 border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3">
-        <div class="flex items-center gap-3">
-          <span class="flex h-11 w-11 items-center justify-center rounded-3 bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
-            <i :class="['fas', category.icon || 'fa-book', 'text-lg']"></i>
-          </span>
-          <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ localized(category, 'nom') }}</h1>
-            <p v-if="localized(category, 'description')" class="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
-              {{ localized(category, 'description') }}
-            </p>
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <span class="flex h-11 w-11 items-center justify-center rounded-3 bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
+              <i :class="['fas', category.icon || 'fa-book', 'text-lg']"></i>
+            </span>
+            <div>
+              <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ localized(category, 'nom') }}</h1>
+              <p v-if="localized(category, 'description')" class="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
+                {{ localized(category, 'description') }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Sélecteur de langue d'affichage (indépendant de la langue de l'UI). -->
+          <div class="flex shrink-0 overflow-hidden rounded-3 border border-gray-300 text-xs font-medium dark:border-gray-700">
+            <button
+              v-for="lang in ['fr', 'en']"
+              :key="lang"
+              @click="displayLang = lang"
+              class="px-3 py-1.5 transition-colors"
+              :class="displayLang === lang
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-gray-600 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'"
+            >
+              {{ lang.toUpperCase() }}
+            </button>
           </div>
         </div>
       </div>
@@ -86,9 +103,12 @@ const articles = ref([])
 const meta = ref(null)
 const loading = ref(false)
 
+// Langue d'affichage — initialisée sur la langue de l'UI, modifiable via FR|EN.
+const displayLang = ref(locale.value)
+
 const localized = (obj, field) => {
   if (!obj) return ''
-  const key = `${field}_${locale.value}`
+  const key = `${field}_${displayLang.value}`
   return obj[key] ?? obj[`${field}_fr`] ?? ''
 }
 

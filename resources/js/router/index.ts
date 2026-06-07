@@ -79,6 +79,7 @@ const router = createRouter({
       component: () => import('../pages/admin/HelpArticleForm.vue'),
       meta: { title: 'Modifier un article', requiresAuth: true },
     },
+    // Catégories gérées dans l'onglet "Catégories" de la page articles (admin.help.articles).
 
     // ==========================================
     // WORKSPACES

@@ -150,7 +150,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/articles/{slug}', [HelpController::class, 'article'])->name('articles.show');
     });
 
-    // Gestion : HELP_ARTICLES_MANAGE (vérifié dans le contrôleur).
+    // Gestion : permissions granulaires par action (vérifiées dans le contrôleur).
     Route::prefix('admin/help')->name('admin.help.')->group(function () {
         Route::get('/categories', [AdminHelpController::class, 'indexCategories'])->name('categories.index');
         Route::post('/categories', [AdminHelpController::class, 'storeCategory'])->name('categories.store');

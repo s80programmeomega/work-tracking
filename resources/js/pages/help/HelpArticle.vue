@@ -23,7 +23,25 @@
 
         <!-- Contenu principal -->
         <article class="lg:col-span-2 rounded-3 border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3 sm:p-8">
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ localized(article, 'titre') }}</h1>
+          <div class="flex items-start justify-between gap-4">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ localized(article, 'titre') }}</h1>
+
+            <!-- Sélecteur de langue de l'article (indépendant de la langue de l'UI). -->
+            <div class="flex shrink-0 overflow-hidden rounded-3 border border-gray-300 text-xs font-medium dark:border-gray-700">
+              <button
+                v-for="lang in ['fr', 'en']"
+                :key="lang"
+                :dusk="`help-article-lang-${lang}`"
+                @click="displayLang = lang"
+                class="px-3 py-1.5 transition-colors"
+                :class="displayLang === lang
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-gray-600 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'"
+              >
+                {{ lang.toUpperCase() }}
+              </button>
+            </div>
+          </div>
 
           <div class="mt-2 flex flex-wrap items-center gap-3 text-xs text-gray-400">
             <span>{{ $t('help.views', { count: article.views_count ?? 0 }) }}</span>
@@ -75,9 +93,13 @@ const article = ref(null)
 const related = ref([])
 const loading = ref(false)
 
+// Langue d'affichage de l'article — initialisée sur la langue de l'UI mais
+// modifiable indépendamment par le lecteur via le sélecteur FR|EN.
+const displayLang = ref(locale.value)
+
 const localized = (obj, field) => {
   if (!obj) return ''
-  const key = `${field}_${locale.value}`
+  const key = `${field}_${displayLang.value}`
   return obj[key] ?? obj[`${field}_fr`] ?? ''
 }
 

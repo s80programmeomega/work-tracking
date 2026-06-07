@@ -145,8 +145,23 @@ final class Permission
     /** Consulter les articles du centre d'aide — tous les rôles. */
     const HELP_ARTICLES_READ = 'help_articles.read';
 
-    /** Créer / modifier / publier des articles — super_admin + owner/directeur. */
-    const HELP_ARTICLES_MANAGE = 'help_articles.manage';
+    /** Créer un brouillon d'article — super_admin + owner/directeur. */
+    const HELP_ARTICLES_CREATE = 'help_articles.create';
+
+    /** Modifier un article (titre, corps, catégorie) — super_admin + owner/directeur. */
+    const HELP_ARTICLES_EDIT = 'help_articles.edit';
+
+    /** Publier / dépublier un article — super_admin + owner/directeur. */
+    const HELP_ARTICLES_PUBLISH = 'help_articles.publish';
+
+    /** Supprimer (corbeille) un article — super_admin + owner/directeur. */
+    const HELP_ARTICLES_DELETE = 'help_articles.delete';
+
+    /** Téléverser / supprimer des images d'article — super_admin + owner/directeur. */
+    const HELP_ARTICLES_UPLOAD_IMAGE = 'help_articles.upload_image';
+
+    /** Gérer les catégories du centre d'aide (CRUD) — super_admin + owner/directeur. */
+    const HELP_CATEGORIES_MANAGE = 'help_categories.manage';
 
     // ── Users (platform admin) ────────────────────────────────────────────
     const USERS_VIEW = 'users.view';
@@ -226,7 +241,12 @@ final class Permission
             self::SEARCH_SCOPED,
 
             self::HELP_ARTICLES_READ,
-            self::HELP_ARTICLES_MANAGE,
+            self::HELP_ARTICLES_CREATE,
+            self::HELP_ARTICLES_EDIT,
+            self::HELP_ARTICLES_PUBLISH,
+            self::HELP_ARTICLES_DELETE,
+            self::HELP_ARTICLES_UPLOAD_IMAGE,
+            self::HELP_CATEGORIES_MANAGE,
 
             self::USERS_VIEW,
             self::USERS_CREATE,

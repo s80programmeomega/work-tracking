@@ -23,10 +23,21 @@
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('help.admin.field_category') }}</label>
-            <select v-model="form.category_id" required class="w-full rounded-3 border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white">
-              <option value="" disabled>{{ $t('help.admin.select_category') }}</option>
-              <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.nom_fr }}</option>
-            </select>
+            <div class="flex gap-2">
+              <select v-model="form.category_id" required class="w-full rounded-3 border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                <option value="" disabled>{{ $t('help.admin.select_category') }}</option>
+                <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.nom_fr }}</option>
+              </select>
+              <button
+                v-if="canManageHelpCategories"
+                type="button"
+                @click="categoryModalOpen = true"
+                :title="$t('help.admin.new_category')"
+                class="shrink-0 rounded-3 border border-gray-300 px-3 text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+              >
+                +
+              </button>
+            </div>
           </div>
           <div>
             <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('help.admin.field_slug') }}</label>
@@ -71,6 +82,14 @@
         </div>
       </form>
 
+      <!-- Modale de création rapide d'une catégorie. -->
+      <HelpCategoryModal
+        v-if="categoryModalOpen"
+        :category="null"
+        @saved="onCategoryCreated"
+        @close="categoryModalOpen = false"
+      />
+
     </div>
   </AdminLayout>
 </template>
@@ -83,10 +102,15 @@ import { ChevronLeftIcon } from '@heroicons/vue/24/outline'
 import api from '@/api/axios'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import HelpArticleEditor from '@/components/help/HelpArticleEditor.vue'
+import HelpCategoryModal from '@/components/help/HelpCategoryModal.vue'
+import { useWorkspace } from '@/composables/useWorkspace'
+import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
+const { currentWorkspace } = useWorkspace()
+const { canManageHelpCategories } = useWorkspacePermissions(currentWorkspace)
 
 const isEdit = computed(() => !!route.params.id)
 const articleId = ref(route.params.id ? Number(route.params.id) : null)
@@ -95,6 +119,16 @@ const categories = ref([])
 const loading = ref(false)
 const saving = ref(false)
 const error = ref(null)
+const categoryModalOpen = ref(false)
+
+// Après création inline d'une catégorie : on recharge la liste et on la sélectionne.
+const onCategoryCreated = async (category) => {
+  categoryModalOpen.value = false
+  await fetchCategories()
+  if (category?.id) {
+    form.value.category_id = category.id
+  }
+}
 
 const form = ref({
   category_id: '',

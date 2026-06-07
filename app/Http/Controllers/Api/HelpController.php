@@ -14,7 +14,8 @@ use Illuminate\Http\Request;
  * Centre d'aide — endpoints de lecture (tout utilisateur authentifié).
  *
  * Ne renvoie QUE le contenu publié. La gestion (brouillons, création,
- * édition) passe par AdminHelpController, gardé par HELP_ARTICLES_MANAGE.
+ * édition) passe par AdminHelpController, gardé par les permissions granulaires
+ * help_articles.create/edit/publish/delete/upload_image + help_categories.manage.
  */
 class HelpController extends Controller
 {

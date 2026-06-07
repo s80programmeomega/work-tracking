@@ -931,12 +931,10 @@ const menuGroups = computed(() => [
             {
                 icon: FolderIcon,
                 name: t('navigation.documents'),
-                subItems: [{ name: t('sidebar.all_documents'), path: "/documents" }],
-            },
-            {
-                icon: DocsIcon,
-                name: t('help.nav'),
-                path: "/help",
+                subItems: [
+                    { name: t('sidebar.all_documents'), path: "/documents" },
+                    { name: t('help.nav'), path: "/help" },
+                ],
             },
         ],
     },

@@ -13,19 +13,29 @@ use App\Models\HelpArticle;
 use App\Models\HelpArticleImage;
 use App\Models\HelpCategory;
 use App\Models\User;
+use App\Models\Workspace;
+use App\Permissions\ContextualPermissionGate;
+use App\Permissions\Permission;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Centre d'aide — gestion (HELP_ARTICLES_MANAGE).
+ * Centre d'aide — gestion (permissions granulaires par action).
  *
- * Autorisation : super_admin, ou propriétaire d'au moins un workspace
- * (les directeurs deviennent owner du workspace qu'ils créent). Vérifiée
- * par authorizeManage() au début de chaque action d'écriture.
+ * Chaque action vérifie sa propre permission via authorize() :
+ *   - help_articles.create / edit / publish / delete / upload_image
+ *   - help_categories.manage
+ *
+ * Le contenu d'aide est global (non rattaché à un workspace). L'autorisation
+ * est donc accordée si l'utilisateur est super_admin OU détient la permission
+ * dans au moins un de ses workspaces (les directeurs sont owner du workspace
+ * qu'ils créent, et owner reçoit toutes les permissions d'aide).
  */
 class AdminHelpController extends Controller
 {
+    public function __construct(private ContextualPermissionGate $gate) {}
+
     // =========================================================================
     // CATÉGORIES
     // =========================================================================
@@ -33,7 +43,7 @@ class AdminHelpController extends Controller
     /** GET /api/admin/help/categories — inclut les brouillons. */
     public function indexCategories(Request $request): JsonResponse
     {
-        $this->authorizeManage($request->user());
+        $this->authorizeHelp($request->user(), Permission::HELP_CATEGORIES_MANAGE);
 
         $categories = HelpCategory::withCount('articles')
             ->orderBy('position')
@@ -45,7 +55,7 @@ class AdminHelpController extends Controller
     /** POST /api/admin/help/categories */
     public function storeCategory(StoreHelpCategoryRequest $request): JsonResponse
     {
-        $this->authorizeManage($request->user());
+        $this->authorizeHelp($request->user(), Permission::HELP_CATEGORIES_MANAGE);
 
         $category = HelpCategory::create($request->validated());
 
@@ -55,7 +65,7 @@ class AdminHelpController extends Controller
     /** PUT /api/admin/help/categories/{category} */
     public function updateCategory(UpdateHelpCategoryRequest $request, HelpCategory $category): JsonResponse
     {
-        $this->authorizeManage($request->user());
+        $this->authorizeHelp($request->user(), Permission::HELP_CATEGORIES_MANAGE);
 
         $category->update($request->validated());
 
@@ -65,7 +75,7 @@ class AdminHelpController extends Controller
     /** DELETE /api/admin/help/categories/{category} — soft-delete. */
     public function destroyCategory(Request $request, HelpCategory $category): JsonResponse
     {
-        $this->authorizeManage($request->user());
+        $this->authorizeHelp($request->user(), Permission::HELP_CATEGORIES_MANAGE);
 
         $category->delete();
 
@@ -76,10 +86,18 @@ class AdminHelpController extends Controller
     // ARTICLES
     // =========================================================================
 
-    /** GET /api/admin/help/articles — inclut les brouillons, filtres. */
+    /**
+     * GET /api/admin/help/articles — inclut les brouillons, filtres.
+     * Accessible à quiconque détient au moins une permission de gestion d'article.
+     */
     public function indexArticles(Request $request): JsonResponse
     {
-        $this->authorizeManage($request->user());
+        $this->authorizeHelpAny($request->user(), [
+            Permission::HELP_ARTICLES_CREATE,
+            Permission::HELP_ARTICLES_EDIT,
+            Permission::HELP_ARTICLES_PUBLISH,
+            Permission::HELP_ARTICLES_DELETE,
+        ]);
 
         $query = HelpArticle::with('category:id,nom_fr,nom_en,slug');
 
@@ -110,7 +128,7 @@ class AdminHelpController extends Controller
     public function storeArticle(StoreHelpArticleRequest $request): JsonResponse
     {
         $user = $request->user();
-        $this->authorizeManage($user);
+        $this->authorizeHelp($user, Permission::HELP_ARTICLES_CREATE);
 
         $article = HelpArticle::create(array_merge($request->validated(), [
             'created_by' => $user->id,
@@ -120,10 +138,16 @@ class AdminHelpController extends Controller
         return response()->json(['success' => true, 'article' => $article->load('category')], 201);
     }
 
-    /** GET /api/admin/help/articles/{article} — détail (brouillon inclus). */
+    /**
+     * GET /api/admin/help/articles/{article} — détail (brouillon inclus).
+     * Lecture côté gestion : quiconque peut créer ou éditer.
+     */
     public function showArticle(Request $request, HelpArticle $article): JsonResponse
     {
-        $this->authorizeManage($request->user());
+        $this->authorizeHelpAny($request->user(), [
+            Permission::HELP_ARTICLES_CREATE,
+            Permission::HELP_ARTICLES_EDIT,
+        ]);
 
         return response()->json([
             'success' => true,
@@ -135,7 +159,7 @@ class AdminHelpController extends Controller
     public function updateArticle(UpdateHelpArticleRequest $request, HelpArticle $article): JsonResponse
     {
         $user = $request->user();
-        $this->authorizeManage($user);
+        $this->authorizeHelp($user, Permission::HELP_ARTICLES_EDIT);
 
         $article->update(array_merge($request->validated(), [
             'updated_by' => $user->id,
@@ -147,7 +171,7 @@ class AdminHelpController extends Controller
     /** POST /api/admin/help/articles/{article}/publish */
     public function publishArticle(Request $request, HelpArticle $article): JsonResponse
     {
-        $this->authorizeManage($request->user());
+        $this->authorizeHelp($request->user(), Permission::HELP_ARTICLES_PUBLISH);
 
         $article->update([
             'published_at' => now(),
@@ -160,7 +184,7 @@ class AdminHelpController extends Controller
     /** POST /api/admin/help/articles/{article}/unpublish */
     public function unpublishArticle(Request $request, HelpArticle $article): JsonResponse
     {
-        $this->authorizeManage($request->user());
+        $this->authorizeHelp($request->user(), Permission::HELP_ARTICLES_PUBLISH);
 
         $article->update([
             'published_at' => null,
@@ -173,7 +197,7 @@ class AdminHelpController extends Controller
     /** DELETE /api/admin/help/articles/{article} — soft-delete. */
     public function destroyArticle(Request $request, HelpArticle $article): JsonResponse
     {
-        $this->authorizeManage($request->user());
+        $this->authorizeHelp($request->user(), Permission::HELP_ARTICLES_DELETE);
 
         $article->delete();
 
@@ -188,7 +212,7 @@ class AdminHelpController extends Controller
     public function uploadImage(Request $request, HelpArticle $article): JsonResponse
     {
         $user = $request->user();
-        $this->authorizeManage($user);
+        $this->authorizeHelp($user, Permission::HELP_ARTICLES_UPLOAD_IMAGE);
 
         $request->validate([
             'image' => ['required', 'file', 'image', 'max:5120', 'mimes:png,jpg,jpeg,webp,gif'],
@@ -212,7 +236,7 @@ class AdminHelpController extends Controller
     public function destroyImage(Request $request, HelpArticleImage $image): JsonResponse
     {
         $user = $request->user();
-        $this->authorizeManage($user);
+        $this->authorizeHelp($user, Permission::HELP_ARTICLES_UPLOAD_IMAGE);
 
         // Seul l'uploader d'origine ou un super_admin peut supprimer l'image.
         if (! $user->isSuperAdmin() && $image->uploaded_by !== $user->id) {
@@ -230,18 +254,55 @@ class AdminHelpController extends Controller
     // =========================================================================
 
     /**
-     * Vérifie que l'utilisateur peut gérer le centre d'aide.
-     * Autorité : super_admin, ou propriétaire d'au moins un workspace.
+     * Vérifie que l'utilisateur détient la permission d'aide donnée.
+     * Le contenu d'aide étant global, on accorde si super_admin OU si la
+     * permission est détenue dans au moins un workspace de l'utilisateur.
      */
-    private function authorizeManage(User $user): void
+    private function authorizeHelp(User $user, string $permission): void
     {
-        if ($user->isSuperAdmin()) {
-            return;
+        if (! $this->userHasHelpPermission($user, $permission)) {
+            abort(403, "Vous n'êtes pas autorisé à effectuer cette action sur le centre d'aide.");
+        }
+    }
+
+    /**
+     * Variante : accorde si l'utilisateur détient AU MOINS UNE des permissions.
+     *
+     * @param  list<string>  $permissions
+     */
+    private function authorizeHelpAny(User $user, array $permissions): void
+    {
+        foreach ($permissions as $permission) {
+            if ($this->userHasHelpPermission($user, $permission)) {
+                return;
+            }
         }
 
-        $ownsWorkspace = $user->ownedWorkspaces()->exists();
-        if (! $ownsWorkspace) {
-            abort(403, "Vous n'êtes pas autorisé à gérer le centre d'aide.");
+        abort(403, "Vous n'êtes pas autorisé à effectuer cette action sur le centre d'aide.");
+    }
+
+    /**
+     * super_admin → toujours ; sinon vrai si la permission est accordée dans
+     * l'un des workspaces possédés ou rejoints par l'utilisateur.
+     */
+    private function userHasHelpPermission(User $user, string $permission): bool
+    {
+        if ($user->isSuperAdmin()) {
+            return true;
         }
+
+        // Workspaces possédés (owner) + workspaces rejoints (membre).
+        $workspaces = Workspace::query()
+            ->where('owner_id', $user->id)
+            ->orWhereHas('members', fn ($q) => $q->where('user_id', $user->id))
+            ->get();
+
+        foreach ($workspaces as $workspace) {
+            if ($this->gate->userCan($user, $permission, $workspace)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

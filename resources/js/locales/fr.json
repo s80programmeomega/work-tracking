@@ -2258,7 +2258,10 @@
     "see_all": "Voir tous les résultats pour",
     "type_sous_taches": "Sous-tâches",
     "type_messages": "Messages",
-    "type_notifications": "Notifications"
+    "type_notifications": "Notifications",
+    "type_help_articles": "Articles d'aide",
+    "type_help_categories": "Catégories d'aide",
+    "type_help_images": "Images d'aide"
   },
   "search_page": {
     "title": "Recherche globale",
@@ -2344,7 +2347,25 @@
       "confirm_delete": "Supprimer cet article ? Cette action est réversible (corbeille).",
       "saved": "Article enregistré.",
       "deleted": "Article supprimé.",
-      "save_first": "Enregistrez l'article avant d'ajouter des images."
+      "save_first": "Enregistrez l'article avant d'ajouter des images.",
+      "tab_articles": "Articles",
+      "tab_categories": "Catégories",
+      "categories_title": "Catégories d'aide",
+      "manage_categories": "Gérer les catégories",
+      "new_category": "Nouvelle catégorie",
+      "edit_category": "Modifier la catégorie",
+      "no_categories": "Aucune catégorie. Créez-en une.",
+      "confirm_delete_category": "Supprimer cette catégorie ? Les articles liés ne seront pas supprimés.",
+      "cat_name": "Nom",
+      "cat_name_fr": "Nom (FR)",
+      "cat_name_en": "Nom (EN)",
+      "cat_slug": "Slug (URL)",
+      "cat_icon": "Icône",
+      "cat_position": "Position",
+      "cat_desc_fr": "Description (FR)",
+      "cat_desc_en": "Description (EN)",
+      "cat_published": "Publiée",
+      "cat_articles": "Articles"
     }
   }
 }

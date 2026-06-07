@@ -7,7 +7,7 @@
       <div class="rounded-3 border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3">
         <div class="flex items-start justify-between gap-4">
           <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('help.title') }}</h1>
+            <h1 dusk="help-index-title" class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('help.title') }}</h1>
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ $t('help.subtitle') }}</p>
           </div>
           <router-link
@@ -24,6 +24,7 @@
           <input
             v-model="searchQuery"
             type="text"
+            dusk="help-search-input"
             :placeholder="$t('help.search_placeholder')"
             class="w-full rounded-3 border border-gray-300 bg-white py-3 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
             @input="onSearchInput"

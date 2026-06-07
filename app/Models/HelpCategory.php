@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Scout\Searchable;
 
 /**
  * @property int $id
@@ -22,7 +23,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class HelpCategory extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, Searchable, SoftDeletes;
 
     protected $fillable = [
         'slug',
@@ -49,5 +50,35 @@ class HelpCategory extends Model
     public function scopePublished(Builder $query): Builder
     {
         return $query->whereNotNull('published_at')->where('published_at', '<=', now());
+    }
+
+    /** Collection Scout dédiée. */
+    public function searchableAs(): string
+    {
+        return 'help_categories';
+    }
+
+    /** N'indexe que les catégories publiées. */
+    public function shouldBeSearchable(): bool
+    {
+        return $this->published_at !== null && $this->published_at->lte(now());
+    }
+
+    /**
+     * Données indexées : noms + descriptions bilingues.
+     *
+     * @return array<string, mixed>
+     */
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => (string) $this->id,
+            'slug' => $this->slug,
+            'nom_fr' => $this->nom_fr,
+            'nom_en' => $this->nom_en,
+            'description_fr' => $this->description_fr ?? '',
+            'description_en' => $this->description_en ?? '',
+            'created_at' => $this->created_at?->timestamp ?? 0,
+        ];
     }
 }

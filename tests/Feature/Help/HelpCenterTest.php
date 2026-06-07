@@ -11,6 +11,8 @@ use App\Models\User;
 use App\Models\Workspace;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 /**
@@ -51,6 +53,34 @@ class HelpCenterTest extends TestCase
     private function plainUser(): User
     {
         return User::factory()->create();
+    }
+
+    /**
+     * Crée un membre d'un workspace dont le rôle contextuel ne détient QUE
+     * les permissions d'aide données — sert à tester la granularité par action.
+     *
+     * @param  list<string>  $helpPermissions
+     */
+    private function memberWithHelpPermissions(array $helpPermissions): User
+    {
+        $owner = User::factory()->create();
+        $workspace = Workspace::factory()->create(['owner_id' => $owner->id]);
+
+        // Rôle contextuel jetable ne portant que les permissions d'aide voulues.
+        $role = Role::create([
+            'name' => 'help-test-'.uniqid(),
+            'guard_name' => 'web',
+        ]);
+        $role->syncPermissions(
+            Permission::whereIn('name', $helpPermissions)
+                ->where('guard_name', 'web')
+                ->get()
+        );
+
+        $member = User::factory()->create(['current_workspace_id' => $workspace->id]);
+        $workspace->members()->attach($member->id, ['role_id' => $role->id]);
+
+        return $member;
     }
 
     // ── Lecture ──────────────────────────────────────────────────────────────
@@ -240,5 +270,68 @@ class HelpCenterTest extends TestCase
         Sanctum::actingAs($this->superAdmin());
         $this->deleteJson("/api/admin/help/article-images/{$image->id}")->assertOk();
         $this->assertDatabaseMissing('help_article_images', ['id' => $image->id]);
+    }
+
+    // ── Granularité des permissions par action (Phase 7 — fix) ───────────────────
+
+    public function test_create_permission_alone_allows_create_but_not_publish(): void
+    {
+        $member = $this->memberWithHelpPermissions(['help_articles.create']);
+        $category = HelpCategory::factory()->create();
+        $article = HelpArticle::factory()->unpublished()->create(['category_id' => $category->id]);
+
+        Sanctum::actingAs($member);
+
+        // create OK
+        $this->postJson('/api/admin/help/articles', [
+            'category_id' => $category->id,
+            'slug' => 'granular-create',
+            'titre_fr' => 'T', 'titre_en' => 'T',
+            'body_fr' => '<p>x</p>', 'body_en' => '<p>x</p>',
+        ])->assertCreated();
+
+        // publish refusé (permission distincte)
+        $this->postJson("/api/admin/help/articles/{$article->id}/publish")->assertForbidden();
+        // delete refusé
+        $this->deleteJson("/api/admin/help/articles/{$article->id}")->assertForbidden();
+    }
+
+    public function test_publish_permission_alone_allows_publish_but_not_create(): void
+    {
+        $member = $this->memberWithHelpPermissions(['help_articles.publish']);
+        $category = HelpCategory::factory()->create();
+        $article = HelpArticle::factory()->unpublished()->create(['category_id' => $category->id]);
+
+        Sanctum::actingAs($member);
+
+        // publish OK
+        $this->postJson("/api/admin/help/articles/{$article->id}/publish")->assertOk();
+
+        // create refusé (permission distincte)
+        $this->postJson('/api/admin/help/articles', [
+            'category_id' => $category->id,
+            'slug' => 'granular-pub',
+            'titre_fr' => 'T', 'titre_en' => 'T',
+            'body_fr' => '<p>x</p>', 'body_en' => '<p>x</p>',
+        ])->assertForbidden();
+    }
+
+    public function test_category_manage_permission_required_for_categories(): void
+    {
+        // Un membre avec seulement create d'article ne peut pas gérer les catégories.
+        $member = $this->memberWithHelpPermissions(['help_articles.create']);
+        Sanctum::actingAs($member);
+
+        $this->postJson('/api/admin/help/categories', [
+            'slug' => 'cat-x', 'nom_fr' => 'X', 'nom_en' => 'X',
+        ])->assertForbidden();
+
+        // Un membre avec help_categories.manage le peut.
+        $manager = $this->memberWithHelpPermissions(['help_categories.manage']);
+        Sanctum::actingAs($manager);
+
+        $this->postJson('/api/admin/help/categories', [
+            'slug' => 'cat-y', 'nom_fr' => 'Y', 'nom_en' => 'Y',
+        ])->assertCreated();
     }
 }

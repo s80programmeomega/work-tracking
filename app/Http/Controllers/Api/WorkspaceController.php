@@ -87,7 +87,12 @@ class WorkspaceController extends Controller
                 'can_search_global' => $gate->userCan($user, Permission::SEARCH_GLOBAL, $workspace),
                 'can_search_scoped' => $gate->userCan($user, Permission::SEARCH_SCOPED, $workspace),
                 'can_help_articles_read' => $gate->userCan($user, Permission::HELP_ARTICLES_READ, $workspace),
-                'can_help_articles_manage' => $gate->userCan($user, Permission::HELP_ARTICLES_MANAGE, $workspace),
+                'can_help_articles_create' => $gate->userCan($user, Permission::HELP_ARTICLES_CREATE, $workspace),
+                'can_help_articles_edit' => $gate->userCan($user, Permission::HELP_ARTICLES_EDIT, $workspace),
+                'can_help_articles_publish' => $gate->userCan($user, Permission::HELP_ARTICLES_PUBLISH, $workspace),
+                'can_help_articles_delete' => $gate->userCan($user, Permission::HELP_ARTICLES_DELETE, $workspace),
+                'can_help_articles_upload_image' => $gate->userCan($user, Permission::HELP_ARTICLES_UPLOAD_IMAGE, $workspace),
+                'can_help_categories_manage' => $gate->userCan($user, Permission::HELP_CATEGORIES_MANAGE, $workspace),
             ];
 
             return $workspace;
@@ -739,7 +744,12 @@ class WorkspaceController extends Controller
                         'can_search_global' => $gate->userCan($user, Permission::SEARCH_GLOBAL, $workspace),
                         'can_search_scoped' => $gate->userCan($user, Permission::SEARCH_SCOPED, $workspace),
                         'can_help_articles_read' => $gate->userCan($user, Permission::HELP_ARTICLES_READ, $workspace),
-                        'can_help_articles_manage' => $gate->userCan($user, Permission::HELP_ARTICLES_MANAGE, $workspace),
+                        'can_help_articles_create' => $gate->userCan($user, Permission::HELP_ARTICLES_CREATE, $workspace),
+                        'can_help_articles_edit' => $gate->userCan($user, Permission::HELP_ARTICLES_EDIT, $workspace),
+                        'can_help_articles_publish' => $gate->userCan($user, Permission::HELP_ARTICLES_PUBLISH, $workspace),
+                        'can_help_articles_delete' => $gate->userCan($user, Permission::HELP_ARTICLES_DELETE, $workspace),
+                        'can_help_articles_upload_image' => $gate->userCan($user, Permission::HELP_ARTICLES_UPLOAD_IMAGE, $workspace),
+                        'can_help_categories_manage' => $gate->userCan($user, Permission::HELP_CATEGORIES_MANAGE, $workspace),
                     ],
                 ];
             })
@@ -1513,7 +1523,12 @@ class WorkspaceController extends Controller
                     'can_search_global' => $gate->userCan($user, Permission::SEARCH_GLOBAL, $workspace),
                     'can_search_scoped' => $gate->userCan($user, Permission::SEARCH_SCOPED, $workspace),
                     'can_help_articles_read' => $gate->userCan($user, Permission::HELP_ARTICLES_READ, $workspace),
-                    'can_help_articles_manage' => $gate->userCan($user, Permission::HELP_ARTICLES_MANAGE, $workspace),
+                    'can_help_articles_create' => $gate->userCan($user, Permission::HELP_ARTICLES_CREATE, $workspace),
+                    'can_help_articles_edit' => $gate->userCan($user, Permission::HELP_ARTICLES_EDIT, $workspace),
+                    'can_help_articles_publish' => $gate->userCan($user, Permission::HELP_ARTICLES_PUBLISH, $workspace),
+                    'can_help_articles_delete' => $gate->userCan($user, Permission::HELP_ARTICLES_DELETE, $workspace),
+                    'can_help_articles_upload_image' => $gate->userCan($user, Permission::HELP_ARTICLES_UPLOAD_IMAGE, $workspace),
+                    'can_help_categories_manage' => $gate->userCan($user, Permission::HELP_CATEGORIES_MANAGE, $workspace),
                 ],
                 'subscription_summary' => app(SubscriptionService::class)->summary($workspace),
             ]),

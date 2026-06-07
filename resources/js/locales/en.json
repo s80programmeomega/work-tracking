@@ -2255,7 +2255,10 @@
     "see_all": "See all results for",
     "type_sous_taches": "Subtasks",
     "type_messages": "Messages",
-    "type_notifications": "Notifications"
+    "type_notifications": "Notifications",
+    "type_help_articles": "Help articles",
+    "type_help_categories": "Help categories",
+    "type_help_images": "Help images"
   },
   "search_page": {
     "title": "Global search",
@@ -2341,7 +2344,25 @@
       "confirm_delete": "Delete this article? This is reversible (trash).",
       "saved": "Article saved.",
       "deleted": "Article deleted.",
-      "save_first": "Save the article before adding images."
+      "save_first": "Save the article before adding images.",
+      "tab_articles": "Articles",
+      "tab_categories": "Categories",
+      "categories_title": "Help categories",
+      "manage_categories": "Manage categories",
+      "new_category": "New category",
+      "edit_category": "Edit category",
+      "no_categories": "No categories. Create one.",
+      "confirm_delete_category": "Delete this category? Linked articles will not be deleted.",
+      "cat_name": "Name",
+      "cat_name_fr": "Name (FR)",
+      "cat_name_en": "Name (EN)",
+      "cat_slug": "Slug (URL)",
+      "cat_icon": "Icon",
+      "cat_position": "Position",
+      "cat_desc_fr": "Description (FR)",
+      "cat_desc_en": "Description (EN)",
+      "cat_published": "Published",
+      "cat_articles": "Articles"
     }
   }
 }

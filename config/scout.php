@@ -2,6 +2,9 @@
 
 use App\Models\Activite;
 use App\Models\Document;
+use App\Models\HelpArticle;
+use App\Models\HelpArticleImage;
+use App\Models\HelpCategory;
 use App\Models\Notification;
 use App\Models\Projet;
 use App\Models\SousTache;
@@ -346,6 +349,57 @@ return [
                     'default_sorting_field' => 'created_at',
                 ],
                 'search-parameters' => ['query_by' => 'content,type,event'],
+            ],
+
+            HelpArticle::class => [
+                'collection-schema' => [
+                    'fields' => [
+                        ['name' => 'id', 'type' => 'string'],
+                        ['name' => 'slug', 'type' => 'string', 'optional' => true],
+                        ['name' => 'titre_fr', 'type' => 'string'],
+                        ['name' => 'titre_en', 'type' => 'string'],
+                        ['name' => 'body_plain_fr', 'type' => 'string', 'optional' => true],
+                        ['name' => 'body_plain_en', 'type' => 'string', 'optional' => true],
+                        ['name' => 'category_id', 'type' => 'int32'],
+                        ['name' => 'category_nom', 'type' => 'string', 'optional' => true],
+                        ['name' => 'created_at', 'type' => 'int64'],
+                    ],
+                    'default_sorting_field' => 'created_at',
+                ],
+                'search-parameters' => ['query_by' => 'titre_fr,titre_en,body_plain_fr,body_plain_en,category_nom'],
+            ],
+
+            HelpCategory::class => [
+                'collection-schema' => [
+                    'fields' => [
+                        ['name' => 'id', 'type' => 'string'],
+                        ['name' => 'slug', 'type' => 'string', 'optional' => true],
+                        ['name' => 'nom_fr', 'type' => 'string'],
+                        ['name' => 'nom_en', 'type' => 'string'],
+                        ['name' => 'description_fr', 'type' => 'string', 'optional' => true],
+                        ['name' => 'description_en', 'type' => 'string', 'optional' => true],
+                        ['name' => 'created_at', 'type' => 'int64'],
+                    ],
+                    'default_sorting_field' => 'created_at',
+                ],
+                'search-parameters' => ['query_by' => 'nom_fr,nom_en,description_fr,description_en'],
+            ],
+
+            HelpArticleImage::class => [
+                'collection-schema' => [
+                    'fields' => [
+                        ['name' => 'id', 'type' => 'string'],
+                        ['name' => 'filename', 'type' => 'string'],
+                        ['name' => 'mime', 'type' => 'string', 'optional' => true],
+                        ['name' => 'article_id', 'type' => 'int32'],
+                        ['name' => 'article_slug', 'type' => 'string', 'optional' => true],
+                        ['name' => 'article_titre_fr', 'type' => 'string', 'optional' => true],
+                        ['name' => 'article_titre_en', 'type' => 'string', 'optional' => true],
+                        ['name' => 'created_at', 'type' => 'int64'],
+                    ],
+                    'default_sorting_field' => 'created_at',
+                ],
+                'search-parameters' => ['query_by' => 'filename,article_titre_fr,article_titre_en'],
             ],
 
         ],
