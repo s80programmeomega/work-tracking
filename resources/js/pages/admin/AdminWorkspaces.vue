@@ -133,6 +133,31 @@
                   >
                     <i class="fas fa-check-circle mr-1"></i>Reactivate
                   </button>
+                  <!-- Activate paid plan (Phase 8) -->
+                  <button
+                    @click="openActivateModal(ws)"
+                    class="text-xs px-2 py-1 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 rounded hover:bg-indigo-200 transition-colors"
+                    :title="$t('admin.workspaces.activate_plan')"
+                  >
+                    <i class="fas fa-crown mr-1"></i>{{ $t('admin.workspaces.activate') }}
+                  </button>
+                  <!-- Lock / unlock (hard gate → 402) -->
+                  <button
+                    v-if="ws.subscription?.subscription_status !== 'locked'"
+                    @click="lockWorkspace(ws)"
+                    class="text-xs px-2 py-1 bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 rounded hover:bg-orange-200 transition-colors"
+                    :title="$t('admin.workspaces.lock')"
+                  >
+                    <i class="fas fa-lock mr-1"></i>{{ $t('admin.workspaces.lock') }}
+                  </button>
+                  <button
+                    v-else
+                    @click="unlockWorkspace(ws)"
+                    class="text-xs px-2 py-1 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded hover:bg-green-200 transition-colors"
+                    :title="$t('admin.workspaces.unlock')"
+                  >
+                    <i class="fas fa-lock-open mr-1"></i>{{ $t('admin.workspaces.unlock') }}
+                  </button>
                 </div>
               </td>
             </tr>
@@ -180,6 +205,38 @@
               class="px-4 py-2 bg-brand-600 text-white rounded-3 text-sm hover:bg-brand-700 disabled:opacity-50"
             >
               <i class="fas fa-save mr-1"></i>Save
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activate plan modal (Phase 8) -->
+      <div v-if="activateModal.open" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700 p-6 w-full max-w-sm mx-4">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            {{ $t('admin.workspaces.activate_plan') }} — {{ activateModal.workspace?.nom }}
+          </h3>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('admin.workspaces.plan') }}</label>
+          <select
+            v-model.number="activateModal.planId"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+          >
+            <option v-for="p in paidPlans" :key="p.id" :value="p.id">{{ p.nom_fr }}</option>
+          </select>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mt-3 mb-1">{{ $t('admin.workspaces.period_days') }}</label>
+          <input
+            v-model.number="activateModal.periodDays"
+            type="number" min="1" max="366"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+          />
+          <div class="flex justify-end gap-3 mt-4">
+            <button @click="activateModal.open = false" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900">{{ $t('common.cancel') }}</button>
+            <button
+              @click="confirmActivate"
+              :disabled="activateModal.loading || !activateModal.planId"
+              class="px-4 py-2 bg-indigo-600 text-white rounded-3 text-sm hover:bg-indigo-700 disabled:opacity-50"
+            >
+              <i class="fas fa-crown mr-1"></i>{{ $t('admin.workspaces.activate') }}
             </button>
           </div>
         </div>
@@ -277,6 +334,62 @@ const confirmExtend = async () => {
   }
 };
 
+// ── Abonnement (Phase 8) : activation manuelle + verrou ──────────────────────
+const paidPlans = ref([]);
+const activateModal = ref({ open: false, workspace: null, planId: null, periodDays: 30, loading: false });
+
+const loadPaidPlans = async () => {
+  try {
+    const { data } = await api.get('/subscription/plans');
+    paidPlans.value = (data.plans ?? []).filter((p) => !p.is_free);
+  } catch { /* silencieux : la modale affichera une liste vide */ }
+};
+
+const openActivateModal = (ws) => {
+  activateModal.value = {
+    open: true,
+    workspace: ws,
+    planId: paidPlans.value[0]?.id ?? null,
+    periodDays: 30,
+    loading: false,
+  };
+};
+
+const confirmActivate = async () => {
+  activateModal.value.loading = true;
+  try {
+    await api.post(`/admin/subscription/${activateModal.value.workspace.id}/activate`, {
+      plan_id: activateModal.value.planId,
+      period_days: activateModal.value.periodDays,
+    });
+    activateModal.value.open = false;
+    fetchWorkspaces();
+  } catch (e) {
+    error.value = e.response?.data?.message ?? 'Failed to activate plan.';
+  } finally {
+    activateModal.value.loading = false;
+  }
+};
+
+const lockWorkspace = async (ws) => {
+  if (!confirm(t('admin.workspaces.confirm_lock'))) { return; }
+  try {
+    await api.post(`/admin/subscription/${ws.id}/lock`);
+    fetchWorkspaces();
+  } catch (e) {
+    error.value = e.response?.data?.message ?? 'Failed to lock workspace.';
+  }
+};
+
+const unlockWorkspace = async (ws) => {
+  try {
+    await api.post(`/admin/subscription/${ws.id}/unlock`);
+    fetchWorkspaces();
+  } catch (e) {
+    error.value = e.response?.data?.message ?? 'Failed to unlock workspace.';
+  }
+};
+
 // Suspend
 const suspendModal = ref({ open: false, workspace: null, reason: '', loading: false });
 const openSuspendModal = (ws) => {
@@ -307,5 +420,8 @@ const reactivate = async (ws) => {
   }
 };
 
-onMounted(fetchWorkspaces);
+onMounted(() => {
+  fetchWorkspaces();
+  loadPaidPlans();
+});
 </script>

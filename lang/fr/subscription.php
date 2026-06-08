@@ -15,6 +15,7 @@ return [
     ],
     'errors' => [
         'trial_expired' => 'Votre période d\'essai a expiré. Veuillez passer à un plan payant.',
+        'locked' => 'L\'accès à ce workspace est suspendu. Un abonnement actif est requis pour continuer.',
         'limit_reached' => [
             'add_member' => 'Limite de membres atteinte pour le plan d\'essai (:max maximum).',
             'upload_file' => 'Ce fichier dépasse la taille maximale autorisée pour le plan d\'essai.',

@@ -67,6 +67,14 @@ api.interceptors.response.use(
             router.push('/unauthorized');
         }
 
+        // 402 Payment Required - workspace verrouillé par la garde d'abonnement (Phase 8).
+        // On envoie l'utilisateur vers la page des plans pour régulariser.
+        if (error.response?.status === 402) {
+            if (router.currentRoute.value.name !== 'subscription.plans') {
+                router.push({ name: 'subscription.plans' });
+            }
+        }
+
         return Promise.reject(error);
     }
 );

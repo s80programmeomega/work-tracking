@@ -506,10 +506,7 @@
                         (canManageSubscription || isSuperAdmin) &&
                         currentWorkspace?.id
                     "
-                    :to="{
-                        name: 'workspaces.subscription',
-                        params: { id: currentWorkspace.id },
-                    }"
+                    :to="{ name: 'subscription.plans' }"
                     :class="[
                         'menu-item menu-item-inactive group',
                         !isExpanded && !isHovered
