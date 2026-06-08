@@ -179,6 +179,29 @@ Deep security + performance sweep. Findings below with **before → after**.
 - **After:** `summary()` = **2 queries** (cold) / **1** (warm). Admin workspaces list:
   ~80 free-plan queries → **~1**. Verified via `DB::listen`.
 
+### P2 — Frontend bundle: 1 MB `app.js` loaded on every page — FIXED (MEDIUM)
+- **Before:** the entry `app-*.js` was **1,056,562 bytes (~1.03 MB)** and loaded on **every**
+  page (blocking first paint). It bundled heavy libs registered globally in `app.js`:
+  `vue3-apexcharts` (~514 KB) via `app.use()`, plus global CSS for `swiper`, `jsvectormap`,
+  `flatpickr`. Vite had **no `manualChunks`** → all vendors lumped into one bundle.
+- **Fixes:**
+  1. Removed the global `app.use(VueApexCharts)` + top-level import — the 5 chart components
+     already `import VueApexCharts` locally (auto-registered via `<script setup>`), so charts
+     still render; ApexCharts now loads **only on chart pages**.
+  2. Removed dead/redundant global lib CSS from `app.js`: `swiper` (unused in the app),
+     `jsvectormap` (only an orphan component), `flatpickr` (already self-imported by its one
+     consumer `DefaultInputs.vue`).
+  3. Added `rollupOptions.output.manualChunks` in `vite.config.js` — split vendors into
+     cache-stable chunks: `vendor-vue`, `vendor-apexcharts`, `vendor-tiptap`,
+     `vendor-realtime` (echo/pusher/socket.io), `vendor-jsvectormap`, `vendor-flatpickr`,
+     `vendor`.
+- **After:** `app-*.js` = **201,469 bytes (~197 KB)** — an **81% reduction** of the
+  every-page bundle. Heavy libs load lazily with the routes/components that use them
+  (routes were already lazy via dynamic `import()`). Vendor chunks cache independently, so
+  an app code change no longer reinvalidates ~1.4 MB of library downloads.
+- **Verified:** `/line-chart` renders ApexCharts (`apexcharts-canvas` present, no JS errors)
+  after the global registration was removed; `npm run build` green.
+
 ## Performance — audited, clean (no action)
 
 - **Unbounded-list / pagination:** real list endpoints use `->paginate()` (19 call sites).
