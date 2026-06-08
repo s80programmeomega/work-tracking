@@ -21,6 +21,10 @@ return [
             'upload_file' => 'This file exceeds the maximum allowed size for the trial plan.',
         ],
     ],
+    'plan_errors' => [
+        'cannot_delete_free' => 'The free fallback plan cannot be deleted.',
+        'cannot_delete_in_use' => 'This plan is used by at least one workspace and cannot be deleted.',
+    ],
     'notifications' => [
         'trial_expiring' => [
             'subject' => 'Your Work Tracking trial is expiring soon',

@@ -743,6 +743,16 @@ const router = createRouter({
       },
     },
     {
+      path: '/admin/plans',
+      name: 'admin.plans',
+      component: () => import('../pages/admin/ManagePlans.vue'),
+      meta: {
+        title: 'Plan Management',
+        requiresAuth: true,
+        requiresSuperAdmin: true,
+      },
+    },
+    {
       path: '/admin/users',
       name: 'admin.users',
       component: () => import('../pages/admin/AdminUsers.vue'),
