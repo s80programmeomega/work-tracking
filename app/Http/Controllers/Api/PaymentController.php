@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Payment\InitiatePaymentRequest;
 use App\Models\Payment;
 use App\Models\Plan;
+use App\Services\Payment\PaymentProviderRegistry;
 use App\Services\Payment\PaymentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,7 +21,10 @@ use Illuminate\Http\Request;
  */
 class PaymentController extends Controller
 {
-    public function __construct(private PaymentService $payments) {}
+    public function __construct(
+        private PaymentService $payments,
+        private PaymentProviderRegistry $registry,
+    ) {}
 
     /**
      * POST /api/payment/initiate — le propriétaire lance un paiement pour un plan.
@@ -77,6 +81,17 @@ class PaymentController extends Controller
 
         if (! $isMember && ! $user->isSuperAdmin()) {
             return response()->json(['success' => false, 'message' => 'Accès refusé.'], 403);
+        }
+
+        // Flux push (MTN) : tant que le paiement est en attente, on RE-INTERROGE le
+        // fournisseur (source de vérité) afin de ne pas dépendre uniquement du
+        // webhook. Même chemin vérifié que le callback ; sûr car on ne fait pas
+        // confiance au client.
+        if ($payment->isPending()) {
+            $verified = $this->registry->for($payment->provider)->fetchStatus($payment);
+            if ($verified->status !== Payment::STATUS_PENDING) {
+                $payment = $this->payments->confirm($payment, $verified->status, $verified->raw);
+            }
         }
 
         return response()->json(['success' => true, 'payment' => $this->present($payment)]);

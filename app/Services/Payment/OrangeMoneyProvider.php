@@ -37,9 +37,12 @@ class OrangeMoneyProvider implements PaymentProviderInterface
 
         try {
             $response = Http::withToken($token)
-                ->post($config['base_url'].'/orange-money-webpay/dev/v1/webpayment', [
+                ->timeout((int) config('payment.http_timeout', 30))
+                ->post($config['webpayment_url'], [
                     'merchant_key' => $config['merchant_key'],
-                    'currency' => $payment->currency,
+                    // Devise EXIGÉE par le fournisseur (config) : OUV en bac à sable,
+                    // XAF en production — pas la devise du plan.
+                    'currency' => $config['currency'] ?? $payment->currency,
                     'order_id' => $payment->reference,
                     'amount' => $payment->amount,
                     'return_url' => $config['return_url'],
@@ -81,7 +84,8 @@ class OrangeMoneyProvider implements PaymentProviderInterface
 
         try {
             $response = Http::withToken($token)
-                ->get($config['base_url'].'/orange-money-webpay/dev/v1/transactionstatus', [
+                ->timeout((int) config('payment.http_timeout', 30))
+                ->get($config['status_url'], [
                     'order_id' => $payment->reference,
                     'amount' => $payment->amount,
                     'pay_token' => $payment->provider_token,
@@ -109,6 +113,7 @@ class OrangeMoneyProvider implements PaymentProviderInterface
         return Cache::remember('payment.orange.token', now()->addMinutes(50), function () use ($config): ?string {
             try {
                 $response = Http::withBasicAuth($config['consumer_key'] ?? '', $config['consumer_secret'] ?? '')
+                    ->timeout((int) config('payment.http_timeout', 30))
                     ->asForm()
                     ->post($config['token_url'], ['grant_type' => 'client_credentials']);
             } catch (\Throwable $e) {

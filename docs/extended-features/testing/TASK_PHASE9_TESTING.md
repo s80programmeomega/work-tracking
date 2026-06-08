@@ -3,6 +3,16 @@
 > Branch: `feature/phase9-payment-momo-orange`
 > Prerequisites: `php artisan migrate` + `php artisan db:seed --class=PlanSeeder` + your sandbox credentials in `.env` (see `.env.example` block) + `php artisan serve` + `npm run dev`.
 
+> **Live-test status (2026-06-08):**
+> - **Level 1 (local fake):** ✅ passed in-browser.
+> - **MTN sandbox:** ✅ integration proven (auth + 202 + status + mapping); blocked only by
+>   MTN-side `INTERNAL_PROCESSING_ERROR` on the success number (see status section).
+> - **Orange sandbox:** ⏸️ **deferred** — Orange's Web Payment sandbox access is gated for
+>   this account (operator-side, not a code issue). Integration is verified via `Http::fake`
+>   tests; provider URLs/currency are env-driven (`PAYMENT_ORANGE_WEBPAYMENT_URL` /
+>   `_STATUS_URL`, sandbox currency `OUV`). Resume when sandbox credentials are obtained.
+> - **Production (real money):** not run — no merchant credentials yet (see go-live checklist).
+
 ---
 
 ## Scope
@@ -122,3 +132,89 @@ POST /api/webhooks/payment/orange     public — re-verifies via Orange API
 > currency. Orange base URLs/payloads differ by operator/country — confirm against your
 > Orange onboarding pack. Webhook URLs must be publicly reachable (configure
 > `PAYMENT_MOMO_CALLBACK_URL` / `PAYMENT_ORANGE_NOTIF_URL`).
+
+---
+
+## Known gaps / future enhancements
+
+Observed during Phase 9 testing — **deferred** (to fix in a follow-up):
+
+1. **Payment phone number not validated** (frontend) — the payment modal accepts any
+   string for `payer_phone`; no MSISDN format/length check before `initiate`.
+   _Enhancement:_ validate format client-side + tighten the `payer_phone` rule in
+   `InitiatePaymentRequest`.
+2. **`subscription.limits` not on the direct `addMember` route** — only
+   `POST /workspaces/{id}/members/invite` carries the middleware; the direct
+   `POST /workspaces/{id}/members` (`WorkspaceController::addMember`) does **not**, so
+   the member cap can be bypassed there. Also `projets`/`activites` `addMember` routes
+   are unguarded by design (membership ≠ workspace seat) — confirm intended.
+3. **Storage quota (`canUploadStorage`) never enforced** — `CheckSubscriptionLimits`
+   only handles `add_member` and `upload_file` (file *size*); total workspace storage
+   is computed in `SubscriptionService::canUploadStorage()` but no route/match-arm calls
+   it. _Enhancement:_ add an `upload_storage` arm + apply on document upload.
+4. **Enforcement is middleware-only** — limits are checked by route middleware, not also
+   inside the controllers, so any unguarded path skips the cap. _Enhancement:_ enforce
+   `canAddMember`/`canUpload*` inside the service-calling controllers as a safety net.
+
+> These predate Phase 9 (Phase 8 limit-enforcement) and were surfaced by paid-plan
+> activation. They do not affect the payment flow itself.
+
+---
+
+## Sandbox testing status (2026-06-08)
+
+Verified against the **real MTN sandbox** with provisioned credentials:
+
+| Step | Result |
+|---|---|
+| OAuth token (`/collection/token/`) | ✅ HTTP 200, valid JWT |
+| `requesttopay` (real charge request) | ✅ HTTP 202 Accepted |
+| Status query (`GET requesttopay/{id}`) | ✅ HTTP 200, parsed |
+| Provider status mapping (SUCCESSFUL→succeeded, FAILED→failed) | ✅ |
+| Currency EUR, UUID v4 ref, no-space externalId, real callback host | ✅ per MTN spec |
+
+**Blocker (MTN-side):** the documented sandbox success number `46733123450` returns
+`status=FAILED, reason=INTERNAL_PROCESSING_ERROR`. We worked through MTN's entire
+documented cause list for this error (currency, unique UUID, Bearer auth, externalId
+spaces, callback host) and ruled out every one — it's a known intermittent sandbox
+condition ("Wallet Platform not reachable"). The **integration is correct**; only MTN's
+sandbox is failing. Network latency to the sandbox is also high (~6–10 s/call), which is
+why a 30 s `PAYMENT_HTTP_TIMEOUT` is required (a shorter timeout causes false `cURL 28`).
+
+**MTN sandbox magic MSISDNs:** `46733123450` → SUCCESSFUL, `46733123451` → FAILED.
+No real phone/money is involved in sandbox.
+
+---
+
+## Production go-live checklist (real money — do NOT do from a dev session)
+
+Going live debits **real** mobile-money wallets and is a deliberate launch step on the
+**deployed** app, with the client. Sandbox keys CANNOT reach production.
+
+**1. Obtain production access (per provider):**
+- **MTN:** commercial/merchant agreement + KYC → **production** subscription key + a
+  **production** API user/key provisioned against `https://proxy.momoapi.mtn.com`.
+- **Orange:** production merchant key from your local Orange operator (Cameroon = XAF).
+
+**2. Production `.env` (on the production server only):**
+```
+PAYMENT_FAKE=false
+PAYMENT_MOMO_BASE_URL=https://proxy.momoapi.mtn.com
+PAYMENT_MOMO_TARGET_ENV=production
+PAYMENT_MOMO_CURRENCY=XAF                      # real currency (config-driven, no code change)
+PAYMENT_MOMO_SUBSCRIPTION_KEY=<prod key>
+PAYMENT_MOMO_API_USER=<prod user>
+PAYMENT_MOMO_API_KEY=<prod key>
+PAYMENT_MOMO_CALLBACK_URL=https://<live-domain>/api/webhooks/payment/momo
+# Orange equivalents with production URLs + merchant key
+```
+
+**3. Public webhook URLs** — `PAYMENT_MOMO_CALLBACK_URL` / `PAYMENT_ORANGE_NOTIF_URL`
+must be your **live HTTPS domain**, reachable by the providers.
+
+**4. Controlled first real test:** initiate **one** payment of a tiny amount (e.g. 100 XAF)
+to **your own phone**, approve it, confirm the workspace activates. Do this once,
+deliberately — never in an automated loop. Refund/settle per the provider's process.
+
+> The XAF code path is already built and config-driven (`MtnMomoProvider` sends
+> `config('payment.mtn_momo.currency')`). Going live is config + credentials, not code.

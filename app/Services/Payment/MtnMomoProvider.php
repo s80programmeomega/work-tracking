@@ -34,17 +34,27 @@ class MtnMomoProvider implements PaymentProviderInterface
 
         $config = config('payment.mtn_momo');
 
+        // X-Callback-Url est OPTIONNEL : ne l'envoyer que s'il est configuré.
+        // Un en-tête vide/null fait échouer la requête (HTTP 500 côté sandbox).
+        $headers = [
+            'Ocp-Apim-Subscription-Key' => $config['subscription_key'],
+            'X-Reference-Id' => $payment->reference, // idempotence
+            'X-Target-Environment' => $config['target_environment'],
+        ];
+        if (! empty($config['callback_url'])) {
+            $headers['X-Callback-Url'] = $config['callback_url'];
+        }
+
         try {
             $response = Http::withToken($token)
-                ->withHeaders([
-                    'Ocp-Apim-Subscription-Key' => $config['subscription_key'],
-                    'X-Reference-Id' => $payment->reference, // idempotence
-                    'X-Target-Environment' => $config['target_environment'],
-                    'X-Callback-Url' => $config['callback_url'],
-                ])
+                ->timeout((int) config('payment.http_timeout', 30))
+                ->withHeaders($headers)
                 ->post($config['base_url'].'/collection/v1_0/requesttopay', [
                     'amount' => (string) $payment->amount,
-                    'currency' => $payment->currency,
+                    // La devise envoyée est celle EXIGÉE par le fournisseur (config),
+                    // pas celle du plan : le sandbox MTN n'accepte que EUR, alors que
+                    // le plan est en XAF. En production, les deux coïncident.
+                    'currency' => $config['currency'] ?? $payment->currency,
                     'externalId' => $payment->reference,
                     'payer' => ['partyIdType' => 'MSISDN', 'partyId' => $payerPhone],
                     'payerMessage' => 'Abonnement Work Tracking',
@@ -77,6 +87,7 @@ class MtnMomoProvider implements PaymentProviderInterface
 
         try {
             $response = Http::withToken($token)
+                ->timeout((int) config('payment.http_timeout', 30))
                 ->withHeaders([
                     'Ocp-Apim-Subscription-Key' => $config['subscription_key'],
                     'X-Target-Environment' => $config['target_environment'],
@@ -109,6 +120,7 @@ class MtnMomoProvider implements PaymentProviderInterface
         return Cache::remember('payment.mtn.token', now()->addMinutes(50), function () use ($config): ?string {
             try {
                 $response = Http::withBasicAuth($config['api_user'] ?? '', $config['api_key'] ?? '')
+                    ->timeout((int) config('payment.http_timeout', 30))
                     ->withHeaders(['Ocp-Apim-Subscription-Key' => $config['subscription_key']])
                     ->post($config['base_url'].'/collection/token/');
             } catch (\Throwable $e) {

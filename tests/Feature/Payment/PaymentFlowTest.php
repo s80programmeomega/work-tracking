@@ -8,6 +8,9 @@ use App\Models\Payment;
 use App\Models\Plan;
 use App\Models\User;
 use App\Models\Workspace;
+use App\Services\Payment\FakePaymentProvider;
+use App\Services\Payment\MtnMomoProvider;
+use App\Services\Payment\PaymentProviderRegistry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Laravel\Sanctum\Sanctum;
@@ -33,13 +36,19 @@ class PaymentFlowTest extends TestCase
 
         // Config de paiement déterministe pour les tests.
         config([
+            // Mode factice désactivé par défaut : les tests exercent les VRAIS
+            // fournisseurs (via Http::fake). Les cas dédiés le réactivent localement.
+            'payment.fake' => false,
             'payment.mtn_momo.base_url' => 'https://sandbox.momodeveloper.mtn.com',
             'payment.mtn_momo.subscription_key' => 'test-key',
             'payment.mtn_momo.api_user' => 'test-user',
             'payment.mtn_momo.api_key' => 'test-secret',
             'payment.orange_money.base_url' => 'https://api.orange.com',
             'payment.orange_money.token_url' => 'https://api.orange.com/oauth/v3/token',
+            'payment.orange_money.webpayment_url' => 'https://api.orange.com/orange-money-webpay/dev/v1/webpayment',
+            'payment.orange_money.status_url' => 'https://api.orange.com/orange-money-webpay/dev/v1/transactionstatus',
             'payment.orange_money.merchant_key' => 'merchant-123',
+            'payment.orange_money.currency' => 'OUV',
         ]);
     }
 
@@ -211,5 +220,65 @@ class PaymentFlowTest extends TestCase
 
         $this->postJson('/api/webhooks/payment/momo', ['referenceId' => 'does-not-exist'])
             ->assertStatus(404);
+    }
+
+    public function test_status_poll_reverifies_pending_payment_and_activates(): void
+    {
+        // Flux push : sans webhook, le sondage du statut doit RE-INTERROGER MTN
+        // et conclure le paiement (SUCCESSFUL) → activation.
+        [$owner, $workspace] = $this->ownerWithWorkspace();
+        $plan = $this->paidPlan();
+        $payment = Payment::factory()->create([
+            'workspace_id' => $workspace->id,
+            'plan_id' => $plan->id,
+            'user_id' => $owner->id,
+            'provider' => Payment::PROVIDER_MTN,
+            'status' => Payment::STATUS_PENDING,
+        ]);
+
+        Http::fake([
+            '*/collection/token/' => Http::response(['access_token' => 'tok'], 200),
+            '*/collection/v1_0/requesttopay/*' => Http::response(['status' => 'SUCCESSFUL'], 200),
+        ]);
+
+        Sanctum::actingAs($owner);
+
+        $this->getJson("/api/payment/{$payment->reference}/status")
+            ->assertOk()
+            ->assertJsonPath('payment.status', Payment::STATUS_SUCCEEDED);
+
+        $this->assertSame('active', $workspace->fresh()->subscription_status);
+    }
+
+    // ── Mode factice (dev) + verrou anti-production ────────────────────────────
+
+    public function test_fake_provider_is_used_when_enabled_outside_production(): void
+    {
+        // Hors production + PAYMENT_FAKE=true → le registre renvoie le faux fournisseur.
+        $this->app['env'] = 'local';
+        config(['payment.fake' => true]);
+
+        $registry = app(PaymentProviderRegistry::class);
+
+        $this->assertTrue($registry->fakeEnabled());
+        $this->assertInstanceOf(
+            FakePaymentProvider::class,
+            $registry->for(Payment::PROVIDER_MTN),
+        );
+    }
+
+    public function test_fake_provider_is_blocked_in_production(): void
+    {
+        // Même avec PAYMENT_FAKE=true, la production NE DOIT JAMAIS utiliser le faux.
+        $this->app['env'] = 'production';
+        config(['payment.fake' => true]);
+
+        $registry = app(PaymentProviderRegistry::class);
+
+        $this->assertFalse($registry->fakeEnabled());
+        $this->assertInstanceOf(
+            MtnMomoProvider::class,
+            $registry->for(Payment::PROVIDER_MTN),
+        );
     }
 }
