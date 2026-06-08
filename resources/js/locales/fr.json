@@ -2431,6 +2431,18 @@
     "limit_members": "membres",
     "limit_storage": "Mo de stockage",
     "limit_file": "Mo par fichier",
+    "payment": {
+      "title": "Paiement",
+      "provider": "Moyen de paiement",
+      "phone": "Numéro de téléphone (Mobile Money)",
+      "pay": "Payer",
+      "waiting": "Validez le paiement sur votre téléphone…",
+      "checking": "Vérification du paiement en cours…",
+      "success": "Paiement confirmé. Votre abonnement est actif.",
+      "failed": "Le paiement a échoué ou a expiré.",
+      "cancelled": "Paiement annulé.",
+      "error": "Impossible de démarrer le paiement."
+    },
     "period": { "monthly": "mois", "yearly": "an" },
     "status": {
       "trial": "Essai",

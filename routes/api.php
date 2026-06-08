@@ -10,6 +10,8 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\EvaluationController;
 use App\Http\Controllers\Api\HelpController;
+use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\PaymentWebhookController;
 use App\Http\Controllers\Api\ProjetController;
 use App\Http\Controllers\Api\ProjetInvitationController;
 use App\Http\Controllers\Api\PushSubscriptionController;
@@ -85,6 +87,14 @@ Route::prefix('invitations/projet')->group(function () {
     Route::post('/{token}/accept', [ProjetInvitationController::class, 'accept']);
 });
 
+// Webhooks de paiement (Phase 9) — PUBLICS : appelés par MTN/Orange (pas de session).
+// Pas de CSRF ici (groupe 'api' sans état). La sécurité repose sur la RE-VÉRIFICATION
+// du statut auprès du fournisseur dans PaymentWebhookController, jamais sur le corps reçu.
+Route::prefix('webhooks/payment')->name('webhooks.payment.')->group(function () {
+    Route::post('/momo', [PaymentWebhookController::class, 'momo'])->name('momo');
+    Route::post('/orange', [PaymentWebhookController::class, 'orange'])->name('orange');
+});
+
 // Protected routes
 // subscription.status (Phase 8) : garde d'abonnement globale sur CHAQUE requête
 // authentifiée — 402 si le workspace est verrouillé (routes auth/paiement exemptées).
@@ -152,6 +162,13 @@ Route::middleware(['auth:sanctum', 'subscription.status'])->group(function () {
         Route::get('/plans', [SubscriptionController::class, 'plans'])->name('plans');
         Route::get('/current', [SubscriptionController::class, 'current'])->name('current');
         Route::post('/select', [SubscriptionController::class, 'select'])->name('select');
+    });
+
+    // Paiement d'abonnement (Phase 9). Préfixe 'payment' EXEMPTÉ de subscription.status
+    // (un workspace verrouillé/expiré doit pouvoir régler son abonnement).
+    Route::prefix('payment')->name('payment.')->group(function () {
+        Route::post('/initiate', [PaymentController::class, 'initiate'])->name('initiate');
+        Route::get('/{reference}/status', [PaymentController::class, 'status'])->name('status');
     });
 
     // Gestion super_admin (activation manuelle, verrou) — en attendant Phase 9.
