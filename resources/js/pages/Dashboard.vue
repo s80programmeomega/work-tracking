@@ -294,7 +294,21 @@ import { ref, onMounted, nextTick, computed, onBeforeUnmount, markRaw } from 'vu
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import api from '@/api/axios'
-import Chart from 'chart.js/auto'
+// Perf : import minimal de Chart.js (au lieu de 'chart.js/auto' qui embarque
+// TOUS les contrôleurs/échelles). On n'enregistre que ce que ce graphique
+// « line + fill » utilise, ce qui permet le tree-shaking du reste.
+import {
+  Chart,
+  LineController,
+  LineElement,
+  PointElement,
+  LinearScale,
+  CategoryScale,
+  Filler,
+  Legend,
+  Tooltip,
+} from 'chart.js'
+Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Filler, Legend, Tooltip)
 import AdminLayout from '../components/layout/AdminLayout.vue'
 import KanbanColumn from './dashboard/KanbanColumn.vue' 
 import {

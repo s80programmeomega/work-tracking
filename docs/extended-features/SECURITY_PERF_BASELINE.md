@@ -202,6 +202,21 @@ Deep security + performance sweep. Findings below with **before → after**.
 - **Verified:** `/line-chart` renders ApexCharts (`apexcharts-canvas` present, no JS errors)
   after the global registration was removed; `npm run build` green.
 
+### P3 — Chart.js `/auto` kitchen-sink import — FIXED (LOW-MED)
+- **Before:** `Dashboard.vue` (the landing route `/`) did `import Chart from 'chart.js/auto'`,
+  which registers **every** Chart.js controller, scale and element — pulling the whole library
+  into the `vendor` chunk even though the page draws a single line chart.
+- **Fix:** import from `'chart.js'` and `Chart.register(...)` only the pieces used
+  (`LineController, LineElement, PointElement, LinearScale, CategoryScale, Filler, Legend,
+  Tooltip`), letting Rollup tree-shake the rest (bar/pie/radar/time-scale/etc.).
+- **After:** `vendor` chunk 620,592 → 574,792 bytes (−46 KB). Verified: dashboard chart still
+  renders (`canvas` drawn, no JS errors). `npm run build` green.
+
+> **Icon imports audited clean:** `@heroicons` (44 files) and `lucide-vue-next` (4) are
+> imported **by name** → tree-shaken (only used icons ship). Heavy transitive libs of
+> `admin-lte` (pdfmake, summernote, bootstrap-colorpicker, filterizr, date-fns, fontawesome)
+> are **never imported in JS** (AdminLTE is used via CSS only) → not bundled. No action.
+
 ## Performance — audited, clean (no action)
 
 - **Unbounded-list / pagination:** real list endpoints use `->paginate()` (19 call sites).
