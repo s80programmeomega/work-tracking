@@ -190,6 +190,8 @@ Deep security + performance sweep. Findings below with **before → after**.
 
 ## Deferred from Phase 10 (require separate, approved work)
 
+> Migration plan for the breaking bumps: **`MAJOR_UPGRADES_PLAN.md`**.
+
 - `laravel/framework` CVE-2026-48019 — needs Laravel 10→11 major upgrade.
 - npm `vite@8` + `admin-lte@4` major upgrades (breaking) — separate migration.
 - Phase 8 limit-enforcement gaps (addMember route unguarded, storage quota unenforced,
