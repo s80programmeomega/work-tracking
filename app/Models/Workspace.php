@@ -28,6 +28,9 @@ class Workspace extends Model
         'subscription_mode',
         'trial_started_at',
         'trial_duration_days',
+        'plan_id',
+        'subscription_status',
+        'subscription_ends_at',
     ];
 
     protected $casts = [
@@ -35,6 +38,7 @@ class Workspace extends Model
         'is_active' => 'boolean',
         'trial_started_at' => 'datetime',
         'trial_duration_days' => 'integer',
+        'subscription_ends_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
@@ -75,6 +79,10 @@ class Workspace extends Model
             }
             if (empty($workspace->trial_duration_days)) {
                 $workspace->trial_duration_days = config('subscription.trial_duration_days', 30);
+            }
+            // Phase 8 : cycle de vie d'abonnement initialisé en essai.
+            if (empty($workspace->subscription_status)) {
+                $workspace->subscription_status = 'trial';
             }
         });
     }
@@ -134,6 +142,14 @@ class Workspace extends Model
     public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'owner_id');
+    }
+
+    /**
+     * Plan d'abonnement souscrit (null = repli sur le plan gratuit).
+     */
+    public function plan(): BelongsTo
+    {
+        return $this->belongsTo(Plan::class, 'plan_id');
     }
 
     /**

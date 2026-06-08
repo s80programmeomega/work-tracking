@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\PushSubscriptionController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\SocialAuthController;
 use App\Http\Controllers\Api\SousTacheController;
+use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\SupportTicketController;
 use App\Http\Controllers\Api\TacheController;
 use App\Http\Controllers\Api\TacheResultatController;
@@ -84,7 +85,9 @@ Route::prefix('invitations/projet')->group(function () {
 });
 
 // Protected routes
-Route::middleware(['auth:sanctum'])->group(function () {
+// subscription.status (Phase 8) : garde d'abonnement globale sur CHAQUE requête
+// authentifiée — 402 si le workspace est verrouillé (routes auth/paiement exemptées).
+Route::middleware(['auth:sanctum', 'subscription.status'])->group(function () {
     Route::prefix('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/me', [AuthController::class, 'me']);
@@ -140,6 +143,22 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/search', [SearchController::class, 'search'])->name('search.global');
     Route::get('/search/export', [SearchController::class, 'export'])->name('search.export');
     Route::post('/search/export', [SearchController::class, 'exportSelected'])->name('search.export.selected');
+
+    // ── Abonnements (Phase 8) ────────────────────────────────────────────────
+    // NB : ces préfixes ('subscription', 'admin/subscription') sont EXEMPTÉS de
+    // la garde subscription.status pour qu'un workspace verrouillé puisse payer.
+    Route::prefix('subscription')->name('subscription.')->group(function () {
+        Route::get('/plans', [SubscriptionController::class, 'plans'])->name('plans');
+        Route::get('/current', [SubscriptionController::class, 'current'])->name('current');
+        Route::post('/select', [SubscriptionController::class, 'select'])->name('select');
+    });
+
+    // Gestion super_admin (activation manuelle, verrou) — en attendant Phase 9.
+    Route::prefix('admin/subscription')->name('admin.subscription.')->group(function () {
+        Route::post('/{workspace}/activate', [SubscriptionController::class, 'activate'])->name('activate');
+        Route::post('/{workspace}/lock', [SubscriptionController::class, 'lock'])->name('lock');
+        Route::post('/{workspace}/unlock', [SubscriptionController::class, 'unlock'])->name('unlock');
+    });
 
     // ── Centre d'aide (Phase 7) ─────────────────────────────────────────────
     // Lecture : tout utilisateur authentifié (contenu publié uniquement).

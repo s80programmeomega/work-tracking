@@ -15,6 +15,7 @@ return [
     ],
     'errors' => [
         'trial_expired' => 'Your trial period has expired. Please upgrade to a paid plan.',
+        'locked' => 'Access to this workspace is suspended. An active subscription is required to continue.',
         'limit_reached' => [
             'add_member' => 'Member limit reached for the trial plan (:max maximum).',
             'upload_file' => 'This file exceeds the maximum allowed size for the trial plan.',

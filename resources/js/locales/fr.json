@@ -564,7 +564,14 @@
       "filter_paid": "Payant",
       "filter_all_statuses": "Tous les statuts",
       "filter_active": "Actif",
-      "filter_suspended": "Suspendu"
+      "filter_suspended": "Suspendu",
+      "activate": "Activer",
+      "activate_plan": "Activer un plan",
+      "plan": "Plan",
+      "period_days": "Durée (jours)",
+      "lock": "Verrouiller",
+      "unlock": "Déverrouiller",
+      "confirm_lock": "Verrouiller ce workspace ? L'accès sera bloqué (402) jusqu'au déverrouillage."
     },
     "roles": {
       "title": "Rôles & Permissions",
@@ -2366,6 +2373,28 @@
       "cat_desc_en": "Description (EN)",
       "cat_published": "Publiée",
       "cat_articles": "Articles"
+    }
+  },
+  "subscription_plans": {
+    "title": "Plans & abonnement",
+    "subtitle": "Choisissez le plan adapté à votre équipe.",
+    "current_plan": "Plan actuel",
+    "renews_on": "Renouvellement le {date}",
+    "loading": "Chargement…",
+    "free": "Gratuit",
+    "choose": "Choisir ce plan",
+    "choose_free": "Passer au gratuit",
+    "current": "Plan actuel",
+    "selected": "Plan sélectionné.",
+    "error": "Une erreur est survenue.",
+    "period": { "monthly": "mois", "yearly": "an" },
+    "status": {
+      "trial": "Essai",
+      "active": "Actif",
+      "free": "Gratuit",
+      "pending": "En attente de paiement",
+      "lapsed": "Expiré",
+      "locked": "Verrouillé"
     }
   }
 }

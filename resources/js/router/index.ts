@@ -139,6 +139,15 @@ const router = createRouter({
       },
     },
     {
+      path: '/subscription/plans',
+      name: 'subscription.plans',
+      component: () => import('../pages/subscription/Plans.vue'),
+      meta: {
+        title: 'Plans & abonnement',
+        requiresAuth: true,
+      },
+    },
+    {
       path: '/accept-invitation/:token',
       name: 'accept-invitation',
       component: () => import('../pages/AcceptInvitation.vue'),

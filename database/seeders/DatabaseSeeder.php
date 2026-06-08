@@ -12,6 +12,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RolePermissionSeeder::class,
+            // Plans d'abonnement (Phase 8). Avant WorkspaceSeeder qui peut y faire référence.
+            PlanSeeder::class,
             WorkspaceSeeder::class,
             SousTacheSeeder::class,
             // Préférences notification + souscriptions Web Push de démo
