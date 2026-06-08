@@ -2424,6 +2424,10 @@
     "current": "Current plan",
     "selected": "Plan selected.",
     "error": "An error occurred.",
+    "unlimited": "Unlimited",
+    "limit_members": "members",
+    "limit_storage": "MB storage",
+    "limit_file": "MB per file",
     "period": { "monthly": "month", "yearly": "year" },
     "status": {
       "trial": "Trial",

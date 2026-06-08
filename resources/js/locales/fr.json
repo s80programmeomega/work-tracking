@@ -2427,6 +2427,10 @@
     "current": "Plan actuel",
     "selected": "Plan sélectionné.",
     "error": "Une erreur est survenue.",
+    "unlimited": "Illimité",
+    "limit_members": "membres",
+    "limit_storage": "Mo de stockage",
+    "limit_file": "Mo par fichier",
     "period": { "monthly": "mois", "yearly": "an" },
     "status": {
       "trial": "Essai",

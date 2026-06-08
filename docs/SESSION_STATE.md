@@ -16,34 +16,41 @@
 
 ## Current Session
 
-**Date:** 2026-06-07
-**Session goal:** Phase 7 — Help Center (reader + author UI, no AI). Backend + frontend built and committed.
-**Branch:** `feature/phase7-help-center` (from `jonas`)
-**Status:** 🚧 Committed `92c482a` (NOT merged, NOT pushed). 15 PHPUnit tests passing, Pint + Larastan clean, frontend build green.
+**Date:** 2026-06-08
+**Session goal:** Phase 8 — Subscription plans + global subscription-status gate, then super-admin plan CRUD.
+**Branch:** `feature/phase8-subscription-plans` (from `jonas`)
+**Status:** ✅ Phase 8 core + plan CRUD merged into `jonas` (`9ace2e9`, `4011b26`), pushed both remotes. 43 subscription tests, Pint + Larastan clean, build green. **Uncommitted refinements** on the feature branch (plan-card display + openEdit payload + i18n) awaiting commit.
 
 ---
 
 ## Current Task
 
-**Task:** Extended Features — Phase 7 Help Center (HELP_CENTER_PLAN.md Phases 1–3 + 6; AI + auto-screenshots skipped)
-**Branch:** `feature/phase7-help-center`
-**Status:** 🚧 Committed `92c482a` — docs being finalized; not yet merged/pushed (awaiting explicit per-push approval).
+**Task:** Extended Features — Phase 8 Subscription Plans + payment gate (manual activation; real payment is Phase 9)
+**Branch:** `feature/phase8-subscription-plans`
+**Status:** ✅ Merged into `jonas` (`9ace2e9` core, `4011b26` plan CRUD). A few **frontend refinements uncommitted** (see below).
 
-**What was done (Phase 7):**
-- **Models** — `HelpCategory`, `HelpArticle` (Purifier sanitize-on-save via `help-article` allowlist + plain-text extraction + bilingual MySQL FULLTEXT `scopeSearch` in boolean/prefix mode), `HelpArticleImage` (public-disk URL accessor) + factories.
-- **Migrations** — `help_categories`, `help_articles` (+ FULLTEXT index on `titre_fr/en` + `body_plain_fr/en`, guarded for MySQL), `help_article_images`.
-- **Permissions** — `help_articles.read` (all roles) + `help_articles.manage` (owner/directeur + super_admin); full Guide 4+15 flow (Permission.php + all() + forRole(), Permission.js, `canReadHelpArticles`/`canManageHelpArticles`, `WorkspaceController.user_permissions` ×3). Server gate: `AdminHelpController::authorizeManage()`.
-- **Controllers/routes** — `HelpController` (4 read endpoints, published-only, view counter) + `AdminHelpController` (CRUD + publish/unpublish + image upload/delete) + 4 Form Requests; 17 routes.
-- **Reader UI** — `HelpIndex` (debounced FULLTEXT search + category grid), `HelpCategory`, `HelpArticle` (sanitized HTML in `prose` + related); routes `/help`, `/help/c/:slug`, `/help/a/:slug`; sidebar "Aide" entry; fr/en i18n.
-- **Author UI** — `HelpArticlesList`, `HelpArticleForm`, `HelpArticleEditor` (Tiptap WYSIWYG + image upload); admin routes. **Tiptap deps added (user-approved).**
-- **Tests** — `HelpCenterTest` (RefreshDatabase) + `HelpSearchTest` (DatabaseTruncation — InnoDB FULLTEXT can't see uncommitted rows). 15 passing.
-- **Fix** — reader pages used a doubled `/api` prefix (axios baseURL already includes `/api`); corrected to `/help/...` and `/admin/help/...`.
-- **Docs** — `PERMISSIONS_MATRIX.md` (new Help Center section + changelog), `testing/TASK_PHASE7_TESTING.md`, this file, PROGRESSION + INDEX updated.
+**What was done (Phase 8 — core, merged `9ace2e9`):**
+- **Plan entity** — `plans` table + `Plan` model/factory/`PlanSeeder` (free/starter/pro). `workspace.plan_id` (FK nullOnDelete) + `subscription_status` (trial/active/lapsed/locked/free/pending) + `subscription_ends_at`. **Migration ordering gotcha:** `create_plans` retimed to `210206` so it runs before `add_plan_to_workspaces` (`210207`).
+- **Plan-aware `SubscriptionService`** — `effectivePlan` (paid plan or free fallback), `planLimit` (`-1` = unlimited), `isLocked`, `reconcileStatus` (lazy trial/subscription expiry → `lapsed`), plan + status in `summary()`. `canAddMember`/`canUpload*` now read the effective plan's limits.
+- **Global `CheckSubscriptionStatus` middleware** — alias `subscription.status` on the `auth:sanctum` route group → runs on **every authenticated request**; HTTP **402** when workspace is `locked`; exempt prefixes (`auth`, `subscription`, `admin/subscription`, `payment`, `webhooks`, `user`); super_admin bypass.
+- **`SubscriptionController`** — plans / current / select (free=immediate, paid=`pending`) / activate / lock / unlock. Manual activation only (Phase 9 = real payment).
+- **Frontend** — `/subscription/plans` pricing page + select; **402 interceptor → redirect to plans**; admin activate/lock/unlock UI in `AdminWorkspaces`; sidebar links; fr/en i18n.
+
+**What was done (plan CRUD — merged `4011b26`):**
+- `AdminPlanController` (index/store/update/destroy), super_admin-gated. `StorePlanRequest`/`UpdatePlanRequest` — **super_admin check in `authorize()`** so a non-admin gets 403 *before* validation (not a misleading 422). Delete guards: free fallback + in-use plan → **422**.
+- Routes `GET/POST/PUT/DELETE /api/admin/plans`; `subscription.plan_errors.*` lang.
+- `/admin/plans` **ManagePlans** page (table + create/edit modal + guarded delete) + sidebar link + fr/en i18n.
+- **43 subscription tests** (21 pre-existing + 13 `SubscriptionStatusTest` + 9 `AdminPlanTest`).
+
+**Uncommitted on the feature branch (frontend refinements):**
+- `Plans.vue` — cards now show **dynamic plan limits only** (members/storage/file, `-1`=Illimité); static seeded `features` list removed.
+- `ManagePlans.vue` — `openEdit` tightened to send only editable fields (drops `id`/timestamps/`workspaces_count` from the PUT).
+- `fr.json`/`en.json` — `subscription_plans.limit_*`/`unlimited` keys.
+- Build green, Pint passed. (Root cause of "edited limits not showing" = the card rendered static `features` text, never the numeric limit columns.)
 
 **What to do next:**
-1. Optional: live manual pass (`php artisan serve` + `npm run dev`) per `testing/TASK_PHASE7_TESTING.md`.
-2. When ready, ask for explicit per-push approval, then push `feature/phase7-help-center` to both remotes and merge into `jonas`.
-3. Then **Phase 8** — Subscription plans + payment gate.
+1. **Commit** the uncommitted Phase 8 frontend refinements; on approval push + merge into `jonas` (both remotes).
+2. Then **Phase 9** — payment gateway (MTN MoMo + Orange Money). Reuses `subscription.status`; processing a payment flips a `pending` selection → `active`.
 
 **What was done (Phase 6 — role tiers, notifications, security):**
 - **Role-scoped search tiers** — `search.global` (super-admin/owner/manager: workspace-wide; super-admin = all workspaces) + new `search.scoped` (cadre/collaborateur/stagiaire: assigned resources only); observateur/utilisateur = none. Full Guide 4+15 flow; `PERMISSIONS_MATRIX.md` updated.
@@ -339,7 +346,7 @@ Tests: 11 feature in `NotificationServiceTest` + 8 feature in `SendDailyDigestCo
 
 | Branch | Phase / Task | Status |
 |---|---|---|
-| `feature/phase7-help-center` | Extended Phase 7 (Help Center) | Not started ⬜ |
+| `feature/phase8-subscription-plans` | Extended Phase 8 (Subscription plans + gate) | ✅ Merged `4011b26`; frontend refinements uncommitted |
 
 **Previously merged into `jonas` (extended features):**
 - `chore/security-perf-baseline` → `jonas` `4493754` (Phase 0 — baseline docs)
@@ -348,6 +355,8 @@ Tests: 11 feature in `NotificationServiceTest` + 8 feature in `SendDailyDigestCo
 - `feature/support-contact` → `jonas` (Phase 3 + Phase 4 — support system + native admin logs)
 - `feature/phase5-chat` → `jonas` `cae2a7e` (Phase 5 — chat real-time + @mentions)
 - `feature/phase6-search` → `jonas` (Phase 6 — global search: tiers, notifications, file extraction, security hardening)
+- `feature/phase7-help-center` → `jonas` `58f76da` (Phase 7 — Help Center: granular perms, global-search inclusion, category mgmt, Tiptap author UI; + project-wide animations, modal borders/drag, Guide 25 security)
+- `feature/phase8-subscription-plans` → `jonas` `9ace2e9` + `4011b26` (Phase 8 — subscription plans, global 402 gate, manual activation, plan CRUD)
 
 **Previously merged (v2 tasks):**
 Tasks 0–16, fix/cdc-hotfixes, fix/bug-batch, design-system-v1, chore/test-coverage-expansion — all merged into `jonas` (see PROGRESSION.md for full history).
@@ -407,3 +416,6 @@ Tasks 0–16, fix/cdc-hotfixes, fix/bug-batch, design-system-v1, chore/test-cove
 | 2026-06-04 | Phase 6 Part A — command palette | Scout + Typesense installed, search.global permission, 5 Searchable models, SearchController, SearchBar.vue Cmd+K palette. 8 PHPUnit tests. Uncommitted. |
 | 2026-06-04 | Phase 6 Part B — full search page + file extraction | 6 migrations, DocumentTextExtractorService + jobs, TeamMessage Searchable (6th model), SearchController rewrite (super-admin, highlights, pagination), export pipeline (SearchExport+Job), Search.vue page, TacheDetailModal readonly, Teams/Show ?message= handler, 28 i18n keys, 15 PHPUnit tests. Awaiting commit + merge. |
 | 2026-06-06 | Phase 6 — tiers, notifications, security | search.scoped tier (cadre/collaborateur/stagiaire); SousTache (7th) + Notification (8th, user-scoped) Searchable; topbar SearchPageButton; **fixed critical Typesense fromRaw scoping leak (filter_by) + exportSelected IDOR**; export restricted to manager+; reindexed all 8 collections; TeamMessages list test shape fix. Full suite 717 green. Merged into jonas, pushed both remotes. |
+| 2026-06-07 | Phase 7 — Help Center + UI polish | Help Center (bilingual categories/articles, Purifier sanitize, MySQL FULLTEXT, Tiptap author UI); **granular** help perms (create/edit/publish/delete/upload_image + categories.manage); global-search inclusion (published-only). Plus project-wide collapse/fade animations (`animations.css`, `useDraggable`), sidebar submenu collapse fix, modal borders/draggability/outside-click sweep, mes-validations header fix, Guide 25 (security & prompt-injection defense). Committed `927565d`; merged into jonas `58f76da`, pushed both remotes. |
+| 2026-06-07 | Phase 8 — Subscription plans + global gate | Plan entity (free/starter/pro) + workspace plan_id/subscription_status/ends_at; plan-aware SubscriptionService (effectivePlan, planLimit −1=unlimited, isLocked, reconcileStatus); **global CheckSubscriptionStatus middleware → 402 on locked** (exempt auth/subscription/payment; super_admin bypass); SubscriptionController (plans/current/select/activate/lock/unlock); `/subscription/plans` page + 402 interceptor + admin activate/lock UI. Migration ordering fix (create_plans→210206). 34 subscription tests. Committed `3420ef2`, merged into jonas `9ace2e9`, pushed both remotes. |
+| 2026-06-08 | Phase 8 — plan CRUD + card display | Super-admin plan CRUD (AdminPlanController + Store/Update requests with super_admin authorize() → 403 before validation; delete guards free+in-use → 422) + `/admin/plans` ManagePlans page. 9 AdminPlanTest cases (43 subscription total). Committed `e579a80`, merged into jonas `4011b26`, pushed both remotes. Then frontend refinements (cards show dynamic limits only; openEdit payload tightened; i18n) — **uncommitted**. |
