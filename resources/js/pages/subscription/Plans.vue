@@ -73,18 +73,57 @@
       <p v-if="message" class="rounded-3 border border-green-200 bg-green-50 p-3 text-sm text-green-700 dark:border-green-800 dark:bg-green-900/20 dark:text-green-400">
         {{ message }}
       </p>
+
+      <!-- Modale de paiement (plan payant) -->
+      <div v-if="pay.open" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" @click.self="closePay">
+        <div class="w-full max-w-md rounded-3 border border-gray-200 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-900">
+          <h2 class="mb-1 text-lg font-semibold text-gray-900 dark:text-white">
+            {{ $t('subscription_plans.payment.title') }} — {{ localized(pay.plan, 'nom') }}
+          </h2>
+          <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">{{ formatPrice(pay.plan) }}</p>
+
+          <!-- En attente de validation (flux MTN) -->
+          <div v-if="pay.waiting" class="space-y-3 text-center">
+            <p class="text-sm text-gray-700 dark:text-gray-200">{{ $t('subscription_plans.payment.waiting') }}</p>
+            <p v-if="pay.error" class="text-sm text-red-600">{{ pay.error }}</p>
+            <button @click="closePay" class="rounded-3 border border-gray-300 px-4 py-2 text-sm text-gray-600 dark:border-gray-700 dark:text-gray-300">{{ $t('common.cancel') }}</button>
+          </div>
+
+          <!-- Formulaire fournisseur + téléphone -->
+          <form v-else class="space-y-3" @submit.prevent="startPayment">
+            <div>
+              <label class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">{{ $t('subscription_plans.payment.provider') }}</label>
+              <select v-model="pay.provider" class="w-full rounded-3 border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                <option value="mtn_momo">MTN MoMo</option>
+                <option value="orange_money">Orange Money</option>
+              </select>
+            </div>
+            <div>
+              <label class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">{{ $t('subscription_plans.payment.phone') }}</label>
+              <input v-model="pay.phone" required placeholder="2376XXXXXXXX" class="w-full rounded-3 border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white" />
+            </div>
+            <p v-if="pay.error" class="text-sm text-red-600">{{ pay.error }}</p>
+            <div class="flex items-center justify-end gap-3 pt-1">
+              <button type="button" @click="closePay" class="rounded-3 border border-gray-300 px-4 py-2 text-sm text-gray-600 dark:border-gray-700 dark:text-gray-300">{{ $t('common.cancel') }}</button>
+              <button type="submit" :disabled="pay.loading" class="rounded-3 bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">{{ $t('subscription_plans.payment.pay') }}</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   </AdminLayout>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 import { useStagger } from '@/composables/useAnimations'
 import api from '@/api/axios'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 
 const { t, locale } = useI18n()
+const route = useRoute()
 const { staggerRef: plansRef, applyStagger } = useStagger(60)
 
 const plans = ref([])
@@ -92,6 +131,10 @@ const current = ref(null)
 const loading = ref(false)
 const selecting = ref(false)
 const message = ref('')
+
+// Modale de paiement (plans payants).
+const pay = ref({ open: false, plan: null, provider: 'mtn_momo', phone: '', loading: false, error: '', waiting: false })
+let pollTimer = null
 
 const localized = (obj, field) => {
   if (!obj) return ''
@@ -136,19 +179,91 @@ const load = async () => {
   }
 }
 
+// Plan gratuit → application immédiate ; plan payant → ouvre la modale de paiement.
 const selectPlan = async (plan) => {
-  selecting.value = true
-  message.value = ''
+  if (plan.is_free) {
+    selecting.value = true
+    message.value = ''
+    try {
+      const { data } = await api.post('/subscription/select', { plan_id: plan.id })
+      current.value = data.subscription ?? current.value
+      message.value = data.message ?? t('subscription_plans.selected')
+    } catch (e) {
+      message.value = e.response?.data?.message ?? t('subscription_plans.error')
+    } finally {
+      selecting.value = false
+    }
+    return
+  }
+  pay.value = { open: true, plan, provider: 'mtn_momo', phone: '', loading: false, error: '', waiting: false }
+}
+
+// Lance le paiement : MTN = push + polling ; Orange = redirection web.
+const startPayment = async () => {
+  pay.value.loading = true
+  pay.value.error = ''
   try {
-    const { data } = await api.post('/subscription/select', { plan_id: plan.id })
-    current.value = data.subscription ?? current.value
-    message.value = data.message ?? t('subscription_plans.selected')
+    const { data } = await api.post('/payment/initiate', {
+      plan_id: pay.value.plan.id,
+      provider: pay.value.provider,
+      payer_phone: pay.value.phone,
+    })
+
+    if (data.redirect_url) {
+      // Orange : on quitte l'app vers la page de paiement Orange.
+      window.location.href = data.redirect_url
+      return
+    }
+
+    // MTN : la collecte est lancée, on attend la validation sur le téléphone.
+    pay.value.waiting = true
+    pollStatus(data.payment.reference)
   } catch (e) {
-    message.value = e.response?.data?.message ?? t('subscription_plans.error')
+    pay.value.error = e.response?.data?.message ?? t('subscription_plans.payment.error')
   } finally {
-    selecting.value = false
+    pay.value.loading = false
   }
 }
 
-onMounted(load)
+// Interroge l'état du paiement toutes les 4 s jusqu'à résolution (max ~2 min).
+const pollStatus = (reference) => {
+  let tries = 0
+  pollTimer = setInterval(async () => {
+    tries += 1
+    try {
+      const { data } = await api.get(`/payment/${reference}/status`)
+      const status = data.payment?.status
+      if (status === 'succeeded') {
+        clearInterval(pollTimer)
+        pay.value.open = false
+        message.value = t('subscription_plans.payment.success')
+        await load()
+      } else if (status === 'failed' || status === 'expired' || tries > 30) {
+        clearInterval(pollTimer)
+        pay.value.waiting = false
+        pay.value.error = t('subscription_plans.payment.failed')
+      }
+    } catch {
+      // on réessaiera au prochain tick
+    }
+  }, 4000)
+}
+
+const closePay = () => {
+  if (pollTimer) { clearInterval(pollTimer) }
+  pay.value.open = false
+}
+
+onBeforeUnmount(() => { if (pollTimer) { clearInterval(pollTimer) } })
+
+onMounted(async () => {
+  await load()
+  // Retour depuis Orange : ?payment=return → on rafraîchit l'état d'abonnement.
+  if (route.query.payment === 'return') {
+    message.value = t('subscription_plans.payment.checking')
+    await load()
+  } else if (route.query.payment === 'cancel') {
+    message.value = t('subscription_plans.payment.cancelled')
+  }
+})
 </script>

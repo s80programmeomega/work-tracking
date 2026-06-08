@@ -43,6 +43,23 @@ class SubscriptionService
     }
 
     /**
+     * Active un abonnement payant suite à un paiement confirmé (Phase 9).
+     * C'est la transition pending → active : pose le plan, le mode payant,
+     * le statut actif et la date de fin de période.
+     */
+    public function activateFromPayment(Workspace $workspace, Plan $plan): void
+    {
+        $periodDays = $plan->billing_period === 'yearly' ? 365 : 30;
+
+        $workspace->forceFill([
+            'plan_id' => $plan->id,
+            'subscription_mode' => 'paid',
+            'subscription_status' => 'active',
+            'subscription_ends_at' => now()->addDays($periodDays),
+        ])->save();
+    }
+
+    /**
      * Réconcilie le statut quand un essai/abonnement payant a expiré :
      * bascule en 'lapsed' (rétrogradé au plan gratuit, accès limité).
      * Le verrou dur ('locked') reste une décision séparée (super_admin / Phase 9).

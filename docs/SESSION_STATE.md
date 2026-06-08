@@ -17,17 +17,37 @@
 ## Current Session
 
 **Date:** 2026-06-08
-**Session goal:** Phase 8 — Subscription plans + global subscription-status gate, then super-admin plan CRUD.
-**Branch:** `feature/phase8-subscription-plans` (from `jonas`)
-**Status:** ✅ Phase 8 core + plan CRUD merged into `jonas` (`9ace2e9`, `4011b26`), pushed both remotes. 43 subscription tests, Pint + Larastan clean, build green. **Uncommitted refinements** on the feature branch (plan-card display + openEdit payload + i18n) awaiting commit.
+**Session goal:** Phase 9 — Payment gateway (MTN MoMo + Orange Money) wiring real payment into the Phase 8 subscription flow.
+**Branch:** `feature/phase9-payment-momo-orange` (from `jonas`)
+**Status:** 🚧 Built end-to-end (provider seam, webhook-confirmed activation, payment modal). 8 PaymentFlowTest (Http::fake, no network/secrets) + 51 with subscription suite, Pint + Larastan clean, build green. **Uncommitted** on the feature branch (whole Phase 9). Phase 8 (incl. refinements) already merged into `jonas` (`3820162`).
 
 ---
 
 ## Current Task
 
-**Task:** Extended Features — Phase 8 Subscription Plans + payment gate (manual activation; real payment is Phase 9)
-**Branch:** `feature/phase8-subscription-plans`
-**Status:** ✅ Merged into `jonas` (`9ace2e9` core, `4011b26` plan CRUD). A few **frontend refinements uncommitted** (see below).
+**Task:** Extended Features — Phase 9 Payment gateway (MTN MoMo + Orange Money)
+**Branch:** `feature/phase9-payment-momo-orange`
+**Status:** 🚧 Implemented; uncommitted; awaiting commit + push/merge approval.
+
+**What was done (Phase 9):**
+- **Provider-agnostic seam** — `PaymentProviderInterface` + `PaymentResult` DTO + `MtnMomoProvider` (token cache, requesttopay 202, status map) + `OrangeMoneyProvider` (token, webpayment→pay_token/payment_url, transactionstatus) + `PaymentProviderRegistry` (key→impl). Strategy pattern.
+- **Data** — `payments` migration + `Payment` model (uuid `reference` = idempotency key + MTN `X-Reference-Id`) + `PaymentFactory`. `amount` frozen at checkout.
+- **`PaymentService`** — `startCheckout()` (create pending + initiate, persist redirect_url) + **idempotent** `confirm()` (no-op if not pending → safe on replayed callbacks). `SubscriptionService::activateFromPayment()` = pending→active (plan_id, mode=paid, status=active, ends_at by billing period).
+- **Webhook-confirmed only** — `PaymentWebhookController::{momo,orange}` look up our payment by reference and **re-verify status via the provider API** (`fetchStatus`); never trust the POST body. Public routes (no auth/CSRF; `api` group is stateless).
+- **Routes** — `POST /api/payment/initiate`, `GET /api/payment/{reference}/status` (auth; `payment` prefix already exempt from `subscription.status`); public `POST /api/webhooks/payment/{momo,orange}`.
+- **Secrets** — `config/payment.php` reads `.env` only; `.env.example` placeholders added; nothing logged/committed.
+- **Frontend** — `Plans.vue` paid-plan button opens a payment modal (provider + phone); MTN = push + poll `payment/{ref}/status`; Orange = `window.location` redirect; `?payment=return\|cancel` handled on mount; fr/en `subscription_plans.payment.*` i18n.
+- **Tests/gates** — 8 `PaymentFlowTest` via `Http::fake()` (initiate MTN/Orange, webhook success/fail, idempotent replay, unknown ref, non-owner, free plan); 51 with subscription suite. Pint + Larastan clean, build green.
+
+**What to do next:**
+1. Commit Phase 9; on approval push + merge into `jonas` (both remotes).
+2. Real sandbox testing needs MTN/Orange sandbox credentials in `.env` (Jonas fills; build never asks for real values). Orange base URLs/payloads vary by operator — confirm vs onboarding pack.
+
+---
+
+## (Previous) Phase 8 — merged
+
+**Branch:** `feature/phase8-subscription-plans` → merged into `jonas` (`9ace2e9` core, `4011b26` plan CRUD, `3820162` UI refinements).
 
 **What was done (Phase 8 — core, merged `9ace2e9`):**
 - **Plan entity** — `plans` table + `Plan` model/factory/`PlanSeeder` (free/starter/pro). `workspace.plan_id` (FK nullOnDelete) + `subscription_status` (trial/active/lapsed/locked/free/pending) + `subscription_ends_at`. **Migration ordering gotcha:** `create_plans` retimed to `210206` so it runs before `add_plan_to_workspaces` (`210207`).
@@ -418,4 +438,5 @@ Tasks 0–16, fix/cdc-hotfixes, fix/bug-batch, design-system-v1, chore/test-cove
 | 2026-06-06 | Phase 6 — tiers, notifications, security | search.scoped tier (cadre/collaborateur/stagiaire); SousTache (7th) + Notification (8th, user-scoped) Searchable; topbar SearchPageButton; **fixed critical Typesense fromRaw scoping leak (filter_by) + exportSelected IDOR**; export restricted to manager+; reindexed all 8 collections; TeamMessages list test shape fix. Full suite 717 green. Merged into jonas, pushed both remotes. |
 | 2026-06-07 | Phase 7 — Help Center + UI polish | Help Center (bilingual categories/articles, Purifier sanitize, MySQL FULLTEXT, Tiptap author UI); **granular** help perms (create/edit/publish/delete/upload_image + categories.manage); global-search inclusion (published-only). Plus project-wide collapse/fade animations (`animations.css`, `useDraggable`), sidebar submenu collapse fix, modal borders/draggability/outside-click sweep, mes-validations header fix, Guide 25 (security & prompt-injection defense). Committed `927565d`; merged into jonas `58f76da`, pushed both remotes. |
 | 2026-06-07 | Phase 8 — Subscription plans + global gate | Plan entity (free/starter/pro) + workspace plan_id/subscription_status/ends_at; plan-aware SubscriptionService (effectivePlan, planLimit −1=unlimited, isLocked, reconcileStatus); **global CheckSubscriptionStatus middleware → 402 on locked** (exempt auth/subscription/payment; super_admin bypass); SubscriptionController (plans/current/select/activate/lock/unlock); `/subscription/plans` page + 402 interceptor + admin activate/lock UI. Migration ordering fix (create_plans→210206). 34 subscription tests. Committed `3420ef2`, merged into jonas `9ace2e9`, pushed both remotes. |
-| 2026-06-08 | Phase 8 — plan CRUD + card display | Super-admin plan CRUD (AdminPlanController + Store/Update requests with super_admin authorize() → 403 before validation; delete guards free+in-use → 422) + `/admin/plans` ManagePlans page. 9 AdminPlanTest cases (43 subscription total). Committed `e579a80`, merged into jonas `4011b26`, pushed both remotes. Then frontend refinements (cards show dynamic limits only; openEdit payload tightened; i18n) — **uncommitted**. |
+| 2026-06-08 | Phase 8 — plan CRUD + card display | Super-admin plan CRUD (AdminPlanController + Store/Update requests with super_admin authorize() → 403 before validation; delete guards free+in-use → 422) + `/admin/plans` ManagePlans page. 9 AdminPlanTest cases (43 subscription total). Committed `e579a80`, merged into jonas `4011b26`, pushed both remotes. Then frontend refinements (cards show dynamic limits only; openEdit payload tightened; i18n) — committed `b453e18`, merged `3820162`, pushed both. |
+| 2026-06-08 | Phase 9 — payment gateway (MTN MoMo + Orange Money) | Provider-agnostic seam (interface + MTN/Orange providers + registry, Strategy); payments table + Payment model (uuid reference = idempotency key); PaymentService (startCheckout + idempotent confirm) + SubscriptionService::activateFromPayment (pending→active); **webhook-confirmed only** (re-verify status via provider API, never trust callback body); MTN push+poll / Orange redirect; config/payment.php + .env.example placeholders (secrets in .env only); Plans.vue payment modal + ?payment=return/cancel + i18n. 8 PaymentFlowTest (Http::fake, no network/secrets); 51 with subscription suite; Pint + Larastan clean; build green. **Uncommitted** on `feature/phase9-payment-momo-orange`. |

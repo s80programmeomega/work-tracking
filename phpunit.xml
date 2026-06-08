@@ -24,6 +24,7 @@
         <env name="BROADCAST_CONNECTION" value="log"/>
         <env name="SCOUT_DRIVER" value="collection"/>
         <env name="CACHE_DRIVER" value="array"/>
+        <env name="PAYMENT_FAKE" value="false"/>
         <env name="DB_CONNECTION" value="mysql"/>
         <env name="DB_DATABASE" value="work-tracking-test"/>
         <env name="MAIL_MAILER" value="array"/>

@@ -2428,6 +2428,18 @@
     "limit_members": "members",
     "limit_storage": "MB storage",
     "limit_file": "MB per file",
+    "payment": {
+      "title": "Payment",
+      "provider": "Payment method",
+      "phone": "Phone number (Mobile Money)",
+      "pay": "Pay",
+      "waiting": "Approve the payment on your phone…",
+      "checking": "Verifying payment…",
+      "success": "Payment confirmed. Your subscription is active.",
+      "failed": "The payment failed or expired.",
+      "cancelled": "Payment cancelled.",
+      "error": "Could not start the payment."
+    },
     "period": { "monthly": "month", "yearly": "year" },
     "status": {
       "trial": "Trial",
