@@ -107,3 +107,92 @@ Covered by F1 item 2 (schedule `sanctum:prune-expired`). No separate action.
 | 6 (Search) | Workspace-scope every query + manager+ gate; no cross-workspace/below-manager leakage |
 | 9 (Payments) | Webhook signature/IP verification + idempotency + replay protection; no secrets in repo; dedicated `/security-review` pre-merge |
 | 10 | Everything under "Deferred" above |
+
+---
+
+# Phase 10 — Hardening Pass Results (2026-06-08, branch `chore/hardening-pass`)
+
+Deep security + performance sweep. Findings below with **before → after**.
+
+## Security — fixed
+
+### S1 — Dependency CVEs (composer) — FIXED (7 of 8)
+- **Before:** `composer audit` = 8 advisories / 5 packages — **1 HIGH** (`symfony/mime`
+  CVE-2026-45067, email-header/SMTP CRLF injection), 3 medium, 4 low.
+- **Fix:** `composer update` within Laravel 10 constraints —
+  `symfony/mime` 6.4.37→6.4.41 (the HIGH), `symfony/http-foundation` →6.4.41,
+  `symfony/mailer` →6.4.40, `symfony/routing` →6.4.41, `symfony/yaml` 7.4.10→7.4.13,
+  `symfony/polyfill-intl-idn` 1.37→1.38.1.
+- **After:** **1 advisory left** — `laravel/framework` CVE-2026-48019 (CRLF in the default
+  `email` validation rule). Patch is **not reachable within `^10`** → requires a Laravel
+  10→11 major upgrade. **Deferred** (out of the approved no-major-bump scope). Low practical
+  risk here (exploitable only if untrusted input flows through that rule into a mail header).
+- Verified: full suite **771/772** (the 1 failure is a pre-existing SocialAuth ordering
+  flake — passes 3/3 in isolation; unrelated to the bumps).
+
+### S2 — Dependency CVEs (npm) — FIXED (high-sev), majors deferred
+- **Before:** `npm audit` = 11 vulns (9 moderate, **2 high**); high-sev in the
+  `ws`/`engine.io-client`/`socket.io-client` chain (via `laravel-echo`).
+- **Fix:** `npm audit fix` (non-breaking) — `ws` 8.18.3→8.20.1; both **highs cleared**.
+- **After:** 5 moderate left, fixable only via `npm audit fix --force` (breaking majors:
+  `vite@8` from esbuild, `admin-lte@4` from summernote). **Deferred** — separate migration.
+- Verified: `npm run build` green.
+
+### S3 — CORS: wildcard origin with credentials — FIXED (MEDIUM/HIGH)
+- **Before:** `config/cors.php` had `'allowed_origins' => ['*']` **with**
+  `'supports_credentials' => true`. This combo lets **any** website make credentialed
+  (cookie/auth) requests to the API — weakens CSRF posture for the SPA + Sanctum setup.
+- **Fix:** `allowed_origins` is now **env-driven** — `CORS_ALLOWED_ORIGINS` (comma-separated),
+  fallback to `APP_URL`. No more `*`.
+- **Deploy note:** production `.env` MUST set `CORS_ALLOWED_ORIGINS` to the real frontend
+  domain(s); otherwise CORS blocks the app (intended).
+
+### S4 — F3: sensitive auth/payment endpoints lacked dedicated rate limits — FIXED (LOW→MED)
+- **Before:** `/auth/login`, `/auth/register`, `/auth/refresh`, `/payment/initiate` relied on
+  the global `throttle:60,1` only (login = prime brute-force target). (2FA endpoints were
+  already tight.)
+- **Fix:** dedicated throttles — `login` & `register` `5,1`; `refresh` `10,1`;
+  `payment/initiate` `6,1`.
+
+## Security — verified already-sound (no change needed)
+
+- **F1 (token expiry):** ✅ already fixed in Phase 1 — `login()` + `refreshToken()` both issue
+  7-day tokens (consistent with advertised `expires_at`); `sanctum:prune-expired --hours=24`
+  scheduled.
+- **Payment webhooks CSRF:** ✅ correct — public webhooks are on the stateless `api` group
+  (no `VerifyCsrfToken`, which is `web`-only), so provider POSTs work without tokens by design.
+- **Payment hard-lock (402) bypass:** ✅ sound — exempt prefixes (`auth`, `subscription`,
+  `payment`, `webhooks`, `user`) are exactly those a locked workspace must reach to pay/log
+  out; everything else is gated. No over-exemption.
+- **Webhook authenticity:** ✅ (Phase 9) — webhooks re-verify status via the provider API,
+  never trust the POST body; `confirm()` is idempotent (replay-safe).
+
+## Performance — fixed
+
+### P1 — N+1: `Plan::free()` queried repeatedly — FIXED (MEDIUM)
+- **Before:** `SubscriptionService::summary()` issued **5 queries**, of which **4 were the
+  identical** `select * from plans where is_free=1 limit 1` (one in `effectivePlan` + 3 in
+  `planLimit`). `AdminController::workspaces` calls `summary()` **per row** → a 20-row page
+  did **~80 redundant free-plan queries**.
+- **Fix:** request-scoped memoization of `Plan::free()` (static cache + `forgetFreeCache()`,
+  busted on `Plan` save/delete via `booted()`).
+- **After:** `summary()` = **2 queries** (cold) / **1** (warm). Admin workspaces list:
+  ~80 free-plan queries → **~1**. Verified via `DB::listen`.
+
+## Performance — audited, clean (no action)
+
+- **Unbounded-list / pagination:** real list endpoints use `->paginate()` (19 call sites).
+  The `index() → ->get()` cases (AdminPlan, PushSubscription, SousTache, ProjetInvitation)
+  are naturally bounded or single-parent-scoped. **No `Model::all()` in any controller.**
+- **Dashboard `->get()` sets** are workspace/user-scoped (`accessibleBy`, `assignedTo`,
+  `whereIn($ids)`) — aggregates, not whole-table loads (confirms F2). Watch-item only for
+  very large single workspaces.
+
+## Deferred from Phase 10 (require separate, approved work)
+
+- `laravel/framework` CVE-2026-48019 — needs Laravel 10→11 major upgrade.
+- npm `vite@8` + `admin-lte@4` major upgrades (breaking) — separate migration.
+- Phase 8 limit-enforcement gaps (addMember route unguarded, storage quota unenforced,
+  middleware-only enforcement) — see `testing/TASK_PHASE9_TESTING.md` "Known gaps".
+- Deeper perf (caching layer, Vue route lazy-loading, bundle-size reduction) — not pursued
+  this round; no blocking issue found.

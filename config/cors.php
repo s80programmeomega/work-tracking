@@ -15,11 +15,17 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie','login', 'logout'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'login', 'logout'],
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    /*
+    | Origines autorisées (durcissement Phase 10) : avec supports_credentials=true,
+    | un '*' permettait à N'IMPORTE QUEL site des requêtes authentifiées (faille CORS).
+    | On restreint aux origines de l'application, pilotées par .env
+    | (CORS_ALLOWED_ORIGINS, séparées par des virgules) ; repli sur APP_URL.
+    */
+    'allowed_origins' => array_filter(array_map('trim', explode(',', (string) env('CORS_ALLOWED_ORIGINS', (string) env('APP_URL', 'http://localhost'))))),
 
     'allowed_origins_patterns' => [],
 
