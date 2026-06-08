@@ -184,7 +184,15 @@ const openCreate = () => {
 }
 
 const openEdit = (plan) => {
-  form.value = { ...emptyForm(), ...plan }
+  // N'extraire que les champs modifiables (les clés de emptyForm) ; on évite
+  // d'envoyer id/created_at/updated_at/workspaces_count dans le PUT.
+  const base = emptyForm()
+  for (const key of Object.keys(base)) {
+    if (plan[key] !== undefined && plan[key] !== null) {
+      base[key] = plan[key]
+    }
+  }
+  form.value = base
   modal.value = { open: true, editing: plan, loading: false, error: '' }
 }
 

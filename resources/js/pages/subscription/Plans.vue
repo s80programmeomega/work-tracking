@@ -50,10 +50,11 @@
             </span>
           </div>
 
-          <ul class="mt-4 flex-1 space-y-2 text-sm text-gray-600 dark:text-gray-300">
-            <li v-for="(feat, i) in (plan.features || [])" :key="i" class="flex items-start gap-2">
-              <span class="mt-0.5 text-green-500">✓</span>{{ feat }}
-            </li>
+          <!-- Limites effectives du plan (source de vérité : colonnes du plan). -->
+          <ul class="mt-4 flex-1 space-y-2 text-sm text-gray-700 dark:text-gray-200">
+            <li class="flex items-start gap-2"><span class="mt-0.5 text-green-500">✓</span>{{ lim(plan.max_members) }} {{ $t('subscription_plans.limit_members') }}</li>
+            <li class="flex items-start gap-2"><span class="mt-0.5 text-green-500">✓</span>{{ lim(plan.max_storage_mb) }} {{ $t('subscription_plans.limit_storage') }}</li>
+            <li class="flex items-start gap-2"><span class="mt-0.5 text-green-500">✓</span>{{ lim(plan.max_file_size_mb) }} {{ $t('subscription_plans.limit_file') }}</li>
           </ul>
 
           <button
@@ -107,6 +108,9 @@ const formatDate = (iso) => {
 }
 
 const isCurrent = (plan) => current.value?.plan?.id === plan.id
+
+// -1 = illimité (sentinelle partagée avec le backend / la page admin).
+const lim = (v) => v === -1 ? t('subscription_plans.unlimited') : v
 
 const statusClass = (status) => ({
   active: 'text-green-600 dark:text-green-400',
