@@ -4,6 +4,7 @@ use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\Api\ActiviteController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AdminHelpController;
+use App\Http\Controllers\Api\AdminPlanController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DocumentController;
@@ -158,6 +159,14 @@ Route::middleware(['auth:sanctum', 'subscription.status'])->group(function () {
         Route::post('/{workspace}/activate', [SubscriptionController::class, 'activate'])->name('activate');
         Route::post('/{workspace}/lock', [SubscriptionController::class, 'lock'])->name('lock');
         Route::post('/{workspace}/unlock', [SubscriptionController::class, 'unlock'])->name('unlock');
+    });
+
+    // CRUD des plans — super_admin uniquement (config plateforme globale).
+    Route::prefix('admin/plans')->name('admin.plans.')->group(function () {
+        Route::get('/', [AdminPlanController::class, 'index'])->name('index');
+        Route::post('/', [AdminPlanController::class, 'store'])->name('store');
+        Route::put('/{plan}', [AdminPlanController::class, 'update'])->name('update');
+        Route::delete('/{plan}', [AdminPlanController::class, 'destroy'])->name('destroy');
     });
 
     // ── Centre d'aide (Phase 7) ─────────────────────────────────────────────

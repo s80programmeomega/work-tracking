@@ -21,6 +21,10 @@ return [
             'upload_file' => 'Ce fichier dépasse la taille maximale autorisée pour le plan d\'essai.',
         ],
     ],
+    'plan_errors' => [
+        'cannot_delete_free' => 'Le plan gratuit de repli ne peut pas être supprimé.',
+        'cannot_delete_in_use' => 'Ce plan est utilisé par au moins un workspace et ne peut pas être supprimé.',
+    ],
     'notifications' => [
         'trial_expiring' => [
             'subject' => 'Votre essai Work Tracking expire bientôt',

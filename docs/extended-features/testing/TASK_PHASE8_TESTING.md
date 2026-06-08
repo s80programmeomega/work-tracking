@@ -41,7 +41,12 @@ Manual activation only — real MTN MoMo / Orange Money payment processing is Ph
 php artisan test --compact tests/Feature/Subscription/
 ```
 
-Expected: **34 passed** (21 pre-existing + 13 new in `SubscriptionStatusTest`).
+Expected: **43 passed** (21 pre-existing + 13 in `SubscriptionStatusTest` + 9 in `AdminPlanTest`).
+
+`tests/Feature/Subscription/AdminPlanTest.php` covers the super-admin **plan CRUD**:
+list / create / update / delete, validation, 403 for non-super-admin (checked in the
+FormRequest `authorize()` so it precedes validation), and delete guards (free fallback +
+in-use plan both → 422).
 
 `tests/Feature/Subscription/SubscriptionStatusTest.php` covers:
 - locked workspace → 402 on a protected route (`/api/dashboard`);
@@ -102,6 +107,18 @@ POST /api/subscription/select   {plan_id}              propriétaire choisit un 
 POST /api/admin/subscription/{workspace}/activate      super_admin (manual)
 POST /api/admin/subscription/{workspace}/lock          super_admin (402 hard-lock)
 POST /api/admin/subscription/{workspace}/unlock        super_admin
+
+GET    /api/admin/plans            super_admin — list all plans (+workspaces_count)
+POST   /api/admin/plans            super_admin — create a plan
+PUT    /api/admin/plans/{plan}     super_admin — update a plan
+DELETE /api/admin/plans/{plan}     super_admin — delete (422 if free or in use)
 ```
+
+### TC-05 — Plan management (super_admin)
+
+1. As super_admin, open **Plans** (admin sidebar) → `/admin/plans`.
+2. **New plan** → fill slug/names/price/limits (−1 = unlimited) → save → appears in the table.
+3. **Edit** a plan → change price/limits → save.
+4. **Delete** is offered only for non-free plans with 0 workspaces; deleting the free plan or an in-use plan returns 422 with an explanatory message.
 
 > Deploy note (Phase 8): run `php artisan db:seed --class=PlanSeeder` on each environment so the plans (incl. the free fallback) exist; the gate's free-tier fallback depends on a plan with `is_free = true`.

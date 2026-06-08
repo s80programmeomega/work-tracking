@@ -952,6 +952,12 @@ const menuGroups = computed(() => [
                 superAdminOnly: true,
             },
             {
+                icon: BoxCubeIcon,
+                name: t('navigation.plans'),
+                path: "/admin/plans",
+                superAdminOnly: true,
+            },
+            {
                 icon: UsersIcon,
                 name: t('navigation.users'),
                 path: "/admin/users",
