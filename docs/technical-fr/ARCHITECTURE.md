@@ -331,7 +331,20 @@ Toutes les routes sont préfixées `/api`. Authentification par token Sanctum
 ## 9. Déploiement (points clés)
 
 Prérequis serveur : PHP 8.1+ (testé 8.4), MySQL, **Redis**, **Typesense**,
-extension PHP **phpredis**, un superviseur de processus (systemd/supervisor).
+Node 20+, et un superviseur de processus (systemd/supervisor).
+
+**Extensions PHP requises** (vérifiées par le préflight de `deploy.sh`) :
+`redis` (phpredis — cache/session/queue), `gd` (intervention/image — avatars),
+`bcmath` (minishlink/web-push — VAPID ; `gmp` recommandée pour la perf), `zip`
+(maatwebsite/excel), `pdo_mysql`, `mbstring`, `curl`, `openssl`, `intl`,
+`fileinfo`, `json`, `tokenizer`, `xml`, `ctype`.
+```bash
+sudo apt-get install -y php8.4-redis php8.4-gd php8.4-bcmath php8.4-zip \
+  php8.4-intl php8.4-mbstring php8.4-curl php8.4-xml php8.4-gmp
+```
+> `deploy.sh` **n'installe pas** ces paquets (besoin de sudo, spécifique à l'OS) :
+> il **échoue rapidement** avec la liste des manquants, avant toute mise hors
+> ligne, si un prérequis n'est pas satisfait.
 
 Processus longs à superviser en production :
 - `php artisan horizon` (files) ;

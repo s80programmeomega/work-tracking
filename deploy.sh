@@ -72,6 +72,76 @@ if [ "${APP_ENV:-}" != "production" ]; then
   warn "APP_ENV n'est pas 'production' (= ${APP_ENV:-vide}). Poursuite quand même."
 fi
 
+# ── 0bis. Préflight : exigences de paquets (échec rapide AVANT toute action) ───
+# On vérifie les prérequis ici, hors mode maintenance, pour qu'un environnement
+# incomplet échoue proprement sans jamais mettre l'application hors ligne.
+log "Préflight — vérification des prérequis (paquets backend & frontend)"
+PREFLIGHT_FAIL=0
+
+# Binaires requis.
+for bin in "$PHP" "$COMPOSER" "$NPM" git; do
+  if command -v "$bin" >/dev/null 2>&1; then ok "binaire présent : $bin"
+  else echo "  ✗ binaire manquant : $bin"; PREFLIGHT_FAIL=1; fi
+done
+
+# Versions minimales (info).
+ok "PHP $("$PHP" -r 'echo PHP_VERSION;' 2>/dev/null)  |  Node $("$NPM" --version 2>/dev/null | sed 's/^/v/' >/dev/null; node -v 2>/dev/null || echo '?')"
+
+# Extensions PHP requises par le code/les paquets.
+#   redis(phpredis)→cache/queue/session · gd→intervention/image (avatars)
+#   bcmath→minishlink/web-push (VAPID) · zip→maatwebsite/excel · pdo_mysql→DB
+#   + extensions standard du framework.
+REQUIRED_EXT=(redis gd bcmath zip pdo_mysql mbstring curl openssl intl fileinfo json tokenizer xml ctype)
+MISSING_EXT=()
+for ext in "${REQUIRED_EXT[@]}"; do
+  "$PHP" -m 2>/dev/null | grep -qiE "^${ext}$" || MISSING_EXT+=("$ext")
+done
+if [ "${#MISSING_EXT[@]}" -eq 0 ]; then
+  ok "extensions PHP requises présentes (${#REQUIRED_EXT[@]})"
+else
+  echo "  ✗ extensions PHP manquantes : ${MISSING_EXT[*]}"
+  echo "    (ex: sudo apt-get install -y php-redis php-gd php-bcmath php-zip php-intl)"
+  PREFLIGHT_FAIL=1
+fi
+# gmp : recommandée (web-push plus rapide). Avertissement seulement.
+"$PHP" -m 2>/dev/null | grep -qiE "^gmp$" || warn "ext gmp absente — Web Push fonctionne via bcmath mais gmp est recommandée (perf)."
+
+# Service Redis joignable (cache/session/queue en dépendent).
+REDIS_HOST_V="$("$PHP" artisan tinker --no-interaction --execute='echo config("database.redis.default.host");' 2>/dev/null | tail -1)"
+REDIS_PORT_V="$("$PHP" artisan tinker --no-interaction --execute='echo config("database.redis.default.port");' 2>/dev/null | tail -1)"
+if command -v redis-cli >/dev/null 2>&1; then
+  if [ "$(redis-cli -h "${REDIS_HOST_V:-127.0.0.1}" -p "${REDIS_PORT_V:-6379}" ping 2>/dev/null)" = "PONG" ]; then
+    ok "Redis joignable (${REDIS_HOST_V:-127.0.0.1}:${REDIS_PORT_V:-6379})"
+  else
+    echo "  ✗ Redis injoignable (${REDIS_HOST_V:-127.0.0.1}:${REDIS_PORT_V:-6379}) — requis pour cache/session/queue."; PREFLIGHT_FAIL=1
+  fi
+else
+  warn "redis-cli absent — impossible de tester Redis (vérifiez le service manuellement)."
+fi
+
+# Typesense joignable si la recherche l'utilise.
+SCOUT_DRV="$("$PHP" artisan tinker --no-interaction --execute='echo config("scout.driver");' 2>/dev/null | tail -1)"
+if [ "$SCOUT_DRV" = "typesense" ]; then
+  TS_HOST="$("$PHP" artisan tinker --no-interaction --execute='echo config("scout.typesense.client-settings.nodes.0.host");' 2>/dev/null | tail -1)"
+  TS_PORT="$("$PHP" artisan tinker --no-interaction --execute='echo config("scout.typesense.client-settings.nodes.0.port");' 2>/dev/null | tail -1)"
+  if curl -fsS --max-time 5 "http://${TS_HOST:-localhost}:${TS_PORT:-8108}/health" >/dev/null 2>&1; then
+    ok "Typesense joignable (${TS_HOST:-localhost}:${TS_PORT:-8108})"
+  else
+    warn "Typesense (${TS_HOST:-localhost}:${TS_PORT:-8108}) injoignable — la recherche sera dégradée jusqu'à sa disponibilité."
+  fi
+fi
+
+# package.json doit exposer un script 'build'.
+if grep -q '"build"' package.json 2>/dev/null; then ok "script frontend 'build' présent"
+else echo "  ✗ script 'build' absent de package.json."; PREFLIGHT_FAIL=1; fi
+
+if [ "$PREFLIGHT_FAIL" -ne 0 ]; then
+  echo ""
+  echo "❌ Préflight échoué — prérequis manquants. Déploiement interrompu (application intacte)."
+  exit 1
+fi
+ok "Préflight OK"
+
 # ── 1. Récupérer le code ──────────────────────────────────────────────────────
 if [ "$SKIP_GIT" != "1" ]; then
   log "Récupération du code (branche $BRANCH)"
