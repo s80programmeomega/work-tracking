@@ -253,6 +253,8 @@ const disableTotp = async () => {
     await api.delete('/user/two-factor-authentication')
     recoveryCodes.value = []
     await authStore.fetchUser()
+    // Le backend désactive aussi l'OTP email avec le TOTP — refléter l'état local.
+    emailOtpEnabled.value = authStore.user?.email_otp_enabled ?? false
   } catch {
     // Ignore
   } finally {
@@ -291,7 +293,7 @@ const toggleEmailOtp = async (enabled) => {
   emailOtpError.value = ''
   emailOtpLoading.value = true
   try {
-    const res = await api.post('/api/auth/email-otp-toggle', { enabled })
+    const res = await api.post('/auth/email-otp-toggle', { enabled })
     emailOtpEnabled.value = res.data.email_otp_enabled
   } catch (err) {
     emailOtpError.value = err.response?.data?.message ?? t('auth.mfa.email_otp_requires_totp')

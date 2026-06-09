@@ -312,4 +312,27 @@ class MfaTest extends TestCase
             ->assertOk()
             ->assertJsonPath('email_otp_enabled', true);
     }
+
+    /**
+     * Régression : /auth/me doit exposer l'état MFA (sans le secret) pour que le
+     * front affiche le bouton de désactivation et l'activation de l'OTP email.
+     *
+     * @test
+     */
+    public function me_endpoint_exposes_mfa_state_without_secret(): void
+    {
+        $user = User::factory()->create([
+            'is_active' => true,
+            'two_factor_confirmed_at' => now(),
+            'email_otp_enabled' => true,
+        ]);
+
+        $response = $this->actingAs($user)->getJson('/api/auth/me')->assertOk();
+
+        $response->assertJsonPath('data.email_otp_enabled', true);
+        $this->assertNotNull($response->json('data.two_factor_confirmed_at'));
+        // Le secret et les codes de récupération ne doivent JAMAIS être exposés.
+        $response->assertJsonMissingPath('data.two_factor_secret');
+        $response->assertJsonMissingPath('data.two_factor_recovery_codes');
+    }
 }
