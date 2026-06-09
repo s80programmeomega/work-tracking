@@ -221,6 +221,29 @@ Deep security + performance sweep. Findings below with **before → after**.
 > `admin-lte` (pdfmake, summernote, bootstrap-colorpicker, filterizr, date-fns, fontawesome)
 > are **never imported in JS** (AdminLTE is used via CSS only) → not bundled. No action.
 
+### P4 — Backend: `DashboardController::index` N+1 + redundant queries — FIXED (HIGH)
+- **Before:** the dashboard endpoint (the most-hit authenticated page) issued **74 queries**
+  per request. Profiled via `DB::listen`. Three causes:
+  1. `getMonthlyProgress` recomputed the **month-invariant** `projetIds`/`activiteIds` inside
+     each of the 6 monthly iterations (≈10 redundant queries), and ran **18** separate
+     per-month `count()` queries (3 metrics × 6 months).
+  2. `getRecentProjects` lazy-loaded `responsable` + `members()->count()` + a tasks query
+     **per project**, and `getUrgentTasks`/`myTasks` lazy-loaded `assignees` + `activite.projet`
+     **per task** → a 16× single-user `select … where id = ?` N+1.
+- **Fixes:**
+  1. Hoisted the invariant ID sets out of the monthly loop (compute once).
+  2. Collapsed the 18 per-month counts into **3 `GROUP BY DATE_FORMAT(…,'%Y-%m')`** queries
+     over the whole 6-month window, then bucketed by `Y-m` key. **Equivalence verified**:
+     old per-month logic and new grouped logic produce identical counts on real data.
+  3. Eager-loaded `responsable`/`activites` + `withCount('members')` on `$projets`, and
+     `activite.projet` + `assignees` on `$taches`, so the helper maps read from memory.
+- **After:** **74 → 34 queries (−54%)** for the dashboard, HTTP 200, identical output.
+  Verified via `DB::listen` + an old-vs-new equivalence check. Pint + Larastan clean;
+  32 dashboard-adjacent tests green.
+  - *Note (DB):* the grouped query uses MySQL `DATE_FORMAT` (app + test DB are both MySQL).
+  - *Remaining (not pursued):* `getRecentProjects` still runs one tasks query per recent
+    project (≤3) — minor; a deeper restructure for marginal gain.
+
 ## Performance — audited, clean (no action)
 
 - **Unbounded-list / pagination:** real list endpoints use `->paginate()` (19 call sites).

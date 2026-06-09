@@ -11,6 +11,7 @@ use App\Models\Tache;
 use App\Models\User;
 use App\Models\Workspace;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Spatie\Permission\Models\Role;
 
 class DashboardController extends Controller
@@ -38,7 +39,11 @@ class DashboardController extends Controller
 
         // Projets avec filtres
         $projetsQuery = Projet::accessibleBy($user->id)
-            ->whereIn('workspace_id', $workspaceIds);
+            ->whereIn('workspace_id', $workspaceIds)
+            // Perf : eager-load des relations lues par les helpers (évite des N+1
+            // sur responsable/activites/membres dans getRecentProjects).
+            ->with(['responsable:id,nom,prenom', 'activites:id,projet_id'])
+            ->withCount('members');
 
         // Filtre par statut de projet
         if ($projectStatus) {
@@ -50,7 +55,10 @@ class DashboardController extends Controller
 
         // Tâches avec filtres
         $activiteIds = Activite::whereIn('projet_id', $projetIds)->pluck('id');
-        $tachesQuery = Tache::whereIn('activite_id', $activiteIds);
+        // Perf : eager-load activite.projet + assignees (lus par getUrgentTasks /
+        // myTasks) pour éviter les N+1 par tâche.
+        $tachesQuery = Tache::whereIn('activite_id', $activiteIds)
+            ->with(['activite:id,projet_id,nom', 'activite.projet:id,nom,code', 'assignees:id,nom_complet']);
 
         // Filtre par membre assigné
         if ($memberId) {
@@ -166,38 +174,52 @@ class DashboardController extends Controller
     private function getMonthlyProgress($user)
     {
         $workspaceIds = Workspace::accessibleBy($user->id)->pluck('id');
-        $months = [];
 
+        // Perf : ces ensembles d'IDs ne dépendent PAS du mois — on les calcule
+        // UNE fois au lieu de les recharger à chaque itération (évitait 12 requêtes
+        // redondantes sur 6 mois).
+        $projetIds = Projet::accessibleBy($user->id)
+            ->whereIn('workspace_id', $workspaceIds)
+            ->pluck('id');
+        $activiteIds = Activite::whereIn('projet_id', $projetIds)->pluck('id');
+
+        $start = now()->subMonths(5)->startOfMonth();
+        $end = now()->endOfMonth();
+
+        // Perf : 3 requêtes GROUPÉES par mois sur toute la fenêtre (au lieu de
+        // 18 comptes mois par mois). On agrège ensuite par clé "Y-m".
+        $countByMonth = function ($query) use ($start, $end): Collection {
+            return $query
+                ->whereBetween('created_at', [$start, $end])
+                ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as ym, COUNT(*) as total")
+                ->groupBy('ym')
+                ->pluck('total', 'ym');
+        };
+
+        $projetsByMonth = $countByMonth(
+            Projet::accessibleBy($user->id)->whereIn('workspace_id', $workspaceIds)
+        );
+        $tachesByMonth = $countByMonth(
+            Tache::query()->whereIn('activite_id', $activiteIds)
+        );
+        // Complétées : groupées par date de fin réelle (et non de création).
+        $completesByMonth = Tache::whereIn('activite_id', $activiteIds)
+            ->where('statut', TacheStatut::TERMINE)
+            ->whereBetween('date_fin_reelle', [$start, $end])
+            ->selectRaw("DATE_FORMAT(date_fin_reelle, '%Y-%m') as ym, COUNT(*) as total")
+            ->groupBy('ym')
+            ->pluck('total', 'ym');
+
+        $months = [];
         for ($i = 5; $i >= 0; $i--) {
             $date = now()->subMonths($i);
-            $startOfMonth = $date->copy()->startOfMonth();
-            $endOfMonth = $date->copy()->endOfMonth();
-
-            $projets = Projet::accessibleBy($user->id)
-                ->whereIn('workspace_id', $workspaceIds)
-                ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
-                ->count();
-
-            $projetIds = Projet::accessibleBy($user->id)
-                ->whereIn('workspace_id', $workspaceIds)
-                ->pluck('id');
-
-            $activiteIds = Activite::whereIn('projet_id', $projetIds)->pluck('id');
-
-            $taches = Tache::whereIn('activite_id', $activiteIds)
-                ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
-                ->count();
-
-            $completes = Tache::whereIn('activite_id', $activiteIds)
-                ->where('statut', TacheStatut::TERMINE)
-                ->whereBetween('date_fin_reelle', [$startOfMonth, $endOfMonth])
-                ->count();
+            $key = $date->format('Y-m');
 
             $months[] = [
                 'month' => $date->locale('fr')->isoFormat('MMM'),
-                'projets' => $projets,
-                'taches' => $taches,
-                'completes' => $completes,
+                'projets' => (int) ($projetsByMonth[$key] ?? 0),
+                'taches' => (int) ($tachesByMonth[$key] ?? 0),
+                'completes' => (int) ($completesByMonth[$key] ?? 0),
             ];
         }
 
@@ -277,7 +299,7 @@ class DashboardController extends Controller
                     'progress' => $projet->progression,
                     'status' => $projet->status,
                     'due_date' => $projet->date_fin?->format('d M Y'),
-                    'team' => $projet->members()->count(),
+                    'team' => $projet->members_count ?? $projet->members()->count(),
                     'tasks' => [
                         'total' => $taches->count(),
                         'completed' => $taches->where('statut', TacheStatut::TERMINE)->count(),
