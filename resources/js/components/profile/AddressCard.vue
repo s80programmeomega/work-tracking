@@ -148,9 +148,13 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useToast } from 'vue-toastification'
 import Modal from './Modal.vue'
+import { useUsers } from '../../composables/useUsers'
 
 const { t } = useI18n()
+const toast = useToast()
+const { updateProfile } = useUsers()
 
 const props = defineProps({
   user: {
@@ -167,7 +171,7 @@ const isProfileAddressModal = ref(false)
 const formData = ref({
   adresse: '',
   language: 'fr',
-  timezone: 'UTC'
+  timezone: 'UTC',
 })
 
 // Watch for user changes and populate form
@@ -179,11 +183,21 @@ watch(() => props.user, (newUser) => {
   }
 }, { immediate: true })
 
-const saveProfile = () => {
-  // Implement save profile logic here
-  console.log('Profile saved', formData.value)
-  isProfileAddressModal.value = false
-  emit('refresh')
+const saveProfile = async () => {
+  try {
+    // Correctif : cette sauvegarde était un stub (console.log) — elle persiste
+    // désormais réellement via l'API.
+    await updateProfile({
+      adresse: formData.value.adresse,
+      language: formData.value.language,
+      timezone: formData.value.timezone,
+    })
+    toast.success(t('address_card.save_success'))
+    isProfileAddressModal.value = false
+    emit('refresh')
+  } catch (error) {
+    toast.error(error.response?.data?.message || t('address_card.save_error'))
+  }
 }
 </script>
 

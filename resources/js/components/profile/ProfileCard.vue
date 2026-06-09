@@ -91,18 +91,9 @@
       </div>
     </div>
     
-    <!-- Quick Actions -->
-    <div class="grid grid-cols-1 gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-4">
-      <button 
-        @click="openEditModal"
-        class="flex items-center justify-center gap-2 p-4 bg-white border border-gray-200 rounded-3 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-      >
-        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-        </svg>
-        <span>{{ $t('profile_card.action_edit') }}</span>
-      </button>
-
+    <!-- Quick Actions (l'édition se fait désormais en ligne dans les cartes ci-dessous ;
+         la photo de profil se change directement sur cette carte) -->
+    <div class="grid grid-cols-1 gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-3">
       <button
         @click="downloadProfile"
         class="flex items-center justify-center gap-2 p-4 bg-white border border-gray-200 rounded-3 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
@@ -134,21 +125,11 @@
       </button>
     </div>
   </div>
-
-  <!-- Edit Modal -->
-  <EditProfileModal 
-    v-if="showEditModal"
-    :user="user"
-    :initialData="formData"
-    @close="showEditModal = false"
-    @save="handleSaveProfile"
-  />
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import EditProfileModal from './EditProfileModal.vue'
 import { useUsers } from '@/composables/useUsers'
 import { useNotifications } from '@/composables/useNotifications'
  
@@ -166,7 +147,6 @@ const { t } = useI18n()
 const { updateProfile } = useUsers()
 const { showSuccess, showError } = useNotifications()
 
-const showEditModal = ref(false)
 const uploadingAvatar = ref(false)
 const avatarPreview = ref(null)
 const avatarInput = ref(null)
@@ -177,29 +157,6 @@ const avatarUrl = computed(() => {
   }
   return null
 })
-
-const formData = ref({
-  nom: '',
-  lastName: '',
-  email: '',
-  phone: '',
-  bio: '',
-  facebook: '',
-  twitter: '',
-  linkedin: '',
-  instagram: ''
-})
-
-watch(() => props.user, (newUser) => {
-  if (newUser) {
-    const names = newUser.nom?.split(' ') || []
-    formData.value.nom = names[0] || ''
-    formData.value.lastName = names.slice(1).join(' ') || ''
-    formData.value.email = newUser.email || ''
-    formData.value.phone = newUser.numero_telephone || ''
-    formData.value.bio = newUser.bio || ''
-  }
-}, { immediate: true })
 
 const handleAvatarChange = async (event) => {
   const file = event.target.files[0]
@@ -247,21 +204,6 @@ const handleAvatarChange = async (event) => {
     if (avatarInput.value) {
       avatarInput.value.value = ''
     }
-  }
-}
-
-const openEditModal = () => {
-  showEditModal.value = true
-}
-
-const handleSaveProfile = async (data) => {
-  try {
-    await updateProfile(data)
-    showSuccess(t('profile_card.profile_save_success'))
-    showEditModal.value = false
-    emit('refresh')
-  } catch (error) {
-    showError(error.response?.data?.message || t('profile_card.profile_save_error'))
   }
 }
 

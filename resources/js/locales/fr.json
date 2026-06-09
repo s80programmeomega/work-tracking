@@ -2170,6 +2170,7 @@
     "field_last_name": "Nom",
     "field_email": "Adresse email",
     "field_phone": "Téléphone",
+    "field_fonction": "Fonction",
     "field_bio": "Bio",
     "modal_title": "Éditer les informations personnelles",
     "modal_subtitle": "Mettez à jour les détails de vos informations.",
