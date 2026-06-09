@@ -16,10 +16,11 @@
 
 ## Current Session
 
-**Date:** 2026-06-08
-**Session goal:** Phase 9 — Payment gateway (MTN MoMo + Orange Money) wiring real payment into the Phase 8 subscription flow.
-**Branch:** `feature/phase9-payment-momo-orange` (from `jonas`)
-**Status:** 🚧 Built end-to-end (provider seam, webhook-confirmed activation, payment modal). 8 PaymentFlowTest (Http::fake, no network/secrets) + 51 with subscription suite, Pint + Larastan clean, build green. **Uncommitted** on the feature branch (whole Phase 9). Phase 8 (incl. refinements) already merged into `jonas` (`3820162`).
+**Date:** 2026-06-09
+**Session goal:** Phase 10 — deep security + performance hardening pass.
+**Branch:** `chore/hardening-pass` (from `jonas`) → **merged into `jonas` `6abe4fb`, pushed both remotes.**
+**Status:** ✅ **Phase 10 done & merged.** Security: composer 7/8 CVEs patched (incl. HIGH symfony/mime CRLF; 1 laravel CVE deferred → Laravel 11), npm 2 HIGH (`ws`) fixed, **CORS `*`+credentials → env-driven `CORS_ALLOWED_ORIGINS`**, F3 tight throttles (login/register 5/min, refresh 10/min, payment 6/min). Perf: **dashboard 74→34 queries, admin/workspaces 41→12, admin/stats 44→22** (N+1 fixes incl. `Plan::free()` memoization + `Workspace` appended-count accessors), **frontend app.js 1 MB→197 KB** (vendor splitting + lazy libs + one chart library). 771/772 tests (1 pre-existing SocialAuth ordering flake), Pint + Larastan clean, build green. Full before/after in `SECURITY_PERF_BASELINE.md` (P1–P5); deferred majors in `MAJOR_UPGRADES_PLAN.md`.
+**Phase 9** (Payment gateway) was completed + merged earlier (`106984f`): provider-agnostic seam, webhook-confirmed activation, MTN sandbox verified, Orange deferred (sandbox gated). Real-money go-live needs production merchant credentials (checklist in `TASK_PHASE9_TESTING.md`).
 
 ---
 
