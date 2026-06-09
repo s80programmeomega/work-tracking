@@ -50,3 +50,5 @@
 | [SECURITY_PERF_BASELINE.md](SECURITY_PERF_BASELINE.md) | Phase 0 findings + per-phase action items + Phase 10 hardening results |
 | [MAJOR_UPGRADES_PLAN.md](MAJOR_UPGRADES_PLAN.md) | Deferred breaking upgrades (Laravel 11, vite 8, admin-lte 4) |
 | [HELP_CENTER_PLAN.md](HELP_CENTER_PLAN.md) | Detailed spec for Phase 7 (Help Center) |
+
+**See also:** [docs/technical-fr/](../technical-fr/INDEX.md) — French technical documentation (architecture reference + developer guide) for the team/client.
