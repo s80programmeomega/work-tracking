@@ -113,23 +113,27 @@
         </p>
       </div>
 
-      <div v-if="recoveryCodes.length > 0" ref="codesRef" class="grid grid-cols-2 gap-1.5">
-        <code
-          v-for="code in recoveryCodes"
-          :key="code"
-          class="stagger-item text-xs font-mono bg-gray-100 dark:bg-gray-800 rounded px-2 py-1 text-gray-900 dark:text-white text-center"
-        >
-          {{ code }}
-        </code>
-      </div>
+      <transition name="collapse">
+        <div v-if="showCodes && recoveryCodes.length > 0">
+          <div ref="codesRef" class="collapse-inner grid grid-cols-2 gap-1.5">
+            <code
+              v-for="code in recoveryCodes"
+              :key="code"
+              class="stagger-item text-xs font-mono bg-gray-100 dark:bg-gray-800 rounded px-2 py-1 text-gray-900 dark:text-white text-center"
+            >
+              {{ code }}
+            </code>
+          </div>
+        </div>
+      </transition>
 
       <div class="flex gap-2">
         <button
-          @click="loadRecoveryCodes"
+          @click="toggleRecoveryCodes"
           :disabled="codesLoading"
           class="rounded-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-transparent px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 transition-colors"
         >
-          {{ recoveryCodes.length > 0 ? $t('auth.mfa.recovery_codes_title') : $t('auth.mfa.recovery_codes_title') }}
+          {{ showCodes ? $t('auth.mfa.recovery_codes_hide') : $t('auth.mfa.recovery_codes_show') }}
         </button>
         <button
           @click="regenerateCodes"
@@ -212,6 +216,7 @@ const codesLoading = ref(false)
 const emailOtpLoading = ref(false)
 const emailOtpError = ref('')
 const recoveryCodes = ref([])
+const showCodes = ref(false)
 
 const startTotpSetup = async () => {
   actionLoading.value = true
@@ -238,7 +243,11 @@ const confirmTotp = async () => {
     confirmCode.value = ''
     await authStore.fetchUser()
     emailOtpEnabled.value = authStore.user?.email_otp_enabled ?? false
+    // Juste après l'activation : on révèle les codes une fois (moment clé).
     await loadRecoveryCodes()
+    showCodes.value = true
+    await nextTick()
+    staggerCodes()
   } catch (err) {
     confirmError.value = err.response?.data?.message ?? t('auth.mfa.invalid_code')
   } finally {
@@ -252,6 +261,7 @@ const disableTotp = async () => {
   try {
     await api.delete('/user/two-factor-authentication')
     recoveryCodes.value = []
+    showCodes.value = false
     await authStore.fetchUser()
     // Le backend désactive aussi l'OTP email avec le TOTP — refléter l'état local.
     emailOtpEnabled.value = authStore.user?.email_otp_enabled ?? false
@@ -267,13 +277,26 @@ const loadRecoveryCodes = async () => {
   try {
     const res = await api.get('/user/two-factor-recovery-codes')
     recoveryCodes.value = res.data
-    await nextTick()
-    staggerCodes()
   } catch {
     // Ignore
   } finally {
     codesLoading.value = false
   }
+}
+
+// Le bouton « Codes de récupération » bascule l'affichage (transition collapse).
+// Les codes sont chargés à la première ouverture, puis l'animation stagger joue.
+const toggleRecoveryCodes = async () => {
+  if (showCodes.value) {
+    showCodes.value = false
+    return
+  }
+  if (recoveryCodes.value.length === 0) {
+    await loadRecoveryCodes()
+  }
+  showCodes.value = true
+  await nextTick()
+  staggerCodes()
 }
 
 const regenerateCodes = async () => {
@@ -282,6 +305,10 @@ const regenerateCodes = async () => {
   try {
     await api.post('/user/two-factor-recovery-codes')
     await loadRecoveryCodes()
+    // Révèle les nouveaux codes (l'utilisateur doit les noter).
+    showCodes.value = true
+    await nextTick()
+    staggerCodes()
   } catch {
     // Ignore
   } finally {

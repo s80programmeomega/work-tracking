@@ -73,6 +73,8 @@
       "confirm_btn": "Confirmer",
       "recovery_codes_title": "Codes de récupération",
       "recovery_codes_desc": "Conservez ces codes dans un endroit sûr. Chacun ne peut être utilisé qu'une seule fois pour accéder à votre compte si vous perdez votre appareil.",
+      "recovery_codes_show": "Afficher les codes de récupération",
+      "recovery_codes_hide": "Masquer les codes de récupération",
       "regenerate_codes": "Générer de nouveaux codes",
       "regenerate_warning": "La génération de nouveaux codes invalidera tous les codes existants.",
       "email_otp_title": "Code de vérification par email",
