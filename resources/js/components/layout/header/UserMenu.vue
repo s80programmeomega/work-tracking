@@ -5,8 +5,14 @@
             dusk="user-menu-toggle"
             @click.prevent="toggleDropdown"
         >
-            <span class="mr-3 overflow-hidden rounded-full h-11 w-11">
-                <img src="@images/user/owner.jpg" alt="User" />
+            <span class="mr-3 flex items-center justify-center overflow-hidden rounded-full h-11 w-11 bg-brand-500 text-white">
+                <img
+                    v-if="avatarUrl"
+                    :src="avatarUrl"
+                    :alt="userName"
+                    class="h-full w-full object-cover"
+                />
+                <span v-else class="text-sm font-semibold">{{ userInitials }}</span>
             </span>
 
             <span class="block mr-1 font-medium text-theme-sm">{{
@@ -91,6 +97,18 @@ const dropdownRef = ref(null);
 
 const userName = computed(() => user.value?.nom || "Utilisateur");
 const userEmail = computed(() => user.value?.email || "");
+
+// Avatar de l'utilisateur connecté (UserResource.avatar = avatar_url). À défaut,
+// on affiche les initiales — la navbar reflète ainsi la photo de profil mise à jour.
+const avatarUrl = computed(() => user.value?.avatar || null);
+const userInitials = computed(() => {
+    if (user.value?.initials) {
+        return user.value.initials;
+    }
+    const p = (user.value?.prenom || "").charAt(0);
+    const n = (user.value?.nom || "").charAt(0);
+    return (p + n).toUpperCase() || "U";
+});
 
 const menuItems = computed(() => [
     { href: "/profile", icon: UserCircleIcon, text: t('user_menu.edit_profile') },
