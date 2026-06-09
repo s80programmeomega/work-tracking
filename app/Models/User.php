@@ -465,6 +465,31 @@ class User extends Authenticatable
     }
 
     /**
+     * Garantit que current_workspace_id pointe vers un workspace accessible.
+     *
+     * Corrige le cas où un utilisateur (ex. collaborateur invité, ou propriétaire
+     * dont le pointeur n'a jamais été posé) appartient à >=1 workspace mais a
+     * current_workspace_id = null — ce qui le piégeait sur /workspaces/create.
+     * Choisit un workspace possédé en priorité, sinon un workspace membre.
+     * Ne fait rien s'il n'a aucun workspace (création légitimement requise).
+     */
+    public function ensureCurrentWorkspace(): ?int
+    {
+        if ($this->current_workspace_id !== null) {
+            return $this->current_workspace_id;
+        }
+
+        $workspaceId = $this->ownedWorkspaces()->value('id')
+            ?? $this->workspaces()->value('workspaces.id');
+
+        if ($workspaceId !== null) {
+            $this->forceFill(['current_workspace_id' => $workspaceId])->save();
+        }
+
+        return $workspaceId;
+    }
+
+    /**
      * Surcharge la relation notifications() du trait Notifiable pour utiliser
      * App\Models\Notification (indexable Scout) au lieu du DatabaseNotification
      * standard. Comme ce modèle étend DatabaseNotification, c'est un remplacement

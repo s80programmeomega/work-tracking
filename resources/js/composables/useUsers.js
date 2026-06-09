@@ -41,7 +41,21 @@ export function useUsers() {
     error.value = null
 
     try {
-      const response = await api.put('/users/profile', data)
+      // Les uploads de fichiers (avatar) passent en FormData : PHP ne parse PAS
+      // le multipart sur une vraie requête PUT. On envoie donc en POST avec
+      // method spoofing (_method=PUT) — la route POST /users/profile existe pour ça.
+      const isFormData = typeof FormData !== 'undefined' && data instanceof FormData
+      let response
+      if (isFormData) {
+        if (!data.has('_method')) {
+          data.append('_method', 'PUT')
+        }
+        response = await api.post('/users/profile', data, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        })
+      } else {
+        response = await api.put('/users/profile', data)
+      }
 
       // Update auth store
       if (response.data.data) {

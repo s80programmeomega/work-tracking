@@ -107,8 +107,13 @@ class AuthController extends Controller
 
     public function me(): JsonResponse
     {
+        $user = auth()->user();
+        // Backfill du workspace courant pour les sessions existantes (collaborateurs
+        // invités, comptes créés avant ce correctif) afin de ne pas les piéger.
+        $user->ensureCurrentWorkspace();
+
         return response()->json([
-            'data' => new UserResource(auth()->user()->load('roles', 'permissions')),
+            'data' => new UserResource($user->load('roles', 'permissions')),
         ]);
     }
 

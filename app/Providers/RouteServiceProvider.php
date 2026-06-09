@@ -34,6 +34,19 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
 
+        // Limiteur dédié au login : protège contre le brute-force sans piéger les
+        // utilisateurs légitimes. Clé = email + IP, donc les échecs d'un utilisateur
+        // ne bloquent pas les autres derrière la même IP (NAT/bureau). 10/min.
+        RateLimiter::for('login', function (Request $request) {
+            if (app()->environment('testing', 'dusk.local')) {
+                return Limit::none();
+            }
+
+            $email = (string) $request->input('email');
+
+            return Limit::perMinute(10)->by(mb_strtolower($email).'|'.$request->ip());
+        });
+
         $this->routes(function () {
             Route::middleware('api')
                 ->prefix('api')

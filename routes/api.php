@@ -54,8 +54,10 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->group(function () {
     // Limites dédiées sur les endpoints d'authentification (F3) : le throttle
     // global 60/min est trop large pour le login (cible n°1 de brute-force).
-    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
-    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+    // 'login' = limiteur nommé 10/min par (email + IP) — voir RouteServiceProvider :
+    // protège du brute-force sans piéger plusieurs utilisateurs derrière une même IP.
+    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:10,1');
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
     Route::post('/refresh', [AuthController::class, 'refresh'])->middleware('throttle:10,1');
 
     // Google OAuth — le redirect renvoie vers Google, le callback revient ici

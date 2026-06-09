@@ -60,6 +60,11 @@ class UserResource extends JsonResource
             'current_workspace_id' => $this->current_workspace_id,
             'last_login_at' => $this->last_login_at?->toISOString(),
             'email_verified_at' => $this->email_verified_at?->toISOString(),
+            // État MFA (non sensibles) : nécessaires au front pour afficher
+            // « confirmé », le bouton de désactivation et l'activation de l'OTP email.
+            // On n'expose JAMAIS two_factor_secret ni les codes de récupération.
+            'two_factor_confirmed_at' => $this->two_factor_confirmed_at?->toISOString(),
+            'email_otp_enabled' => (bool) $this->email_otp_enabled,
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
 

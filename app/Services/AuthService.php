@@ -61,6 +61,10 @@ class AuthService
             'last_login_ip' => request()->ip(),
         ]);
 
+        // Garantit un workspace courant si l'utilisateur en possède/membre d'un
+        // (évite de piéger un collaborateur invité sur /workspaces/create).
+        $user->ensureCurrentWorkspace();
+
         activity()
             ->performedOn($user)
             ->causedBy($user)

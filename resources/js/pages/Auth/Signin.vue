@@ -31,9 +31,9 @@
                                     <input
                                         v-model="mfaCode"
                                         type="text"
-                                        inputmode="numeric"
+                                        :inputmode="mfaType === 'recovery' ? 'text' : 'numeric'"
                                         pattern="[0-9a-zA-Z\-]*"
-                                        maxlength="20"
+                                        :maxlength="mfaType === 'recovery' ? 21 : 6"
                                         :placeholder="$t('auth.mfa.code_placeholder')"
                                         dusk="mfa-code-input"
                                         class="w-full rounded-3 border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"

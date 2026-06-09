@@ -85,4 +85,51 @@ class WorkspaceMembershipTest extends TestCase
 
         $this->assertFalse($workspace->isOwnerOrAdmin($collaborateur));
     }
+
+    /**
+     * Régression : un collaborateur invité (membre, mais current_workspace_id null)
+     * ne doit pas rester piégé sans workspace courant — ensureCurrentWorkspace() le
+     * pointe vers son workspace membre. Sinon le SPA le bloque sur /workspaces/create
+     * et il ne peut atteindre aucune page (ex. /profile).
+     */
+    public function test_ensure_current_workspace_backfills_member_pointer(): void
+    {
+        $owner = User::factory()->create();
+        $workspace = Workspace::factory()->create(['owner_id' => $owner->id]);
+
+        $collaborateur = User::factory()->create(['current_workspace_id' => null]);
+        $workspace->addMember($collaborateur, 'collaborateur');
+
+        $resolved = $collaborateur->ensureCurrentWorkspace();
+
+        $this->assertSame($workspace->id, $resolved);
+        $this->assertSame($workspace->id, $collaborateur->fresh()->current_workspace_id);
+    }
+
+    public function test_ensure_current_workspace_prefers_owned_workspace(): void
+    {
+        $user = User::factory()->create(['current_workspace_id' => null]);
+        $owned = Workspace::factory()->create(['owner_id' => $user->id]);
+
+        $this->assertSame($owned->id, $user->ensureCurrentWorkspace());
+    }
+
+    public function test_ensure_current_workspace_leaves_workspaceless_user_null(): void
+    {
+        $user = User::factory()->create(['current_workspace_id' => null]);
+
+        $this->assertNull($user->ensureCurrentWorkspace());
+        $this->assertNull($user->fresh()->current_workspace_id);
+    }
+
+    public function test_ensure_current_workspace_does_not_override_existing_pointer(): void
+    {
+        $owner = User::factory()->create();
+        $a = Workspace::factory()->create(['owner_id' => $owner->id]);
+        $b = Workspace::factory()->create(['owner_id' => $owner->id]);
+        $user = User::factory()->create(['current_workspace_id' => $b->id]);
+        $a->addMember($user, 'collaborateur');
+
+        $this->assertSame($b->id, $user->ensureCurrentWorkspace());
+    }
 }

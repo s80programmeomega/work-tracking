@@ -72,10 +72,12 @@ class Plan extends Model
         return $this->hasMany(Workspace::class, 'plan_id');
     }
 
-    /** Plans actifs (souscriptibles), triés par position. */
+    /** Plans actifs (souscriptibles), triés par prix croissant (puis position). */
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where('is_active', true)->orderBy('position');
+        return $query->where('is_active', true)
+            ->orderBy('price')
+            ->orderBy('position');
     }
 
     /**
