@@ -19,8 +19,8 @@
 | 6 — Global search (Typesense + Scout + search page) | [PHASE6_SEARCH_PLAN.md](PHASE6_SEARCH_PLAN.md) | ✅ Merged | `feature/phase6-search` |
 | 7 — Help Center (reader + author, no AI) | [HELP_CENTER_PLAN.md](HELP_CENTER_PLAN.md) | ✅ Merged | `feature/phase7-help-center` |
 | 8 — Subscription plans + payment gate | *(within README.md)* | 🚧 In progress | `feature/phase8-subscription-plans` |
-| 9 — Payment gateway (MTN MoMo + Orange Money) | *(within README.md)* | 🚧 In progress | `feature/phase9-payment-momo-orange` |
-| 10 — Perf + security hardening | [SECURITY_PERF_BASELINE.md](SECURITY_PERF_BASELINE.md) | 🚧 In progress | `chore/hardening-pass` |
+| 9 — Payment gateway (MTN MoMo + Orange Money) | *(within README.md)* | ✅ Merged | `feature/phase9-payment-momo-orange` |
+| 10 — Perf + security hardening | [SECURITY_PERF_BASELINE.md](SECURITY_PERF_BASELINE.md) | ✅ Merged | `chore/hardening-pass` |
 
 ---
 
