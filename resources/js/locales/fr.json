@@ -2149,19 +2149,11 @@
     "stat_projects": "Projets",
     "stat_tasks": "Tâches",
     "stat_efficiency": "Efficacité",
-    "action_edit": "Modifier le profil",
-    "action_export": "Exporter données",
-    "action_share": "Partager profil",
-    "action_print": "Imprimer profil",
     "not_set": "Non renseigné",
     "avatar_invalid": "Veuillez sélectionner une image valide (JPG, PNG, GIF)",
     "avatar_too_large": "La taille de l'image ne doit pas dépasser 5 MB",
     "avatar_success": "Avatar mis à jour avec succès",
-    "avatar_error": "Erreur lors du téléchargement de l'avatar",
-    "profile_save_success": "Profil mis à jour avec succès",
-    "profile_save_error": "Erreur lors de la mise à jour",
-    "download_started": "Téléchargement démarré",
-    "link_copied": "Lien copié dans le presse-papier"
+    "avatar_error": "Erreur lors du téléchargement de l'avatar"
   },
   "personal_info": {
     "title": "Information Personnelle",

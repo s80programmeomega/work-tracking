@@ -2146,19 +2146,11 @@
     "stat_projects": "Projects",
     "stat_tasks": "Tasks",
     "stat_efficiency": "Efficiency",
-    "action_edit": "Edit profile",
-    "action_export": "Export data",
-    "action_share": "Share profile",
-    "action_print": "Print profile",
     "not_set": "Not provided",
     "avatar_invalid": "Please select a valid image (JPG, PNG, GIF)",
     "avatar_too_large": "Image size must not exceed 5 MB",
     "avatar_success": "Avatar updated successfully",
-    "avatar_error": "Error uploading avatar",
-    "profile_save_success": "Profile updated successfully",
-    "profile_save_error": "Error updating profile",
-    "download_started": "Download started",
-    "link_copied": "Link copied to clipboard"
+    "avatar_error": "Error uploading avatar"
   },
   "personal_info": {
     "title": "Personal Information",

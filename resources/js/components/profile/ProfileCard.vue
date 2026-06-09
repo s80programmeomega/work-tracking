@@ -90,40 +90,6 @@
         </div>
       </div>
     </div>
-    
-    <!-- Quick Actions (l'édition se fait désormais en ligne dans les cartes ci-dessous ;
-         la photo de profil se change directement sur cette carte) -->
-    <div class="grid grid-cols-1 gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-3">
-      <button
-        @click="downloadProfile"
-        class="flex items-center justify-center gap-2 p-4 bg-white border border-gray-200 rounded-3 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-      >
-        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-        <span>{{ $t('profile_card.action_export') }}</span>
-      </button>
-
-      <button
-        @click="shareProfile"
-        class="flex items-center justify-center gap-2 p-4 bg-white border border-gray-200 rounded-3 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-      >
-        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-        </svg>
-        <span>{{ $t('profile_card.action_share') }}</span>
-      </button>
-
-      <button
-        @click="printProfile"
-        class="flex items-center justify-center gap-2 p-4 bg-white border border-gray-200 rounded-3 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-      >
-        <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-        </svg>
-        <span>{{ $t('profile_card.action_print') }}</span>
-      </button>
-    </div>
   </div>
 </template>
 
@@ -207,23 +173,4 @@ const handleAvatarChange = async (event) => {
   }
 }
 
-const downloadProfile = () => {
-  showSuccess(t('profile_card.download_started'))
-}
-
-const shareProfile = () => {
-  if (navigator.share) {
-    navigator.share({
-      title: `${props.user.nom} - Profile`,
-      text: `Découvrez le profil de ${props.user.nom}`,
-      url: window.location.href,
-    })
-  } else {
-    showSuccess(t('profile_card.link_copied'))
-  }
-}
-
-const printProfile = () => {
-  window.print()
-}
 </script>
