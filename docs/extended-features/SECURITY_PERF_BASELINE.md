@@ -202,15 +202,19 @@ Deep security + performance sweep. Findings below with **before → after**.
 - **Verified:** `/line-chart` renders ApexCharts (`apexcharts-canvas` present, no JS errors)
   after the global registration was removed; `npm run build` green.
 
-### P3 — Chart.js `/auto` kitchen-sink import — FIXED (LOW-MED)
-- **Before:** `Dashboard.vue` (the landing route `/`) did `import Chart from 'chart.js/auto'`,
-  which registers **every** Chart.js controller, scale and element — pulling the whole library
-  into the `vendor` chunk even though the page draws a single line chart.
-- **Fix:** import from `'chart.js'` and `Chart.register(...)` only the pieces used
-  (`LineController, LineElement, PointElement, LinearScale, CategoryScale, Filler, Legend,
-  Tooltip`), letting Rollup tree-shake the rest (bar/pie/radar/time-scale/etc.).
-- **After:** `vendor` chunk 620,592 → 574,792 bytes (−46 KB). Verified: dashboard chart still
-  renders (`canvas` drawn, no JS errors). `npm run build` green.
+### P3 — Two charting libraries → consolidated to one (ApexCharts) — FIXED (MEDIUM)
+- **Before:** the app shipped **two** charting libraries — ApexCharts (5 components) **and**
+  Chart.js (1 chart on `Dashboard.vue`, the landing route). Dashboard originally used
+  `import Chart from 'chart.js/auto'` (kitchen-sink: every controller/scale).
+- **Fix (two steps):**
+  1. First trimmed `chart.js/auto` → explicit `Chart.register(...)` of only used pieces
+     (vendor 620,592 → 574,792).
+  2. Then **rewrote the Dashboard line chart to ApexCharts** (3-series area, smooth fill,
+     dark-mode-aware colors; built-in legend off since the template has a custom one) and
+     **removed `chart.js` entirely** (`npm remove chart.js`).
+- **After:** `vendor` chunk 620,592 → **412,773 bytes (−208 KB total)**; one charting library
+  app-wide. Verified: Dashboard renders the ApexCharts area chart
+  (`apexcharts-canvas` + 3 area series, no JS errors). `npm run build` green.
 
 > **Icon imports audited clean:** `@heroicons` (44 files) and `lucide-vue-next` (4) are
 > imported **by name** → tree-shaken (only used icons ship). Heavy transitive libs of

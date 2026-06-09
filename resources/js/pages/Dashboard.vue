@@ -185,7 +185,13 @@
                 </div>
               </div>
               <div class="h-80">
-                <canvas ref="monthlyChart"></canvas>
+                <VueApexCharts
+                  v-if="monthlySeries.length && monthlySeries[0].data.length"
+                  type="area"
+                  height="100%"
+                  :options="monthlyChartOptions"
+                  :series="monthlySeries"
+                />
               </div>
             </div>
           </div>
@@ -294,21 +300,8 @@ import { ref, onMounted, nextTick, computed, onBeforeUnmount, markRaw } from 'vu
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import api from '@/api/axios'
-// Perf : import minimal de Chart.js (au lieu de 'chart.js/auto' qui embarque
-// TOUS les contrôleurs/échelles). On n'enregistre que ce que ce graphique
-// « line + fill » utilise, ce qui permet le tree-shaking du reste.
-import {
-  Chart,
-  LineController,
-  LineElement,
-  PointElement,
-  LinearScale,
-  CategoryScale,
-  Filler,
-  Legend,
-  Tooltip,
-} from 'chart.js'
-Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Filler, Legend, Tooltip)
+// Graphiques : ApexCharts (librairie unique de l'application ; Chart.js supprimé).
+import VueApexCharts from 'vue3-apexcharts'
 import AdminLayout from '../components/layout/AdminLayout.vue'
 import KanbanColumn from './dashboard/KanbanColumn.vue' 
 import {
@@ -577,64 +570,43 @@ const memberInitials = (member) => {
 }
 
 // Gestion des charts
-const monthlyChart = ref(null)
-let monthlyChartInstance = null
+// Graphique mensuel (ApexCharts) — données réactives. La légende custom du
+// template (chartLegends) est conservée ; la légende intégrée est désactivée.
+const monthlySeries = ref([])
+const monthlyChartOptions = ref({})
+
 const createCharts = () => {
-  if (monthlyChartInstance) monthlyChartInstance.destroy()
-  if (monthlyChart.value && dashboardData.value.monthly_progress?.length) {
-    const isDark = document.documentElement.classList.contains('dark')
-    const textColor = isDark ? '#d1d5db' : '#4b5563'
-    const gridColor = isDark ? '#374151' : '#e5e7eb'
+  const rows = dashboardData.value.monthly_progress ?? []
+  if (! rows.length) {
+    monthlySeries.value = []
+    return
+  }
 
+  const isDark = document.documentElement.classList.contains('dark')
+  const textColor = isDark ? '#d1d5db' : '#4b5563'
+  const gridColor = isDark ? '#374151' : '#e5e7eb'
 
-    monthlyChartInstance = new Chart(monthlyChart.value, {
-      type: 'line',
-      data: {
-        labels: dashboardData.value.monthly_progress.map(d => d.month),
-        datasets: [
-          {
-            label: 'Projets',
-            data: dashboardData.value.monthly_progress.map(d => d.projets),
-            borderColor: '#6366f1',
-            backgroundColor: '#6366f120',
-            borderWidth: 3,
-            tension: 0.4,
-            fill: true
-          },
-          {
-            label: 'Tâches totales',
-            data: dashboardData.value.monthly_progress.map(d => d.taches),
-            borderColor: '#f59e0b',
-            backgroundColor: '#f59e0b20',
-            borderWidth: 3,
-            tension: 0.4,
-            fill: true
-          },
-          {
-            label: 'Complétées',
-            data: dashboardData.value.monthly_progress.map(d => d.completes),
-            borderColor: '#10b981',
-            backgroundColor: '#10b98120',
-            borderWidth: 3,
-            tension: 0.4,
-            fill: true
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            labels: { color: textColor }
-          }
-        },
-        scales: {
-          x: { grid: { color: gridColor }, ticks: { color: textColor } },
-          y: { grid: { color: gridColor }, ticks: { color: textColor } }
-        }
-      }
-    })
+  monthlySeries.value = [
+    { name: 'Projets', data: rows.map(d => d.projets), color: '#6366f1' },
+    { name: 'Tâches totales', data: rows.map(d => d.taches), color: '#f59e0b' },
+    { name: 'Complétées', data: rows.map(d => d.completes), color: '#10b981' },
+  ]
+
+  monthlyChartOptions.value = {
+    chart: { type: 'area', toolbar: { show: false }, fontFamily: 'inherit' },
+    stroke: { curve: 'smooth', width: 3 },
+    fill: { type: 'gradient', gradient: { opacityFrom: 0.3, opacityTo: 0.05 } },
+    dataLabels: { enabled: false },
+    legend: { show: false }, // légende custom dans le template
+    grid: { borderColor: gridColor },
+    xaxis: {
+      categories: rows.map(d => d.month),
+      labels: { style: { colors: textColor } },
+      axisBorder: { color: gridColor },
+      axisTicks: { color: gridColor },
+    },
+    yaxis: { labels: { style: { colors: textColor } } },
+    tooltip: { theme: isDark ? 'dark' : 'light' },
   }
 }
 // Écoute des changements depuis la sidebar
@@ -671,9 +643,7 @@ onBeforeUnmount(() => {
   if (unsubscribeWorkspace) {
     unsubscribeWorkspace()
   }
-  if (monthlyChartInstance) {
-    monthlyChartInstance.destroy()
-  }
+  // Le composant ApexCharts gère sa propre destruction — rien à nettoyer ici.
 })
 </script>
 <style scoped>
