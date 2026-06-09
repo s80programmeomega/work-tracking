@@ -52,9 +52,11 @@ use Illuminate\Support\Facades\Route;
 
 // Public routes
 Route::prefix('auth')->group(function () {
-    Route::post('/register', [AuthController::class, 'register']);
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/refresh', [AuthController::class, 'refresh']);
+    // Limites dédiées sur les endpoints d'authentification (F3) : le throttle
+    // global 60/min est trop large pour le login (cible n°1 de brute-force).
+    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+    Route::post('/refresh', [AuthController::class, 'refresh'])->middleware('throttle:10,1');
 
     // Google OAuth — le redirect renvoie vers Google, le callback revient ici
     Route::get('/google/redirect', [SocialAuthController::class, 'redirectToGoogle'])->name('auth.google.redirect');
@@ -167,7 +169,9 @@ Route::middleware(['auth:sanctum', 'subscription.status'])->group(function () {
     // Paiement d'abonnement (Phase 9). Préfixe 'payment' EXEMPTÉ de subscription.status
     // (un workspace verrouillé/expiré doit pouvoir régler son abonnement).
     Route::prefix('payment')->name('payment.')->group(function () {
-        Route::post('/initiate', [PaymentController::class, 'initiate'])->name('initiate');
+        // Limite dédiée (F3) : chaque initiation déclenche un appel fournisseur + une
+        // collecte ; on borne pour éviter abus/spam de prompts de paiement.
+        Route::post('/initiate', [PaymentController::class, 'initiate'])->name('initiate')->middleware('throttle:6,1');
         Route::get('/{reference}/status', [PaymentController::class, 'status'])->name('status');
     });
 

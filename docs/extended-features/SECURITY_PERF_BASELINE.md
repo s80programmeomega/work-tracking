@@ -107,3 +107,181 @@ Covered by F1 item 2 (schedule `sanctum:prune-expired`). No separate action.
 | 6 (Search) | Workspace-scope every query + manager+ gate; no cross-workspace/below-manager leakage |
 | 9 (Payments) | Webhook signature/IP verification + idempotency + replay protection; no secrets in repo; dedicated `/security-review` pre-merge |
 | 10 | Everything under "Deferred" above |
+
+---
+
+# Phase 10 — Hardening Pass Results (2026-06-08, branch `chore/hardening-pass`)
+
+Deep security + performance sweep. Findings below with **before → after**.
+
+## Security — fixed
+
+### S1 — Dependency CVEs (composer) — FIXED (7 of 8)
+- **Before:** `composer audit` = 8 advisories / 5 packages — **1 HIGH** (`symfony/mime`
+  CVE-2026-45067, email-header/SMTP CRLF injection), 3 medium, 4 low.
+- **Fix:** `composer update` within Laravel 10 constraints —
+  `symfony/mime` 6.4.37→6.4.41 (the HIGH), `symfony/http-foundation` →6.4.41,
+  `symfony/mailer` →6.4.40, `symfony/routing` →6.4.41, `symfony/yaml` 7.4.10→7.4.13,
+  `symfony/polyfill-intl-idn` 1.37→1.38.1.
+- **After:** **1 advisory left** — `laravel/framework` CVE-2026-48019 (CRLF in the default
+  `email` validation rule). Patch is **not reachable within `^10`** → requires a Laravel
+  10→11 major upgrade. **Deferred** (out of the approved no-major-bump scope). Low practical
+  risk here (exploitable only if untrusted input flows through that rule into a mail header).
+- Verified: full suite **771/772** (the 1 failure is a pre-existing SocialAuth ordering
+  flake — passes 3/3 in isolation; unrelated to the bumps).
+
+### S2 — Dependency CVEs (npm) — FIXED (high-sev), majors deferred
+- **Before:** `npm audit` = 11 vulns (9 moderate, **2 high**); high-sev in the
+  `ws`/`engine.io-client`/`socket.io-client` chain (via `laravel-echo`).
+- **Fix:** `npm audit fix` (non-breaking) — `ws` 8.18.3→8.20.1; both **highs cleared**.
+- **After:** 5 moderate left, fixable only via `npm audit fix --force` (breaking majors:
+  `vite@8` from esbuild, `admin-lte@4` from summernote). **Deferred** — separate migration.
+- Verified: `npm run build` green.
+
+### S3 — CORS: wildcard origin with credentials — FIXED (MEDIUM/HIGH)
+- **Before:** `config/cors.php` had `'allowed_origins' => ['*']` **with**
+  `'supports_credentials' => true`. This combo lets **any** website make credentialed
+  (cookie/auth) requests to the API — weakens CSRF posture for the SPA + Sanctum setup.
+- **Fix:** `allowed_origins` is now **env-driven** — `CORS_ALLOWED_ORIGINS` (comma-separated),
+  fallback to `APP_URL`. No more `*`.
+- **Deploy note:** production `.env` MUST set `CORS_ALLOWED_ORIGINS` to the real frontend
+  domain(s); otherwise CORS blocks the app (intended).
+
+### S4 — F3: sensitive auth/payment endpoints lacked dedicated rate limits — FIXED (LOW→MED)
+- **Before:** `/auth/login`, `/auth/register`, `/auth/refresh`, `/payment/initiate` relied on
+  the global `throttle:60,1` only (login = prime brute-force target). (2FA endpoints were
+  already tight.)
+- **Fix:** dedicated throttles — `login` & `register` `5,1`; `refresh` `10,1`;
+  `payment/initiate` `6,1`.
+
+## Security — verified already-sound (no change needed)
+
+- **F1 (token expiry):** ✅ already fixed in Phase 1 — `login()` + `refreshToken()` both issue
+  7-day tokens (consistent with advertised `expires_at`); `sanctum:prune-expired --hours=24`
+  scheduled.
+- **Payment webhooks CSRF:** ✅ correct — public webhooks are on the stateless `api` group
+  (no `VerifyCsrfToken`, which is `web`-only), so provider POSTs work without tokens by design.
+- **Payment hard-lock (402) bypass:** ✅ sound — exempt prefixes (`auth`, `subscription`,
+  `payment`, `webhooks`, `user`) are exactly those a locked workspace must reach to pay/log
+  out; everything else is gated. No over-exemption.
+- **Webhook authenticity:** ✅ (Phase 9) — webhooks re-verify status via the provider API,
+  never trust the POST body; `confirm()` is idempotent (replay-safe).
+
+## Performance — fixed
+
+### P1 — N+1: `Plan::free()` queried repeatedly — FIXED (MEDIUM)
+- **Before:** `SubscriptionService::summary()` issued **5 queries**, of which **4 were the
+  identical** `select * from plans where is_free=1 limit 1` (one in `effectivePlan` + 3 in
+  `planLimit`). `AdminController::workspaces` calls `summary()` **per row** → a 20-row page
+  did **~80 redundant free-plan queries**.
+- **Fix:** request-scoped memoization of `Plan::free()` (static cache + `forgetFreeCache()`,
+  busted on `Plan` save/delete via `booted()`).
+- **After:** `summary()` = **2 queries** (cold) / **1** (warm). Admin workspaces list:
+  ~80 free-plan queries → **~1**. Verified via `DB::listen`.
+
+### P2 — Frontend bundle: 1 MB `app.js` loaded on every page — FIXED (MEDIUM)
+- **Before:** the entry `app-*.js` was **1,056,562 bytes (~1.03 MB)** and loaded on **every**
+  page (blocking first paint). It bundled heavy libs registered globally in `app.js`:
+  `vue3-apexcharts` (~514 KB) via `app.use()`, plus global CSS for `swiper`, `jsvectormap`,
+  `flatpickr`. Vite had **no `manualChunks`** → all vendors lumped into one bundle.
+- **Fixes:**
+  1. Removed the global `app.use(VueApexCharts)` + top-level import — the 5 chart components
+     already `import VueApexCharts` locally (auto-registered via `<script setup>`), so charts
+     still render; ApexCharts now loads **only on chart pages**.
+  2. Removed dead/redundant global lib CSS from `app.js`: `swiper` (unused in the app),
+     `jsvectormap` (only an orphan component), `flatpickr` (already self-imported by its one
+     consumer `DefaultInputs.vue`).
+  3. Added `rollupOptions.output.manualChunks` in `vite.config.js` — split vendors into
+     cache-stable chunks: `vendor-vue`, `vendor-apexcharts`, `vendor-tiptap`,
+     `vendor-realtime` (echo/pusher/socket.io), `vendor-jsvectormap`, `vendor-flatpickr`,
+     `vendor`.
+- **After:** `app-*.js` = **201,469 bytes (~197 KB)** — an **81% reduction** of the
+  every-page bundle. Heavy libs load lazily with the routes/components that use them
+  (routes were already lazy via dynamic `import()`). Vendor chunks cache independently, so
+  an app code change no longer reinvalidates ~1.4 MB of library downloads.
+- **Verified:** `/line-chart` renders ApexCharts (`apexcharts-canvas` present, no JS errors)
+  after the global registration was removed; `npm run build` green.
+
+### P3 — Two charting libraries → consolidated to one (ApexCharts) — FIXED (MEDIUM)
+- **Before:** the app shipped **two** charting libraries — ApexCharts (5 components) **and**
+  Chart.js (1 chart on `Dashboard.vue`, the landing route). Dashboard originally used
+  `import Chart from 'chart.js/auto'` (kitchen-sink: every controller/scale).
+- **Fix (two steps):**
+  1. First trimmed `chart.js/auto` → explicit `Chart.register(...)` of only used pieces
+     (vendor 620,592 → 574,792).
+  2. Then **rewrote the Dashboard line chart to ApexCharts** (3-series area, smooth fill,
+     dark-mode-aware colors; built-in legend off since the template has a custom one) and
+     **removed `chart.js` entirely** (`npm remove chart.js`).
+- **After:** `vendor` chunk 620,592 → **412,773 bytes (−208 KB total)**; one charting library
+  app-wide. Verified: Dashboard renders the ApexCharts area chart
+  (`apexcharts-canvas` + 3 area series, no JS errors). `npm run build` green.
+
+> **Icon imports audited clean:** `@heroicons` (44 files) and `lucide-vue-next` (4) are
+> imported **by name** → tree-shaken (only used icons ship). Heavy transitive libs of
+> `admin-lte` (pdfmake, summernote, bootstrap-colorpicker, filterizr, date-fns, fontawesome)
+> are **never imported in JS** (AdminLTE is used via CSS only) → not bundled. No action.
+
+### P4 — Backend: `DashboardController::index` N+1 + redundant queries — FIXED (HIGH)
+- **Before:** the dashboard endpoint (the most-hit authenticated page) issued **74 queries**
+  per request. Profiled via `DB::listen`. Three causes:
+  1. `getMonthlyProgress` recomputed the **month-invariant** `projetIds`/`activiteIds` inside
+     each of the 6 monthly iterations (≈10 redundant queries), and ran **18** separate
+     per-month `count()` queries (3 metrics × 6 months).
+  2. `getRecentProjects` lazy-loaded `responsable` + `members()->count()` + a tasks query
+     **per project**, and `getUrgentTasks`/`myTasks` lazy-loaded `assignees` + `activite.projet`
+     **per task** → a 16× single-user `select … where id = ?` N+1.
+- **Fixes:**
+  1. Hoisted the invariant ID sets out of the monthly loop (compute once).
+  2. Collapsed the 18 per-month counts into **3 `GROUP BY DATE_FORMAT(…,'%Y-%m')`** queries
+     over the whole 6-month window, then bucketed by `Y-m` key. **Equivalence verified**:
+     old per-month logic and new grouped logic produce identical counts on real data.
+  3. Eager-loaded `responsable`/`activites` + `withCount('members')` on `$projets`, and
+     `activite.projet` + `assignees` on `$taches`, so the helper maps read from memory.
+- **After:** **74 → 34 queries (−54%)** for the dashboard, HTTP 200, identical output.
+  Verified via `DB::listen` + an old-vs-new equivalence check. Pint + Larastan clean;
+  32 dashboard-adjacent tests green.
+  - *Note (DB):* the grouped query uses MySQL `DATE_FORMAT` (app + test DB are both MySQL).
+  - *Remaining (not pursued):* `getRecentProjects` still runs one tasks query per recent
+    project (≤3) — minor; a deeper restructure for marginal gain.
+
+### P5 — Per-endpoint sweep: admin stats/workspaces N+1 + Workspace appended counts — FIXED (HIGH)
+- **Method:** static N+1 scan (ranked controllers by get/map vs with/withCount) + live
+  `DB::listen` query counts across the index/list endpoints.
+- **`admin/stats` 44 → 22 queries:**
+  - growth loop ran 14 `whereDate` counts (7 days × 2) → collapsed to **2 `GROUP BY DATE()`**
+    queries bucketed by day;
+  - `recentWorkspaces` map called `summary()` without member counts → added `withCount('members')`.
+- **`admin/workspaces` 41 → 12 queries (−71%):**
+  - **Root cause was model-level:** `Workspace::$appends = ['logo_url','member_count','projet_count']`
+    means **every** `toArray()` fired `getMemberCountAttribute` (`members()->count()`) +
+    `getProjetCountAttribute` (`projets()->count()`) → 2 queries per serialized workspace,
+    everywhere. Fixed the accessors to reuse `members_count`/`projets_count` from
+    `withCount(...)` when present (query fallback otherwise), and added
+    `withCount(['members','projets'])` to the controller.
+  - `SubscriptionService::summary()` also re-counted members per row → now reuses
+    `members_count` when eager-loaded.
+- **Correctness verified:** accessor counts == direct `count()` (member 10==10, projet 5==5);
+  fallback path (no withCount) still queries correctly. Larastan clean; 20 admin tests green.
+- **Sweep result:** other index endpoints profiled (documents, labels, comments,
+  notifications, users, roles) are already healthy (≤3 queries). The N+1s were concentrated
+  in the dashboard + admin stats/workspaces; all now fixed.
+
+## Performance — audited, clean (no action)
+
+- **Unbounded-list / pagination:** real list endpoints use `->paginate()` (19 call sites).
+  The `index() → ->get()` cases (AdminPlan, PushSubscription, SousTache, ProjetInvitation)
+  are naturally bounded or single-parent-scoped. **No `Model::all()` in any controller.**
+- **Dashboard `->get()` sets** are workspace/user-scoped (`accessibleBy`, `assignedTo`,
+  `whereIn($ids)`) — aggregates, not whole-table loads (confirms F2). Watch-item only for
+  very large single workspaces.
+
+## Deferred from Phase 10 (require separate, approved work)
+
+> Migration plan for the breaking bumps: **`MAJOR_UPGRADES_PLAN.md`**.
+
+- `laravel/framework` CVE-2026-48019 — needs Laravel 10→11 major upgrade.
+- npm `vite@8` + `admin-lte@4` major upgrades (breaking) — separate migration.
+- Phase 8 limit-enforcement gaps (addMember route unguarded, storage quota unenforced,
+  middleware-only enforcement) — see `testing/TASK_PHASE9_TESTING.md` "Known gaps".
+- Deeper perf (caching layer, Vue route lazy-loading, bundle-size reduction) — not pursued
+  this round; no blocking issue found.

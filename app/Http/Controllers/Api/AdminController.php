@@ -75,6 +75,7 @@ class AdminController extends Controller
 
         // 10 most recently created workspaces with owner info
         $recentWorkspaces = Workspace::with(['owner:id,nom,email'])
+            ->withCount('members')
             ->orderByDesc('created_at')
             ->limit(10)
             ->get()
@@ -88,14 +89,23 @@ class AdminController extends Controller
                 'subscription' => $this->subscriptionService->summary($w),
             ]);
 
-        // Growth data: new workspaces + users per day for last 7 days
-        $growth = collect(range(6, 0))->map(function (int $daysAgo) {
+        // Growth data: new workspaces + users per day for last 7 days.
+        // Perf : 2 requêtes GROUPÉES par jour (au lieu de 14 comptes jour par jour).
+        $since = now()->subDays(6)->startOfDay();
+        $wsByDay = Workspace::where('created_at', '>=', $since)
+            ->selectRaw('DATE(created_at) as d, COUNT(*) as total')
+            ->groupBy('d')->pluck('total', 'd');
+        $usersByDay = User::where('created_at', '>=', $since)
+            ->selectRaw('DATE(created_at) as d, COUNT(*) as total')
+            ->groupBy('d')->pluck('total', 'd');
+
+        $growth = collect(range(6, 0))->map(function (int $daysAgo) use ($wsByDay, $usersByDay) {
             $date = now()->subDays($daysAgo)->toDateString();
 
             return [
                 'date' => $date,
-                'new_workspaces' => Workspace::whereDate('created_at', $date)->count(),
-                'new_users' => User::whereDate('created_at', $date)->count(),
+                'new_workspaces' => (int) ($wsByDay[$date] ?? 0),
+                'new_users' => (int) ($usersByDay[$date] ?? 0),
             ];
         })->values();
 
@@ -139,7 +149,7 @@ class AdminController extends Controller
     public function workspaces(Request $request): JsonResponse
     {
         $query = Workspace::with(['owner:id,nom,email'])
-            ->withCount('members')
+            ->withCount(['members', 'projets'])
             ->orderByDesc('created_at');
 
         if ($request->search) {

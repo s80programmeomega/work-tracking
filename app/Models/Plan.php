@@ -60,6 +60,13 @@ class Plan extends Model
         'features' => 'array',
     ];
 
+    /** Invalide le cache du plan gratuit dès qu'un plan change. */
+    protected static function booted(): void
+    {
+        static::saved(fn () => static::forgetFreeCache());
+        static::deleted(fn () => static::forgetFreeCache());
+    }
+
     public function workspaces(): HasMany
     {
         return $this->hasMany(Workspace::class, 'plan_id');
@@ -71,10 +78,33 @@ class Plan extends Model
         return $query->where('is_active', true)->orderBy('position');
     }
 
-    /** Le plan de repli gratuit (utilisé après expiration d'un essai/abonnement). */
+    /**
+     * Plan de repli gratuit, mémorisé pour la durée de la requête.
+     *
+     * Perf (Phase 10) : free() est appelé plusieurs fois par summary() et une fois
+     * par ligne dans la liste admin des workspaces. Sans mémorisation cela générait
+     * des dizaines de requêtes identiques par page. On met en cache le résultat
+     * (y compris « absent ») le temps de la requête.
+     */
+    protected static ?self $freeCache = null;
+
+    protected static bool $freeResolved = false;
+
     public static function free(): ?self
     {
-        return static::query()->where('is_free', true)->first();
+        if (! static::$freeResolved) {
+            static::$freeCache = static::query()->where('is_free', true)->first();
+            static::$freeResolved = true;
+        }
+
+        return static::$freeCache;
+    }
+
+    /** Réinitialise le cache du plan gratuit (tests, ou après modification d'un plan). */
+    public static function forgetFreeCache(): void
+    {
+        static::$freeCache = null;
+        static::$freeResolved = false;
     }
 
     /** Une limite à -1 signifie « illimité ». */

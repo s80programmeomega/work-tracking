@@ -20,7 +20,7 @@
 | 7 — Help Center (reader + author, no AI) | [HELP_CENTER_PLAN.md](HELP_CENTER_PLAN.md) | ✅ Merged | `feature/phase7-help-center` |
 | 8 — Subscription plans + payment gate | *(within README.md)* | 🚧 In progress | `feature/phase8-subscription-plans` |
 | 9 — Payment gateway (MTN MoMo + Orange Money) | *(within README.md)* | 🚧 In progress | `feature/phase9-payment-momo-orange` |
-| 10 — Perf + security hardening | *(within README.md)* | ⬜ Not started | — |
+| 10 — Perf + security hardening | [SECURITY_PERF_BASELINE.md](SECURITY_PERF_BASELINE.md) | 🚧 In progress | `chore/hardening-pass` |
 
 ---
 
@@ -47,5 +47,6 @@
 |---|---|
 | [README.md](README.md) | Full 10-phase roadmap with spec for each phase |
 | [PROGRESSION.md](PROGRESSION.md) | Live phase status tracker with deliverables checklists |
-| [SECURITY_PERF_BASELINE.md](SECURITY_PERF_BASELINE.md) | Phase 0 findings + per-phase action items |
+| [SECURITY_PERF_BASELINE.md](SECURITY_PERF_BASELINE.md) | Phase 0 findings + per-phase action items + Phase 10 hardening results |
+| [MAJOR_UPGRADES_PLAN.md](MAJOR_UPGRADES_PLAN.md) | Deferred breaking upgrades (Laravel 11, vite 8, admin-lte 4) |
 | [HELP_CENTER_PLAN.md](HELP_CENTER_PLAN.md) | Detailed spec for Phase 7 (Help Center) |

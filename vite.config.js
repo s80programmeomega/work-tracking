@@ -92,6 +92,25 @@ export default defineConfig({
     // lightningcss comprend ces sélecteurs correctement ; esbuild les rejette à tort.
     build: {
         cssMinify: 'lightningcss',
+        rollupOptions: {
+            output: {
+                // Découpage des gros vendors en chunks séparés (perf) : ils sont mis
+                // en cache indépendamment et ne gonflent plus app.js. Un changement
+                // applicatif ne réinvalide plus le téléchargement de ces librairies.
+                manualChunks(id) {
+                    if (! id.includes('node_modules')) {
+                        return undefined;
+                    }
+                    if (id.includes('apexcharts')) { return 'vendor-apexcharts'; }
+                    if (id.includes('@tiptap') || id.includes('prosemirror')) { return 'vendor-tiptap'; }
+                    if (id.includes('jsvectormap')) { return 'vendor-jsvectormap'; }
+                    if (id.includes('flatpickr')) { return 'vendor-flatpickr'; }
+                    if (id.includes('laravel-echo') || id.includes('pusher') || id.includes('socket.io') || id.includes('engine.io')) { return 'vendor-realtime'; }
+                    if (id.includes('/vue/') || id.includes('vue-router') || id.includes('/pinia/') || id.includes('@vue')) { return 'vendor-vue'; }
+                    return 'vendor';
+                },
+            },
+        },
     },
 });
 
