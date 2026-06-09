@@ -348,12 +348,31 @@ Variables d'environnement critiques en production (voir `.env.example`) :
   production, `PAYMENT_FAKE=false`) — voir
   `docs/extended-features/testing/TASK_PHASE9_TESTING.md` (checklist go-live).
 
-Après déploiement :
+**Script de déploiement.** Le dépôt fournit deux scripts :
+
+- **`deploy.sh`** (racine) — déploiement **VPS / serveur avec shell + systemd** :
+  exécute tout le cycle (mode maintenance, `git pull`, `composer --no-dev`,
+  `npm run build`, `migrate --force`, `storage:link`, `optimize`/caches,
+  réindexation Typesense optionnelle, redémarrage gracieux d'Horizon et de
+  Reverb, sortie de maintenance). Fail-fast, idempotent.
+  ```bash
+  ./deploy.sh                  # déploiement standard de la branche jonas
+  REINDEX=1 ./deploy.sh        # + réindexation Typesense (si schéma modifié)
+  REVERB_RESTART_CMD="sudo systemctl restart reverb" ./deploy.sh
+  ```
+  Prérequis côté serveur : Horizon supervisé (systemd/supervisor) et un service
+  Reverb ; `deploy.sh` **signale** leur redémarrage mais n'est pas le superviseur.
+
+- **`deploy-hostinger.sh`** + `public/post-deploy.php` — hébergement **mutualisé
+  Hostinger** (build front + `composer` + caches ; le lien `storage` se fait via
+  `post-deploy.php` faute d'accès shell au symlink).
+
+Étapes manuelles équivalentes (si besoin) :
 ```bash
 php artisan migrate --force
 php artisan storage:link            # avatars/documents servis via /storage
 php artisan scout:import "App\Models\..."   # (ré)indexation Typesense si besoin
-php artisan config:cache && php artisan route:cache
+php artisan optimize                # config:cache + route:cache
 npm run build
 ```
 
