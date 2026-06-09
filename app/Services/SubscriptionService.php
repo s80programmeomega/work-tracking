@@ -231,7 +231,9 @@ class SubscriptionService
     public function summary(Workspace $workspace): array
     {
         $plan = $this->effectivePlan($workspace);
-        $memberCount = $workspace->members()->count();
+        // Perf : réutilise members_count si le workspace a été chargé avec
+        // withCount('members') (listes admin), au lieu d'une requête par ligne.
+        $memberCount = $workspace->members_count ?? $workspace->members()->count();
         $maxMembers = $this->planLimit($workspace, 'max_members', 'subscription.free_max_members', 5);
 
         return [

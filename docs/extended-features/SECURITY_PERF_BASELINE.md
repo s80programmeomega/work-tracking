@@ -244,6 +244,28 @@ Deep security + performance sweep. Findings below with **before → after**.
   - *Remaining (not pursued):* `getRecentProjects` still runs one tasks query per recent
     project (≤3) — minor; a deeper restructure for marginal gain.
 
+### P5 — Per-endpoint sweep: admin stats/workspaces N+1 + Workspace appended counts — FIXED (HIGH)
+- **Method:** static N+1 scan (ranked controllers by get/map vs with/withCount) + live
+  `DB::listen` query counts across the index/list endpoints.
+- **`admin/stats` 44 → 22 queries:**
+  - growth loop ran 14 `whereDate` counts (7 days × 2) → collapsed to **2 `GROUP BY DATE()`**
+    queries bucketed by day;
+  - `recentWorkspaces` map called `summary()` without member counts → added `withCount('members')`.
+- **`admin/workspaces` 41 → 12 queries (−71%):**
+  - **Root cause was model-level:** `Workspace::$appends = ['logo_url','member_count','projet_count']`
+    means **every** `toArray()` fired `getMemberCountAttribute` (`members()->count()`) +
+    `getProjetCountAttribute` (`projets()->count()`) → 2 queries per serialized workspace,
+    everywhere. Fixed the accessors to reuse `members_count`/`projets_count` from
+    `withCount(...)` when present (query fallback otherwise), and added
+    `withCount(['members','projets'])` to the controller.
+  - `SubscriptionService::summary()` also re-counted members per row → now reuses
+    `members_count` when eager-loaded.
+- **Correctness verified:** accessor counts == direct `count()` (member 10==10, projet 5==5);
+  fallback path (no withCount) still queries correctly. Larastan clean; 20 admin tests green.
+- **Sweep result:** other index endpoints profiled (documents, labels, comments,
+  notifications, users, roles) are already healthy (≤3 queries). The N+1s were concentrated
+  in the dashboard + admin stats/workspaces; all now fixed.
+
 ## Performance — audited, clean (no action)
 
 - **Unbounded-list / pagination:** real list endpoints use `->paginate()` (19 call sites).

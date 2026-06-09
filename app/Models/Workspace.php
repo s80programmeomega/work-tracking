@@ -307,12 +307,14 @@ class Workspace extends Model
 
     public function getMemberCountAttribute(): int
     {
-        return $this->members()->count();
+        // Perf : réutilise members_count d'un withCount('members') si présent,
+        // sinon compte (évite un N+1 à chaque sérialisation de Workspace).
+        return $this->attributes['members_count'] ?? $this->members()->count();
     }
 
     public function getProjetCountAttribute(): int
     {
-        return $this->projets()->count();
+        return $this->attributes['projets_count'] ?? $this->projets()->count();
     }
 
     /**
