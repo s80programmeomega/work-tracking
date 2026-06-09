@@ -906,7 +906,7 @@ const menuGroups = computed(() => [
                 icon: UsersIcon,
                 name: t('navigation.users'),
                 subItems: [
-                    { name: t('sidebar.invitations'), path: "/users/invitations", superAdminHidden: true },
+                    { name: t('sidebar.invitations'), path: "/users/invitations" },
                 ],
             },
             {

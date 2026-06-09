@@ -23,6 +23,16 @@
               </p>
             </div>
             <div class="flex flex-wrap items-center gap-4">
+              <!-- Inviter (workspace courant, hors super-admin) -->
+              <button
+                v-if="!isSuperAdmin && currentWorkspaceId"
+                @click="showInviteModal = true"
+                class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700 transition-colors"
+              >
+                <UserPlusIcon class="w-5 h-5" />
+                {{ $t('invitations.new_invitation') }}
+              </button>
+
               <!-- Global Stats -->
               <div class="flex items-center gap-6">
                 <div class="text-center">
@@ -258,7 +268,8 @@
                   @click="copyInvitationLink(invitation)"
                   class="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-3 transition-colors"
                   :title="$t('invitations.btn_copy_link')"
-                > 
+                >
+                  <CopyIcon class="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -289,6 +300,14 @@
         </div>
       </div>
     </div>
+
+    <!-- Modale d'invitation : la feature existante, branchée sur le workspace courant -->
+    <InviteMemberModal
+      v-if="showInviteModal && currentWorkspaceId"
+      :workspace-id="currentWorkspaceId"
+      @close="showInviteModal = false"
+      @invited="handleInvited"
+    />
   </AdminLayout>
 </template>
 
@@ -296,23 +315,42 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import { useToast } from 'vue-toastification'
 import { useWorkspace } from '@/composables/useWorkspace'
+import { useAuthStore } from '@/stores/authStore'
 import { useStagger } from '@/composables/useAnimations'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
+import InviteMemberModal from '@/components/workspaces/InviteMemberModal.vue'
 import {
   MailIcon,
   SearchIcon,
   RefreshIcon,
   EyeIcon,
-  XIcon, 
-  CheckCircleIcon
+  XIcon,
+  CheckCircleIcon,
+  UserPlusIcon,
+  CopyIcon
 } from '@/icons'
 
 const { t } = useI18n()
 const router = useRouter()
-const { fetchAllInvitations, resendInvitation, cancelInvitation, getRoleLabel, getRoleColor } = useWorkspace()
+const toast = useToast()
+const authStore = useAuthStore()
+const {
+  fetchAllInvitations,
+  fetchInvitations,
+  resendInvitation: resendInvitationService,
+  cancelInvitation: cancelInvitationService,
+  getRoleLabel,
+  getRoleColor,
+} = useWorkspace()
 const { staggerRef: listRef, applyStagger } = useStagger(60)
+
+// Super-admin : vue plateforme (toutes les invitations). Sinon : invitations du
+// workspace courant — réutilise exactement la feature existante (useWorkspace).
+const isSuperAdmin = computed(() => !!authStore.user?.is_super_admin)
+const currentWorkspaceId = computed(() => authStore.user?.current_workspace_id)
 
 const loading = ref(false)
 const invitations = ref([])
@@ -321,6 +359,7 @@ const statistics = ref({})
 const pagination = ref(null)
 const resending = ref(null)
 const cancelling = ref(null)
+const showInviteModal = ref(false)
 
 const filters = ref({
   search: '',
@@ -396,9 +435,9 @@ const formatDate = (date) => {
   })
 }
 
+// Super-admin gère tout ; sinon, gestion limitée au workspace courant.
 const canManageWorkspace = (workspaceId) => {
-  // TODO: Implémenter la vérification des permissions
-  return true // Temporaire
+  return isSuperAdmin.value || workspaceId === currentWorkspaceId.value
 }
 
 const viewWorkspace = (workspaceId) => {
@@ -409,43 +448,48 @@ const copyInvitationLink = async (invitation) => {
   const link = `${window.location.origin}/workspace-invitations/${invitation.token}`
   try {
     await navigator.clipboard.writeText(link)
-    // TODO: Afficher un message de succès
-    console.log('Lien copié:', link)
+    toast.success(t('invitations.link_copied'))
   } catch (err) {
     console.error('Erreur lors de la copie:', err)
+    toast.error(t('invitations.link_copy_error'))
   }
 }
 
-const handleResendInvitation = async (invitation) => {
+const resendInvitation = async (invitation) => {
   try {
     resending.value = invitation.id
-    await resendInvitation(invitation.workspace_id, invitation.id)
+    await resendInvitationService(invitation.workspace_id, invitation.id)
+    toast.success(t('invitations.resend_success'))
     await loadData()
-    // TODO: Afficher message de succès
   } catch (error) {
     console.error('Error resending invitation:', error)
-    // TODO: Afficher message d'erreur
+    toast.error(error.response?.data?.message ?? t('invitations.resend_error'))
   } finally {
     resending.value = null
   }
 }
 
-const handleCancelInvitation = async (invitation) => {
+const cancelInvitation = async (invitation) => {
   if (!confirm(t('invitations.confirm_cancel'))) {
     return
   }
 
   try {
     cancelling.value = invitation.id
-    await cancelInvitation(invitation.workspace_id, invitation.id)
+    await cancelInvitationService(invitation.workspace_id, invitation.id)
+    toast.success(t('invitations.cancel_success'))
     await loadData()
-    // TODO: Afficher message de succès
   } catch (error) {
     console.error('Error cancelling invitation:', error)
-    // TODO: Afficher message d'erreur
+    toast.error(error.response?.data?.message ?? t('invitations.cancel_error'))
   } finally {
     cancelling.value = null
   }
+}
+
+const handleInvited = () => {
+  showInviteModal.value = false
+  loadData()
 }
 
 const changePage = (page) => {
@@ -454,24 +498,32 @@ const changePage = (page) => {
 }
 
 const loadData = async () => {
+  loading.value = true
   try {
-    loading.value = true
-    // TODO: Implémenter fetchAllInvitations dans useWorkspace
-    // const response = await fetchAllInvitations(filters.value)
-    // invitations.value = response.data
-    // pagination.value = response.meta
-    // statistics.value = response.statistics
-    
-    // Données mockées pour le moment
-    invitations.value = []
-    applyStagger()
-    statistics.value = {
-      total_invitations: 0,
-      pending_invitations: 0,
-      accepted_invitations: 0
+    if (isSuperAdmin.value) {
+      // Vue plateforme : toutes les invitations (endpoint super-admin).
+      const response = await fetchAllInvitations(filters.value)
+      invitations.value = response?.data ?? []
+      pagination.value = response?.meta ?? null
+      statistics.value = response?.statistics ?? {}
+    } else if (currentWorkspaceId.value) {
+      // Vue workspace courant : la feature existante (useWorkspace).
+      const list = await fetchInvitations(currentWorkspaceId.value)
+      invitations.value = Array.isArray(list) ? list : (list?.data ?? [])
+      pagination.value = null
+      statistics.value = {
+        total_invitations: invitations.value.length,
+        pending_invitations: invitations.value.filter(i => i.status === 'pending').length,
+        accepted_invitations: invitations.value.filter(i => i.status === 'accepted').length,
+      }
+    } else {
+      invitations.value = []
+      statistics.value = {}
     }
+    await applyStagger()
   } catch (error) {
     console.error('Error loading invitations:', error)
+    toast.error(error.response?.data?.message ?? t('invitations.load_error'))
   } finally {
     loading.value = false
   }
