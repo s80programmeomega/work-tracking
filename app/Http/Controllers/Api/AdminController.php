@@ -83,7 +83,7 @@ class AdminController extends Controller
             ->toArray();
 
         $totalTasks = array_sum($taskStatsByStatus);
-        $overdueTasks = Tache::where('statut', 'en_retard')->count();
+        $overdueTasks = Tache::overdue()->count();
         $criticalTasks = Tache::where('priorite', 'critique')
             ->whereNotIn('statut', ['termine', 'annule'])
             ->count();

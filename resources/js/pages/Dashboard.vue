@@ -383,25 +383,19 @@ const teamMembers = computed(() => {
   return dashboardData.value.team_members || []
 })
 
-// Colonnes Kanban
+// Colonnes Kanban — alignées sur les valeurs réelles de l'enum ProjetStatus
+// (les projets "archived" ne font pas partie de "recent_projects").
 const kanbanColumns = computed(() => [
   {
-    status: 'pending',
-    title: t('statuts.en_attente'),
-    color: 'bg-yellow-500',
-    textColor: 'text-yellow-700 dark:text-yellow-400',
-    bgColor: 'bg-yellow-50 dark:bg-yellow-900/20'
-  },
-  {
     status: 'active',
-    title: t('statuts.en_cours'),
+    title: t('common.active'),
     color: 'bg-green-500',
     textColor: 'text-green-700 dark:text-green-400',
     bgColor: 'bg-green-50 dark:bg-green-900/20'
   },
   {
     status: 'completed',
-    title: t('statuts.termine'),
+    title: t('common.completed'),
     color: 'bg-blue-500',
     textColor: 'text-blue-700 dark:text-blue-400',
     bgColor: 'bg-blue-50 dark:bg-blue-900/20'
@@ -481,9 +475,7 @@ const loadWorkspaceMembers = async () => {
 
 const updateStatsCards = () => {
   const stats = dashboardData.value.stats || {}
-  console.log('Dashboard', dashboardData);
-  console.log('Dashboard value', dashboardData.value);
-  
+
   statsCardsBase.value[0].value = stats.projets_actifs?.value || 0
   statsCardsBase.value[0].change = stats.projets_actifs?.change || '+0%'
   statsCardsBase.value[0].trend = stats.projets_actifs?.trend || 'up'

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Admin;
 
+use App\Models\Activite;
+use App\Models\Projet;
+use App\Models\Tache;
 use App\Models\User;
 use App\Models\Workspace;
 use App\Notifications\TrialExtendedNotification;
@@ -84,6 +87,34 @@ class PlatformDashboardTest extends TestCase
 
         $this->assertGreaterThanOrEqual(2, $data['paid']);
         $this->assertGreaterThanOrEqual(1, $data['trial']);
+    }
+
+    public function test_stats_overdue_uses_isoverdue_semantics_not_just_en_retard_status(): void
+    {
+        $projet = Projet::factory()->create();
+        $activite = Activite::factory()->create(['projet_id' => $projet->id]);
+
+        // Tâche dont le statut est explicitement "en_retard".
+        Tache::factory()->create([
+            'activite_id' => $activite->id,
+            'statut' => 'en_retard',
+            'echeance' => now()->subDays(3),
+        ]);
+
+        // Tâche "à faire" dont l'échéance est dépassée : en retard au sens
+        // de isOverdue()/scopeOverdue(), mais statut != "en_retard".
+        Tache::factory()->create([
+            'activite_id' => $activite->id,
+            'statut' => 'a_faire',
+            'echeance' => now()->subDay(),
+        ]);
+
+        Sanctum::actingAs($this->superAdmin());
+
+        $response = $this->getJson('/api/admin/stats');
+
+        // Les deux tâches doivent compter comme "en retard".
+        $this->assertSame(2, $response->json('data.tasks.overdue'));
     }
 
     public function test_workspaces_returns_403_for_regular_user(): void

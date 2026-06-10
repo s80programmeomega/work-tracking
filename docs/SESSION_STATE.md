@@ -26,9 +26,59 @@
 
 ## Current Task
 
-**Task:** Extended Features — Phase 9 Payment gateway (MTN MoMo + Orange Money)
+**Task:** Phase 11 — Dashboard Accuracy + Profile Page Fixes
+**Plan:** `docs/phase11-dashboard-profile/PLAN.md` (approved 2026-06-10)
+**Tracker:** `docs/phase11-dashboard-profile/PROGRESSION.md`
+**Branch:** `feature/phase11a-dashboard-accuracy` (1 of 5 sub-branches: 11A-11E; not yet merged)
+**Status:** ✅ 11A done (2026-06-10). 🔄 Next: 11B — profile quick wins.
+
+**11A — done:**
+- `calculateStats()` now wires `calculateChange()` for `projets_actifs`/`taux_completion`/
+  `taches_en_retard` — real period-over-period (`now()->subMonth()` snapshot) `change`/`trend`,
+  no more hardcoded `+12%`/`+5%`/`-2%`.
+- `getRecentProjects()` includes `active` + `completed` `ProjetStatus` (was `active`-only);
+  `archived` excluded.
+- `kanbanColumns` in `Dashboard.vue` reduced to 2 columns (`active`/`completed`) aligned to
+  `ProjetStatus`; new `common.completed` i18n key (fr/en) added alongside existing
+  `common.active`/`common.archived`.
+- Debug `console.log`s removed from `updateStatsCards()`.
+- `AdminController::computeStats()` `tasks.overdue` switched to `Tache::overdue()->count()`
+  (matches `isOverdue()` — counts échéance-based overdue regardless of stored `statut`).
+- New: `tests/Feature/Dashboard/DashboardStatsTest.php` (4 tests) +
+  `PlatformDashboardTest::test_stats_overdue_uses_isoverdue_semantics_not_just_en_retard_status`.
+  Pint + Larastan clean, `npm run build` green, full suite 788/789 (1 pre-existing unrelated
+  SocialAuth ordering flake, passes in isolation).
+- Testing guide: `docs/testing/PHASE11A_TESTING.md`.
+
+**Sub-branch sequence:**
+1. ~~**11A** — Dashboard accuracy~~ ✅ done.
+2. **11B** (next) — Profile quick wins: functional notification sound (`useNotificationSound.js` +
+   asset), Preferences tab cleanup (remove Theme/Language/Date Format/Display
+   Density/Auto-Save, keep Timezone), fix dead navbar "Paramètres du compte" link.
+3. **11C** — Session management: Sanctum token list/revoke endpoints + real
+   `SessionSettings.vue` UI (replaces broken `authStore.logoutAllDevices()`).
+4. **11D** — Help Center Tiptap draft auto-save: new `draft_body_fr/en`/`draft_saved_at`
+   columns on `help_articles`, draft endpoint, restore/discard banner.
+5. **11E** — Activity tabs + Users management: wire profile Activité tab to real
+   `GET /users/{user}/activity`; per-user activity drill-down for super-admin (from
+   `/admin/users`) and a new workspace-owner-scoped "Users" page + endpoint + permission.
+
+**What to do next:**
+1. 11A is implemented but **not yet committed** — awaiting user instruction to commit (per
+   CLAUDE.md: never commit without explicit instruction).
+2. Start 11B on a new branch `feature/phase11b-profile-quickwins` from `jonas` (or from
+   `feature/phase11a-dashboard-accuracy` once 11A is committed/merged — confirm with user).
+3. After each sub-branch: tick `docs/phase11-dashboard-profile/PROGRESSION.md`, update the Phase
+   11 row in main `docs/PROGRESSION.md`, write `docs/testing/PHASE11{A-E}_TESTING.md`, update this
+   file (Current Task → next sub-branch).
+
+---
+
+## (Previous) Phase 9 — Payment Gateway (MTN MoMo + Orange Money)
+
 **Branch:** `feature/phase9-payment-momo-orange`
-**Status:** 🚧 Implemented; uncommitted; awaiting commit + push/merge approval.
+**Status:** 🚧 Implemented; uncommitted; awaiting commit + push/merge approval. (Unrelated to
+Phase 11 — left as-is; resume separately.)
 
 **What was done (Phase 9):**
 - **Provider-agnostic seam** — `PaymentProviderInterface` + `PaymentResult` DTO + `MtnMomoProvider` (token cache, requesttopay 202, status map) + `OrangeMoneyProvider` (token, webpayment→pay_token/payment_url, transactionstatus) + `PaymentProviderRegistry` (key→impl). Strategy pattern.
@@ -40,7 +90,7 @@
 - **Frontend** — `Plans.vue` paid-plan button opens a payment modal (provider + phone); MTN = push + poll `payment/{ref}/status`; Orange = `window.location` redirect; `?payment=return\|cancel` handled on mount; fr/en `subscription_plans.payment.*` i18n.
 - **Tests/gates** — 8 `PaymentFlowTest` via `Http::fake()` (initiate MTN/Orange, webhook success/fail, idempotent replay, unknown ref, non-owner, free plan); 51 with subscription suite. Pint + Larastan clean, build green.
 
-**What to do next:**
+**What to do next (when resumed):**
 1. Commit Phase 9; on approval push + merge into `jonas` (both remotes).
 2. Real sandbox testing needs MTN/Orange sandbox credentials in `.env` (Jonas fills; build never asks for real values). Orange base URLs/payloads vary by operator — confirm vs onboarding pack.
 

@@ -152,26 +152,55 @@ class DashboardController extends Controller
     }
 
     /**
-     * Calculate statistics with member context
+     * Calculate statistics with member context, including real
+     * period-over-period (vs. il y a 1 mois) change/trend.
      */
     private function calculateStats($projets, $taches, $myTasks)
     {
+        $previousCutoff = now()->subMonth();
+
+        // Projets actifs : nombre actuel vs. nombre de projets actifs déjà
+        // créés il y a 1 mois (mêmes critères, snapshot dans le temps).
+        $activeProjetsNow = $projets->where('status', 'active')->count();
+        $activeProjetsPrevious = $projets
+            ->where('status', 'active')
+            ->filter(fn ($p) => $p->created_at && $p->created_at->lte($previousCutoff))
+            ->count();
+
+        // Taux de complétion : sur les tâches existant déjà il y a 1 mois,
+        // quelle proportion était terminée à cette date-là vs. aujourd'hui.
+        $tachesPrevious = $taches->filter(fn ($t) => $t->created_at && $t->created_at->lte($previousCutoff));
+        $completionNow = $taches->count() > 0
+            ? round(($taches->where('statut', TacheStatut::TERMINE)->count() / $taches->count()) * 100)
+            : 0;
+        $completionPrevious = $tachesPrevious->count() > 0
+            ? round(($tachesPrevious->filter(fn ($t) => $t->statut === TacheStatut::TERMINE
+                && $t->date_fin_reelle && $t->date_fin_reelle->lte($previousCutoff))->count() / $tachesPrevious->count()) * 100)
+            : 0;
+
+        // Tâches en retard : nombre actuel (isOverdue()) vs. nombre de
+        // tâches qui étaient déjà en retard il y a 1 mois (échéance dépassée
+        // à cette date et non terminées à cette date).
+        $overdueNow = $taches->filter(fn ($t) => $t->isOverdue())->count();
+        $overduePrevious = $taches->filter(fn ($t) => $t->echeance
+            && $t->echeance->lt($previousCutoff)
+            && (! $t->date_fin_reelle || $t->date_fin_reelle->gt($previousCutoff)))->count();
+
         return [
             'projets_actifs' => [
-                'value' => $projets->where('status', 'active')->count(),
-                'change' => '+12%',
-                'trend' => 'up',
+                'value' => $activeProjetsNow,
+                'change' => $this->calculateChange($activeProjetsNow, $activeProjetsPrevious),
+                'trend' => $activeProjetsNow >= $activeProjetsPrevious ? 'up' : 'down',
             ],
             'taux_completion' => [
-                'value' => $taches->count() > 0 ?
-                    round(($taches->where('statut', TacheStatut::TERMINE)->count() / $taches->count()) * 100) : 0,
-                'change' => '+5%',
-                'trend' => 'up',
+                'value' => $completionNow,
+                'change' => $this->calculateChange($completionNow, $completionPrevious),
+                'trend' => $completionNow >= $completionPrevious ? 'up' : 'down',
             ],
             'taches_en_retard' => [
-                'value' => $taches->filter(fn ($t) => $t->isOverdue())->count(),
-                'change' => '-2%',
-                'trend' => 'down',
+                'value' => $overdueNow,
+                'change' => $this->calculateChange($overdueNow, $overduePrevious),
+                'trend' => $overdueNow <= $overduePrevious ? 'up' : 'down',
             ],
         ];
     }
@@ -308,7 +337,7 @@ class DashboardController extends Controller
     private function getRecentProjects($projets)
     {
         return $projets
-            ->where('status', 'active')
+            ->whereIn('status', ['active', 'completed'])
             ->sortByDesc('updated_at')
             ->take(3)
             ->map(function ($projet) {
