@@ -22,6 +22,7 @@ use App\Models\User;
 use App\Models\Workspace;
 use App\Permissions\ContextualPermissionGate;
 use App\Permissions\Permission;
+use App\Services\AdaptiveCache;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -95,14 +96,32 @@ class SearchController extends Controller
         }
 
         $types = $request->input('types', ['projets', 'activites', 'taches', 'sous_taches', 'documents', 'users', 'messages', 'notifications', 'help_articles', 'help_categories', 'help_images']);
-        $results = [];
-        $totals = [];
 
-        foreach ($types as $type) {
-            [$hits, $total] = $this->searchType($type, $query, $workspace, $isSuperAdmin, $tier, $scopedIds, (int) $user->id, $page, $perPage);
-            $results[$type] = $hits;
-            $totals[$type] = $total;
-        }
+        // Mise en cache des résultats (~60 s, TTL adaptatif). L'autorisation (403)
+        // a déjà été tranchée ci-dessus — on ne met en cache QUE le calcul.
+        // La CLÉ inclut toutes les dimensions de portée (utilisateur, tier,
+        // workspace, requête, types, pagination) → impossible de servir à un
+        // utilisateur les résultats d'un autre périmètre.
+        $sortedTypes = $types;
+        sort($sortedTypes);
+        $cacheKey = 'search:'.(int) $user->id.':'.$tier.':w='.($workspace?->id ?? 'global')
+            .':q='.md5((string) $query).':t='.implode(',', $sortedTypes).':p='.$page.':pp='.$perPage;
+
+        ['results' => $results, 'totals' => $totals] = app(AdaptiveCache::class)->remember(
+            $cacheKey,
+            60,
+            function () use ($types, $query, $workspace, $isSuperAdmin, $tier, $scopedIds, $user, $page, $perPage): array {
+                $results = [];
+                $totals = [];
+                foreach ($types as $type) {
+                    [$hits, $total] = $this->searchType($type, $query, $workspace, $isSuperAdmin, $tier, $scopedIds, (int) $user->id, $page, $perPage);
+                    $results[$type] = $hits;
+                    $totals[$type] = $total;
+                }
+
+                return ['results' => $results, 'totals' => $totals];
+            }
+        );
 
         return response()->json([
             'success' => true,

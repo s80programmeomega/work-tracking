@@ -10,23 +10,46 @@ use App\Models\Projet;
 use App\Models\Tache;
 use App\Models\User;
 use App\Models\Workspace;
+use App\Services\AdaptiveCache;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Spatie\Permission\Models\Role;
 
 class DashboardController extends Controller
 {
+    public function __construct(private AdaptiveCache $cache) {}
+
     /**
-     * Get dashboard data with member filtering
+     * Get dashboard data with member filtering.
+     *
+     * Mis en cache (~60 s, TTL adaptatif) : agrégats coûteux (~34 requêtes) sur
+     * la page la plus consultée. CLÉ STRICTEMENT par utilisateur + workspace +
+     * filtres → aucune fuite inter-tenant ; fraîcheur ≤ ~1 min (acceptable pour
+     * un tableau de bord statistique).
      */
     public function index(Request $request)
     {
         $user = $request->user();
-
-        // Filtrage par membre
         $memberId = $request->input('member_id');
         $projectStatus = $request->input('project_status');
         $priority = $request->input('priority');
+        $workspaceParam = $request->has('workspace_id') ? $request->workspace_id : 'accessible';
+
+        // Clé de cache cloisonnée : un utilisateur ne voit jamais les données d'un
+        // autre, ni d'un autre workspace, ni d'un autre jeu de filtres.
+        $cacheKey = 'dashboard:'.$user->id.':'.$workspaceParam
+            .':m='.($memberId ?? '-').':s='.($projectStatus ?? '-').':p='.($priority ?? '-');
+
+        $payload = $this->cache->remember($cacheKey, 60, fn () => $this->computeDashboard($request, $user, $memberId, $projectStatus, $priority));
+
+        return response()->json($payload);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function computeDashboard(Request $request, $user, $memberId, $projectStatus, $priority): array
+    {
 
         // Workspaces accessibles (super_admin voit tous)
         $workspaceIds = $user->isSuperAdmin()
@@ -118,14 +141,14 @@ class DashboardController extends Controller
                 ];
             });
 
-        return response()->json([
+        return [
             'stats' => $this->calculateStats($projets, $taches, $myTasks),
             'monthly_progress' => $this->getMonthlyProgress($user),
             'recent_projects' => $this->getRecentProjects($projets),
             'my_tasks' => $myTasks,
             'team_members' => $teamMembers,
             // ... autres données existantes
-        ]);
+        ];
     }
 
     /**

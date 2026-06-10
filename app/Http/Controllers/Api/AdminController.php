@@ -15,6 +15,7 @@ use App\Models\ValidationAuditLog;
 use App\Models\Workspace;
 use App\Notifications\TrialExtendedNotification;
 use App\Notifications\WorkspaceSuspendedNotification;
+use App\Services\AdaptiveCache;
 use App\Services\SubscriptionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -25,12 +26,29 @@ use Spatie\Permission\PermissionRegistrar;
 
 class AdminController extends Controller
 {
-    public function __construct(protected SubscriptionService $subscriptionService) {}
+    public function __construct(
+        protected SubscriptionService $subscriptionService,
+        protected AdaptiveCache $cache,
+    ) {}
 
     /**
      * Platform-wide aggregate statistics.
+     *
+     * Mises en cache (~5 min, TTL adaptatif) : statistiques plateforme identiques
+     * pour tous les super-admins, coûteuses (≈20 requêtes) et tolérantes à un
+     * léger décalage.
      */
     public function stats(Request $request): JsonResponse
+    {
+        $data = $this->cache->remember('admin:stats', 300, fn () => $this->computeStats());
+
+        return response()->json(['data' => $data]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function computeStats(): array
     {
         $totalWorkspaces = Workspace::count();
         $activeWorkspaces = Workspace::where('is_active', true)->count();
@@ -109,38 +127,36 @@ class AdminController extends Controller
             ];
         })->values();
 
-        return response()->json([
-            'data' => [
-                'workspaces' => [
-                    'total' => $totalWorkspaces,
-                    'active' => $activeWorkspaces,
-                    'trial' => $trialWorkspaces,
-                    'paid' => $paidWorkspaces,
-                    'expired_trials' => $expiredTrials,
-                    'expiring_soon' => $expiringSoon,
-                ],
-                'users' => [
-                    'total' => $totalUsers,
-                    'active_last_30_days' => $activeUsers,
-                    'super_admins' => $superAdmins,
-                    'new_last_7_days' => $newUsersLast7Days,
-                ],
-                'tasks' => [
-                    'total' => $totalTasks,
-                    'by_status' => $taskStatsByStatus,
-                    'overdue' => $overdueTasks,
-                    'critical' => $criticalTasks,
-                ],
-                'projects' => [
-                    'total' => $totalProjects,
-                ],
-                'activities' => [
-                    'total' => $totalActivities,
-                ],
-                'growth' => $growth,
-                'recent_workspaces' => $recentWorkspaces,
+        return [
+            'workspaces' => [
+                'total' => $totalWorkspaces,
+                'active' => $activeWorkspaces,
+                'trial' => $trialWorkspaces,
+                'paid' => $paidWorkspaces,
+                'expired_trials' => $expiredTrials,
+                'expiring_soon' => $expiringSoon,
             ],
-        ]);
+            'users' => [
+                'total' => $totalUsers,
+                'active_last_30_days' => $activeUsers,
+                'super_admins' => $superAdmins,
+                'new_last_7_days' => $newUsersLast7Days,
+            ],
+            'tasks' => [
+                'total' => $totalTasks,
+                'by_status' => $taskStatsByStatus,
+                'overdue' => $overdueTasks,
+                'critical' => $criticalTasks,
+            ],
+            'projects' => [
+                'total' => $totalProjects,
+            ],
+            'activities' => [
+                'total' => $totalActivities,
+            ],
+            'growth' => $growth,
+            'recent_workspaces' => $recentWorkspaces,
+        ];
     }
 
     /**
