@@ -28,6 +28,7 @@ import SidebarProvider from "@/components/layout/SidebarProvider.vue";
 import { ref, onMounted, onErrorCaptured,provide  } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useLiveNotifications } from '@/composables/useLiveNotifications';
+import { useNotificationSound } from '@/composables/useNotificationSound';
 import NotificationContainer from "@/components/ui/NotificationContainer.vue"
 
 
@@ -73,6 +74,7 @@ onErrorCaptured((err) => {
 });
 
 const { start: startLiveNotifications, onNotification } = useLiveNotifications();
+const { playIfEnabled: playNotificationSound } = useNotificationSound();
 
 // Task 8 — when a live broadcast lands, surface a toast and increment the bell.
 // The actual unread counter lives in useNotifications; this just shows the user
@@ -81,6 +83,7 @@ const { start: startLiveNotifications, onNotification } = useLiveNotifications()
 onNotification((data) => {
     const title = data?.tache_titre ?? data?.title ?? 'Nouvelle notification';
     showNotification(title, 'info', 4000);
+    playNotificationSound();
 });
 
 onMounted(() => {

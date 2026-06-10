@@ -21,7 +21,7 @@
 | # | Sub-task | Branch | Status | Started | Completed | Notes |
 |---|---|---|---|---|---|---|
 | 11A | Dashboard & statistics accuracy (A1-A4) | `feature/phase11a-dashboard-accuracy` | ✅ | 2026-06-10 | 2026-06-10 | All A1-A4 done; 4 new dashboard tests + 1 admin overdue test; Pint/Larastan/build green |
-| 11B | Profile quick wins (B2 sound, B3 preferences cleanup, B7 dead link) | `feature/phase11b-profile-quickwins` | ⬜ | — | — | — |
+| 11B | Profile quick wins (B2 sound, B3 preferences cleanup, B7 dead link) | `feature/phase11b-profile-quickwins` | ✅ | 2026-06-10 | 2026-06-10 | Notification sound composable + asset; Preferences tab reduced to Timezone only; dead navbar link removed; Pint/Larastan/build green |
 | 11C | Session management (B1) | `feature/phase11c-session-management` | ⬜ | — | — | — |
 | 11D | Help Center draft auto-save (B4) | `feature/phase11d-help-draft-autosave` | ⬜ | — | — | — |
 | 11E | Activity tabs + Users management (B5 + B6) | `feature/phase11e-activity-users` | ⬜ | — | — | — |
@@ -54,21 +54,30 @@
 - [x] Main `docs/PROGRESSION.md` Phase 11 row updated
 - [x] `docs/SESSION_STATE.md` updated (Current Task → 11B)
 
-### 11B — Profile Quick Wins
+### 11B — Profile Quick Wins ✅
 
-- [ ] B2: `useNotificationSound.js` composable created; sound asset added under `public/sounds/`
-- [ ] B2: `useLiveNotifications.js` plays sound on incoming notification when enabled
-- [ ] B3: Theme/Language/Date Format/Display Density/Auto-Save removed from
+- [x] B2: `useNotificationSound.js` composable created; sound asset added under
+      `public/sounds/notification.ogg` (short two-tone chime, generated with `sox`)
+- [x] B2: `App.vue`'s `onNotification(...)` handler (registered via `useLiveNotifications`) calls
+      `playIfEnabled()` on each incoming live notification, gated on
+      `localStorage.notificationSettings.notificationSounds`
+- [x] B3: Theme/Language/Date Format/Display Density/Auto-Save removed from
       `PreferencesSettings.vue`; Timezone kept (confirmed not duplicated by navbar)
-- [ ] B3: Guide 14 impact check done before removing localStorage-backed preference reads
-- [ ] B7: Dead `/settings` navbar link fixed (removed or repointed to `/profile`)
-- [ ] B7: Unused `user_menu.account_settings` i18n key removed (if applicable, after grep check)
-- [ ] Tests added (Vitest if available, else manual steps documented)
-- [ ] Pint + Larastan clean
-- [ ] `npm run build` green
-- [ ] `docs/testing/PHASE11B_TESTING.md` written
-- [ ] Main `docs/PROGRESSION.md` Phase 11 row updated
-- [ ] `docs/SESSION_STATE.md` updated
+- [x] B3: Guide 14 impact check done — `userPreferences` localStorage key only read/written by
+      `PreferencesSettings.vue` itself; navbar theme/language switchers are independent
+      composables; removed unused `pref_settings.theme_*`/`lang_*`/`date_*`/`density_*`/
+      `autosave_*` i18n keys (fr/en) after confirming zero remaining usages
+- [x] B7: Dead `/settings` navbar link removed from `UserMenu.vue` (`/profile` "Editer le profil"
+      already covers profile editing); unused `SettingsIcon` import removed
+- [x] B7: Unused `user_menu.account_settings` i18n key removed (fr/en) after confirming single
+      usage
+- [x] Tests: no JS test runner configured (per plan, not introduced for this alone) — manual
+      verification steps documented in `docs/testing/PHASE11B_TESTING.md`
+- [x] Pint + Larastan clean
+- [x] `npm run build` green
+- [x] `docs/testing/PHASE11B_TESTING.md` written
+- [x] Main `docs/PROGRESSION.md` Phase 11 row updated
+- [x] `docs/SESSION_STATE.md` updated
 
 ### 11C — Session Management
 

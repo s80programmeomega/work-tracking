@@ -80,7 +80,6 @@ import {
     UserCircleIcon,
     ChevronDownIcon,
     LogoutIcon,
-    SettingsIcon,
     InfoCircleIcon,
 } from "@/icons";
 import { RouterLink, useRouter } from "vue-router";
@@ -112,7 +111,6 @@ const userInitials = computed(() => {
 
 const menuItems = computed(() => [
     { href: "/profile", icon: UserCircleIcon, text: t('user_menu.edit_profile') },
-    { href: "/settings", icon: SettingsIcon, text: t('user_menu.account_settings') },
     { href: "/support", icon: InfoCircleIcon, text: t('user_menu.support') },
 ]);
 
