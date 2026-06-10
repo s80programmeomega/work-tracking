@@ -2405,7 +2405,13 @@
       "cat_desc_fr": "Description (FR)",
       "cat_desc_en": "Description (EN)",
       "cat_published": "Publiée",
-      "cat_articles": "Articles"
+      "cat_articles": "Articles",
+      "draft_saved_at": "Brouillon enregistré à {time}",
+      "draft_restore_banner": "Vous avez un brouillon non publié du {date} — souhaitez-vous le restaurer ?",
+      "draft_restore": "Restaurer",
+      "draft_discard": "Ignorer",
+      "draft_saving": "Enregistrement…",
+      "draft_saved": "Brouillon enregistré à {time}"
     }
   },
   "subscription_plans": {

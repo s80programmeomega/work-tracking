@@ -2402,7 +2402,13 @@
       "cat_desc_fr": "Description (FR)",
       "cat_desc_en": "Description (EN)",
       "cat_published": "Published",
-      "cat_articles": "Articles"
+      "cat_articles": "Articles",
+      "draft_saved_at": "Draft saved at {time}",
+      "draft_restore_banner": "You have an unpublished draft from {date} — would you like to restore it?",
+      "draft_restore": "Restore",
+      "draft_discard": "Discard",
+      "draft_saving": "Saving…",
+      "draft_saved": "Draft saved at {time}"
     }
   },
   "subscription_plans": {

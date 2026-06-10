@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Help\SaveHelpArticleDraftRequest;
 use App\Http\Requests\Help\StoreHelpArticleRequest;
 use App\Http\Requests\Help\StoreHelpCategoryRequest;
 use App\Http\Requests\Help\UpdateHelpArticleRequest;
@@ -166,6 +167,28 @@ class AdminHelpController extends Controller
         ]));
 
         return response()->json(['success' => true, 'article' => $article->load('category')]);
+    }
+
+    /**
+     * PATCH /api/admin/help/articles/{article}/draft
+     *
+     * Persiste uniquement les colonnes de brouillon — n'écrase jamais body_fr/body_en
+     * ni published_at. Le hook booted() (sanitisation Purifier) ne se déclenche pas
+     * car on ne touche pas body_fr/body_en.
+     */
+    public function saveDraft(SaveHelpArticleDraftRequest $request, HelpArticle $article): JsonResponse
+    {
+        $this->authorizeHelp($request->user(), Permission::HELP_ARTICLES_EDIT);
+
+        $article->updateQuietly(array_merge(
+            $request->validated(),
+            ['draft_saved_at' => now()]
+        ));
+
+        return response()->json([
+            'success' => true,
+            'draft_saved_at' => $article->draft_saved_at->toISOString(),
+        ]);
     }
 
     /** POST /api/admin/help/articles/{article}/publish */

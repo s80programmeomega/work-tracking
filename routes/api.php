@@ -212,6 +212,7 @@ Route::middleware(['auth:sanctum', 'subscription.status'])->group(function () {
         Route::post('/articles', [AdminHelpController::class, 'storeArticle'])->name('articles.store');
         Route::get('/articles/{article}', [AdminHelpController::class, 'showArticle'])->name('articles.show');
         Route::put('/articles/{article}', [AdminHelpController::class, 'updateArticle'])->name('articles.update');
+        Route::patch('/articles/{article}/draft', [AdminHelpController::class, 'saveDraft'])->name('articles.draft');
         Route::post('/articles/{article}/publish', [AdminHelpController::class, 'publishArticle'])->name('articles.publish');
         Route::post('/articles/{article}/unpublish', [AdminHelpController::class, 'unpublishArticle'])->name('articles.unpublish');
         Route::delete('/articles/{article}', [AdminHelpController::class, 'destroyArticle'])->name('articles.destroy');
