@@ -5,7 +5,7 @@ import { defineConfig, loadEnv } from 'vite';
 
 // export default defineConfig(({ mode }) => {
 //     const env = loadEnv(mode, process.cwd(), '');
-    
+
 //     return {
 //         plugins: [
 //             laravel({
@@ -48,7 +48,7 @@ import { defineConfig, loadEnv } from 'vite';
 //         },
 //         // ✅ RETOUR à base: '/' pour ne pas affecter Vue Router
 //         base: '/',
-        
+
 //         // ✅ AJOUT : Configuration expérimentale pour préfixer les assets
 //         experimental: {
 //             renderBuiltUrl(filename, { hostType }) {
@@ -58,7 +58,7 @@ import { defineConfig, loadEnv } from 'vite';
 //                 return '/build/' + filename;
 //             }
 //         },
-        
+
 //         server: {
 //             host: true,
 //         },
