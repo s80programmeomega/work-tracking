@@ -767,6 +767,21 @@ export const useAuthStore = defineStore('auth', {
             }
         },
 
+        async fetchSessions() {
+            try {
+                const response = await authAPI.getSessions();
+                return response.data?.data ?? [];
+            } catch {
+                return [];
+            }
+        },
+
+        // Révoque toutes les sessions — en pratique, issueToken() garantit une seule
+        // session active par utilisateur, donc cela équivaut à un logout normal.
+        async logoutAllDevices() {
+            await this.logout();
+        },
+
        clearAuth() {
             // Stop all timers
             if (this.inactivityTimer) {

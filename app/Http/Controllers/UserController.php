@@ -16,6 +16,8 @@ use App\Models\Workspace;
 use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class UserController extends Controller
 {
@@ -223,6 +225,44 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'data' => $activities,
+        ]);
+    }
+
+    /**
+     * Retourne les tokens Sanctum actifs de l'utilisateur courant.
+     * Comme issueToken() révoque tous les tokens précédents à chaque connexion,
+     * il y a au plus un token actif par utilisateur.
+     */
+    public function sessions(Request $request): JsonResponse
+    {
+        /** @var PersonalAccessToken|null $currentToken */
+        $currentToken = $request->user()->currentAccessToken();
+        $currentId = $currentToken instanceof PersonalAccessToken
+            ? $currentToken->id
+            : null;
+
+        /** @var Collection<int, PersonalAccessToken> $tokens */
+        $tokens = $request->user()
+            ->tokens()
+            ->where('name', 'auth_token')
+            ->where(function ($q) {
+                $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
+            })
+            ->orderBy('last_used_at', 'desc')
+            ->get();
+
+        $sessions = $tokens->map(fn (PersonalAccessToken $token) => [
+            'id' => $token->id,
+            'name' => $token->name,
+            'created_at' => $token->created_at->toISOString(),
+            'last_used_at' => $token->last_used_at?->toISOString(),
+            'expires_at' => $token->expires_at?->toISOString(),
+            'is_current' => $currentId !== null && $currentId === $token->id,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $sessions,
         ]);
     }
 

@@ -2202,7 +2202,16 @@
     "btn_refresh": "Rafraîchir la session",
     "btn_logout_all": "Déconnexion de tous les appareils",
     "now": "Maintenant",
-    "confirm_logout_all": "Êtes-vous sûr de vouloir vous déconnecter de tous les appareils ?"
+    "confirm_logout_all": "Êtes-vous sûr de vouloir vous déconnecter de tous les appareils ?",
+    "active_sessions_title": "Sessions actives",
+    "active_sessions_desc": "Appareils actuellement connectés à votre compte",
+    "this_device": "Cet appareil",
+    "session_created": "Connecté depuis",
+    "session_last_used": "Dernière activité",
+    "session_never_used": "Jamais utilisé",
+    "session_revoke": "Révoquer",
+    "sessions_loading": "Chargement des sessions...",
+    "sessions_empty": "Aucune session active trouvée."
   },
   "notif_settings": {
     "title": "Paramètres de notifications",

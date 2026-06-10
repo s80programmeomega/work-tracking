@@ -29,10 +29,10 @@
 **Task:** Phase 11 — Dashboard Accuracy + Profile Page Fixes
 **Plan:** `docs/phase11-dashboard-profile/PLAN.md` (approved 2026-06-10)
 **Tracker:** `docs/phase11-dashboard-profile/PROGRESSION.md`
-**Branch:** `feature/phase11b-profile-quickwins` (2 of 5 sub-branches: 11A-11E; 11A merged into
-`jonas`, 11B not yet committed)
-**Status:** ✅ 11A done (2026-06-10, merged into `jonas`). ✅ 11B done (2026-06-10, not yet
-committed). 🔄 Next: 11C — session management.
+**Branch:** `feature/phase11c-session-management` (3 of 5 sub-branches: 11A-11E; 11A+11B merged
+into `jonas`, 11C not yet committed)
+**Status:** ✅ 11A done (merged `4367a3b`). ✅ 11B done (merged `ede759b`). ✅ 11C done
+(2026-06-10, not yet committed). 🔄 Next: 11D — Help Center draft auto-save.
 
 **11A — done (merged into `jonas` `4367a3b`, pushed to both remotes):**
 - `calculateStats()` now wires `calculateChange()` for `projets_actifs`/`taux_completion`/
@@ -52,42 +52,38 @@ committed). 🔄 Next: 11C — session management.
   SocialAuth ordering flake, passes in isolation).
 - Testing guide: `docs/testing/PHASE11A_TESTING.md`.
 
-**11B — done (on `feature/phase11b-profile-quickwins`, branched from `jonas` post-11A-merge; NOT
-yet committed):**
-- B2: New `useNotificationSound.js` composable (`playIfEnabled()`, reads
-  `localStorage.notificationSettings.notificationSounds`, `.play()` wrapped in try/catch for
-  autoplay restrictions) + new asset `public/sounds/notification.ogg` (short two-tone chime,
-  generated with `sox`, ~5.5KB). Wired into `App.vue`'s existing `onNotification(...)` callback
-  (registered via `useLiveNotifications`) — plays on every incoming live notification when the
-  setting is enabled.
-- B3: `PreferencesSettings.vue` reduced to Timezone section + Reset/Save actions only — removed
-  Theme, Language, Date Format, Display Density, Auto-Save (UI + `preferences.*` fields +
-  `applyTheme()`). `language`/`timezone` still sent via `PUT /users/profile` on save (unchanged
-  backend contract). Guide 14 check: `userPreferences` localStorage key only used within this
-  component; navbar theme/language switchers are independent. Removed now-unused
-  `pref_settings.theme_*`/`lang_*`/`date_*`/`density_*`/`autosave_*` i18n keys (fr/en).
-- B7: Removed dead `/settings` entry (`user_menu.account_settings`, 404) from `UserMenu.vue`'s
-  `menuItems` + unused `SettingsIcon` import; removed `user_menu.account_settings` i18n key
-  (fr/en) after confirming single usage.
-- No JS test runner configured — manual verification documented in
-  `docs/testing/PHASE11B_TESTING.md`. Pint + Larastan clean, `npm run build` green.
+**11B — done (merged into `jonas` `ede759b`):** notification sound, Preferences tab cleanup,
+dead navbar link. See commit history.
+
+**11C — done (on `feature/phase11c-session-management`, NOT yet committed):**
+- `GET /api/users/sessions` added to `UserController` — returns authenticated user's active
+  `auth_token` Sanctum tokens with `id`, `name`, `created_at`, `last_used_at`, `expires_at`,
+  `is_current`. Route wired in `routes/api.php`. Cross-user isolation enforced.
+- `authAPI.getSessions()` added; `authStore.fetchSessions()` + `authStore.logoutAllDevices()`
+  added (`logoutAllDevices` is alias for `logout()` — single-session design means no separate
+  revoke-all needed).
+- `SessionSettings.vue` fully rewritten with Tailwind, real sessions list, stagger animation,
+  "Cet appareil" + "Actif" badge, per-row Révoquer button, inactivity-timeout picker preserved.
+- New i18n keys added (fr/en): `active_sessions_*`, `this_device`, `session_created`,
+  `session_last_used`, `session_never_used`, `session_revoke`, `sessions_loading`,
+  `sessions_empty`.
+- `tests/Feature/UserSessionsTest.php` — 5 passing PHPUnit tests.
+- Pint + Larastan clean, `npm run build` green.
 
 **Sub-branch sequence:**
-1. ~~**11A** — Dashboard accuracy~~ ✅ done, merged into `jonas`.
-2. ~~**11B** — Profile quick wins~~ ✅ done, awaiting commit.
-3. **11C** (next) — Session management: Sanctum token list/revoke endpoints + real
-   `SessionSettings.vue` UI (replaces broken `authStore.logoutAllDevices()`).
-4. **11D** — Help Center Tiptap draft auto-save: new `draft_body_fr/en`/`draft_saved_at`
+1. ~~**11A** — Dashboard accuracy~~ ✅ merged into `jonas`.
+2. ~~**11B** — Profile quick wins~~ ✅ merged into `jonas`.
+3. ~~**11C** — Session management~~ ✅ done, awaiting commit.
+4. **11D** (next) — Help Center Tiptap draft auto-save: new `draft_body_fr/en`/`draft_saved_at`
    columns on `help_articles`, draft endpoint, restore/discard banner.
 5. **11E** — Activity tabs + Users management: wire profile Activité tab to real
    `GET /users/{user}/activity`; per-user activity drill-down for super-admin (from
    `/admin/users`) and a new workspace-owner-scoped "Users" page + endpoint + permission.
 
 **What to do next:**
-1. 11B is implemented but **not yet committed** — awaiting user instruction to commit (per
-   CLAUDE.md: never commit without explicit instruction).
-2. After commit, start 11C on a new branch `feature/phase11c-session-management` from `jonas`
-   (after 11B is merged into `jonas`, mirroring the 11A flow — confirm with user).
+1. 11C is implemented but **not yet committed** — awaiting user instruction to commit + push.
+2. After commit + merge into `jonas`, start 11D on a new branch
+   `feature/phase11d-help-draft-autosave`.
 3. After each sub-branch: tick `docs/phase11-dashboard-profile/PROGRESSION.md`, update the Phase
    11 row in main `docs/PROGRESSION.md`, write `docs/testing/PHASE11{A-E}_TESTING.md`, update this
    file (Current Task → next sub-branch).

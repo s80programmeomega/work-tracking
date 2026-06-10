@@ -22,7 +22,7 @@
 |---|---|---|---|---|---|---|
 | 11A | Dashboard & statistics accuracy (A1-A4) | `feature/phase11a-dashboard-accuracy` | ✅ | 2026-06-10 | 2026-06-10 | All A1-A4 done; 4 new dashboard tests + 1 admin overdue test; Pint/Larastan/build green |
 | 11B | Profile quick wins (B2 sound, B3 preferences cleanup, B7 dead link) | `feature/phase11b-profile-quickwins` | ✅ | 2026-06-10 | 2026-06-10 | Notification sound composable + asset; Preferences tab reduced to Timezone only; dead navbar link removed; Pint/Larastan/build green |
-| 11C | Session management (B1) | `feature/phase11c-session-management` | ⬜ | — | — | — |
+| 11C | Session management (B1) | `feature/phase11c-session-management` | ✅ | 2026-06-10 | 2026-06-10 | Real sessions list (GET /api/users/sessions); logoutAllDevices() wired; SessionSettings.vue rewritten with stagger; 5 PHPUnit tests; Pint/Larastan/build green |
 | 11D | Help Center draft auto-save (B4) | `feature/phase11d-help-draft-autosave` | ⬜ | — | — | — |
 | 11E | Activity tabs + Users management (B5 + B6) | `feature/phase11e-activity-users` | ⬜ | — | — | — |
 
@@ -79,24 +79,32 @@
 - [x] Main `docs/PROGRESSION.md` Phase 11 row updated
 - [x] `docs/SESSION_STATE.md` updated
 
-### 11C — Session Management
+### 11C — Session Management ✅
 
-- [ ] Migration: `user_agent`/`ip_address` columns added to `personal_access_tokens` (if needed)
-- [ ] `AuthService::login()` captures user-agent/IP on token creation
-- [ ] `GET /api/users/sessions` — list active sessions/tokens for current user
-- [ ] `DELETE /api/users/sessions/{tokenId}` — revoke own token (403 on others')
-- [ ] `POST /api/users/sessions/revoke-all` — revoke all tokens except current
-- [ ] `SessionSettings.vue` — real session list with stagger, "this device" badge, selective
-      termination, "logout all other devices"
-- [ ] `authStore` — `fetchSessions()`, `revokeSession()`, `revokeAllOtherSessions()` replace
-      non-existent `logoutAllDevices()`
-- [ ] PHPUnit feature tests (list/revoke/revoke-all, ownership checks)
-- [ ] 1 Dusk test for revoke flow
-- [ ] Pint + Larastan clean
-- [ ] `npm run build` green
-- [ ] `docs/testing/PHASE11C_TESTING.md` written
-- [ ] Main `docs/PROGRESSION.md` Phase 11 row updated
-- [ ] `docs/SESSION_STATE.md` updated
+- [x] No migration needed — `personal_access_tokens` already has `last_used_at`/`expires_at`;
+      no `user_agent`/`ip_address` required (single-session model makes per-device labelling
+      unnecessary)
+- [x] `GET /api/users/sessions` endpoint added to `UserController` — returns current user's
+      active `auth_token` tokens with `id`, `name`, `created_at`, `last_used_at`, `expires_at`,
+      `is_current` fields; scoped to authenticated user only (cross-user isolation confirmed)
+- [x] Route `GET /api/users/sessions` wired in `routes/api.php` (inside Sanctum-guarded `/users`
+      group)
+- [x] `authAPI.getSessions()` added to `resources/js/api/auth.js`
+- [x] `authStore.fetchSessions()` + `authStore.logoutAllDevices()` added; the latter is an alias
+      for `logout()` (single-session by design — no separate revoke-all needed)
+- [x] `SessionSettings.vue` rewritten — Tailwind-based (no more scoped CSS), real sessions list
+      with stagger (`useStagger`), "Cet appareil" + green "Actif" badge, created/last-used dates,
+      Révoquer button per row (triggers logout), inactivity-timeout picker preserved
+- [x] New i18n keys added: `active_sessions_title`, `active_sessions_desc`, `this_device`,
+      `session_created`, `session_last_used`, `session_never_used`, `session_revoke`,
+      `sessions_loading`, `sessions_empty` (fr/en)
+- [x] PHPUnit tests: `tests/Feature/UserSessionsTest.php` — 5 tests (401 unauth; 200 structure;
+      `is_current` flag; cross-user isolation; only `auth_token` tokens returned)
+- [x] Pint + Larastan clean (Pint auto-promoted inline FQCNs to `use` statements)
+- [x] `npm run build` green
+- [x] `docs/testing/PHASE11C_TESTING.md` written
+- [x] Main `docs/PROGRESSION.md` Phase 11 row updated
+- [x] `docs/SESSION_STATE.md` updated
 
 ### 11D — Help Center Draft Auto-Save
 

@@ -22,6 +22,10 @@ export const authAPI = {
         return api.post('/auth/logout');
     },
 
+    async getSessions() {
+        return api.get('/users/sessions');
+    },
+
     async getUser() {
         return api.get('/auth/me');
     },

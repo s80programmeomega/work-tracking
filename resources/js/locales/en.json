@@ -2199,7 +2199,16 @@
     "btn_refresh": "Refresh session",
     "btn_logout_all": "Logout from all devices",
     "now": "Now",
-    "confirm_logout_all": "Are you sure you want to logout from all devices?"
+    "confirm_logout_all": "Are you sure you want to logout from all devices?",
+    "active_sessions_title": "Active sessions",
+    "active_sessions_desc": "Devices currently connected to your account",
+    "this_device": "This device",
+    "session_created": "Connected since",
+    "session_last_used": "Last activity",
+    "session_never_used": "Never used",
+    "session_revoke": "Revoke",
+    "sessions_loading": "Loading sessions...",
+    "sessions_empty": "No active sessions found."
   },
   "notif_settings": {
     "title": "Notification Settings",
