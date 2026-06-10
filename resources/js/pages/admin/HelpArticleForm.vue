@@ -22,6 +22,7 @@
         <!-- Bannière brouillon non publié -->
         <div
           v-if="showDraftBanner"
+          dusk="draft-restore-banner"
           class="flex items-center justify-between gap-4 rounded-3 border border-amber-300 bg-amber-50 px-4 py-3 text-sm dark:border-amber-700 dark:bg-amber-900/20"
         >
           <span class="text-amber-800 dark:text-amber-300">
@@ -30,6 +31,7 @@
           <div class="flex shrink-0 gap-2">
             <button
               type="button"
+              dusk="draft-restore-btn"
               @click="restoreDraft"
               class="rounded-3 bg-amber-600 px-3 py-1 text-xs font-medium text-white hover:bg-amber-700"
             >
@@ -97,7 +99,7 @@
           </div>
 
           <!-- Indicateur de brouillon auto-enregistré -->
-          <p v-if="draftStatus" class="text-xs text-gray-400 dark:text-gray-500">
+          <p v-if="draftStatus" dusk="draft-status-indicator" class="text-xs text-gray-400 dark:text-gray-500">
             {{ draftStatus }}
           </p>
 

@@ -93,7 +93,7 @@
         </div>
 
         <!-- Sessions actives -->
-        <div class="p-5 border border-gray-200 rounded-3 dark:border-gray-800">
+        <div dusk="active-sessions-section" class="p-5 border border-gray-200 rounded-3 dark:border-gray-800">
             <div class="mb-4">
                 <h5 class="font-medium text-gray-800 dark:text-white/90">
                     {{ $t('session_settings.active_sessions_title') }}
@@ -111,10 +111,11 @@
                 {{ $t('session_settings.sessions_empty') }}
             </div>
 
-            <ul v-else ref="staggerRef" class="space-y-3">
+            <ul v-else dusk="sessions-list" ref="staggerRef" class="space-y-3">
                 <li
                     v-for="session in sessions"
                     :key="session.id"
+                    :dusk="`session-item-${session.id}`"
                     class="stagger-item flex items-center justify-between p-3 border border-gray-100 rounded-3 dark:border-gray-700"
                 >
                     <div class="flex items-center gap-3 min-w-0">
@@ -150,6 +151,7 @@
                     </div>
 
                     <button
+                        dusk="session-revoke-btn"
                         @click="revokeSession(session)"
                         class="ml-3 shrink-0 px-3 py-1.5 text-xs font-medium text-red-600 border border-red-200 rounded-3 hover:bg-red-50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/20"
                     >

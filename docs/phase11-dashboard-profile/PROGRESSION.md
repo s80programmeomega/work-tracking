@@ -20,10 +20,10 @@
 
 | # | Sub-task | Branch | Status | Started | Completed | Notes |
 |---|---|---|---|---|---|---|
-| 11A | Dashboard & statistics accuracy (A1-A4) | `feature/phase11a-dashboard-accuracy` | ✅ | 2026-06-10 | 2026-06-10 | All A1-A4 done; 4 new dashboard tests + 1 admin overdue test; Pint/Larastan/build green |
-| 11B | Profile quick wins (B2 sound, B3 preferences cleanup, B7 dead link) | `feature/phase11b-profile-quickwins` | ✅ | 2026-06-10 | 2026-06-10 | Notification sound composable + asset; Preferences tab reduced to Timezone only; dead navbar link removed; Pint/Larastan/build green |
-| 11C | Session management (B1) | `feature/phase11c-session-management` | ✅ | 2026-06-10 | 2026-06-10 | Real sessions list (GET /api/users/sessions); logoutAllDevices() wired; SessionSettings.vue rewritten with stagger; 5 PHPUnit tests; Pint/Larastan/build green |
-| 11D | Help Center draft auto-save (B4) | `feature/phase11d-help-draft-autosave` | ✅ | 2026-06-10 | 2026-06-10 | Migration + model + PATCH /draft endpoint + debounced auto-save + restore banner; 7 PHPUnit tests; Pint/Larastan/build green |
+| 11A | Dashboard & statistics accuracy (A1-A4) | `feature/phase11a-dashboard-accuracy` | ✅ | 2026-06-10 | 2026-06-10 | All A1-A4 done; 4 new dashboard tests + 1 admin overdue test; 3 Dusk tests (stat cards, hardcoded-value check, Kanban columns); Pint/Larastan/build green |
+| 11B | Profile quick wins (B2 sound, B3 preferences cleanup, B7 dead link) | `feature/phase11b-profile-quickwins` | ✅ | 2026-06-10 | 2026-06-10 | Notification sound composable + asset; Preferences tab reduced to Timezone only; dead navbar link removed; 3 Dusk tests (sound toggle, timezone section present, removed sections absent); Pint/Larastan/build green |
+| 11C | Session management (B1) | `feature/phase11c-session-management` | ✅ | 2026-06-10 | 2026-06-10 | Real sessions list (GET /api/users/sessions); logoutAllDevices() wired; SessionSettings.vue rewritten with stagger; 5 PHPUnit + 3 Dusk tests; Pint/Larastan/build green |
+| 11D | Help Center draft auto-save (B4) | `feature/phase11d-help-draft-autosave` | ✅ | 2026-06-10 | 2026-06-10 | Migration + model + PATCH /draft endpoint + debounced auto-save + restore banner; 7 PHPUnit + 3 Dusk tests (banner display, discard, auto-save indicator); Pint/Larastan/build green |
 | 11E | Activity tabs + Users management (B5 + B6) | `feature/phase11e-activity-users` | ⬜ | — | — | — |
 
 ---
@@ -48,6 +48,10 @@
 - [x] PHPUnit tests added/updated for dashboard stats + admin stats
       (`tests/Feature/Dashboard/DashboardStatsTest.php` — 4 tests;
       `PlatformDashboardTest::test_stats_overdue_uses_isoverdue_semantics_not_just_en_retard_status`)
+- [x] Dusk tests: `tests/Browser/Phase11/Phase11ADashboardTest.php` — 3 tests
+      (stat cards visible + change badges, no hardcoded +12%/+5%, Kanban active/completed cols)
+- [x] `dusk` attrs added: `stats-cards-grid`, `stat-card-{n}`, `stat-card-{n}-change`,
+      `kanban-board`, `kanban-col-{status}` in `Dashboard.vue`
 - [x] Pint + Larastan clean
 - [x] `npm run build` green
 - [x] `docs/testing/PHASE11A_TESTING.md` written
@@ -71,8 +75,12 @@
       already covers profile editing); unused `SettingsIcon` import removed
 - [x] B7: Unused `user_menu.account_settings` i18n key removed (fr/en) after confirming single
       usage
-- [x] Tests: no JS test runner configured (per plan, not introduced for this alone) — manual
-      verification steps documented in `docs/testing/PHASE11B_TESTING.md`
+- [x] Tests: no JS test runner configured — manual steps in `docs/testing/PHASE11B_TESTING.md`
+- [x] Dusk tests: `tests/Browser/Phase11/Phase11BProfileTest.php` — 3 tests
+      (sound toggle visible, timezone section present, theme/language/density sections absent)
+- [x] `dusk` attrs added: `notification-sounds-toggle` in `NotificationSettings.vue`;
+      `preferences-settings-panel`, `pref-timezone-section` in `PreferencesSettings.vue`;
+      `profile-tab-{id}` in `UserProfile.vue`
 - [x] Pint + Larastan clean
 - [x] `npm run build` green
 - [x] `docs/testing/PHASE11B_TESTING.md` written
@@ -100,6 +108,10 @@
       `sessions_loading`, `sessions_empty` (fr/en)
 - [x] PHPUnit tests: `tests/Feature/UserSessionsTest.php` — 5 tests (401 unauth; 200 structure;
       `is_current` flag; cross-user isolation; only `auth_token` tokens returned)
+- [x] Dusk tests: `tests/Browser/Phase11/Phase11CSessionTest.php` — 3 tests
+      (active-sessions section visible, sessions list renders, revoke button visible)
+- [x] `dusk` attrs added: `active-sessions-section`, `sessions-list`, `session-item-{id}`,
+      `session-revoke-btn` in `SessionSettings.vue`
 - [x] Pint + Larastan clean (Pint auto-promoted inline FQCNs to `use` statements)
 - [x] `npm run build` green
 - [x] `docs/testing/PHASE11C_TESTING.md` written
@@ -126,6 +138,11 @@
       unauthenticated 401, non-editor 403, super-admin 200, draft columns only written (body_fr
       + published_at unchanged), draft_saved_at set to now, member-with-edit 200,
       booted() hook not triggered on plain-text columns
+- [x] Dusk tests: `tests/Browser/Phase11/Phase11DHelpDraftTest.php` — 3 tests
+      (restore banner shown when draft > updated_at, discard hides banner, auto-save
+      indicator appears after typing in ProseMirror editor within debounce + network delay)
+- [x] `dusk` attrs added: `draft-restore-banner`, `draft-restore-btn`,
+      `draft-status-indicator` in `HelpArticleForm.vue`
 - [x] Pint clean
 - [x] Larastan clean (0 errors)
 - [x] `npm run build` green

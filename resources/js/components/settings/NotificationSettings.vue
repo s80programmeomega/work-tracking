@@ -166,6 +166,7 @@
           </div>
           <label class="relative inline-flex items-center cursor-pointer">
             <input
+              dusk="notification-sounds-toggle"
               type="checkbox"
               v-model="settings.notificationSounds"
               class="sr-only peer"

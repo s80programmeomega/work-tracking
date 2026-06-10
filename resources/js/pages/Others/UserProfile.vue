@@ -20,6 +20,7 @@
             <button
               v-for="tab in tabs"
               :key="tab.id"
+              :dusk="`profile-tab-${tab.id}`"
               @click="activeTab = tab.id"
               :class="[
                 'px-4 py-3 text-sm font-medium transition-all whitespace-nowrap',
