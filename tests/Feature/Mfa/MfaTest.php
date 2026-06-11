@@ -84,6 +84,7 @@ class MfaTest extends TestCase
         $this->mock(MfaService::class, function ($mock) use ($challengeToken, $user) {
             $mock->shouldReceive('resolveChallenge')->with($challengeToken)->andReturn($user);
             $mock->shouldReceive('verifyTotp')->andReturn(true);
+            $mock->shouldReceive('challengeRemember')->andReturn(false);
             $mock->shouldReceive('consumeChallenge')->andReturn(null);
             $mock->shouldNotReceive('verifyEmailOtp');
         });
