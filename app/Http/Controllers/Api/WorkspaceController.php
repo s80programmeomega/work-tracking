@@ -93,6 +93,7 @@ class WorkspaceController extends Controller
                 'can_help_articles_delete' => $gate->userCan($user, Permission::HELP_ARTICLES_DELETE, $workspace),
                 'can_help_articles_upload_image' => $gate->userCan($user, Permission::HELP_ARTICLES_UPLOAD_IMAGE, $workspace),
                 'can_help_categories_manage' => $gate->userCan($user, Permission::HELP_CATEGORIES_MANAGE, $workspace),
+                'can_view_members' => $gate->userCan($user, Permission::WORKSPACES_VIEW_MEMBERS, $workspace),
             ];
 
             return $workspace;
@@ -750,6 +751,7 @@ class WorkspaceController extends Controller
                         'can_help_articles_delete' => $gate->userCan($user, Permission::HELP_ARTICLES_DELETE, $workspace),
                         'can_help_articles_upload_image' => $gate->userCan($user, Permission::HELP_ARTICLES_UPLOAD_IMAGE, $workspace),
                         'can_help_categories_manage' => $gate->userCan($user, Permission::HELP_CATEGORIES_MANAGE, $workspace),
+                        'can_view_members' => $gate->userCan($user, Permission::WORKSPACES_VIEW_MEMBERS, $workspace),
                     ],
                 ];
             })
@@ -1112,6 +1114,63 @@ class WorkspaceController extends Controller
 
         return response()->json([
             'data' => $members,
+        ]);
+    }
+
+    /**
+     * Liste paginée des membres du workspace avec métadonnées de gestion.
+     * Requiert WORKSPACES_VIEW_MEMBERS (owner/directeur/manager).
+     */
+    public function workspaceUsers(Request $request, Workspace $workspace): JsonResponse
+    {
+        $user = $request->user();
+        $gate = app(ContextualPermissionGate::class);
+
+        abort_unless(
+            $gate->userCan($user, Permission::WORKSPACES_VIEW_MEMBERS, $workspace),
+            403,
+            'Accès non autorisé'
+        );
+
+        $request->validate([
+            'search' => 'sometimes|string|max:255',
+            'per_page' => 'sometimes|integer|min:1|max:100',
+        ]);
+
+        $query = $workspace->members()
+            ->withPivot(['role_id', 'invited_at', 'invited_by'])
+            ->when($request->filled('search'), function ($q) use ($request) {
+                $s = $request->search;
+                $q->where(function ($sub) use ($s) {
+                    $sub->where('nom', 'like', "%{$s}%")
+                        ->orWhere('email', 'like', "%{$s}%");
+                });
+            });
+
+        $members = $query->paginate($request->integer('per_page', 20));
+
+        $members->getCollection()->transform(function (User $member) {
+            $roleName = \Spatie\Permission\Models\Role::find($member->pivot->role_id)?->name ?? 'membre';
+            $member->pivot->role = $roleName;
+
+            return [
+                'id' => $member->id,
+                'nom' => $member->nom,
+                'email' => $member->email,
+                'avatar' => $member->avatar,
+                'fonction' => $member->fonction,
+                'workspace_role' => $roleName,
+                'joined_at' => $member->pivot->invited_at,
+                'last_login_at' => $member->last_login_at,
+            ];
+        });
+
+        return response()->json([
+            'data' => $members->items(),
+            'current_page' => $members->currentPage(),
+            'last_page' => $members->lastPage(),
+            'per_page' => $members->perPage(),
+            'total' => $members->total(),
         ]);
     }
 
@@ -1529,6 +1588,7 @@ class WorkspaceController extends Controller
                     'can_help_articles_delete' => $gate->userCan($user, Permission::HELP_ARTICLES_DELETE, $workspace),
                     'can_help_articles_upload_image' => $gate->userCan($user, Permission::HELP_ARTICLES_UPLOAD_IMAGE, $workspace),
                     'can_help_categories_manage' => $gate->userCan($user, Permission::HELP_CATEGORIES_MANAGE, $workspace),
+                    'can_view_members' => $gate->userCan($user, Permission::WORKSPACES_VIEW_MEMBERS, $workspace),
                 ],
                 'subscription_summary' => app(SubscriptionService::class)->summary($workspace),
             ]),

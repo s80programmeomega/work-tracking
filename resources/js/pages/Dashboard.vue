@@ -107,8 +107,9 @@
       <!-- Dashboard Content -->
       <div v-else class="space-y-8">
         <!-- Stats Cards -->
-        <div ref="statsRef" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div ref="statsRef" dusk="stats-cards-grid" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           <div v-for="(stat, index) in statsCards" :key="index"
+            :dusk="`stat-card-${index}`"
             class="stagger-item group bg-white dark:bg-gray-800 rounded-3 p-5 border border-gray-200 dark:border-gray-700 hover:border-brand-300 dark:hover:border-brand-600 transition-colors duration-200">
 
             <div class="flex items-start justify-between">
@@ -120,7 +121,7 @@
                   {{ stat.value }}
                 </p>
                 <div class="mt-3 flex items-center">
-                  <span :class="[
+                  <span :dusk="`stat-card-${index}-change`" :class="[
                     'flex items-center text-[10px] font-medium px-1.5 py-0.5 rounded-1 border',
                     stat.trend === 'up'
                       ? 'bg-success-50 text-success-500 border-success-300 dark:bg-success-500/15 dark:text-success-300 dark:border-success-500/30'
@@ -162,8 +163,10 @@
 
               <!-- Kanban Board -->
               <div
+                dusk="kanban-board"
                 class="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
                 <KanbanColumn v-for="column in kanbanColumns" :key="column.status" :column="column"
+                  :dusk="`kanban-col-${column.status}`"
                   :tasks="getProjectsByStatus(column.status)" @task-click="goToProject"
                   @task-drop="handleProjectDrop" />
               </div>

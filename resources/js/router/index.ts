@@ -609,6 +609,17 @@ const router = createRouter({
       },
     },
 
+    // Phase 11E — Gestion des utilisateurs du workspace (owner/directeur/manager)
+    {
+      path: '/workspace/users',
+      name: 'workspace.users',
+      component: () => import('../pages/workspace/WorkspaceUsers.vue'),
+      meta: {
+        title: 'Membres du workspace',
+        requiresAuth: true,
+      },
+    },
+
     {
       path: '/users/invitations',
       name: 'invitations',
@@ -879,7 +890,7 @@ router.beforeEach(async (to, from, next) => {
       // Super-admin only routes
       if (to.meta.requiresSuperAdmin && !authStore.user?.is_super_admin) {
         isLoading.value = false
-        return next({ name: '404 Error' })
+        return next({ name: '404 Error', query: { code: '403', from: to.fullPath } })
       }
 
       // Routes avec permissions requises
@@ -890,7 +901,7 @@ router.beforeEach(async (to, from, next) => {
           (to.meta.permissions as string[]).some((r: string) => userRoles.includes(r))
         if (!allowed) {
           isLoading.value = false
-          return next({ name: 'Unauthorized' })
+          return next({ name: '404 Error', query: { code: '403', from: to.fullPath } })
         }
       }
 

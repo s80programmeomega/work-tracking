@@ -789,3 +789,17 @@ Investigation confirmed the injection payloads are **not present anywhere in the
 - **Mass-assignment**: keep `$fillable` tight; never add security flags (`is_super_admin`, role columns) to fillable.
 
 This guide is a hard gate: a security lapse is a blocker on the same level as a failing test or a Larastan error.
+
+## Guide 26 — Python Dependencies (mandatory)
+
+Never install Python packages into the system Python interpreter. The system Python is OS-managed; installing into it with `pip install` or `--break-system-packages` can corrupt OS-level tooling.
+
+**Rule:** Any time a Python package is needed (scripting, tooling, one-off tasks), create and use a dedicated virtualenv:
+
+```bash
+python3 -m venv /tmp/venv
+/tmp/venv/bin/pip install <package>
+/tmp/venv/bin/python3 <script>
+```
+
+Use `/tmp/venv` for short-lived task venvs. Never pass `--break-system-packages`. Never `sudo pip install`. If a venv already exists at `/tmp/venv`, reuse it.

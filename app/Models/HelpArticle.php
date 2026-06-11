@@ -23,6 +23,9 @@ use Mews\Purifier\Facades\Purifier;
  * @property string $body_en
  * @property string $body_plain_fr
  * @property string $body_plain_en
+ * @property string|null $draft_body_fr
+ * @property string|null $draft_body_en
+ * @property Carbon|null $draft_saved_at
  * @property string|null $cover_image
  * @property int $views_count
  * @property Carbon|null $published_at
@@ -40,6 +43,9 @@ class HelpArticle extends Model
         'titre_en',
         'body_fr',
         'body_en',
+        'draft_body_fr',
+        'draft_body_en',
+        'draft_saved_at',
         'cover_image',
         'published_at',
         'created_by',
@@ -49,6 +55,7 @@ class HelpArticle extends Model
     protected $casts = [
         'views_count' => 'integer',
         'published_at' => 'datetime',
+        'draft_saved_at' => 'datetime',
     ];
 
     /**

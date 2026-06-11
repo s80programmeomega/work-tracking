@@ -20,6 +20,7 @@
             <button
               v-for="tab in tabs"
               :key="tab.id"
+              :dusk="`profile-tab-${tab.id}`"
               @click="activeTab = tab.id"
               :class="[
                 'px-4 py-3 text-sm font-medium transition-all whitespace-nowrap',
@@ -108,11 +109,6 @@
             <notification-settings :user="profileData" @refresh="loadProfile" />
           </div>
 
-          <!-- Préférences Tab -->
-          <div v-if="activeTab === 'preferences'">
-            <preferences-settings :user="profileData" @refresh="loadProfile" />
-          </div>
-
           <!-- Activité Tab -->
           <div v-if="activeTab === 'activity'">
             <activity-log :user="profileData" />
@@ -142,7 +138,6 @@ import AddressCard from '../../components/profile/AddressCard.vue'
 import SessionSettings from '@/components/settings/SessionSettings.vue'
 import TwoFactorSettings from '@/components/auth/TwoFactorSettings.vue'
 import NotificationSettings from '@/components/settings/NotificationSettings.vue'
-import PreferencesSettings from '@/components/settings/PreferencesSettings.vue'
 import ActivityLog from '@/components/profile/ActivityLog.vue'
 import { useUsers } from '@/composables/useUsers'
 import api from '@/api/axios'
@@ -155,7 +150,6 @@ import {
   UserIcon,
   ShieldCheckIcon,
   BellIcon,
-  CogIcon,
   ClockIcon
 } from '@heroicons/vue/24/outline'
 
@@ -178,7 +172,6 @@ const tabs = computed(() => [
   { id: 'profile', name: t('user_profile.tab_profile'), icon: UserIcon },
   { id: 'security', name: t('user_profile.tab_security'), icon: ShieldCheckIcon },
   { id: 'notifications', name: t('user_profile.tab_notifications'), icon: BellIcon },
-  { id: 'preferences', name: t('user_profile.tab_preferences'), icon: CogIcon },
   { id: 'activity', name: t('user_profile.tab_activity'), icon: ClockIcon }
 ])
 

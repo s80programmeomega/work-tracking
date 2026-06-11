@@ -679,6 +679,7 @@ export const useAuthStore = defineStore('auth', {
                 localStorage.setItem('user', JSON.stringify(user));
                 localStorage.setItem('auth_token', token);
                 localStorage.setItem('user_language', user.language || 'fr');
+                if (data.expires_at) { localStorage.setItem('token_expires_at', data.expires_at); }
 
                 this.setAxiosToken(token);
 
@@ -721,6 +722,7 @@ export const useAuthStore = defineStore('auth', {
             localStorage.setItem('user', JSON.stringify(user));
             localStorage.setItem('auth_token', token);
             localStorage.setItem('user_language', user.language || 'fr');
+            if (data.expires_at) { localStorage.setItem('token_expires_at', data.expires_at); }
             this.setAxiosToken(token);
             if (user.language) { this.setLanguage(user.language); }
             if (this.tokenExpiry) { this.startTokenAutoRefresh(); }
@@ -808,6 +810,7 @@ export const useAuthStore = defineStore('auth', {
             localStorage.removeItem('user');
             localStorage.removeItem('auth_token');
             localStorage.removeItem('current_workspace_id');
+            localStorage.removeItem('token_expires_at');
 
             this.setAxiosToken(null);
         },

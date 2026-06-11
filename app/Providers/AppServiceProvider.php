@@ -6,6 +6,7 @@ use App\Models\Document;
 use App\Models\SousTache;
 use App\Models\User;
 use App\Observers\SousTacheObserver;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\PersonalAccessToken;
@@ -27,6 +28,13 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         SousTache::observe(SousTacheObserver::class);
+
+        // Le lien de réinitialisation doit pointer vers le frontend SPA, pas vers une route Blade
+        ResetPassword::createUrlUsing(function (User $user, string $token): string {
+            return config('app.frontend_url', config('app.url'))
+                .'/reset-password?token='.$token
+                .'&email='.urlencode($user->email);
+        });
 
         // Log Viewer — contrôle d'accès.
         //

@@ -1,6 +1,39 @@
 <!-- resources/js/pages/admin/AdminUsers.vue -->
 <template>
   <AdminLayout>
+    <!-- Profile Modal -->
+    <UserProfileModal
+      v-if="profileModal.open"
+      :user-id="profileModal.userId"
+      @close="profileModal.open = false"
+      @saved="fetchUsers"
+    />
+
+    <!-- Activity Modal -->
+    <div v-if="activityModal.open" dusk="activity-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div class="bg-white dark:bg-gray-800 rounded-3 shadow-xl w-full max-w-5xl max-h-[90vh] flex flex-col">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+            {{ $t('admin.users.activity_modal_title', { name: activityModal.user?.nom }) }}
+          </h3>
+          <button
+            @click="activityModal.open = false"
+            class="p-2 text-gray-400 transition-colors rounded-3 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="overflow-y-auto flex-1">
+          <ActivityLogTab
+            v-if="activityModal.open"
+            :fixed-causer-id="activityModal.user?.id"
+            :fixed-causer-label="activityModal.user?.nom"
+          />
+        </div>
+      </div>
+    </div>
     <div class="space-y-6">
       <!-- Header -->
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -81,7 +114,7 @@
                 {{ user.last_login_at ? formatDate(user.last_login_at) : 'Never' }}
               </td>
               <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ formatDate(user.created_at) }}</td>
-              <td class="px-4 py-3">
+              <td class="px-4 py-3 flex gap-2">
                 <button
                   dusk="change-role-button"
                   @click="openRoleModal(user)"
@@ -89,6 +122,22 @@
                   title="Change role"
                 >
                   <i class="fas fa-user-shield mr-1"></i>Change role
+                </button>
+                <button
+                  dusk="view-activity-button"
+                  @click="openActivityModal(user)"
+                  class="text-xs px-2 py-1 bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 rounded hover:bg-purple-200 transition-colors"
+                  :title="$t('admin.users.btn_activity')"
+                >
+                  <i class="fas fa-history mr-1"></i>{{ $t('admin.users.btn_activity') }}
+                </button>
+                <button
+                  dusk="view-profile-button"
+                  @click="openProfileModal(user)"
+                  class="text-xs px-2 py-1 bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400 rounded hover:bg-teal-200 transition-colors"
+                  :title="$t('admin.users.btn_view_profile')"
+                >
+                  <i class="fas fa-user mr-1"></i>{{ $t('admin.users.btn_view_profile') }}
                 </button>
               </td>
             </tr>
@@ -159,6 +208,8 @@
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import AdminLayout from '@/components/layout/AdminLayout.vue';
+import ActivityLogTab from '@/components/admin/logs/ActivityLogTab.vue';
+import UserProfileModal from '@/components/admin/UserProfileModal.vue';
 import { useStagger } from '@/composables/useAnimations';
 import api from '@/api/axios';
 
@@ -173,6 +224,16 @@ const page = ref(1);
 
 const availableRoles = ['super_admin', 'directeur', 'utilisateur'];
 const roleModal = ref({ open: false, user: null, role: 'utilisateur', isSuperAdmin: false, loading: false, error: null });
+const activityModal = ref({ open: false, user: null });
+const profileModal = ref({ open: false, userId: null });
+
+const openActivityModal = (user) => {
+  activityModal.value = { open: true, user };
+};
+
+const openProfileModal = (user) => {
+  profileModal.value = { open: true, userId: user.id };
+};
 
 const formatDate = (iso) => iso ? new Date(iso).toLocaleDateString() : '—';
 

@@ -16,6 +16,17 @@
       <p class="mt-2 text-gray-500 dark:text-gray-400">{{ $t('activity_log.loading') }}</p>
     </div>
 
+    <!-- Error State -->
+    <div v-else-if="error" class="p-8 text-center">
+      <p class="text-red-500 dark:text-red-400">{{ error }}</p>
+      <button
+        @click="loadActivities"
+        class="mt-3 px-4 py-2 text-sm font-medium text-blue-600 transition-colors bg-blue-50 rounded-3 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400"
+      >
+        {{ $t('activity_log.btn_refresh') }}
+      </button>
+    </div>
+
     <!-- Activity Content -->
     <div v-else class="space-y-6">
       <!-- Filters -->
@@ -24,7 +35,7 @@
           <button
             v-for="filter in timeFilters"
             :key="filter.value"
-            @click="selectedTimeFilter = filter.value"
+            @click="selectTimeFilter(filter.value)"
             :class="[
               'px-3 py-1.5 text-sm font-medium rounded-3 transition-colors',
               selectedTimeFilter === filter.value
@@ -35,10 +46,11 @@
             {{ filter.label }}
           </button>
         </div>
-        
+
         <div class="flex items-center space-x-4">
           <select
             v-model="selectedType"
+            @change="currentPage = 1"
             class="bg-white border border-gray-300 text-gray-700 text-sm rounded-3 focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           >
             <option value="all">{{ $t('activity_log.type_all') }}</option>
@@ -48,13 +60,13 @@
             <option value="system">{{ $t('activity_log.type_system') }}</option>
           </select>
         </div>
-        
+
         <div class="flex items-center ml-auto space-x-2">
           <span class="text-sm text-gray-600 dark:text-gray-400">
             {{ $t('activity_log.count', { count: filteredActivities.length }) }}
           </span>
           <button
-            @click="refreshActivities"
+            @click="loadActivities"
             class="p-2 text-gray-500 transition-colors rounded-3 hover:bg-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300"
             :title="$t('activity_log.btn_refresh')"
           >
@@ -80,11 +92,11 @@
         <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700"></div>
 
         <!-- Activities -->
-        <div class="space-y-6">
+        <div ref="staggerRef" class="space-y-6">
           <div
             v-for="(activity, index) in paginatedActivities"
             :key="activity.id"
-            class="relative flex gap-4"
+            class="stagger-item relative flex gap-4"
           >
             <!-- Timeline dot -->
             <div class="relative z-10 flex-shrink-0">
@@ -124,27 +136,22 @@
                     </span>
                   </div>
                 </div>
-                
-                <!-- Activity details -->
+
+                <!-- Activity details: diff lines -->
                 <div v-if="activity.details" class="mt-3">
-                  <div class="p-3 text-sm bg-gray-50 rounded-3 dark:bg-gray-700">
-                    <pre class="whitespace-pre-wrap text-gray-600 dark:text-gray-300">{{ activity.details }}</pre>
+                  <div class="p-3 bg-gray-50 rounded-3 dark:bg-gray-700 space-y-1">
+                    <div
+                      v-for="(line, i) in activity.details.split('\n')"
+                      :key="i"
+                      class="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-300"
+                    >
+                      <span class="mt-px text-gray-400 dark:text-gray-500 shrink-0">▸</span>
+                      <span>{{ line }}</span>
+                    </div>
                   </div>
                 </div>
-                
-                <!-- Action buttons -->
-                <div v-if="activity.actions" class="flex gap-2 mt-4">
-                  <button
-                    v-for="action in activity.actions"
-                    :key="action.label"
-                    @click="handleAction(action, activity)"
-                    class="px-3 py-1.5 text-sm font-medium text-blue-600 transition-colors bg-blue-50 rounded-3 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
-                  >
-                    {{ action.label }}
-                  </button>
-                </div>
               </div>
-              
+
               <!-- Separator (except for last item) -->
               <div v-if="index < paginatedActivities.length - 1" class="absolute left-4 -bottom-3 w-0.5 h-6 bg-gray-200 dark:bg-gray-700"></div>
             </div>
@@ -209,7 +216,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
   CheckCircleIcon,
@@ -220,6 +227,8 @@ import {
   ClockIcon,
   ExclamationTriangleIcon
 } from '@heroicons/vue/24/outline'
+import { useStagger } from '@/composables/useAnimations'
+import api from '@/api/axios'
 
 const props = defineProps({
   user: {
@@ -230,11 +239,14 @@ const props = defineProps({
 
 const { t } = useI18n()
 const loading = ref(true)
+const error = ref(null)
 const activities = ref([])
-const selectedTimeFilter = ref('today')
+const selectedTimeFilter = ref('all')
 const selectedType = ref('all')
 const currentPage = ref(1)
 const itemsPerPage = ref(10)
+
+const { staggerRef, applyStagger } = useStagger(50)
 
 const timeFilters = computed(() => [
   { label: t('activity_log.filter_today'), value: 'today' },
@@ -288,80 +300,151 @@ const activityTypes = computed(() => ({
   }
 }))
 
+// Map spatie subject_type to UI type categories
+const mapSubjectType = (subjectType) => {
+  if (!subjectType) { return 'system' }
+  const short = subjectType.replace(/^App\\Models\\/, '').replace(/^App\/Models\//, '')
+  if (['Tache', 'SousTache', 'TacheResultat'].includes(short)) { return 'task' }
+  if (['Projet', 'Activite'].includes(short)) { return 'project' }
+  if (['User'].includes(short)) { return 'profile' }
+  if (['PersonalAccessToken'].includes(short)) { return 'login' }
+  return 'system'
+}
+
+const mapEvent = (event) => {
+  if (!event) { return 'system' }
+  const e = event.toLowerCase()
+  if (e.includes('login') || e.includes('logout') || e.includes('session') || e.includes('connexion')) { return 'login' }
+  return 'system'
+}
+
+// Human-readable event verb
+const humanizeEvent = (event) => {
+  if (!event) { return t('activity_log.event_updated') }
+  const e = event.toLowerCase()
+  if (e.includes('created') || e.includes('créé')) { return t('activity_log.event_created') }
+  if (e.includes('updated') || e.includes('mis à jour') || e.includes('modifié')) { return t('activity_log.event_updated') }
+  if (e.includes('deleted') || e.includes('supprimé')) { return t('activity_log.event_deleted') }
+  if (e.includes('login') || e.includes('connexion')) { return t('activity_log.event_logged_in') }
+  if (e.includes('logout') || e.includes('déconnexion')) { return t('activity_log.event_logged_out') }
+  if (e.includes('registered') || e.includes('inscription')) { return t('activity_log.event_registered') }
+  if (e.includes('assigned') || e.includes('assigné')) { return t('activity_log.event_assigned') }
+  if (e.includes('completed') || e.includes('terminé')) { return t('activity_log.event_completed') }
+  if (e.includes('comment')) { return t('activity_log.event_commented') }
+  if (e.includes('upload') || e.includes('document')) { return t('activity_log.event_uploaded') }
+  // Capitalise and return as-is
+  return event.charAt(0).toUpperCase() + event.slice(1)
+}
+
+// Human-readable subject label
+const humanizeSubject = (subjectType, props) => {
+  if (!subjectType) { return '' }
+  const short = subjectType.replace(/^App\\Models\\/, '').replace(/^App\/Models\//, '')
+  const nameFromProps = props?.attributes?.titre
+    ?? props?.attributes?.nom
+    ?? props?.attributes?.name
+    ?? props?.subject_name
+    ?? props?.name
+    ?? null
+  const labels = {
+    Tache: t('activity_log.subject_task'),
+    SousTache: t('activity_log.subject_subtask'),
+    TacheResultat: t('activity_log.subject_result'),
+    Projet: t('activity_log.subject_project'),
+    Activite: t('activity_log.subject_activity'),
+    User: t('activity_log.subject_user'),
+    PersonalAccessToken: t('activity_log.subject_session'),
+    Document: t('activity_log.subject_document'),
+  }
+  const typeLabel = labels[short] ?? short
+  return nameFromProps ? `${typeLabel} « ${nameFromProps} »` : typeLabel
+}
+
+// Build readable diff lines from spatie properties.old / properties.attributes
+const buildDiffLines = (properties) => {
+  if (!properties) { return [] }
+  const oldVals = properties.old ?? {}
+  const newVals = properties.attributes ?? {}
+  const fieldLabels = {
+    titre: t('activity_log.field_title'),
+    nom: t('activity_log.field_name'),
+    statut: t('activity_log.field_status'),
+    priorite: t('activity_log.field_priority'),
+    taux_realisation: t('activity_log.field_progress'),
+    echeance: t('activity_log.field_deadline'),
+    description: t('activity_log.field_description'),
+    responsable_id: t('activity_log.field_owner'),
+    email: 'Email',
+    timezone: t('activity_log.field_timezone'),
+    language: t('activity_log.field_language'),
+  }
+  const SKIP = new Set(['updated_at', 'created_at', 'id', 'password', 'remember_token'])
+  const allKeys = new Set([...Object.keys(oldVals), ...Object.keys(newVals)])
+  const lines = []
+  allKeys.forEach(k => {
+    if (SKIP.has(k)) { return }
+    const o = oldVals[k]
+    const n = newVals[k]
+    if (o === n) { return }
+    const label = fieldLabels[k] ?? k
+    if (o !== undefined && n !== undefined) {
+      lines.push(`${label}: ${o} → ${n}`)
+    } else if (n !== undefined) {
+      lines.push(`${label}: ${n}`)
+    }
+  })
+  return lines
+}
+
+// Normalize a spatie Activity record into the shape the template expects
+const normalizeActivity = (item) => {
+  const type = item.subject_type
+    ? mapSubjectType(item.subject_type)
+    : mapEvent(item.event)
+
+  const verb = humanizeEvent(item.event)
+  const subject = humanizeSubject(item.subject_type, item.properties)
+  const title = subject ? `${verb} — ${subject}` : verb
+
+  const diffLines = buildDiffLines(item.properties)
+  const description = item.human_readable
+    ?? (diffLines.length ? diffLines.join('\n') : (item.description ?? ''))
+
+  return {
+    id: item.id,
+    type,
+    title,
+    description,
+    timestamp: new Date(item.created_at),
+    details: diffLines.length > 1 ? diffLines.join('\n') : null,
+  }
+}
+
 const loadActivities = async () => {
+  if (!props.user?.id) { return }
   loading.value = true
-  
-  // Simulate API call
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  
-  // Generate mock data
-  activities.value = generateMockActivities()
-  loading.value = false
+  error.value = null
+  try {
+    const { data } = await api.get(`/users/${props.user.id}/activity`)
+    activities.value = (data.data ?? []).map(normalizeActivity)
+    await nextTick()
+    applyStagger()
+  } catch (err) {
+    error.value = err.response?.data?.message ?? t('activity_log.loading_error')
+  } finally {
+    loading.value = false
+  }
 }
 
-const generateMockActivities = () => {
-  const mockActivities = []
-  const types = Object.keys(activityTypes.value)
-  
-  for (let i = 0; i < 25; i++) {
-    const type = types[Math.floor(Math.random() * types.length)]
-    const hoursAgo = Math.floor(Math.random() * 168) // Last 7 days
-    
-    mockActivities.push({
-      id: i + 1,
-      type: type,
-      title: getMockTitle(type),
-      description: getMockDescription(type),
-      timestamp: new Date(Date.now() - hoursAgo * 60 * 60 * 1000),
-      details: Math.random() > 0.5 ? JSON.stringify({
-        project: 'Projet Alpha',
-        task: 'Tâche #123',
-        user: props.user?.nom || 'Utilisateur'
-      }, null, 2) : null,
-      actions: Math.random() > 0.7 ? [
-        { label: 'Voir', action: 'view' },
-        { label: 'Modifier', action: 'edit' }
-      ] : null
-    })
-  }
-  
-  // Sort by timestamp (newest first)
-  return mockActivities.sort((a, b) => b.timestamp - a.timestamp)
-}
-
-const getMockTitle = (type) => {
-  const titles = {
-    task: ['Tâche complétée', 'Tâche assignée', 'Tâche mise à jour'],
-    project: ['Projet créé', 'Projet modifié', 'Membre ajouté au projet'],
-    profile: ['Profil mis à jour', 'Mot de passe changé', 'Paramètres modifiés'],
-    system: ['Notification reçue', 'Rapport généré', 'Sauvegarde effectuée'],
-    deadline: ['Délai approchant', 'Délai dépassé', 'Rappel de délai'],
-    login: ['Connexion réussie', 'Tentative de connexion', 'Session expirée'],
-    error: ['Erreur système', 'Échec de sauvegarde', 'Problème réseau']
-  }
-  
-  const typeTitles = titles[type] || ['Activité']
-  return typeTitles[Math.floor(Math.random() * typeTitles.length)]
-}
-
-const getMockDescription = (type) => {
-  const descriptions = {
-    task: 'Une tâche a été mise à jour dans votre liste',
-    project: 'Changements apportés à un projet que vous suivez',
-    profile: 'Vos informations personnelles ont été modifiées',
-    system: 'Opération système effectuée avec succès',
-    deadline: 'Un délai important approche',
-    login: 'Activité de connexion détectée sur votre compte',
-    error: 'Une erreur nécessite votre attention'
-  }
-  
-  return descriptions[type] || 'Activité enregistrée'
+const selectTimeFilter = (value) => {
+  selectedTimeFilter.value = value
+  currentPage.value = 1
 }
 
 const filteredActivities = computed(() => {
   let filtered = [...activities.value]
-  
-  // Filter by time
+
+  // Filtre par période
   const now = new Date()
   if (selectedTimeFilter.value === 'today') {
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
@@ -373,12 +456,12 @@ const filteredActivities = computed(() => {
     const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
     filtered = filtered.filter(a => a.timestamp >= monthAgo)
   }
-  
-  // Filter by type
+
+  // Filtre par type
   if (selectedType.value !== 'all') {
     filtered = filtered.filter(a => a.type === selectedType.value)
   }
-  
+
   return filtered
 })
 
@@ -422,12 +505,12 @@ const formatTime = (timestamp) => {
   const diffMins = Math.floor(diffMs / 60000)
   const diffHours = Math.floor(diffMins / 60)
   const diffDays = Math.floor(diffHours / 24)
-  
-  if (diffMins < 1) return t('activity_log.time_now')
-  if (diffMins < 60) return t('activity_log.time_mins_ago', { n: diffMins })
-  if (diffHours < 24) return t('activity_log.time_hours_ago', { n: diffHours })
-  if (diffDays < 7) return t('activity_log.time_days_ago', { n: diffDays })
-  
+
+  if (diffMins < 1) { return t('activity_log.time_now') }
+  if (diffMins < 60) { return t('activity_log.time_mins_ago', { n: diffMins }) }
+  if (diffHours < 24) { return t('activity_log.time_hours_ago', { n: diffHours }) }
+  if (diffDays < 7) { return t('activity_log.time_days_ago', { n: diffDays }) }
+
   return timestamp.toLocaleDateString('fr-FR', {
     day: 'numeric',
     month: 'short',
@@ -435,22 +518,10 @@ const formatTime = (timestamp) => {
   })
 }
 
-const handleAction = (action, activity) => {
-  console.log('Action:', action.action, 'for activity:', activity.id)
-  // Implement action handling
-  alert(`Action "${action.label}" pour l'activité ${activity.title}`)
-}
-
-const refreshActivities = async () => {
-  await loadActivities()
-}
-
 const exportActivities = () => {
   const dataStr = JSON.stringify(filteredActivities.value, null, 2)
-  const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr)
-  
+  const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr)
   const exportFileDefaultName = `activites-${new Date().toISOString().split('T')[0]}.json`
-  
   const linkElement = document.createElement('a')
   linkElement.setAttribute('href', dataUri)
   linkElement.setAttribute('download', exportFileDefaultName)

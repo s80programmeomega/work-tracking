@@ -18,7 +18,8 @@ export const Permission = Object.freeze({
     WORKSPACES_CREATE_PROJECT:  'workspaces.create_project',
     WORKSPACES_INVITE_MEMBER:   'workspaces.invite_member',
     WORKSPACES_REMOVE_MEMBER:   'workspaces.remove_member',
-    WORKSPACES_MANAGE_SETTINGS: 'workspaces.manage_settings',
+    WORKSPACES_MANAGE_SETTINGS:  'workspaces.manage_settings',
+    WORKSPACES_VIEW_MEMBERS:     'workspaces.view_members',
 
     // Project
     PROJETS_VIEW:               'projets.view',

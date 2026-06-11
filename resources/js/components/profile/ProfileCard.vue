@@ -75,15 +75,24 @@
           <!-- Stats -->
           <div class="flex items-center order-2 gap-4 grow xl:order-3 xl:justify-end">
             <div class="text-center">
-              <div class="text-2xl font-bold text-gray-800 dark:text-white/90">12</div>
+              <div class="text-2xl font-bold text-gray-800 dark:text-white/90">
+                <span v-if="statsLoading" class="inline-block w-6 h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></span>
+                <span v-else>{{ stats.total_projets ?? '—' }}</span>
+              </div>
               <div class="text-xs text-gray-500 dark:text-gray-400">{{ $t('profile_card.stat_projects') }}</div>
             </div>
             <div class="text-center">
-              <div class="text-2xl font-bold text-gray-800 dark:text-white/90">47</div>
+              <div class="text-2xl font-bold text-gray-800 dark:text-white/90">
+                <span v-if="statsLoading" class="inline-block w-6 h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></span>
+                <span v-else>{{ stats.total_taches ?? '—' }}</span>
+              </div>
               <div class="text-xs text-gray-500 dark:text-gray-400">{{ $t('profile_card.stat_tasks') }}</div>
             </div>
             <div class="text-center">
-              <div class="text-2xl font-bold text-gray-800 dark:text-white/90">89%</div>
+              <div class="text-2xl font-bold text-gray-800 dark:text-white/90">
+                <span v-if="statsLoading" class="inline-block w-8 h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></span>
+                <span v-else>{{ stats.taux_completion != null ? stats.taux_completion + '%' : '—' }}</span>
+              </div>
               <div class="text-xs text-gray-500 dark:text-gray-400">{{ $t('profile_card.stat_efficiency') }}</div>
             </div>
           </div>
@@ -94,11 +103,11 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useUsers } from '@/composables/useUsers'
 import { useNotifications } from '@/composables/useNotifications'
- 
+import api from '@/api/axios'
 
 const props = defineProps({
   user: {
@@ -112,6 +121,22 @@ const emit = defineEmits(['refresh'])
 const { t } = useI18n()
 const { updateProfile } = useUsers()
 const { showSuccess, showError } = useNotifications()
+
+const stats = ref({ total_projets: null, total_taches: null, taux_completion: null })
+const statsLoading = ref(true)
+
+const loadStats = async () => {
+  try {
+    const res = await api.get('/users/profile-stats')
+    stats.value = res.data.data
+  } catch {
+    // Pas de toast — les chiffres restent à '—'
+  } finally {
+    statsLoading.value = false
+  }
+}
+
+onMounted(loadStats)
 
 const uploadingAvatar = ref(false)
 const avatarPreview = ref(null)

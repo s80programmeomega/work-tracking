@@ -111,14 +111,52 @@
                 </div>
 
                 <div>
-                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                    {{ $t('address_card.field_timezone') }}
-                  </label>
-                  <input
-                    type="text"
-                    v-model="formData.timezone"
-                    class="dark:bg-dark-900 h-11 w-full appearance-none rounded-3 border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                  />
+                  <div class="flex items-center justify-between mb-1.5">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-400">
+                      {{ $t('address_card.field_timezone') }}
+                    </label>
+                    <button
+                      type="button"
+                      @click="detectTimezone"
+                      class="text-xs text-brand-500 hover:text-brand-600 dark:text-brand-400 flex items-center gap-1"
+                      :title="$t('address_card.timezone_detect')"
+                    >
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      {{ $t('address_card.timezone_auto') }}
+                    </button>
+                  </div>
+                  <!-- Searchable timezone picker -->
+                  <div class="relative">
+                    <input
+                      type="text"
+                      v-model="timezoneSearch"
+                      @focus="showTimezoneList = true"
+                      @blur="onTimezoneBlur"
+                      :placeholder="formData.timezone || $t('address_card.timezone_placeholder')"
+                      class="dark:bg-dark-900 h-11 w-full appearance-none rounded-3 border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                    />
+                    <div
+                      v-if="showTimezoneList && filteredTimezones.length"
+                      class="absolute z-50 mt-1 w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3 shadow-lg max-h-48 overflow-y-auto"
+                    >
+                      <button
+                        v-for="tz in filteredTimezones"
+                        :key="tz"
+                        type="button"
+                        @mousedown.prevent="selectTimezone(tz)"
+                        class="w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                        :class="{ 'bg-brand-50 dark:bg-brand-900/20 font-medium': tz === formData.timezone }"
+                      >
+                        {{ tz }}
+                      </button>
+                    </div>
+                    <p v-if="formData.timezone" class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                      {{ $t('address_card.timezone_current') }}: <span class="font-medium text-gray-600 dark:text-gray-400">{{ formData.timezone }}</span>
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -146,7 +184,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useToast } from 'vue-toastification'
 import Modal from './Modal.vue'
@@ -167,26 +205,77 @@ const emit = defineEmits(['refresh'])
 
 const isProfileAddressModal = ref(false)
 
+// Timezone list — loaded lazily from browser Intl API
+const allTimezones = ref([])
+const timezoneSearch = ref('')
+const showTimezoneList = ref(false)
+
+const loadTimezones = () => {
+  if (allTimezones.value.length) { return }
+  try {
+    allTimezones.value = Intl.supportedValuesOf('timeZone')
+  } catch {
+    // Fallback pour les navigateurs sans Intl.supportedValuesOf
+    allTimezones.value = [
+      'UTC', 'Europe/Paris', 'Europe/London', 'America/New_York', 'America/Chicago',
+      'America/Denver', 'America/Los_Angeles', 'Asia/Tokyo', 'Asia/Shanghai',
+      'Asia/Kolkata', 'Australia/Sydney', 'Africa/Abidjan', 'Africa/Lagos',
+      'Africa/Nairobi', 'Africa/Johannesburg', 'Africa/Douala', 'Africa/Libreville',
+    ]
+  }
+}
+
+const filteredTimezones = computed(() => {
+  const q = timezoneSearch.value.toLowerCase()
+  if (!q) { return allTimezones.value.slice(0, 80) }
+  return allTimezones.value.filter(tz => tz.toLowerCase().includes(q)).slice(0, 80)
+})
+
+const selectTimezone = (tz) => {
+  formData.value.timezone = tz
+  timezoneSearch.value = ''
+  showTimezoneList.value = false
+}
+
+const onTimezoneBlur = () => {
+  setTimeout(() => { showTimezoneList.value = false }, 150)
+}
+
+const detectTimezone = () => {
+  const detected = Intl.DateTimeFormat().resolvedOptions().timeZone
+  if (detected) {
+    formData.value.timezone = detected
+    toast.success(t('address_card.timezone_detected', { tz: detected }))
+  }
+}
+
+watch(isProfileAddressModal, (open) => {
+  if (open) { loadTimezones() }
+})
+
 // Form data
 const formData = ref({
   adresse: '',
   language: 'fr',
-  timezone: 'UTC',
+  timezone: '',
 })
 
-// Watch for user changes and populate form
+// Watch for user changes and populate form; auto-detect timezone if not set
 watch(() => props.user, (newUser) => {
   if (newUser) {
     formData.value.adresse = newUser.adresse || ''
     formData.value.language = newUser.language || 'fr'
-    formData.value.timezone = newUser.timezone || 'UTC'
+    if (newUser.timezone) {
+      formData.value.timezone = newUser.timezone
+    } else {
+      // Auto-detect timezone on first load when user has none saved
+      formData.value.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
+    }
   }
 }, { immediate: true })
 
 const saveProfile = async () => {
   try {
-    // Correctif : cette sauvegarde était un stub (console.log) — elle persiste
-    // désormais réellement via l'API.
     await updateProfile({
       adresse: formData.value.adresse,
       language: formData.value.language,

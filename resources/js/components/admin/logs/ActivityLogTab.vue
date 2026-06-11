@@ -16,8 +16,8 @@
         />
       </div>
 
-      <!-- Filtre auteur (autocomplete) -->
-      <div class="relative min-w-48">
+      <!-- Filtre auteur (autocomplete) — masqué quand fixedCauserId est défini -->
+      <div v-if="!fixedCauserId" class="relative min-w-48">
         <UserIcon class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
         <input
           v-model="causerSearch"
@@ -42,6 +42,11 @@
             {{ user.nom }} <span class="text-gray-400 text-xs">{{ user.email }}</span>
           </li>
         </ul>
+      </div>
+      <!-- Indicateur auteur verrouillé (quand fixedCauserId est défini) -->
+      <div v-else class="flex items-center gap-2 rounded-3 border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-400">
+        <UserIcon class="h-4 w-4 shrink-0" />
+        <span>{{ fixedCauserLabel || $t('admin_logs.filter_causer_locked') }}</span>
       </div>
 
       <!-- Filtre événement -->
@@ -217,13 +222,26 @@ import DatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
 import LogDetailDrawer from './LogDetailDrawer.vue'
 
+const props = defineProps({
+  /** Quand défini, verrouille le filtre auteur sur cet ID et masque l'autocomplete. */
+  fixedCauserId: {
+    type: [Number, String],
+    default: null,
+  },
+  /** Libellé affiché à côté de l'icône quand l'auteur est verrouillé. */
+  fixedCauserLabel: {
+    type: String,
+    default: '',
+  },
+})
+
 const { staggerRef: tableBodyRef, applyStagger } = useStagger(30)
 
 const isDark = computed(() => document.documentElement.classList.contains('dark'))
 
 // Affichage lisible de la date sélectionnée dans le trigger du date picker
 const formatDisplay = (dateStr) => {
-  if (!dateStr) return ''
+  if (!dateStr) { return '' }
   const [y, m, d] = dateStr.split('-')
   return `${d}/${m}/${y}`
 }
@@ -240,7 +258,7 @@ const filters = ref({
   subject_type: '',
   date_from: '',
   date_to: '',
-  causer_id: '',
+  causer_id: props.fixedCauserId ? String(props.fixedCauserId) : '',
 })
 
 // ── Autocomplete auteur ────────────────────────────────────────────────────────
@@ -323,7 +341,14 @@ const changePage = (page) => loadActivities(page)
 const resetFilters = () => {
   causerSearch.value = ''
   causerSuggestions.value = []
-  filters.value = { search: '', event: '', subject_type: '', date_from: '', date_to: '', causer_id: '' }
+  filters.value = {
+    search: '',
+    event: '',
+    subject_type: '',
+    date_from: '',
+    date_to: '',
+    causer_id: props.fixedCauserId ? String(props.fixedCauserId) : '',
+  }
 }
 
 let filterDebounce = null

@@ -1,6 +1,6 @@
 <!-- resources\js\components\settings\PreferencesSettings.vue -->
 <template>
-  <div class="preferences-settings">
+  <div class="preferences-settings" dusk="preferences-settings-panel">
     <div class="mb-6">
       <h4 class="text-lg font-semibold text-gray-800 dark:text-white/90">
         {{ $t('pref_settings.title') }}
@@ -19,7 +19,7 @@
     <!-- Preferences Content -->
     <div v-else class="space-y-6">
       <!-- Timezone Settings -->
-      <div class="p-5 border border-gray-200 rounded-3 dark:border-gray-800">
+      <div dusk="pref-timezone-section" class="p-5 border border-gray-200 rounded-3 dark:border-gray-800">
         <div class="flex items-center justify-between mb-4">
           <div>
             <h5 class="font-medium text-gray-800 dark:text-white/90">{{ $t('pref_settings.tz_title') }}</h5>

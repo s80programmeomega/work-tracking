@@ -91,6 +91,9 @@ export function useWorkspacePermissions(workspace = null) {
     // Peut accéder à la recherche (toutes tiers confondus)
     const canSearch = computed(() => canSearchGlobal.value || canSearchScoped.value)
 
+    // Phase 11E: Voir la liste des membres et leur activité (owner/directeur + manager)
+    const canViewMembers = computed(() => isSuperAdmin.value || isDirecteur.value || (perms.value.can_view_members ?? false))
+
     // Phase 7: Centre d'aide — lecture pour tous les rôles ; gestion granulaire par action
     // (owner/directeur + super_admin par défaut).
     const canReadHelpArticles        = computed(() => isSuperAdmin.value || (perms.value.can_help_articles_read ?? true))
@@ -216,6 +219,9 @@ export function useWorkspacePermissions(workspace = null) {
         // G8
         canViewAllTasks,
         canSubmitResult,
+
+        // Phase 11E
+        canViewMembers,
 
         hasPermission,
         canPerformMemberAction,

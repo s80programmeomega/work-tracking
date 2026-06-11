@@ -159,32 +159,38 @@ class DashboardController extends Controller
     {
         $previousCutoff = now()->subMonth();
 
-        // Projets actifs : nombre actuel vs. nombre de projets actifs déjà
-        // créés il y a 1 mois (mêmes critères, snapshot dans le temps).
+        // Projets actifs : nombre actuel vs. nombre de projets actifs il y a 1 mois.
+        // "Il y a 1 mois" = projets créés avant la coupure (les nouveaux du mois
+        // n'existaient pas encore à cette date).
         $activeProjetsNow = $projets->where('status', 'active')->count();
         $activeProjetsPrevious = $projets
             ->where('status', 'active')
-            ->filter(fn ($p) => $p->created_at && $p->created_at->lte($previousCutoff))
+            ->filter(fn ($p) => $p->created_at && $p->created_at->lt($previousCutoff))
             ->count();
 
-        // Taux de complétion : sur les tâches existant déjà il y a 1 mois,
-        // quelle proportion était terminée à cette date-là vs. aujourd'hui.
-        $tachesPrevious = $taches->filter(fn ($t) => $t->created_at && $t->created_at->lte($previousCutoff));
+        // Taux de complétion : taux actuel (toutes tâches) vs. taux sur les
+        // tâches qui existaient déjà il y a 1 mois (snapshot basé sur created_at).
+        // Pour les "terminées avant la coupure" on utilise updated_at comme proxy
+        // de date de complétion (date_fin_reelle n'est pas chargée ici).
+        $tachesPrevious = $taches->filter(fn ($t) => $t->created_at && $t->created_at->lt($previousCutoff));
         $completionNow = $taches->count() > 0
             ? round(($taches->where('statut', TacheStatut::TERMINE)->count() / $taches->count()) * 100)
             : 0;
         $completionPrevious = $tachesPrevious->count() > 0
             ? round(($tachesPrevious->filter(fn ($t) => $t->statut === TacheStatut::TERMINE
-                && $t->date_fin_reelle && $t->date_fin_reelle->lte($previousCutoff))->count() / $tachesPrevious->count()) * 100)
+                && $t->updated_at && $t->updated_at->lt($previousCutoff))->count() / $tachesPrevious->count()) * 100)
             : 0;
 
-        // Tâches en retard : nombre actuel (isOverdue()) vs. nombre de
-        // tâches qui étaient déjà en retard il y a 1 mois (échéance dépassée
-        // à cette date et non terminées à cette date).
+        // Tâches en retard : nombre actuel vs. nombre qui étaient en retard il y a
+        // 1 mois (échéance dépassée par rapport à la coupure, créées avant la coupure,
+        // et toujours non terminées aujourd'hui — proxy fiable sans date_fin_reelle).
         $overdueNow = $taches->filter(fn ($t) => $t->isOverdue())->count();
-        $overduePrevious = $taches->filter(fn ($t) => $t->echeance
+        $overduePrevious = $taches->filter(fn ($t) => $t->created_at
+            && $t->created_at->lt($previousCutoff)
+            && $t->echeance
             && $t->echeance->lt($previousCutoff)
-            && (! $t->date_fin_reelle || $t->date_fin_reelle->gt($previousCutoff)))->count();
+            && $t->statut !== TacheStatut::TERMINE
+        )->count();
 
         return [
             'projets_actifs' => [

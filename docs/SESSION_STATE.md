@@ -29,10 +29,11 @@
 **Task:** Phase 11 — Dashboard Accuracy + Profile Page Fixes
 **Plan:** `docs/phase11-dashboard-profile/PLAN.md` (approved 2026-06-10)
 **Tracker:** `docs/phase11-dashboard-profile/PROGRESSION.md`
-**Branch:** `feature/phase11c-session-management` (3 of 5 sub-branches: 11A-11E; 11A+11B merged
-into `jonas`, 11C not yet committed)
+**Branch:** `feature/phase11e-activity-users` (all 5 sub-branches: 11A–11E complete; 11A+11B+11C
+merged into `jonas`; 11D+11E implemented, not yet committed)
 **Status:** ✅ 11A done (merged `4367a3b`). ✅ 11B done (merged `ede759b`). ✅ 11C done
-(2026-06-10, not yet committed). 🔄 Next: 11D — Help Center draft auto-save.
+(merged `9094286`). ✅ 11D done (2026-06-10, not yet committed). ✅ 11E done (2026-06-10, not
+yet committed). Phase 11 fully implemented — awaiting commit + push approval.
 
 **11A — done (merged into `jonas` `4367a3b`, pushed to both remotes):**
 - `calculateStats()` now wires `calculateChange()` for `projets_actifs`/`taux_completion`/
@@ -55,38 +56,60 @@ into `jonas`, 11C not yet committed)
 **11B — done (merged into `jonas` `ede759b`):** notification sound, Preferences tab cleanup,
 dead navbar link. See commit history.
 
-**11C — done (on `feature/phase11c-session-management`, NOT yet committed):**
-- `GET /api/users/sessions` added to `UserController` — returns authenticated user's active
-  `auth_token` Sanctum tokens with `id`, `name`, `created_at`, `last_used_at`, `expires_at`,
-  `is_current`. Route wired in `routes/api.php`. Cross-user isolation enforced.
-- `authAPI.getSessions()` added; `authStore.fetchSessions()` + `authStore.logoutAllDevices()`
-  added (`logoutAllDevices` is alias for `logout()` — single-session design means no separate
-  revoke-all needed).
-- `SessionSettings.vue` fully rewritten with Tailwind, real sessions list, stagger animation,
-  "Cet appareil" + "Actif" badge, per-row Révoquer button, inactivity-timeout picker preserved.
-- New i18n keys added (fr/en): `active_sessions_*`, `this_device`, `session_created`,
-  `session_last_used`, `session_never_used`, `session_revoke`, `sessions_loading`,
-  `sessions_empty`.
-- `tests/Feature/UserSessionsTest.php` — 5 passing PHPUnit tests.
+**11C — done (merged into `jonas` `9094286`):** `GET /api/users/sessions`; real session list in
+`SessionSettings.vue` with stagger; 5 PHPUnit tests; Pint/Larastan/build green.
+
+**11D — done (on `feature/phase11d-help-draft-autosave`, NOT yet committed):**
+- Migration: `draft_body_fr` / `draft_body_en` / `draft_saved_at` nullable columns added to
+  `help_articles` (run via `php artisan migrate`).
+- `HelpArticle` model: 3 new columns in `$fillable`; `draft_saved_at` → `datetime` cast; 3
+  `@property` PHPDoc entries.
+- `PATCH /api/admin/help/articles/{article}/draft` endpoint — `AdminHelpController::saveDraft()`;
+  uses `updateQuietly()` so the `booted()` Purifier hook on live `body_fr`/`body_en` never fires;
+  requires `help_articles.edit` permission; returns `{ success, draft_saved_at }`.
+- `SaveHelpArticleDraftRequest` form request; route wired in `routes/api.php`.
+- `HelpArticleForm.vue` fully updated: debounced 5s auto-save watching `form.body_fr`/`form.body_en`;
+  "Draft saved at HH:MM" status indicator; "Restore / Discard" amber banner shown on load when
+  `draft_saved_at > updated_at`; `onBeforeUnmount` clears pending timer.
+- New i18n keys (fr/en): `help.admin.draft_saved_at`, `draft_restore_banner`, `draft_restore`,
+  `draft_discard`, `draft_saving`, `draft_saved`.
+- `tests/Feature/Help/HelpArticleDraftTest.php` — 7 passing PHPUnit tests (401 unauth, 403
+  non-editor, 200 super-admin, draft-only write, `draft_saved_at` freshness, member-with-edit,
+  Purifier hook not triggered).
 - Pint + Larastan clean, `npm run build` green.
 
 **Sub-branch sequence:**
-1. ~~**11A** — Dashboard accuracy~~ ✅ merged into `jonas`.
-2. ~~**11B** — Profile quick wins~~ ✅ merged into `jonas`.
-3. ~~**11C** — Session management~~ ✅ done, awaiting commit.
-4. **11D** (next) — Help Center Tiptap draft auto-save: new `draft_body_fr/en`/`draft_saved_at`
-   columns on `help_articles`, draft endpoint, restore/discard banner.
-5. **11E** — Activity tabs + Users management: wire profile Activité tab to real
-   `GET /users/{user}/activity`; per-user activity drill-down for super-admin (from
-   `/admin/users`) and a new workspace-owner-scoped "Users" page + endpoint + permission.
+1. ~~**11A** — Dashboard accuracy~~ ✅ merged into `jonas` `4367a3b`.
+2. ~~**11B** — Profile quick wins~~ ✅ merged into `jonas` `ede759b`.
+3. ~~**11C** — Session management~~ ✅ merged into `jonas` `9094286`.
+4. ~~**11D** — Help Center draft auto-save~~ ✅ done (2026-06-10), not yet committed.
+5. ~~**11E** — Activity tabs + Users management~~ ✅ done (2026-06-10), not yet committed.
+
+**What was done (11E — on `feature/phase11e-activity-users`):**
+- **B5:** `ActivityLog.vue` wired to real `GET /users/{user}/activity` (mock generator removed);
+  `normalizeActivity()` mapper for spatie fields; `useStagger(50)` applied; error state + retry
+  button added; default filter changed to `'all'`.
+- **B6a:** `ActivityLogTab.vue` accepts `fixedCauserId`/`fixedCauserLabel` props — causer picker
+  hidden when locked; `resetFilters()` preserves lock. `AdminUsers.vue` gains purple "Activité"
+  button per row → opens modal with `ActivityLogTab` pre-filtered to that user.
+- **B6b:** New permission `WORKSPACES_VIEW_MEMBERS = 'workspaces.view_members'` (PHP + JS mirror);
+  `useWorkspacePermissions.js` exports `canViewMembers`; `WorkspaceController::workspaceUsers()`
+  endpoint (`GET /api/workspaces/{workspace}/users`, paginated + searchable); `user_permissions`
+  payload updated at all 3 locations in `WorkspaceController`; new `WorkspaceUsers.vue` page with
+  stagger + activity modal; route `workspace.users`; sidebar "Utilisateurs" entry gated on
+  `canViewMembers`; `docs/PERMISSIONS_MATRIX.md` updated (Guide 15).
+- 8 PHPUnit tests (`tests/Feature/Phase11ETest.php`), 3 Dusk tests
+  (`tests/Browser/Phase11/Phase11EActivityUsersTest.php`).
+- i18n: `workspace_users.*`, `sidebar.workspace_users`, `admin.users.btn_activity`,
+  `admin_logs.filter_causer_locked`, `activity_log.loading_error` (fr + en).
+- Pint clean (3 files auto-fixed), Larastan 0 errors, `npm run build` green.
+- `docs/testing/PHASE11E_TESTING.md` written.
 
 **What to do next:**
-1. 11C is implemented but **not yet committed** — awaiting user instruction to commit + push.
-2. After commit + merge into `jonas`, start 11D on a new branch
-   `feature/phase11d-help-draft-autosave`.
-3. After each sub-branch: tick `docs/phase11-dashboard-profile/PROGRESSION.md`, update the Phase
-   11 row in main `docs/PROGRESSION.md`, write `docs/testing/PHASE11{A-E}_TESTING.md`, update this
-   file (Current Task → next sub-branch).
+1. 11D + 11E are both implemented but **not yet committed** — awaiting explicit user instruction
+   to commit + push each branch.
+2. After commits + merges into `jonas` (both remotes), Phase 11 is complete.
+3. User mentioned post-11E adjustments — ask for specifics when the commits are done.
 
 ---
 
