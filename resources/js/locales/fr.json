@@ -1906,6 +1906,7 @@
       "role_admin": "Admin",
       "role_member": "Membre",
       "role_viewer": "Lecteur",
+      "role_undefined": "—",
       "empty_title": "Aucun workspace trouvé",
       "empty_search": "Essayez une autre recherche",
       "empty_default": "Vous n'avez accès à aucun workspace"

@@ -1903,6 +1903,7 @@
       "role_admin": "Admin",
       "role_member": "Member",
       "role_viewer": "Viewer",
+      "role_undefined": "—",
       "empty_title": "No workspace found",
       "empty_search": "Try a different search",
       "empty_default": "You have no access to any workspace"
