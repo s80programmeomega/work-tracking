@@ -103,9 +103,9 @@ import { ref } from 'vue'
 import CommonGridShape from '@/components/common/CommonGridShape.vue'
 import FullScreenLayout from '@/components/layout/FullScreenLayout.vue'
 import api from '@/api/axios'
-// import LogoDark from '@/assets/images/logo/Logo-dark.jpg'
+// import LogoDark from '@/assets/images/logo/logo-transparent.png'
 
-const LogoDark = new URL('@/assets/images/logo/Logo-dark.jpg', import.meta.url).href
+const LogoDark = new URL('@/assets/images/logo/logo-transparent.png', import.meta.url).href
 const email = ref('')
 const loading = ref(false)
 const error = ref(null)

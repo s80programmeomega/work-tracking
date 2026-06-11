@@ -80,21 +80,21 @@ class AuthService
     }
 
     /**
-     * Émet un token Sanctum 7 jours pour l'utilisateur donné.
-     * Appelé après authentification réussie (sans MFA ou après challenge MFA validé).
+     * Émet un token Sanctum pour l'utilisateur.
+     * Sans "Se souvenir" : expire dans 24 h. Avec : expire dans 15 jours.
      */
-    public function issueToken(User $user): array
+    public function issueToken(User $user, bool $remember = false): array
     {
         // Révocation des sessions existantes : une seule session active par utilisateur.
-        // Empêche deux onglets du même navigateur de maintenir des sessions parallèles.
         $user->tokens()->where('name', 'auth_token')->delete();
 
-        $token = $user->createToken('auth_token', ['*'], now()->addDays(7))->plainTextToken;
+        $expiresAt = $remember ? now()->addDays(15) : now()->addHours(24);
+        $token = $user->createToken('auth_token', ['*'], $expiresAt)->plainTextToken;
 
         return [
             'token' => $token,
             'token_type' => 'Bearer',
-            'expires_at' => now()->addDays(7)->toISOString(),
+            'expires_at' => $expiresAt->toISOString(),
         ];
     }
 
@@ -128,12 +128,13 @@ class AuthService
             $user->currentAccessToken()->delete();
         }
 
-        $token = $user->createToken('auth_token', ['*'], now()->addDays(7))->plainTextToken;
+        $expiresAt = now()->addHours(24);
+        $token = $user->createToken('auth_token', ['*'], $expiresAt)->plainTextToken;
 
         return [
             'token' => $token,
             'token_type' => 'Bearer',
-            'expires_at' => now()->addDays(7)->toISOString(),
+            'expires_at' => $expiresAt->toISOString(),
         ];
     }
 

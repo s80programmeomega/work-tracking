@@ -203,6 +203,7 @@ layer(base);
   }
   body {
     @apply relative font-normal font-outfit z-1 bg-gray-50 dark:bg-gray-900;
+    cursor: default;
   }
 }
 
@@ -797,4 +798,38 @@ body {
 .page-enter-from,
 .page-leave-to {
     opacity: 0;
+}
+
+/* Cursor reset — placé hors de toute @layer pour garantir la priorité maximale.
+   Empêche le curseur texte (I-beam) sur les éléments non éditables.
+   user-select:none est le seul moyen fiable d'empêcher le I-beam navigateur
+   sur les nœuds texte non éditables (cursor seul ne suffit pas). */
+body, body * {
+    cursor: default !important;
+    user-select: none !important;
+}
+a, button, [role="button"], [role="link"], select,
+label[for], summary {
+    cursor: pointer !important;
+}
+a *, button *, [role="button"] *, [role="link"] * {
+    cursor: pointer !important;
+}
+input:not([type="range"]):not([type="checkbox"]):not([type="radio"]):not([readonly]):not([disabled]),
+textarea:not([readonly]):not([disabled]),
+[contenteditable="true"],
+[contenteditable=""] {
+    cursor: text !important;
+    user-select: text !important;
+}
+input[type="range"] {
+    cursor: grab !important;
+    user-select: none !important;
+}
+[disabled], [aria-disabled="true"] {
+    cursor: not-allowed !important;
+}
+/* Restore text selection where needed */
+p, h1, h2, h3, h4, h5, h6, span, li, td, th, pre, code, blockquote {
+    user-select: text !important;
 }

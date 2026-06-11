@@ -22,6 +22,9 @@ final class Permission
 
     const WORKSPACES_MANAGE_SETTINGS = 'workspaces.manage_settings';
 
+    /** Voir la liste des membres du workspace et leur journal d'activité (owner/directeur). */
+    const WORKSPACES_VIEW_MEMBERS = 'workspaces.view_members';
+
     // ── Project ───────────────────────────────────────────────────────────
     const PROJETS_VIEW = 'projets.view';
 
@@ -185,6 +188,7 @@ final class Permission
             self::WORKSPACES_INVITE_MEMBER,
             self::WORKSPACES_REMOVE_MEMBER,
             self::WORKSPACES_MANAGE_SETTINGS,
+            self::WORKSPACES_VIEW_MEMBERS,
 
             self::PROJETS_VIEW,
             self::PROJETS_EDIT,
@@ -282,6 +286,8 @@ final class Permission
                 self::WORKSPACES_INVITE_MEMBER,
                 self::WORKSPACES_REMOVE_MEMBER,
                 self::WORKSPACES_MANAGE_SETTINGS,
+                // Phase 11E — managers peuvent consulter la liste des membres et leur activité.
+                self::WORKSPACES_VIEW_MEMBERS,
                 self::PROJETS_VIEW,
                 self::PROJETS_EDIT,
                 self::PROJETS_DELETE,

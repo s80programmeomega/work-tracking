@@ -58,9 +58,11 @@ class AuthController extends Controller
             /** @var User $user */
             $user = $result['user'];
 
+            $remember = $request->boolean('remember');
+
             // Si l'utilisateur a un facteur 2FA actif, émettre un challenge temporaire
             if ($this->mfaService->hasFactor($user)) {
-                $challengeToken = $this->mfaService->createChallengeToken($user);
+                $challengeToken = $this->mfaService->createChallengeToken($user, $remember);
 
                 return response()->json([
                     'two_factor' => true,
@@ -70,7 +72,7 @@ class AuthController extends Controller
             }
 
             // Pas de MFA — émettre le token Sanctum directement
-            $tokenData = $this->authService->issueToken($user);
+            $tokenData = $this->authService->issueToken($user, $remember);
 
             return response()->json([
                 'message' => 'Login successful',
@@ -178,9 +180,10 @@ class AuthController extends Controller
             return response()->json(['message' => __('auth.mfa.invalid_code')], 422);
         }
 
+        $remember = $this->mfaService->challengeRemember($request->challenge_token);
         $this->mfaService->consumeChallenge($request->challenge_token);
 
-        $result = $this->authService->issueToken($user);
+        $result = $this->authService->issueToken($user, $remember);
 
         Log::info('Challenge MFA validé', ['user_id' => $user->id, 'type' => $request->type]);
 

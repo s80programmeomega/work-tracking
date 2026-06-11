@@ -29,11 +29,11 @@
 **Task:** Phase 11 — Dashboard Accuracy + Profile Page Fixes
 **Plan:** `docs/phase11-dashboard-profile/PLAN.md` (approved 2026-06-10)
 **Tracker:** `docs/phase11-dashboard-profile/PROGRESSION.md`
-**Branch:** `feature/phase11d-help-draft-autosave` (4 of 5 sub-branches: 11A-11E; 11A+11B+11C
-merged into `jonas`)
+**Branch:** `feature/phase11e-activity-users` (all 5 sub-branches: 11A–11E complete; 11A+11B+11C
+merged into `jonas`; 11D+11E implemented, not yet committed)
 **Status:** ✅ 11A done (merged `4367a3b`). ✅ 11B done (merged `ede759b`). ✅ 11C done
-(merged `9094286`). ✅ 11D done (2026-06-10, not yet committed). 🔄 Next: 11E — Activity tabs +
-Users management.
+(merged `9094286`). ✅ 11D done (2026-06-10, not yet committed). ✅ 11E done (2026-06-10, not
+yet committed). Phase 11 fully implemented — awaiting commit + push approval.
 
 **11A — done (merged into `jonas` `4367a3b`, pushed to both remotes):**
 - `calculateStats()` now wires `calculateChange()` for `projets_actifs`/`taux_completion`/
@@ -82,18 +82,34 @@ dead navbar link. See commit history.
 1. ~~**11A** — Dashboard accuracy~~ ✅ merged into `jonas` `4367a3b`.
 2. ~~**11B** — Profile quick wins~~ ✅ merged into `jonas` `ede759b`.
 3. ~~**11C** — Session management~~ ✅ merged into `jonas` `9094286`.
-4. ~~**11D** — Help Center draft auto-save~~ ✅ done, awaiting commit.
-5. **11E** (next) — Activity tabs + Users management: wire profile Activité tab to real
-   `GET /users/{user}/activity`; per-user activity drill-down for super-admin (from
-   `/admin/users`) and a new workspace-owner-scoped "Users" page + endpoint + permission.
+4. ~~**11D** — Help Center draft auto-save~~ ✅ done (2026-06-10), not yet committed.
+5. ~~**11E** — Activity tabs + Users management~~ ✅ done (2026-06-10), not yet committed.
+
+**What was done (11E — on `feature/phase11e-activity-users`):**
+- **B5:** `ActivityLog.vue` wired to real `GET /users/{user}/activity` (mock generator removed);
+  `normalizeActivity()` mapper for spatie fields; `useStagger(50)` applied; error state + retry
+  button added; default filter changed to `'all'`.
+- **B6a:** `ActivityLogTab.vue` accepts `fixedCauserId`/`fixedCauserLabel` props — causer picker
+  hidden when locked; `resetFilters()` preserves lock. `AdminUsers.vue` gains purple "Activité"
+  button per row → opens modal with `ActivityLogTab` pre-filtered to that user.
+- **B6b:** New permission `WORKSPACES_VIEW_MEMBERS = 'workspaces.view_members'` (PHP + JS mirror);
+  `useWorkspacePermissions.js` exports `canViewMembers`; `WorkspaceController::workspaceUsers()`
+  endpoint (`GET /api/workspaces/{workspace}/users`, paginated + searchable); `user_permissions`
+  payload updated at all 3 locations in `WorkspaceController`; new `WorkspaceUsers.vue` page with
+  stagger + activity modal; route `workspace.users`; sidebar "Utilisateurs" entry gated on
+  `canViewMembers`; `docs/PERMISSIONS_MATRIX.md` updated (Guide 15).
+- 8 PHPUnit tests (`tests/Feature/Phase11ETest.php`), 3 Dusk tests
+  (`tests/Browser/Phase11/Phase11EActivityUsersTest.php`).
+- i18n: `workspace_users.*`, `sidebar.workspace_users`, `admin.users.btn_activity`,
+  `admin_logs.filter_causer_locked`, `activity_log.loading_error` (fr + en).
+- Pint clean (3 files auto-fixed), Larastan 0 errors, `npm run build` green.
+- `docs/testing/PHASE11E_TESTING.md` written.
 
 **What to do next:**
-1. 11D is implemented but **not yet committed** — awaiting user instruction to commit + push.
-2. After commit + merge into `jonas`, start 11E on a new branch
-   `feature/phase11e-activity-users` (branched from `feature/phase11d-help-draft-autosave`).
-3. After each sub-branch: tick `docs/phase11-dashboard-profile/PROGRESSION.md`, update the Phase
-   11 row in main `docs/PROGRESSION.md`, write `docs/testing/PHASE11E_TESTING.md`, update this
-   file (Current Task → next sub-branch).
+1. 11D + 11E are both implemented but **not yet committed** — awaiting explicit user instruction
+   to commit + push each branch.
+2. After commits + merges into `jonas` (both remotes), Phase 11 is complete.
+3. User mentioned post-11E adjustments — ask for specifics when the commits are done.
 
 ---
 

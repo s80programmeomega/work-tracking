@@ -369,11 +369,11 @@ import CommonGridShape from "@/components/common/CommonGridShape.vue";
 import FullScreenLayout from "@/components/layout/FullScreenLayout.vue";
 import LanguageSwitcher from "@/components/common/LanguageSwitcher.vue";
 import { useAuthStore } from "@/stores/authStore";
-// import LogoDark from '@/assets/images/logo/Logo-dark.jpg'
+// import LogoDark from '@/assets/images/logo/logo-transparent.png'
 
 
 // Composables et stores
-const LogoDark = new URL('@/assets/images/logo/Logo-dark.jpg', import.meta.url).href
+const LogoDark = new URL('@/assets/images/logo/logo-transparent.png', import.meta.url).href
 const { t, locale } = useI18n();
 const router = useRouter();
 const route = useRoute();

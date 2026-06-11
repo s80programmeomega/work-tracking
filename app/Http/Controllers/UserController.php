@@ -13,6 +13,8 @@ use App\Models\Tache;
 use App\Models\TacheResultat;
 use App\Models\User;
 use App\Models\Workspace;
+use App\Permissions\ContextualPermissionGate;
+use App\Permissions\Permission;
 use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -263,6 +265,72 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'data' => $sessions,
+        ]);
+    }
+
+    /**
+     * Consulte le profil d'un utilisateur avec les droits appropriés.
+     * - Super-admin : accès complet + flag can_edit = true.
+     * - Propriétaire/manager de workspace partageant un workspace avec la cible : lecture seule (can_edit = false).
+     * - Soi-même : accès complet + can_edit = true.
+     * - Autres : 403.
+     */
+    public function profileView(Request $request, User $user): JsonResponse
+    {
+        /** @var User $viewer */
+        $viewer = $request->user();
+        $isSelf = $viewer->id === $user->id;
+        $isSuperAdmin = $viewer->isSuperAdmin();
+
+        // Vérifie si le viewer partage un workspace avec la cible et possède WORKSPACES_VIEW_MEMBERS
+        $canViewAsManager = false;
+        if (! $isSelf && ! $isSuperAdmin) {
+            $gate = app(ContextualPermissionGate::class);
+            $sharedWorkspace = Workspace::whereHas('members', fn ($q) => $q->where('users.id', $viewer->id))
+                ->whereHas('members', fn ($q) => $q->where('users.id', $user->id))
+                ->first();
+            if ($sharedWorkspace && $gate->userCan($viewer, Permission::WORKSPACES_VIEW_MEMBERS, $sharedWorkspace)) {
+                $canViewAsManager = true;
+            }
+        }
+
+        abort_unless($isSelf || $isSuperAdmin || $canViewAsManager, 403, 'Accès non autorisé');
+
+        $user->load(['roles', 'permissions']);
+        $stats = $this->userService->getUserStats($user);
+
+        return response()->json([
+            'success' => true,
+            'can_edit' => $isSelf || $isSuperAdmin,
+            'data' => new UserResource($user->setAttribute('stats', $stats)),
+        ]);
+    }
+
+    /**
+     * Statistiques de l'utilisateur courant pour le bloc de profil.
+     * Retourne le nombre de projets, tâches assignées, et taux de complétion.
+     */
+    public function profileStats(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        $taches = $user->taches()->with([])->get(['statut', 'taux_realisation']);
+
+        $totalTaches = $taches->count();
+        $tachesTerminees = $taches->where('statut', 'termine')->count();
+        $tauxCompletion = $totalTaches > 0
+            ? (int) round(($tachesTerminees / $totalTaches) * 100)
+            : 0;
+
+        $totalProjets = $user->projets()->count();
+
+        return response()->json([
+            'data' => [
+                'total_projets' => $totalProjets,
+                'total_taches' => $totalTaches,
+                'taux_completion' => $tauxCompletion,
+            ],
         ]);
     }
 

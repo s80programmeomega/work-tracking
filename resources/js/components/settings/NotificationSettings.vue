@@ -116,45 +116,6 @@
           </label>
         </div>
 
-        <!-- Frequency Settings -->
-        <div v-if="settings.inAppNotifications" class="pl-4 mt-4 space-y-4 border-l-2 border-gray-200 dark:border-gray-700">
-          <div>
-            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-              {{ $t('notif_settings.freq_label') }}
-            </label>
-            <select
-              v-model="settings.notificationFrequency"
-              @change="updateSettings"
-              class="bg-gray-50 border border-gray-300 text-gray-700 text-sm rounded-3 focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            >
-              <option value="realtime">{{ $t('notif_settings.freq_realtime') }}</option>
-              <option value="hourly">{{ $t('notif_settings.freq_hourly') }}</option>
-              <option value="daily">{{ $t('notif_settings.freq_daily') }}</option>
-              <option value="weekly">{{ $t('notif_settings.freq_weekly') }}</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-              {{ $t('notif_settings.hours_label') }}
-            </label>
-            <div class="flex items-center space-x-4">
-              <input
-                type="time"
-                v-model="settings.notificationStartTime"
-                @change="updateSettings"
-                class="bg-gray-50 border border-gray-300 text-gray-700 text-sm rounded-3 focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              >
-              <span class="text-gray-500 dark:text-gray-400">{{ $t('notif_settings.hours_to') }}</span>
-              <input
-                type="time"
-                v-model="settings.notificationEndTime"
-                @change="updateSettings"
-                class="bg-gray-50 border border-gray-300 text-gray-700 text-sm rounded-3 focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              >
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- Notification Sounds -->
@@ -225,9 +186,6 @@ const settings = reactive({
   emailProjectUpdates: true,
   pushNotifications: true,
   inAppNotifications: true,
-  notificationFrequency: 'realtime',
-  notificationStartTime: '09:00',
-  notificationEndTime: '18:00',
   notificationSounds: true
 })
 

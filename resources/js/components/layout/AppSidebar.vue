@@ -26,23 +26,12 @@
             ]"
         >
             <router-link to="/">
-                <img
-                    v-if="isExpanded || isHovered || isMobileOpen"
-                    class="dark:hidden"
-                    :src="Logo"
-                    alt="Logo"
-                    width="150"
-                    height="40"
-                />
-                <img
-                    v-if="isExpanded || isHovered || isMobileOpen"
-                    class="hidden dark:block"
-                    :src="LogoDark"
-                    alt="Logo"
-                    width="150"
-                    height="40"
-                />
-                <img v-else :src="Icon" alt="Logo" width="32" height="32" />
+                <template v-if="isExpanded || isHovered || isMobileOpen">
+                    <img :src="Logo" alt="Logo" width="150" height="40" />
+                </template>
+                <template v-else>
+                    <img :src="Icon" alt="Logo" width="32" height="32" />
+                </template>
             </router-link>
         </div>
 
@@ -569,10 +558,8 @@ import { useAuthStore } from "@/stores/authStore";
 import { useWorkspace } from "@/composables/useWorkspace";
 import { useWorkspacePermissions } from "@/composables/useWorkspacePermissions";
 
-const LogoDark = new URL("@/assets/images/logo/Logo-dark.jpg", import.meta.url)
-    .href;
-const Logo = new URL("@/assets/images/logo/Logo.png", import.meta.url).href;
-const Icon = new URL("@/assets/images/logo/icon.jpg", import.meta.url).href;
+const Logo = new URL("@/assets/images/logo/logo-transparent.png", import.meta.url).href;
+const Icon = new URL("@/assets/images/logo/icon-transparent.png", import.meta.url).href;
 
 const { t } = useI18n();
 const route = useRoute();
@@ -604,6 +591,7 @@ const {
     canViewEvaluationDashboard,
     canViewWorkspaceTaches,
     canReadHelpArticles,
+    canViewMembers,
 } = useWorkspacePermissions(currentWorkspace);
 
 // Workspace management
@@ -887,6 +875,11 @@ const menuGroups = computed(() => [
                         path: "/workspace/taches",
                         requiresPermission: "canViewWorkspaceTaches",
                     },
+                    {
+                        name: t('sidebar.workspace_users'),
+                        path: "/workspace/users",
+                        requiresPermission: "canViewMembers",
+                    },
                 ],
             },
         ],
@@ -1029,6 +1022,7 @@ const permissionMap = computed(() => ({
     canViewEvaluationDashboard: canViewEvaluationDashboard.value,
     canViewWorkspaceTaches: canViewWorkspaceTaches.value,
     canReadHelpArticles: canReadHelpArticles.value,
+    canViewMembers: canViewMembers.value,
     isSuperAdmin: isSuperAdmin.value,
 }));
 

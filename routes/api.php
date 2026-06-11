@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\TacheController;
 use App\Http\Controllers\Api\TacheResultatController;
 use App\Http\Controllers\Api\TwoFactorManagementController;
 use App\Http\Controllers\Api\WorkspaceController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LabelController;
 use App\Http\Controllers\LabelTemplateController;
@@ -69,6 +70,12 @@ Route::prefix('auth')->group(function () {
         ->middleware('throttle:10,1');
     Route::post('/two-factor-email-send', [AuthController::class, 'twoFactorEmailSend'])
         ->middleware('throttle:3,1');
+
+    // Réinitialisation de mot de passe — flux en deux étapes (envoi du lien + reset effectif)
+    Route::post('/forgot-password', [ResetPasswordController::class, 'sendResetLink'])
+        ->middleware('throttle:5,1');
+    Route::post('/reset-password', [ResetPasswordController::class, 'reset'])
+        ->middleware('throttle:5,1');
 });
 
 // Routes publiques pour les invitations (pas besoin d'authentification)
@@ -265,6 +272,9 @@ Route::middleware(['auth:sanctum', 'subscription.status'])->group(function () {
 
         // Super-admin: configure trial duration per workspace
         Route::patch('/{workspace}/subscription', [WorkspaceController::class, 'updateSubscription'])->name('workspaces.subscription.update');
+
+        // Phase 11E: Liste des membres avec métadonnées (owner/directeur/manager)
+        Route::get('/{workspace}/users', [WorkspaceController::class, 'workspaceUsers'])->name('workspaces.users');
 
         // ========================================  MEMBRE REMOVAL WITH TRANSFER  ========================================
         Route::prefix('/{workspace}')->group(function () {
@@ -762,6 +772,8 @@ Route::middleware(['auth:sanctum', 'subscription.status'])->group(function () {
         Route::delete('/profile', [UserController::class, 'deleteAccount']);
         Route::post('/change-password', [UserController::class, 'changePassword']);
         Route::get('/sessions', [UserController::class, 'sessions']);
+        Route::get('/profile-stats', [UserController::class, 'profileStats']);
+        Route::get('/{user}/profile-view', [UserController::class, 'profileView']);
 
         // User CRUD
         Route::post('/', [UserController::class, 'store']);

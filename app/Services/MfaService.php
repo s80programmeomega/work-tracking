@@ -37,14 +37,15 @@ class MfaService
     /**
      * Génère un jeton de challenge temporaire (5 min) et le stocke en cache.
      * Retourné au SPA à la place du token Sanctum lors d'un login avec 2FA actif.
+     * Le flag $remember est conservé dans le cache pour être transmis à issueToken().
      */
-    public function createChallengeToken(User $user): string
+    public function createChallengeToken(User $user, bool $remember = false): string
     {
         $token = Str::random(64);
 
         Cache::put(
             $this->challengeKey($token),
-            ['user_id' => $user->id, 'created_at' => now()->timestamp],
+            ['user_id' => $user->id, 'remember' => $remember, 'created_at' => now()->timestamp],
             now()->addMinutes(self::CHALLENGE_TOKEN_TTL_MINUTES)
         );
 
@@ -64,6 +65,16 @@ class MfaService
         }
 
         return User::find($data['user_id']);
+    }
+
+    /**
+     * Retourne le flag "remember" stocké dans le challenge, ou false par défaut.
+     */
+    public function challengeRemember(string $token): bool
+    {
+        $data = Cache::get($this->challengeKey($token));
+
+        return (bool) ($data['remember'] ?? false);
     }
 
     /**

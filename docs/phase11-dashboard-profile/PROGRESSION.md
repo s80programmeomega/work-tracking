@@ -24,7 +24,7 @@
 | 11B | Profile quick wins (B2 sound, B3 preferences cleanup, B7 dead link) | `feature/phase11b-profile-quickwins` | ✅ | 2026-06-10 | 2026-06-10 | Notification sound composable + asset; Preferences tab reduced to Timezone only; dead navbar link removed; 3 Dusk tests (sound toggle, timezone section present, removed sections absent); Pint/Larastan/build green |
 | 11C | Session management (B1) | `feature/phase11c-session-management` | ✅ | 2026-06-10 | 2026-06-10 | Real sessions list (GET /api/users/sessions); logoutAllDevices() wired; SessionSettings.vue rewritten with stagger; 5 PHPUnit + 3 Dusk tests; Pint/Larastan/build green |
 | 11D | Help Center draft auto-save (B4) | `feature/phase11d-help-draft-autosave` | ✅ | 2026-06-10 | 2026-06-10 | Migration + model + PATCH /draft endpoint + debounced auto-save + restore banner; 7 PHPUnit + 3 Dusk tests (banner display, discard, auto-save indicator); Pint/Larastan/build green |
-| 11E | Activity tabs + Users management (B5 + B6) | `feature/phase11e-activity-users` | ⬜ | — | — | — |
+| 11E | Activity tabs + Users management (B5 + B6) | `feature/phase11e-activity-users` | ✅ | 2026-06-10 | 2026-06-10 | ActivityLog.vue wired to real API + stagger; ActivityLogTab fixedCauserId prop; AdminUsers Activity button; WORKSPACES_VIEW_MEMBERS permission; GET /workspaces/{id}/users endpoint; WorkspaceUsers.vue + route + sidebar; 8 PHPUnit + 3 Dusk tests; Pint/Larastan/build green |
 
 ---
 
@@ -150,25 +150,45 @@
 - [x] Main `docs/PROGRESSION.md` Phase 11 row updated
 - [x] `docs/SESSION_STATE.md` updated
 
-### 11E — Activity Tabs + Users Management
+### 11E — Activity Tabs + Users Management ✅
 
-- [ ] B5: `ActivityLog.vue` wired to real `GET /users/{user}/activity` (mock generator removed)
-- [ ] B5: stagger applied to activity list
-- [ ] B6a: `AdminUsers.vue` — "Activity" action per row, pre-filtered to `causer_id`
-- [ ] B6a: `ActivityLogTab.vue` accepts `fixedCauserId` prop
-- [ ] B6a: `adminFeed()` confirmed/extended to support `causer_id` filter
-- [ ] B6b: New workspace-scoped "Users" page + route, gated to workspace owner
-- [ ] B6b: New backend endpoint `GET /api/workspaces/{workspace}/users` (workspace-scoped)
-- [ ] B6b: Per-user activity drill-down for owner (scoped endpoint or `adminFeed` extension)
-- [ ] B6b: New permission added — Guide 4 full checklist (PermissionService, RolePermissionSeeder,
-      Permission.php/forRole, Permission.js, useWorkspacePermissions.js, WorkspaceController
-      user_permissions ×3)
-- [ ] B6b: Sidebar "Users" entry added for workspace owners
-- [ ] PHPUnit: workspace users endpoint (200/403 boundaries), activity drill-down (200/403)
-- [ ] Dusk: owner navigates Users page → Activity drill-down
-- [ ] `docs/PERMISSIONS_MATRIX.md` updated + changelog row (Guide 15 hard gate)
-- [ ] Pint + Larastan clean
-- [ ] `npm run build` green
-- [ ] `docs/testing/PHASE11E_TESTING.md` written
-- [ ] Main `docs/PROGRESSION.md` Phase 11 row updated
-- [ ] `docs/SESSION_STATE.md` updated
+- [x] B5: `ActivityLog.vue` wired to real `GET /users/{user}/activity` (mock generator removed)
+- [x] B5: stagger applied to activity list (`useStagger(50)` + `ref="staggerRef"` + `.stagger-item`)
+- [x] B5: error state added with retry button
+- [x] B6a: `AdminUsers.vue` — "Activity" button per row, opens modal with `ActivityLogTab`
+- [x] B6a: `ActivityLogTab.vue` accepts `fixedCauserId` + `fixedCauserLabel` props — causer
+      autocomplete hidden, locked chip shown; `resetFilters()` preserves the lock
+- [x] B6a: `adminFeed()` already supported `causer_id` filter — no backend change needed
+- [x] B6b: New permission `WORKSPACES_VIEW_MEMBERS = 'workspaces.view_members'` added to
+      `Permission.php` (constant + `all()` + `forRole('owner')` auto-included via `array_diff`,
+      `forRole('manager')` explicit grant)
+- [x] B6b: `Permission.js` mirror updated with `WORKSPACES_VIEW_MEMBERS`
+- [x] B6b: `useWorkspacePermissions.js` — `canViewMembers` computed added + exported
+- [x] B6b: `WorkspaceController::workspaceUsers()` — `GET /api/workspaces/{workspace}/users`
+      endpoint: paginated, searchable, returns `id/nom/email/workspace_role/joined_at/last_login_at`;
+      gated by `abort_unless(WORKSPACES_VIEW_MEMBERS)`
+- [x] B6b: `WorkspaceController` `user_permissions` payload updated at all 3 locations to include
+      `can_view_members`
+- [x] B6b: Route `GET /api/workspaces/{workspace}/users` wired in `routes/api.php`
+- [x] B6b: `WorkspaceUsers.vue` page created at `resources/js/pages/workspace/WorkspaceUsers.vue`
+      (AdminLayout, search, stagger table, pagination, per-row Activity modal re-using
+      `ActivityLogTab` with `fixedCauserId`)
+- [x] B6b: Route `workspace.users` added to `resources/js/router/index.ts`
+- [x] B6b: Sidebar "Utilisateurs" entry added (gated on `canViewMembers`)
+- [x] B6b: `canViewMembers` added to sidebar `permissionMap` computed
+- [x] PHPUnit: `tests/Feature/Phase11ETest.php` — 8 tests (own activity 200, other user 403,
+      super-admin cross-user 200, unauthenticated 401; owner list 200, member fields, workspace
+      scoping, non-member 403, collaborateur 403, search filter, unauthenticated 401)
+- [x] Dusk: `tests/Browser/Phase11/Phase11EActivityUsersTest.php` — 3 tests (profile activity tab
+      renders, admin users activity button present, workspace users page shows members)
+- [x] `dusk` attrs added: `workspace-users-title`, `workspace-users-search`, `workspace-user-row`,
+      `ws-view-activity-button`, `ws-activity-modal` in `WorkspaceUsers.vue`;
+      `view-activity-button`, `activity-modal` in `AdminUsers.vue`
+- [x] i18n: `workspace_users.*` section (fr/en), `sidebar.workspace_users` (fr/en),
+      `admin.users.btn_activity` + `activity_modal_title` (fr/en),
+      `admin_logs.filter_causer_locked` (fr/en), `activity_log.loading_error` (fr/en)
+- [x] `docs/PERMISSIONS_MATRIX.md` — new permission `workspaces.view_members` added (Guide 15)
+- [x] Pint clean (3 files auto-fixed)
+- [x] Larastan clean (0 errors)
+- [x] `npm run build` green
+- [x] `docs/testing/PHASE11E_TESTING.md` written
