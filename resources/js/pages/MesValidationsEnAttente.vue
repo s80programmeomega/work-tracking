@@ -206,9 +206,16 @@ async function loadData() {
   loading.value = true
   error.value = null
   try {
-    const { data } = await api.get('/evaluations/mes-resultats/en-attente')
-    resultats.value = data.data.resultats || []
-    counts.value = data.data.counts || { en_validation_n1: 0, en_validation_n2: 0, total: 0 }
+    const { data } = await api.get('/evaluations/resultats/en-attente')
+    const n1 = (data.data.pending_n1 || []).map(r => ({ ...r, statut: 'en_validation_n1' }))
+    const n2 = (data.data.pending_n2 || []).map(r => ({ ...r, statut: 'en_validation_n2' }))
+    resultats.value = [...n1, ...n2]
+    const apiCounts = data.data.counts || {}
+    counts.value = {
+      en_validation_n1: apiCounts.n1 ?? n1.length,
+      en_validation_n2: apiCounts.n2 ?? n2.length,
+      total: apiCounts.total ?? resultats.value.length,
+    }
     applyStagger()
   } catch (err) {
     error.value = err.response?.data?.message || 'Erreur lors du chargement'

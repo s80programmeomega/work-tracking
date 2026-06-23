@@ -24,7 +24,8 @@
         <p v-if="loading" class="p-6 text-sm text-gray-500 dark:text-gray-400">{{ $t('admin.plans.loading') }}</p>
         <p v-else-if="plans.length === 0" class="p-6 text-sm text-gray-500 dark:text-gray-400">{{ $t('admin.plans.empty') }}</p>
 
-        <table v-else class="w-full text-sm">
+        <div v-else class="overflow-x-auto">
+        <table class="min-w-full text-sm">
           <thead class="border-b border-gray-200 text-left text-xs uppercase text-gray-400 dark:border-gray-800">
             <tr>
               <th class="px-4 py-3">{{ $t('admin.plans.col_name') }}</th>
@@ -67,6 +68,7 @@
             </tr>
           </tbody>
         </table>
+        </div>
       </div>
 
       <!-- Modale création / édition -->

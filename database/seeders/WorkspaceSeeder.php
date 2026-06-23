@@ -7,6 +7,7 @@ namespace Database\Seeders;
 use App\Enums\Role;
 use App\Models\Activite;
 use App\Models\Comment;
+use App\Models\Plan;
 use App\Models\Projet;
 use App\Models\SousTache;
 use App\Models\Tache;
@@ -37,11 +38,11 @@ class WorkspaceSeeder extends Seeder
         $directeur = User::where('email', 'directeur@worktracking.com')->firstOrFail();
 
         // Core test accounts
-        $eric = $this->ensureUser('Kouassi', 'Éric', 'manager@worktracking.com', Role::UTILISATEUR);
-        $aicha = $this->ensureUser('Traoré', 'Aïcha', 'cadre@worktracking.com', Role::UTILISATEUR);
-        $kofi = $this->ensureUser('Mensah', 'Kofi', 'collaborateur@worktracking.com', Role::UTILISATEUR);
-        $fatouma = $this->ensureUser('Diallo', 'Fatouma', 'stagiaire@worktracking.com', Role::UTILISATEUR);
-        $mamadou = $this->ensureUser('Sanogo', 'Mamadou', 'observateur@worktracking.com', Role::UTILISATEUR);
+        $eric = $this->ensureUser('Kouassi', 'Éric', 'manager@worktracking.com', Role::UTILISATEUR, 'manager');
+        $aicha = $this->ensureUser('Traoré', 'Aïcha', 'cadre@worktracking.com', Role::UTILISATEUR, 'cadre');
+        $kofi = $this->ensureUser('Mensah', 'Kofi', 'collaborateur@worktracking.com', Role::UTILISATEUR, 'collaborateur');
+        $fatouma = $this->ensureUser('Diallo', 'Fatouma', 'stagiaire@worktracking.com', Role::UTILISATEUR, 'stagiaire');
+        $mamadou = $this->ensureUser('Sanogo', 'Mamadou', 'observateur@worktracking.com', Role::UTILISATEUR, 'observateur');
 
         // Extended team
         $aminata = $this->ensureUser('Koné', 'Aminata', 'aminata@worktracking.com', Role::UTILISATEUR);
@@ -57,6 +58,8 @@ class WorkspaceSeeder extends Seeder
         // WS 1 — Direction Générale (owned by directeur)
         // 5 projects · 15 activities · ~45 tasks
         // ════════════════════════════════════════════════════════════════════════
+        $freePlan = Plan::where('slug', 'free')->first();
+
         $ws1 = $this->makeWorkspace(
             'Direction Générale — CERD Africa',
             'Espace de travail principal de la direction. Regroupe les projets stratégiques.',
@@ -64,6 +67,10 @@ class WorkspaceSeeder extends Seeder
             $directeur,
             ['default_project_visibility' => 'team', 'require_task_validation' => true]
         );
+        if ($freePlan) {
+            $ws1->plan_id = $freePlan->id;
+            $ws1->save();
+        }
 
         foreach ([$directeur, $eric, $aicha, $kofi, $fatouma, $mamadou, $aminata, $ibrahim, $seydou, $mariam, $superAdmin] as $u) {
             $u->update(['current_workspace_id' => $ws1->id]);
@@ -453,6 +460,10 @@ class WorkspaceSeeder extends Seeder
             $eric,
             ['default_project_visibility' => 'team', 'members_can_create_projects' => true]
         );
+        if ($freePlan) {
+            $ws2->plan_id = $freePlan->id;
+            $ws2->save();
+        }
 
         $eric->update(['current_workspace_id' => $ws2->id]);
 
@@ -756,6 +767,10 @@ class WorkspaceSeeder extends Seeder
             $aicha,
             ['default_project_visibility' => 'team', 'members_can_create_projects' => true]
         );
+        if ($freePlan) {
+            $ws3->plan_id = $freePlan->id;
+            $ws3->save();
+        }
 
         $aicha->update(['current_workspace_id' => $ws3->id]);
 
@@ -955,7 +970,7 @@ class WorkspaceSeeder extends Seeder
 
     // ── helpers ───────────────────────────────────────────────────────────────
 
-    private function ensureUser(string $nom, string $prenom, string $email, Role $globalRole): User
+    private function ensureUser(string $nom, string $prenom, string $email, Role $globalRole, ?string $spatieRole = null): User
     {
         $user = User::firstOrCreate(
             ['email' => $email],
@@ -968,7 +983,7 @@ class WorkspaceSeeder extends Seeder
                 'is_active' => true,
             ]
         );
-        $user->syncRoles([$globalRole->value]);
+        $user->syncRoles([$spatieRole ?? $globalRole->value]);
 
         return $user;
     }

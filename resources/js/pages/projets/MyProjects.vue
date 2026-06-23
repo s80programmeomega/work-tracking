@@ -397,6 +397,9 @@ import { useProjets } from '@/composables/useProjets'
 import { useWorkspace } from '@/composables/useWorkspace'
 import { useAuthStore } from '@/stores/authStore'
 import { useStagger } from '@/composables/useAnimations'
+
+const gridRef = ref(null)
+const { applyStagger } = useStagger(gridRef, 50)
 import AdminLayout from "@/components/layout/AdminLayout.vue"
 import MyProjectsStats from '@/components/projets/MyProjectsStats.vue'
 import ProjetFormModal from '@/components/projets/ProjetFormModal.vue'

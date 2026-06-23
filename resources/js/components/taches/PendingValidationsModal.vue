@@ -245,7 +245,7 @@ const props = defineProps({
   // Props if needed
 })
 
-const emit = defineEmits(['close', 'validated'])
+const emit = defineEmits(['close', 'validated', 'view-task'])
 
 const { fetchPendingValidations, validateTacheN1, validateTacheN2 } = useTaches()
 
@@ -291,9 +291,7 @@ const loadPendingValidations = async () => {
 }
 
 const viewTaskDetails = (tache) => {
-  // Implémenter l'ouverture des détails de la tâche
-  console.log('View task details:', tache)
-  // Vous pouvez émettre un événement ou utiliser un store pour gérer cela
+  emit('view-task', tache)
 }
 
 const validateTask = async (tache) => {

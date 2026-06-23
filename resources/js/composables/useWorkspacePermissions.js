@@ -34,7 +34,7 @@ export function useWorkspacePermissions(workspace = null) {
         return member?.pivot?.role ?? null
     })
 
-    const isManager      = computed(() => memberRole.value === 'manager')
+    const isManager      = computed(() => memberRole.value === 'manager' || memberRole.value === 'owner')
     const isCadre        = computed(() => memberRole.value === 'cadre')
     const isCollaborateur = computed(() => memberRole.value === 'collaborateur')
     const isStagiaire    = computed(() => memberRole.value === 'stagiaire')

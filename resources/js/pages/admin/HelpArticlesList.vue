@@ -69,7 +69,8 @@
           <p v-if="loading" class="p-6 text-sm text-gray-500 dark:text-gray-400">{{ $t('help.loading') }}</p>
           <p v-else-if="articles.length === 0" class="p-6 text-sm text-gray-500 dark:text-gray-400">{{ $t('help.admin.no_articles') }}</p>
 
-          <table v-else class="w-full text-sm">
+          <div v-else class="overflow-x-auto">
+          <table class="min-w-full text-sm">
             <thead class="border-b border-gray-200 text-left text-xs uppercase text-gray-400 dark:border-gray-800">
               <tr>
                 <th class="px-4 py-3">{{ $t('help.admin.col_title') }}</th>
@@ -122,6 +123,7 @@
               </tr>
             </tbody>
           </table>
+          </div>
 
           <!-- Pagination -->
           <div v-if="meta && meta.last_page > 1" class="flex items-center justify-between border-t border-gray-100 px-4 py-3 dark:border-gray-800">
@@ -138,7 +140,8 @@
           <p v-if="categoriesLoading" class="p-6 text-sm text-gray-500 dark:text-gray-400">{{ $t('help.loading') }}</p>
           <p v-else-if="categories.length === 0" class="p-6 text-sm text-gray-500 dark:text-gray-400">{{ $t('help.admin.no_categories') }}</p>
 
-          <table v-else class="w-full text-sm">
+          <div v-else class="overflow-x-auto">
+          <table class="min-w-full text-sm">
             <thead class="border-b border-gray-200 text-left text-xs uppercase text-gray-400 dark:border-gray-800">
               <tr>
                 <th class="px-4 py-3">{{ $t('help.admin.cat_name') }}</th>
@@ -189,6 +192,7 @@
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
       </template>
 

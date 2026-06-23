@@ -109,7 +109,7 @@
 
       <!-- Users Table -->
       <div v-else-if="users.length > 0" class="overflow-x-auto">
-        <table class="w-full">
+        <table class="min-w-full">
           <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">

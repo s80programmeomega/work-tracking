@@ -61,7 +61,7 @@
         </div>
 
         <div v-else class="overflow-x-auto">
-        <table class="w-full text-sm">
+        <table class="min-w-full text-sm">
           <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500 dark:text-gray-400 uppercase">
             <tr>
               <th class="px-4 py-3 text-left">Workspace</th>

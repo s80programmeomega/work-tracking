@@ -349,8 +349,8 @@ const getValidationStatusClass = (status) => {
 const getValidationStatusLabel = (status) => {
   const labels = {
     'not_submitted': 'Non soumis',
-    'pending_n1': 'En attente N+1',
-    'pending_n2': 'En attente N+2',
+    'pending_n1': 'En validation N1',
+    'pending_n2': 'En validation N2',
     'fully_validated': 'Validé',
   };
   return labels[status] || status;

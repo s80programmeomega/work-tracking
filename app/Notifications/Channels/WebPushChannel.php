@@ -63,7 +63,14 @@ class WebPushChannel
         }
 
         foreach ($subscriptions as $sub) {
-            $this->queueSubscription($webPush, $sub, $payload);
+            try {
+                $this->queueSubscription($webPush, $sub, $payload);
+            } catch (\Throwable $e) {
+                Log::warning('WebPush: souscription invalide ignorée', [
+                    'subscription_id' => $sub->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
 
         // Flush — envoi en parallèle de tous les pushes mis en file.

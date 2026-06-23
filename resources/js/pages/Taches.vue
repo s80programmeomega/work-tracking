@@ -334,6 +334,7 @@
       v-if="showPendingValidations"
       @close="showPendingValidations = false"
       @validated="loadPendingValidations"
+      @view-task="(tache) => { showPendingValidations = false; handleViewTask(tache) }"
     />
   </AdminLayout>
 </template>

@@ -450,8 +450,8 @@ Route::middleware(['auth:sanctum', 'subscription.status'])->group(function () {
 
         // ✅ Actions principales
         Route::post('/{tache}/complete', [TacheController::class, 'complete']); // Marquer terminé
-        // Route::post('/{tache}/validate-n1', [TacheController::class, 'validateN1']); // Validation N1
-        // Route::post('/{tache}/validate-n2', [TacheController::class, 'validateN2']); // Validation N2
+        Route::post('/{tache}/validate-n1', [TacheController::class, 'validateN1']);
+        Route::post('/{tache}/validate-n2', [TacheController::class, 'validateN2']);
         Route::post('/{tache}/move', [TacheController::class, 'move']); // Déplacer (Kanban)
         Route::post('/{tache}/archive', [TacheController::class, 'archive']);
         Route::post('/{tache}/unarchive', [TacheController::class, 'unarchive']);

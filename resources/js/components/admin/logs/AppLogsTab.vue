@@ -95,8 +95,8 @@
         {{ $t('admin_logs.no_logs') }}
       </p>
 
-      <div v-else>
-        <table class="w-full text-sm">
+      <div v-else class="overflow-x-auto">
+        <table class="min-w-full text-sm">
           <thead>
             <tr class="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
               <th class="w-28 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Niveau</th>

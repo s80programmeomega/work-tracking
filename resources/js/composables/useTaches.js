@@ -1,6 +1,7 @@
 // resources/js/composables/useTaches.js
 import { useTacheStore } from '@/stores/tacheStore'
 import { storeToRefs } from 'pinia'
+import api from '@/api/axios'
 
 export function useTaches() {
   const tacheStore = useTacheStore()

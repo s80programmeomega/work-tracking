@@ -111,7 +111,7 @@
           <div v-if="!data.scores.length" class="text-center py-6 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-3">
             {{ $t('evaluations.dashboard.no_scores') }}
           </div>
-          <div v-else class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3 overflow-hidden">
+          <div v-else class="overflow-x-auto rounded-3 border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
             <table class="min-w-full text-sm">
               <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
                 <tr>

@@ -87,6 +87,12 @@ export default defineConfig({
             '@images': fileURLToPath(new URL('./resources/js/assets/images', import.meta.url))
         },
     },
+    server: {
+        host: '0.0.0.0',
+        hmr: {
+            host: '10.5.50.95',
+        },
+    },
     // Supprime les faux avertissements CSS d'esbuild sur les sélecteurs :is() dans
     // les pseudo-éléments vendor (::-webkit-scrollbar-thumb) générés par Tailwind v4.
     // lightningcss comprend ces sélecteurs correctement ; esbuild les rejette à tort.

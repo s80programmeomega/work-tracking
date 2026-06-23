@@ -437,6 +437,10 @@ const props = defineProps({
   expanded: {
     type: Boolean,
     default: false
+  },
+  level: {
+    type: String,
+    default: null
   }
 })
 

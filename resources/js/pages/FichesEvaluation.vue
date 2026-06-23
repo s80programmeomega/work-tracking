@@ -174,7 +174,7 @@
 
           <!-- Table header -->
           <div class="overflow-x-auto">
-            <table class="w-full">
+            <table class="min-w-full">
               <thead class="border-b-2 border-gray-200 dark:border-gray-700">
                 <tr>
                   <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">

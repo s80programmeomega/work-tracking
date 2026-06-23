@@ -124,9 +124,11 @@ class AuthService
     {
         $user = Auth::user();
 
-        if ($user->currentAccessToken()) {
-            $user->currentAccessToken()->delete();
+        if (! $user) {
+            throw new \RuntimeException('Unauthenticated.');
         }
+
+        $user->currentAccessToken()->delete();
 
         $expiresAt = now()->addHours(24);
         $token = $user->createToken('auth_token', ['*'], $expiresAt)->plainTextToken;

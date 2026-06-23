@@ -1,8 +1,8 @@
 <template>
   <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 " @click.self="$emit('close')">
-    <div class="bg-white dark:bg-gray-800 rounded-3 max-w-3xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+    <div class="bg-white dark:bg-gray-800 rounded-3 max-w-3xl w-full mx-2 sm:mx-4 max-h-[90vh] overflow-hidden flex flex-col">
       <!-- Header -->
-      <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700">
+      <div class="px-4 py-4 sm:px-8 sm:py-6 border-b border-gray-200 dark:border-gray-700">
           <div class="flex items-center gap-3">
           <div class="w-12 h-12 rounded-3 flex items-center justify-center ">
             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -10,7 +10,7 @@
             </svg>
           </div>
           <div class="flex-1">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+            <h2 class="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
               {{ projet ? 'Modifier le projet' : 'Nouveau projet' }}
             </h2>
             <p class="text-sm text-gray-500 dark:text-gray-400">
@@ -48,7 +48,7 @@
       </div>
 
       <!-- Form Body -->
-      <div class="flex-1 overflow-y-auto px-8 py-6">
+      <div class="flex-1 overflow-y-auto px-4 py-4 sm:px-8 sm:py-6">
         <form @submit.prevent="handleSubmit" class="space-y-6">
           <!-- Section 1: Informations générales -->
           <div class="space-y-4">
@@ -141,7 +141,7 @@
                 >
                   <option value="">Sélectionner un responsable</option>
                   <option v-for="user in users" :key="user.id" :value="user.id">
-                    {{ user.nom }}
+                    {{ user.prenom ? user.prenom + ' ' + user.nom : user.nom }}
                   </option>
                 </select>
               </div>
@@ -268,7 +268,7 @@
       </div>
 
        <!-- Footer -->
-      <div class="px-8 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+      <div class="px-4 py-4 sm:px-8 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
         <div class="flex justify-end gap-3">
           <button
             type="button"
@@ -374,8 +374,14 @@ const formData = ref({
 
 const loadUsers = async () => {
   try {
-    const { data } = await api.get('/users')
-    users.value = data.data || []
+    const workspaceId = currentWorkspaceId.value
+    if (workspaceId) {
+      const { data } = await api.get(`/workspaces/${workspaceId}/users`)
+      users.value = data.data || data || []
+    } else {
+      const { data } = await api.get('/users')
+      users.value = data.data || []
+    }
   } catch (error) {
     console.error('Error loading users:', error)
   }

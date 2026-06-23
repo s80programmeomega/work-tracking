@@ -77,8 +77,8 @@
               <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
                 {{ $t('admin_logs.prop_old') }} → {{ $t('admin_logs.prop_new') }}
               </p>
-              <div class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
-                <table class="w-full text-xs">
+              <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+                <table class="min-w-full text-xs">
                   <thead>
                     <tr class="bg-gray-50 dark:bg-gray-800">
                       <th class="px-3 py-2 text-left font-semibold text-gray-500 dark:text-gray-400">Champ</th>
@@ -106,8 +106,8 @@
               <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
                 Contexte
               </p>
-              <div class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
-                <table class="w-full text-xs">
+              <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+                <table class="min-w-full text-xs">
                   <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                     <tr v-for="(val, key) in entry.context" :key="key">
                       <td class="px-3 py-2 font-mono font-medium text-gray-500 dark:text-gray-400 w-1/3">{{ key }}</td>

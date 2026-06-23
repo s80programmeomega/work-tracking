@@ -302,7 +302,7 @@
             Annuler
           </button>
           <button type="submit" @click="handleSubmit" :disabled="loading"
-            class="px-6 py-2.5 text-white font-semibold rounded-3 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+            class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-3 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
             <span v-if="loading" class="flex items-center gap-2">
               <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
