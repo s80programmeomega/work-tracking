@@ -63,13 +63,14 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'http://localhost'),
+    'url' => env('APP_URL', 'http://'.env('APP_HOST', 'localhost').':8000'),
 
     'asset_url' => env('ASSET_URL'),
 
-    // URL du frontend SPA (peut différer de APP_URL en dev : localhost vs 127.0.0.1).
-    // Utilisée dans les liens des emails de notification.
-    'frontend_url' => env('APP_FRONTEND_URL', env('APP_URL', 'http://localhost')),
+    // URL du frontend SPA — dérivée de APP_HOST si APP_FRONTEND_URL n'est pas défini.
+    // Même port que APP_URL (8000 en dev, 80/443 en prod) : Laravel sert le SPA via la
+    // route catch-all web, pas Vite directement. Vite (5173) est le serveur HMR uniquement.
+    'frontend_url' => env('APP_FRONTEND_URL', 'http://'.env('APP_HOST', 'localhost').':8000'),
 
     /*
     |--------------------------------------------------------------------------

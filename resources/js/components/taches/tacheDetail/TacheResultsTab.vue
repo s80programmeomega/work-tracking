@@ -16,7 +16,7 @@
           >
             <i class="fas fa-plus mr-2"></i>Soumettre
           </button>
-          <button 
+          <button
             v-if="tache.my_result && !tache.my_result.valide_par_n1"
             @click="openEditModal"
             class="px-4 py-2 bg-gray-600 text-white rounded-3 hover:bg-gray-700 transition-colors"
@@ -123,7 +123,7 @@
           <!-- Validation N1 -->
           <div v-if="tache.my_result.valide_par_n1" class="border-l-4 border-green-500 pl-3 py-2 bg-green-50 dark:bg-green-900/20 rounded">
             <p class="text-sm font-medium text-green-700 dark:text-green-400 mb-1">
-              <i class="fas fa-check-circle mr-1"></i>Validé N+1
+              <i class="fas fa-check-circle mr-1"></i>Validation N1
             </p>
             <p class="text-xs text-gray-600 dark:text-gray-400">
               Le {{ formatDate(tache.my_result.valide_le_n1) }}
@@ -134,9 +134,9 @@
           </div>
 
           <!-- Validation N2 -->
-          <div v-if="tache.my_result.valide_par_n2" class="border-l-4 border-green-500 pl-3 py-2 bg-green-50 dark:bg-green-900/20 rounded">
-            <p class="text-sm font-medium text-green-700 dark:text-green-400 mb-1">
-              <i class="fas fa-check-double mr-1"></i>Validé N+2
+          <div v-if="tache.my_result.valide_par_n2" class="border-l-4 border-purple-500 pl-3 py-2 bg-purple-50 dark:bg-purple-900/20 rounded">
+            <p class="text-sm font-medium text-purple-700 dark:text-purple-400 mb-1">
+              <i class="fas fa-check-double mr-1"></i>Validation N2
             </p>
             <p class="text-xs text-gray-600 dark:text-gray-400">
               Le {{ formatDate(tache.my_result.valide_le_n2) }}
@@ -206,10 +206,10 @@
                   <i class="fas fa-paperclip mr-1"></i>{{ result.documents_count }} doc(s)
                 </span>
                 <span v-if="result.valide_par_n1" class="text-green-600 dark:text-green-400">
-                  <i class="fas fa-check mr-1"></i>N+1
+                  <i class="fas fa-check mr-1"></i>N1
                 </span>
                 <span v-if="result.valide_par_n2" class="text-green-600 dark:text-green-400">
-                  <i class="fas fa-check-double mr-1"></i>N+2
+                  <i class="fas fa-check-double mr-1"></i>N2
                 </span>
               </div>
             </div>
@@ -223,11 +223,11 @@
               >
                 <i class="fas fa-eye"></i>
               </button>
-              <button 
+              <button
                 v-if="permissions.can_validate_n1 && !result.valide_par_n1"
                 @click="validateN1(result)"
                 class="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-3"
-                title="Valider N+1"
+                title="Valider N1"
               >
                 <i class="fas fa-check"></i>
               </button>

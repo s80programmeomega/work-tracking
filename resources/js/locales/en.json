@@ -116,6 +116,8 @@
     "my_workspaces": "My Workspaces",
     "filter_active": "Filter active",
     "filter_dashboard": "Filter dashboard",
+    "view_all_workspaces": "View all workspaces",
+    "switch_workspace": "Switch workspace",
     "create_workspace": "Create a workspace",
     "dashboard_filtered": "Dashboard filtered",
     "clear_filter": "Clear filter",
@@ -2556,5 +2558,19 @@
     "500_hint": "Try refreshing the page. If the problem persists, contact support.",
     "generic_title": "Unexpected error",
     "generic_desc": "An unexpected error occurred. Please try again or contact support."
+  },
+  "workspace_picker": {
+    "title": "Choose a workspace",
+    "subtitle": "Select the workspace you want to work in.",
+    "loading": "Loading workspaces...",
+    "no_workspaces": "You don't have any workspaces yet.",
+    "create_btn": "Create a workspace",
+    "badge_owner": "Owner",
+    "active": "Active",
+    "inactive": "Inactive",
+    "no_description": "No description",
+    "projects": "projects",
+    "members": "members",
+    "footer": "Uptiimum Work Tracking"
   }
 }

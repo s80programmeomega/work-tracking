@@ -34,7 +34,7 @@ class ResultatSoumisNotification extends Notification implements ShouldQueue
             ->greeting("Bonjour {$notifiable->nom},")
             ->line("{$this->resultat->user->nom} a soumis un résultat pour la tâche **{$this->resultat->tache->titre}**.")
             ->line("**Taux de réalisation:** {$this->resultat->taux_realisation}%")
-            ->action('Consulter le résultat', url("/taches/{$this->resultat->tache->id}/resultats/{$this->resultat->id}"))
+            ->action('Consulter le résultat', url("/taches/{$this->resultat->tache->id}?tab=results"))
             ->line('Merci de valider ce résultat.');
     }
 
@@ -48,7 +48,7 @@ class ResultatSoumisNotification extends Notification implements ShouldQueue
             'auteur_id' => $this->resultat->user->id,
             'auteur_nom' => $this->resultat->user->nom,
             'taux_realisation' => $this->resultat->taux_realisation,
-            'url' => "/taches/{$this->resultat->tache->id}/resultats/{$this->resultat->id}",
+            'url' => "/taches/{$this->resultat->tache->id}?tab=results",
         ];
     }
 }

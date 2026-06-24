@@ -109,32 +109,32 @@
     <!-- Validations -->
     <div v-if="isSubmitted" class="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
       <!-- Validation N1 -->
-      <div v-if="resultat.valide_par_n1" class="p-3 bg-green-50 dark:bg-green-900/20 rounded-3">
+      <div v-if="isValidatedN1" class="p-3 bg-green-50 dark:bg-green-900/20 rounded-3">
         <div class="flex items-center gap-2 mb-1">
           <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <span class="text-sm font-semibold text-green-900 dark:text-green-100">
-            Validé N1 par {{ resultat.validateur_n1?.nom }}
+            Validation N1 par {{ resultat.validation_n1?.validateur?.nom }}
           </span>
         </div>
-        <p v-if="resultat.commentaire_n1" class="text-sm text-green-700 dark:text-green-300 mt-2">
-          {{ resultat.commentaire_n1 }}
+        <p v-if="resultat.validation_n1?.commentaire" class="text-sm text-green-700 dark:text-green-300 mt-2">
+          {{ resultat.validation_n1.commentaire }}
         </p>
       </div>
 
       <!-- Validation N2 -->
-      <div v-if="resultat.valide_par_n2" class="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-3">
+      <div v-if="isValidatedN2" class="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-3">
         <div class="flex items-center gap-2 mb-1">
           <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
           </svg>
           <span class="text-sm font-semibold text-purple-900 dark:text-purple-100">
-            Validé N2 par {{ resultat.validateur_n2?.nom }}
+            Validation N2 par {{ resultat.validation_n2?.validateur?.nom }}
           </span>
         </div>
-        <p v-if="resultat.commentaire_n2" class="text-sm text-purple-700 dark:text-purple-300 mt-2">
-          {{ resultat.commentaire_n2 }}
+        <p v-if="resultat.validation_n2?.commentaire" class="text-sm text-purple-700 dark:text-purple-300 mt-2">
+          {{ resultat.validation_n2.commentaire }}
         </p>
       </div>
     </div>
@@ -195,8 +195,8 @@ const props = defineProps({
 defineEmits(['edit', 'delete', 'submit', 'validate-n1', 'validate-n2', 'reject'])
 
 const isSubmitted = computed(() => !!props.resultat.soumis_le)
-const isValidatedN1 = computed(() => !!props.resultat.valide_par_n1)
-const isValidatedN2 = computed(() => !!props.resultat.valide_par_n2)
+const isValidatedN1 = computed(() => !!props.resultat.validation_n1?.valide)
+const isValidatedN2 = computed(() => !!props.resultat.validation_n2?.valide)
 
 const canEdit = computed(() => !isSubmitted.value)
 const canDelete = computed(() => !isSubmitted.value)

@@ -44,6 +44,7 @@
             class="mb-4 px-2"
         >
             <button
+                dusk="workspace-selector-btn"
                 @click="showWorkspaceSelector = !showWorkspaceSelector"
                 class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             >
@@ -174,6 +175,25 @@
                     <div
                         class="px-3 pt-2 mt-2 border-t border-gray-200 dark:border-gray-700 space-y-2"
                     >
+                        <router-link
+                            v-if="isSuperAdmin"
+                            to="/admin/workspaces"
+                            dusk="view-all-workspaces-btn"
+                            class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
+                        >
+                            <span>{{ $t('sidebar.view_all_workspaces') }}</span>
+                            <ArrowRightIcon class="w-3 h-3 ml-auto" />
+                        </router-link>
+
+                        <router-link
+                            to="/workspaces/select"
+                            dusk="switch-workspace-btn"
+                            class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
+                        >
+                            <SwitchIcon class="w-4 h-4" />
+                            {{ $t('sidebar.switch_workspace') }}
+                        </router-link>
+
                         <router-link
                             to="/workspaces/create"
                             class="flex items-center gap-2 text-sm text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 transition-colors"
@@ -540,6 +560,7 @@ import {
     SettingsIcon,
     XIcon,
     StarIcon,
+    ArrowRightIcon,
 } from "../../icons";
 
 import BoxCubeIcon from "@/icons/BoxCubeIcon.vue";
@@ -618,16 +639,24 @@ const isSuperAdmin = computed(() => {
     return authStore.isSuperAdmin;
 });
 
-// Computed property avec fallback
+// Affichage contextuel des workspaces dans la sidebar selon le rôle et le contexte
 const filteredWorkspaces = computed(() => {
-    return (workspaces.value || [])
-        .filter((workspace) => workspace && workspace.id)
-        .map((workspace) => ({
-            id: workspace.id,
-            nom: workspace.nom || t('sidebar.workspace_unknown'),
-            projets_count:
-                workspace.projets_count ?? workspace.projet_count ?? 0,
-        }));
+    const all = (workspaces.value || []).filter((w) => w?.id);
+
+    // Règle 1 : super_admin → 3 premiers workspaces uniquement
+    if (isSuperAdmin.value) {
+        return all.slice(0, 3);
+    }
+
+    const userId = authStore.user?.id;
+
+    // Règle 3 : non-propriétaire du workspace courant → workspace courant uniquement
+    if (currentWorkspace.value && currentWorkspace.value.owner_id !== userId) {
+        return all.filter((w) => w.id === currentWorkspace.value?.id);
+    }
+
+    // Règle 2 : propriétaire → tous les workspaces dont l'utilisateur est propriétaire
+    return all.filter((w) => w.owner_id === userId);
 });
 
 // Icônes supplémentaires pour le filtre — définies en fonctions de rendu
@@ -663,6 +692,15 @@ const GlobeIcon = {
             h("path", {
                 d: "M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z",
             }),
+        ]);
+    },
+};
+
+const SwitchIcon = {
+    render() {
+        return h("svg", { ...svgAttrs }, [
+            h("path", { d: "M7 16V4m0 0L3 8m4-4l4 4" }),
+            h("path", { d: "M17 8v12m0 0l4-4m-4 4l-4-4" }),
         ]);
     },
 };

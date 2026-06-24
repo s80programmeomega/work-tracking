@@ -1,4 +1,3 @@
-import { defineConfig, loadEnv } from 'vite';
 // import laravel from 'laravel-vite-plugin';
 // import vue from '@vitejs/plugin-vue';
 // import { fileURLToPath, URL } from 'node:url';
@@ -69,11 +68,16 @@ import { defineConfig, loadEnv } from 'vite';
 //     };
 // });
 
+import { defineConfig, loadEnv } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import vue from '@vitejs/plugin-vue';
 import { fileURLToPath, URL } from 'node:url';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+    const env = loadEnv(mode, process.cwd(), '');
+    const host = env.APP_HOST || 'localhost';
+
+    return {
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.js'],
@@ -90,8 +94,14 @@ export default defineConfig({
     server: {
         host: '0.0.0.0',
         hmr: {
-            host: '10.5.50.95',
+            host: host,
         },
+    },
+    // Injecte les vars dérivées de APP_HOST pour que le frontend n'ait pas
+    // besoin de VITE_DEV_SERVER_URL / VITE_REVERB_HOST dans .env.
+    define: {
+        'import.meta.env.VITE_DEV_SERVER_URL': JSON.stringify(`http://${host}:5173`),
+        'import.meta.env.VITE_REVERB_HOST': JSON.stringify(host),
     },
     // Supprime les faux avertissements CSS d'esbuild sur les sélecteurs :is() dans
     // les pseudo-éléments vendor (::-webkit-scrollbar-thumb) générés par Tailwind v4.
@@ -118,5 +128,5 @@ export default defineConfig({
             },
         },
     },
+    };
 });
-

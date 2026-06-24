@@ -691,7 +691,7 @@ export const useAuthStore = defineStore('auth', {
                 if (invitationToken) {
                     router.push(`/accept-invitation/${invitationToken}`);
                 } else {
-                    router.push('/');
+                    router.push({ name: 'workspaces.select' });
                 }
 
                 return response.data;
@@ -728,7 +728,7 @@ export const useAuthStore = defineStore('auth', {
             if (this.tokenExpiry) { this.startTokenAutoRefresh(); }
 
             const invitationToken = router.currentRoute.value.query.invitation;
-            router.push(invitationToken ? `/accept-invitation/${invitationToken}` : '/');
+            router.push(invitationToken ? `/accept-invitation/${invitationToken}` : { name: 'workspaces.select' });
         },
 
         // ==========================================

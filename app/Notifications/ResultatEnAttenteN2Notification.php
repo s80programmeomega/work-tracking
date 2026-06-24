@@ -36,7 +36,7 @@ class ResultatEnAttenteN2Notification extends Notification implements ShouldQueu
             ->line("**Tâche:** {$this->resultat->tache->titre}")
             ->line("**Auteur:** {$this->resultat->user->nom}")
             ->line("**Validé N1 par:** {$this->resultat->validateurN1->nom}")
-            ->action('Valider le résultat', url("/taches/{$this->resultat->tache->id}/resultats/{$this->resultat->id}"))
+            ->action('Valider le résultat', url("/taches/{$this->resultat->tache->id}?tab=results"))
             ->line('Ce résultat a déjà été validé au niveau 1.');
     }
 
@@ -50,7 +50,7 @@ class ResultatEnAttenteN2Notification extends Notification implements ShouldQueu
             'auteur_id' => $this->resultat->user->id,
             'auteur_nom' => $this->resultat->user->nom,
             'taux_realisation' => $this->resultat->taux_realisation,
-            'url' => "/resultats/{$this->resultat->id}",
+            'url' => "/taches/{$this->resultat->tache->id}?tab=results",
             'title' => 'Résultat en attente de validation',
             'message' => "Un résultat de {$this->resultat->user->nom} pour « {$this->resultat->tache->titre} » attend votre validation (N2)",
         ];

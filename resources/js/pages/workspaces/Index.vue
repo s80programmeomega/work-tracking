@@ -184,7 +184,7 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ workspace.code }}</p>
                 
                 <!-- Quick Actions -->
-                <div class="flex items-center space-x-3 mt-3">
+                <div class="flex flex-wrap items-center gap-2 mt-3">
                   <span :class="[
                     'px-2 py-1 text-xs font-medium rounded-full',
                     workspace.is_active
@@ -192,6 +192,13 @@
                       : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
                   ]">
                     {{ workspace.is_active ? `● ${$t('workspaces_index.status_active')}` : `● ${$t('workspaces_index.status_inactive')}` }}
+                  </span>
+                  <span
+                    v-if="isOwner(workspace)"
+                    dusk="owner-badge"
+                    class="px-2 py-1 text-xs font-medium rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
+                  >
+                    {{ $t('workspace_picker.badge_owner') }}
                   </span>
                   <span class="text-xs text-gray-500 dark:text-gray-400">
                     {{ formatDate(workspace.created_at) }}
@@ -301,6 +308,13 @@
                       ]">
                         {{ workspace.is_active ? $t('workspaces_index.status_active') : $t('workspaces_index.status_inactive') }}
                       </span>
+                      <span
+                        v-if="isOwner(workspace)"
+                        dusk="owner-badge"
+                        class="text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
+                      >
+                        {{ $t('workspace_picker.badge_owner') }}
+                      </span>
                     </div>
                     
                     <p class="text-sm text-gray-600 dark:text-gray-400 truncate">
@@ -358,11 +372,15 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useWorkspace } from '@/composables/useWorkspace';
 import { useStagger } from '@/composables/useAnimations';
+import { useAuthStore } from '@/stores/authStore';
 import AdminLayout from '@/components/layout/AdminLayout.vue';
 
 const router = useRouter();
+const authStore = useAuthStore();
 const { workspaces, loading, fetchWorkspaces, selectWorkspace } = useWorkspace();
 const { staggerRef, applyStagger } = useStagger(60);
+
+const isOwner = (workspace: any): boolean => workspace.owner_id === authStore.user?.id;
 
 const searchQuery = ref('');
 const filterActive = ref('all');

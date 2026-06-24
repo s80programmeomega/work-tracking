@@ -64,7 +64,7 @@ class ResultatValideN1Notification extends Notification implements ShouldQueue
             'validateur_nom' => $this->validateur->nom,
             'commentaire' => $this->commentaire,
             'taux_realisation' => $this->resultat->taux_realisation,
-            'url' => "/resultats/{$this->resultat->id}",
+            'url' => "/taches/{$this->resultat->tache->id}?tab=results",
             'title' => 'Résultat validé (N1)',
             'message' => "Votre résultat pour « {$this->resultat->tache->titre} » a été validé par {$this->validateur->nom}",
         ];

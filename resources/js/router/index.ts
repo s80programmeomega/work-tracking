@@ -94,6 +94,15 @@ const router = createRouter({
       },
     },
     {
+      path: '/workspaces/select',
+      name: 'workspaces.select',
+      component: () => import('../pages/workspaces/WorkspacePicker.vue'),
+      meta: {
+        title: 'Sélectionner un Workspace',
+        requiresAuth: true,
+      },
+    },
+    {
       path: '/workspaces/create',
       name: 'workspaces.create',
       component: () => import('../pages/workspaces/Create.vue'),
@@ -480,6 +489,10 @@ const router = createRouter({
         requiresAuth: true,
         title: 'Détails de la tâche'
       }
+    },
+    {
+      path: '/taches/:id/resultats/:resultatId',
+      redirect: (to) => ({ name: 'taches.show', params: { id: to.params.id }, query: { tab: 'results' } }),
     },
 
     // {
@@ -915,10 +928,10 @@ router.beforeEach(async (to, from, next) => {
       }
     }
 
-    // Guest-only routes (signin, signup) redirect authenticated users to dashboard
+    // Guest-only routes (signin, signup) redirect authenticated users to the workspace picker
     if (to.meta.guest && isLoggedIn) {
       isLoading.value = false
-      return next({ name: 'Dashboard' })
+      return next({ name: 'workspaces.select' })
     }
 
     next()

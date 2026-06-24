@@ -25,7 +25,20 @@ return [
     | On restreint aux origines de l'application, pilotées par .env
     | (CORS_ALLOWED_ORIGINS, séparées par des virgules) ; repli sur APP_URL.
     */
-    'allowed_origins' => array_filter(array_map('trim', explode(',', (string) env('CORS_ALLOWED_ORIGINS', (string) env('APP_URL', 'http://localhost'))))),
+    'allowed_origins' => (function () {
+        if ($explicit = env('CORS_ALLOWED_ORIGINS')) {
+            return array_filter(array_map('trim', explode(',', $explicit)));
+        }
+        // Dérivé automatiquement de APP_HOST — backend :8000 + frontend :5173
+        $host = env('APP_HOST', 'localhost');
+
+        return array_filter([
+            'http://localhost:8000',
+            'http://localhost:5173',
+            "http://{$host}:8000",
+            "http://{$host}:5173",
+        ]);
+    })(),
 
     'allowed_origins_patterns' => [],
 

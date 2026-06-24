@@ -43,7 +43,7 @@ class ResultatRejeteNotification extends Notification implements ShouldQueue
             ->line("Votre résultat pour la tâche **{$this->resultat->tache->titre}** a été rejeté par {$this->validateur->nom} (Niveau {$niveau}).")
             ->line('**Motif du rejet:**')
             ->line($this->commentaire)
-            ->action('Modifier le résultat', url("/taches/{$this->resultat->tache->id}/resultats/{$this->resultat->id}/edit"))
+            ->action('Modifier le résultat', url("/taches/{$this->resultat->tache->id}?tab=results"))
             ->line('Merci de corriger et soumettre à nouveau votre résultat.');
     }
 
@@ -59,7 +59,7 @@ class ResultatRejeteNotification extends Notification implements ShouldQueue
             'commentaire' => $this->commentaire,
             'level' => $this->level,
             'taux_realisation' => $this->resultat->taux_realisation,
-            'url' => "/resultats/{$this->resultat->id}",
+            'url' => "/taches/{$this->resultat->tache->id}?tab=results",
             'title' => 'Résultat rejeté',
             'message' => "Votre résultat pour « {$this->resultat->tache->titre} » nécessite des corrections",
         ];

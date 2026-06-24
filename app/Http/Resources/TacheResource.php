@@ -223,31 +223,35 @@ class TacheResource extends JsonResource
             'estimated_hours' => $this->estimated_hours,
             'actual_hours' => $this->actual_hours,
 
-            // ✅ CORRECTION CRITIQUE: Validation avec vérifications null-safe
-            'validation' => [
-                'n1_required' => $this->validation_n1_required,
-                'n1_validated_at' => $formatDate($this->validated_n1_at),
-                'n1_validated_by' => $this->when($this->validatedN1By && $this->validatedN1By->id, function () {
-                    return [
-                        'id' => $this->validatedN1By->id,
-                        'nom' => $this->validatedN1By->nom,
-                    ];
-                }),
-                'n1_commentaire' => $this->commentaire_n1,
+            // Validation — dérivée des résultats soumis (les colonnes validated_n1_at
+            // au niveau tâche ne sont jamais écrites ; la source de vérité est TacheResultat).
+            'validation' => (function () use ($formatDate) {
+                $n1Resultat = $this->resultats->where('valide_par_n1', true)->first();
+                $n2Resultat = $this->resultats->where('valide_par_n2', true)->first();
 
-                'n2_required' => $this->validation_n2_required,
-                'n2_validated_at' => $formatDate($this->validated_n2_at),
-                'n2_validated_by' => $this->when($this->validatedN2By && $this->validatedN2By->id, function () {
-                    return [
-                        'id' => $this->validatedN2By->id,
-                        'nom' => $this->validatedN2By->nom,
-                    ];
-                }),
-                'n2_commentaire' => $this->commentaire_n2,
+                $n1ValidateurN1Id = $n1Resultat?->validateur_n1_id;
+                $n1ValidateurN1 = $n1ValidateurN1Id ? $this->resultats
+                    ->where('valide_par_n1', true)
+                    ->first()
+                    ?->validateurN1 : null;
 
-                'status' => $this->validation_status,
-                'is_fully_validated' => $this->isFullyValidated(),
-            ],
+                $n2ValidateurN2 = $n2Resultat?->validateurN2 ?? null;
+
+                return [
+                    'n1_required' => $this->validation_n1_required,
+                    'n1_validated_at' => $formatDate($n1Resultat?->valide_le_n1),
+                    'n1_validated_by' => $n1ValidateurN1 ? ['id' => $n1ValidateurN1->id, 'nom' => $n1ValidateurN1->nom] : null,
+                    'n1_commentaire' => $n1Resultat?->commentaire_n1,
+
+                    'n2_required' => $this->validation_n2_required,
+                    'n2_validated_at' => $formatDate($n2Resultat?->valide_le_n2),
+                    'n2_validated_by' => $n2ValidateurN2 ? ['id' => $n2ValidateurN2->id, 'nom' => $n2ValidateurN2->nom] : null,
+                    'n2_commentaire' => $n2Resultat?->commentaire_n2,
+
+                    'status' => $n2Resultat ? 'fully_validated' : ($n1Resultat ? 'pending_n2' : ($this->resultats->where('soumis_le', '!=', null)->isNotEmpty() ? 'pending_n1' : 'not_validated')),
+                    'is_fully_validated' => (bool) $n2Resultat,
+                ];
+            })(),
 
             // ✅ Assignés avec helper de formatage
             'assignees' => $this->whenLoaded('assignees', function () use ($formatPivotDate) {

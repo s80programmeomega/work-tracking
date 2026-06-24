@@ -67,6 +67,15 @@ class WorkspaceController extends Controller
 
         $gate = app(ContextualPermissionGate::class);
         $workspaces->getCollection()->transform(function ($workspace) use ($user, $gate) {
+            if ($workspace->owner_id === $user->id) {
+                $workspace->setAttribute('user_role', 'owner');
+            } else {
+                $member = $workspace->members()->where('user_id', $user->id)->first();
+                $workspace->setAttribute('user_role', $member
+                    ? (\Spatie\Permission\Models\Role::find($member->pivot->role_id)?->name ?? 'membre')
+                    : null);
+            }
+
             $workspace->user_permissions = [
                 'can_view_workspace' => $gate->userCan($user, Permission::WORKSPACES_VIEW, $workspace),
                 'can_create_project' => $gate->userCan($user, Permission::WORKSPACES_CREATE_PROJECT, $workspace),
