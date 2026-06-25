@@ -114,10 +114,7 @@ export function useProjets() {
         params.workspace_id = authStore.user.current_workspace_id
       }
 
-      // ✅ Route différente selon le rôle
-      const endpoint = isSuperAdmin.value && !params.workspace_id
-        ? '/projets' // Super admin voit tous les projets
-        : '/projets/mes-projets' // Users voient leurs projets
+      const endpoint = '/projets/mes-projets'
 
       const { data } = await api.get(endpoint, { params })
 
@@ -153,50 +150,10 @@ export function useProjets() {
   }
 
   /**
-   * ✅ NOUVEAU : Fetch ALL projects (SUPER ADMIN ONLY)
+   * Alias kept for callers — delegates to fetchProjets (no SA bypass)
    */
   const fetchAllProjets = async (filters = {}) => {
-    if (!isSuperAdmin.value) {
-      console.warn('fetchAllProjets is only available for super admins')
-      return []
-    }
-
-    loading.value = true
-    errors.value = {}
-
-    try {
-      const params = {
-        page: filters.page || 1,
-        per_page: filters.per_page || 15,
-        ...filters
-      }
-
-      const { data } = await api.get('/projets/list/all', { params })
-
-      if (data?.data) {
-        projets.value = Array.isArray(data.data) ? data.data : []
-
-        if (data.meta) {
-          pagination.value = {
-            current_page: data.meta.current_page || 1,
-            last_page: data.meta.last_page || 1,
-            per_page: data.meta.per_page || 15,
-            total: data.meta.total || 0
-          }
-        }
-      } else {
-        projets.value = []
-      }
-
-      return projets.value
-    } catch (error) {
-      console.error('Error fetching all projets:', error)
-      projets.value = []
-      errors.value.fetch = error.response?.data?.message || 'Erreur lors du chargement des projets'
-      showToast('Impossible de charger les projets', 'error')
-    } finally {
-      loading.value = false
-    }
+    return await fetchProjets(filters)
   }
 
   /**
@@ -410,51 +367,10 @@ export function useProjets() {
   }
 
   /**
-   * ✅ Fetch ALL archived projects (SUPER ADMIN ONLY)
+   * Alias kept for callers — delegates to fetchArchivedProjets (no SA bypass)
    */
   const fetchAllArchivedProjets = async (filters = {}) => {
-    if (!isSuperAdmin.value) {
-      console.warn('fetchAllArchivedProjets is only available for super admins')
-      return []
-    }
-
-    loading.value = true
-    errors.value = {}
-
-    try {
-      const params = {
-        page: filters.page || 1,
-        per_page: filters.per_page || 15,
-        ...filters
-      }
-
-      // ✅ Super admin peut voir tous les projets archivés sans workspace_id
-      const { data } = await api.get('/projets/archives', { params })
-
-      if (data?.data) {
-        projets.value = Array.isArray(data.data) ? data.data : []
-
-        if (data.meta) {
-          pagination.value = {
-            current_page: data.meta.current_page || 1,
-            last_page: data.meta.last_page || 1,
-            per_page: data.meta.per_page || 15,
-            total: data.meta.total || 0
-          }
-        }
-      } else {
-        projets.value = []
-      }
-
-      return projets.value
-    } catch (error) {
-      console.error('Error fetching all archived projets:', error)
-      projets.value = []
-      errors.value.fetch = error.response?.data?.message || 'Erreur lors du chargement des projets archivés'
-      showToast('Impossible de charger les projets archivés', 'error')
-    } finally {
-      loading.value = false
-    }
+    return await fetchArchivedProjets(filters)
   }
 
 

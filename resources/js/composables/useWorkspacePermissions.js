@@ -41,49 +41,49 @@ export function useWorkspacePermissions(workspace = null) {
     const isObservateur  = computed(() => memberRole.value === 'observateur')
 
     const isMember = computed(() => {
-        if (isSuperAdmin.value || isDirecteur.value) return true
+        if (isDirecteur.value) return true
         return memberRole.value !== null
     })
 
     // Pre-computed permissions object from backend (ContextualPermissionGate)
     const perms = computed(() => workspace?.value?.user_permissions ?? {})
 
-    const canView            = computed(() => isSuperAdmin.value || (perms.value.can_view_workspace ?? false))
-    const canManageSettings  = computed(() => isSuperAdmin.value || (perms.value.can_manage_workspace_settings ?? false))
-    const canDelete          = computed(() => isSuperAdmin.value || isDirecteur.value)
-    const canInviteMembers   = computed(() => isSuperAdmin.value || isDirecteur.value || (perms.value.can_invite_members ?? false))
-    const canDeleteMembers   = computed(() => isSuperAdmin.value || isDirecteur.value || (perms.value.can_remove_members ?? false))
-    const canCreateProjects  = computed(() => isSuperAdmin.value || (perms.value.can_create_project ?? false))
-    const canViewAllProjects = computed(() => isSuperAdmin.value || isDirecteur.value || isManager.value)
-    const canTransferOwnership = computed(() => isSuperAdmin.value || isDirecteur.value)
+    const canView            = computed(() => perms.value.can_view_workspace ?? false)
+    const canManageSettings  = computed(() => perms.value.can_manage_workspace_settings ?? false)
+    const canDelete          = computed(() => isDirecteur.value)
+    const canInviteMembers   = computed(() => isDirecteur.value || (perms.value.can_invite_members ?? false))
+    const canDeleteMembers   = computed(() => isDirecteur.value || (perms.value.can_remove_members ?? false))
+    const canCreateProjects  = computed(() => perms.value.can_create_project ?? false)
+    const canViewAllProjects = computed(() => isDirecteur.value || isManager.value)
+    const canTransferOwnership = computed(() => isDirecteur.value)
 
     // Task 7: Evaluations / Scoring
-    const canViewPendingValidations = computed(() => isSuperAdmin.value || (perms.value.can_view_pending_validations ?? false))
-    const canViewEvaluationScore    = computed(() => isSuperAdmin.value || (perms.value.can_view_evaluation_score ?? false))
+    const canViewPendingValidations = computed(() => perms.value.can_view_pending_validations ?? false)
+    const canViewEvaluationScore    = computed(() => perms.value.can_view_evaluation_score ?? false)
 
     // Task 9: Agent evaluation sheet
     // canViewFicheEvaluation gates the entry to the sheet page; the controller
     // re-applies a per-target scope check (own / cadre→assignees / manager→activity).
     // canExportFicheEvaluation gates the export action (PDF/Excel) — same scope.
-    const canViewFicheEvaluation   = computed(() => isSuperAdmin.value || (perms.value.can_view_fiche_evaluation ?? false))
-    const canExportFicheEvaluation = computed(() => isSuperAdmin.value || (perms.value.can_export_fiche_evaluation ?? false))
+    const canViewFicheEvaluation   = computed(() => perms.value.can_view_fiche_evaluation ?? false)
+    const canExportFicheEvaluation = computed(() => perms.value.can_export_fiche_evaluation ?? false)
 
     // Task 10: Evaluation dashboard + workspace-wide task view
-    const canViewEvaluationDashboard  = computed(() => isSuperAdmin.value || (perms.value.can_view_evaluation_dashboard ?? false))
-    const canViewWorkspaceTaches      = computed(() => isSuperAdmin.value || isDirecteur.value || (perms.value.can_view_workspace_taches ?? false))
-    const canInlineEditTache          = computed(() => isSuperAdmin.value || (perms.value.can_inline_edit_tache ?? false))
+    const canViewEvaluationDashboard  = computed(() => perms.value.can_view_evaluation_dashboard ?? false)
+    const canViewWorkspaceTaches      = computed(() => isDirecteur.value || (perms.value.can_view_workspace_taches ?? false))
+    const canInlineEditTache          = computed(() => perms.value.can_inline_edit_tache ?? false)
 
     // Task 12: Documents
-    const canManageWorkspaceDocuments = computed(() => isSuperAdmin.value || (perms.value.can_manage_workspace_documents ?? false))
+    const canManageWorkspaceDocuments = computed(() => perms.value.can_manage_workspace_documents ?? false)
 
     // Task 13: Subscription
-    const canManageSubscription = computed(() => isSuperAdmin.value || (perms.value.can_manage_subscription ?? false))
+    const canManageSubscription = computed(() => perms.value.can_manage_subscription ?? false)
 
     // Task 8: Notifications
-    const canManageNotificationPreferences = computed(() => isSuperAdmin.value || (perms.value.can_manage_notification_preferences ?? false))
+    const canManageNotificationPreferences = computed(() => perms.value.can_manage_notification_preferences ?? false)
 
     // Phase 6: Recherche globale — manager et supérieur (owner/directeur inclus)
-    const canSearchGlobal = computed(() => isSuperAdmin.value || isDirecteur.value || (perms.value.can_search_global ?? false))
+    const canSearchGlobal = computed(() => isDirecteur.value || (perms.value.can_search_global ?? false))
 
     // Phase 6: Recherche scopée — cadre, collaborateur, stagiaire (ressources assignées uniquement)
     const canSearchScoped = computed(() => perms.value.can_search_scoped ?? false)
@@ -92,17 +92,17 @@ export function useWorkspacePermissions(workspace = null) {
     const canSearch = computed(() => canSearchGlobal.value || canSearchScoped.value)
 
     // Phase 11E: Voir la liste des membres et leur activité (owner/directeur + manager)
-    const canViewMembers = computed(() => isSuperAdmin.value || isDirecteur.value || (perms.value.can_view_members ?? false))
+    const canViewMembers = computed(() => isDirecteur.value || (perms.value.can_view_members ?? false))
 
     // Phase 7: Centre d'aide — lecture pour tous les rôles ; gestion granulaire par action
-    // (owner/directeur + super_admin par défaut).
-    const canReadHelpArticles        = computed(() => isSuperAdmin.value || (perms.value.can_help_articles_read ?? true))
-    const canCreateHelpArticles      = computed(() => isSuperAdmin.value || isDirecteur.value || (perms.value.can_help_articles_create ?? false))
-    const canEditHelpArticles        = computed(() => isSuperAdmin.value || isDirecteur.value || (perms.value.can_help_articles_edit ?? false))
-    const canPublishHelpArticles     = computed(() => isSuperAdmin.value || isDirecteur.value || (perms.value.can_help_articles_publish ?? false))
-    const canDeleteHelpArticles      = computed(() => isSuperAdmin.value || isDirecteur.value || (perms.value.can_help_articles_delete ?? false))
-    const canUploadHelpImages        = computed(() => isSuperAdmin.value || isDirecteur.value || (perms.value.can_help_articles_upload_image ?? false))
-    const canManageHelpCategories    = computed(() => isSuperAdmin.value || isDirecteur.value || (perms.value.can_help_categories_manage ?? false))
+    // (owner/directeur par défaut).
+    const canReadHelpArticles        = computed(() => perms.value.can_help_articles_read ?? true)
+    const canCreateHelpArticles      = computed(() => isDirecteur.value || (perms.value.can_help_articles_create ?? false))
+    const canEditHelpArticles        = computed(() => isDirecteur.value || (perms.value.can_help_articles_edit ?? false))
+    const canPublishHelpArticles     = computed(() => isDirecteur.value || (perms.value.can_help_articles_publish ?? false))
+    const canDeleteHelpArticles      = computed(() => isDirecteur.value || (perms.value.can_help_articles_delete ?? false))
+    const canUploadHelpImages        = computed(() => isDirecteur.value || (perms.value.can_help_articles_upload_image ?? false))
+    const canManageHelpCategories    = computed(() => isDirecteur.value || (perms.value.can_help_categories_manage ?? false))
 
     // Helper agrégé (PAS une permission backend) : sert uniquement à afficher/masquer
     // le point d'entrée vers le back-office d'aide. Vrai dès que l'utilisateur détient
@@ -118,11 +118,11 @@ export function useWorkspacePermissions(workspace = null) {
     )
 
     // G8: Sidebar gating helpers
-    // canViewAllTasks: managers, owners and super_admins can see the full task list.
-    const canViewAllTasks = computed(() => isSuperAdmin.value || isDirecteur.value || isManager.value || isCadre.value)
+    // canViewAllTasks: managers, owners and directeurs can see the full task list.
+    const canViewAllTasks = computed(() => isDirecteur.value || isManager.value || isCadre.value)
     // canSubmitResult: any member who is a collaborateur, cadre or above can submit
     // results — corresponds to TACHES_SUBMIT_RESULT permission on the backend.
-    const canSubmitResult = computed(() => isSuperAdmin.value || (perms.value.can_submit_result ?? isMember.value))
+    const canSubmitResult = computed(() => perms.value.can_submit_result ?? isMember.value)
 
     /**
      * Whether the current user can perform an action on a specific member.
@@ -131,7 +131,7 @@ export function useWorkspacePermissions(workspace = null) {
      */
     const canPerformMemberAction = (targetMember, action) => {
         if (!targetMember) return false
-        if (isSuperAdmin.value || isDirecteur.value) return true
+        if (isDirecteur.value) return true
         if (targetMember.pivot?.role === 'owner') return false
         if (targetMember.id === currentUser.value?.id) return false
 

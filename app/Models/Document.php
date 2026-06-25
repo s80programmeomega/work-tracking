@@ -301,6 +301,11 @@ class Document extends Model
         });
     }
 
+    public function scopeInWorkspace($query, int $workspaceId)
+    {
+        return $query->where('workspace_id', $workspaceId);
+    }
+
     /**
      * Check if user can view this document
      */

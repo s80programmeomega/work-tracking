@@ -82,8 +82,20 @@ class TacheService
                                     $wmq->where('user_id', $user->id);
                                 });
                             });
+                    })
+                    // OU manager/supérieur dans le workspace : voit toutes les tâches du workspace
+                    ->orWhereHas('activite.projet.workspace.members', function ($mq) use ($user) {
+                        $managerRoleIds = Role::whereIn('name', ['owner', 'manager', 'directeur', 'super_admin'])
+                            ->pluck('id');
+                        $mq->where('user_id', $user->id)
+                            ->whereIn('role_id', $managerRoleIds);
                     });
             });
+        }
+
+        // Filtre par workspace
+        if (! empty($filters['workspace_id'])) {
+            $query->whereHas('activite.projet', fn ($q) => $q->where('workspace_id', $filters['workspace_id']));
         }
 
         // Filtres standards

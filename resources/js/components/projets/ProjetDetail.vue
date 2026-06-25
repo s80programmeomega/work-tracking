@@ -603,6 +603,16 @@
               </div>
             </div>
 
+            <!-- Documents Tab -->
+            <div v-if="activeTab === 'documents'">
+              <DocumentManager
+                :documentable-type="'App\\Models\\Projet'"
+                :documentable-id="projetId"
+                :entity-label="projet.nom"
+                :can-upload="canUpload"
+              />
+            </div>
+
             <!-- Invitations Tab -->
             <div v-if="activeTab === 'invitations'" class="space-y-4">
               <div class="flex items-center justify-between mb-4">
@@ -854,14 +864,17 @@ import { useProjetInvitations } from '@/composables/useProjetInvitations'
 import EditMemberPermissionsModal from '@/components/activites/EditMemberPermissionsModal.vue'
 import { useStagger } from '@/composables/useAnimations'
 
+import { useI18n } from 'vue-i18n'
 import {
   ChevronLeftIcon, EditIcon,
   SettingsIcon, CalendarIcon,
   UsersIcon, StarIcon,
   ListIcon, PlusIcon,
   CheckCircleIcon, TrendingUpIcon,
-  ArchiveIcon, ClockIcon, MailIcon
+  ArchiveIcon, ClockIcon, MailIcon,
+  FolderIcon
 } from '@/icons'
+import DocumentManager from '@/components/documents/DocumentManager.vue'
 
 import ActiviteForm from '@/components/activites/ActiviteForm.vue'
 import EditProjetMemberModal from './EditProjetMemberModal.vue'
@@ -887,6 +900,7 @@ const props = defineProps({
 
 const emit = defineEmits(['back', 'create-activity', 'view-activity'])
 
+const { t } = useI18n()
 const router = useRouter()
 const authStore = useAuthStore()
 const { staggerRef: activityStaggerRef, applyStagger: applyActivityStagger } = useStagger(50)
@@ -1027,11 +1041,22 @@ const isExpiringSoon = (expiresAt) => {
 // ==================== COMPUTED PROPERTIES ====================
 
 const tabs = computed(() => [
-  { id: 'overview', label: 'Vue d\'ensemble', icon: TrendingUpIcon },
-  { id: 'activities', label: 'Activités', icon: ListIcon, count: displayedActivities.value.length },
-  { id: 'members', label: 'Membres', icon: UsersIcon, count: members.value.length },
-  { id: 'invitations', label: 'Invitations', icon: MailIcon, count: pendingInvitations.value.length }
+  { id: 'overview', label: t('projets_show.tab_overview'), icon: TrendingUpIcon },
+  { id: 'activities', label: t('projets_show.tab_activities'), icon: ListIcon, count: displayedActivities.value.length },
+  { id: 'members', label: t('projets_show.tab_members'), icon: UsersIcon, count: members.value.length },
+  { id: 'invitations', label: t('projets_show.tab_invitations'), icon: MailIcon, count: pendingInvitations.value.length },
+  { id: 'documents', label: t('projets_show.tab_documents'), icon: FolderIcon },
 ])
+
+const canUpload = computed(() => {
+  const user = authStore.user
+  if (!user) return false
+  if (user.is_super_admin) return true
+  if (!projet.value) return false
+  // Responsable du projet ou manager du workspace
+  if (projet.value.responsable_id === user.id) return true
+  return user.role_level >= 3 // manager et supérieur
+})
 
 /**
  * ✅ Activités accessibles à l'utilisateur (membre ou responsable)

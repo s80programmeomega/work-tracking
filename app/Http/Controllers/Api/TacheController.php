@@ -65,7 +65,13 @@ class TacheController extends Controller
             'validation_status',
             'date_from',
             'date_to',
+            'workspace_id',
         ]);
+
+        // Appliquer le workspace courant si aucun workspace_id explicite n'est fourni
+        if (empty($filters['workspace_id'])) {
+            $filters['workspace_id'] = $request->user()->current_workspace_id;
+        }
 
         $taches = $this->tacheService->getAllTaches($request->user(), $filters);
 
@@ -277,32 +283,27 @@ class TacheController extends Controller
 
         $with = ['activite.projet', 'assignees', 'labels', 'validatedN1By', 'validatedN2By'];
 
-        if ($user->isSuperAdmin()) {
-            $pendingN1 = Tache::pendingValidationN1()->with($with)->get();
-            $pendingN2 = Tache::pendingValidationN2()->with($with)->get();
-        } else {
-            // N1: activités où l'utilisateur est responsable ou validateur
-            $pendingN1 = Tache::pendingValidationN1()
-                ->whereHas('activite', function ($q) use ($user) {
-                    $q->where('responsable_id', $user->id)
-                        ->orWhereHas('membres', function ($mq) use ($user) {
-                            $mq->where('user_id', $user->id)
-                                ->where('can_validate_results', true);
-                        });
-                })
-                ->with($with)
-                ->get()
-                ->filter(fn ($tache) => Gate::allows('validateN1', $tache));
+        // N1: activités où l'utilisateur est responsable ou validateur
+        $pendingN1 = Tache::pendingValidationN1()
+            ->whereHas('activite', function ($q) use ($user) {
+                $q->where('responsable_id', $user->id)
+                    ->orWhereHas('membres', function ($mq) use ($user) {
+                        $mq->where('user_id', $user->id)
+                            ->where('can_validate_results', true);
+                    });
+            })
+            ->with($with)
+            ->get()
+            ->filter(fn ($tache) => Gate::allows('validateN1', $tache));
 
-            // N2: projets dont l'utilisateur est responsable
-            $pendingN2 = Tache::pendingValidationN2()
-                ->whereHas('activite.projet', function ($q) use ($user) {
-                    $q->where('responsable_id', $user->id);
-                })
-                ->with($with)
-                ->get()
-                ->filter(fn ($tache) => Gate::allows('validateN2', $tache));
-        }
+        // N2: projets dont l'utilisateur est responsable
+        $pendingN2 = Tache::pendingValidationN2()
+            ->whereHas('activite.projet', function ($q) use ($user) {
+                $q->where('responsable_id', $user->id);
+            })
+            ->with($with)
+            ->get()
+            ->filter(fn ($tache) => Gate::allows('validateN2', $tache));
 
         return response()->json([
             'pending_n1' => TacheResource::collection($pendingN1),
@@ -324,16 +325,14 @@ class TacheController extends Controller
 
         $query = Tache::overdue()->with(['activite.projet', 'labels', 'assignees'])->withCount('sousTaches')->ordered();
 
-        if (! $user->isSuperAdmin()) {
-            $query->where(function ($q) use ($user) {
-                $q->whereHas('assignees', function ($aq) use ($user) {
-                    $aq->where('user_id', $user->id);
-                })
-                    ->orWhereHas('activite', function ($actq) use ($user) {
-                        $actq->where('responsable_id', $user->id);
-                    });
-            });
-        }
+        $query->where(function ($q) use ($user) {
+            $q->whereHas('assignees', function ($aq) use ($user) {
+                $aq->where('user_id', $user->id);
+            })
+                ->orWhereHas('activite', function ($actq) use ($user) {
+                    $actq->where('responsable_id', $user->id);
+                });
+        });
 
         $taches = $query->get();
 

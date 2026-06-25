@@ -29,33 +29,11 @@ class ActiviteController extends Controller
     ) {}
 
     /**
-     * Display a listing of ALL activities (SUPER ADMIN ONLY).
+     * Endpoint removed — superadmin no longer has unscoped access to all activities.
      */
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(): never
     {
-        $user = $request->user();
-
-        $filters = $request->only([
-            'search',
-            'projet_id',
-            'responsable_id',
-            'status',
-            'is_overdue',
-            'per_page',
-            'workspace_id', // ✅ Permet de filtrer par workspace
-            'date_from',
-            'date_to',
-        ]);
-
-        // ✅ Si Super Admin : toutes les activités
-        if ($user->isSuperAdmin()) {
-            $activites = $this->activiteService->getAllActivites($filters);
-        } else {
-            // ✅ Sinon : activités des projets accessibles
-            $activites = $this->activiteService->getAccessibleActivites($user, $filters);
-        }
-
-        return ActiviteResource::collection($activites);
+        abort(403, 'Accès non autorisé.');
     }
 
     /**

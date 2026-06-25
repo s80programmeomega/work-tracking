@@ -34,10 +34,6 @@ class ContextualPermissionGate
      */
     public function userCan(User $user, string $permission, Model $resource): bool
     {
-        if ($user->isSuperAdmin()) {
-            return true;
-        }
-
         $permissions = $this->resolveEffectivePermissions($user, $resource);
 
         return in_array($permission, $permissions, true);

@@ -35,7 +35,7 @@ abstract class WorkTrackingTestCase extends DuskTestCase
             'nom' => $user->nom,
             'email' => $user->email,
             'current_workspace_id' => $user->current_workspace_id,
-            'is_super_admin' => $user->hasRole('super_admin'),
+            'is_super_admin' => $user->isSuperAdmin(),
         ], JSON_HEX_APOS | JSON_HEX_TAG | JSON_UNESCAPED_UNICODE);
 
         // 1. Clear localStorage on the current page so the SPA's auth guard

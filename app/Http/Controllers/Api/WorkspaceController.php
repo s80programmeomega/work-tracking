@@ -41,14 +41,12 @@ class WorkspaceController extends Controller
     {
         $user = $request->user();
 
-        $baseQuery = $user->isSuperAdmin()
-            ? Workspace::query()
-            : Workspace::where(function ($query) use ($user) {
-                $query->where('owner_id', $user->id)
-                    ->orWhereHas('members', function ($q) use ($user) {
-                        $q->where('user_id', $user->id);
-                    });
-            });
+        $baseQuery = Workspace::where(function ($query) use ($user) {
+            $query->where('owner_id', $user->id)
+                ->orWhereHas('members', function ($q) use ($user) {
+                    $q->where('user_id', $user->id);
+                });
+        });
 
         $workspaces = $baseQuery
             // Chargement du nombre de projets et de membres pour les cartes du picker
@@ -1518,6 +1516,19 @@ class WorkspaceController extends Controller
      */
     private function userHasAccess(User $user, Workspace $workspace): bool
     {
+        // Temporary superadmin: check for an explicit workspace grant in temporary_access.
+        if ($user->isSuperAdmin() && $user->admin_expires_at !== null) {
+            return DB::table('temporary_access')
+                ->where('user_id', $user->id)
+                ->where('accessible_type', Workspace::class)
+                ->where('accessible_id', $workspace->id)
+                ->where('role', 'readonly')
+                ->where(function ($q) {
+                    $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
+                })
+                ->exists();
+        }
+
         return app(ContextualPermissionGate::class)->userCan($user, Permission::WORKSPACES_VIEW, $workspace);
     }
 

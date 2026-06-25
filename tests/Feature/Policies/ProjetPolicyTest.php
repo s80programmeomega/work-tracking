@@ -109,12 +109,14 @@ class ProjetPolicyTest extends TestCase
     }
 
     /** @test */
-    public function super_admin_can_view_any_projet(): void
+    public function super_admin_without_membership_cannot_view_projet(): void
     {
+        // Superadmin scoping: platform operators no longer bypass projet policies.
+        // A superadmin with no workspace/projet membership is denied via the policy.
         $superAdmin = User::factory()->create(['is_super_admin' => true]);
         $projet = $this->makePublicProjet();
 
-        $this->assertTrue($superAdmin->can('view', $projet));
+        $this->assertFalse($superAdmin->can('view', $projet));
     }
 
     // =========================================================================

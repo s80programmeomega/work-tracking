@@ -10,6 +10,7 @@ use App\Http\Middleware\PreventRequestsDuringMaintenance;
 use App\Http\Middleware\RecordRequestRate;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\SuperAdminMiddleware;
+use App\Http\Middleware\ThrottleRequestsUnlessTest;
 use App\Http\Middleware\TrimStrings;
 use App\Http\Middleware\TrustProxies;
 use App\Http\Middleware\ValidateSignature;
@@ -26,7 +27,6 @@ use Illuminate\Foundation\Http\Middleware\ValidatePostSize;
 use Illuminate\Http\Middleware\HandleCors;
 use Illuminate\Http\Middleware\SetCacheHeaders;
 use Illuminate\Routing\Middleware\SubstituteBindings;
-use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
@@ -67,7 +67,7 @@ class Kernel extends HttpKernel
 
         'api' => [
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-            ThrottleRequests::class.':api',
+            ThrottleRequestsUnlessTest::class.':api',
             SubstituteBindings::class,
             RecordRequestRate::class,
         ],
@@ -92,7 +92,7 @@ class Kernel extends HttpKernel
         'password.confirm' => RequirePassword::class,
         'precognitive' => HandlePrecognitiveRequests::class,
         'signed' => ValidateSignature::class,
-        'throttle' => ThrottleRequests::class,
+        'throttle' => ThrottleRequestsUnlessTest::class,
         'verified' => EnsureEmailIsVerified::class,
 
         'super_admin' => SuperAdminMiddleware::class,

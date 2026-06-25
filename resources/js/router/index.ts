@@ -813,6 +813,12 @@ const router = createRouter({
       meta: { requiresAuth: true, requiresSuperAdmin: true },
     },
     {
+      path: '/admin/my-audit-log',
+      name: 'admin.my-audit-log',
+      component: () => import('../pages/admin/DirecteurAuditLog.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
       path: '/auth/callback',
       name: 'AuthCallback',
       component: () => import('../pages/Auth/SocialCallback.vue'),
@@ -890,12 +896,16 @@ router.beforeEach(async (to, from, next) => {
         return next({ name: '404 Error', query: { code: '403', from: to.fullPath } })
       }
 
-      // Routes avec permissions requises
+      // Superadmin must stay in admin routes only — redirect to admin.dashboard.
+      if (authStore.isSuperAdmin && !String(to.name ?? '').startsWith('admin')) {
+        isLoading.value = false
+        return next({ name: 'admin.dashboard' })
+      }
+
+      // Routes avec permissions requises — superadmin no longer bypasses these.
       if (Array.isArray(to.meta.permissions) && (to.meta.permissions as string[]).length > 0) {
         const userRoles: string[] = authStore.user?.roles ?? []
-        const allowed =
-          authStore.isSuperAdmin ||
-          (to.meta.permissions as string[]).some((r: string) => userRoles.includes(r))
+        const allowed = (to.meta.permissions as string[]).some((r: string) => userRoles.includes(r))
         if (!allowed) {
           isLoading.value = false
           return next({ name: '404 Error', query: { code: '403', from: to.fullPath } })
@@ -903,19 +913,22 @@ router.beforeEach(async (to, from, next) => {
       }
 
       // Redirect utilisateur (no workspace yet) to workspace creation,
-      // unless they're already heading there
+      // unless they're already heading there or they're a superadmin (who never has a workspace).
       const noWorkspace = !authStore.user?.current_workspace_id
       const isHeadingToWorkspaceCreate = to.name === 'workspaces.create'
-      if (noWorkspace && !isHeadingToWorkspaceCreate && !authStore.user?.is_super_admin) {
+      if (noWorkspace && !isHeadingToWorkspaceCreate && !authStore.isSuperAdmin) {
         isLoading.value = false
         return next({ name: 'workspaces.create' })
       }
     }
 
-    // Guest-only routes (signin, signup) redirect authenticated users to the workspace picker
+    // Guest-only routes (signin, signup) redirect authenticated users.
+    // Superadmin goes to admin.dashboard; regular users go to workspaces.select.
     if (to.meta.guest && isLoggedIn) {
       isLoading.value = false
-      return next({ name: 'workspaces.select' })
+      return next(authStore.isSuperAdmin
+        ? { name: 'admin.dashboard' }
+        : { name: 'workspaces.select' })
     }
 
     next()

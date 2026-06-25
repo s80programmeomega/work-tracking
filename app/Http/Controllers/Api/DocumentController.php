@@ -20,6 +20,7 @@ use App\Permissions\Permission;
 use App\Services\DocumentAccessResolver;
 use App\Services\DocumentService;
 use App\Services\PermissionService;
+use App\Services\SubscriptionService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -32,6 +33,7 @@ class DocumentController extends Controller
 {
     public function __construct(
         protected DocumentService $documentService,
+        protected SubscriptionService $subscriptionService,
         protected PermissionService $permissionService,
     ) {}
 
@@ -515,54 +517,37 @@ class DocumentController extends Controller
     public function globalStats(Request $request)
     {
         $user = auth()->user();
+        $workspaceId = $user->current_workspace_id;
 
         try {
-            // Compter les workspaces accessibles
-            $workspacesCount = Workspace::where(function ($q) use ($user) {
-                $q->where('owner_id', $user->id)
-                    ->orWhereHas('members', function ($q) use ($user) {
-                        $q->where('user_id', $user->id);
-                    });
-            })->count();
+            $projectsCount = Projet::where('workspace_id', $workspaceId)->count();
 
-            // Compter les projets accessibles
-            $projectsCount = Projet::whereHas('workspace', function ($q) use ($user) {
-                $q->where('owner_id', $user->id)
-                    ->orWhereHas('members', function ($q) use ($user) {
-                        $q->where('user_id', $user->id);
-                    });
-            })->count();
+            $activitiesCount = Activite::whereHas('projet', fn ($q) => $q->where('workspace_id', $workspaceId))->count();
 
-            // Compter les activités accessibles
-            $activitiesCount = Activite::whereHas('projet.workspace', function ($q) use ($user) {
-                $q->where('owner_id', $user->id)
-                    ->orWhereHas('members', function ($q) use ($user) {
-                        $q->where('user_id', $user->id);
-                    });
-            })->count();
-
-            // Compter les tâches accessibles
-            $tasksCount = Tache::whereHas('activite.projet.workspace', function ($q) use ($user) {
-                $q->where('owner_id', $user->id)
-                    ->orWhereHas('members', function ($q) use ($user) {
-                        $q->where('user_id', $user->id);
-                    });
-            })->count();
+            $tasksCount = Tache::whereHas('activite.projet', fn ($q) => $q->where('workspace_id', $workspaceId))->count();
 
             // Stats documents
-            $documentsQuery = Document::accessibleBy($user);
+            $documentsQuery = Document::accessibleBy($user)->inWorkspace($workspaceId);
             $documentsCount = $documentsQuery->count();
             $totalSize = $documentsQuery->sum('taille');
+
+            // Quota stockage depuis le plan d'abonnement
+            $workspace = Workspace::find($workspaceId);
+            $subscriptionSummary = $workspace ? $this->subscriptionService->summary($workspace) : null;
+            $maxStorageMb = $subscriptionSummary['limits']['storage_mb'] ?? 100;
+            $usedStorageBytes = Document::inWorkspace($workspaceId)->sum('taille');
 
             return response()->json([
                 'success' => true,
                 'data' => [
-                    'workspaces' => $workspacesCount,
+                    'workspaces' => 1,
                     'projects' => $projectsCount,
                     'activities' => $activitiesCount,
                     'tasks' => $tasksCount,
                     'documents' => $documentsCount,
                     'totalSize' => $totalSize,
+                    'usedStorageBytes' => $usedStorageBytes,
+                    'maxStorageMb' => $maxStorageMb,
                 ],
             ]);
         } catch (\Exception $e) {
@@ -582,6 +567,7 @@ class DocumentController extends Controller
 
         try {
             $documents = Document::accessibleBy($user)
+                ->inWorkspace($user->current_workspace_id)
                 ->with(['user:id,nom,email,avatar', 'documentable'])
                 ->latest('created_at')
                 ->limit(50)
@@ -607,14 +593,15 @@ class DocumentController extends Controller
         $user = auth()->user();
 
         try {
-            $documents = Document::whereHas('permissions', function ($q) use ($user) {
-                $q->where('permissionable_type', User::class)
-                    ->where('permissionable_id', $user->id)
-                    ->where(function ($q) {
-                        $q->whereNull('expires_at')
-                            ->orWhere('expires_at', '>', now());
-                    });
-            })
+            $documents = Document::inWorkspace($user->current_workspace_id)
+                ->whereHas('permissions', function ($q) use ($user) {
+                    $q->where('permissionable_type', User::class)
+                        ->where('permissionable_id', $user->id)
+                        ->where(function ($q) {
+                            $q->whereNull('expires_at')
+                                ->orWhere('expires_at', '>', now());
+                        });
+                })
                 ->with([
                     'user:id,nom,email,avatar',
                     'documentable',
@@ -652,6 +639,7 @@ class DocumentController extends Controller
 
         try {
             $documents = Document::where('user_id', $user->id)
+                ->inWorkspace($user->current_workspace_id)
                 ->with(['user:id,nom,email,avatar', 'documentable'])
                 ->withCount('permissions as shared_with_count')
                 ->latest('created_at')

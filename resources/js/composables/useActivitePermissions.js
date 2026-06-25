@@ -40,33 +40,33 @@ export function useActivitePermissions(activite = null) {
     const isObservateur   = computed(() => memberRole.value === 'observateur')
 
     const isMember = computed(() => {
-        if (isSuperAdmin.value || isResponsable.value) return true
+        if (isResponsable.value) return true
         return memberRole.value !== null
     })
 
     // Pre-computed permissions object from backend (ContextualPermissionGate)
     const perms = computed(() => activite?.value?.user_permissions ?? {})
 
-    const canView         = computed(() => isSuperAdmin.value || isResponsable.value || isMember.value)
-    const canEdit         = computed(() => isSuperAdmin.value || perms.value.can_edit_activity ?? false)
-    const canDelete       = computed(() => isSuperAdmin.value || perms.value.can_delete_activity ?? false)
-    const canCreateTask   = computed(() => isSuperAdmin.value || perms.value.can_create_tasks ?? false)
-    const canEditTask     = computed(() => isSuperAdmin.value || perms.value.can_edit_tasks ?? false)
-    const canDeleteTask   = computed(() => isSuperAdmin.value || perms.value.can_delete_tasks ?? false)
-    const canValidateN1   = computed(() => isSuperAdmin.value || perms.value.can_validate_results ?? false)
-    const canAssignUsers  = computed(() => isSuperAdmin.value || perms.value.can_assign_users ?? false)
-    const canManageMembers = computed(() => isSuperAdmin.value || perms.value.can_manage_members ?? false)
+    const canView         = computed(() => isResponsable.value || isMember.value)
+    const canEdit         = computed(() => perms.value.can_edit_activity ?? false)
+    const canDelete       = computed(() => perms.value.can_delete_activity ?? false)
+    const canCreateTask   = computed(() => perms.value.can_create_tasks ?? false)
+    const canEditTask     = computed(() => perms.value.can_edit_tasks ?? false)
+    const canDeleteTask   = computed(() => perms.value.can_delete_tasks ?? false)
+    const canValidateN1   = computed(() => perms.value.can_validate_results ?? false)
+    const canAssignUsers  = computed(() => perms.value.can_assign_users ?? false)
+    const canManageMembers = computed(() => perms.value.can_manage_members ?? false)
 
     /** Can create sous-tâches (cadre, collaborateur, or explicit can_create_tasks) */
     const canCreateSousTache = computed(() => {
-        if (isSuperAdmin.value || isResponsable.value) return true
+        if (isResponsable.value) return true
         if (isObservateur.value) return false
         return isCadre.value || isCollaborateur.value || (memberPivot.value?.can_create_tasks ?? false)
     })
 
     /** Can assign an intervenant to a sous-tâche */
     const canAssignSousTacheIntervenant = computed(() => {
-        if (isSuperAdmin.value || isResponsable.value) return true
+        if (isResponsable.value) return true
         return isCadre.value || (memberPivot.value?.can_assign_users ?? false)
     })
 

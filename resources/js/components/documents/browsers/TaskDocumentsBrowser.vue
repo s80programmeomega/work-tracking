@@ -202,6 +202,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStagger } from '@/composables/useAnimations'
+import { useAuthStore } from '@/stores/auth'
 import {
   CheckCircleIcon,
   MagnifyingGlassIcon,
@@ -220,6 +221,8 @@ defineEmits(['select'])
 
 const { t } = useI18n()
 const { staggerRef, applyStagger } = useStagger(50)
+const authStore = useAuthStore()
+const currentWorkspaceId = computed(() => authStore.currentWorkspaceId)
 
 const tasks = ref([])
 const activities = ref([])
@@ -320,7 +323,8 @@ const loadTasks = async () => {
   try {
     const response = await api.get('/taches', {
       params: {
-        with_counts: true
+        with_counts: true,
+        workspace_id: currentWorkspaceId.value
       }
     })
     tasks.value = response.data.data

@@ -14,18 +14,18 @@
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
               {{ $t('documents_page.subtitle') }}
             </p>
+            <button
+              v-if="currentWorkspaceId"
+              @click="showUploadModal = true"
+              class="mt-3 inline-flex items-center gap-2 rounded-3 bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+            >
+              <ArrowUpTrayIcon class="h-4 w-4" />
+              {{ $t('documents_page.upload_btn') }}
+            </button>
           </div>
 
           <!-- Quick Stats -->
-          <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            <div class="rounded-3 bg-blue-50 px-4 py-3 dark:bg-blue-900/20">
-              <p class="text-xs font-medium text-blue-600 dark:text-blue-400">
-                {{ $t('documents_page.stat_workspaces') }}
-              </p>
-              <p class="mt-1 text-2xl font-bold text-blue-900 dark:text-blue-300">
-                {{ stats.workspaces || 0 }}
-              </p>
-            </div>
+          <div class="grid grid-cols-2 gap-4 lg:grid-cols-3">
             <div class="rounded-3 bg-green-50 px-4 py-3 dark:bg-green-900/20">
               <p class="text-xs font-medium text-green-600 dark:text-green-400">
                 {{ $t('documents_page.stat_projects') }}
@@ -46,8 +46,22 @@
               <p class="text-xs font-medium text-orange-600 dark:text-orange-400">
                 {{ $t('documents_page.stat_storage') }}
               </p>
-              <p class="mt-1 text-2xl font-bold text-orange-900 dark:text-orange-300">
-                {{ formatBytes(stats.totalSize || 0) }}
+              <p class="mt-1 text-lg font-bold text-orange-900 dark:text-orange-300">
+                {{ formatBytes(stats.usedStorageBytes || 0) }}
+                <span class="text-xs font-normal text-orange-600 dark:text-orange-400">
+                  /
+                  {{ stats.maxStorageMb === -1 ? $t('documents_page.storage_unlimited') : formatBytes(stats.maxStorageMb * 1024 * 1024) }}
+                </span>
+              </p>
+              <div v-if="stats.maxStorageMb !== -1" class="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-orange-200 dark:bg-orange-900/40">
+                <div
+                  class="h-full rounded-full transition-all duration-500"
+                  :class="storageBarClass"
+                  :style="{ width: storagePercent + '%' }"
+                />
+              </div>
+              <p v-if="stats.maxStorageMb !== -1" class="mt-0.5 text-xs text-orange-500 dark:text-orange-400">
+                {{ storagePercent.toFixed(1) }}% {{ $t('documents_page.storage_used') }}
               </p>
             </div>
           </div>
@@ -88,15 +102,8 @@
 
         <!-- Tab Content -->
         <div class="p-6">
-          <!-- Par Workspace -->
-          <div v-if="activeTab === 'workspaces'">
-            <workspace-documents-browser
-              @select="handleWorkspaceSelect"
-            />
-          </div>
-
           <!-- Par Projet -->
-          <div v-else-if="activeTab === 'projects'">
+          <div v-if="activeTab === 'projects'">
             <project-documents-browser
               @select="handleProjectSelect"
             />
@@ -142,6 +149,15 @@
       :entity-label="selectedEntity.label"
       @close="selectedEntity = null"
     />
+
+    <!-- Upload Modal (workspace-level) -->
+    <document-upload-modal
+      v-if="showUploadModal && currentWorkspaceId"
+      :documentable-type="'App\\Models\\Workspace'"
+      :documentable-id="currentWorkspaceId"
+      @close="showUploadModal = false"
+      @uploaded="showUploadModal = false; loadStats()"
+    />
   </admin-layout>
 </template>
 
@@ -151,8 +167,8 @@ import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
-import WorkspaceDocumentsBrowser from '@/components/documents/browsers/WorkspaceDocumentsBrowser.vue'
 import ProjectDocumentsBrowser from '@/components/documents/browsers/ProjectDocumentsBrowser.vue'
+import DocumentUploadModal from '@/components/documents/DocumentUploadModal.vue'
 import ActivityDocumentsBrowser from '@/components/documents/browsers/ActivityDocumentsBrowser.vue'
 import TaskDocumentsBrowser from '@/components/documents/browsers/TaskDocumentsBrowser.vue'
 import RecentDocumentsList from '@/components/documents/lists/RecentDocumentsList.vue'
@@ -160,38 +176,49 @@ import SharedDocumentsList from '@/components/documents/lists/SharedDocumentsLis
 import MyDocumentsList from '@/components/documents/lists/MyDocumentsList.vue'
 import DocumentManagerModal from '@/components/documents/DocumentManagerModal.vue'
 import {
-  FolderIcon,
   BriefcaseIcon,
   RectangleStackIcon,
   CheckCircleIcon,
   ClockIcon,
   UserGroupIcon,
-  DocumentIcon
+  DocumentIcon,
+  ArrowUpTrayIcon
 } from '@heroicons/vue/24/outline'
 import api from '@/api/axios'
+import { useAuthStore } from '@/stores/auth'
 
 const { t } = useI18n()
 const route = useRoute()
-const validTabs = ['workspaces', 'projects', 'activities', 'tasks', 'recent', 'shared', 'my-documents']
+const authStore = useAuthStore()
+const validTabs = ['projects', 'activities', 'tasks', 'recent', 'shared', 'my-documents']
 const currentPageTitle = computed(() => t('documents_page.page_title'))
-const activeTab = ref(validTabs.includes(route.query.tab) ? route.query.tab : 'workspaces')
+const activeTab = ref(validTabs.includes(route.query.tab) ? route.query.tab : 'projects')
 const selectedEntity = ref(null)
+const showUploadModal = ref(false)
+const currentWorkspaceId = computed(() => authStore.currentWorkspaceId)
 const stats = ref({
-  workspaces: 0,
   projects: 0,
   activities: 0,
   tasks: 0,
   documents: 0,
-  totalSize: 0
+  totalSize: 0,
+  usedStorageBytes: 0,
+  maxStorageMb: 100,
+})
+
+const storageUsedMb = computed(() => stats.value.usedStorageBytes / 1024 / 1024)
+const storageMaxMb = computed(() => stats.value.maxStorageMb)
+const storagePercent = computed(() => {
+  if (storageMaxMb.value === -1) return 0
+  return Math.min(100, (storageUsedMb.value / storageMaxMb.value) * 100)
+})
+const storageBarClass = computed(() => {
+  if (storagePercent.value >= 90) return 'bg-red-500'
+  if (storagePercent.value >= 70) return 'bg-amber-500'
+  return 'bg-blue-500'
 })
 
 const tabs = computed(() => [
-  {
-    id: 'workspaces',
-    name: t('documents_page.tab_workspaces'),
-    icon: FolderIcon,
-    count: stats.value.workspaces
-  },
   {
     id: 'projects',
     name: t('documents_page.tab_projects'),
@@ -226,14 +253,6 @@ const tabs = computed(() => [
     icon: DocumentIcon
   }
 ])
-
-const handleWorkspaceSelect = (workspace) => {
-  selectedEntity.value = {
-    type: 'App\\Models\\Workspace',
-    id: workspace.id,
-    label: workspace.nom
-  }
-}
 
 const handleProjectSelect = (project) => {
   selectedEntity.value = {

@@ -4,24 +4,31 @@
       <div class="relative flex flex-col justify-center w-full h-screen lg:flex-row dark:bg-gray-900">
         <div class="flex flex-col flex-1 w-full lg:w-1/2">
           <div class="w-full max-w-md pt-10 mx-auto">
-            <router-link to="/signin"
+            <router-link to="/signin" dusk="back-to-signin"
               class="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
               <svg class="stroke-current" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"
                 fill="none">
                 <path d="M12.7083 5L7.5 10.2083L12.7083 15.4167" stroke="" stroke-width="1.5" stroke-linecap="round"
                   stroke-linejoin="round" />
               </svg>
-              Back to sign in
+              {{ $t('auth.back_to_signin') }}
             </router-link>
           </div>
           <div class="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
             <div>
               <div class="mb-5 sm:mb-8">
                 <h1 class="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
-                  Reset Password
+                  {{ $t('auth.reset_password_title') }}
                 </h1>
                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                  Enter your new password
+                  {{ $t('auth.reset_password_subtitle') }}
+                </p>
+              </div>
+
+              <!-- Success Message -->
+              <div v-if="success" dusk="reset-success" class="mb-5 rounded-3 bg-success-50 p-4 dark:bg-success-500/10">
+                <p class="text-sm text-success-700 dark:text-success-400">
+                  {{ $t('auth.reset_password_success') }}
                 </p>
               </div>
 
@@ -30,7 +37,7 @@
                 <p class="text-sm text-error-700 dark:text-error-400">{{ error }}</p>
               </div>
 
-              <form @submit.prevent="handleSubmit">
+              <form v-if="!success" @submit.prevent="handleSubmit">
                 <div class="space-y-5">
                   <!-- Email -->
                   <div>
@@ -48,11 +55,11 @@
                   <!-- Password -->
                   <div>
                     <label for="password" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                      New Password<span class="text-error-500">*</span>
+                      {{ $t('auth.reset_password_new') }}<span class="text-error-500">*</span>
                     </label>
                     <div class="relative">
-                      <input v-model="password" :type="showPassword ? 'text' : 'password'" id="password"
-                        placeholder="Enter your new password"
+                      <input v-model="password" :type="showPassword ? 'text' : 'password'" id="password" dusk="reset-password"
+                        :placeholder="$t('auth.reset_password_new_placeholder')"
                         :class="validationErrors.password ? 'border-error-500' : 'border-gray-300'"
                         class="dark:bg-dark-900 h-11 w-full rounded-3 border bg-transparent py-2.5 pl-4 pr-11 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
                       <span @click="togglePasswordVisibility"
@@ -80,16 +87,16 @@
                   <div>
                     <label for="password_confirmation"
                       class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                      Confirm Password<span class="text-error-500">*</span>
+                      {{ $t('auth.reset_password_confirm') }}<span class="text-error-500">*</span>
                     </label>
-                    <input v-model="passwordConfirmation" type="password" id="password_confirmation"
-                      placeholder="Confirm your new password"
+                    <input v-model="passwordConfirmation" type="password" id="password_confirmation" dusk="reset-password-confirm"
+                      :placeholder="$t('auth.reset_password_confirm_placeholder')"
                       class="dark:bg-dark-900 h-11 w-full rounded-3 border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
                   </div>
 
                   <!-- Button -->
                   <div>
-                    <button type="submit" :disabled="loading"
+                    <button type="submit" dusk="reset-submit" :disabled="loading"
                       class="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-3 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed">
                       <svg v-if="loading" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
                         xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -99,7 +106,7 @@
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
                         </path>
                       </svg>
-                      {{ loading ? 'Resetting...' : 'Reset Password' }}
+                      {{ loading ? $t('auth.reset_password_submitting') : $t('auth.reset_password_submit') }}
                     </button>
                   </div>
                 </div>
@@ -128,22 +135,24 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import CommonGridShape from '@/components/common/CommonGridShape.vue'
 import FullScreenLayout from '@/components/layout/FullScreenLayout.vue'
 import api from '@/api/axios'
-// import LogoDark from '@/assets/images/logo/logo-transparent.png'
 
 const LogoDark = new URL('@/assets/images/logo/logo-transparent.png', import.meta.url).href
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 
 const email = ref('')
 const password = ref('')
 const passwordConfirmation = ref('')
 const showPassword = ref(false)
 const loading = ref(false)
-const error = ref(null)
-const validationErrors = ref({})
+const error = ref<string | null>(null)
+const success = ref(false)
+const validationErrors = ref<Record<string, string[]>>({})
 const token = ref('')
 
 onMounted(() => {
@@ -167,12 +176,13 @@ const handleSubmit = async () => {
       password: password.value,
       password_confirmation: passwordConfirmation.value,
     })
-    router.push('/signin')
-  } catch (err) {
+    success.value = true
+    setTimeout(() => router.push('/signin'), 2000)
+  } catch (err: any) {
     if (err.response?.data?.errors) {
       validationErrors.value = err.response.data.errors
     } else {
-      error.value = err.response?.data?.message || 'Failed to reset password'
+      error.value = err.response?.data?.message || t('auth.reset_password_failed')
     }
   } finally {
     loading.value = false

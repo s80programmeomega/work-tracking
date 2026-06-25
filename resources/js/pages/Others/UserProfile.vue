@@ -51,6 +51,19 @@
             <session-settings />
             <two-factor-settings />
 
+            <!-- Change Password -->
+            <div class="p-5 border border-gray-200 dark:border-gray-700 rounded-3">
+              <h5 class="font-semibold text-gray-900 dark:text-white mb-1">{{ $t('user_profile.change_password_title') }}</h5>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ $t('user_profile.change_password_desc') }}</p>
+              <button
+                @click="showChangePasswordModal = true"
+                dusk="change-password-btn"
+                class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-3 hover:bg-blue-700 transition-colors"
+              >
+                {{ $t('user_profile.change_password_btn') }}
+              </button>
+            </div>
+
             <!-- Danger Zone: account deletion -->
             <div class="p-5 border border-red-200 dark:border-red-800/50 rounded-3 bg-red-50/50 dark:bg-red-900/10">
               <h5 class="font-semibold text-red-700 dark:text-red-400 mb-1">{{ $t('user_profile.danger_zone_title') }}</h5>
@@ -124,6 +137,11 @@
         </button>
       </div>
     </div>
+
+    <change-password-modal
+      :show="showChangePasswordModal"
+      @close="showChangePasswordModal = false"
+    />
   </admin-layout>
 </template>
 
@@ -139,6 +157,7 @@ import SessionSettings from '@/components/settings/SessionSettings.vue'
 import TwoFactorSettings from '@/components/auth/TwoFactorSettings.vue'
 import NotificationSettings from '@/components/settings/NotificationSettings.vue'
 import ActivityLog from '@/components/profile/ActivityLog.vue'
+import ChangePasswordModal from '@/components/profile/ChangePasswordModal.vue'
 import { useUsers } from '@/composables/useUsers'
 import api from '@/api/axios'
 import { useAuthStore } from '@/stores/authStore'
@@ -167,6 +186,8 @@ const showDeleteAccountModal = ref(false)
 const deleteAccountPassword = ref('')
 const deletingAccount = ref(false)
 const deleteAccountError = ref(null)
+
+const showChangePasswordModal = ref(false)
 
 const tabs = computed(() => [
   { id: 'profile', name: t('user_profile.tab_profile'), icon: UserIcon },

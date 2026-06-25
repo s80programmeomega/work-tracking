@@ -26,35 +26,11 @@ class ProjetController extends Controller
     ) {}
 
     /**
-     * Display a listing of ALL projects (SUPER ADMIN ONLY).
-     * Shows projects from ALL workspaces.
+     * Endpoint removed — superadmin no longer has unscoped access to all projects.
      */
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(): never
     {
-        // Cette route est protégée par le middleware super_admin
-        $filters = $request->only([
-            'search',
-            'status',
-            'visibility',
-            'responsable_id',
-            'tags',
-            'is_template',
-            'is_favorite',
-            'is_overdue',
-            'per_page',
-            'workspace_id', // ✅ Permet au super_admin de filtrer par workspace
-            'date_from',
-            'date_to',
-        ]);
-
-        // Si le super_admin spécifie un workspace_id, on filtre par ce workspace
-        if ($request->has('workspace_id') && $request->workspace_id) {
-            $filters['workspace_id'] = $request->workspace_id;
-        }
-
-        $projets = $this->projetService->getAllProjets($filters);
-
-        return ProjetResource::collection($projets);
+        abort(403, 'Accès non autorisé.');
     }
 
     /**

@@ -88,9 +88,11 @@ class PermissionServiceTest extends TestCase
     // =========================================================================
 
     /** @test */
-    public function super_admin_can_manage_any_workspace(): void
+    public function super_admin_without_workspace_membership_cannot_manage_workspace(): void
     {
-        $this->assertTrue($this->gate->userCan($this->superAdmin, Permission::WORKSPACES_MANAGE_SETTINGS, $this->workspace));
+        // Superadmin scoping: platform operators no longer have blanket workspace access.
+        // A superadmin who is not a member of the workspace is denied, like any other user.
+        $this->assertFalse($this->gate->userCan($this->superAdmin, Permission::WORKSPACES_MANAGE_SETTINGS, $this->workspace));
     }
 
     /** @test */

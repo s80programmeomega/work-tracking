@@ -84,8 +84,10 @@ class SubscriptionMiddlewareTest extends TestCase
             ->assertJsonFragment(['subscription_status' => 'limit_reached']);
     }
 
-    public function test_super_admin_bypasses_subscription_limits(): void
+    public function test_super_admin_without_workspace_access_gets_403_on_workspace_route(): void
     {
+        // Superadmin scoping: SA without workspace membership cannot access customer workspace routes.
+        // The subscription middleware no longer has a SA bypass — access is denied at the workspace gate.
         $workspace = Workspace::factory()->trialExpired()->create();
         $superAdmin = User::factory()->create([
             'is_super_admin' => true,
@@ -94,12 +96,11 @@ class SubscriptionMiddlewareTest extends TestCase
 
         Sanctum::actingAs($superAdmin);
 
-        // Middleware passes → controller runs → never 403 (subscription block)
         $response = $this->postJson("/api/workspaces/{$workspace->id}/members/invite", [
             'emails' => ['new@example.com'],
         ]);
 
-        $this->assertNotEquals(403, $response->status());
+        $response->assertStatus(403);
     }
 
     public function test_subscription_summary_endpoint_returns_200_for_workspace_member(): void

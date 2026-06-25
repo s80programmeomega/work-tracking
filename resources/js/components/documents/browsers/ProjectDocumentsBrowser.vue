@@ -13,21 +13,6 @@
         />
       </div>
 
-      <!-- Workspace Filter -->
-      <select
-        v-model="selectedWorkspaceId"
-        class="rounded-3 border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-      >
-        <option value="">{{ $t('documents_page.project_browser.filter_all_workspaces') }}</option>
-        <option
-          v-for="workspace in workspaces"
-          :key="workspace.id"
-          :value="workspace.id"
-        >
-          {{ workspace.nom }}
-        </option>
-      </select>
-
       <!-- Status Filter -->
       <select
         v-model="statusFilter"
@@ -174,10 +159,8 @@ const { t } = useI18n()
 const { staggerRef, applyStagger } = useStagger(50)
 
 const projects = ref([])
-const workspaces = ref([])
 const loading = ref(false)
 const searchQuery = ref('')
-const selectedWorkspaceId = ref('')
 const statusFilter = ref('')
 
 const filteredProjects = computed(() => {
@@ -190,10 +173,6 @@ const filteredProjects = computed(() => {
       p.code.toLowerCase().includes(query) ||
       p.description?.toLowerCase().includes(query)
     )
-  }
-
-  if (selectedWorkspaceId.value) {
-    filtered = filtered.filter(p => p.workspace_id === parseInt(selectedWorkspaceId.value))
   }
 
   if (statusFilter.value) {
@@ -233,17 +212,8 @@ const loadProjects = async () => {
   }
 }
 
-const loadWorkspaces = async () => {
-  try {
-    const response = await api.get('/workspaces')
-    workspaces.value = response.data.data
-  } catch (error) {
-    console.error('Error loading workspaces:', error)
-  }
-}
-
 onMounted(async () => {
-  await Promise.all([loadProjects(), loadWorkspaces()])
+  await loadProjects()
   applyStagger()
 })
 </script>

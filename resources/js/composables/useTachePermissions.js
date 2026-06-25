@@ -25,7 +25,6 @@ export function useTachePermissions(tache = null, resultat = null) {
     })
 
     const isTaskResponsable = computed(() => {
-        if (isSuperAdmin.value) return true
         return assigneePivot.value?.is_responsable === true || assigneePivot.value?.is_responsable === 1
     })
 
@@ -36,7 +35,6 @@ export function useTachePermissions(tache = null, resultat = null) {
      * Reserved for the task is_responsable.
      */
     const canApprouverN0 = computed(() => {
-        if (isSuperAdmin.value) return true
         if (!resultat?.value) return false
         // Only when statut is en_verification_n0
         if (resultat.value.statut !== 'en_verification_n0') return false
@@ -57,7 +55,6 @@ export function useTachePermissions(tache = null, resultat = null) {
      * and the bypass has not already been used on this submission.
      */
     const canActiverBypass = computed(() => {
-        if (isSuperAdmin.value) return true
         if (!resultat?.value) return false
         // Only when N0 has returned the result
         if (resultat.value.statut !== 'a_refaire') return false
