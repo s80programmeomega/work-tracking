@@ -177,7 +177,7 @@
                 <button
                   @click="acceptInvitation"
                   :disabled="accepting"
-                  class="flex-1 px-6 py-4 text-white rounded-3 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 font-semibold transition-all"
+                  class="flex-1 px-6 py-4 bg-brand-600 hover:bg-brand-700 text-white rounded-3 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 font-semibold transition-all"
                 >
                   <span v-if="accepting" class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></span>
                   <svg v-else class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -283,7 +283,7 @@
                 <button
                   type="submit"
                   :disabled="accepting"
-                  class="w-full px-6 py-4 text-white rounded-3 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 font-semibold transition-all"
+                  class="w-full px-6 py-4 bg-brand-600 hover:bg-brand-700 text-white rounded-3 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 font-semibold transition-all"
                 >
                   <span v-if="accepting" class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></span>
                   <svg v-else class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

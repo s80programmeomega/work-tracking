@@ -209,13 +209,14 @@ class Tache extends Model
             }
         });
 
-        // Block forward statut changes when sous-taches exist (except annule and rollbacks to a_faire)
+        // Block forward statut changes when sous-taches exist and not all are completed
         static::updating(function ($tache) {
             $blocked = ['termine', 'pending_validation', 'en_validation_n1', 'en_validation_n2'];
             if (
                 $tache->isDirty('statut')
                 && in_array($tache->statut->value, $blocked, true)
                 && $tache->sousTaches()->whereNull('deleted_at')->exists()
+                && $tache->sousTaches()->whereNull('deleted_at')->where('statut', '!=', 'termine')->exists()
             ) {
                 Log::warning('Manual statut update blocked: sous-taches exist', [
                     'tache_id' => $tache->id,

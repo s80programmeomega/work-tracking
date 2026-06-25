@@ -10,8 +10,8 @@ l'organisation CERD Africa sous les yeux du public.
 
 ```bash
 # Réinitialiser sans données (juste les rôles, plans et permissions)
-php artisan migrate:fresh --seed --class=RolePermissionSeeder
-php artisan db:seed --class=PlanSeeder
+php artisan migrate:fresh && php artisan db:seed --class=RolePermissionSeeder && php artisan db:seed --class=PlanSeeder
+
 
 # Démarrer les 4 serveurs
 php artisan serve

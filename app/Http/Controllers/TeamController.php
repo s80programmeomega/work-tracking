@@ -75,7 +75,9 @@ class TeamController extends Controller
      */
     private function canCreateTeam(User $user): bool
     {
-        return $user->isSuperAdmin() || $user->hasRole('directeur') || $user->hasRole('manager') || $user->hasRole('cadre');
+        return $user->isSuperAdmin()
+            || in_array($user->role, ['super_admin', 'admin', 'manager', 'cadre'])
+            || $user->ownedWorkspaces()->exists();
     }
 
     /**

@@ -349,7 +349,7 @@
         :parent-echeance="parentEcheance"
         :total-poids="totalPoids"
         :loading="creating"
-        :members="canAssign ? workspaceMembers : []"
+        :members="workspaceMembers"
         @submit="handleCreate"
         @cancel="showForm = false"
       />
@@ -365,6 +365,7 @@ import SousTacheForm from './SousTacheForm.vue'
 import { useSousTaches } from '@/composables/useSousTaches'
 import { useAuthStore } from '@/stores/authStore'
 import { useStagger } from '@/composables/useAnimations'
+import api from '@/api/axios'
 
 const props = defineProps({
     tacheId: { type: Number, required: true },
@@ -376,7 +377,19 @@ const props = defineProps({
 })
 
 const authStore = useAuthStore()
-const workspaceMembers = computed(() => authStore.currentWorkspace?.members ?? [])
+const workspaceMembers = ref([])
+
+const loadMembers = async () => {
+    try {
+        const { data: tache } = await api.get(`/taches/${props.tacheId}`)
+        const activiteId = tache?.data?.activite_id ?? tache?.activite_id
+        if (!activiteId) return
+        const { data } = await api.get(`/activites/${activiteId}/membres`)
+        workspaceMembers.value = Array.isArray(data) ? data : (data?.data ?? [])
+    } catch {
+        workspaceMembers.value = []
+    }
+}
 
 const emit = defineEmits(['updated'])
 
@@ -396,6 +409,7 @@ const {
 const { staggerRef: listRef, applyStagger } = useStagger(50)
 
 fetchSousTaches().then(applyStagger)
+loadMembers()
 
 const showForm = ref(false)
 const creating = ref(false)
