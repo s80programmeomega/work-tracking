@@ -8,7 +8,7 @@
         <div class="container mx-auto px-4 py-6">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-4">
-              <router-link to="/workspaces"
+              <router-link :to="{ name: 'workspaces.select' }"
                 class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-3 transition-colors">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -168,7 +168,7 @@
 
             <!-- Actions -->
             <div class="flex items-center justify-end gap-4 bg-white dark:bg-gray-800 rounded-3 p-6">
-              <router-link to="/workspaces"
+              <router-link :to="{ name: 'workspaces.select' }"
                 class="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                 {{ $t('ws_create.btn_cancel') }}
               </router-link>
@@ -320,8 +320,8 @@ const handleSubmit = async () => {
     console.log('Workspace créé avec succès', response);
     toast.success(t('ws_create.toast_success'))
 
-    // Redirect to workspace details
-    router.push({ name: 'workspaces.show', params: { id: response.id } });
+    // Redirection vers le picker après création — le workspace vient d'être ajouté au compte
+    router.push({ name: 'workspaces.select' });
   } catch (error: any) {
     console.error('Erreur lors de la création du workspace:', error);
     toast.error(t('ws_create.toast_error'))

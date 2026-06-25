@@ -23,7 +23,7 @@
                     <div class="container mx-auto px-4 py-6">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-4">
-                                <router-link :to="{ name: 'workspaces.show', params: { id: workspace.id } }"
+                                <router-link :to="{ name: 'workspaces.select' }"
                                     class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-3 transition-colors">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -278,7 +278,7 @@
                             <!-- Actions -->
                             <div
                                 class="flex items-center justify-end gap-4 bg-white dark:bg-gray-800 rounded-3 p-6">
-                                <router-link :to="{ name: 'workspaces.show', params: { id: workspace.id } }"
+                                <router-link :to="{ name: 'workspaces.select' }"
                                     class="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                     Annuler
                                 </router-link>
@@ -435,7 +435,7 @@ const loadWorkspace = async () => {
         console.error('Erreur lors du chargement du workspace:', error);
         toast.warning('Erreur lors du chargement du workspace')
 
-        router.push({ name: 'workspaces.index' });
+        router.push({ name: 'workspaces.select' });
     } finally {
         loadingWorkspace.value = false;
     }
@@ -549,8 +549,8 @@ const handleSubmit = async () => {
         await updateWorkspace(workspace.value.id, formData);
         toast.success('workspace mise à jour avec success');
 
-        // Success - redirect to workspace details
-        router.push({ name: 'workspaces.show', params: { id: workspace.value.id } });
+        // Redirection vers le picker après sauvegarde
+        router.push({ name: 'workspaces.select' });
     } catch (error: any) {
         console.error('Erreur lors de la mise à jour du workspace:', error);
         toast.warning('Erreur lors de la mise à jour du workspace')
@@ -573,7 +573,7 @@ const handleDelete = async () => {
         await deleteWorkspace(workspace.value.id);
         toast.success(' workspace supprimé avec success');
 
-        router.push({ name: 'workspaces.index' });
+        router.push({ name: 'workspaces.select' });
     } catch (error: any) {
         console.error('Erreur lors de la suppression du workspace:', error);
         toast.warning('Erreur lors de la suppression du workspace')

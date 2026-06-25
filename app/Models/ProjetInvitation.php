@@ -119,9 +119,9 @@ class ProjetInvitation extends Model
         // ✅ Ajouter au workspace s'il n'est pas déjà membre
         $workspace = $projet->workspace;
         if ($workspace && ! $workspace->members()->where('user_id', $user->id)->exists()) {
+            $observateurRole = Role::findByName('observateur', 'web');
             $workspace->members()->attach($user->id, [
-                'role' => 'viewer', // Rôle par défaut dans le workspace
-                'permissions' => json_encode([]),
+                'role_id' => $observateurRole->id,
                 'invited_at' => now(),
                 'invited_by' => $this->invited_by,
             ]);

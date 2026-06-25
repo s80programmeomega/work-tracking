@@ -84,12 +84,14 @@ const router = createRouter({
     // ==========================================
     // WORKSPACES
     // ==========================================
+    // Note : workspaces.index et workspaces.show ont été supprimés — le picker
+    // est désormais le point d'entrée unique pour la sélection de workspace.
     {
-      path: '/workspaces',
-      name: 'workspaces.index',
-      component: () => import('../pages/workspaces/Index.vue'),
+      path: '/workspaces/select',
+      name: 'workspaces.select',
+      component: () => import('../pages/workspaces/WorkspacePicker.vue'),
       meta: {
-        title: 'Mes Workspaces',
+        title: 'Sélectionner un Workspace',
         requiresAuth: true,
       },
     },
@@ -99,15 +101,6 @@ const router = createRouter({
       component: () => import('../pages/workspaces/Create.vue'),
       meta: {
         title: 'Créer un Workspace',
-        requiresAuth: true,
-      },
-    },
-    {
-      path: '/workspaces/:id',
-      name: 'workspaces.show',
-      component: () => import('../pages/workspaces/Show.vue'),
-      meta: {
-        title: 'Détails du Workspace',
         requiresAuth: true,
       },
     },
@@ -480,6 +473,10 @@ const router = createRouter({
         requiresAuth: true,
         title: 'Détails de la tâche'
       }
+    },
+    {
+      path: '/taches/:id/resultats/:resultatId',
+      redirect: (to) => ({ name: 'taches.show', params: { id: to.params.id }, query: { tab: 'results' } }),
     },
 
     // {
@@ -915,10 +912,10 @@ router.beforeEach(async (to, from, next) => {
       }
     }
 
-    // Guest-only routes (signin, signup) redirect authenticated users to dashboard
+    // Guest-only routes (signin, signup) redirect authenticated users to the workspace picker
     if (to.meta.guest && isLoggedIn) {
       isLoading.value = false
-      return next({ name: 'Dashboard' })
+      return next({ name: 'workspaces.select' })
     }
 
     next()

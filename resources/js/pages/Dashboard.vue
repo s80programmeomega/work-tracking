@@ -22,19 +22,6 @@
           </div>
 
           <div class="flex items-center gap-3 flex-wrap">
-            <!-- Filtre Workspace -->
-            <div class="relative group">
-              <select v-model="selectedWorkspace" @change="onWorkspaceChange"
-                class="appearance-none rounded-[4px] border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 pl-10 pr-8 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-colors duration-200 cursor-pointer">
-                <option value="all">{{ $t('sidebar.all_workspaces') }}</option>
-                <option v-for="workspace in workspaces" :key="workspace.id" :value="workspace.id">
-                  {{ workspace.nom }}
-                </option>
-              </select>
-              <BuildingOfficeIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <ChevronDownIcon class="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            </div>
-
             <!-- Filtre Membre -->
             <!-- <div class="relative group" v-if="workspaceMembers.length > 0 && selectedWorkspace !== 'all'">
               <select v-model="selectedMember" @change="loadDashboardData"
@@ -319,8 +306,6 @@ import {
   ListTodoIcon,
   TargetIcon,
   AlertCircleIcon,
-  BuildingOfficeIcon,
-  ChevronDownIcon,
   XIcon
 } from '@/icons'
 import { useWorkspace } from '@/composables/useWorkspace'
@@ -332,15 +317,11 @@ const { t } = useI18n()
 const loading = ref(true)
 const { staggerRef: statsRef, applyStagger: applyStatsStagger } = useStagger(60)
 const selectedPeriod = ref('month')
-const selectedWorkspace = ref('all')
 const selectedMember = ref('all')
 
-// Utiliser le composable workspace
+// Utiliser le composable workspace — données scoppées au workspace actif uniquement
 const {
   currentWorkspace,
-  workspaces,
-  fetchWorkspaces,
-  selectWorkspace,
   onWorkspaceChanged,
   fetchMembers
 } = useWorkspace()
@@ -363,17 +344,11 @@ const dashboardData = ref({
 })
 
 // Computed
-const currentWorkspaceName = computed(() => {
-  if (selectedWorkspace.value === 'all') {
-    return t('sidebar.all_workspaces')
-  }
-  const workspace = workspaces.value.find(w => w.id === selectedWorkspace.value)
-  return workspace?.nom || t('dashboard.overview')
-})
+// Nom du workspace actif pour l'en-tête du tableau de bord
+const currentWorkspaceName = computed(() => currentWorkspace.value?.nom || '')
 
 const hasActiveFilters = computed(() => {
-  return selectedWorkspace.value !== 'all' ||
-    selectedMember.value !== 'all' ||
+  return selectedMember.value !== 'all' ||
     filters.value.projectStatus !== 'all' ||
     filters.value.priority !== 'all'
 })
@@ -427,9 +402,10 @@ const chartLegends = computed(() => [
 const loadDashboardData = async () => {
   loading.value = true
   try {
+    // Toujours scoper les données au workspace actif — aucun accès multi-workspace
     const params = {
       period: selectedPeriod.value,
-      workspace_id: selectedWorkspace.value === 'all' ? null : selectedWorkspace.value,
+      workspace_id: currentWorkspace.value?.id ?? null,
       member_id: selectedMember.value === 'all' ? null : selectedMember.value,
       project_status: filters.value.projectStatus === 'all' ? null : filters.value.projectStatus,
       priority: filters.value.priority === 'all' ? null : filters.value.priority
@@ -449,26 +425,14 @@ const loadDashboardData = async () => {
   }
 }
 
-const onWorkspaceChange = async () => {
-  selectedMember.value = 'all'
-
-  if (selectedWorkspace.value !== 'all') {
-    await loadWorkspaceMembers()
-  } else {
-    workspaceMembers.value = []
-  }
-
-  loadDashboardData()
-}
-
 const loadWorkspaceMembers = async () => {
-  if (selectedWorkspace.value === 'all') {
+  if (!currentWorkspace.value?.id) {
     workspaceMembers.value = []
     return
   }
 
   try {
-    const members = await fetchMembers(selectedWorkspace.value)
+    const members = await fetchMembers(currentWorkspace.value.id)
     workspaceMembers.value = members
   } catch (error) {
     console.error('Error loading workspace members:', error)
@@ -514,7 +478,6 @@ const handleProjectDrop = async (projectId, newStatus) => {
 
 
 const resetFilters = () => {
-  selectedWorkspace.value = 'all'
   selectedMember.value = 'all'
   selectedPeriod.value = 'month'
   filters.value = {
@@ -604,32 +567,17 @@ const createCharts = () => {
     tooltip: { theme: isDark ? 'dark' : 'light' },
   }
 }
-// Écoute des changements depuis la sidebar
-const handleWorkspaceChange = (event) => {
-  console.log('🔄 Dashboard: Workspace changé depuis sidebar', event.detail)
-  selectedWorkspace.value = event.detail.workspace.id
+// Rechargement du tableau de bord lors d'un changement de workspace depuis la sidebar
+const handleWorkspaceChange = () => {
   loadDashboardData()
 }
 // Lifecycle
 let unsubscribeWorkspace = null
 onMounted(async () => {
-  console.log('🚀 Montage du Dashboard')
   try {
-    // Workspaces are already in Pinia from Sidebar init — no need to refetch
-    if (currentWorkspace.value) {
-      selectedWorkspace.value = currentWorkspace.value.id
-    }
-
-    // Load dashboard data and workspace members in parallel
-    const promises = [loadDashboardData()]
-    if (selectedWorkspace.value !== 'all') {
-      promises.push(loadWorkspaceMembers())
-    }
-    await Promise.all(promises)
-
+    // Chargement des données et des membres du workspace actif en parallèle
+    await Promise.all([loadDashboardData(), loadWorkspaceMembers()])
     unsubscribeWorkspace = onWorkspaceChanged(handleWorkspaceChange)
-
-    console.log('✅ Dashboard initialisé')
   } catch (error) {
     console.error('❌ Erreur initialisation dashboard:', error)
   }

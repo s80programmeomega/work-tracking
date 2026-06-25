@@ -10,7 +10,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-
 /**
  * 📧 Notification: Résultat individuel soumis
  */
@@ -32,12 +31,12 @@ class ResultatIndividuelSoumisNotification extends Notification implements Shoul
     public function toMail($notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject("📋 Nouveau résultat à valider")
+            ->subject('📋 Nouveau résultat à valider')
             ->greeting("Bonjour {$notifiable->nom},")
             ->line("{$this->assignee->nom} a soumis son résultat pour la tâche **{$this->tache->titre}**.")
             ->line("**Taux de réalisation:** {$this->resultat->taux_realisation}%")
             ->line("Activité: {$this->tache->activite->nom}")
-            ->action('Valider le résultat', url("/taches/{$this->tache->id}/resultats/{$this->resultat->id}"))
+            ->action('Valider le résultat', url("/taches/{$this->tache->id}?tab=results"))
             ->line('Merci de valider ce résultat dans les meilleurs délais.');
     }
 
@@ -51,7 +50,7 @@ class ResultatIndividuelSoumisNotification extends Notification implements Shoul
             'assignee_id' => $this->assignee->id,
             'assignee_nom' => $this->assignee->nom,
             'taux_realisation' => $this->resultat->taux_realisation,
-            'url' => "/taches/{$this->tache->id}/resultats/{$this->resultat->id}"
+            'url' => "/taches/{$this->tache->id}?tab=results",
         ];
     }
 }

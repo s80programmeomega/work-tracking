@@ -970,6 +970,15 @@ const availableUsers = computed(() => {
   return availableMembers.value
 })
 
+const stringToColor = (str) => {
+  if (!str) return '#6B7280'
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  return `hsl(${hash % 360}, 65%, 50%)`
+}
+
 const assigneeSearch = ref('')
 
 const filteredAssigneeUsers = computed(() => {

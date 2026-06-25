@@ -640,7 +640,7 @@ class ActiviteController extends Controller
             }
 
             // Combiner les membres de l'activité et du projet
-            $membres = $activite->membres->merge($activite->projet->membres ?? collect())->unique('id');
+            $membres = $activite->membres->merge($activite->projet->members ?? collect())->unique('id');
 
             // Formater la réponse
             $formattedMembers = $membres->map(function ($membre) {

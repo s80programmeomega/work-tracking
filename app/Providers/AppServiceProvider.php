@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Observers\SousTacheObserver;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\PersonalAccessToken;
 use Opcodes\LogViewer\Facades\LogViewer;
@@ -28,6 +29,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         SousTache::observe(SousTacheObserver::class);
+
+        // Forcer url() à utiliser l'URL du frontend SPA pour les e-mails et notifications.
+        // APP_FRONTEND_URL = adresse réseau du frontend (ex: http://10.175.13.27:5173).
+        URL::forceRootUrl(config('app.frontend_url', config('app.url')));
 
         // Le lien de réinitialisation doit pointer vers le frontend SPA, pas vers une route Blade
         ResetPassword::createUrlUsing(function (User $user, string $token): string {

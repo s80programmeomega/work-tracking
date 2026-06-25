@@ -291,7 +291,7 @@
         <!-- Validation N1 -->
         <div v-if="localTache.validation.n1_required" class="border-l-4 pl-4" :class="localTache.validation.n1_validated_at ? 'border-green-500' : 'border-yellow-500'">
           <div class="flex items-center justify-between mb-2">
-            <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Validation N+1</span>
+            <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Validation N1</span>
             <span v-if="localTache.validation.n1_validated_at" class="text-sm text-green-600 dark:text-green-400">
               <i class="fas fa-check-circle mr-1"></i>Validé
             </span>
@@ -313,7 +313,7 @@
         <!-- Validation N2 -->
         <div v-if="localTache.validation.n2_required" class="border-l-4 pl-4" :class="localTache.validation.n2_validated_at ? 'border-green-500' : 'border-yellow-500'">
           <div class="flex items-center justify-between mb-2">
-            <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Validation N+2</span>
+            <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Validation N2</span>
             <span v-if="localTache.validation.n2_validated_at" class="text-sm text-green-600 dark:text-green-400">
               <i class="fas fa-check-circle mr-1"></i>Validé
             </span>

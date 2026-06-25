@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Str;
 
-return [ 
+return [
     /*
     |--------------------------------------------------------------------------
     | Default Session Driver
@@ -154,7 +154,7 @@ return [
     |
     */
 
-    'domain' => env('SESSION_DOMAIN'),
+    'domain' => env('SESSION_DOMAIN', env('APP_HOST', null)),
 
     /*
     |--------------------------------------------------------------------------

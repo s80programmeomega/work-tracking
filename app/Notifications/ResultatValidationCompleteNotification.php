@@ -57,7 +57,7 @@ class ResultatValidationCompleteNotification extends Notification implements Sho
             'validateur_n2_id' => $this->resultat->validateur_n2_id,
             'validateur_n2_nom' => $this->resultat->validateurN2->nom,
             'taux_realisation' => $this->resultat->taux_realisation,
-            'url' => "/resultats/{$this->resultat->id}",
+            'url' => "/taches/{$this->resultat->tache->id}?tab=results",
             'title' => 'Validation complète',
             'message' => "Le résultat de {$this->resultat->user->nom} que vous aviez validé (N1) est maintenant entièrement validé par {$this->resultat->validateurN2->nom} (N2)",
         ];

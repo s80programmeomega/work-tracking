@@ -303,9 +303,9 @@ const filteredResultats = computed(() => {
   if (activeFilters.value.length > 0) {
     filtered = filtered.filter(r => {
       if (filters.value.draft && !r.soumis_le) return true
-      if (filters.value.submitted && r.soumis_le && !r.valide_par_n1) return true
-      if (filters.value.validated_n1 && r.valide_par_n1 && !r.valide_par_n2) return true
-      if (filters.value.validated_n2 && r.valide_par_n2) return true
+      if (filters.value.submitted && r.soumis_le && !r.validation_n1?.valide) return true
+      if (filters.value.validated_n1 && r.validation_n1?.valide && !r.validation_n2?.valide) return true
+      if (filters.value.validated_n2 && r.validation_n2?.valide) return true
       return false
     })
   }
@@ -334,8 +334,8 @@ const stats = computed(() => {
   return {
     total: resultats.value.length,
     drafts: resultats.value.filter(r => !r.soumis_le).length,
-    pending: resultats.value.filter(r => r.soumis_le && (!r.valide_par_n1 || !r.valide_par_n2)).length,
-    validated: resultats.value.filter(r => r.valide_par_n2).length,
+    pending: resultats.value.filter(r => r.soumis_le && (!r.validation_n1?.valide || !r.validation_n2?.valide)).length,
+    validated: resultats.value.filter(r => r.validation_n2?.valide).length,
   }
 })
 
