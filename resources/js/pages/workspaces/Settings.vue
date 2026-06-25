@@ -14,7 +14,7 @@
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-4">
                             <router-link
-                                :to="{ name: 'workspaces.show', params: { id: workspace.id } }"
+                                :to="{ name: 'workspaces.select' }"
                                 class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-3 transition-colors"
                             >
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -579,7 +579,7 @@ const loadWorkspace = async () => {
         console.error('Error loading workspace:', error);
         toast.warning('Erreur lors du chargement du workspace')
 
-        router.push({ name: 'workspaces.index' });
+        router.push({ name: 'workspaces.select' });
     } finally {
         loading.value = false;
     }
@@ -616,7 +616,7 @@ const handleDelete = async () => {
         await deleteWorkspace(workspaceId);
         toast.success(' workspace supprimé avec success'); 
 
-        router.push({ name: 'workspaces.index' });
+        router.push({ name: 'workspaces.select' });
     } catch (error) {
         console.error('Error deleting workspace:', error);
         toast.error('Error deleting workspace');

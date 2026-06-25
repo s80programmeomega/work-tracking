@@ -440,8 +440,9 @@ const canManageWorkspace = (workspaceId) => {
   return isSuperAdmin.value || workspaceId === currentWorkspaceId.value
 }
 
-const viewWorkspace = (workspaceId) => {
-  router.push(`/workspaces/${workspaceId}`)
+const viewWorkspace = (_workspaceId) => {
+  // Redirection vers le picker — les détails workspace sont centralisés ici
+  router.push({ name: 'workspaces.select' })
 }
 
 const copyInvitationLink = async (invitation) => {

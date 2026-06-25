@@ -51,7 +51,8 @@ class WorkspaceController extends Controller
             });
 
         $workspaces = $baseQuery
-            ->withCount('projets')
+            // Chargement du nombre de projets et de membres pour les cartes du picker
+            ->withCount(['projets', 'members'])
             ->with(['owner:id,nom,email,avatar'])
             ->when($request->search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {

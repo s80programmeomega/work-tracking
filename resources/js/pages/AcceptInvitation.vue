@@ -20,7 +20,7 @@
           <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">Invitation invalide</h3>
           <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ error }}</p>
           <router-link
-            to="/workspaces"
+            :to="{ name: 'workspaces.select' }"
             class="mt-6 inline-block px-4 py-2 bg-brand-600 text-white rounded-3 hover:bg-brand-700"
           >
             Retour a l'espace de travail
@@ -89,7 +89,7 @@
           <div v-if="userExists">
             <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-3 p-4 mb-6">
               <div class="flex items-start gap-3">
-                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <div>

@@ -84,15 +84,8 @@ const router = createRouter({
     // ==========================================
     // WORKSPACES
     // ==========================================
-    {
-      path: '/workspaces',
-      name: 'workspaces.index',
-      component: () => import('../pages/workspaces/Index.vue'),
-      meta: {
-        title: 'Mes Workspaces',
-        requiresAuth: true,
-      },
-    },
+    // Note : workspaces.index et workspaces.show ont été supprimés — le picker
+    // est désormais le point d'entrée unique pour la sélection de workspace.
     {
       path: '/workspaces/select',
       name: 'workspaces.select',
@@ -108,15 +101,6 @@ const router = createRouter({
       component: () => import('../pages/workspaces/Create.vue'),
       meta: {
         title: 'Créer un Workspace',
-        requiresAuth: true,
-      },
-    },
-    {
-      path: '/workspaces/:id',
-      name: 'workspaces.show',
-      component: () => import('../pages/workspaces/Show.vue'),
-      meta: {
-        title: 'Détails du Workspace',
         requiresAuth: true,
       },
     },

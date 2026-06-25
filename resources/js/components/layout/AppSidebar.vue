@@ -35,194 +35,67 @@
             </router-link>
         </div>
 
-        <!-- Workspace Selector — only shown when user has at least one workspace -->
+        <!-- Workspace actif — vue unique, pas de liste des autres workspaces -->
         <div
-            v-if="
-                (isExpanded || isHovered || isMobileOpen) &&
-                workspaces.length > 0
-            "
+            v-if="(isExpanded || isHovered || isMobileOpen) && currentWorkspace"
             class="mb-4 px-2"
         >
-            <button
-                dusk="workspace-selector-btn"
-                @click="showWorkspaceSelector = !showWorkspaceSelector"
-                class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            <!-- Carte du workspace courant (non cliquable — lecture seule) -->
+            <div
+                dusk="current-workspace-card"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gray-50 dark:bg-gray-800"
             >
                 <div
-                    class="w-8 h-8 rounded-lg bg-[#1E3A5F] flex items-center justify-center text-white font-semibold text-sm"
+                    class="w-8 h-8 rounded-lg bg-[#1E3A5F] flex items-center justify-center text-white font-semibold text-sm shrink-0"
                 >
                     {{ currentWorkspaceInitials }}
                 </div>
-                <div class="flex-1 text-left overflow-hidden">
-                    <p
-                        class="text-sm font-semibold text-gray-900 dark:text-white truncate"
-                    >
-                        {{ currentWorkspace?.nom || $t('sidebar.my_workspace') }}
+                <div class="flex-1 overflow-hidden">
+                    <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                        {{ currentWorkspace.nom }}
                     </p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">
-                        {{ $t('workspaces.projects') }}: {{ workspaceProjectCount }}
-                    </p>
+                    <div class="flex items-center gap-2 mt-0.5">
+                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                            {{ $t('workspaces.projects') }}: {{ workspaceProjectCount }}
+                        </p>
+                        <SubscriptionBadge
+                            v-if="currentWorkspace.subscription_mode && isCurrentWorkspaceOwner"
+                            :mode="currentWorkspace.subscription_mode"
+                        />
+                    </div>
                 </div>
-                <ChevronDownIcon
-                    :class="[
-                        'w-4 h-4 text-gray-400 transition-transform',
-                        { 'rotate-180': showWorkspaceSelector },
-                    ]"
-                />
-            </button>
+            </div>
 
-            <!-- Workspace Dropdown avec Filtre Dashboard -->
-            <transition name="fade-slide">
-                <div
-                    v-if="showWorkspaceSelector"
-                    class="mt-2 py-2 bg-white dark:bg-gray-800 rounded-3 border border-gray-200 dark:border-gray-700"
+            <!-- Actions sous la carte -->
+            <div class="mt-1.5 flex flex-col gap-0.5">
+                <router-link
+                    to="/workspaces/select"
+                    dusk="switch-workspace-btn"
+                    class="flex items-center gap-2 px-3 py-1.5 text-xs text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
                 >
-                    <!-- Section Filtre Dashboard -->
-                    <div
-                        class="px-3 pb-2 mb-2 border-b border-gray-200 dark:border-gray-700"
-                    >
-                        <p
-                            class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2"
-                        >
-                            {{ $t('sidebar.dashboard_filter') }}
-                        </p>
-                        <button
-                            @click="selectWorkspaceForDashboard('all')"
-                            :class="[
-                                'w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs font-medium transition-colors mb-1',
-                                selectedDashboardWorkspace === 'all'
-                                    ? 'bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400'
-                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700',
-                            ]"
-                        >
-                            <GlobeIcon class="w-3 h-3" />
-                            <span>{{ $t('sidebar.all_workspaces') }}</span>
-                            <CheckIcon
-                                v-if="selectedDashboardWorkspace === 'all'"
-                                class="w-3 h-3 ml-auto"
-                            />
-                        </button>
-                    </div>
+                    <SwitchIcon class="w-3.5 h-3.5 shrink-0" />
+                    {{ $t('sidebar.switch_workspace') }}
+                </router-link>
 
-                    <!-- Section Mes Workspaces -->
-                    <div
-                        class="px-3 pb-2 mb-2 border-b border-gray-200 dark:border-gray-700"
-                    >
-                        <p
-                            class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase"
-                        >
-                            {{ $t('sidebar.my_workspaces') }}
-                        </p>
-                    </div>
+                <router-link
+                    to="/workspaces/create"
+                    dusk="create-workspace-btn"
+                    class="flex items-center gap-2 px-3 py-1.5 text-xs text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                >
+                    <PlusIcon class="w-3.5 h-3.5 shrink-0" />
+                    {{ $t('sidebar.create_workspace') }}
+                </router-link>
 
-                    <div class="max-h-60 overflow-y-auto">
-                        <!-- CORRECTION : Utiliser filteredWorkspaces et vérifier null -->
-                        <button
-                            v-for="workspace in filteredWorkspaces"
-                            :key="workspace?.id || 'null'"
-                            @click="handleSelectWorkspace(workspace)"
-                            class="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors group"
-                        >
-                            <div
-                                class="w-8 h-8 rounded-lg bg-[#1E3A5F] flex items-center justify-center text-white font-semibold text-sm"
-                            >
-                                {{ getWorkspaceInitials(workspace?.nom) }}
-                            </div>
-                            <div class="flex-1 text-left">
-                                <p
-                                    class="text-sm font-medium text-gray-900 dark:text-white"
-                                >
-                                    {{ workspace?.nom || $t('sidebar.workspace_unknown') }}
-                                </p>
-                                <p
-                                    class="text-xs text-gray-500 dark:text-gray-400"
-                                >
-                                    {{ $t('workspaces.projects') }}: {{ workspace?.projets_count || 0 }}
-                                </p>
-                            </div>
-
-                            <!-- Indicateur workspace actuel -->
-                            <CheckIcon
-                                v-if="currentWorkspace?.id === workspace?.id"
-                                class="w-4 h-4 text-brand-500"
-                            />
-
-                            <!-- Bouton filtre dashboard pour ce workspace -->
-                            <div
-                                role="button"
-                                tabindex="0"
-                                @click.stop="
-                                    selectWorkspaceForDashboard(workspace?.id)
-                                "
-                                :class="[
-                                    'p-1 rounded transition-colors cursor-pointer',
-                                    selectedDashboardWorkspace === workspace?.id
-                                        ? 'bg-brand-500 text-white'
-                                        : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 hover:bg-brand-500 hover:text-white',
-                                ]"
-                                :title="
-                                    selectedDashboardWorkspace === workspace?.id
-                                        ? $t('sidebar.filter_active')
-                                        : $t('sidebar.filter_dashboard')
-                                "
-                            >
-                                <FilterIcon class="w-3 h-3" />
-                            </div>
-                        </button>
-                    </div>
-
-                    <!-- Actions -->
-                    <div
-                        class="px-3 pt-2 mt-2 border-t border-gray-200 dark:border-gray-700 space-y-2"
-                    >
-                        <router-link
-                            v-if="isSuperAdmin"
-                            to="/admin/workspaces"
-                            dusk="view-all-workspaces-btn"
-                            class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
-                        >
-                            <span>{{ $t('sidebar.view_all_workspaces') }}</span>
-                            <ArrowRightIcon class="w-3 h-3 ml-auto" />
-                        </router-link>
-
-                        <router-link
-                            to="/workspaces/select"
-                            dusk="switch-workspace-btn"
-                            class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
-                        >
-                            <SwitchIcon class="w-4 h-4" />
-                            {{ $t('sidebar.switch_workspace') }}
-                        </router-link>
-
-                        <router-link
-                            to="/workspaces/create"
-                            class="flex items-center gap-2 text-sm text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 transition-colors"
-                        >
-                            <PlusIcon class="w-4 h-4" />
-                            {{ $t('sidebar.create_workspace') }}
-                        </router-link>
-
-                        <!-- Indicateur filtre actif -->
-                        <div
-                            v-if="
-                                selectedDashboardWorkspace &&
-                                selectedDashboardWorkspace !== 'all'
-                            "
-                            class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/50 px-2 py-1 rounded"
-                        >
-                            <FilterIcon class="w-3 h-3" />
-                            <span>{{ $t('sidebar.dashboard_filtered') }}</span>
-                            <button
-                                @click="clearDashboardFilter"
-                                class="ml-auto text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300"
-                                :title="$t('sidebar.clear_filter')"
-                            >
-                                <XIcon class="w-3 h-3" />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </transition>
+                <router-link
+                    v-if="isSuperAdmin"
+                    to="/admin/workspaces"
+                    dusk="view-all-workspaces-btn"
+                    class="flex items-center gap-2 px-3 py-1.5 text-xs text-gray-400 dark:text-gray-500 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                >
+                    <ArrowRightIcon class="w-3.5 h-3.5 shrink-0" />
+                    {{ $t('sidebar.view_all_workspaces') }}
+                </router-link>
+            </div>
         </div>
 
         <!-- Navigation Menu avec gestion des permissions -->
@@ -496,7 +369,7 @@
                                   name: 'workspaces.settings',
                                   params: { id: currentWorkspace.id },
                               }
-                            : '/workspaces'
+                            : { name: 'workspaces.select' }
                     "
                     :class="[
                         'menu-item menu-item-inactive group',
@@ -555,7 +428,6 @@ import {
     ChevronDownIcon,
     HorizontalDots,
     ListIcon,
-    CheckIcon,
     PlusIcon,
     SettingsIcon,
     XIcon,
@@ -578,6 +450,7 @@ import api from "@/api/axios";
 import { useAuthStore } from "@/stores/authStore";
 import { useWorkspace } from "@/composables/useWorkspace";
 import { useWorkspacePermissions } from "@/composables/useWorkspacePermissions";
+import SubscriptionBadge from "@/components/admin/SubscriptionBadge.vue";
 
 const Logo = new URL("@/assets/images/logo/logo-transparent.png", import.meta.url).href;
 const Icon = new URL("@/assets/images/logo/icon-transparent.png", import.meta.url).href;
@@ -591,11 +464,6 @@ const authStore = useAuthStore();
 // ✅ Utiliser le composable workspace
 const {
     currentWorkspace,
-    currentWorkspaceId,
-    workspaces,
-    loading: workspaceLoading,
-    selectWorkspace,
-    fetchWorkspaces,
     fetchWorkspace,
     onWorkspaceChanged,
     initializeCurrentWorkspace,
@@ -615,14 +483,6 @@ const {
     canViewMembers,
 } = useWorkspacePermissions(currentWorkspace);
 
-// Workspace management
-const showWorkspaceSelector = ref(false);
-// const currentWorkspace = ref(null);
-// const workspaces = ref([]);
-// const loading = ref(false);
-
-const selectedDashboardWorkspace = ref("all"); // 'all' ou workspace_id
-
 // Badge de messages non lus dans les équipes
 const totalUnreadChat = ref(0)
 const fetchUnreadChat = async () => {
@@ -639,29 +499,13 @@ const isSuperAdmin = computed(() => {
     return authStore.isSuperAdmin;
 });
 
-// Affichage contextuel des workspaces dans la sidebar selon le rôle et le contexte
-const filteredWorkspaces = computed(() => {
-    const all = (workspaces.value || []).filter((w) => w?.id);
-
-    // Règle 1 : super_admin → 3 premiers workspaces uniquement
-    if (isSuperAdmin.value) {
-        return all.slice(0, 3);
-    }
-
-    const userId = authStore.user?.id;
-
-    // Règle 3 : non-propriétaire du workspace courant → workspace courant uniquement
-    if (currentWorkspace.value && currentWorkspace.value.owner_id !== userId) {
-        return all.filter((w) => w.id === currentWorkspace.value?.id);
-    }
-
-    // Règle 2 : propriétaire → tous les workspaces dont l'utilisateur est propriétaire
-    return all.filter((w) => w.owner_id === userId);
+// Le badge de plan n'est visible que si l'utilisateur est propriétaire du workspace actif
+const isCurrentWorkspaceOwner = computed(() => {
+    return currentWorkspace.value?.owner_id === authStore.user?.id;
 });
 
-// Icônes supplémentaires pour le filtre — définies en fonctions de rendu
-// (h()) plutôt qu'avec template:'<svg…>' car le build de Vue utilisé par
-// Vite est runtime-only et ne sait pas compiler un template à la volée.
+// Icônes SVG en fonctions de rendu — Vite utilise le build runtime-only de Vue
+// qui ne sait pas compiler un template string à la volée.
 const svgAttrs = {
     xmlns: "http://www.w3.org/2000/svg",
     viewBox: "0 0 24 24",
@@ -670,30 +514,6 @@ const svgAttrs = {
     "stroke-width": 2,
     "stroke-linecap": "round",
     "stroke-linejoin": "round",
-};
-
-const FilterIcon = {
-    props: ["className"],
-    render() {
-        return h("svg", { ...svgAttrs, class: this.className }, [
-            h("polygon", {
-                points: "22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3",
-            }),
-        ]);
-    },
-};
-
-const GlobeIcon = {
-    props: ["className"],
-    render() {
-        return h("svg", { ...svgAttrs, class: this.className }, [
-            h("circle", { cx: 12, cy: 12, r: 10 }),
-            h("line", { x1: 2, y1: 12, x2: 22, y2: 12 }),
-            h("path", {
-                d: "M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z",
-            }),
-        ]);
-    },
 };
 
 const SwitchIcon = {
@@ -729,68 +549,8 @@ const getWorkspaceInitials = (name) => {
     );
 };
 
-// ✅ Fonction de sélection de workspace
-const handleSelectWorkspace = async (workspace) => {
-    if (currentWorkspace.value?.id === workspace.id) {
-        console.log("Sidebar: Même workspace, aucune action");
-        showWorkspaceSelector.value = false;
-        return;
-    }
-
-    console.log("Sidebar: Changement de workspace vers:", workspace.nom);
-
-    try {
-        await selectWorkspace(workspace);
-        showWorkspaceSelector.value = false;
-        console.log("✅ Sidebar: Workspace changé avec succès");
-    } catch (error) {
-        console.error(
-            "❌ Sidebar: Erreur lors du changement de workspace:",
-            error,
-        );
-    }
-};
-
-// ✅ Fonction pour filtrer le dashboard
-const selectWorkspaceForDashboard = (workspaceId) => {
-    console.log("🔄 Filtrage dashboard pour workspace:", workspaceId);
-
-    selectedDashboardWorkspace.value = workspaceId;
-
-    // Émettre un événement pour le dashboard
-    window.dispatchEvent(
-        new CustomEvent("dashboard-filter-changed", {
-            detail: { workspaceId },
-        }),
-    );
-
-    // Si on est sur le dashboard, recharger les données
-    if (route.path === "/") {
-        router.go(0); // Rechargement simple
-    }
-
-    showWorkspaceSelector.value = false;
-};
-
-// ✅ Effacer le filtre dashboard
-const clearDashboardFilter = () => {
-    selectedDashboardWorkspace.value = "all";
-    window.dispatchEvent(
-        new CustomEvent("dashboard-filter-changed", {
-            detail: { workspaceId: "all" },
-        }),
-    );
-};
-
-// ✅ Écoute des changements externes
+// Abonnement aux changements de workspace pour réagir aux événements externes
 let unsubscribeWorkspaceListener = null;
-
-const handleWorkspaceChange = (event) => {
-    console.log("Sidebar: Changement externe détecté", event.detail);
-    // Le currentWorkspace est déjà mis à jour par le composable
-    // Fermer le dropdown si ouvert
-    showWorkspaceSelector.value = false;
-};
 
 const menuGroups = computed(() => [
     {
@@ -800,11 +560,6 @@ const menuGroups = computed(() => [
                 icon: GridIcon,
                 name: t('navigation.dashboard'),
                 path: "/",
-            },
-            {
-                icon: BoxCubeIcon,
-                name: t('navigation.workspaces'),
-                path: "/workspaces",
             },
         ],
     },
@@ -1173,7 +928,8 @@ onMounted(async () => {
                 .catch(() => {});
         }
 
-        unsubscribeWorkspaceListener = onWorkspaceChanged(handleWorkspaceChange);
+        // currentWorkspace est réactif via le store — pas d'action manuelle requise ici
+        unsubscribeWorkspaceListener = onWorkspaceChanged(() => {});
 
         console.log(
             "✅ Sidebar initialisé, workspace courant:",
@@ -1205,44 +961,4 @@ onBeforeUnmount(() => {
     transition: height 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.fade-slide-enter-active,
-.fade-slide-leave-active {
-    transition: all 0.2s ease;
-}
-
-.fade-slide-enter-from {
-    opacity: 0;
-    transform: translateY(-10px);
-}
-
-.fade-slide-leave-to {
-    opacity: 0;
-    transform: translateY(-10px);
-}
-
-/* Style pour la scrollbar du dropdown */
-.max-h-60::-webkit-scrollbar {
-    width: 4px;
-}
-
-.max-h-60::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.max-h-60::-webkit-scrollbar-thumb {
-    background: #d1d5db;
-    border-radius: 2px;
-}
-
-.max-h-60::-webkit-scrollbar-thumb:hover {
-    background: #9ca3af;
-}
-
-.dark .max-h-60::-webkit-scrollbar-thumb {
-    background: #4b5563;
-}
-
-.dark .max-h-60::-webkit-scrollbar-thumb:hover {
-    background: #6b7280;
-}
 </style>

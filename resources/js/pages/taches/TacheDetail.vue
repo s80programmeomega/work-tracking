@@ -27,7 +27,7 @@
           <i class="fas fa-home"></i>
         </router-link>
         <i class="fas fa-chevron-right text-xs"></i>
-        <router-link :to="`/workspaces/${breadcrumb.workspace.id}`" class="hover:text-brand-600">
+        <router-link :to="{ name: 'workspaces.select' }" class="hover:text-brand-600">
           {{ breadcrumb.workspace.nom }}
         </router-link>
         <i class="fas fa-chevron-right text-xs"></i>

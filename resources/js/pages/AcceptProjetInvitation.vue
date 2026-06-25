@@ -25,7 +25,7 @@
             <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Invitation invalide</h3>
             <p class="text-gray-600 dark:text-gray-400 mb-6">{{ error }}</p>
             <router-link
-              to="/workspaces"
+              :to="{ name: 'workspaces.select' }"
               class="inline-flex items-center gap-2 px-6 py-3 bg-brand-600 text-white rounded-3 hover:bg-brand-700 transition-colors font-medium"
             >
               <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
