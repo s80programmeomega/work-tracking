@@ -51,11 +51,14 @@ export const useAuthStore = defineStore('auth', {
         currentUser: (state) => state.user,
 
         /**
-         * ✅ Vérifie si super admin (accès total)
+         * ✅ Vérifie si super admin (accès total — exclut les admins temporaires).
+         * Les admins temporaires ont is_temp_admin=true et doivent être traités comme
+         * des utilisateurs normaux avec accès workspace limité.
          */
         isSuperAdmin: (state) => {
             if (!state.user) return false;
-            // Check explicit flag (set by UserResource) OR Spatie roles array
+            const isTmp = state.user.is_temp_admin === true || (state.user.is_super_admin === true && !!state.user.admin_expires_at);
+            if (isTmp) return false;
             if (state.user.is_super_admin === true) return true;
             if (Array.isArray(state.user.roles)) {
                 return state.user.roles.includes('super_admin')
@@ -64,10 +67,22 @@ export const useAuthStore = defineStore('auth', {
         },
 
         /**
-         * ✅ Vérifie si admin (accès étendu)
+         * Vérifie si l'utilisateur est un admin temporaire (superadmin avec expiry).
+         * Double check : is_temp_admin OU (is_super_admin + admin_expires_at présent).
+         */
+        isTempAdmin: (state) => {
+            if (!state.user) return false;
+            if (state.user.is_temp_admin === true) return true;
+            return state.user.is_super_admin === true && !!state.user.admin_expires_at;
+        },
+
+        /**
+         * ✅ Vérifie si admin (accès étendu — exclut les admins temporaires).
          */
         isAdmin: (state) => {
             if (!state.user) return false;
+            const isTmpAdmin = state.user.is_temp_admin === true || (state.user.is_super_admin === true && !!state.user.admin_expires_at);
+            if (isTmpAdmin) return false;
 
             // Super admin est aussi admin
             if (state.user.is_super_admin === true) return true;

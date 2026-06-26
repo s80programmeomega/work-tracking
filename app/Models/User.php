@@ -449,14 +449,6 @@ class User extends Authenticatable
     }
 
     /**
-     * Vérifie si l'utilisateur a un rôle spécifique
-     */
-    public function hasRole(string $role): bool
-    {
-        return $this->role === $role;
-    }
-
-    /**
      * Scope pour les super_admins
      */
     public function scopeSuperAdmins($query)

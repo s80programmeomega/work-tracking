@@ -158,14 +158,14 @@ class Workspace extends Model
     public function members(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'workspace_members')
-            ->withPivot(['role_id', 'invited_at', 'invited_by'])
+            ->withPivot(['role_id', 'invited_at', 'invited_by', 'banned_at', 'banned_by', 'ban_reason', 'is_temp_access', 'custom_permissions'])
             ->withTimestamps();
     }
 
     public function membres(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'workspace_members')
-            ->withPivot(['role_id', 'invited_at', 'invited_by'])
+            ->withPivot(['role_id', 'invited_at', 'invited_by', 'banned_at', 'banned_by', 'ban_reason', 'is_temp_access', 'custom_permissions'])
             ->withTimestamps()
             ->using(new class extends Pivot
             {
@@ -327,19 +327,28 @@ class Workspace extends Model
 
     public function isMember(User $user): bool
     {
-        return $this->members()->where('user_id', $user->id)->exists();
+        return $this->members()
+            ->where('user_id', $user->id)
+            ->whereNull('workspace_members.banned_at')
+            ->exists();
     }
 
     public function hasMember(int $userId): bool
     {
-        return $this->members()->where('user_id', $userId)->exists();
+        return $this->members()
+            ->where('user_id', $userId)
+            ->whereNull('workspace_members.banned_at')
+            ->exists();
     }
 
     public function hasAccess(User $user): bool
     {
         return $user->isSuperAdmin()
             || $this->owner_id === $user->id
-            || $this->members()->where('user_id', $user->id)->exists();
+            || $this->members()
+                ->where('user_id', $user->id)
+                ->whereNull('workspace_members.banned_at')
+                ->exists();
     }
 
     /**

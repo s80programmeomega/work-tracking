@@ -14,15 +14,18 @@ use App\Models\Tache;
 use App\Models\User;
 use App\Models\ValidationAuditLog;
 use App\Models\Workspace;
+use App\Notifications\TempAdminAccessGrantedNotification;
 use App\Notifications\TrialExtendedNotification;
 use App\Notifications\WorkspaceSuspendedNotification;
 use App\Services\AdaptiveCache;
 use App\Services\AdminAuditService;
 use App\Services\SubscriptionService;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
@@ -430,9 +433,13 @@ class AdminController extends Controller
 
         AdminAuditService::log($actor, 'superadmins.list');
 
-        $query = User::where('is_super_admin', true)
-            ->whereNotNull('admin_expires_at')
+        // Inclure les comptes actifs ET les comptes suspendus (is_super_admin=false mais admin_expires_at présent et action=suspend).
+        $query = User::whereNotNull('admin_expires_at')
             ->whereNull('is_system_owner')
+            ->where(function ($q) {
+                $q->where('is_super_admin', true)
+                    ->orWhere(fn ($q2) => $q2->where('is_super_admin', false)->where('admin_expiry_action', 'suspend'));
+            })
             ->with(['currentWorkspace:id,nom']);
 
         if (! $actor->isSuperAdmin() || $actor->hasRole('directeur')) {
@@ -449,9 +456,20 @@ class AdminController extends Controller
                 'admin_expires_at' => $u->admin_expires_at?->toISOString(),
                 'admin_expiry_action' => $u->admin_expiry_action,
                 'is_active' => $u->is_active,
+                'is_suspended' => ! $u->is_super_admin && ! $u->is_active && $u->admin_expiry_action === 'suspend',
+                // Rôle workspace accordé — premier grant trouvé (tous partagent le même rôle).
+                'workspace_role' => DB::table('temporary_access')
+                    ->where('user_id', $u->id)
+                    ->value('role') ?? 'observateur',
+                'custom_permissions' => (function () use ($u): ?array {
+                    $raw = DB::table('temporary_access')
+                        ->where('user_id', $u->id)
+                        ->value('custom_permissions');
+
+                    return $raw ? json_decode($raw, true) : null;
+                })(),
                 'granted_workspaces' => DB::table('temporary_access')
                     ->where('user_id', $u->id)
-                    ->where('role', 'readonly')
                     ->join('workspaces', 'workspaces.id', '=', 'temporary_access.accessible_id')
                     ->select('workspaces.id', 'workspaces.nom')
                     ->get(),
@@ -481,21 +499,220 @@ class AdminController extends Controller
             abort(403, 'Vous ne pouvez terminer que les comptes que vous avez créés.');
         }
 
-        // Delete associated temporary workspace access records.
-        DB::table('temporary_access')->where('user_id', $user->id)->where('role', 'readonly')->delete();
+        // Révoquer les accès temporaires : supprimer les grants et les memberships provisionnées.
+        DB::table('temporary_access')->where('user_id', $user->id)->delete();
+        DB::table('workspace_members')
+            ->where('user_id', $user->id)
+            ->where('is_temp_access', true)
+            ->delete();
+
+        // Invalider toutes les sessions actives immédiatement.
+        $user->tokens()->delete();
+
+        // Désactiver le compte dans tous les cas avant l'action finale.
+        $user->update(['is_active' => false, 'is_super_admin' => false]);
+        $user->syncRoles([]);
 
         if ($user->admin_expiry_action === 'delete') {
             AdminAuditService::log($actor, 'superadmin.terminated', $user, ['expiry_action' => 'delete']);
-            $user->delete();
+            $user->forceDelete();
         } else {
-            $user->update(['is_active' => false, 'is_super_admin' => false]);
-            $user->syncRoles([]);
             AdminAuditService::log($actor, 'superadmin.terminated', $user, ['expiry_action' => 'suspend']);
         }
 
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         return response()->json(['message' => 'Compte superadmin temporaire terminé.']);
+    }
+
+    /**
+     * Réactiver un compte superadmin temporaire suspendu.
+     */
+    public function reactivateTempAdmin(Request $request, User $user): JsonResponse
+    {
+        $actor = $request->user();
+
+        if ($user->isSystemOwner()) {
+            abort(403, 'Compte système protégé — modification impossible.');
+        }
+
+        // Le compte doit être suspendu : is_super_admin=false, admin_expires_at présent, action=suspend.
+        if ($user->is_super_admin || $user->admin_expires_at === null || $user->admin_expiry_action !== 'suspend') {
+            abort(422, 'Ce compte n\'est pas un compte superadmin temporaire suspendu.');
+        }
+
+        if ($actor->hasRole('directeur') && $user->created_by !== $actor->id) {
+            abort(403, 'Vous ne pouvez réactiver que les comptes que vous avez créés.');
+        }
+
+        // Réactiver le compte et restaurer le rôle Spatie.
+        $user->update(['is_active' => true, 'is_super_admin' => true]);
+        $user->syncRoles(['super_admin']);
+
+        // Restaurer les grants temporary_access si tous ont été supprimés.
+        // Sans grants, le compte ne peut accéder à aucun workspace : on ne peut pas deviner
+        // lesquels recréer — la réactivation restaure uniquement le statut du compte.
+        // Le directeur devra recréer les accès workspace via l'interface si nécessaire.
+
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
+        AdminAuditService::log($actor, 'superadmin.reactivated', $user);
+
+        return response()->json(['message' => __('admin.users.temp_admin_reactivated')]);
+    }
+
+    /**
+     * Recherche un utilisateur par adresse email exacte — accessible aux directeurs et superadmins.
+     */
+    public function lookupUserByEmail(Request $request): JsonResponse
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $user = User::where('email', $request->email)
+            ->whereNull('is_system_owner')
+            ->first();
+
+        if (! $user) {
+            return response()->json(['message' => __('admin.users.not_found')], 404);
+        }
+
+        return response()->json([
+            'id' => $user->id,
+            'nom_complet' => $user->nom_complet,
+            'email' => $user->email,
+            'is_super_admin' => $user->isSuperAdmin(),
+        ]);
+    }
+
+    /**
+     * Crée un nouveau compte administrateur temporaire sans envoyer les identifiants automatiquement.
+     * Les identifiants sont envoyés manuellement via sendTempAdminCredentials().
+     */
+    public function createTempAdmin(Request $request): JsonResponse
+    {
+        $actor = $request->user();
+
+        $validated = $request->validate([
+            'email' => 'required|email|unique:users,email',
+            'nom' => 'required|string|max:255',
+            'expires_in_days' => 'required|integer|min:1|max:365',
+            'expiry_action' => 'required|in:suspend,delete',
+            'workspace_ids' => 'required|array|min:1',
+            'workspace_ids.*' => 'integer|exists:workspaces,id',
+            // Rôle par défaut appliqué à tous les workspaces sélectionnés.
+            'workspace_role' => 'sometimes|string|in:observateur,cadre,manager',
+            // Permissions personnalisées (tableau de chaînes) — surcharge le jeu du rôle si présent.
+            'custom_permissions' => 'sometimes|nullable|array',
+            'custom_permissions.*' => 'string',
+        ]);
+
+        // Un directeur ne peut accorder l'accès qu'à ses propres workspaces.
+        if ($actor->hasRole('directeur')) {
+            $ownedIds = Workspace::where('owner_id', $actor->id)
+                ->whereIn('id', $validated['workspace_ids'])
+                ->pluck('id');
+
+            if ($ownedIds->count() !== count($validated['workspace_ids'])) {
+                abort(403, 'Vous ne pouvez accorder l\'accès qu\'à vos propres workspaces.');
+            }
+        }
+
+        $plainPassword = Str::password(12);
+        $expiresAt = Carbon::now()->addDays($validated['expires_in_days']);
+        $workspaceRole = $validated['workspace_role'] ?? 'observateur';
+        $customPermissions = ! empty($validated['custom_permissions']) ? $validated['custom_permissions'] : null;
+
+        $user = User::create([
+            'nom' => $validated['nom'],
+            'email' => $validated['email'],
+            'password' => $plainPassword,
+            'is_super_admin' => true,
+            'is_active' => true,
+            'admin_expires_at' => $expiresAt,
+            'admin_expiry_action' => $validated['expiry_action'],
+            'created_by' => $actor->id,
+        ]);
+
+        $user->syncRoles(['super_admin']);
+
+        // Enregistrer les accès workspace scopés dans temporary_access.
+        // Le champ role contient le rôle contextuel workspace (observateur/cadre/manager),
+        // pas readonly/readwrite — ce mappage est géré côté frontend.
+        foreach ($validated['workspace_ids'] as $wsId) {
+            DB::table('temporary_access')->insert([
+                'user_id' => $user->id,
+                'accessible_type' => Workspace::class,
+                'accessible_id' => $wsId,
+                'role' => $workspaceRole,
+                'custom_permissions' => $customPermissions !== null ? json_encode($customPermissions) : null,
+                'created_by' => $actor->id,
+                'expires_at' => $expiresAt,
+                'created_at' => now(),
+            ]);
+        }
+
+        AdminAuditService::log($actor, 'superadmin.created', $user, [
+            'workspace_ids' => $validated['workspace_ids'],
+            'expires_at' => $expiresAt->toISOString(),
+        ]);
+
+        return response()->json([
+            'message' => __('admin.users.temp_admin_created'),
+            'data' => [
+                'id' => $user->id,
+                'nom' => $user->nom,
+                'email' => $user->email,
+                'admin_expires_at' => $expiresAt->toISOString(),
+                'admin_expiry_action' => $validated['expiry_action'],
+            ],
+        ], 201);
+    }
+
+    /**
+     * Envoie (ou renvoie) les identifiants d'un compte admin temporaire par email.
+     * Génère un nouveau mot de passe à chaque appel.
+     */
+    public function sendTempAdminCredentials(Request $request, User $user): JsonResponse
+    {
+        $actor = $request->user();
+
+        if (! $user->isSuperAdmin() || $user->admin_expires_at === null) {
+            abort(422, 'Ce compte n\'est pas un compte admin temporaire.');
+        }
+
+        if ($actor->hasRole('directeur') && $user->created_by !== $actor->id) {
+            abort(403, 'Vous ne pouvez envoyer les identifiants que pour les comptes que vous avez créés.');
+        }
+
+        // Génère un nouveau mot de passe et le sauvegarde.
+        // Le cast 'hashed' sur User appelle Hash::make() automatiquement —
+        // passer le texte brut évite un double-hachage.
+        $plainPassword = Str::password(12);
+        $user->update(['password' => $plainPassword]);
+
+        $firstGrantedWorkspace = DB::table('temporary_access')
+            ->where('user_id', $user->id)
+            ->where('accessible_type', Workspace::class)
+            ->orderBy('id')
+            ->first();
+
+        $workspace = $firstGrantedWorkspace
+            ? Workspace::find($firstGrantedWorkspace->accessible_id)
+            : null;
+
+        if ($workspace) {
+            $user->notify(new TempAdminAccessGrantedNotification(
+                grantedBy: $actor,
+                workspace: $workspace,
+                expiresAt: Carbon::parse($user->admin_expires_at),
+                expiryAction: $user->admin_expiry_action ?? 'suspend',
+                plainPassword: $plainPassword,
+            ));
+        }
+
+        AdminAuditService::log($actor, 'superadmin.credentials_sent', $user);
+
+        return response()->json(['message' => __('admin.users.credentials_sent')]);
     }
 
     /**
@@ -542,7 +759,7 @@ class AdminController extends Controller
         if (isset($validated['admin_expiry_action'])) {
             $updateData['admin_expiry_action'] = $validated['admin_expiry_action'];
         }
-        if (isset($validated['created_by'])) {
+        if ($validated['is_super_admin'] ?? false) {
             $updateData['created_by'] = $actor->id;
         }
         if (! empty($updateData)) {
@@ -554,7 +771,6 @@ class AdminController extends Controller
             $expiresAt = $validated['admin_expires_at'] ?? null;
 
             DB::table('temporary_access')->where('user_id', $user->id)
-                ->where('role', 'readonly')
                 ->whereIn('accessible_id', $validated['workspace_ids'])
                 ->delete();
 
@@ -563,7 +779,7 @@ class AdminController extends Controller
                     'user_id' => $user->id,
                     'accessible_type' => Workspace::class,
                     'accessible_id' => $wsId,
-                    'role' => 'readonly',
+                    'role' => 'observateur',
                     'expires_at' => $expiresAt,
                     'created_by' => $actor->id,
                     'created_at' => now(),
@@ -572,6 +788,22 @@ class AdminController extends Controller
         }
 
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
+        // Notifier l'utilisateur promu par email si un accès temporaire vient d'être accordé.
+        if (($validated['is_super_admin'] ?? false) && isset($validated['admin_expires_at'])) {
+            $workspace = ! empty($validated['workspace_ids'])
+                ? Workspace::find($validated['workspace_ids'][0])
+                : null;
+
+            if ($workspace) {
+                $user->notify(new TempAdminAccessGrantedNotification(
+                    grantedBy: $actor,
+                    workspace: $workspace,
+                    expiresAt: Carbon::parse($validated['admin_expires_at']),
+                    expiryAction: $validated['admin_expiry_action'] ?? 'suspend',
+                ));
+            }
+        }
 
         AdminAuditService::log($actor, 'user.role_updated', $user, [
             'new_role' => $validated['role'],

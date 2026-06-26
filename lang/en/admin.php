@@ -24,6 +24,10 @@ return [
         'last_login' => 'Last Login',
         'workspace' => 'Current Workspace',
         'role_updated' => 'User role updated successfully.',
+        'not_found' => 'No user found with this email address.',
+        'temp_admin_created' => 'Temporary admin account created. Use the "Send credentials" button to email the login details.',
+        'credentials_sent' => 'Credentials sent by email.',
+        'temp_admin_reactivated' => 'Temporary admin account reactivated.',
     ],
     'roles' => [
         'title' => 'Roles & Permissions',

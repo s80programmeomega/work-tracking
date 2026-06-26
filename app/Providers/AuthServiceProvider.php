@@ -46,7 +46,7 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('platform.manage-workspace', fn (User $user) => $user->isSuperAdmin());
         Gate::define('platform.manage-users', fn (User $user) => $user->isSuperAdmin());
 
-        // platform.operator: superadmin OR directeur (used for user-role endpoint).
+        // platform.operator: superadmin OR directeur (workspace owner, Spatie platform role).
         Gate::define('platform.operator', fn (User $user) => $user->isSuperAdmin() || $user->hasRole('directeur')
         );
 

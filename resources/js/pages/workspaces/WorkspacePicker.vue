@@ -64,7 +64,7 @@
       </div>
 
       <!-- Aucun workspace -->
-      <div v-else-if="workspaces.length === 0" class="text-center py-20">
+      <div v-else-if="workspaces.length === 0" dusk="picker-empty-state" class="text-center py-20">
         <p class="text-gray-500 dark:text-gray-400 mb-4">{{ $t('workspace_picker.no_workspaces') }}</p>
         <button
           @click="router.push({ name: 'workspaces.create' })"
@@ -285,6 +285,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/api/axios'
 import { useWorkspace } from '@/composables/useWorkspace'
+import { useAuthStore } from '@/stores/authStore'
 import { useStagger } from '@/composables/useAnimations'
 import ThemeToggler from '@/components/common/ThemeToggler.vue'
 import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue'
@@ -321,6 +322,7 @@ const cardAvatarClass = (id: number) => AVATAR_CLASSES[id % AVATAR_CLASSES.lengt
 const LogoDark = new URL('@/assets/images/logo/logo-transparent.png', import.meta.url).href
 
 const router = useRouter()
+const authStore = useAuthStore()
 const { selectWorkspace } = useWorkspace()
 
 // Stagger pour les cartes workspace
@@ -390,10 +392,15 @@ onMounted(async () => {
     return
   }
   try {
-    const { data } = await api.get('/workspaces', { params: { per_page: 100 } })
-    workspaces.value = data.data ?? data
-  } catch {
-    // Le guard de route ou l'intercepteur axios gère la redirection
+    // Admin temporaire : utiliser l'endpoint scopé via temporary_access.
+    const endpoint = authStore.isTempAdmin ? '/workspaces/user-workspaces' : '/workspaces'
+    const params = authStore.isTempAdmin ? {} : { per_page: 100 }
+    const { data } = await api.get(endpoint, { params })
+    // Normaliser : paginated (/workspaces) → data.data.data, non-paginé (/workspaces/user-workspaces) → data.data
+    const raw = data?.data?.data ?? data?.data ?? data
+    workspaces.value = Array.isArray(raw) ? raw : []
+  } catch (e) {
+    console.error('[WorkspacePicker] fetch error', e)
   } finally {
     loading.value = false
     // Appliquer les animations après chargement des données

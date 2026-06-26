@@ -40,21 +40,26 @@ class ExpireSuperAdminAccounts extends Command
                 continue;
             }
 
-            // Supprimer les accès temporaires au workspace associés à ce compte.
-            $user->getConnection()
-                ->table('temporary_access')
+            // Révoquer les accès temporaires : grants et memberships provisionnées.
+            $user->getConnection()->table('temporary_access')
                 ->where('user_id', $user->id)
                 ->delete();
+            $user->getConnection()->table('workspace_members')
+                ->where('user_id', $user->id)
+                ->where('is_temp_access', true)
+                ->delete();
+
+            // Invalider toutes les sessions actives immédiatement.
+            $user->tokens()->delete();
+
+            // Désactiver dans tous les cas avant l'action finale.
+            $user->update(['is_active' => false, 'is_super_admin' => false]);
+            $user->syncRoles([]);
 
             if ($action === 'delete') {
                 Log::info('Compte superadmin expiré supprimé', ['user_id' => $user->id, 'email' => $user->email]);
-                $user->delete();
+                $user->forceDelete();
             } else {
-                $user->update([
-                    'is_active' => false,
-                    'is_super_admin' => false,
-                ]);
-                $user->syncRoles([]);
                 Log::info('Compte superadmin expiré suspendu', ['user_id' => $user->id, 'email' => $user->email]);
                 $this->line("Suspendu : {$user->email}");
             }

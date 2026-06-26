@@ -243,7 +243,7 @@
                                         </div>
 
                                         <!-- Message d'erreur -->
-                                        <div v-if="authError" class="rounded-3 bg-error-50 p-4 dark:bg-error-500/10">
+                                        <div v-if="authError" dusk="auth-error" class="rounded-3 bg-error-50 p-4 dark:bg-error-500/10">
                                             <div class="flex items-center">
                                                 <svg class="w-5 h-5 mr-2 text-error-500" fill="currentColor"
                                                     viewBox="0 0 20 20">
@@ -471,7 +471,9 @@ const handleSubmit = async () => {
         }
 
         // Gérer les erreurs d'authentification
-        if (error.response?.status === 401) {
+        if (error.response?.status === 401 && error.response?.data?.message) {
+            authStore.error = error.response.data.message;
+        } else if (error.response?.status === 401) {
             authStore.error = t('auth.invalid_credentials');
         } else if (error.response?.data?.message) {
             authStore.error = error.response.data.message;

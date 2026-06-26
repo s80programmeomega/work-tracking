@@ -481,6 +481,7 @@ const {
     canViewWorkspaceTaches,
     canReadHelpArticles,
     canViewMembers,
+    isDirecteur,
 } = useWorkspacePermissions(currentWorkspace);
 
 // Badge de messages non lus dans les équipes
@@ -681,21 +682,6 @@ const menuGroups = computed(() => [
         title: t('sidebar.collaboration'),
         items: [
             {
-                icon: ChatIcon,
-                name: t('navigation.teams'),
-                badge: totalUnreadChat.value > 0 ? String(totalUnreadChat.value > 99 ? '99+' : totalUnreadChat.value) : '',
-                subItems: [
-                    { name: t('sidebar.my_teams'), path: "/teams", superAdminHidden: true },
-                ],
-            },
-            {
-                icon: UsersIcon,
-                name: t('navigation.users'),
-                subItems: [
-                    { name: t('sidebar.invitations'), path: "/users/invitations" },
-                ],
-            },
-            {
                 icon: MailIcon,
                 name: t('navigation.notifications'),
                 path: "/notifications",
@@ -718,6 +704,30 @@ const menuGroups = computed(() => [
                     { name: t('sidebar.all_documents'), path: "/documents" },
                     { name: t('help.nav'), path: "/help" },
                 ],
+            },
+        ],
+    },
+    {
+        title: t('sidebar.workspace_management'),
+        items: [
+            {
+                icon: ChatIcon,
+                name: t('navigation.teams'),
+                path: "/teams",
+                badge: totalUnreadChat.value > 0 ? String(totalUnreadChat.value > 99 ? '99+' : totalUnreadChat.value) : '',
+                superAdminHidden: true,
+            },
+            {
+                icon: UsersIcon,
+                name: t('sidebar.workspace_members_manage'),
+                path: "/workspace/members",
+                requiresPermission: "isDirecteur",
+            },
+            {
+                icon: ShieldIcon,
+                name: t('sidebar.workspace_temp_admin'),
+                path: "/workspace/admin-account",
+                requiresPermission: "isDirecteur",
             },
         ],
     },
@@ -799,6 +809,7 @@ const filteredMenuGroups = computed(() => {
                     return filteredSubItems.length > 0;
                 }
                 // Pour les items simples, on vérifie la permission
+                if (item.requiresPermission && !permissionMap.value[item.requiresPermission]) return false;
                 return !item.superAdminOnly || isSuperAdmin.value;
             }),
         }))
@@ -816,6 +827,7 @@ const permissionMap = computed(() => ({
     canViewWorkspaceTaches: canViewWorkspaceTaches.value,
     canReadHelpArticles: canReadHelpArticles.value,
     canViewMembers: canViewMembers.value,
+    isDirecteur: isDirecteur.value,
     isSuperAdmin: isSuperAdmin.value,
 }));
 

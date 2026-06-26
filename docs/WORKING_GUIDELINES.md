@@ -790,6 +790,49 @@ Investigation confirmed the injection payloads are **not present anywhere in the
 
 This guide is a hard gate: a security lapse is a blocker on the same level as a failing test or a Larastan error.
 
+## Guide 27 — Roles & Permissions Architecture (mandatory)
+
+This app uses **three distinct role layers**. Never mix them up.
+
+### Layer 1 — Spatie platform roles (`model_has_roles` table)
+
+Managed by the Spatie `HasRoles` trait on `User`. These are **global, platform-level** roles:
+
+| Role | Who has it | Assigned when |
+|---|---|---|
+| `super_admin` | Platform superadmin account | Via Artisan `admin:create-superadmin` or `AdminController::updateUserRole` |
+| `directeur` | Workspace owner | At workspace creation (`WorkspaceController::store`) and in `WorkspaceSeeder::makeWorkspace` |
+| `utilisateur` | Everyone else | At registration (`AuthService`, `SocialAuthController`) |
+
+**These are the roles to use in Gates, Policies, and backend checks.** Always call Spatie's `$user->hasRole('directeur')` — never the custom `users.role` column.
+
+> ⚠️ `User` previously had a custom `hasRole(string $role): bool` method that shadowed Spatie's version and checked `users.role` instead. That override was removed (2026-06-26). Do **not** re-add it.
+
+### Layer 2 — Workspace pivot roles (`workspace_members.role_id`)
+
+Stored in the `workspace_members` pivot via a FK to the `roles` table. These are **workspace-scoped** roles:
+
+`owner` · `manager` · `cadre` · `collaborateur` · `stagiaire` · `observateur`
+
+Used by: `WorkspacePolicy`, `useWorkspacePermissions.js`, `ContextualPermissionGate`, `PermissionService`.
+
+The workspace owner holds both: the pivot role `owner` **and** the Spatie platform role `directeur`. Both must be assigned consistently — `makeWorkspace` in the seeder handles this. `WorkspaceController::store` also calls `syncRoles(['directeur'])` at line ~172.
+
+### Layer 3 — `users.role` column (legacy, ignore)
+
+A plain string column on `users`. Every user currently has `role = 'admin'`. This column is **not used** by any Gate, Policy, or Middleware. Do not add new logic that reads it. `hasRoleLevel()` still reads it for legacy hierarchy checks in `Projet.php` / `ProjetPolicy.php` / `ActiviteService.php` — do not extend this pattern.
+
+### Rules
+
+1. **Gates and route middleware** — use Spatie roles (`$user->hasRole(...)` via `HasRoles` trait).
+2. **Workspace-scoped permissions** — use pivot role via `WorkspacePolicy` / `ContextualPermissionGate`.
+3. **Assigning roles** — use `$user->syncRoles([...])` or `$user->assignRole(...)` (Spatie methods).
+4. **Never** add a custom `hasRole()` override on `User` — it will shadow Spatie and break all role checks silently.
+5. **When a user becomes a workspace owner** — always `syncRoles(['directeur'])` unless they are already `super_admin`.
+6. **When a user loses their only workspace** — `syncRoles(['utilisateur'])` (handled by `WorkspaceController::destroy`/transfer-ownership flows).
+
+---
+
 ## Guide 26 — Python Dependencies (mandatory)
 
 Never install Python packages into the system Python interpreter. The system Python is OS-managed; installing into it with `pip install` or `--break-system-packages` can corrupt OS-level tooling.

@@ -107,7 +107,9 @@ class NotificationService
             'document_shared',
             'support_ticket_new', 'support_ticket_status_changed',
             'support_ticket_reply',
-            'chat_mention' => true,
+            'chat_mention',
+            'workspace_member_banned', 'workspace_member_unbanned',
+            'workspace_invitation_accepted' => true,
 
             // Low-signal — uniquement in-app
             'evaluation_sheet_ready', 'approuve_n0', 'score_updated' => false,
@@ -249,7 +251,9 @@ class NotificationService
             'document_shared',
             'support_ticket_new', 'support_ticket_status_changed',
             'support_ticket_reply',
-            'chat_mention' => true,
+            'chat_mention',
+            'workspace_member_banned', 'workspace_member_unbanned',
+            'workspace_invitation_accepted' => true,
             'approuve_n0', 'score_updated' => false,
             // Unknown event type — opt out of email by default to be safe.
             default => false,

@@ -28,6 +28,9 @@ class ContextualPermissionGate
     /** @var array<int, list<string>> Request-scoped cache: role_id → permission names */
     private array $rolePermissionCache = [];
 
+    /** @var array<int, list<string>> Permissions personnalisées par user_id (admin temporaire). */
+    private array $customPermissionOverrides = [];
+
     /**
      * Check whether a user has a specific permission on the given resource.
      * Works for Workspace, Projet, Activite, Tache, and SousTache.
@@ -50,6 +53,12 @@ class ContextualPermissionGate
         $roleIds = $this->collectRoleIds($user, $resource);
         $perms = $this->loadPermissionsForRoles($roleIds);
         $perms = $this->applyPivotOverrides($user, $resource, $perms);
+
+        // Permissions personnalisées du pivot workspace_members (admin temporaire).
+        if (isset($this->customPermissionOverrides[$user->id])) {
+            $perms = array_values(array_unique(array_merge($perms, $this->customPermissionOverrides[$user->id])));
+            unset($this->customPermissionOverrides[$user->id]);
+        }
 
         return array_values(array_unique($perms));
     }
@@ -92,7 +101,21 @@ class ContextualPermissionGate
 
         $member = $workspace->members()->where('user_id', $user->id)->first();
         if ($member) {
+            // Banni = aucun rôle, aucune permission sur ce workspace ni ses ressources.
+            if (! is_null($member->pivot->banned_at)) {
+                return;
+            }
+
             $roleIds[] = (int) $member->pivot->role_id;
+
+            // Permissions personnalisées stockées sur le pivot (admin temporaire).
+            $custom = $member->pivot->custom_permissions;
+            if (! empty($custom)) {
+                $decoded = is_string($custom) ? json_decode($custom, true) : $custom;
+                if (is_array($decoded)) {
+                    $this->customPermissionOverrides[$user->id] = $decoded;
+                }
+            }
         }
     }
 

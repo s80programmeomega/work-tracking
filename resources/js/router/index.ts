@@ -617,6 +617,28 @@ const router = createRouter({
       },
     },
 
+    // Gestion des membres du workspace (propriétaire uniquement — ban/unban/invite)
+    {
+      path: '/workspace/members',
+      name: 'workspace.members',
+      component: () => import('../pages/workspace/WorkspaceMembers.vue'),
+      meta: {
+        title: 'Membres & Invitations',
+        requiresAuth: true,
+      },
+    },
+
+    // Compte admin temporaire (propriétaire uniquement)
+    {
+      path: '/workspace/admin-account',
+      name: 'workspace.admin-account',
+      component: () => import('../pages/workspace/WorkspaceTempAdmin.vue'),
+      meta: {
+        title: 'Compte admin temporaire',
+        requiresAuth: true,
+      },
+    },
+
     {
       path: '/users/invitations',
       name: 'invitations',
@@ -896,8 +918,10 @@ router.beforeEach(async (to, from, next) => {
         return next({ name: '404 Error', query: { code: '403', from: to.fullPath } })
       }
 
-      // Superadmin must stay in admin routes only — redirect to admin.dashboard.
-      if (authStore.isSuperAdmin && !String(to.name ?? '').startsWith('admin')) {
+      // Admin temporaire : traité comme un utilisateur normal (accès workspace picker).
+      // Admin permanent : doit rester dans les routes admin uniquement.
+      const isTempAdmin = authStore.user?.is_temp_admin === true
+      if (authStore.isSuperAdmin && !isTempAdmin && !String(to.name ?? '').startsWith('admin')) {
         isLoading.value = false
         return next({ name: 'admin.dashboard' })
       }
@@ -913,20 +937,21 @@ router.beforeEach(async (to, from, next) => {
       }
 
       // Redirect utilisateur (no workspace yet) to workspace creation,
-      // unless they're already heading there or they're a superadmin (who never has a workspace).
+      // unless they're already heading there, a permanent superadmin, or a temp admin.
       const noWorkspace = !authStore.user?.current_workspace_id
       const isHeadingToWorkspaceCreate = to.name === 'workspaces.create'
-      if (noWorkspace && !isHeadingToWorkspaceCreate && !authStore.isSuperAdmin) {
+      if (noWorkspace && !isHeadingToWorkspaceCreate && !authStore.isSuperAdmin && !authStore.isTempAdmin) {
         isLoading.value = false
         return next({ name: 'workspaces.create' })
       }
     }
 
     // Guest-only routes (signin, signup) redirect authenticated users.
-    // Superadmin goes to admin.dashboard; regular users go to workspaces.select.
+    // Admin temporaire → workspace picker. Admin permanent → admin.dashboard.
     if (to.meta.guest && isLoggedIn) {
       isLoading.value = false
-      return next(authStore.isSuperAdmin
+      const isTempAdminGuest = authStore.user?.is_temp_admin === true
+      return next(authStore.isSuperAdmin && !isTempAdminGuest
         ? { name: 'admin.dashboard' }
         : { name: 'workspaces.select' })
     }

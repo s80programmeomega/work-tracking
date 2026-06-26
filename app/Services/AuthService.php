@@ -52,7 +52,7 @@ class AuthService
 
         if (! $user->is_active) {
             Auth::logout();
-            throw new \Exception('Account is inactive');
+            throw new \Exception(__('auth.account_inactive'));
         }
 
         // Update last login info

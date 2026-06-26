@@ -166,6 +166,10 @@ Route::middleware(['auth:sanctum', 'subscription.status'])->group(function () {
     Route::prefix('admin')->middleware('can:platform.operator')->group(function () {
         Route::get('/my-superadmins', [AdminController::class, 'myTempSuperadmins'])->name('admin.superadmins.list');
         Route::post('/superadmins/{user}/terminate', [AdminController::class, 'terminate'])->name('admin.superadmins.terminate');
+        Route::post('/superadmins/{user}/reactivate', [AdminController::class, 'reactivateTempAdmin'])->name('admin.superadmins.reactivate');
+        Route::get('/users/lookup', [AdminController::class, 'lookupUserByEmail'])->name('admin.users.lookup');
+        Route::post('/temp-admins', [AdminController::class, 'createTempAdmin'])->name('admin.temp-admins.create');
+        Route::post('/temp-admins/{user}/send-credentials', [AdminController::class, 'sendTempAdminCredentials'])->name('admin.temp-admins.send-credentials');
         Route::patch('/users/{user}/role', [AdminController::class, 'updateUserRole'])->name('admin.users.update-role');
         // Journal d'audit scopé — directeur voit uniquement les actions de ses superadmins temp
         Route::get('/my-audit-log', [AdminController::class, 'myAuditLog'])->name('admin.my-audit-log');
@@ -269,6 +273,8 @@ Route::middleware(['auth:sanctum', 'subscription.status'])->group(function () {
             Route::put('/{user}', [WorkspaceController::class, 'updateMember'])->name('workspace.members.update');
             Route::get('/{user}', [WorkspaceController::class, 'showMember'])->name('workspace.members.show');
             Route::delete('/{user}', [WorkspaceController::class, 'removeMember']);
+            Route::post('/{user}/ban', [WorkspaceController::class, 'banMember'])->name('workspace.members.ban');
+            Route::delete('/{user}/ban', [WorkspaceController::class, 'unbanMember'])->name('workspace.members.unban');
         });
 
         // Workspace Projects

@@ -24,6 +24,10 @@ return [
         'last_login' => 'Dernière connexion',
         'workspace' => 'Workspace actuel',
         'role_updated' => 'Rôle utilisateur mis à jour avec succès.',
+        'not_found' => 'Aucun utilisateur trouvé avec cette adresse email.',
+        'temp_admin_created' => 'Compte admin temporaire créé. Utilisez le bouton "Envoyer les identifiants" pour envoyer les accès par email.',
+        'credentials_sent' => 'Identifiants envoyés par email.',
+        'temp_admin_reactivated' => 'Compte admin temporaire réactivé.',
     ],
     'roles' => [
         'title' => 'Rôles & Permissions',
