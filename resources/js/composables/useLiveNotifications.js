@@ -5,16 +5,8 @@
 // Subscribes to the authenticated user's private channel and increments the
 // unread badge whenever Laravel broadcasts a notification.
 //
-// Usage in App.vue (or any high-level layout):
-//   import { useLiveNotifications } from '@/composables/useLiveNotifications'
-//   const { start, stop, onNotification } = useLiveNotifications()
-//   onMounted(start)
-//   onUnmounted(stop)
-//
-// Laravel automatically broadcasts every Notification with channel 'broadcast'
-// on the user's private channel 'App.Models.User.{id}' as the event
-// 'Illuminate\\Notifications\\Events\\BroadcastNotificationCreated'.
-// Echo's .notification() listener picks this up out of the box.
+// Also listens for session revocation events and logs the user out immediately
+// when their specific token (or all tokens) are revoked by another session.
 
 import { ref, onUnmounted } from 'vue'
 import { useEcho } from '@/composables/useEcho'
@@ -36,18 +28,33 @@ export function useLiveNotifications() {
         }
     }
 
+    const handleSessionRevoked = (data) => {
+        const currentToken = localStorage.getItem('auth_token')
+        if (!currentToken) return
+
+        // Extraire l'ID du token courant depuis le JWT Sanctum (format: id|hash)
+        const currentTokenId = parseInt(currentToken.split('|')[0], 10)
+        if (currentTokenId === data.token_id) {
+            authStore.logout()
+        }
+    }
+
+    const handleAllSessionsRevoked = () => {
+        authStore.logout()
+    }
+
     const start = () => {
         const userId = authStore.user?.id
         if (!userId || subscribed.value || !echo) return
 
         echo.private(`App.Models.User.${userId}`)
             .notification((data) => {
-                // data is the notification's toArray() payload + a 'type' field
-                // containing the FQCN of the Notification class.
                 listeners.forEach((cb) => {
                     try { cb(data) } catch (e) { console.error('Live notification listener error:', e) }
                 })
             })
+            .listen('.session.revoked', handleSessionRevoked)
+            .listen('.sessions.all.revoked', handleAllSessionsRevoked)
 
         subscribed.value = true
     }
@@ -59,9 +66,8 @@ export function useLiveNotifications() {
         subscribed.value = false
     }
 
-    // Cleanup if a consumer never explicitly calls stop()
     onUnmounted(() => {
-        // intentionally don't auto-stop — the channel is shared across the app session
+        // intentionally don't auto-stop — le canal est partagé sur toute la session
     })
 
     return {

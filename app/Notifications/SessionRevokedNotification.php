@@ -11,7 +11,7 @@ class SessionRevokedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct() {}
+    public function __construct(public readonly int $tokenId) {}
 
     /**
      * @return array<int, string>
@@ -32,12 +32,13 @@ class SessionRevokedNotification extends Notification implements ShouldQueue
     }
 
     /**
-     * @return array<string, string>
+     * @return array<string, string|int>
      */
     public function toDatabase(object $notifiable): array
     {
         return [
             'type' => 'session_revoked',
+            'token_id' => $this->tokenId,
             'message' => __('notifications.session_revoked.line1'),
             'time' => now()->toISOString(),
         ];

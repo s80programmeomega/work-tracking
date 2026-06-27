@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\Role;
+use App\Events\Realtime\SessionsAllRevoked;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -127,6 +128,7 @@ class AuthService
         $user = Auth::user();
 
         if ($user) {
+            event(new SessionsAllRevoked($user));
             $user->tokens()->where('name', 'auth_token')->delete();
 
             activity()

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\Realtime\SessionRevoked;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
@@ -146,7 +147,8 @@ class AuthController extends Controller
         Log::info('Session révoquée', ['user_id' => $user->id, 'token_id' => $tokenId, 'is_current' => $isCurrent]);
 
         if (! $isCurrent) {
-            $user->notify(new SessionRevokedNotification);
+            event(new SessionRevoked($user, $tokenId));
+            $user->notify(new SessionRevokedNotification($tokenId));
         }
 
         return response()->json([
