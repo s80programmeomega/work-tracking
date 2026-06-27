@@ -986,9 +986,9 @@ Already implemented: `RouteServiceProvider` applies `Limit::perMinute(60)->by(us
 
 > **Update this section at the end of every session.**
 
-- Last completed task: **Task 12** — Document Management (`feature/v2-task-12-document-management`) — merged into `jonas` 2026-05-26
-- Current task: **CDC Hotfixes** — R7 backend guard + audit-log endpoint + agent sheet §5 (`fix/cdc-hotfixes`) — in progress
-- Next task after CDC Hotfixes: **Task 13** — Subscription Modes + Trial Duration (`feature/v2-task-13-subscription`)
+- Last completed: **Phase 1 Steps 1.1–1.6** — Visibility Full Replacement (`feature/visibility-teams-chat`) — Steps 1.1–1.6 complete 2026-06-27; tests deferred to end of plan
+- Current task: **Phase 2** — Team Integration at Project Level (`feature/visibility-teams-chat`) — `use_teams` flag, team-link endpoints, candidates endpoint, observer/event sync, UI
+- Next: **Phase 3** — Multi-Type Chat (workspace channels, WorkspaceChat.vue)
 
 ### Dusk note (applies to all remaining tasks)
 Each task must include at least one Dusk browser test covering its main user flow. Place tests under `tests/Browser/<FeatureArea>/`. Follow Guide 16 in `WORKING_GUIDELINES.md`.

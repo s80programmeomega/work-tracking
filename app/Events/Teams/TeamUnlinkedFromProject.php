@@ -1,0 +1,20 @@
+<?php
+
+namespace App\Events\Teams;
+
+use App\Models\Projet;
+use App\Models\Team;
+use App\Models\User;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
+
+class TeamUnlinkedFromProject
+{
+    use Dispatchable, SerializesModels;
+
+    public function __construct(
+        public readonly Team $team,
+        public readonly Projet $projet,
+        public readonly User $acteur,
+    ) {}
+}

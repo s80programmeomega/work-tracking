@@ -577,48 +577,6 @@
               </div>
             </div>
 
-            <!-- Section Visibilité -->
-            <div class="space-y-5">
-              <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
-                <div class="p-2 rounded-3">
-                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white">
-                  Visibilité
-                </h3>
-              </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <label 
-                  v-for="visibility in visibilityOptions" 
-                  :key="visibility.value"
-                  class="relative flex flex-col items-center gap-3 p-5 border-2 rounded-3 cursor-pointer transition-all text-center group"
-                  :class="formData.visibility === visibility.value
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 scale-105'
-                    : 'border-gray-300 dark:border-gray-600 hover:border-blue-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'"
-                >
-                  <input type="radio" v-model="formData.visibility" :value="visibility.value" class="sr-only" />
-                  <span class="text-3xl">{{ visibility.icon }}</span>
-                  <div>
-                    <span class="block text-sm font-bold text-gray-900 dark:text-white">{{ visibility.label }}</span>
-                    <span class="block text-xs text-gray-600 dark:text-gray-400 mt-1">{{ visibility.description }}</span>
-                  </div>
-                  <svg v-if="formData.visibility === visibility.value" 
-                    class="absolute top-3 right-3 w-5 h-5 text-blue-600" 
-                    fill="currentColor" 
-                    viewBox="0 0 20 20"
-                  >
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                  </svg>
-                </label>
-              </div>
-            </div>
-
             <!-- Section Commentaire -->
             <div class="space-y-5">
               <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
@@ -789,7 +747,6 @@ const formData = ref({
   commentaire: '',
   assignee_ids: [],
   label_ids: [],
-  visibility: 'members_only'
 })
 
 const statutOptions = [
@@ -803,12 +760,6 @@ const prioriteOptions = [
   { value: 'moyenne', label: 'Moyenne', icon: '🟡' },
   { value: 'elevee', label: 'Élevée', icon: '🟠' },
   { value: 'critique', label: 'Critique', icon: '🔴' }
-]
-
-const visibilityOptions = [
-  { value: 'public', label: 'Public', icon: '👁️', description: 'Tous les membres du projet' },
-  { value: 'members_only', label: 'Membres', icon: '👥', description: 'Membres de l\'activité' },
-  { value: 'private', label: 'Privé', icon: '🔒', description: 'Seulement les assignés' }
 ]
 
 // ✅ CORRECTION : Utiliser les membres de l'activité
@@ -1028,7 +979,6 @@ onMounted(async () => {
         commentaire: props.tache.commentaire || '',
         assignee_ids: props.tache.assignees?.map(a => a.id) || [],
         label_ids: props.tache.labels?.map(l => l.id) || [],
-        visibility: props.tache.visibility || 'members_only'
       }
       
       // Charger l'activité et les membres pour la tâche existante

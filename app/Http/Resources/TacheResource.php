@@ -58,7 +58,6 @@ class TacheResource extends JsonResource
      * @responseField position integer|null Kanban column sort position.
      * @responseField couleur string|null Hex color code.
      * @responseField cover_image string|null Cover image filename.
-     * @responseField visibility string Visibility enum: public | private.
      * @responseField is_overdue boolean Whether the task is past its due date.
      * @responseField can_be_completed boolean Whether all conditions to complete the task are met.
      * @responseField can_be_started boolean Whether the task can be started.
@@ -398,8 +397,6 @@ class TacheResource extends JsonResource
             'position' => $this->position,
             'couleur' => $this->couleur,
             'cover_image' => $this->cover_image,
-            // 'cover_image' => $this->getFileUrlAttribute,
-            'visibility' => $this->visibility,
 
             // État et indicateurs
             'is_overdue' => $this->is_overdue,

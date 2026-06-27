@@ -119,21 +119,6 @@
         ></textarea>
       </div>
 
-      <!-- Visibility -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-          Visibilité
-        </label>
-        <select
-          v-model="visibility"
-          class="mt-1 w-full rounded-3 border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-        >
-          <option value="private">Privé (seulement moi)</option>
-          <option value="team">Équipe (membres sélectionnés)</option>
-          <option value="public">Public (tous les membres du workspace)</option>
-        </select>
-      </div>
-
       <!-- Action Buttons -->
       <div class="flex justify-end gap-3">
         <button
@@ -200,7 +185,6 @@ const fileInput = ref(null)
 const selectedFiles = ref([])
 const dragOver = ref(false)
 const description = ref('')
-const visibility = ref('private')
 
 let fileIdCounter = 0
 
@@ -268,7 +252,6 @@ const removeFile = (index) => {
 const clearAll = () => {
   selectedFiles.value = []
   description.value = ''
-  visibility.value = 'private'
 }
 
 const uploadFiles = async () => {
@@ -289,7 +272,6 @@ const uploadFiles = async () => {
       props.documentableId,
       {
         description: description.value,
-        visibility: visibility.value
       }
     )
 

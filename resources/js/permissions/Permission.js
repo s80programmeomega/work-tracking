@@ -26,6 +26,8 @@ export const Permission = Object.freeze({
     PROJETS_EDIT:               'projets.edit',
     PROJETS_DELETE:             'projets.delete',
     PROJETS_MANAGE_MEMBERS:     'projets.manage_members',
+    PROJETS_VIEW_ALL:           'projets.view_all',
+    PROJETS_MANAGE_TEAMS:       'projets.manage_teams',
 
     // Activity
     ACTIVITES_VIEW:             'activites.view',

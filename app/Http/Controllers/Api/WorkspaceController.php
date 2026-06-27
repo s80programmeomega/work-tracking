@@ -127,7 +127,6 @@ class WorkspaceController extends Controller
 
             // Préparer les settings avec des valeurs par défaut
             $defaultSettings = [
-                'default_project_visibility' => 'team',
                 'members_can_create_projects' => true,
                 'members_can_invite' => false,
                 'require_task_validation' => true,

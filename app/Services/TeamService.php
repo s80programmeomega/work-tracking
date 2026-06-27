@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Models\Team;
-use App\Models\TeamMember;
 use App\Models\TeamActivity;
+use App\Models\TeamMember;
 use App\Models\TeamPresence;
 use App\Models\User;
 use App\Notifications\TeamMemberAddedNotification;
@@ -22,10 +22,6 @@ class TeamService
         $query = Team::with(['owner', 'project', 'members'])
             ->withCount('members');
 
-        if (isset($filters['visibility'])) {
-            $query->where('visibility', $filters['visibility']);
-        }
-
         if (isset($filters['is_active'])) {
             $query->where('is_active', $filters['is_active']);
         }
@@ -37,11 +33,12 @@ class TeamService
         if (isset($filters['search'])) {
             $query->where(function ($q) use ($filters) {
                 $q->where('name', 'LIKE', "%{$filters['search']}%")
-                  ->orWhere('description', 'LIKE', "%{$filters['search']}%");
+                    ->orWhere('description', 'LIKE', "%{$filters['search']}%");
             });
         }
 
         $perPage = $filters['per_page'] ?? 15;
+
         return $query->orderBy('created_at', 'desc')->paginate($perPage);
     }
 
@@ -79,7 +76,6 @@ class TeamService
                 'description' => $data['description'] ?? null,
                 'owner_id' => $owner->id,
                 'project_id' => $data['project_id'] ?? null,
-                'visibility' => $data['visibility'] ?? 'private',
                 'settings' => $data['settings'] ?? [],
                 'is_active' => true,
             ]);
@@ -114,7 +110,6 @@ class TeamService
         $team->update([
             'name' => $data['name'] ?? $team->name,
             'description' => $data['description'] ?? $team->description,
-            'visibility' => $data['visibility'] ?? $team->visibility,
             'settings' => $data['settings'] ?? $team->settings,
         ]);
 

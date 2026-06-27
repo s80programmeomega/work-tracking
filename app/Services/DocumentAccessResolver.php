@@ -37,11 +37,6 @@ class DocumentAccessResolver
             return true;
         }
 
-        // Document public
-        if ($document->visibility === 'public') {
-            return true;
-        }
-
         // Permission explicite sur le document
         if ($this->hasDirectPermission($user, $document, 'can_view')) {
             return true;

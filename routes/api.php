@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\PaymentWebhookController;
 use App\Http\Controllers\Api\ProjetController;
 use App\Http\Controllers\Api\ProjetInvitationController;
+use App\Http\Controllers\Api\ProjetTeamController;
 use App\Http\Controllers\Api\PushSubscriptionController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\SocialAuthController;
@@ -373,6 +374,13 @@ Route::middleware(['auth:sanctum', 'subscription.status'])->group(function () {
 
         Route::get('/{projet}/members/{user}/removal-impact', [ProjetController::class, 'getMemberRemovalImpact']);
         Route::delete('/{projet}/members/{user}/remove', [ProjetController::class, 'removeMemberWithTransfer']);
+
+        // Team integration (Phase 2)
+        Route::get('/{projet}/teams', [ProjetTeamController::class, 'index'])->name('projets.teams.index');
+        Route::post('/{projet}/teams', [ProjetTeamController::class, 'link'])->name('projets.teams.link');
+        Route::delete('/{projet}/teams/{team}', [ProjetTeamController::class, 'unlink'])->name('projets.teams.unlink');
+        Route::patch('/{projet}/use-teams', [ProjetTeamController::class, 'toggleUseTeams'])->name('projets.use-teams.toggle');
+        Route::get('/{projet}/candidates', [ProjetTeamController::class, 'candidates'])->name('projets.candidates');
 
     });
 

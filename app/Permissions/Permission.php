@@ -37,6 +37,12 @@ final class Permission
 
     const PROJETS_MANAGE_MEMBERS = 'projets.manage_members';
 
+    /** Manager+ voit tous les projets du workspace sans être membre. */
+    const PROJETS_VIEW_ALL = 'projets.view_all';
+
+    /** Manager+ peut activer use_teams et lier/délier des équipes à un projet. */
+    const PROJETS_MANAGE_TEAMS = 'projets.manage_teams';
+
     // ── Activity ──────────────────────────────────────────────────────────
     const ACTIVITES_VIEW = 'activites.view';
 
@@ -198,6 +204,8 @@ final class Permission
             self::PROJETS_EDIT,
             self::PROJETS_DELETE,
             self::PROJETS_MANAGE_MEMBERS,
+            self::PROJETS_VIEW_ALL,
+            self::PROJETS_MANAGE_TEAMS,
 
             self::ACTIVITES_VIEW,
             self::ACTIVITES_EDIT,
@@ -296,6 +304,8 @@ final class Permission
                 self::PROJETS_EDIT,
                 self::PROJETS_DELETE,
                 self::PROJETS_MANAGE_MEMBERS,
+                self::PROJETS_VIEW_ALL,
+                self::PROJETS_MANAGE_TEAMS,
                 self::ACTIVITES_VIEW,
                 self::ACTIVITES_EDIT,
                 self::ACTIVITES_DELETE,

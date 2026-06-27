@@ -35,14 +35,6 @@
               <h1 class="text-3xl font-bold text-gray-900 dark:text-white" dusk="team-detail-name">{{ team.name }}</h1>
               <p v-if="team.description" class="text-gray-600 dark:text-gray-400 mt-1">{{ team.description }}</p>
               <div class="flex items-center gap-3 mt-2 flex-wrap">
-                <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full" :class="{
-                  'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400': team.visibility === 'public',
-                  'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400': team.visibility === 'private',
-                  'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400': team.visibility === 'secret'
-                }">
-                  {{ getVisibilityLabel(team.visibility) }}
-                </span>
-
                 <!-- Linked project chip -->
                 <router-link
                   v-if="team.project"
@@ -700,30 +692,6 @@
                 class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all resize-none"></textarea>
             </div>
 
-            <!-- Visibility -->
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                {{ $t('team_show.visibility_label') }}
-              </label>
-              <div class="grid grid-cols-3 gap-3">
-                <label v-for="option in visibilityOptions" :key="option.value"
-                  class="relative flex flex-col items-center p-4 border-2 rounded-3 cursor-pointer transition-all"
-                  :class="editForm.visibility === option.value
-                    ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20'
-                    : 'border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600'">
-                  <input type="radio" v-model="editForm.visibility" :value="option.value" class="sr-only" />
-                  <span class="text-2xl mb-2">{{ option.icon }}</span>
-                  <span class="text-sm font-semibold text-gray-900 dark:text-white mb-1">{{ option.label }}</span>
-                  <span class="text-xs text-gray-500 dark:text-gray-400 text-center">{{ option.description }}</span>
-                  <svg v-if="editForm.visibility === option.value" class="absolute top-2 right-2 w-5 h-5 text-brand-500"
-                    fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clip-rule="evenodd" />
-                  </svg>
-                </label>
-              </div>
-            </div>
           </div>
         </form>
 
@@ -896,30 +864,6 @@
                 class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all resize-none"></textarea>
             </div>
 
-            <!-- Visibility -->
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                {{ $t('team_show.visibility_label') }}
-              </label>
-              <div class="grid grid-cols-3 gap-3">
-                <label v-for="option in visibilityOptions" :key="option.value"
-                  class="relative flex flex-col items-center p-4 border-2 rounded-3 cursor-pointer transition-all"
-                  :class="editForm.visibility === option.value
-                    ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20'
-                    : 'border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600'">
-                  <input type="radio" v-model="editForm.visibility" :value="option.value" class="sr-only" />
-                  <span class="text-2xl mb-2">{{ option.icon }}</span>
-                  <span class="text-sm font-semibold text-gray-900 dark:text-white mb-1">{{ option.label }}</span>
-                  <span class="text-xs text-gray-500 dark:text-gray-400 text-center">{{ option.description }}</span>
-                  <svg v-if="editForm.visibility === option.value" class="absolute top-2 right-2 w-5 h-5 text-brand-500"
-                    fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clip-rule="evenodd" />
-                  </svg>
-                </label>
-              </div>
-            </div>
           </div>
         </form>
 
@@ -1469,7 +1413,6 @@ const creatingEvent = ref(false)
 const editForm = ref({
   name: '',
   description: '',
-  visibility: 'private'
 })
 
 // Add member form
@@ -1520,13 +1463,6 @@ const eventTypes = computed(() => [
   { value: 'event', label: t('team_show.type_event'), icon: '📅' },
 ])
 
-// Visibility options
-const visibilityOptions = computed(() => [
-  { value: 'public', label: t('teams_page.vis_public'), icon: '🌍', description: t('teams_page.vis_public_desc') },
-  { value: 'private', label: t('teams_page.vis_private'), icon: '🔒', description: t('teams_page.vis_private_desc') },
-  { value: 'secret', label: t('teams_page.vis_secret'), icon: '🕵️', description: t('teams_page.vis_secret_desc') },
-])
-
 // Member roles
 const memberRoles = computed(() => [
   { value: 'admin', label: t('team_show.role_admin'), icon: '👑', description: t('team_show.role_admin_desc') },
@@ -1547,7 +1483,6 @@ watch(team, (newTeam) => {
     editForm.value = {
       name: newTeam.name,
       description: newTeam.description || '',
-      visibility: newTeam.visibility || 'private'
     }
   }
 }, { immediate: true })
@@ -1584,15 +1519,6 @@ const getInitials = (name) => {
 
 const getUserInitials = (user) => {
   return user?.nom ? getInitials(user.nom) : '??'
-}
-
-const getVisibilityLabel = (visibility) => {
-  const labels = {
-    public: t('teams_page.vis_public'),
-    private: t('teams_page.vis_private'),
-    secret: t('teams_page.vis_secret'),
-  }
-  return labels[visibility] || visibility
 }
 
 const getRoleLabel = (role) => {

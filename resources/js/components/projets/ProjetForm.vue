@@ -221,47 +221,6 @@
                 </div>
               </div>
 
-              <div>
-                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Visibilité
-                </label>
-                <div class="space-y-2">
-                  <label
-                    v-for="visibility in visibilityOptions"
-                    :key="visibility.value"
-                    class="relative flex items-center gap-3 p-3 border-2 rounded-3 cursor-pointer transition-all "
-                    :class="formData.visibility === visibility.value
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                      : 'border-gray-300 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-700'"
-                  >
-                    <input
-                      type="radio"
-                      v-model="formData.visibility"
-                      :value="visibility.value"
-                      class="sr-only"
-                    />
-                    <svg :class="visibility.iconColor" class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="visibility.icon" />
-                    </svg>
-                    <div class="flex-1">
-                      <div class="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                        {{ visibility.label }}
-                      </div>
-                      <div class="text-xs text-gray-500 dark:text-gray-400">
-                        {{ visibility.description }}
-                      </div>
-                    </div>
-                    <svg
-                      v-if="formData.visibility === visibility.value"
-                      class="absolute right-3 w-5 h-5 text-blue-500"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                    </svg>
-                  </label>
-                </div>
-              </div>
             </div>
           </div>
         </form>
@@ -335,30 +294,6 @@ const statusOptions = [
   { value: 'archived', label: 'Archivé', color: 'bg-gray-500' }
 ]
 
-const visibilityOptions = [
-  {
-    value: 'private',
-    label: 'Privé',
-    description: 'Visible par vous uniquement',
-    icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z',
-    iconColor: 'text-red-500'
-  },
-  {
-    value: 'team',
-    label: 'Équipe',
-    description: 'Visible par les membres',
-    icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z',
-    iconColor: 'text-blue-500'
-  },
-  {
-    value: 'public',
-    label: 'Public',
-    description: 'Visible par tous',
-    icon: 'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
-    iconColor: 'text-green-500'
-  }
-]
-
 const formData = ref({
   nom: '',
   description: '',
@@ -367,8 +302,8 @@ const formData = ref({
   responsable_id: authStore.user?.id,
   progression: 0,
   status: 'active',
-  visibility: 'team',
-    // ✅ AJOUTER LE WORKSPACE_ID AUTOMATIQUEMENT
+  use_teams: false,
+  // ✅ AJOUTER LE WORKSPACE_ID AUTOMATIQUEMENT
   workspace_id: currentWorkspaceId.value
 })
 
@@ -437,8 +372,8 @@ onMounted(async () => {
       responsable_id: props.projet.responsable_id || authStore.user?.id,
       progression: props.projet.progression || 0,
       status: props.projet.status || 'active',
-      visibility: props.projet.visibility || 'team',
-      workspace_id: props.projet.workspace_id // Garder le workspace original en modification
+      workspace_id: props.projet.workspace_id,
+      use_teams: props.projet.use_teams ?? false
     }
   } else {
     // ✅ EN CRÉATION, FORCER LE WORKSPACE COURANT

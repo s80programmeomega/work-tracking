@@ -885,9 +885,8 @@ class TacheResultatController extends Controller
             'mime_type' => $file->getMimeType(),           // ✔ correspond au modèle
             'taille' => $file->getSize(),                  // ✔ correspond au modèle
             'chemin' => $path,                             // ✔ correspond au modèle
-            'disk' => 'public',                            // ✔ manquait
-            'user_id' => auth()->id(),                     // ✔ correspond
-            'visibility' => 'private',
+            'disk' => 'public',
+            'user_id' => auth()->id(),
             'metadata' => null,
 
         ]);
@@ -946,9 +945,8 @@ class TacheResultatController extends Controller
             'mime_type' => $file->getMimeType(),
             'taille' => $file->getSize(),
             'chemin' => $path,
-            'disk' => 'private', // ← Stockage privé
+            'disk' => 'private',
             'user_id' => auth()->id(),
-            'visibility' => 'private',
             'metadata' => [
                 'original_name' => $originalName,
                 'uploaded_by' => auth()->user()->nom,

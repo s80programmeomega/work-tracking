@@ -51,19 +51,6 @@
         v{{ document.version }}
       </div>
 
-      <!-- Visibility Badge -->
-      <div
-        v-if="document.visibility === 'public'"
-        class="absolute left-2 top-2 rounded-full bg-green-600 px-2 py-1 text-xs font-medium text-white "
-      >
-        <GlobeAltIcon class="inline h-3 w-3" />
-      </div>
-      <div
-        v-else-if="document.visibility === 'team'"
-        class="absolute left-2 top-2 rounded-full bg-orange-600 px-2 py-1 text-xs font-medium text-white "
-      >
-        <UserGroupIcon class="inline h-3 w-3" />
-      </div>
     </div>
 
     <!-- Document Info -->
@@ -184,8 +171,6 @@ import {
   MusicalNoteIcon,
   ArchiveBoxIcon,
   DocumentIcon,
-  GlobeAltIcon,
-  UserGroupIcon
 } from '@heroicons/vue/24/outline'
 
 const props = defineProps({

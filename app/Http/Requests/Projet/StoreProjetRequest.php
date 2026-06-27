@@ -16,7 +16,7 @@ class StoreProjetRequest extends FormRequest
         return [
             // Workspace requis
             'workspace_id' => 'required|exists:workspaces,id',
-            
+
             'nom' => 'required|string|max:255',
             'code' => 'nullable|string|max:50|unique:projets,code',
             'description' => 'nullable|string',
@@ -24,14 +24,14 @@ class StoreProjetRequest extends FormRequest
             'date_fin' => 'required|date|after:date_debut',
             'responsable_id' => 'required|exists:users,id',
             'status' => 'nullable|in:active,pending,completed,archived',
-            'visibility' => 'nullable|in:public,team,private',
-            'couleur' => 'nullable|string|max:7', // Format HEX
+            'couleur' => 'nullable|string|max:7',
             'budget' => 'nullable|numeric|min:0',
             'objectifs' => 'nullable|string',
             'is_template' => 'nullable|boolean',
             'is_favorite' => 'nullable|boolean',
+            'use_teams' => 'nullable|boolean',
             'metadata' => 'nullable|array',
-            
+
             // Relations
             'members' => 'nullable|array',
             'members.*.user_id' => 'required_with:members|exists:users,id',
@@ -39,7 +39,7 @@ class StoreProjetRequest extends FormRequest
             'members.*.can_edit' => 'nullable|boolean',
             'members.*.can_delete' => 'nullable|boolean',
             'members.*.can_invite' => 'nullable|boolean',
-            
+
             'tags' => 'nullable|array',
             'tags.*' => 'exists:projet_tags,id',
         ];
@@ -50,7 +50,7 @@ class StoreProjetRequest extends FormRequest
         return [
             'workspace_id.required' => 'Le workspace est obligatoire.',
             'workspace_id.exists' => 'Le workspace sélectionné n\'existe pas.',
-            
+
             'nom.required' => 'Le nom du projet est obligatoire.',
             'nom.max' => 'Le nom ne peut pas dépasser 255 caractères.',
             'code.unique' => 'Ce code de projet existe déjà.',
@@ -61,7 +61,6 @@ class StoreProjetRequest extends FormRequest
             'responsable_id.required' => 'Le responsable du projet est obligatoire.',
             'responsable_id.exists' => 'Le responsable sélectionné n\'existe pas.',
             'status.in' => 'Le statut doit être: active, pending, completed ou archived.',
-            'visibility.in' => 'La visibilité doit être: public, team ou private.',
             'couleur.max' => 'La couleur doit être au format HEX (#RRGGBB).',
             'budget.numeric' => 'Le budget doit être un nombre.',
             'budget.min' => 'Le budget ne peut pas être négatif.',
@@ -76,9 +75,9 @@ class StoreProjetRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         // Si workspace_id n'est pas fourni, utiliser le workspace actuel de l'utilisateur
-        if (!$this->has('workspace_id') && auth()->user()->current_workspace_id) {
+        if (! $this->has('workspace_id') && auth()->user()->current_workspace_id) {
             $this->merge([
-                'workspace_id' => auth()->user()->current_workspace_id
+                'workspace_id' => auth()->user()->current_workspace_id,
             ]);
         }
     }

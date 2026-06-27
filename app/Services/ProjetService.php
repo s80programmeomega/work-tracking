@@ -205,10 +205,6 @@ class ProjetService
             $query->where('status', $filters['status']);
         }
 
-        if (! empty($filters['visibility']) && $filters['visibility'] !== 'all') {
-            $query->where('visibility', $filters['visibility']);
-        }
-
         if (! empty($filters['responsable_id'])) {
             $query->where('responsable_id', $filters['responsable_id']);
         }
@@ -387,7 +383,6 @@ class ProjetService
                 'workspace_id',
                 'description',
                 'responsable_id',
-                'visibility',
                 'couleur',
                 'budget',
                 'objectifs',

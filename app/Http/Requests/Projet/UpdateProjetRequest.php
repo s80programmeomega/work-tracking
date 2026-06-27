@@ -35,13 +35,13 @@ class UpdateProjetRequest extends FormRequest
             'date_fin' => 'sometimes|required|date|after:date_debut',
             'responsable_id' => 'sometimes|required|exists:users,id',
             'status' => 'nullable|in:active,pending,completed,archived',
-            'visibility' => 'nullable|in:public,team,private',
             'couleur' => 'nullable|string|max:7',
             'budget' => 'nullable|numeric|min:0',
             'progression' => 'nullable|integer|min:0|max:100',
             'objectifs' => 'nullable|string',
             'is_template' => 'nullable|boolean',
             'is_favorite' => 'nullable|boolean',
+            'use_teams' => 'nullable|boolean',
             'metadata' => 'nullable|array',
 
             // Relations
@@ -67,7 +67,6 @@ class UpdateProjetRequest extends FormRequest
             'responsable_id.required' => 'Le responsable du projet est requis.',
             'responsable_id.exists' => 'Le responsable sélectionné n\'existe pas.',
             'status.in' => 'Le statut doit être : active, pending, completed ou archived.',
-            'visibility.in' => 'La visibilité doit être : public, private ou team.',
             'couleur.max' => 'La couleur ne peut pas dépasser 7 caractères.',
             'budget.numeric' => 'Le budget doit être un nombre.',
             'budget.min' => 'Le budget ne peut pas être négatif.',

@@ -40,7 +40,6 @@ class DocumentResource extends JsonResource
      * @responseField parent_id integer|null ID of the previous version document.
      * @responseField download_count integer Total number of downloads.
      * @responseField last_downloaded_at string|null ISO 8601 datetime of last download.
-     * @responseField visibility string Visibility enum: private | public | shared.
      * @responseField is_image boolean Whether the file is an image.
      * @responseField is_pdf boolean Whether the file is a PDF.
      * @responseField is_video boolean Whether the file is a video.
@@ -78,7 +77,6 @@ class DocumentResource extends JsonResource
             'parent_id' => $this->parent_id,
             'download_count' => $this->download_count,
             'last_downloaded_at' => $this->last_downloaded_at?->toISOString(),
-            'visibility' => $this->visibility,
             'is_image' => $this->is_image,
             'is_pdf' => $this->is_pdf,
             'is_video' => $this->is_video,

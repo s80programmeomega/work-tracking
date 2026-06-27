@@ -15,14 +15,8 @@ class TeamFactory extends Factory
             'name' => fake()->words(3, true),
             'description' => fake()->sentence(),
             'owner_id' => User::factory(),
-            'visibility' => 'private',
             'is_active' => true,
         ];
-    }
-
-    public function public(): static
-    {
-        return $this->state(['visibility' => 'public']);
     }
 
     public function archived(): static

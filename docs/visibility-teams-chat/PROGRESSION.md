@@ -21,15 +21,15 @@
 
 | Step | Task | Status | Notes |
 |---|---|---|---|
-| 1.1 | New permission constants (`PROJETS_VIEW_ALL`, `TACHES_VIEW`), seeder, Role enum, composable, PERMISSIONS_MATRIX | ⬜ | |
-| 1.2 | Drop visibility from Projet — migration, model scopes rewrite, ProjetPolicy cleanup, form requests, factory, seeder, ProjetForm.vue | ⬜ | |
-| 1.3 | Drop visibility from Tache — migration, new TachePolicy, AuthServiceProvider, TacheController validation, TacheForm.vue | ⬜ | |
-| 1.4 | Drop visibility from Document — migration, DocumentPolicy public-bypass removal, DocumentAccessResolver, DocumentController, DocumentCard.vue, DocumentFactory | ⬜ | |
-| 1.5 | Drop visibility from Team — migration, Team model, TeamController, TeamFactory | ⬜ | |
-| 1.6 | Workspace settings cleanup — StoreWorkspaceRequest, UpdateWorkspaceRequest, Workspace defaults | ⬜ | |
-| 1.7 | Tests — ProjetAccessTest (replace ProjetVisibilityTest), TachePolicyTest, DocumentAccessTest, Dusk ProjetAccessTest | ⬜ | |
-| — | **Testing guide written** → `docs/testing/PHASE1_VISIBILITY_TESTING.md` | ⬜ | |
-| — | **Pint + Larastan + full test suite green** | ⬜ | |
+| 1.1 | New permission constants (`PROJETS_VIEW_ALL`, `TACHES_VIEW`), seeder, Role enum, composable, PERMISSIONS_MATRIX | ✅ | |
+| 1.2 | Drop visibility from Projet — migration, model scopes rewrite, ProjetPolicy cleanup, form requests, factory, seeder, ProjetForm.vue | ✅ | |
+| 1.3 | Drop visibility from Tache — migration, new TachePolicy, AuthServiceProvider, TacheController validation, TacheForm.vue | ✅ | |
+| 1.4 | Drop visibility from Document — migration, DocumentPolicy public-bypass removal, DocumentAccessResolver, DocumentController, DocumentCard.vue, DocumentFactory | ✅ | |
+| 1.5 | Drop visibility from Team — migration, Team model, TeamController, TeamFactory | ✅ | |
+| 1.6 | Workspace settings cleanup — StoreWorkspaceRequest, UpdateWorkspaceRequest, Workspace defaults | ✅ | |
+| 1.7 | Tests — ProjetAccessTest (replace ProjetVisibilityTest), TachePolicyTest, DocumentAccessTest, Dusk ProjetAccessTest | ⬜ | Deferred to end of plan |
+| — | **Testing guide written** → `docs/visibility-teams-chat/testing/PHASE1_VISIBILITY_TESTING.md` | ✅ | |
+| — | **Pint + Larastan green** | ✅ | Full test suite deferred |
 
 ---
 
@@ -37,15 +37,15 @@
 
 | Step | Task | Status | Notes |
 |---|---|---|---|
-| 2.1 | Migration `use_teams`, Projet model fillable + cast, UpdateProjetRequest | ⬜ | |
-| 2.2 | `PROJETS_MANAGE_TEAMS` permission — Permission.php, seeder, Role enum, ProjetPolicy::manageTeams(), composable, PERMISSIONS_MATRIX | ⬜ | |
-| 2.3 | New API endpoints — linkTeam, unlinkTeam, toggleUseTeams, linkedTeams, memberCandidates, assigneeCandidates, intervenantCandidates; new routes | ⬜ | |
-| 2.4 | Observer/events — TeamLinkedToProject, TeamUnlinkedFromProject, TeamProjectObserver, AppServiceProvider registration; TeamController member add/remove sync | ⬜ | |
-| 2.5 | Notifications — TeamLinkedToProjectNotification, TeamMemberAutoAddedNotification, NotificationService event keys, i18n | ⬜ | |
-| 2.6 | Frontend — ProjetForm.vue use_teams toggle + linked teams panel, useProjets.js, useActivites.js, useTaches.js, IntervenantPicker.vue candidates prop, Teams/Show.vue badge, i18n | ⬜ | |
-| 2.7 | Tests — TeamProjectIntegrationTest.php (10+), Dusk TeamProjectIntegrationTest.php with screenshots | ⬜ | |
-| — | **Testing guide written** → `docs/testing/PHASE2_TEAM_INTEGRATION_TESTING.md` | ⬜ | |
-| — | **Pint + Larastan + full test suite green** | ⬜ | |
+| 2.1 | Migration `use_teams`, Projet model fillable + cast, UpdateProjetRequest | ✅ | |
+| 2.2 | `PROJETS_MANAGE_TEAMS` permission — Permission.php, seeder, Role enum, ProjetPolicy::manageTeams(), composable, PERMISSIONS_MATRIX | ✅ | |
+| 2.3 | New API endpoints — ProjetTeamController: linkTeam, unlinkTeam, toggleUseTeams, linkedTeams, candidates; routes | ✅ | |
+| 2.4 | Events + observer — TeamLinkedToProject, TeamUnlinkedFromProject, TeamProjectObserver, EventServiceProvider registration | ✅ | |
+| 2.5 | Notifications — TeamMemberAutoAddedNotification, EventServiceProvider listeners, i18n | ✅ | |
+| 2.6 | Frontend — ProjetDetail.vue use_teams toggle + linked teams panel, ProjetForm.vue use_teams field, TeamResource, useActivityMembers candidates fallback, Teams/Show.vue badge (pre-existing) | ✅ | |
+| 2.7 | Tests — TeamProjectIntegrationTest.php (10+), Dusk TeamProjectIntegrationTest.php with screenshots | ⬜ | Deferred to end of plan |
+| — | **Testing guide written** → `docs/visibility-teams-chat/testing/PHASE2_TEAM_INTEGRATION_TESTING.md` | ⬜ | |
+| — | **Pint + Larastan green** | ✅ | Full test suite deferred |
 
 ---
 

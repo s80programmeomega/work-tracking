@@ -209,11 +209,13 @@ export function useActivityMembers() {
     }
 
     loadingMembers.value = true
-    
+
     try {
-      console.log('👥 Chargement des membres du projet:', projetId)
-      
-      const response = await api.get(`/projets/${projetId}/membres`)
+      // Utiliser l'endpoint candidates qui tient compte de use_teams
+      let response = await api.get(`/projets/${projetId}/candidates`).catch(() => null)
+      if (!response) {
+        response = await api.get(`/projets/${projetId}/membres`)
+      }
       const members = normalizeApiResponse(response.data)
       
       if (!Array.isArray(members)) {

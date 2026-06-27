@@ -84,21 +84,6 @@
                                     </p>
                                 </div>
 
-                                <!-- Default Project Settings -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        {{ $t('ws_settings.general.default_project_visibility') }}
-                                    </label>
-                                    <select
-                                        v-model="settings.default_project_visibility"
-                                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-brand-500 dark:bg-gray-700 dark:text-white"
-                                    >
-                                        <option value="public">{{ $t('ws_settings.general.visibility_public_short') }}</option>
-                                        <option value="team">{{ $t('ws_settings.general.visibility_team') }}</option>
-                                        <option value="private">{{ $t('ws_settings.general.visibility_private_short') }}</option>
-                                    </select>
-                                </div>
-
                                 <!-- Time Zone -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -544,7 +529,6 @@ const settingsTabs = computed(() => [
 const settings = ref({
     // General
     visibility: 'private',
-    default_project_visibility: 'team',
     timezone: 'Africa/Douala',
     language: 'fr',
     

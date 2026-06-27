@@ -49,10 +49,12 @@ export function useProjetPermissions(projet = null) {
     const perms = computed(() => projet?.value?.user_permissions ?? {})
 
     const canView           = computed(() => perms.value.can_view ?? false)
+    const canViewAll        = computed(() => perms.value.can_view_all ?? false)
     const canEdit           = computed(() => perms.value.can_edit ?? false)
     const canDelete         = computed(() => perms.value.can_delete ?? false)
     const canManageMembers  = computed(() => perms.value.can_manage_members ?? false)
     const canCreateActivity = computed(() => perms.value.can_create_activity ?? false)
+    const canManageTeams    = computed(() => perms.value.can_manage_teams ?? false)
 
     // Task 12: Documents
     const canViewDocuments   = computed(() => perms.value.can_view_documents ?? false)
@@ -74,10 +76,12 @@ export function useProjetPermissions(projet = null) {
         isMember,
 
         canView,
+        canViewAll,
         canEdit,
         canDelete,
         canManageMembers,
         canCreateActivity,
+        canManageTeams,
 
         // Task 12
         canViewDocuments,

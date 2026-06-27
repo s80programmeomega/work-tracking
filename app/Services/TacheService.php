@@ -74,15 +74,6 @@ class TacheService
                     ->orWhereHas('activite.projet', function ($projq) use ($user) {
                         $projq->where('responsable_id', $user->id);
                     })
-                    // OU tâches visibles (public) dans mes workspaces
-                    ->orWhere(function ($visq) use ($user) {
-                        $visq->where('visibility', 'public')
-                            ->whereHas('activite.projet.workspace', function ($wsq) use ($user) {
-                                $wsq->whereHas('membres', function ($wmq) use ($user) {
-                                    $wmq->where('user_id', $user->id);
-                                });
-                            });
-                    })
                     // OU manager/supérieur dans le workspace : voit toutes les tâches du workspace
                     ->orWhereHas('activite.projet.workspace.members', function ($mq) use ($user) {
                         $managerRoleIds = Role::whereIn('name', ['owner', 'manager', 'directeur', 'super_admin'])

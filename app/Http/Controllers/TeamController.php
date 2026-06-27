@@ -27,7 +27,6 @@ class TeamController extends Controller
     {
         try {
             $filters = [
-                'visibility' => $request->input('visibility'),
                 'is_active' => $request->input('is_active', true),
                 'project_id' => $request->input('project_id'),
                 'search' => $request->input('search'),
@@ -104,7 +103,6 @@ class TeamController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'project_id' => 'nullable|exists:projets,id',
-            'visibility' => 'nullable|in:public,private,secret',
             'settings' => 'nullable|array',
         ]);
 
@@ -161,7 +159,6 @@ class TeamController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
-            'visibility' => 'sometimes|in:public,private,secret',
             'settings' => 'sometimes|array',
         ]);
 

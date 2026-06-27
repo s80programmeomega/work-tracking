@@ -171,29 +171,6 @@
                       </div>
                     </div>
 
-                    <div>
-                      <h4 class="text-xs font-medium text-gray-500 uppercase dark:text-gray-400">
-                        Visibilité
-                      </h4>
-                      <div class="mt-2">
-                        <span
-                          :class="[
-                            'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium',
-                            document.visibility === 'public'
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                              : document.visibility === 'team'
-                              ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
-                              : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
-                          ]"
-                        >
-                          <component
-                            :is="getVisibilityIcon(document.visibility)"
-                            class="h-4 w-4"
-                          />
-                          {{ getVisibilityLabel(document.visibility) }}
-                        </span>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -222,9 +199,6 @@ import {
   MusicalNoteIcon,
   ArchiveBoxIcon,
   DocumentTextIcon,
-  GlobeAltIcon,
-  UserGroupIcon,
-  LockClosedIcon
 } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
@@ -267,25 +241,5 @@ const formatDate = (dateString) => {
   })
 }
 
-const getVisibilityIcon = (visibility) => {
-  switch (visibility) {
-    case 'public':
-      return GlobeAltIcon
-    case 'team':
-      return UserGroupIcon
-    default:
-      return LockClosedIcon
-  }
-}
 
-const getVisibilityLabel = (visibility) => {
-  switch (visibility) {
-    case 'public':
-      return 'Public'
-    case 'team':
-      return 'Équipe'
-    default:
-      return 'Privé'
-  }
-}
 </script>

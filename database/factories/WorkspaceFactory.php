@@ -17,7 +17,6 @@ class WorkspaceFactory extends Factory
             'owner_id' => User::factory(),
             'is_active' => true,
             'settings' => [
-                'default_project_visibility' => 'team',
                 'members_can_create_projects' => true,
                 'members_can_invite' => false,
                 'require_task_validation' => true,

@@ -11,7 +11,6 @@ export const useProjetStore = defineStore('projet', {
     filters: {
       search: '',
       status: 'all',
-      visibility: 'all',
       responsable_id: null,
       tags: [],
       is_template: null,
@@ -339,8 +338,7 @@ export const useProjetStore = defineStore('projet', {
       this.filters = {
         search: '',
         status: 'all',
-        visibility: 'all',
-        responsable_id: null,
+          responsable_id: null,
         tags: [],
         is_template: null,
         is_favorite: null,

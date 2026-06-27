@@ -188,15 +188,6 @@
                   <option value="archived">Archivé</option>
                 </select>
               </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Visibilité</label>
-                <select v-model="form.visibility"
-                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent">
-                  <option value="public">Public - Visible par tous</option>
-                  <option value="team">Équipe - Visible par les membres</option>
-                  <option value="private">Privé - Visible uniquement par le responsable</option>
-                </select>
-              </div>
             </div>
 
             <!-- Budget -->
@@ -319,7 +310,6 @@ const form = ref({
   date_fin: '',
   responsable_id: '',
   status: 'active',
-  visibility: 'team',
   couleur: '#3B82F6',
   budget: null,
   objectifs: '',

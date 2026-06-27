@@ -68,9 +68,6 @@ export function useDocuments() {
             if (options.description) {
                 formData.append('description', options.description);
             }
-            if (options.visibility) {
-                formData.append('visibility', options.visibility);
-            }
             if (options.disk) {
                 formData.append('disk', options.disk);
             }

@@ -20,10 +20,6 @@ class DocumentPolicy
             return true;
         }
 
-        if ($document->visibility === 'public') {
-            return true;
-        }
-
         if ($this->hasExplicitPermission($user, $document, 'can_view')) {
             return true;
         }
