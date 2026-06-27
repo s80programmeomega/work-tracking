@@ -2178,7 +2178,10 @@
     "action_workspace_extend_trial": "Trial extended",
     "action_workspace_read": "Workspace viewed",
     "action_user_role_updated": "Role updated",
-    "action_superadmin_terminated": "Superadmin terminated"
+    "action_superadmin_terminated": "Superadmin terminated",
+    "action_superadmin_created": "Superadmin created",
+    "action_superadmin_credentials_sent": "Credentials sent",
+    "action_superadmin_reactivated": "Superadmin reactivated"
   },
   "profile_card": {
     "change_avatar": "Change avatar",

@@ -2181,7 +2181,10 @@
     "action_workspace_extend_trial": "Essai prolongé",
     "action_workspace_read": "Workspace consulté",
     "action_user_role_updated": "Rôle modifié",
-    "action_superadmin_terminated": "Superadmin terminé"
+    "action_superadmin_terminated": "Superadmin terminé",
+    "action_superadmin_created": "Superadmin créé",
+    "action_superadmin_credentials_sent": "Identifiants envoyés",
+    "action_superadmin_reactivated": "Superadmin réactivé"
   },
   "profile_card": {
     "change_avatar": "Changer l'avatar",

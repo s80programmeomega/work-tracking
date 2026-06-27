@@ -193,6 +193,9 @@ const knownActions = [
   { value: 'workspace.read', label: t('admin_audit.action_workspace_read') },
   { value: 'user.role_updated', label: t('admin_audit.action_user_role_updated') },
   { value: 'superadmin.terminated', label: t('admin_audit.action_superadmin_terminated') },
+  { value: 'superadmin.created', label: t('admin_audit.action_superadmin_created') },
+  { value: 'superadmin.credentials_sent', label: t('admin_audit.action_superadmin_credentials_sent') },
+  { value: 'superadmin.reactivated', label: t('admin_audit.action_superadmin_reactivated') },
 ]
 
 const loadEntries = async (page = 1) => {
