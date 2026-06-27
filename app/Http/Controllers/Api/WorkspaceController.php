@@ -1162,6 +1162,51 @@ class WorkspaceController extends Controller
     }
 
     /**
+     * Recherche contextuelle des membres du workspace pour le partage de documents.
+     * Exclut les rôles privilégiés (super_admin, directeur) et les utilisateurs déjà partagés.
+     */
+    public function searchMembers(Request $request, Workspace $workspace): JsonResponse
+    {
+        $this->authorize('view', $workspace);
+
+        $request->validate([
+            'q' => ['required', 'string', 'min:2'],
+            'exclude_user_ids' => ['sometimes', 'array'],
+            'exclude_user_ids.*' => ['integer'],
+        ]);
+
+        $q = $request->string('q');
+        $excludeIds = collect($request->input('exclude_user_ids', []))
+            ->merge(User::role(['super_admin', 'directeur'])->pluck('id'))
+            ->unique()
+            ->values()
+            ->all();
+
+        $members = $workspace->members()
+            ->active()
+            ->where(function ($query) use ($q) {
+                $query->where('nom', 'LIKE', "%{$q}%")
+                    ->orWhere('email', 'LIKE', "%{$q}%")
+                    ->orWhere('fonction', 'LIKE', "%{$q}%");
+            })
+            ->whereNotIn('users.id', $excludeIds)
+            ->limit(15)
+            ->get(['users.id', 'users.nom', 'users.email', 'users.avatar', 'users.fonction'])
+            ->map(fn (User $u) => [
+                'id' => $u->id,
+                'nom' => $u->nom,
+                'email' => $u->email,
+                'avatar' => $u->avatar_url,
+                'initials' => $u->initials,
+            ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $members,
+        ]);
+    }
+
+    /**
      * Liste paginée des membres du workspace avec métadonnées de gestion.
      * Requiert WORKSPACES_VIEW_MEMBERS (owner/directeur/manager).
      */

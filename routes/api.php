@@ -263,6 +263,7 @@ Route::middleware(['auth:sanctum', 'subscription.status'])->group(function () {
         // Workspace Members
         Route::prefix('{workspace}/members')->group(function () {
             Route::get('/', [WorkspaceController::class, 'members']);
+            Route::get('/search', [WorkspaceController::class, 'searchMembers']);
             Route::post('/', [WorkspaceController::class, 'addMember']);
 
             // Static routes MUST come before /{user} to avoid being swallowed by the wildcard

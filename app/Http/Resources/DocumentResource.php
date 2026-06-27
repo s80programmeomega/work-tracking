@@ -57,6 +57,7 @@ class DocumentResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'workspace_id' => $this->workspace_id,
             'documentable_type' => $this->documentable_type,
             'documentable_id' => $this->documentable_id,
             'nom' => $this->nom,

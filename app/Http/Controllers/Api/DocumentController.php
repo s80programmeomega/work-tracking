@@ -363,7 +363,7 @@ class DocumentController extends Controller
     public function download(Request $request, Document $document): StreamedResponse|JsonResponse
     {
         try {
-            $this->authorize('view', $document);
+            $this->authorize('download', $document);
 
             // Enregistrer le téléchargement
             $this->documentService->recordDownload($document, $request->user());
@@ -593,15 +593,14 @@ class DocumentController extends Controller
         $user = auth()->user();
 
         try {
-            $documents = Document::inWorkspace($user->current_workspace_id)
-                ->whereHas('permissions', function ($q) use ($user) {
-                    $q->where('permissionable_type', User::class)
-                        ->where('permissionable_id', $user->id)
-                        ->where(function ($q) {
-                            $q->whereNull('expires_at')
-                                ->orWhere('expires_at', '>', now());
-                        });
-                })
+            $documents = Document::whereHas('permissions', function ($q) use ($user) {
+                $q->where('permissionable_type', User::class)
+                    ->where('permissionable_id', $user->id)
+                    ->where(function ($q) {
+                        $q->whereNull('expires_at')
+                            ->orWhere('expires_at', '>', now());
+                    });
+            })
                 ->with([
                     'user:id,nom,email,avatar',
                     'documentable',

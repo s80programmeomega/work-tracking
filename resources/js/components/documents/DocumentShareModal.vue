@@ -66,12 +66,6 @@
                                 <p class="truncate text-sm font-medium text-gray-900 dark:text-white">
                                   {{ user.nom }}
                                 </p>
-                                <span
-                                  v-if="user.is_member"
-                                  class="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-                                >
-                                  Déjà membre
-                                </span>
                               </div>
                               <p class="truncate text-xs text-gray-500 dark:text-gray-400">
                                 {{ user.email }}
@@ -353,9 +347,15 @@ const searchUsers = async () => {
     return
   }
 
+  if (!props.document.workspace_id) return
+
   try {
-    const response = await api.get('/users/search', {
-      params: { q: searchQuery.value, document_id: props.document.id }
+    const alreadySharedIds = currentPermissions.value.map(p => p.permissionable_id)
+    const response = await api.get(`/workspaces/${props.document.workspace_id}/members/search`, {
+      params: {
+        q: searchQuery.value,
+        exclude_user_ids: alreadySharedIds,
+      },
     })
     searchResults.value = response.data.data
     showSearchResults.value = true
