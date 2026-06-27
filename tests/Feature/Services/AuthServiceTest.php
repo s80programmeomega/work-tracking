@@ -116,7 +116,7 @@ class AuthServiceTest extends TestCase
         ]);
 
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Account is inactive');
+        $this->expectExceptionMessage('This account has been deactivated. Please contact your administrator.');
 
         $this->authService->login([
             'email' => 'inactive@example.com',

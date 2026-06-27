@@ -23,42 +23,55 @@ abstract class WorkTrackingTestCase extends DuskTestCase
     /**
      * Authenticate by injecting a Sanctum token directly into localStorage.
      * This bypasses the UI and is fast — use it when not testing auth itself.
+     *
+     * Key invariant: the Pinia authStore reads from localStorage ONCE at store
+     * creation time (when the Vue app boots).  We must therefore inject credentials
+     * into localStorage BEFORE visiting the destination page so that isTempAdmin,
+     * isSuperAdmin, etc. are correct when onMounted() fires.
+     *
+     * Strategy:
+     *   1. Visit a neutral page to get a JS context for localStorage writes.
+     *   2. Write token + user payload to localStorage.
+     *   3. Visit the destination — this is a full SPA navigation that re-boots
+     *      nothing (Vue Router handles it), but on first load the store was already
+     *      hydrated in step 1's page context.  We therefore use visit() which does
+     *      an actual HTTP GET → full page reload → Vue app re-initialises from the
+     *      now-populated localStorage.
      */
     protected function signInAs(Browser $browser, User $user): Browser
     {
-        $token = $user->createToken('dusk')->plainTextToken;
+        $token = $user->createToken('auth_token')->plainTextToken;
 
-        // JSON_HEX_APOS escapes ' → ' so the string is safe inside a JS
-        // single-quoted or double-quoted context without breaking the JS parser.
+        $isTempAdmin = (bool) $user->is_super_admin && $user->admin_expires_at !== null;
+
+        // JSON_HEX_APOS escapes ' → ' so the value is safe inside a JS string literal.
         $payload = json_encode([
             'id' => $user->id,
             'nom' => $user->nom,
             'email' => $user->email,
             'current_workspace_id' => $user->current_workspace_id,
-            'is_super_admin' => $user->hasRole('super_admin'),
+            'is_super_admin' => (bool) $user->is_super_admin,
+            'is_temp_admin' => $isTempAdmin,
+            'admin_expires_at' => $user->admin_expires_at?->toISOString(),
+            'roles' => $user->roles->pluck('name')->toArray(),
         ], JSON_HEX_APOS | JSON_HEX_TAG | JSON_UNESCAPED_UNICODE);
 
-        // 1. Clear localStorage on the current page so the SPA's auth guard
-        // sees no token and lets /signin render instead of redirecting away.
-        try {
-            $browser->script(['localStorage.clear();']);
-        } catch (\Throwable) {
-            // No page loaded yet — safe to ignore
-        }
-
-        // 2. Now visit /signin — with no token in localStorage, Vue Router
-        // will render the signin form instead of redirecting to the dashboard.
+        // 1. Land on a real page — localStorage is disabled on data: URLs (Chrome's
+        //    initial about:blank state).  /signin is always accessible without auth.
         $browser->visit('/signin')->waitFor('[dusk="email"]', 20);
 
-        // 3. Inject fresh credentials.
+        // 2. Inject credentials now that we have a valid http(s) page context.
         $browser->script([
-            "localStorage.setItem('auth_token', '{$token}');",
-            "localStorage.setItem('user', '{$payload}');",
+            "localStorage.clear(); localStorage.setItem('auth_token', '{$token}'); localStorage.setItem('user', '{$payload}');",
         ]);
 
-        // 4. Navigate to the app and wait until the authenticated layout is visible
-        // (user-menu-toggle only renders after auth state is confirmed by the SPA).
-        return $browser->visit('/taches/mes-taches')->waitFor('[dusk="user-menu-toggle"]', 20);
+        // 3. Hard-navigate to the destination page.  Dusk's visit() issues a real
+        //    HTTP GET which triggers a full page reload → Vue app boots fresh →
+        //    authStore reads the localStorage we just populated → isTempAdmin is correct
+        //    before onMounted() in WorkspacePicker (or any other component) runs.
+        $destination = $isTempAdmin ? '/workspaces/select' : '/taches/mes-taches';
+
+        return $browser->visit($destination)->waitFor('[dusk="user-menu-toggle"]', 20);
     }
 
     /**

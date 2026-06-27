@@ -283,8 +283,11 @@ class ProjetVisibilityTest extends TestCase
     // =========================================================================
 
     /** @test */
-    public function super_admin_sees_all_visibility_types(): void
+    public function super_admin_without_membership_does_not_see_projects(): void
     {
+        // Superadmin scoping: platform operators are not members of customer workspaces.
+        // A superadmin with no workspace membership sees an empty project list and gets
+        // 403/404 on individual project endpoints they don't own.
         $superAdmin = User::factory()->create(['is_super_admin' => true]);
 
         foreach (['public', 'team', 'private'] as $visibility) {
@@ -292,9 +295,7 @@ class ProjetVisibilityTest extends TestCase
 
             $listResponse = $this->actingAs($superAdmin)->getJson($this->listUrl());
             $listResponse->assertOk();
-            $this->assertInList($listResponse, $projet, "super_admin devrait voir le projet {$visibility}");
-
-            $this->actingAs($superAdmin)->getJson("/api/projets/{$projet->id}")->assertOk();
+            $this->assertNotInList($listResponse, $projet, "super_admin sans membership ne devrait pas voir le projet {$visibility}");
         }
     }
 

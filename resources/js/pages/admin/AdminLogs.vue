@@ -29,6 +29,7 @@
         <ActivityLogTab v-if="activeTab === 'activity'" dusk="activity-tab" />
         <AppLogsTab v-else-if="activeTab === 'app_logs'" dusk="app-logs-tab" />
         <ValidationAuditLogTab v-else-if="activeTab === 'audit'" dusk="audit-tab" />
+        <AdminAuditLogTab v-else-if="activeTab === 'admin_audit'" dusk="admin-audit-tab" />
       </div>
     </div>
   </admin-layout>
@@ -37,12 +38,13 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { ClipboardDocumentListIcon, DocumentTextIcon, ShieldCheckIcon } from '@heroicons/vue/24/outline'
+import { ClipboardDocumentListIcon, DocumentTextIcon, ShieldCheckIcon, LockClosedIcon } from '@heroicons/vue/24/outline'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import ActivityLogTab from '@/components/admin/logs/ActivityLogTab.vue'
 import AppLogsTab from '@/components/admin/logs/AppLogsTab.vue'
 import ValidationAuditLogTab from '@/components/admin/logs/ValidationAuditLogTab.vue'
+import AdminAuditLogTab from '@/components/admin/logs/AdminAuditLogTab.vue'
 
 const { t } = useI18n()
 
@@ -52,5 +54,6 @@ const tabs = computed(() => [
   { id: 'activity', label: t('admin_logs.tab_activity'), icon: ClipboardDocumentListIcon },
   { id: 'app_logs', label: t('admin_logs.tab_app_logs'), icon: DocumentTextIcon },
   { id: 'audit', label: t('admin_logs.tab_audit'), icon: ShieldCheckIcon },
+  { id: 'admin_audit', label: t('admin_logs.tab_admin_audit'), icon: LockClosedIcon },
 ])
 </script>

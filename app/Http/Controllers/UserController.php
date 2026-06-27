@@ -19,6 +19,7 @@ use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\Rules\Password;
 use Laravel\Sanctum\PersonalAccessToken;
 
 class UserController extends Controller
@@ -132,7 +133,7 @@ class UserController extends Controller
     {
         $request->validate([
             'current_password' => ['required', 'string'],
-            'new_password' => ['required', 'string', 'min:8', 'confirmed'],
+            'new_password' => ['required', 'string', 'confirmed', Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
         ]);
 
         try {
@@ -232,8 +233,6 @@ class UserController extends Controller
 
     /**
      * Retourne les tokens Sanctum actifs de l'utilisateur courant.
-     * Comme issueToken() révoque tous les tokens précédents à chaque connexion,
-     * il y a au plus un token actif par utilisateur.
      */
     public function sessions(Request $request): JsonResponse
     {
@@ -256,6 +255,7 @@ class UserController extends Controller
         $sessions = $tokens->map(fn (PersonalAccessToken $token) => [
             'id' => $token->id,
             'name' => $token->name,
+            'user_agent' => $token->user_agent,
             'created_at' => $token->created_at->toISOString(),
             'last_used_at' => $token->last_used_at?->toISOString(),
             'expires_at' => $token->expires_at?->toISOString(),

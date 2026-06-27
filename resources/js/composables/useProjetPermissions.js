@@ -41,24 +41,24 @@ export function useProjetPermissions(projet = null) {
     const isObservateur   = computed(() => memberRole.value === 'observateur')
 
     const isMember = computed(() => {
-        if (isSuperAdmin.value || isResponsable.value) return true
+        if (isResponsable.value) return true
         return memberRole.value !== null
     })
 
     // Pre-computed permissions object from backend (ContextualPermissionGate)
     const perms = computed(() => projet?.value?.user_permissions ?? {})
 
-    const canView           = computed(() => isSuperAdmin.value || perms.value.can_view ?? false)
-    const canEdit           = computed(() => isSuperAdmin.value || perms.value.can_edit ?? false)
-    const canDelete         = computed(() => isSuperAdmin.value || perms.value.can_delete ?? false)
-    const canManageMembers  = computed(() => isSuperAdmin.value || perms.value.can_manage_members ?? false)
-    const canCreateActivity = computed(() => isSuperAdmin.value || perms.value.can_create_activity ?? false)
+    const canView           = computed(() => perms.value.can_view ?? false)
+    const canEdit           = computed(() => perms.value.can_edit ?? false)
+    const canDelete         = computed(() => perms.value.can_delete ?? false)
+    const canManageMembers  = computed(() => perms.value.can_manage_members ?? false)
+    const canCreateActivity = computed(() => perms.value.can_create_activity ?? false)
 
     // Task 12: Documents
-    const canViewDocuments   = computed(() => isSuperAdmin.value || (perms.value.can_view_documents ?? false))
-    const canUploadDocuments = computed(() => isSuperAdmin.value || (perms.value.can_upload_documents ?? false))
-    const canDeleteDocuments = computed(() => isSuperAdmin.value || (perms.value.can_delete_documents ?? false))
-    const canShareDocuments  = computed(() => isSuperAdmin.value || (perms.value.can_share_documents ?? false))
+    const canViewDocuments   = computed(() => perms.value.can_view_documents ?? false)
+    const canUploadDocuments = computed(() => perms.value.can_upload_documents ?? false)
+    const canDeleteDocuments = computed(() => perms.value.can_delete_documents ?? false)
+    const canShareDocuments  = computed(() => perms.value.can_share_documents ?? false)
 
     return {
         currentUser,

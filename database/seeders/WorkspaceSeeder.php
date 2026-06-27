@@ -991,7 +991,7 @@ class WorkspaceSeeder extends Seeder
     /** @param array<string,mixed> $settings */
     private function makeWorkspace(string $nom, string $description, string $code, User $owner, array $settings = []): Workspace
     {
-        return Workspace::create([
+        $workspace = Workspace::create([
             'nom' => $nom,
             'description' => $description,
             'code' => $code,
@@ -999,6 +999,13 @@ class WorkspaceSeeder extends Seeder
             'is_active' => true,
             'settings' => $settings,
         ]);
+
+        // Workspace owner gets the platform-level Spatie 'directeur' role unless already superadmin.
+        if (! $owner->isSuperAdmin()) {
+            $owner->syncRoles([Role::DIRECTEUR->value]);
+        }
+
+        return $workspace;
     }
 
     private function attachMember(Workspace $ws, User $user, string $role, User $invitedBy): void

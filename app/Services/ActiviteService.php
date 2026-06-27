@@ -6,6 +6,7 @@ use App\Models\Activite;
 use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 
 class ActiviteService
 {
@@ -83,14 +84,17 @@ class ActiviteService
         $query = Activite::query()
             ->with(['projet.workspace', 'responsable', 'membres']);
 
-        // ✅ AMÉLIORATION : Inclure les activités où l'utilisateur est membre
+        // Responsable, membre direct, ou manager du workspace
         $query->where(function ($q) use ($user) {
-            // Responsable de l'activité
             $q->where('responsable_id', $user->id)
-                // OU membre de l'activité
-                ->orWhereHas('membres', function ($mq) use ($user) {
-                    $mq->where('user_id', $user->id);
-                });
+                ->orWhereHas('membres', fn ($mq) => $mq->where('user_id', $user->id));
+
+            if ($user->hasRoleLevel('manager')) {
+                $managerRoleIds = Role::whereIn('name', ['owner', 'manager', 'directeur', 'super_admin'])
+                    ->pluck('id');
+                $q->orWhereHas('projet.workspace.members', fn ($mq) => $mq->where('user_id', $user->id)
+                    ->whereIn('role_id', $managerRoleIds));
+            }
         });
 
         // ✅ Filtrer par projets accessibles

@@ -25,6 +25,9 @@ final class Permission
     /** Voir la liste des membres du workspace et leur journal d'activité (owner/directeur). */
     const WORKSPACES_VIEW_MEMBERS = 'workspaces.view_members';
 
+    /** Bannir / révoquer l'accès d'un membre (owner uniquement). */
+    const WORKSPACES_BAN_MEMBER = 'workspaces.ban_member';
+
     // ── Project ───────────────────────────────────────────────────────────
     const PROJETS_VIEW = 'projets.view';
 
@@ -189,6 +192,7 @@ final class Permission
             self::WORKSPACES_REMOVE_MEMBER,
             self::WORKSPACES_MANAGE_SETTINGS,
             self::WORKSPACES_VIEW_MEMBERS,
+            self::WORKSPACES_BAN_MEMBER,
 
             self::PROJETS_VIEW,
             self::PROJETS_EDIT,

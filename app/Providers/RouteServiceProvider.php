@@ -25,26 +25,25 @@ class RouteServiceProvider extends ServiceProvider
     public function boot(): void
     {
         RateLimiter::for('api', function (Request $request) {
-            // Tests PHPUnit + sweep Dusk (dusk.local) : pas de rate limit pour
-            // ne pas étrangler les balayages multi-pages.
-            if (app()->environment('testing', 'dusk.local')) {
+            // Tests PHPUnit + Dusk : pas de rate limit pour ne pas étrangler les balayages multi-pages.
+            if (app()->environment('testing') || env('DISABLE_RATE_LIMITING')) {
                 return Limit::none();
             }
 
-            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+            return Limit::perMinute(300)->by($request->user()?->id ?: $request->ip());
         });
 
         // Limiteur dédié au login : protège contre le brute-force sans piéger les
         // utilisateurs légitimes. Clé = email + IP, donc les échecs d'un utilisateur
         // ne bloquent pas les autres derrière la même IP (NAT/bureau). 10/min.
         RateLimiter::for('login', function (Request $request) {
-            if (app()->environment('testing', 'dusk.local')) {
+            if (app()->environment('testing') || env('DISABLE_RATE_LIMITING')) {
                 return Limit::none();
             }
 
             $email = (string) $request->input('email');
 
-            return Limit::perMinute(10)->by(mb_strtolower($email).'|'.$request->ip());
+            return Limit::perMinute(30)->by(mb_strtolower($email).'|'.$request->ip());
         });
 
         $this->routes(function () {

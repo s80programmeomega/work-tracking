@@ -21,6 +21,7 @@ return [
     // Errors
     'invalid_credentials' => 'Invalid email or password',
     'login_failed' => 'Login failed',
+    'account_inactive' => 'This account has been deactivated. Please contact your administrator.',
 
     // Placeholders
     'email_placeholder' => 'info@gmail.com',

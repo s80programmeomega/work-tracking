@@ -22,6 +22,7 @@
                 <button
                     v-for="option in timeoutOptions"
                     :key="option.value"
+                    :dusk="`timeout-option-${option.value}`"
                     :class="[
                         'flex flex-col items-center p-3 border-2 rounded-3 transition-colors cursor-pointer text-sm font-medium',
                         selectedTimeout === option.value
@@ -69,7 +70,7 @@
                     <p class="text-xs text-gray-500 dark:text-gray-400">
                         {{ $t('session_settings.info_logout_in') }}
                     </p>
-                    <p class="mt-1 text-sm font-medium text-gray-800 dark:text-white/90">
+                    <p dusk="timeout-countdown" class="mt-1 text-sm font-medium text-gray-800 dark:text-white/90">
                         {{ timeUntilLogout }}
                     </p>
                 </div>
@@ -120,14 +121,19 @@
                 >
                     <div class="flex items-center gap-3 min-w-0">
                         <div class="flex items-center justify-center w-9 h-9 rounded-full bg-blue-50 dark:bg-blue-900/30 shrink-0">
-                            <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <!-- Icône mobile -->
+                            <svg v-if="isMobile(session.user_agent)" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                            <!-- Icône desktop -->
+                            <svg v-else class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2h-2" />
                             </svg>
                         </div>
                         <div class="min-w-0">
                             <div class="flex items-center gap-2 flex-wrap">
                                 <span class="text-sm font-medium text-gray-800 dark:text-white/90">
-                                    {{ $t('session_settings.this_device') }}
+                                    {{ parseUserAgent(session.user_agent) }}
                                 </span>
                                 <span
                                     v-if="session.is_current"
@@ -164,6 +170,7 @@
         <!-- Actions -->
         <div class="flex flex-col gap-3 pt-4 border-t border-gray-200 sm:flex-row dark:border-gray-800">
             <button
+                dusk="refresh-session-btn"
                 @click="refreshSession"
                 class="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-3 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800 dark:hover:bg-blue-900/40"
             >
@@ -174,6 +181,7 @@
             </button>
 
             <button
+                dusk="logout-all-btn"
                 @click="logoutAll"
                 class="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-3 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/40"
             >
@@ -198,9 +206,13 @@ const { staggerRef, applyStagger } = useStagger()
 
 const showCustomInput = ref(false)
 const customTimeout = ref(60)
-const timerInterval = ref(null)
 const sessions = ref([])
 const sessionsLoading = ref(true)
+
+// Référence réactive à l'instant présent — mise à jour chaque seconde
+// pour que le compteur s'affiche en temps réel sans dépendre de setInterval vide.
+const now = ref(Date.now())
+let tickInterval = null
 
 const timeoutOptions = computed(() => [
     { label: t('session_settings.opt_15min'), value: 15 },
@@ -215,8 +227,9 @@ const selectedTimeout = computed(() => authStore.getTimeoutDuration())
 const lastActivity = computed(() => authStore.lastActivity)
 
 const timeUntilLogout = computed(() => {
-    const now = Date.now()
-    const inactiveTime = now - authStore.lastActivity
+    if (authStore.inactivityTimeout === Infinity) { return t('session_settings.never') }
+
+    const inactiveTime = now.value - authStore.lastActivity
     const timeLeft = authStore.inactivityTimeout - inactiveTime
 
     if (timeLeft <= 0) { return t('session_settings.now') }
@@ -242,14 +255,28 @@ const applyCustomTimeout = () => {
     }
 }
 
-const refreshSession = () => {
+const refreshSession = async () => {
+    // Si le token est déjà expiré, éviter l'appel API inutile qui retournerait 401
+    const expiry = localStorage.getItem('token_expires_at')
+    if (expiry && Date.now() > new Date(expiry).getTime()) {
+        await authStore.logout()
+        return
+    }
     authStore.resetInactivityTimer()
-    authStore.refreshToken().catch(console.error)
+    try {
+        await authStore.refreshToken()
+    } catch {
+        // refreshToken appelle logout() en cas d'échec — pas d'action supplémentaire nécessaire
+    }
 }
 
 const revokeSession = async (session) => {
-    if (confirm(t('session_settings.confirm_logout_all'))) {
-        await authStore.logoutAllDevices()
+    if (!confirm(t('session_settings.confirm_revoke_session'))) return
+    if (session.is_current) {
+        await authStore.logout()
+    } else {
+        await authStore.revokeSession(session.id)
+        await loadSessions()
     }
 }
 
@@ -289,18 +316,54 @@ const formatDuration = (ms) => {
     return hours > 0 ? `${hours}h ${minutes}min` : `${minutes} min`
 }
 
+const isMobile = (ua) => {
+    if (!ua) { return false }
+    return /android|iphone|ipad|ipod|mobile|phone/i.test(ua)
+}
+
+const parseUserAgent = (ua) => {
+    if (!ua) { return t('session_settings.unknown_client') }
+
+    // Navigateur
+    let browser = 'Navigateur inconnu'
+    if (/Edg\//.test(ua)) { browser = 'Edge' }
+    else if (/OPR\/|Opera/.test(ua)) { browser = 'Opera' }
+    else if (/Chrome\//.test(ua) && !/Chromium/.test(ua)) { browser = 'Chrome' }
+    else if (/Firefox\//.test(ua)) { browser = 'Firefox' }
+    else if (/Safari\//.test(ua) && !/Chrome/.test(ua)) { browser = 'Safari' }
+    else if (/Chromium\//.test(ua)) { browser = 'Chromium' }
+
+    // OS
+    let os = ''
+    if (/Windows NT 10/.test(ua)) { os = 'Windows 10/11' }
+    else if (/Windows NT/.test(ua)) { os = 'Windows' }
+    else if (/Android/.test(ua)) {
+        const m = ua.match(/Android ([0-9.]+)/)
+        os = m ? `Android ${m[1]}` : 'Android'
+    } else if (/iPhone OS/.test(ua)) {
+        const m = ua.match(/iPhone OS ([0-9_]+)/)
+        os = m ? `iOS ${m[1].replace(/_/g, '.')}` : 'iOS'
+    } else if (/iPad/.test(ua)) { os = 'iPadOS' }
+    else if (/Mac OS X/.test(ua)) { os = 'macOS' }
+    else if (/Linux/.test(ua)) { os = 'Linux' }
+
+    return os ? `${browser} — ${os}` : browser
+}
+
 onMounted(() => {
     if (!localStorage.getItem('login_time')) {
         localStorage.setItem('login_time', Date.now().toString())
     }
 
-    timerInterval.value = setInterval(() => {}, 1000)
+    // Tick toutes les secondes pour que timeUntilLogout se mette à jour en temps réel
+    tickInterval = setInterval(() => { now.value = Date.now() }, 1000)
     loadSessions()
 })
 
 onUnmounted(() => {
-    if (timerInterval.value) {
-        clearInterval(timerInterval.value)
+    if (tickInterval) {
+        clearInterval(tickInterval)
+        tickInterval = null
     }
 })
 </script>

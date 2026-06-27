@@ -10,9 +10,13 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Models\Workspace;
 use App\Models\WorkspaceInvitation;
+use App\Notifications\WorkspaceInvitationAcceptedNotification;
 use App\Notifications\WorkspaceInvitationNotification;
+use App\Notifications\WorkspaceMemberBannedNotification;
+use App\Notifications\WorkspaceMemberUnbannedNotification;
 use App\Permissions\ContextualPermissionGate;
 use App\Permissions\Permission;
+use App\Services\AdminAuditService;
 use App\Services\MemberRemovalService;
 use App\Services\PermissionService;
 use App\Services\SubscriptionService;
@@ -41,14 +45,12 @@ class WorkspaceController extends Controller
     {
         $user = $request->user();
 
-        $baseQuery = $user->isSuperAdmin()
-            ? Workspace::query()
-            : Workspace::where(function ($query) use ($user) {
-                $query->where('owner_id', $user->id)
-                    ->orWhereHas('members', function ($q) use ($user) {
-                        $q->where('user_id', $user->id);
-                    });
-            });
+        $baseQuery = Workspace::where(function ($query) use ($user) {
+            $query->where('owner_id', $user->id)
+                ->orWhereHas('members', function ($q) use ($user) {
+                    $q->where('user_id', $user->id);
+                });
+        });
 
         $workspaces = $baseQuery
             // Chargement du nombre de projets et de membres pour les cartes du picker
@@ -225,6 +227,22 @@ class WorkspaceController extends Controller
     public function getUserWorkspaces(Request $request)
     {
         $user = $request->user();
+
+        // Admin temporaire : scoper aux workspaces accordés via temporary_access uniquement.
+        // Utiliser la colonne brute is_super_admin car isSuperAdmin() retourne false pour
+        // les admins temporaires (comportement intentionnel pour la gestion des droits).
+        if ($user->is_super_admin && $user->admin_expires_at !== null) {
+            $grantedIds = DB::table('temporary_access')
+                ->where('user_id', $user->id)
+                ->where('accessible_type', Workspace::class)
+                ->pluck('accessible_id');
+
+            $workspaces = Workspace::whereIn('id', $grantedIds)
+                ->withCount('projets', 'members')
+                ->get();
+
+            return response()->json(['data' => $workspaces]);
+        }
 
         $workspaces = $user->isSuperAdmin()
             ? Workspace::withCount('projets', 'members')->get()
@@ -779,8 +797,18 @@ class WorkspaceController extends Controller
         try {
             $workspace = $invitation->workspace;
 
+            // Vérifier si banni
+            $existingPivot = $workspace->members()->where('user_id', $user->id)->first();
+            if ($existingPivot && ! is_null($existingPivot->pivot->banned_at)) {
+                DB::rollBack();
+
+                return response()->json([
+                    'message' => 'Votre accès à ce workspace a été révoqué. Contactez le propriétaire.',
+                ], 403);
+            }
+
             // Vérifier si déjà membre
-            if ($workspace->members()->where('user_id', $user->id)->exists()) {
+            if ($existingPivot) {
                 DB::rollBack();
 
                 return response()->json([
@@ -813,6 +841,12 @@ class WorkspaceController extends Controller
                 ->log('User accepted workspace invitation');
 
             DB::commit();
+
+            // Notification à l'invitant
+            $inviter = $invitation->invitedBy;
+            if ($inviter && $inviter->id !== $user->id) {
+                $inviter->notify(new WorkspaceInvitationAcceptedNotification($invitation, $user, $workspace));
+            }
 
             return response()->json([
                 'message' => 'Invitation acceptée avec succès',
@@ -1128,6 +1162,51 @@ class WorkspaceController extends Controller
     }
 
     /**
+     * Recherche contextuelle des membres du workspace pour le partage de documents.
+     * Exclut les rôles privilégiés (super_admin, directeur) et les utilisateurs déjà partagés.
+     */
+    public function searchMembers(Request $request, Workspace $workspace): JsonResponse
+    {
+        $this->authorize('view', $workspace);
+
+        $request->validate([
+            'q' => ['required', 'string', 'min:2'],
+            'exclude_user_ids' => ['sometimes', 'array'],
+            'exclude_user_ids.*' => ['integer'],
+        ]);
+
+        $q = $request->string('q');
+        $excludeIds = collect($request->input('exclude_user_ids', []))
+            ->merge(User::role(['super_admin', 'directeur'])->pluck('id'))
+            ->unique()
+            ->values()
+            ->all();
+
+        $members = $workspace->members()
+            ->active()
+            ->where(function ($query) use ($q) {
+                $query->where('nom', 'LIKE', "%{$q}%")
+                    ->orWhere('email', 'LIKE', "%{$q}%")
+                    ->orWhere('fonction', 'LIKE', "%{$q}%");
+            })
+            ->whereNotIn('users.id', $excludeIds)
+            ->limit(15)
+            ->get(['users.id', 'users.nom', 'users.email', 'users.avatar', 'users.fonction'])
+            ->map(fn (User $u) => [
+                'id' => $u->id,
+                'nom' => $u->nom,
+                'email' => $u->email,
+                'avatar' => $u->avatar_url,
+                'initials' => $u->initials,
+            ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $members,
+        ]);
+    }
+
+    /**
      * Liste paginée des membres du workspace avec métadonnées de gestion.
      * Requiert WORKSPACES_VIEW_MEMBERS (owner/directeur/manager).
      */
@@ -1148,7 +1227,7 @@ class WorkspaceController extends Controller
         ]);
 
         $query = $workspace->members()
-            ->withPivot(['role_id', 'invited_at', 'invited_by'])
+            ->withPivot(['role_id', 'invited_at', 'invited_by', 'banned_at', 'banned_by', 'ban_reason'])
             ->when($request->filled('search'), function ($q) use ($request) {
                 $s = $request->search;
                 $q->where(function ($sub) use ($s) {
@@ -1161,17 +1240,25 @@ class WorkspaceController extends Controller
 
         $members->getCollection()->transform(function (User $member) {
             $roleName = \Spatie\Permission\Models\Role::find($member->pivot->role_id)?->name ?? 'membre';
-            $member->pivot->role = $roleName;
+            $bannedByUser = $member->pivot->banned_by
+                ? User::find($member->pivot->banned_by)?->nom_complet
+                : null;
 
             return [
                 'id' => $member->id,
                 'nom' => $member->nom,
+                'prenom' => $member->prenom,
+                'nom_complet' => $member->nom_complet,
                 'email' => $member->email,
                 'avatar' => $member->avatar,
                 'fonction' => $member->fonction,
                 'workspace_role' => $roleName,
                 'joined_at' => $member->pivot->invited_at,
                 'last_login_at' => $member->last_login_at,
+                'is_banned' => ! is_null($member->pivot->banned_at),
+                'banned_at' => $member->pivot->banned_at,
+                'banned_by' => $bannedByUser,
+                'ban_reason' => $member->pivot->ban_reason,
             ];
         });
 
@@ -1518,6 +1605,18 @@ class WorkspaceController extends Controller
      */
     private function userHasAccess(User $user, Workspace $workspace): bool
     {
+        // Temporary superadmin: check for an explicit workspace grant in temporary_access.
+        if ($user->is_super_admin && $user->admin_expires_at !== null) {
+            return DB::table('temporary_access')
+                ->where('user_id', $user->id)
+                ->where('accessible_type', Workspace::class)
+                ->where('accessible_id', $workspace->id)
+                ->where(function ($q) {
+                    $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
+                })
+                ->exists();
+        }
+
         return app(ContextualPermissionGate::class)->userCan($user, Permission::WORKSPACES_VIEW, $workspace);
     }
 
@@ -1853,21 +1952,88 @@ class WorkspaceController extends Controller
     {
         $user = $request->user();
 
-        // Vérifie que l'utilisateur a accès à ce workspace
-        if (! $workspace->hasAccess($user)) {
+        // Vérifie que l'utilisateur a accès à ce workspace.
+        // Pour les admins temporaires, l'accès est vérifié via temporary_access, pas via membership.
+        $isTempAdmin = $user->is_super_admin && $user->admin_expires_at !== null;
+
+        if (! $isTempAdmin && ! $workspace->hasAccess($user)) {
             return response()->json([
                 'message' => 'Accès refusé à ce workspace',
             ], 403);
         }
 
+        // Admin temporaire : vérifier que le workspace est dans ses grants.
+        if ($isTempAdmin) {
+            $grant = DB::table('temporary_access')
+                ->where('user_id', $user->id)
+                ->where('accessible_type', Workspace::class)
+                ->where('accessible_id', $workspace->id)
+                ->where('expires_at', '>', now())
+                ->first();
+
+            if (! $grant) {
+                return response()->json([
+                    'message' => 'Accès refusé à ce workspace',
+                ], 403);
+            }
+
+            // Provisionner l'adhésion workspace si elle n'existe pas encore.
+            // Le rôle stocké dans temporary_access est déjà un rôle contextuel workspace
+            // (observateur, cadre, manager). On l'attribue directement.
+            $roleName = $grant->role;
+            $role = \Spatie\Permission\Models\Role::findByName($roleName, 'web');
+
+            if ($role) {
+                $existing = DB::table('workspace_members')
+                    ->where('workspace_id', $workspace->id)
+                    ->where('user_id', $user->id)
+                    ->first();
+
+                // Décoder les permissions personnalisées si présentes.
+                $customPerms = ! empty($grant->custom_permissions)
+                    ? (is_string($grant->custom_permissions) ? $grant->custom_permissions : json_encode($grant->custom_permissions))
+                    : null;
+
+                if (! $existing) {
+                    DB::table('workspace_members')->insert([
+                        'workspace_id' => $workspace->id,
+                        'user_id' => $user->id,
+                        'role_id' => $role->id,
+                        'invited_by' => $user->created_by,
+                        'invited_at' => now(),
+                        'is_temp_access' => true,
+                        'custom_permissions' => $customPerms,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                } elseif (! $existing->is_temp_access) {
+                    // Membership permanente déjà existante — on ne la touche pas.
+                    Log::info('Accès temporaire sur une membership existante, rôle conservé', [
+                        'user_id' => $user->id,
+                        'workspace_id' => $workspace->id,
+                    ]);
+                }
+            }
+
+            activity()
+                ->causedBy($user)
+                ->performedOn($workspace)
+                ->withProperties([
+                    'workspace_id' => $workspace->id,
+                    'temp_admin' => true,
+                    'granted_role' => $roleName,
+                ])
+                ->log('Accès temporaire activé sur le workspace');
+        } else {
+            activity()
+                ->causedBy($user)
+                ->performedOn($workspace)
+                ->withProperties(['workspace_id' => $workspace->id])
+                ->log('Workspace switched');
+        }
+
         // Met à jour le workspace courant
         $user->update(['current_workspace_id' => $workspace->id]);
-
-        activity()
-            ->causedBy($user)
-            ->performedOn($workspace)
-            ->withProperties(['workspace_id' => $workspace->id])
-            ->log('Workspace switched');
 
         return response()->json([
             'message' => 'Workspace sélectionné avec succès',
@@ -2125,6 +2291,137 @@ class WorkspaceController extends Controller
                 ];
             }),
             'count' => $projects->count(),
+        ]);
+    }
+
+    /**
+     * Bannir un membre : révoque son accès et enregistre le motif.
+     * Requiert WORKSPACES_BAN_MEMBER (propriétaire uniquement).
+     */
+    public function banMember(Request $request, Workspace $workspace, User $user): JsonResponse
+    {
+        $actor = $request->user();
+        $gate = app(ContextualPermissionGate::class);
+
+        if (! $gate->userCan($actor, Permission::WORKSPACES_BAN_MEMBER, $workspace)) {
+            return response()->json([
+                'message' => 'Seul le propriétaire du workspace peut bannir un membre. Vous ne disposez pas de cette permission.',
+            ], 403);
+        }
+
+        if ($workspace->owner_id === $user->id) {
+            return response()->json([
+                'message' => 'Impossible de bannir le propriétaire du workspace.',
+            ], 422);
+        }
+
+        if ($actor->id === $user->id) {
+            return response()->json([
+                'message' => 'Vous ne pouvez pas vous bannir vous-même.',
+            ], 422);
+        }
+
+        $pivot = $workspace->members()->where('user_id', $user->id)->first();
+
+        if (! $pivot) {
+            return response()->json([
+                'message' => 'Cet utilisateur n\'est pas membre du workspace.',
+            ], 404);
+        }
+
+        if (! is_null($pivot->pivot->banned_at)) {
+            return response()->json([
+                'message' => 'Cet utilisateur est déjà banni du workspace.',
+            ], 409);
+        }
+
+        $request->validate([
+            'reason' => 'nullable|string|max:500',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $workspace->members()->updateExistingPivot($user->id, [
+                'banned_at' => now(),
+                'banned_by' => $actor->id,
+                'ban_reason' => $request->reason,
+            ]);
+
+            // Journal d'audit
+            AdminAuditService::log($actor, 'workspace.member.banned', $workspace, [
+                'target_user_id' => $user->id,
+                'target_email' => $user->email,
+                'reason' => $request->reason,
+            ]);
+
+            // Notification à la cible
+            $user->notify(new WorkspaceMemberBannedNotification($workspace, $actor, $request->reason));
+
+            DB::commit();
+
+            return response()->json([
+                'message' => "{$user->nom_complet} a été banni du workspace.",
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Erreur lors du bannissement du membre', [
+                'workspace_id' => $workspace->id,
+                'target_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'message' => 'Une erreur est survenue lors du bannissement.',
+            ], 500);
+        }
+    }
+
+    /**
+     * Lever le bannissement d'un membre.
+     * Requiert WORKSPACES_BAN_MEMBER (propriétaire uniquement).
+     */
+    public function unbanMember(Request $request, Workspace $workspace, User $user): JsonResponse
+    {
+        $actor = $request->user();
+        $gate = app(ContextualPermissionGate::class);
+
+        if (! $gate->userCan($actor, Permission::WORKSPACES_BAN_MEMBER, $workspace)) {
+            return response()->json([
+                'message' => 'Seul le propriétaire du workspace peut lever un bannissement.',
+            ], 403);
+        }
+
+        $pivot = $workspace->members()->where('user_id', $user->id)->first();
+
+        if (! $pivot) {
+            return response()->json([
+                'message' => 'Cet utilisateur n\'est pas membre du workspace.',
+            ], 404);
+        }
+
+        if (is_null($pivot->pivot->banned_at)) {
+            return response()->json([
+                'message' => 'Cet utilisateur n\'est pas banni.',
+            ], 409);
+        }
+
+        $workspace->members()->updateExistingPivot($user->id, [
+            'banned_at' => null,
+            'banned_by' => null,
+            'ban_reason' => null,
+        ]);
+
+        AdminAuditService::log($actor, 'workspace.member.unbanned', $workspace, [
+            'target_user_id' => $user->id,
+            'target_email' => $user->email,
+        ]);
+
+        $user->notify(new WorkspaceMemberUnbannedNotification($workspace, $actor));
+
+        return response()->json([
+            'message' => "Le bannissement de {$user->nom_complet} a été levé.",
         ]);
     }
 

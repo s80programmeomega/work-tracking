@@ -263,10 +263,6 @@ class Projet extends Model
      */
     public function scopeVisibleTo(Builder $query, User $user): void
     {
-        if ($user->isSuperAdmin()) {
-            return;
-        }
-
         $query->where(function (Builder $q) use ($user) {
             // Propriétaire du workspace : accès total
             $q->whereHas('workspace', fn (Builder $w) => $w->where('owner_id', $user->id))
@@ -289,11 +285,13 @@ class Projet extends Model
                         });
                 });
 
-            // private : manager et supérieur + membre du workspace
+            // manager et supérieur dans le workspace : voient tous les projets (team + private)
             if ($user->hasRoleLevel('manager')) {
-                $q->orWhere(function (Builder $priv) use ($user) {
-                    $priv->where('visibility', 'private')
-                        ->whereHas('workspace.members', fn (Builder $m) => $m->where('user_id', $user->id));
+                $managerRoleIds = Role::whereIn('name', ['owner', 'manager', 'directeur', 'super_admin'])
+                    ->pluck('id');
+                $q->orWhereHas('workspace', function (Builder $w) use ($user, $managerRoleIds) {
+                    $w->whereHas('members', fn (Builder $m) => $m->where('user_id', $user->id)
+                        ->whereIn('role_id', $managerRoleIds));
                 });
             }
         });
@@ -344,13 +342,6 @@ class Projet extends Model
      */
     public function scopeAccessibleBy(Builder $query, $userId): Builder
     {
-        $user = User::find($userId);
-
-        // Super admin voit tout
-        if ($user && $user->isSuperAdmin()) {
-            return $query;
-        }
-
         return $query->where(function ($q) use ($userId) {
             // 1. Projets où l'user est responsable
             $q->where('responsable_id', $userId)

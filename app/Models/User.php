@@ -39,6 +39,10 @@ use Spatie\Permission\Traits\HasRoles;
  * @property array|null $notification_preferences
  * @property bool $is_active
  * @property bool $is_super_admin
+ * @property Carbon|null $admin_expires_at
+ * @property string $admin_expiry_action
+ * @property int|null $created_by
+ * @property bool|null $is_system_owner
  * @property string|null $last_login_ip
  * @property Carbon|null $last_login_at
  * @property Carbon|null $last_activity_at
@@ -112,9 +116,13 @@ class User extends Authenticatable
         'last_login_at',
         'last_login_ip',
         'is_super_admin',
+        'admin_expires_at',
+        'admin_expiry_action',
+        'created_by',
         'email_otp_enabled',
         'provider',
         'provider_id',
+        // is_system_owner is intentionally NOT fillable — set only via Artisan command
     ];
 
     /**
@@ -139,11 +147,13 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'two_factor_confirmed_at' => 'datetime',
         'last_login_at' => 'datetime',
+        'admin_expires_at' => 'datetime',
         'is_active' => 'boolean',
         'email_otp_enabled' => 'boolean',
         'notification_preferences' => 'array',
         'password' => 'hashed',
         'is_super_admin' => 'boolean',
+        'is_system_owner' => 'boolean',
     ];
 
     protected $appends = [
@@ -399,12 +409,14 @@ class User extends Authenticatable
     }
 
     /**
-     * Vérifie si l'utilisateur est super_admin
+     * Vérifie si l'utilisateur est super_admin ou system owner.
      */
     public function isSuperAdmin(): bool
     {
-        // Column is the fast path; Spatie role is the authoritative fallback.
-        // Both must agree — if the column is set, trust it; otherwise check Spatie.
+        if ($this->is_system_owner) {
+            return true;
+        }
+
         if ($this->is_super_admin) {
             return true;
         }
@@ -413,19 +425,27 @@ class User extends Authenticatable
     }
 
     /**
+     * Vérifie si l'utilisateur est le propriétaire système (compte permanent, invisible, intouchable).
+     */
+    public function isSystemOwner(): bool
+    {
+        return (bool) $this->is_system_owner;
+    }
+
+    /**
+     * Vérifie si le compte superadmin temporaire est expiré.
+     */
+    public function isSuperAdminExpired(): bool
+    {
+        return $this->admin_expires_at !== null && $this->admin_expires_at->isPast();
+    }
+
+    /**
      * Vérifie si l'utilisateur est admin
      */
     public function isAdmin(): bool
     {
         return in_array($this->role, ['super_admin', 'admin']);
-    }
-
-    /**
-     * Vérifie si l'utilisateur a un rôle spécifique
-     */
-    public function hasRole(string $role): bool
-    {
-        return $this->role === $role;
     }
 
     /**

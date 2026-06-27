@@ -36,12 +36,16 @@ class ProjetPolicy
             return true;
         }
 
+        // Manager ou supérieur dans le workspace : accès à toutes les visibilités
+        if ($user->hasRoleLevel('manager') && ($projet->workspace?->isMember($user) ?? false)) {
+            return true;
+        }
+
         return match ($projet->visibility) {
             'public' => $projet->workspace?->isMember($user) ?? false,
             'team' => $projet->members()->where('user_id', $user->id)->exists()
                 || $projet->teams()->whereHas('members', fn ($m) => $m->where('user_id', $user->id))->exists(),
-            'private' => $user->hasRoleLevel('manager')
-                && ($projet->workspace?->isMember($user) ?? false),
+            'private' => false,
             default => false,
         };
     }

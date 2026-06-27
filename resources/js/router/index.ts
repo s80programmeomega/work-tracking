@@ -617,6 +617,28 @@ const router = createRouter({
       },
     },
 
+    // Gestion des membres du workspace (propriétaire uniquement — ban/unban/invite)
+    {
+      path: '/workspace/members',
+      name: 'workspace.members',
+      component: () => import('../pages/workspace/WorkspaceMembers.vue'),
+      meta: {
+        title: 'Membres & Invitations',
+        requiresAuth: true,
+      },
+    },
+
+    // Compte admin temporaire (propriétaire uniquement)
+    {
+      path: '/workspace/admin-account',
+      name: 'workspace.admin-account',
+      component: () => import('../pages/workspace/WorkspaceTempAdmin.vue'),
+      meta: {
+        title: 'Compte admin temporaire',
+        requiresAuth: true,
+      },
+    },
+
     {
       path: '/users/invitations',
       name: 'invitations',
@@ -813,6 +835,12 @@ const router = createRouter({
       meta: { requiresAuth: true, requiresSuperAdmin: true },
     },
     {
+      path: '/admin/my-audit-log',
+      name: 'admin.my-audit-log',
+      component: () => import('../pages/admin/DirecteurAuditLog.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
       path: '/auth/callback',
       name: 'AuthCallback',
       component: () => import('../pages/Auth/SocialCallback.vue'),
@@ -890,12 +918,18 @@ router.beforeEach(async (to, from, next) => {
         return next({ name: '404 Error', query: { code: '403', from: to.fullPath } })
       }
 
-      // Routes avec permissions requises
+      // Admin temporaire : traité comme un utilisateur normal (accès workspace picker).
+      // Admin permanent : doit rester dans les routes admin uniquement.
+      const isTempAdmin = authStore.user?.is_temp_admin === true
+      if (authStore.isSuperAdmin && !isTempAdmin && !String(to.name ?? '').startsWith('admin')) {
+        isLoading.value = false
+        return next({ name: 'admin.dashboard' })
+      }
+
+      // Routes avec permissions requises — superadmin no longer bypasses these.
       if (Array.isArray(to.meta.permissions) && (to.meta.permissions as string[]).length > 0) {
         const userRoles: string[] = authStore.user?.roles ?? []
-        const allowed =
-          authStore.isSuperAdmin ||
-          (to.meta.permissions as string[]).some((r: string) => userRoles.includes(r))
+        const allowed = (to.meta.permissions as string[]).some((r: string) => userRoles.includes(r))
         if (!allowed) {
           isLoading.value = false
           return next({ name: '404 Error', query: { code: '403', from: to.fullPath } })
@@ -903,19 +937,23 @@ router.beforeEach(async (to, from, next) => {
       }
 
       // Redirect utilisateur (no workspace yet) to workspace creation,
-      // unless they're already heading there
+      // unless they're already heading there, a permanent superadmin, or a temp admin.
       const noWorkspace = !authStore.user?.current_workspace_id
       const isHeadingToWorkspaceCreate = to.name === 'workspaces.create'
-      if (noWorkspace && !isHeadingToWorkspaceCreate && !authStore.user?.is_super_admin) {
+      if (noWorkspace && !isHeadingToWorkspaceCreate && !authStore.isSuperAdmin && !authStore.isTempAdmin) {
         isLoading.value = false
         return next({ name: 'workspaces.create' })
       }
     }
 
-    // Guest-only routes (signin, signup) redirect authenticated users to the workspace picker
+    // Guest-only routes (signin, signup) redirect authenticated users.
+    // Admin temporaire → workspace picker. Admin permanent → admin.dashboard.
     if (to.meta.guest && isLoggedIn) {
       isLoading.value = false
-      return next({ name: 'workspaces.select' })
+      const isTempAdminGuest = authStore.user?.is_temp_admin === true
+      return next(authStore.isSuperAdmin && !isTempAdminGuest
+        ? { name: 'admin.dashboard' }
+        : { name: 'workspaces.select' })
     }
 
     next()

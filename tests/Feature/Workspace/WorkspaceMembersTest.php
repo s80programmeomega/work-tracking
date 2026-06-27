@@ -248,6 +248,75 @@ class WorkspaceMembersTest extends TestCase
     // GET TRANSFER CANDIDATES
     // =========================================================================
 
+    // =========================================================================
+    // SEARCH MEMBERS (document share contextual search)
+    // =========================================================================
+
+    /** @test */
+    public function owner_can_search_workspace_members(): void
+    {
+        $member = $this->makeCollaborateur();
+
+        $response = $this->actingAs($this->owner)
+            ->getJson("/api/workspaces/{$this->workspace->id}/members/search?q=".urlencode(substr($member->nom, 0, 3)));
+
+        $response->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonStructure(['data' => [['id', 'nom', 'email', 'initials']]]);
+    }
+
+    /** @test */
+    public function search_excludes_specified_user_ids(): void
+    {
+        $memberA = $this->makeCollaborateur();
+        $memberB = $this->makeCollaborateur();
+
+        $response = $this->actingAs($this->owner)
+            ->getJson("/api/workspaces/{$this->workspace->id}/members/search?q=&exclude_user_ids[]={$memberA->id}", []);
+
+        // Pass a query that matches both but exclude memberA
+        $response = $this->actingAs($this->owner)
+            ->getJson("/api/workspaces/{$this->workspace->id}/members/search?".http_build_query([
+                'q' => substr($memberA->nom, 0, 2),
+                'exclude_user_ids' => [$memberA->id],
+            ]));
+
+        $response->assertOk();
+        $ids = collect($response->json('data'))->pluck('id')->all();
+        $this->assertNotContains($memberA->id, $ids);
+    }
+
+    /** @test */
+    public function search_requires_min_2_chars(): void
+    {
+        $this->actingAs($this->owner)
+            ->getJson("/api/workspaces/{$this->workspace->id}/members/search?q=a")
+            ->assertUnprocessable();
+    }
+
+    /** @test */
+    public function outsider_cannot_search_workspace_members(): void
+    {
+        $outsider = User::factory()->create();
+
+        $this->actingAs($outsider)
+            ->getJson("/api/workspaces/{$this->workspace->id}/members/search?q=test")
+            ->assertForbidden();
+    }
+
+    /** @test */
+    public function search_does_not_return_users_outside_workspace(): void
+    {
+        $outsider = User::factory()->create(['nom' => 'Outsider99']);
+
+        $response = $this->actingAs($this->owner)
+            ->getJson("/api/workspaces/{$this->workspace->id}/members/search?q=Outsider99");
+
+        $response->assertOk();
+        $ids = collect($response->json('data'))->pluck('id')->all();
+        $this->assertNotContains($outsider->id, $ids);
+    }
+
     /** @test */
     public function owner_can_get_transfer_candidates(): void
     {

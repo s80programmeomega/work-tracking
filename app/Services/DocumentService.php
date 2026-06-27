@@ -509,6 +509,7 @@ class DocumentService
 
         $documentsQuery = Document::query()
             ->accessibleBy($user)
+            ->inWorkspace($user->current_workspace_id)
             ->search($query);
 
         // Filtres optionnels

@@ -48,4 +48,14 @@ class WorkspacePolicy
         return $this->gate->userCan($user, Permission::WORKSPACES_INVITE_MEMBER, $workspace)
             || $this->gate->userCan($user, Permission::WORKSPACES_REMOVE_MEMBER, $workspace);
     }
+
+    public function banMember(User $user, Workspace $workspace): bool
+    {
+        return $this->gate->userCan($user, Permission::WORKSPACES_BAN_MEMBER, $workspace);
+    }
+
+    public function viewMembers(User $user, Workspace $workspace): bool
+    {
+        return $this->gate->userCan($user, Permission::WORKSPACES_VIEW_MEMBERS, $workspace);
+    }
 }

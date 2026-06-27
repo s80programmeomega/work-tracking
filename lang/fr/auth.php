@@ -21,6 +21,7 @@ return [
     // Erreurs
     'invalid_credentials' => 'Email ou mot de passe incorrect',
     'login_failed' => 'Échec de la connexion',
+    'account_inactive' => 'Ce compte a été désactivé. Contactez votre administrateur.',
 
     // Placeholders
     'email_placeholder' => 'votre email',

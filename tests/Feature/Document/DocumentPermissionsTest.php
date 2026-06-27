@@ -8,6 +8,7 @@ use App\Models\Document;
 use App\Models\Projet;
 use App\Models\User;
 use App\Models\Workspace;
+use App\Notifications\DocumentSharedNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
@@ -45,6 +46,40 @@ class DocumentPermissionsTest extends TestCase
             'user_id' => $this->owner->id,
             'visibility' => 'private',
         ]);
+    }
+
+    // =========================================================================
+    // SHARED WITH ME — cross-workspace visibility
+    // =========================================================================
+
+    /** @test */
+    public function shared_document_visible_regardless_of_recipient_current_workspace(): void
+    {
+        Notification::fake();
+
+        // Recipient belongs to a different workspace than the document
+        $recipient = User::factory()->create();
+        $otherWorkspace = Workspace::factory()->create(['owner_id' => $recipient->id]);
+        $recipient->update(['current_workspace_id' => $otherWorkspace->id]);
+
+        // Grant permission from owner in workspace 1
+        $this->actingAs($this->owner)
+            ->postJson("/api/documents/{$this->document->id}/permissions/grant", [
+                'user_id' => $recipient->id,
+                'can_view' => true,
+                'can_download' => true,
+            ])
+            ->assertOk();
+
+        // Recipient (current workspace = otherWorkspace) must still see the document
+        $response = $this->actingAs($recipient)
+            ->getJson('/api/documents/shared-with-me');
+
+        $response->assertOk()
+            ->assertJsonPath('success', true);
+
+        $ids = collect($response->json('data'))->pluck('id')->all();
+        $this->assertContains($this->document->id, $ids);
     }
 
     // =========================================================================
@@ -172,5 +207,46 @@ class DocumentPermissionsTest extends TestCase
         $this->actingAs($outsider)
             ->getJson("/api/documents/{$this->document->id}/permissions")
             ->assertForbidden();
+    }
+
+    // =========================================================================
+    // DOCUMENT RESOURCE INCLUDES workspace_id
+    // =========================================================================
+
+    /** @test */
+    public function document_resource_exposes_workspace_id(): void
+    {
+        $response = $this->actingAs($this->owner)
+            ->getJson("/api/documents/{$this->document->id}");
+
+        $response->assertOk()
+            ->assertJsonPath('data.workspace_id', $this->workspace->id);
+    }
+
+    // =========================================================================
+    // SHARE BY EMAIL — link points to frontend /documents
+    // =========================================================================
+
+    /** @test */
+    public function share_by_email_notification_uses_frontend_url(): void
+    {
+        Notification::fake();
+
+        $this->actingAs($this->owner)
+            ->postJson("/api/documents/{$this->document->id}/share-by-email", [
+                'email' => 'external@example.com',
+            ])
+            ->assertOk();
+
+        Notification::assertSentOnDemand(
+            DocumentSharedNotification::class,
+            function (DocumentSharedNotification $notification) {
+                $mail = $notification->toMail(new \stdClass);
+                $actionUrl = $mail->actionUrl;
+                $expectedBase = rtrim(config('app.frontend_url'), '/').'/documents';
+
+                return str_starts_with($actionUrl, $expectedBase);
+            }
+        );
     }
 }

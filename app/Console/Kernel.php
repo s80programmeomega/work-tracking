@@ -34,6 +34,12 @@ class Kernel extends ConsoleKernel
             ->dailyAt('00:05')
             ->onOneServer()
             ->runInBackground();
+
+        // Suspension ou suppression des comptes superadmin temporaires expirés.
+        $schedule->command('admin:expire-accounts')
+            ->daily()
+            ->onOneServer()
+            ->runInBackground();
     }
 
     /**

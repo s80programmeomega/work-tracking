@@ -9,6 +9,7 @@ use App\Models\Document;
 use App\Models\Projet;
 use App\Models\SousTache;
 use App\Models\Tache;
+use App\Models\User;
 use App\Models\Workspace;
 use App\Permissions\ContextualPermissionGate;
 use App\Policies\ActivitePolicy;
@@ -39,11 +40,18 @@ class AuthServiceProvider extends ServiceProvider
         // per-request role permission cache is shared across all policy calls.
         $this->app->scoped(ContextualPermissionGate::class);
 
-        // super_admin bypasses ALL policy checks app-wide — never contextual.
-        Gate::before(function ($user, $ability) {
-            if ($user->isSuperAdmin()) {
-                return true;
-            }
-        });
+        // Platform-level Gates: superadmin-only operator actions.
+        // Gate::before() has been removed — superadmin no longer bypasses workspace policy checks.
+        Gate::define('platform.admin', fn (User $user) => $user->isSuperAdmin());
+        Gate::define('platform.manage-workspace', fn (User $user) => $user->isSuperAdmin());
+        Gate::define('platform.manage-users', fn (User $user) => $user->isSuperAdmin());
+
+        // platform.operator: superadmin OR directeur (workspace owner, Spatie platform role).
+        Gate::define('platform.operator', fn (User $user) => $user->isSuperAdmin() || $user->hasRole('directeur')
+        );
+
+        // Lock Horizon and Pulse to superadmin only.
+        Gate::define('viewHorizon', fn (?User $user = null) => (bool) $user?->isSuperAdmin());
+        Gate::define('viewPulse', fn (?User $user = null) => (bool) $user?->isSuperAdmin());
     }
 }

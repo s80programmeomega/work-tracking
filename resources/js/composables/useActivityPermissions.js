@@ -91,7 +91,6 @@ export function useActivityPermissions(activite) {
    * Hiérarchie: super_admin > project_responsable > responsable > contributor > viewer
    */
   const userRole = computed(() => {
-    if (isSuperAdmin.value) return 'super_admin'
     if (isProjectResponsable.value) return 'project_responsable'
     if (isActivityResponsable.value) return 'responsable'
     
@@ -120,7 +119,6 @@ export function useActivityPermissions(activite) {
    * Hiérarchie complète + vérification projet parent
    */
   const canView = computed(() => {
-    if (isSuperAdmin.value) return true
     if (isProjectResponsable.value) return true
     if (isActivityResponsable.value) return true
     if (isMember.value) return true
@@ -134,54 +132,44 @@ export function useActivityPermissions(activite) {
   })
 
   /**
-   * PERMISSION: Peut éditer l'activité
-   * SuperAdmin + Responsables seulement
+   * PERMISSION: Peut éditer l'activité — responsables seulement
    */
   const canEdit = computed(() => {
-    if (isSuperAdmin.value) return true
     if (isActivityResponsable.value) return true
     if (isProjectResponsable.value) return true
     return userPermissions.value.can_edit_activity || false
   })
 
   /**
-   * PERMISSION: Peut supprimer l'activité
-   * SuperAdmin + Responsable projet seulement (sécurité renforcée)
+   * PERMISSION: Peut supprimer l'activité — responsable projet seulement (sécurité renforcée)
    */
   const canDelete = computed(() => {
-    if (isSuperAdmin.value) return true
     if (isProjectResponsable.value) return true
-    // Note: Le responsable d'activité ne peut PAS supprimer sans permission explicite
     return userPermissions.value.can_delete || false
   })
 
   /**
-   * PERMISSION: Peut gérer les membres
-   * SuperAdmin + Responsables
+   * PERMISSION: Peut gérer les membres — responsables seulement
    */
   const canManageMembers = computed(() => {
-    if (isSuperAdmin.value) return true
     if (isActivityResponsable.value) return true
     if (isProjectResponsable.value) return true
     return userPermissions.value.can_manage_members || false
   })
+
   /**
-   * PERMISSION: Peut supprimer les membres
-   * SuperAdmin + Responsables
+   * PERMISSION: Peut supprimer les membres — responsables seulement
    */
   const canDeleteMembers = computed(() => {
-    if (isSuperAdmin.value) return true
     if (isActivityResponsable.value) return true
     if (isProjectResponsable.value) return true
     return userPermissions.value.can_delete_member || false
   })
 
   /**
-   * PERMISSION: Peut créer des tâches
-   * Refusé pour les viewers
+   * PERMISSION: Peut créer des tâches — refusé pour les viewers
    */
   const canCreateTasks = computed(() => {
-    if (isSuperAdmin.value) return true
     if (isActivityResponsable.value) return true
     if (isProjectResponsable.value) return true
 
@@ -192,11 +180,9 @@ export function useActivityPermissions(activite) {
   })
 
   /**
-   * PERMISSION: Peut modifier des tâches
-   * Refusé pour les viewers
+   * PERMISSION: Peut modifier des tâches — refusé pour les viewers
    */
   const canEditTasks = computed(() => {
-    if (isSuperAdmin.value) return true
     if (isActivityResponsable.value) return true
     if (isProjectResponsable.value) return true
 
@@ -207,11 +193,9 @@ export function useActivityPermissions(activite) {
   })
 
   /**
-   * PERMISSION: Peut supprimer des tâches
-   * Refusé pour les viewers et contributors
+   * PERMISSION: Peut supprimer des tâches — refusé pour les viewers et contributors
    */
   const canDeleteTasks = computed(() => {
-    if (isSuperAdmin.value) return true
     if (isActivityResponsable.value) return true
     if (isProjectResponsable.value) return true
 
@@ -222,11 +206,9 @@ export function useActivityPermissions(activite) {
   })
 
   /**
-   * PERMISSION: Peut valider les résultats (N1)
-   * Pour responsables et utilisateurs avec permission explicite
+   * PERMISSION: Peut valider les résultats (N1) — refusé pour les viewers
    */
   const canValidateResults = computed(() => {
-    if (isSuperAdmin.value) return true
     if (isActivityResponsable.value) return true
     if (isProjectResponsable.value) return true
 
@@ -352,7 +334,6 @@ export function useActivityPermissions(activite) {
     if (!task) return false
 
     // Vérifications hiérarchiques
-    if (isSuperAdmin.value) return true
     if (isProjectResponsable.value) return true
     if (isActivityResponsable.value) return true
 

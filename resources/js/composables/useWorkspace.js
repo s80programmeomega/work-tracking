@@ -81,8 +81,12 @@ export function useWorkspace() {
                 await fetchWorkspaces();
             }
 
-            let workspaceId = authStore.currentWorkspaceId
-                || parseInt(localStorage.getItem('current_workspace_id') || '0')
+            // Priority: explicit localStorage selection > server-stored user preference > first workspace.
+            // localStorage wins because it reflects the user's last explicit in-app selection,
+            // which may differ from the server-stored current_workspace_id (e.g. after switching workspaces
+            // without a full page reload that would flush the server record).
+            let workspaceId = parseInt(localStorage.getItem('current_workspace_id') || '0')
+                || authStore.currentWorkspaceId
                 || authStore.workspaces[0]?.id
                 || null;
 

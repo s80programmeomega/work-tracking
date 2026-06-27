@@ -57,9 +57,8 @@ Route::prefix('auth')->group(function () {
     // global 60/min est trop large pour le login (cible n°1 de brute-force).
     // 'login' = limiteur nommé 10/min par (email + IP) — voir RouteServiceProvider :
     // protège du brute-force sans piéger plusieurs utilisateurs derrière une même IP.
-    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:10,1');
+    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:30,1');
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
-    Route::post('/refresh', [AuthController::class, 'refresh'])->middleware('throttle:10,1');
 
     // Google OAuth — le redirect renvoie vers Google, le callback revient ici
     Route::get('/google/redirect', [SocialAuthController::class, 'redirectToGoogle'])->name('auth.google.redirect');
@@ -112,6 +111,9 @@ Route::prefix('webhooks/payment')->name('webhooks.payment.')->group(function () 
 Route::middleware(['auth:sanctum', 'subscription.status'])->group(function () {
     Route::prefix('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
+        Route::post('/logout-all', [AuthController::class, 'logoutAll']);
+        Route::delete('/sessions/{tokenId}', [AuthController::class, 'revokeSession']);
+        Route::post('/refresh', [AuthController::class, 'refresh'])->middleware('throttle:30,1');
         Route::get('/me', [AuthController::class, 'me']);
         Route::post('/verify-email', [AuthController::class, 'verifyEmail']);
         Route::put('/language', [AuthController::class, 'updateLanguage']);
@@ -145,7 +147,6 @@ Route::middleware(['auth:sanctum', 'subscription.status'])->group(function () {
         Route::get('/stats', [AdminController::class, 'stats'])->name('admin.stats');
         Route::get('/workspaces', [AdminController::class, 'workspaces'])->name('admin.workspaces');
         Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
-        Route::patch('/users/{user}/role', [AdminController::class, 'updateUserRole'])->name('admin.users.update-role');
         Route::post('/workspaces/{workspace}/extend-trial', [AdminController::class, 'extendTrial'])->name('admin.workspaces.extend-trial');
         Route::post('/workspaces/{workspace}/suspend', [AdminController::class, 'suspendWorkspace'])->name('admin.workspaces.suspend');
         Route::post('/workspaces/{workspace}/reactivate', [AdminController::class, 'reactivateWorkspace'])->name('admin.workspaces.reactivate');
@@ -159,6 +160,21 @@ Route::middleware(['auth:sanctum', 'subscription.status'])->group(function () {
         Route::get('/activity-log', [ActivityController::class, 'adminFeed'])->name('admin.activity-log');
         // Journal d'audit de validation (N0/N1/bypass) — super-admin seulement
         Route::get('/validation-audit-log', [AdminController::class, 'validationAuditLog'])->name('admin.validation-audit-log');
+        // Journal d'audit des actions admin plateforme — super-admin permanent uniquement
+        Route::get('/audit-log', [AdminController::class, 'auditLog'])->name('admin.audit-log');
+    });
+
+    // Gestion lifecycle superadmin temporaire — accessible aux superadmins ET aux directeurs.
+    Route::prefix('admin')->middleware('can:platform.operator')->group(function () {
+        Route::get('/my-superadmins', [AdminController::class, 'myTempSuperadmins'])->name('admin.superadmins.list');
+        Route::post('/superadmins/{user}/terminate', [AdminController::class, 'terminate'])->name('admin.superadmins.terminate');
+        Route::post('/superadmins/{user}/reactivate', [AdminController::class, 'reactivateTempAdmin'])->name('admin.superadmins.reactivate');
+        Route::get('/users/lookup', [AdminController::class, 'lookupUserByEmail'])->name('admin.users.lookup');
+        Route::post('/temp-admins', [AdminController::class, 'createTempAdmin'])->name('admin.temp-admins.create');
+        Route::post('/temp-admins/{user}/send-credentials', [AdminController::class, 'sendTempAdminCredentials'])->name('admin.temp-admins.send-credentials');
+        Route::patch('/users/{user}/role', [AdminController::class, 'updateUserRole'])->name('admin.users.update-role');
+        // Journal d'audit scopé — directeur voit uniquement les actions de ses superadmins temp
+        Route::get('/my-audit-log', [AdminController::class, 'myAuditLog'])->name('admin.my-audit-log');
     });
 
     // Recherche globale (Phase 6) — manager et supérieur uniquement
@@ -247,6 +263,7 @@ Route::middleware(['auth:sanctum', 'subscription.status'])->group(function () {
         // Workspace Members
         Route::prefix('{workspace}/members')->group(function () {
             Route::get('/', [WorkspaceController::class, 'members']);
+            Route::get('/search', [WorkspaceController::class, 'searchMembers']);
             Route::post('/', [WorkspaceController::class, 'addMember']);
 
             // Static routes MUST come before /{user} to avoid being swallowed by the wildcard
@@ -259,6 +276,8 @@ Route::middleware(['auth:sanctum', 'subscription.status'])->group(function () {
             Route::put('/{user}', [WorkspaceController::class, 'updateMember'])->name('workspace.members.update');
             Route::get('/{user}', [WorkspaceController::class, 'showMember'])->name('workspace.members.show');
             Route::delete('/{user}', [WorkspaceController::class, 'removeMember']);
+            Route::post('/{user}/ban', [WorkspaceController::class, 'banMember'])->name('workspace.members.ban');
+            Route::delete('/{user}/ban', [WorkspaceController::class, 'unbanMember'])->name('workspace.members.unban');
         });
 
         // Workspace Projects
@@ -314,11 +333,6 @@ Route::middleware(['auth:sanctum', 'subscription.status'])->group(function () {
         Route::get('/mes-projets', [ProjetController::class, 'myProjets']);
         Route::get('/archives', [ProjetController::class, 'archived']);
         Route::get('/projets-accessibles', [ProjetController::class, 'accessible']);
-
-        Route::middleware(['super_admin'])->group(function () {
-            Route::get('/list/all', [ProjetController::class, 'index']); // Tous les projets
-            Route::get('/activites', [ActiviteController::class, 'index']); // Toutes les activités
-        });
 
         // CRUD de base
         Route::post('/', [ProjetController::class, 'store']);

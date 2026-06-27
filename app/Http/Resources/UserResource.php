@@ -40,7 +40,7 @@ class UserResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $isSuperAdmin = $this->resource->isSuperAdmin();
+        $isTempAdmin = $this->resource->is_super_admin && $this->resource->admin_expires_at !== null;
 
         return [
             'id' => $this->id,
@@ -56,7 +56,9 @@ class UserResource extends JsonResource
             'language' => $this->language ?? 'fr',
             'timezone' => $this->timezone,
             'is_active' => $this->is_active,
-            'is_super_admin' => $isSuperAdmin,
+            'is_super_admin' => (bool) $this->resource->is_super_admin,
+            'is_temp_admin' => $isTempAdmin,
+            'admin_expires_at' => $this->resource->admin_expires_at?->toISOString(),
             'current_workspace_id' => $this->current_workspace_id,
             'last_login_at' => $this->last_login_at?->toISOString(),
             'email_verified_at' => $this->email_verified_at?->toISOString(),

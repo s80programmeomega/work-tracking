@@ -28,13 +28,13 @@ class DocumentSharedNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $downloadUrl = url("/documents/{$this->document->id}/download");
+        $documentUrl = rtrim(config('app.frontend_url'), '/').'/documents';
 
         return (new MailMessage)
             ->subject(__('documents.share.email_subject', ['nom' => $this->document->nom]))
             ->greeting(__('documents.share.email_greeting'))
             ->line(__('documents.share.email_intro', ['user' => $this->sharedBy->nom_complet, 'nom' => $this->document->nom]))
-            ->action(__('documents.actions.download'), $downloadUrl)
+            ->action(__('documents.actions.download'), $documentUrl)
             ->line(__('documents.share.email_footer'));
     }
 

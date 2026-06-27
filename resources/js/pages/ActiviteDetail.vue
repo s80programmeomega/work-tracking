@@ -67,6 +67,23 @@
                   {{ $t('activite_detail.btn_statistics') }}
                 </button>
 
+                <!-- Bouton Documents -->
+                <button
+                  @click="showDocuments = !showDocuments"
+                  :class="[
+                    'inline-flex items-center gap-2 rounded-3 border px-4 py-2 text-sm font-medium transition-colors',
+                    showDocuments
+                      ? 'border-blue-600 bg-blue-50 text-blue-700 dark:border-blue-500 dark:bg-blue-900/20 dark:text-blue-400'
+                      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                  ]"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                  </svg>
+                  {{ $t('activite_detail.btn_documents') }}
+                </button>
+
                 <!-- A.10: Voir toutes les tâches de cette activité -->
                 <router-link
                   dusk="voir-toutes-taches-btn"
@@ -121,6 +138,25 @@
               :loading="false"
               @close="showStats = false"
             />
+          </transition>
+
+          <!-- Panneau documents -->
+          <transition
+            enter-active-class="transition-all duration-300 ease-out"
+            enter-from-class="opacity-0 -translate-y-4"
+            enter-to-class="opacity-100 translate-y-0"
+            leave-active-class="transition-all duration-200 ease-in"
+            leave-from-class="opacity-100 translate-y-0"
+            leave-to-class="opacity-0 -translate-y-4"
+          >
+            <div v-if="showDocuments" class="rounded-3 border border-blue-200 bg-white p-6 dark:border-blue-800 dark:bg-gray-800">
+              <DocumentManager
+                :documentable-type="'App\\Models\\Activite'"
+                :documentable-id="activite.id"
+                :entity-label="activite.nom"
+                :can-upload="canEdit"
+              />
+            </div>
           </transition>
 
           <div class="grid gap-8 lg:grid-cols-3">
@@ -625,6 +661,7 @@
               </div>
             </div>
           </div>
+
         </div>
 
         <!-- Loading State -->
@@ -743,18 +780,20 @@ import TacheCreateWizard from '@/components/taches/TacheCreateWizard.vue'
 import TacheDetailModal from '@/components/taches/TacheDetailModal.vue'
 import KanbanBoard from '@/components/taches/KanbanBoardSimple.vue'
 import { useTaches } from '@/composables/useTaches'
+import DocumentManager from '@/components/documents/DocumentManager.vue'
 
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
-const authStore = useAuthStore() 
+const authStore = useAuthStore()
 
 const { staggerRef: taskStaggerRef, applyStagger: applyTaskStagger } = useStagger(50)
 const { staggerRef: memberStaggerRef, applyStagger: applyMemberStagger } = useStagger(40)
 
 const loading = ref(true)
 const showStats = ref(false)
+const showDocuments = ref(false)
 const activite = ref(null)
 const taches = ref([])
 const showMembersModal = ref(false)

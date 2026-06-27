@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Policies;
 
 use App\Models\Document;
+use App\Models\DocumentPermission;
 use App\Models\Projet;
 use App\Models\User;
 use App\Models\Workspace;
@@ -198,5 +199,96 @@ class DocumentPolicyTest extends TestCase
 
         // observateur n'a pas documents.share
         $this->assertFalse($observateur->can('share', $document));
+    }
+
+    // =========================================================================
+    // EXPLICIT DocumentPermission overrides
+    // =========================================================================
+
+    private function grantExplicit(User $user, Document $document, array $flags): DocumentPermission
+    {
+        return DocumentPermission::create(array_merge([
+            'document_id' => $document->id,
+            'permissionable_type' => User::class,
+            'permissionable_id' => $user->id,
+            'can_view' => false,
+            'can_download' => false,
+            'can_edit' => false,
+            'can_delete' => false,
+            'can_share' => false,
+        ], $flags));
+    }
+
+    /** @test */
+    public function user_with_explicit_can_share_permission_can_share(): void
+    {
+        $sharer = User::factory()->create();
+        $uploader = $this->makeWsMember('cadre');
+        $document = $this->makeDocument($uploader);
+
+        $this->grantExplicit($sharer, $document, ['can_share' => true]);
+
+        $this->assertTrue($sharer->can('share', $document));
+    }
+
+    /** @test */
+    public function user_without_can_share_permission_cannot_share(): void
+    {
+        $user = User::factory()->create();
+        $uploader = $this->makeWsMember('cadre');
+        $document = $this->makeDocument($uploader);
+
+        $this->grantExplicit($user, $document, ['can_view' => true, 'can_share' => false]);
+
+        $this->assertFalse($user->can('share', $document));
+    }
+
+    /** @test */
+    public function user_with_explicit_can_edit_permission_can_update(): void
+    {
+        $editor = User::factory()->create();
+        $uploader = $this->makeWsMember('cadre');
+        $document = $this->makeDocument($uploader);
+
+        $this->grantExplicit($editor, $document, ['can_edit' => true]);
+
+        $this->assertTrue($editor->can('update', $document));
+    }
+
+    /** @test */
+    public function user_with_explicit_can_delete_permission_can_delete(): void
+    {
+        $deleter = User::factory()->create();
+        $uploader = $this->makeWsMember('cadre');
+        $document = $this->makeDocument($uploader);
+
+        $this->grantExplicit($deleter, $document, ['can_delete' => true]);
+
+        $this->assertTrue($deleter->can('delete', $document));
+    }
+
+    /** @test */
+    public function user_with_explicit_can_download_permission_can_download(): void
+    {
+        $downloader = User::factory()->create();
+        $uploader = $this->makeWsMember('cadre');
+        $document = $this->makeDocument($uploader);
+
+        $this->grantExplicit($downloader, $document, ['can_download' => true]);
+
+        $this->assertTrue($downloader->can('download', $document));
+    }
+
+    /** @test */
+    public function expired_explicit_permission_does_not_grant_access(): void
+    {
+        $user = User::factory()->create();
+        $uploader = $this->makeWsMember('cadre');
+        $document = $this->makeDocument($uploader);
+
+        $perm = $this->grantExplicit($user, $document, ['can_share' => true]);
+        $perm->update(['expires_at' => now()->subDay()]);
+
+        $this->assertFalse($user->can('share', $document));
     }
 }
