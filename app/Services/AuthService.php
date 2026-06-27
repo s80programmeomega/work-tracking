@@ -89,7 +89,9 @@ class AuthService
     {
         $expiresAt = $remember ? now()->addDays(15) : now()->addHours(24);
         $newToken = $user->createToken('auth_token', ['*'], $expiresAt);
-        $newToken->accessToken->update(['user_agent' => request()->userAgent()]);
+        DB::table('personal_access_tokens')
+            ->where('id', $newToken->accessToken->id)
+            ->update(['user_agent' => request()->userAgent()]);
 
         return [
             'token' => $newToken->plainTextToken,
@@ -157,7 +159,9 @@ class AuthService
 
         $expiresAt = $remember ? now()->addDays(15) : now()->addHours(24);
         $newToken = $user->createToken('auth_token', ['*'], $expiresAt);
-        $newToken->accessToken->update(['user_agent' => request()->userAgent()]);
+        DB::table('personal_access_tokens')
+            ->where('id', $newToken->accessToken->id)
+            ->update(['user_agent' => request()->userAgent()]);
 
         return [
             'token' => $newToken->plainTextToken,
