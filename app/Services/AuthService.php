@@ -88,10 +88,11 @@ class AuthService
     public function issueToken(User $user, bool $remember = false): array
     {
         $expiresAt = $remember ? now()->addDays(15) : now()->addHours(24);
-        $token = $user->createToken('auth_token', ['*'], $expiresAt)->plainTextToken;
+        $newToken = $user->createToken('auth_token', ['*'], $expiresAt);
+        $newToken->accessToken->update(['user_agent' => request()->userAgent()]);
 
         return [
-            'token' => $token,
+            'token' => $newToken->plainTextToken,
             'token_type' => 'Bearer',
             'expires_at' => $expiresAt->toISOString(),
         ];
@@ -155,10 +156,11 @@ class AuthService
         $currentToken->delete();
 
         $expiresAt = $remember ? now()->addDays(15) : now()->addHours(24);
-        $token = $user->createToken('auth_token', ['*'], $expiresAt)->plainTextToken;
+        $newToken = $user->createToken('auth_token', ['*'], $expiresAt);
+        $newToken->accessToken->update(['user_agent' => request()->userAgent()]);
 
         return [
-            'token' => $token,
+            'token' => $newToken->plainTextToken,
             'token_type' => 'Bearer',
             'expires_at' => $expiresAt->toISOString(),
         ];

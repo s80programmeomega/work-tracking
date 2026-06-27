@@ -2259,6 +2259,7 @@
     "session_created": "Connecté depuis",
     "session_last_used": "Dernière activité",
     "session_never_used": "Jamais utilisé",
+    "unknown_client": "Client inconnu",
     "session_revoke": "Révoquer",
     "sessions_loading": "Chargement des sessions...",
     "sessions_empty": "Aucune session active trouvée."

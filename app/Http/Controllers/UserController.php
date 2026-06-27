@@ -255,6 +255,7 @@ class UserController extends Controller
         $sessions = $tokens->map(fn (PersonalAccessToken $token) => [
             'id' => $token->id,
             'name' => $token->name,
+            'user_agent' => $token->user_agent,
             'created_at' => $token->created_at->toISOString(),
             'last_used_at' => $token->last_used_at?->toISOString(),
             'expires_at' => $token->expires_at?->toISOString(),

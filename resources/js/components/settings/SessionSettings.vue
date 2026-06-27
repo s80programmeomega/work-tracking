@@ -121,14 +121,19 @@
                 >
                     <div class="flex items-center gap-3 min-w-0">
                         <div class="flex items-center justify-center w-9 h-9 rounded-full bg-blue-50 dark:bg-blue-900/30 shrink-0">
-                            <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <!-- Icône mobile -->
+                            <svg v-if="isMobile(session.user_agent)" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                            <!-- Icône desktop -->
+                            <svg v-else class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2h-2" />
                             </svg>
                         </div>
                         <div class="min-w-0">
                             <div class="flex items-center gap-2 flex-wrap">
                                 <span class="text-sm font-medium text-gray-800 dark:text-white/90">
-                                    {{ $t('session_settings.this_device') }}
+                                    {{ parseUserAgent(session.user_agent) }}
                                 </span>
                                 <span
                                     v-if="session.is_current"
@@ -309,6 +314,40 @@ const formatDuration = (ms) => {
     const minutes = Math.floor((ms % 3600000) / 60000)
 
     return hours > 0 ? `${hours}h ${minutes}min` : `${minutes} min`
+}
+
+const isMobile = (ua) => {
+    if (!ua) { return false }
+    return /android|iphone|ipad|ipod|mobile|phone/i.test(ua)
+}
+
+const parseUserAgent = (ua) => {
+    if (!ua) { return t('session_settings.unknown_client') }
+
+    // Navigateur
+    let browser = 'Navigateur inconnu'
+    if (/Edg\//.test(ua)) { browser = 'Edge' }
+    else if (/OPR\/|Opera/.test(ua)) { browser = 'Opera' }
+    else if (/Chrome\//.test(ua) && !/Chromium/.test(ua)) { browser = 'Chrome' }
+    else if (/Firefox\//.test(ua)) { browser = 'Firefox' }
+    else if (/Safari\//.test(ua) && !/Chrome/.test(ua)) { browser = 'Safari' }
+    else if (/Chromium\//.test(ua)) { browser = 'Chromium' }
+
+    // OS
+    let os = ''
+    if (/Windows NT 10/.test(ua)) { os = 'Windows 10/11' }
+    else if (/Windows NT/.test(ua)) { os = 'Windows' }
+    else if (/Android/.test(ua)) {
+        const m = ua.match(/Android ([0-9.]+)/)
+        os = m ? `Android ${m[1]}` : 'Android'
+    } else if (/iPhone OS/.test(ua)) {
+        const m = ua.match(/iPhone OS ([0-9_]+)/)
+        os = m ? `iOS ${m[1].replace(/_/g, '.')}` : 'iOS'
+    } else if (/iPad/.test(ua)) { os = 'iPadOS' }
+    else if (/Mac OS X/.test(ua)) { os = 'macOS' }
+    else if (/Linux/.test(ua)) { os = 'Linux' }
+
+    return os ? `${browser} — ${os}` : browser
 }
 
 onMounted(() => {

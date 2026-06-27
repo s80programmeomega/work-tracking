@@ -2256,6 +2256,7 @@
     "session_created": "Connected since",
     "session_last_used": "Last activity",
     "session_never_used": "Never used",
+    "unknown_client": "Unknown client",
     "session_revoke": "Revoke",
     "sessions_loading": "Loading sessions...",
     "sessions_empty": "No active sessions found."
