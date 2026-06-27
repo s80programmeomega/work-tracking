@@ -8,7 +8,7 @@
 ## How to Resume
 
 1. Read `docs/WORKING_GUIDELINES.md` (conventions + tools)
-2. Read `docs/IMPLEMENTATION_PLAN.md` (full task details)
+2. Read `docs/PROGRESSION.md` (full task status table)
 3. Read this file (current state)
 4. Say: _"I've read the docs. Resuming from [Current Task] — [what's next]."_
 
@@ -17,89 +17,77 @@
 ## Current Session
 
 **Date:** 2026-06-27
-**Branch:** `feature/superadmin-scoping`
-**Status:** 🔄 Not yet committed — session management fixes + Step 13b all done. Pint + Larastan clean, build green. All Dusk tests pass (run individually). Full test suite pending.
+**Branch:** `feature/superadmin-scoping` (merged into `jonas` 2026-06-27)
+**Status:** ✅ Session complete — all committed, pushed to both remotes, merged into `jonas`.
+
+---
+
+## What Was Done This Session
+
+### Session management — UA display + reactive termination
+
+- **Migration** `2026_06_27_101207_add_user_agent_to_personal_access_tokens_table.php` — adds `user_agent VARCHAR(512)` to `personal_access_tokens`.
+- **`AuthService::issueToken()` + `refreshToken()`** — stores `request()->userAgent()` via `DB::table()` after token creation (Sanctum fillable guard blocks Eloquent update).
+- **`UserController::sessions()`** — exposes `user_agent` in session list response.
+- **`SessionSettings.vue`** — parses UA into `"Browser — OS"` label (Opera/Chrome/Firefox/Safari/Edge/Chromium + Windows/macOS/Linux/Android/iOS), phone icon for mobile UAs, desktop icon otherwise, "Client inconnu" fallback for null.
+- **`SessionRevoked` event** (`ShouldBroadcastNow`) — fires immediately on `App.Models.User.{id}` with `{type, token_id}` as `.session.revoked`.
+- **`SessionsAllRevoked` event** (`ShouldBroadcastNow`) — fires on same channel as `.sessions.all.revoked`.
+- **`AuthController::revokeSession()`** — fires `SessionRevoked` before the queued `SessionRevokedNotification`.
+- **`AuthService::logoutAll()`** — fires `SessionsAllRevoked` before deleting tokens.
+- **`useLiveNotifications.js`** — listens on `.session.revoked` (matches token ID from localStorage `id|hash` format) and `.sessions.all.revoked`, calls `authStore.logout()` immediately → redirect to `/signin`.
+
+### Document sharing — scope, share link, shared-with-me, policy
+
+- **`WorkspaceController::searchMembers()`** — new endpoint `GET /workspaces/{workspace}/members/search?q=&exclude_user_ids[]` scoped to workspace members only, excludes `super_admin`/`directeur` and already-shared users.
+- **`DocumentResource`** — exposes `workspace_id` field.
+- **`DocumentShareModal.vue`** — uses workspace-scoped member search (`/workspaces/{workspace_id}/members/search`) instead of global `/users/search`; passes already-shared user IDs as exclusions.
+- **`DocumentSharedNotification`** — share link fixed from `url("/documents/{id}/download")` (backend URL) to `config('app.frontend_url').'/documents'` (SPA route).
+- **`DocumentController::sharedWithMe()`** — removed `->inWorkspace($user->current_workspace_id)` filter; shared documents are cross-workspace and must not be filtered by the recipient's current workspace.
+- **`DocumentPolicy`** — all five policy methods (`view`, `update`, `delete`, `download`, `share`) now check `DocumentPermission` records via `hasExplicitPermission()` before falling back to the workspace contextual gate. Expired permissions excluded. `download` split from `view` as a dedicated policy method.
+- **`DocumentController::download()`** — uses `authorize('download', $document)` instead of `authorize('view', ...)`.
+
+### Tests added
+
+- `WorkspaceMembersTest` — 5 new tests for `searchMembers` (happy path, exclusion, min-2-chars, outsider-forbidden, non-member not returned).
+- `DocumentPermissionsTest` — cross-workspace `sharedWithMe` test + `workspace_id` in resource + share-by-email frontend URL test.
+- `DocumentPolicyTest` — 6 new tests for explicit `DocumentPermission` flags (can_share, can_edit, can_delete, can_download, no-share, expired).
+
+**Final suite: 872 passed, 6 skipped, 0 failed.**
 
 ---
 
 ## Current Task
 
-**Task:** Session management fixes — multi-session, inactivity timer, refresh, push notifications
-
-### What was implemented this session
-
-#### Ban/unban member feature (new)
-- **Migration:** `2026_06_25_234736_add_ban_columns_to_workspace_members.php` — adds `banned_at`, `banned_by` (FK), `ban_reason` to `workspace_members`. Applied to both DBs.
-- **Permission:** `Permission::WORKSPACES_BAN_MEMBER = 'workspaces.ban_member'` — owner-only (auto via `Permission::forRole('owner')` using `array_diff`).
-- **Policy:** `WorkspacePolicy::banMember()` + `viewMembers()` added.
-- **Controller:** `WorkspaceController::banMember(Request $request, Workspace $workspace, User $user)` + `unbanMember(...)` — **root-cause bug fixed**: parameter was named `$target` but route segment is `{user}`, causing Laravel implicit binding to inject empty model. Renamed to `$user`.
-- **Routes:** `POST /api/workspaces/{workspace}/members/{user}/ban` + `DELETE` same URL.
-- **Notifications:** `WorkspaceMemberBannedNotification` (mail + webpush + database) + `WorkspaceInvitationAcceptedNotification` (notifies inviter when invitation accepted, hooked into `acceptInvitationForExistingUser()` after `DB::commit()`).
-- **Audit:** `AdminAuditService::log()` called on ban and unban.
-- **Model:** `Workspace::members()` + `membres()` updated with ban pivot columns.
-- **Bug fix in `AdminController::updateUserRole()`:** `created_by` was never stored on new temp superadmin accounts (condition checked `$validated['created_by']` which is never set). Fixed to store `created_by = $actor->id` whenever `is_super_admin = true`.
-
-#### Workspace member management frontend (new)
-- **`/workspace/members` (`WorkspaceMembers.vue`):** Two tabs — "Membres" (ban/unban/invite) + "Invitations en attente" (list pending invitations with Resend + Cancel actions).
-- **`/workspace/admin-account` (`WorkspaceTempAdmin.vue`):** Create/revoke temporary superadmin accounts. Owner picks from workspace member list (search by name/email), sets duration + expiry action, calls `PATCH /api/admin/users/{id}/role`. Lists existing temp admins with status + Revoke button.
-- **Sidebar:** New **"Gestion du workspace"** section (visible only to `isDirecteur`, hidden from super_admin) with two direct-path items: "Membres & Invitations" + "Compte admin temporaire". Items use `requiresPermission: "isDirecteur"` — filtering logic updated to check `permissionMap` for top-level direct-path items (was only checked for sub-items).
-- **Router:** Routes `/workspace/members` + `/workspace/admin-account` added.
-- **i18n:** `sidebar.workspace_management`, `sidebar.workspace_members_manage` (renamed), `sidebar.workspace_temp_admin`; full `workspace_members.tab_*` + `workspace_members.inv_*` namespace; new `temp_admin.*` namespace (fr + en).
-
-#### Superadmin scoping (Steps 1–16 all done per PROGRESSION.md)
-- All steps from `docs/superadmin-scoping/PROGRESSION.md` marked ✅ Done as of last session, except Steps 13b and 17 (Pint + Larastan + build) which are ✅ now done (Larastan: 0 errors, Pint: passed, build: green).
-
-#### PHPUnit tests
-- **`tests/Feature/Workspace/WorkspaceBanMemberTest.php`** — 11 tests, all passing. Covers: ban happy path, ban sends notification, ban without reason, non-owner 403, owner can't ban self 422, already banned 409, non-member 404, unban happy path, non-owner unban 403, unban non-banned 409, invitation accepted notifies inviter.
-- **`tests/Browser/Workspaces/WorkspaceMembersManagementTest.php`** — 6 Dusk tests (sidebar visibility, page access, ban/unban via UI). Syntax-fixed but not run.
+**No active task.** All work committed and merged.
 
 ---
 
-## What to do next
+## Next Task
 
-1. **Run full test suite** — `php artisan test --compact` — verify no regressions introduced by session management changes.
-2. **Push** to both `origin` and `client` remotes (HTTPS — requires explicit per-push approval from Jonas).
-3. **Merge** `feature/superadmin-scoping` into `jonas` (requires explicit per-merge approval from Jonas).
+Continue with remaining items on `feature/superadmin-scoping` or pick the next task from `docs/PROGRESSION.md`. Suggested candidates:
 
----
-
-## Open Issues / Known State
-
-- The `WORKSPACES_REMOVE_MEMBER` permission (used by `MemberRemovalService`) is distinct from ban — it handles clean removal with responsibility transfer. Ban is reversible and keeps the pivot row; remove is permanent.
-- Temp admin creation (`WorkspaceTempAdmin.vue`) creates a **brand-new User account** — it does NOT require the target to be an existing workspace member. The directeur fills in nom + email, selects which of their owned workspaces to grant access to, and submits. The backend creates the user, assigns `super_admin` role, and writes `temporary_access` rows. Credentials are sent manually via the per-row button.
-- The `invited_at` column on `workspace_members` does not use `withTimestamps()` — it's in `withPivot` manually.
-- `WorkspaceInvitationFactory` does not exist — the feature test uses `WorkspaceInvitation::create()` directly with a `Str::uuid()` token.
+1. **Phase 7 — Help Center** (`feature/phase7-help-center`) — committed `92c482a` but never pushed or merged. Resume, test, push, merge.
+2. **Any remaining CDC compliance gaps** not yet addressed.
+3. **New feature** as directed by user.
 
 ---
 
-## Previously Completed (pre-this-session)
+## Open Decisions
 
-See previous session entries in SESSION_STATE.md history. All Phases 0–12 (superadmin scoping steps 1–16) were completed and documented in `docs/superadmin-scoping/PROGRESSION.md`.
-
----
-
-## Environment Reminder
-
-- Project path: `/media/iori/Jonas/Work-traking`
-- DB: MySQL, database `work-tracking` (test: `work-tracking-test`)
-- Remotes: `origin` (Jonas, `s80programmeomega`) + `client` (Team-TDR-Consulting) — **HTTPS only, never SSH**
-- Push rule: never push `main`; push `jonas` only with explicit per-push approval; feature branches push freely to both remotes
-- Run backend: `php artisan serve`
-- Run frontend: `npm run dev` or `npm run build`
-- Run tests: `php artisan test --compact`
-- Pre-commit: `vendor/bin/pint --dirty --format agent` then `php artisan clear-compiled && php -d memory_limit=1500M vendor/bin/phpstan analyse --memory-limit=1500M` — both must pass
+- None.
 
 ---
 
-## Session Log
+## Blocking Issues
 
-| Date | Tasks worked on | Outcome |
-|---|---|---|
-| 2026-06-25 | Superadmin scoping Steps 1–16 | All steps complete (see `docs/superadmin-scoping/PROGRESSION.md`). Pint + Larastan clean, build green. Not yet committed. |
-| 2026-06-26 | Ban/unban member feature + workspace member management frontend + sidebar "Gestion du workspace" section | 11 PHPUnit tests passing. Bug fixed: Laravel implicit binding `$target` → `$user` in `banMember`/`unbanMember`. `created_by` bug fixed in `AdminController::updateUserRole`. Sidebar entries moved out of Evaluations into own "Gestion du workspace" group. Pint + Larastan clean, build green. Not yet committed. |
-| 2026-06-26 | WorkspaceTempAdmin.vue redesign: brand-new account creation, workspace-scoped access grant, manual send-credentials. `createTempAdmin` + `sendTempAdminCredentials` endpoints. 12 PHPUnit + 6 Dusk tests all pass. Fixed `updated_at` bug in `temporary_access` insert. Testing doc written. Not yet committed. |
-| 2026-06-26 | Temp admin workspace role permissions: `workspace_role` field on creation (observateur/cadre/manager); auto-provision `workspace_members` row on workspace switch via `WorkspaceController::switch()`; cleanup on revoke/expiry; role selector UI + role badge in table; `myTempSuperadmins()` exposes `workspace_role`; all stale `readonly` filters removed. Migration `add_is_temp_access_to_workspace_members`. 15/15 PHPUnit tests. Pint + Larastan clean, build green. Not yet committed. |
-| 2026-06-26 | Temp admin custom permissions: read-only toggle (off = observateur, no customisation); when toggled on: role select + grouped permission accordion pre-filled from role defaults; `custom_permissions` JSON stored on `temporary_access` and copied to `workspace_members` pivot; `ContextualPermissionGate` applies them at check time. Migration `add_custom_permissions_to_temporary_access`. Pint + Larastan clean, build green, 15/15 PHPUnit + 8/8 Dusk tests pass. Committed `e8458f0`. |
-| 2026-06-27 | Testing docs written: `TASK_BAN_MEMBER_TESTING.md`. `docs/PROGRESSION.md` updated with superadmin-scoping row. `SESSION_STATE.md` updated to reflect committed state. Pending: Dusk test run + push to both remotes. |
-| 2026-06-27 | Session management fixes — Task B (inactivity timer: multiplier, init, Infinity, display), Task C (refresh: localStorage sync, expired-token guard, remember-me preservation, route moved to auth:sanctum), Task A (multi-session: removed single-session lock, logoutAll, revokeSession, SessionRevokedNotification, per-session revoke in UI), Task D (push notifications: NotificationSettings.vue rewritten to real API + useWebPush). Guide 28 added to WORKING_GUIDELINES. 11 PHPUnit tests (7 MultiSession + 4 TokenRefresh) all pass. Testing docs written for all 4 steps. Pint + Larastan + build all green. Not yet committed — full test suite pending. |
-| 2026-06-27 | Step 13b (admin audit log frontend): `AdminAuditLog.vue` standalone page, router `/admin/audit-log` (`requiresSuperAdmin`), sidebar link "Journal d'audit plateforme", i18n keys fr+en. Dusk fixes: `signInAs` token `dusk`→`auth_token`, `acceptDialog()` added for revoke test. All 9 Dusk tests pass individually (screenshots in `tests/Browser/screenshots/session-management/`). Pint + Larastan + build green. Not yet committed. |
+- None.
+
+---
+
+## Branch State
+
+| Branch | Status |
+|---|---|
+| `feature/superadmin-scoping` | Merged into `jonas` 2026-06-27. Still exists as working branch. |
+| `jonas` | Up to date — pushed to both `origin` and `client` 2026-06-27. |
+| `main` | Never touched (hard rule). |
