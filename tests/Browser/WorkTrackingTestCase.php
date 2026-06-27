@@ -40,7 +40,7 @@ abstract class WorkTrackingTestCase extends DuskTestCase
      */
     protected function signInAs(Browser $browser, User $user): Browser
     {
-        $token = $user->createToken('dusk')->plainTextToken;
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         $isTempAdmin = (bool) $user->is_super_admin && $user->admin_expires_at !== null;
 

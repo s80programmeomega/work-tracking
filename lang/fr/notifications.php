@@ -16,4 +16,12 @@ return [
     'temp_admin_cta' => 'Accéder au tableau de bord admin',
     'temp_admin_credentials' => 'Vos identifiants de connexion — Email : **:email** | Mot de passe : **:password** — Changez votre mot de passe dès votre première connexion.',
     'temp_admin_warning' => 'Si vous n\'êtes pas à l\'origine de cette demande, contactez immédiatement le propriétaire du workspace.',
+
+    'session_revoked' => [
+        'subject' => 'Une session a été révoquée',
+        'greeting' => 'Bonjour :name,',
+        'line1' => 'Une session de votre compte a été déconnectée.',
+        'line2' => 'Déconnexion effectuée le : :time.',
+        'line3' => 'Si vous n\'êtes pas à l\'origine de cette action, changez immédiatement votre mot de passe.',
+    ],
 ];

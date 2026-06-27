@@ -7,12 +7,14 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Notifications\SessionRevokedNotification;
 use App\Services\AuthService;
 use App\Services\MfaService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
@@ -104,6 +106,53 @@ class AuthController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function logoutAll(): JsonResponse
+    {
+        try {
+            $this->authService->logoutAll();
+
+            return response()->json([
+                'message' => 'All sessions revoked',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Erreur lors de la révocation de toutes les sessions', ['error' => $e->getMessage()]);
+
+            return response()->json([
+                'message' => 'Logout all failed',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function revokeSession(Request $request, int $tokenId): JsonResponse
+    {
+        $user = $request->user();
+
+        /** @var PersonalAccessToken|null $token */
+        $token = PersonalAccessToken::find($tokenId);
+
+        if (! $token || $token->tokenable_id !== $user->id || $token->tokenable_type !== get_class($user)) {
+            return response()->json(['message' => 'Session introuvable.'], 404);
+        }
+
+        /** @var PersonalAccessToken $currentToken */
+        $currentToken = $user->currentAccessToken();
+        $isCurrent = $currentToken instanceof PersonalAccessToken && $currentToken->id === $token->id;
+
+        $token->delete();
+
+        Log::info('Session révoquée', ['user_id' => $user->id, 'token_id' => $tokenId, 'is_current' => $isCurrent]);
+
+        if (! $isCurrent) {
+            $user->notify(new SessionRevokedNotification);
+        }
+
+        return response()->json([
+            'message' => 'Session révoquée.',
+            'is_current' => $isCurrent,
+        ]);
     }
 
     public function me(): JsonResponse

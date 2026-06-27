@@ -219,6 +219,9 @@ export const useAuthStore = defineStore('auth', {
                 this.hideTimeoutWarning();
             }
 
+            // Mode "Jamais" — pas de timer à définir
+            if (this.inactivityTimeout === Infinity) return;
+
             // Définir le nouveau timer
             this.inactivityTimer = setTimeout(() => {
                 this.showTimeoutWarning();
@@ -229,7 +232,7 @@ export const useAuthStore = defineStore('auth', {
          * ⭐ Vérifier l'inactivité
          */
         checkInactivity() {
-            if (!this.isAuthenticated) return;
+            if (!this.isAuthenticated || this.inactivityTimeout === Infinity) return;
 
             const now = Date.now();
             const inactiveTime = now - this.lastActivity;
@@ -350,16 +353,28 @@ export const useAuthStore = defineStore('auth', {
          * ⭐ Définir le timeout d'inactivité
          */
         setTimeoutDuration(minutes) {
-            this.inactivityTimeout = minutes * 1 * 1000;
-            localStorage.setItem('inactivity_timeout', minutes);
+            if (minutes === 0) {
+                // Valeur 0 = jamais déconnecter
+                this.inactivityTimeout = Infinity;
+                localStorage.setItem('inactivity_timeout', '0');
+                if (this.inactivityTimer) {
+                    clearTimeout(this.inactivityTimer);
+                    this.inactivityTimer = null;
+                }
+                this.hideTimeoutWarning();
+                return;
+            }
+            this.inactivityTimeout = minutes * 60 * 1000;
+            localStorage.setItem('inactivity_timeout', String(minutes));
             this.resetInactivityTimer();
         },
 
         /**
-         * ⭐ Récupérer le timeout configuré
+         * ⭐ Récupérer le timeout configuré (en minutes)
          */
         getTimeoutDuration() {
-            return this.inactivityTimeout / (1 * 1000); // Retourne en minutes
+            if (this.inactivityTimeout === Infinity) return 0;
+            return this.inactivityTimeout / (60 * 1000);
         },
 
         // ==========================================
@@ -793,10 +808,26 @@ export const useAuthStore = defineStore('auth', {
             }
         },
 
-        // Révoque toutes les sessions — en pratique, issueToken() garantit une seule
-        // session active par utilisateur, donc cela équivaut à un logout normal.
         async logoutAllDevices() {
-            await this.logout();
+            try {
+                await authAPI.logoutAll();
+            } catch {
+                // Continuer même si l'appel échoue — l'état local doit être nettoyé
+            }
+            this.clearAuth();
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('token_expires_at');
+            window.location.href = '/signin';
+        },
+
+        async revokeSession(sessionId) {
+            const response = await authAPI.revokeSession(sessionId);
+            if (response.data?.is_current) {
+                this.clearAuth();
+                localStorage.removeItem('auth_token');
+                localStorage.removeItem('token_expires_at');
+                window.location.href = '/signin';
+            }
         },
 
        clearAuth() {
@@ -881,6 +912,8 @@ export const useAuthStore = defineStore('auth', {
                 this.token = token;
                 this.tokenExpiry = expires_at ? new Date(expires_at).getTime() : null;
                 localStorage.setItem('auth_token', token);
+                // Synchroniser token_expires_at pour éviter la dérive entre localStorage et l'état en mémoire
+                if (expires_at) { localStorage.setItem('token_expires_at', expires_at); }
                 this.setAxiosToken(token);
 
                 // Reschedule next refresh based on new expiry
@@ -946,8 +979,11 @@ export const useAuthStore = defineStore('auth', {
         // INITIALISATION
         // ==========================================
         initialize() {
-            // Clear any corrupted inactivity_timeout value from older buggy code
-            localStorage.removeItem('inactivity_timeout');
+            // Restaurer le timeout d'inactivité sauvegardé par l'utilisateur
+            const savedTimeout = parseInt(localStorage.getItem('inactivity_timeout') ?? '', 10);
+            if (!isNaN(savedTimeout)) {
+                this.inactivityTimeout = savedTimeout === 0 ? Infinity : savedTimeout * 60 * 1000;
+            }
 
             this.setAxiosToken(this.token);
 

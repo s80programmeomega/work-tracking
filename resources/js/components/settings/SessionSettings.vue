@@ -22,6 +22,7 @@
                 <button
                     v-for="option in timeoutOptions"
                     :key="option.value"
+                    :dusk="`timeout-option-${option.value}`"
                     :class="[
                         'flex flex-col items-center p-3 border-2 rounded-3 transition-colors cursor-pointer text-sm font-medium',
                         selectedTimeout === option.value
@@ -69,7 +70,7 @@
                     <p class="text-xs text-gray-500 dark:text-gray-400">
                         {{ $t('session_settings.info_logout_in') }}
                     </p>
-                    <p class="mt-1 text-sm font-medium text-gray-800 dark:text-white/90">
+                    <p dusk="timeout-countdown" class="mt-1 text-sm font-medium text-gray-800 dark:text-white/90">
                         {{ timeUntilLogout }}
                     </p>
                 </div>
@@ -164,6 +165,7 @@
         <!-- Actions -->
         <div class="flex flex-col gap-3 pt-4 border-t border-gray-200 sm:flex-row dark:border-gray-800">
             <button
+                dusk="refresh-session-btn"
                 @click="refreshSession"
                 class="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-3 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800 dark:hover:bg-blue-900/40"
             >
@@ -174,6 +176,7 @@
             </button>
 
             <button
+                dusk="logout-all-btn"
                 @click="logoutAll"
                 class="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-3 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/40"
             >
@@ -198,9 +201,13 @@ const { staggerRef, applyStagger } = useStagger()
 
 const showCustomInput = ref(false)
 const customTimeout = ref(60)
-const timerInterval = ref(null)
 const sessions = ref([])
 const sessionsLoading = ref(true)
+
+// Référence réactive à l'instant présent — mise à jour chaque seconde
+// pour que le compteur s'affiche en temps réel sans dépendre de setInterval vide.
+const now = ref(Date.now())
+let tickInterval = null
 
 const timeoutOptions = computed(() => [
     { label: t('session_settings.opt_15min'), value: 15 },
@@ -215,8 +222,9 @@ const selectedTimeout = computed(() => authStore.getTimeoutDuration())
 const lastActivity = computed(() => authStore.lastActivity)
 
 const timeUntilLogout = computed(() => {
-    const now = Date.now()
-    const inactiveTime = now - authStore.lastActivity
+    if (authStore.inactivityTimeout === Infinity) { return t('session_settings.never') }
+
+    const inactiveTime = now.value - authStore.lastActivity
     const timeLeft = authStore.inactivityTimeout - inactiveTime
 
     if (timeLeft <= 0) { return t('session_settings.now') }
@@ -242,14 +250,28 @@ const applyCustomTimeout = () => {
     }
 }
 
-const refreshSession = () => {
+const refreshSession = async () => {
+    // Si le token est déjà expiré, éviter l'appel API inutile qui retournerait 401
+    const expiry = localStorage.getItem('token_expires_at')
+    if (expiry && Date.now() > new Date(expiry).getTime()) {
+        await authStore.logout()
+        return
+    }
     authStore.resetInactivityTimer()
-    authStore.refreshToken().catch(console.error)
+    try {
+        await authStore.refreshToken()
+    } catch {
+        // refreshToken appelle logout() en cas d'échec — pas d'action supplémentaire nécessaire
+    }
 }
 
 const revokeSession = async (session) => {
-    if (confirm(t('session_settings.confirm_logout_all'))) {
-        await authStore.logoutAllDevices()
+    if (!confirm(t('session_settings.confirm_revoke_session'))) return
+    if (session.is_current) {
+        await authStore.logout()
+    } else {
+        await authStore.revokeSession(session.id)
+        await loadSessions()
     }
 }
 
@@ -294,13 +316,15 @@ onMounted(() => {
         localStorage.setItem('login_time', Date.now().toString())
     }
 
-    timerInterval.value = setInterval(() => {}, 1000)
+    // Tick toutes les secondes pour que timeUntilLogout se mette à jour en temps réel
+    tickInterval = setInterval(() => { now.value = Date.now() }, 1000)
     loadSessions()
 })
 
 onUnmounted(() => {
-    if (timerInterval.value) {
-        clearInterval(timerInterval.value)
+    if (tickInterval) {
+        clearInterval(tickInterval)
+        tickInterval = null
     }
 })
 </script>

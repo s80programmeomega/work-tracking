@@ -148,6 +148,7 @@
     "administration": "Administration",
     "support": "Help & Support",
     "logs": "Logs",
+    "admin_audit_log": "Platform audit log",
     "other": "Other",
     "all_tasks": "All tasks",
     "as_responsible": "As responsible",
@@ -2152,6 +2153,7 @@
     "tab_admin_audit": "Platform admin audit"
   },
   "admin_audit": {
+    "page_title": "Platform admin audit log",
     "directeur_page_title": "My superadmins — Audit log",
     "filter_all_actions": "All actions",
     "date_from": "Start date",
@@ -2243,7 +2245,9 @@
     "btn_refresh": "Refresh session",
     "btn_logout_all": "Logout from all devices",
     "now": "Now",
+    "never": "Never",
     "confirm_logout_all": "Are you sure you want to logout from all devices?",
+    "confirm_revoke_session": "Revoke this session?",
     "active_sessions_title": "Active sessions",
     "active_sessions_desc": "Devices currently connected to your account",
     "this_device": "This device",
@@ -2282,7 +2286,10 @@
     "btn_saving": "Saving...",
     "btn_save": "Save changes",
     "save_success": "Settings saved successfully",
-    "save_error": "Error saving settings"
+    "save_error": "Error saving settings",
+    "load_error": "Error loading notification preferences",
+    "push_not_supported": "Your browser does not support push notifications.",
+    "push_permission_denied": "Permission denied in browser. Enable it in your browser settings."
   },
   "pref_settings": {
     "title": "General Preferences",

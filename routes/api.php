@@ -59,7 +59,6 @@ Route::prefix('auth')->group(function () {
     // protège du brute-force sans piéger plusieurs utilisateurs derrière une même IP.
     Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:30,1');
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
-    Route::post('/refresh', [AuthController::class, 'refresh'])->middleware('throttle:30,1');
 
     // Google OAuth — le redirect renvoie vers Google, le callback revient ici
     Route::get('/google/redirect', [SocialAuthController::class, 'redirectToGoogle'])->name('auth.google.redirect');
@@ -112,6 +111,9 @@ Route::prefix('webhooks/payment')->name('webhooks.payment.')->group(function () 
 Route::middleware(['auth:sanctum', 'subscription.status'])->group(function () {
     Route::prefix('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
+        Route::post('/logout-all', [AuthController::class, 'logoutAll']);
+        Route::delete('/sessions/{tokenId}', [AuthController::class, 'revokeSession']);
+        Route::post('/refresh', [AuthController::class, 'refresh'])->middleware('throttle:30,1');
         Route::get('/me', [AuthController::class, 'me']);
         Route::post('/verify-email', [AuthController::class, 'verifyEmail']);
         Route::put('/language', [AuthController::class, 'updateLanguage']);

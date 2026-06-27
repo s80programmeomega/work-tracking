@@ -148,6 +148,7 @@
     "administration": "Administration",
     "support": "Aide & Support",
     "logs": "Journaux",
+    "admin_audit_log": "Journal d'audit plateforme",
     "other": "Autres",
     "all_tasks": "Toutes les tâches",
     "as_responsible": "En tant que responsable",
@@ -2155,6 +2156,7 @@
     "tab_admin_audit": "Audit admin plateforme"
   },
   "admin_audit": {
+    "page_title": "Journal d'audit admin plateforme",
     "directeur_page_title": "Mes superadmins — Journal d'audit",
     "filter_all_actions": "Toutes les actions",
     "date_from": "Date début",
@@ -2246,7 +2248,9 @@
     "btn_refresh": "Rafraîchir la session",
     "btn_logout_all": "Déconnexion de tous les appareils",
     "now": "Maintenant",
+    "never": "Jamais",
     "confirm_logout_all": "Êtes-vous sûr de vouloir vous déconnecter de tous les appareils ?",
+    "confirm_revoke_session": "Révoquer cette session ?",
     "active_sessions_title": "Sessions actives",
     "active_sessions_desc": "Appareils actuellement connectés à votre compte",
     "this_device": "Cet appareil",
@@ -2285,7 +2289,10 @@
     "btn_saving": "Enregistrement...",
     "btn_save": "Enregistrer les modifications",
     "save_success": "Paramètres enregistrés avec succès",
-    "save_error": "Erreur lors de l'enregistrement"
+    "save_error": "Erreur lors de l'enregistrement",
+    "load_error": "Erreur lors du chargement des préférences",
+    "push_not_supported": "Votre navigateur ne supporte pas les notifications push.",
+    "push_permission_denied": "Permission refusée dans le navigateur. Activez-la dans les paramètres du navigateur."
   },
   "pref_settings": {
     "title": "Préférences générales",

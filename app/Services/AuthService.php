@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthService
 {
@@ -80,14 +81,12 @@ class AuthService
     }
 
     /**
-     * Émet un token Sanctum pour l'utilisateur.
+     * Emet un token Sanctum pour l'utilisateur.
      * Sans "Se souvenir" : expire dans 24 h. Avec : expire dans 15 jours.
+     * Les sessions multiples sont autorisees — chaque appareil conserve son propre token.
      */
     public function issueToken(User $user, bool $remember = false): array
     {
-        // Révocation des sessions existantes : une seule session active par utilisateur.
-        $user->tokens()->where('name', 'auth_token')->delete();
-
         $expiresAt = $remember ? now()->addDays(15) : now()->addHours(24);
         $token = $user->createToken('auth_token', ['*'], $expiresAt)->plainTextToken;
 
@@ -118,7 +117,27 @@ class AuthService
     }
 
     /**
-     * Rafraîchir le token d’accès
+     * Révoque toutes les sessions actives de l'utilisateur courant.
+     */
+    public function logoutAll(): void
+    {
+        $user = Auth::user();
+
+        if ($user) {
+            $user->tokens()->where('name', 'auth_token')->delete();
+
+            activity()
+                ->performedOn($user)
+                ->causedBy($user)
+                ->log('Toutes les sessions révoquées');
+        }
+
+        Auth::guard('web')->logout();
+    }
+
+    /**
+     * Rafraîchir le token d'accès.
+     * Préserve la durée "Se souvenir de moi" (15 jours) si le token actuel l'était.
      */
     public function refreshToken(): array
     {
@@ -128,9 +147,14 @@ class AuthService
             throw new \RuntimeException('Unauthenticated.');
         }
 
-        $user->currentAccessToken()->delete();
+        // Détecter si le token actuel était un token "Se souvenir de moi" (expiry > 24 h restantes)
+        /** @var PersonalAccessToken $currentToken */
+        $currentToken = $user->currentAccessToken();
+        $remember = $currentToken->expires_at && $currentToken->expires_at->diffInHours(now()) > 24;
 
-        $expiresAt = now()->addHours(24);
+        $currentToken->delete();
+
+        $expiresAt = $remember ? now()->addDays(15) : now()->addHours(24);
         $token = $user->createToken('auth_token', ['*'], $expiresAt)->plainTextToken;
 
         return [

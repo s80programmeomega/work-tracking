@@ -16,4 +16,12 @@ return [
     'temp_admin_cta' => 'Go to admin dashboard',
     'temp_admin_credentials' => 'Your login credentials — Email: **:email** | Password: **:password** — Please change your password on first login.',
     'temp_admin_warning' => 'If you did not request this access, contact the workspace owner immediately.',
+
+    'session_revoked' => [
+        'subject' => 'A session has been revoked',
+        'greeting' => 'Hello :name,',
+        'line1' => 'A session on your account has been signed out.',
+        'line2' => 'Signed out at: :time.',
+        'line3' => 'If you did not initiate this action, change your password immediately.',
+    ],
 ];

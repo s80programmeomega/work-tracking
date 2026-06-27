@@ -833,6 +833,27 @@ A plain string column on `users`. Every user currently has `role = 'admin'`. Thi
 
 ---
 
+## Guide 28 — Regression-First Impact Check (mandatory)
+
+Before touching any existing method, column, route, composable, store action, or translation key:
+
+1. **Search the full codebase** for all callers and usages — PHP, JS/Vue, tests, translations, migrations, seeders.
+2. **Report the complete impact surface** before writing a single line.
+3. **Only then make the change.**
+
+This applies even to single-line edits. "It looks isolated" is not sufficient justification. In this project, most regressions have come from edits that appeared isolated but had hidden callers or side effects.
+
+**How to apply:**
+- Grep for the method name, column name, or key before changing it.
+- If a test references something you're changing, update the test in the same commit.
+- If a migration column is referenced by a model's `$fillable`, `$casts`, `withPivot`, or a resource's `toArray`, all four must be updated together.
+- If a route is renamed, check all `route()` helper calls and frontend API calls.
+- If a store action or composable is renamed, grep JS/Vue files — IDE "find references" is not sufficient (dynamic string calls exist).
+
+**Why this is a hard gate:** The same class of bug — "touched X, broke Y" — has recurred throughout this project across at least 6 sessions. Enforcing the search-before-touch discipline is cheaper than reverting broken deployments.
+
+---
+
 ## Guide 26 — Python Dependencies (mandatory)
 
 Never install Python packages into the system Python interpreter. The system Python is OS-managed; installing into it with `pip install` or `--break-system-packages` can corrupt OS-level tooling.

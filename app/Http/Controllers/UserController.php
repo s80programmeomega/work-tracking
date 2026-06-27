@@ -233,8 +233,6 @@ class UserController extends Controller
 
     /**
      * Retourne les tokens Sanctum actifs de l'utilisateur courant.
-     * Comme issueToken() révoque tous les tokens précédents à chaque connexion,
-     * il y a au plus un token actif par utilisateur.
      */
     public function sessions(Request $request): JsonResponse
     {

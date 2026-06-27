@@ -16,15 +16,15 @@
 
 ## Current Session
 
-**Date:** 2026-06-26
+**Date:** 2026-06-27
 **Branch:** `feature/superadmin-scoping`
-**Status:** 🔄 In progress — superadmin scoping (Steps 1–16) + workspace ban/member management + temp admin creation/credentials + temp admin workspace role permissions implemented. Pint + Larastan clean, build green. Not yet committed.
+**Status:** 🔄 Not yet committed — session management fixes + Step 13b all done. Pint + Larastan clean, build green. All Dusk tests pass (run individually). Full test suite pending.
 
 ---
 
 ## Current Task
 
-**Task:** Workspace ban/member management + superadmin scoping (combined session)
+**Task:** Session management fixes — multi-session, inactivity timer, refresh, push notifications
 
 ### What was implemented this session
 
@@ -57,11 +57,9 @@
 
 ## What to do next
 
-1. **Commit** all changes on `feature/superadmin-scoping` (explicit user instruction required — never commit without asking).
-2. **Dusk tests** — run `WorkspaceMembersManagementTest` to confirm browser tests pass.
-3. **Write testing docs** — `docs/superadmin-scoping/testing/` for the ban/member-management and temp-admin features (per WORKING_GUIDELINES rule).
-4. **Update `docs/superadmin-scoping/PROGRESSION.md`** — mark Step 17 (Pint + Larastan + build) ✅ Done.
-5. **Push + merge** into `jonas` and `client` (both remotes, HTTPS, per-push approval required).
+1. **Run full test suite** — `php artisan test --compact` — verify no regressions introduced by session management changes.
+2. **Push** to both `origin` and `client` remotes (HTTPS — requires explicit per-push approval from Jonas).
+3. **Merge** `feature/superadmin-scoping` into `jonas` (requires explicit per-merge approval from Jonas).
 
 ---
 
@@ -101,4 +99,7 @@ See previous session entries in SESSION_STATE.md history. All Phases 0–12 (sup
 | 2026-06-26 | Ban/unban member feature + workspace member management frontend + sidebar "Gestion du workspace" section | 11 PHPUnit tests passing. Bug fixed: Laravel implicit binding `$target` → `$user` in `banMember`/`unbanMember`. `created_by` bug fixed in `AdminController::updateUserRole`. Sidebar entries moved out of Evaluations into own "Gestion du workspace" group. Pint + Larastan clean, build green. Not yet committed. |
 | 2026-06-26 | WorkspaceTempAdmin.vue redesign: brand-new account creation, workspace-scoped access grant, manual send-credentials. `createTempAdmin` + `sendTempAdminCredentials` endpoints. 12 PHPUnit + 6 Dusk tests all pass. Fixed `updated_at` bug in `temporary_access` insert. Testing doc written. Not yet committed. |
 | 2026-06-26 | Temp admin workspace role permissions: `workspace_role` field on creation (observateur/cadre/manager); auto-provision `workspace_members` row on workspace switch via `WorkspaceController::switch()`; cleanup on revoke/expiry; role selector UI + role badge in table; `myTempSuperadmins()` exposes `workspace_role`; all stale `readonly` filters removed. Migration `add_is_temp_access_to_workspace_members`. 15/15 PHPUnit tests. Pint + Larastan clean, build green. Not yet committed. |
-| 2026-06-26 | Temp admin custom permissions: read-only toggle (off = observateur, no customisation); when toggled on: role select + grouped permission accordion pre-filled from role defaults; `custom_permissions` JSON stored on `temporary_access` and copied to `workspace_members` pivot; `ContextualPermissionGate` applies them at check time. Migration `add_custom_permissions_to_temporary_access`. Pint + Larastan clean, build green, 15/15 PHPUnit + 8/8 Dusk tests pass. Not yet committed. |
+| 2026-06-26 | Temp admin custom permissions: read-only toggle (off = observateur, no customisation); when toggled on: role select + grouped permission accordion pre-filled from role defaults; `custom_permissions` JSON stored on `temporary_access` and copied to `workspace_members` pivot; `ContextualPermissionGate` applies them at check time. Migration `add_custom_permissions_to_temporary_access`. Pint + Larastan clean, build green, 15/15 PHPUnit + 8/8 Dusk tests pass. Committed `e8458f0`. |
+| 2026-06-27 | Testing docs written: `TASK_BAN_MEMBER_TESTING.md`. `docs/PROGRESSION.md` updated with superadmin-scoping row. `SESSION_STATE.md` updated to reflect committed state. Pending: Dusk test run + push to both remotes. |
+| 2026-06-27 | Session management fixes — Task B (inactivity timer: multiplier, init, Infinity, display), Task C (refresh: localStorage sync, expired-token guard, remember-me preservation, route moved to auth:sanctum), Task A (multi-session: removed single-session lock, logoutAll, revokeSession, SessionRevokedNotification, per-session revoke in UI), Task D (push notifications: NotificationSettings.vue rewritten to real API + useWebPush). Guide 28 added to WORKING_GUIDELINES. 11 PHPUnit tests (7 MultiSession + 4 TokenRefresh) all pass. Testing docs written for all 4 steps. Pint + Larastan + build all green. Not yet committed — full test suite pending. |
+| 2026-06-27 | Step 13b (admin audit log frontend): `AdminAuditLog.vue` standalone page, router `/admin/audit-log` (`requiresSuperAdmin`), sidebar link "Journal d'audit plateforme", i18n keys fr+en. Dusk fixes: `signInAs` token `dusk`→`auth_token`, `acceptDialog()` added for revoke test. All 9 Dusk tests pass individually (screenshots in `tests/Browser/screenshots/session-management/`). Pint + Larastan + build green. Not yet committed. |

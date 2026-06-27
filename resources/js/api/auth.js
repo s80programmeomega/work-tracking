@@ -22,6 +22,14 @@ export const authAPI = {
         return api.post('/auth/logout');
     },
 
+    async logoutAll() {
+        return api.post('/auth/logout-all');
+    },
+
+    async revokeSession(tokenId) {
+        return api.delete(`/auth/sessions/${tokenId}`);
+    },
+
     async getSessions() {
         return api.get('/users/sessions');
     },
