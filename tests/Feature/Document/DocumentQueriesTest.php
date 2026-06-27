@@ -35,6 +35,7 @@ class DocumentQueriesTest extends TestCase
         $this->owner = User::factory()->create();
         $this->workspace = Workspace::factory()->create(['owner_id' => $this->owner->id]);
         $this->workspace->addMember($this->owner, 'owner');
+        $this->owner->update(['current_workspace_id' => $this->workspace->id]);
 
         $this->projet = Projet::factory()->create([
             'workspace_id' => $this->workspace->id,
