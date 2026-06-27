@@ -771,12 +771,6 @@ const menuGroups = computed(() => [
                 path: '/admin/logs',
                 superAdminOnly: true,
             },
-            {
-                icon: ShieldIcon,
-                name: t('sidebar.admin_audit_log'),
-                path: '/admin/audit-log',
-                superAdminOnly: true,
-            },
         ],
     },
     {
