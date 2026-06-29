@@ -110,7 +110,10 @@ export function useTeamMessages() {
     try {
       const response = await api.get(`/teams/${teamUuid}/messages`, { params: filters })
       const raw = response.data
-      messages.value = raw.data ?? (Array.isArray(raw.messages) ? raw.messages : [])
+      const payload = raw.data
+      messages.value = Array.isArray(payload)
+        ? payload
+        : (Array.isArray(payload?.data) ? payload.data : (Array.isArray(raw.messages) ? raw.messages : []))
       return messages.value
     } catch (err) {
       error.value = err.response?.data?.message || 'Erreur lors de la récupération des messages'

@@ -6,6 +6,7 @@ use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreWorkspaceRequest;
 use App\Http\Requests\UpdateWorkspaceRequest;
+use App\Http\Resources\ActivityResource;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Models\Workspace;
@@ -30,6 +31,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Spatie\Activitylog\Models\Activity;
 
 class WorkspaceController extends Controller
 {
@@ -1604,6 +1606,11 @@ class WorkspaceController extends Controller
      */
     private function userHasAccess(User $user, Workspace $workspace): bool
     {
+        // Permanent superadmin: platform-level read access on any workspace.
+        if ($user->isSuperAdmin() && $user->admin_expires_at === null) {
+            return true;
+        }
+
         // Temporary superadmin: check for an explicit workspace grant in temporary_access.
         if ($user->is_super_admin && $user->admin_expires_at !== null) {
             return DB::table('temporary_access')
@@ -2207,6 +2214,78 @@ class WorkspaceController extends Controller
 
         return response()->json([
             'data' => $activities,
+        ]);
+    }
+
+    /**
+     * Journal d'activité scopé au workspace, accessible aux directeurs/managers.
+     * Retourne le même format que adminFeed pour compatibilité avec ActivityLogTab.
+     */
+    public function memberActivityLog(Request $request, Workspace $workspace): JsonResponse
+    {
+        abort_unless($this->userHasAccess($request->user(), $workspace), 403);
+
+        $request->validate([
+            'causer_id' => 'sometimes|integer|exists:users,id',
+            'subject_type' => 'sometimes|string',
+            'event' => 'sometimes|string',
+            'date_from' => 'sometimes|date',
+            'date_to' => 'sometimes|date|after_or_equal:date_from',
+            'search' => 'sometimes|string|max:255',
+            'per_page' => 'sometimes|integer|min:1|max:100',
+        ]);
+
+        // Limiter aux causeurs membres du workspace
+        $memberIds = $workspace->members()->pluck('users.id');
+
+        $query = Activity::query()
+            ->with(['causer', 'subject'])
+            ->whereIn('causer_id', $memberIds)
+            ->where('causer_type', 'App\\Models\\User')
+            ->latest();
+
+        if ($request->filled('causer_id')) {
+            $query->where('causer_id', $request->integer('causer_id'));
+        }
+
+        if ($request->filled('subject_type')) {
+            $type = str_contains($request->subject_type, '\\')
+                ? $request->subject_type
+                : 'App\\Models\\'.$request->subject_type;
+            $query->where('subject_type', $type);
+        }
+
+        if ($request->filled('event')) {
+            $query->where('event', $request->event);
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        if ($request->filled('search')) {
+            $q = $request->search;
+            $query->where(function ($sub) use ($q): void {
+                $sub->where('description', 'like', "%{$q}%")
+                    ->orWhere('log_name', 'like', "%{$q}%");
+            });
+        }
+
+        $activities = $query->paginate($request->integer('per_page', 25));
+
+        return response()->json([
+            'success' => true,
+            'data' => ActivityResource::collection($activities),
+            'meta' => [
+                'current_page' => $activities->currentPage(),
+                'last_page' => $activities->lastPage(),
+                'per_page' => $activities->perPage(),
+                'total' => $activities->total(),
+            ],
         ]);
     }
 

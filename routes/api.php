@@ -296,6 +296,7 @@ Route::middleware(['auth:sanctum', 'subscription.status'])->group(function () {
 
         // Phase 11E: Liste des membres avec métadonnées (owner/directeur/manager)
         Route::get('/{workspace}/users', [WorkspaceController::class, 'workspaceUsers'])->name('workspaces.users');
+        Route::get('/{workspace}/member-activity-log', [WorkspaceController::class, 'memberActivityLog'])->name('workspaces.member-activity-log');
 
         // ========================================  MEMBRE REMOVAL WITH TRANSFER  ========================================
         Route::prefix('/{workspace}')->group(function () {

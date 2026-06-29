@@ -233,6 +233,16 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  /** URL de l'endpoint journal — par défaut /admin/activity-log (SA uniquement). */
+  logEndpoint: {
+    type: String,
+    default: '/admin/activity-log',
+  },
+  /** URL de recherche de causeurs — par défaut /admin/users (SA uniquement). */
+  causerSearchEndpoint: {
+    type: String,
+    default: '/admin/users',
+  },
 })
 
 const { staggerRef: tableBodyRef, applyStagger } = useStagger(30)
@@ -279,7 +289,7 @@ const onCauserInput = () => {
   }
   causerDebounce = setTimeout(async () => {
     try {
-      const { data } = await api.get('/admin/users', { params: { search: causerSearch.value, per_page: 8 } })
+      const { data } = await api.get(props.causerSearchEndpoint, { params: { search: causerSearch.value, per_page: 8 } })
       causerSuggestions.value = data.data ?? []
       showSuggestions.value = causerSuggestions.value.length > 0
     } catch {
@@ -324,7 +334,7 @@ const loadActivities = async (page = 1) => {
       page,
       ...Object.fromEntries(Object.entries(filters.value).filter(([, v]) => v !== '')),
     }
-    const res = await api.get('/admin/activity-log', { params })
+    const res = await api.get(props.logEndpoint, { params })
     activities.value = res.data.data ?? []
     meta.value = res.data.meta ?? meta.value
     await nextTick()

@@ -54,8 +54,9 @@ export function useWorkspacePermissions(workspace = null) {
     const canInviteMembers   = computed(() => isDirecteur.value || (perms.value.can_invite_members ?? false))
     const canDeleteMembers   = computed(() => isDirecteur.value || (perms.value.can_remove_members ?? false))
     const canCreateProjects  = computed(() => perms.value.can_create_project ?? false)
-    const canViewAllProjects = computed(() => isDirecteur.value || isManager.value)
-    const canTransferOwnership = computed(() => isDirecteur.value)
+    const canViewAllProjects    = computed(() => isDirecteur.value || isManager.value)
+    const canViewAllActivities  = computed(() => isDirecteur.value || isManager.value)
+    const canTransferOwnership  = computed(() => isDirecteur.value)
 
     // Task 7: Evaluations / Scoring
     const canViewPendingValidations = computed(() => perms.value.can_view_pending_validations ?? false)
@@ -177,6 +178,7 @@ export function useWorkspacePermissions(workspace = null) {
         canDeleteMembers,
         canCreateProjects,
         canViewAllProjects,
+        canViewAllActivities,
         canTransferOwnership,
 
         // Task 7

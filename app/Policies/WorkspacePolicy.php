@@ -16,6 +16,10 @@ class WorkspacePolicy
 
     public function view(User $user, Workspace $workspace): bool
     {
+        if ($user->isSuperAdmin() && $user->admin_expires_at === null) {
+            return true;
+        }
+
         return $this->gate->userCan($user, Permission::WORKSPACES_VIEW, $workspace);
     }
 

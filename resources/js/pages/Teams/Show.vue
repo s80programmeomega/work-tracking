@@ -1463,7 +1463,7 @@ const isOwn = (message) => message.user?.id === authStore.currentUser?.id
 
 const users = ref([])
 const fetchUsers = async () => {
-  const workspaceId = authStore.currentWorkspaceId
+  const workspaceId = team.value?.workspace_id ?? authStore.currentWorkspaceId
   if (!workspaceId) return
   try {
     const { data } = await api.get(`/workspaces/${workspaceId}/members`)
@@ -1822,7 +1822,7 @@ const sendMessage = async () => {
 const onPhotoSelected = async (e) => {
   const files = Array.from(e.target.files ?? [])
   if (!files.length) { return }
-  const workspaceId = authStore.currentWorkspaceId
+  const workspaceId = team.value?.workspace_id ?? authStore.currentWorkspaceId
   for (const file of files) {
     const localUrl = URL.createObjectURL(file)
     const entry = { url: localUrl, name: file.name, _uploading: true }

@@ -476,6 +476,8 @@ const {
     canViewEvaluationScore,
     canViewFicheEvaluation,
     canViewAllTasks,
+    canViewAllProjects,
+    canViewAllActivities,
     canSubmitResult,
     canViewEvaluationDashboard,
     canViewWorkspaceTaches,
@@ -585,10 +587,10 @@ const menuGroups = computed(() => [
                     {
                         name: t('sidebar.all_projects'),
                         path: "/projets/list/all",
-                        superAdminOnly: true,
+                        requiresPermission: "canViewAllProjects",
                     },
                     { name: t('sidebar.my_projects'), path: "/projets/mes-projets", superAdminHidden: true },
-                    { name: t('sidebar.archived_projects'), path: "/projets/archives" },
+                    { name: t('sidebar.archived_projects'), path: "/projets/archives", superAdminHidden: true },
                 ],
             },
             {
@@ -598,36 +600,24 @@ const menuGroups = computed(() => [
                     {
                         name: t('sidebar.all_activities'),
                         path: "/activites/all/activity",
-                        superAdminOnly: true,
+                        requiresPermission: "canViewAllActivities",
                     },
                     { name: t('sidebar.my_activities'), path: "/activites/mes-activites", superAdminHidden: true },
                 ],
             },
-            // ==================== MISE À JOUR DE AppSidebar.vue ====================
-
-            // {
-            //     icon: TaskIcon,
-            //     name: t('navigation.tasks'),
-            //     subItems: [
-            //         {
-            //             name: t('sidebar.all_tasks'),
-            //             path: '/taches',
-            //             superAdminOnly: false
-            //         },
-            //         ...
-            //     ],
-            // },
-
-            // ==================== ALTERNATIVE : Groupement par rôle ====================
-
             {
                 icon: TaskIcon,
                 name: t('navigation.tasks'),
                 subItems: [
                     {
-                        name: t('sidebar.all_tasks'),
+                        name: t('sidebar.my_tasks'),
                         path: "/taches",
-                        requiresPermission: "canViewAllTasks",
+                        superAdminHidden: true,
+                    },
+                    {
+                        name: t('sidebar.workspace_tasks'),
+                        path: "/workspace/taches",
+                        requiresPermission: "canViewWorkspaceTaches",
                     },
                     {
                         name: t('sidebar.as_responsible'),
@@ -675,16 +665,6 @@ const menuGroups = computed(() => [
                         path: "/evaluations/fiches",
                         requiresPermission: "canViewFicheEvaluation",
                     },
-                    {
-                        name: t('sidebar.workspace_tasks'),
-                        path: "/workspace/taches",
-                        requiresPermission: "canViewWorkspaceTaches",
-                    },
-                    {
-                        name: t('sidebar.workspace_users'),
-                        path: "/workspace/users",
-                        requiresPermission: "canViewMembers",
-                    },
                 ],
             },
         ],
@@ -697,11 +677,13 @@ const menuGroups = computed(() => [
                 name: t('navigation.notifications'),
                 path: "/notifications",
                 badge: "",
+                superAdminHidden: true,
             },
             {
                 icon: SupportIcon,
                 name: t('sidebar.support'),
                 path: "/support",
+                superAdminHidden: true,
             },
         ],
     },
@@ -712,8 +694,8 @@ const menuGroups = computed(() => [
                 icon: FolderIcon,
                 name: t('navigation.documents'),
                 subItems: [
-                    { name: t('sidebar.all_documents'), path: "/documents" },
-                    { name: t('help.nav'), path: "/help" },
+                    { name: t('sidebar.all_documents'), path: "/documents", superAdminHidden: true },
+                    { name: t('help.nav'), path: "/help", superAdminHidden: true },
                 ],
             },
         ],
@@ -789,6 +771,12 @@ const menuGroups = computed(() => [
                 path: '/admin/logs',
                 superAdminOnly: true,
             },
+            {
+                icon: SupportIcon,
+                name: t('sidebar.support'),
+                path: '/admin/support',
+                superAdminOnly: true,
+            },
         ],
     },
     {
@@ -837,6 +825,8 @@ const filteredMenuGroups = computed(() => {
 // Filtrer les sous-items selon les permissions avec sécurité
 const permissionMap = computed(() => ({
     canViewAllTasks: canViewAllTasks.value,
+    canViewAllProjects: canViewAllProjects.value,
+    canViewAllActivities: canViewAllActivities.value,
     canSubmitResult: canSubmitResult.value,
     canViewPendingValidations: canViewPendingValidations.value,
     canViewEvaluationScore: canViewEvaluationScore.value,

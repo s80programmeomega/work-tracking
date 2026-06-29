@@ -75,7 +75,13 @@
 
           <!-- Read-only fields -->
           <template v-if="!editMode">
+
+            <!-- Section : identité & contact -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div v-if="profileData.prenom" class="flex flex-col gap-1">
+                <span class="text-xs text-gray-500 dark:text-gray-400">{{ $t('user_profile_modal.field_firstname') }}</span>
+                <span class="text-sm font-medium text-gray-800 dark:text-white/90">{{ profileData.prenom }}</span>
+              </div>
               <div class="flex flex-col gap-1">
                 <span class="text-xs text-gray-500 dark:text-gray-400">{{ $t('user_profile_modal.field_role') }}</span>
                 <span class="text-sm font-medium text-gray-800 dark:text-white/90">{{ rolesDisplay }}</span>
@@ -83,7 +89,7 @@
               <div class="flex flex-col gap-1">
                 <span class="text-xs text-gray-500 dark:text-gray-400">{{ $t('user_profile_modal.field_status') }}</span>
                 <span
-                  class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                  class="inline-flex w-fit items-center px-2 py-0.5 rounded-full text-xs font-medium"
                   :class="profileData.is_active
                     ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                     : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'"
@@ -91,9 +97,9 @@
                   {{ profileData.is_active ? $t('user_profile_modal.status_active') : $t('user_profile_modal.status_inactive') }}
                 </span>
               </div>
-              <div v-if="profileData.telephone" class="flex flex-col gap-1">
+              <div v-if="profileData.numero_telephone" class="flex flex-col gap-1">
                 <span class="text-xs text-gray-500 dark:text-gray-400">{{ $t('user_profile_modal.field_phone') }}</span>
-                <span class="text-sm font-medium text-gray-800 dark:text-white/90">{{ profileData.telephone }}</span>
+                <span class="text-sm font-medium text-gray-800 dark:text-white/90">{{ profileData.numero_telephone }}</span>
               </div>
               <div v-if="profileData.adresse" class="flex flex-col gap-1">
                 <span class="text-xs text-gray-500 dark:text-gray-400">{{ $t('user_profile_modal.field_address') }}</span>
@@ -107,24 +113,64 @@
                 <span class="text-xs text-gray-500 dark:text-gray-400">{{ $t('user_profile_modal.field_language') }}</span>
                 <span class="text-sm font-medium text-gray-800 dark:text-white/90">{{ profileData.language === 'fr' ? 'Français' : 'English' }}</span>
               </div>
-              <div v-if="profileData.last_login_at" class="flex flex-col gap-1 col-span-2">
+            </div>
+
+            <!-- Bio -->
+            <div v-if="profileData.bio" class="flex flex-col gap-1">
+              <span class="text-xs text-gray-500 dark:text-gray-400">{{ $t('user_profile_modal.field_bio') }}</span>
+              <p class="text-sm text-gray-800 dark:text-white/90 whitespace-pre-line">{{ profileData.bio }}</p>
+            </div>
+
+            <!-- Section : dates & sécurité -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div v-if="profileData.created_at" class="flex flex-col gap-1">
+                <span class="text-xs text-gray-500 dark:text-gray-400">{{ $t('user_profile_modal.field_member_since') }}</span>
+                <span class="text-sm font-medium text-gray-800 dark:text-white/90">{{ formatDate(profileData.created_at) }}</span>
+              </div>
+              <div v-if="profileData.last_login_at" class="flex flex-col gap-1">
                 <span class="text-xs text-gray-500 dark:text-gray-400">{{ $t('user_profile_modal.field_last_login') }}</span>
                 <span class="text-sm font-medium text-gray-800 dark:text-white/90">{{ formatDate(profileData.last_login_at) }}</span>
               </div>
+              <div class="flex flex-col gap-1">
+                <span class="text-xs text-gray-500 dark:text-gray-400">{{ $t('user_profile_modal.field_email_verified') }}</span>
+                <span
+                  class="inline-flex w-fit items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
+                  :class="profileData.email_verified_at
+                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                    : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'"
+                >
+                  {{ profileData.email_verified_at ? $t('user_profile_modal.verified') : $t('user_profile_modal.not_verified') }}
+                </span>
+              </div>
+              <div class="flex flex-col gap-1">
+                <span class="text-xs text-gray-500 dark:text-gray-400">{{ $t('user_profile_modal.field_2fa') }}</span>
+                <span
+                  class="inline-flex w-fit items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
+                  :class="profileData.two_factor_confirmed_at || profileData.email_otp_enabled
+                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                    : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'"
+                >
+                  {{ profileData.two_factor_confirmed_at || profileData.email_otp_enabled ? $t('user_profile_modal.enabled') : $t('user_profile_modal.disabled') }}
+                </span>
+              </div>
             </div>
 
-            <!-- Stats (only if super-admin or self) -->
-            <div v-if="canEdit && profileData.stats" class="grid grid-cols-3 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <!-- Stats -->
+            <div v-if="profileData.stats" class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
               <div class="text-center">
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ profileData.stats?.projets_actifs ?? '—' }}</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ profileData.stats.projects_count ?? '—' }}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('user_profile_modal.stat_projects') }}</p>
               </div>
               <div class="text-center">
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ profileData.stats?.taches_total ?? '—' }}</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ profileData.stats.tasks_count ?? '—' }}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('user_profile_modal.stat_tasks') }}</p>
               </div>
               <div class="text-center">
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ profileData.stats?.taux_completion != null ? profileData.stats.taux_completion + '%' : '—' }}</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ profileData.stats.completed_tasks_count ?? '—' }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('user_profile_modal.stat_completed') }}</p>
+              </div>
+              <div class="text-center">
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ profileData.stats.productivity_rate != null ? profileData.stats.productivity_rate + '%' : '—' }}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('user_profile_modal.stat_completion') }}</p>
               </div>
             </div>
@@ -143,7 +189,7 @@
               </div>
               <div>
                 <label class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-400">{{ $t('user_profile_modal.field_phone') }}</label>
-                <input v-model="editForm.telephone" type="text" class="w-full h-10 px-3 py-2 text-sm text-gray-800 dark:text-white/90 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/10" />
+                <input v-model="editForm.numero_telephone" type="text" class="w-full h-10 px-3 py-2 text-sm text-gray-800 dark:text-white/90 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/10" />
               </div>
               <div>
                 <label class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-400">{{ $t('user_profile_modal.field_fonction') }}</label>
@@ -222,7 +268,7 @@ const editMode = ref(false)
 const editForm = ref({
   nom: '',
   email: '',
-  telephone: '',
+  numero_telephone: '',
   fonction: '',
   is_active: true,
   timezone: '',
@@ -253,7 +299,7 @@ const loadProfile = async () => {
     editForm.value = {
       nom: profileData.value.nom ?? '',
       email: profileData.value.email ?? '',
-      telephone: profileData.value.telephone ?? '',
+      numero_telephone: profileData.value.numero_telephone ?? '',
       fonction: profileData.value.fonction ?? '',
       is_active: profileData.value.is_active ?? true,
       timezone: profileData.value.timezone ?? '',
