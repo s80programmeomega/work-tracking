@@ -1,12 +1,14 @@
 <!-- resources\js\App.vue -->
 <template>
     <ThemeProvider>
+        <!-- Notifications téléportées sur body pour éviter tout problème de stacking context -->
+        <Teleport to="body">
+            <NotificationContainer
+                :notifications="notifications"
+                @remove="removeNotification"
+            />
+        </Teleport>
         <SidebarProvider>
-             <!-- Notifications -->
-      <NotificationContainer
-        :notifications="notifications"
-        @remove="removeNotification"
-      />
 
             <!-- Erreur d'initialisation -->
             <div v-if="error" class="error-overlay">
@@ -25,7 +27,7 @@
 <script setup>
 import ThemeProvider from "@/components/layout/ThemeProvider.vue";
 import SidebarProvider from "@/components/layout/SidebarProvider.vue";
-import { ref, onMounted, onErrorCaptured,provide  } from 'vue';
+import { ref, onMounted, onErrorCaptured, provide, watch } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useLiveNotifications } from '@/composables/useLiveNotifications';
 import { useNotificationSound } from '@/composables/useNotificationSound';
@@ -81,7 +83,13 @@ const { playIfEnabled: playNotificationSound } = useNotificationSound();
 // that something happened. Consumers (e.g. the bell component) can also subscribe
 // via onNotification to refresh their list.
 onNotification((data) => {
-    const title = data?.tache_titre ?? data?.title ?? 'Nouvelle notification';
+    const title = data?.tache_titre
+        ?? data?.title
+        ?? data?.document_nom
+        ?? data?.team_name
+        ?? data?.projet_nom
+        ?? data?.workspace_name
+        ?? 'Nouvelle notification';
     showNotification(title, 'info', 4000);
     playNotificationSound();
 });
@@ -89,12 +97,20 @@ onNotification((data) => {
 onMounted(() => {
     try {
         authStore.initialize();
-        startLiveNotifications();
+        // Si l'utilisateur est déjà en mémoire, on s'abonne immédiatement.
+        // Sinon on attend que fetchUser() ait peuplé authStore.user.
+        if (authStore.user?.id) {
+            startLiveNotifications();
+        }
     } catch (err) {
         console.error('❌ Erreur lors de l\'initialisation:', err);
         error.value = err;
     }
 });
+
+watch(() => authStore.user?.id, (userId) => {
+    if (userId) startLiveNotifications();
+}, { immediate: false });
 </script>
 
 <style scoped>

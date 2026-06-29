@@ -599,6 +599,7 @@
                 </p>
               </div>
             </div> -->
+  </div>
 
           <!-- Onglet 3: Fichiers & Ressources -->
           <div v-if="activeTab === 'fichiers'" class="space-y-8">

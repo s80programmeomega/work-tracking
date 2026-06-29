@@ -66,7 +66,6 @@ class TeamCrudTest extends TestCase
             ->postJson('/api/teams', [
                 'name' => 'Nouvelle équipe',
                 'description' => 'Description de l\'équipe',
-                'visibility' => 'public',
             ]);
 
         $response->assertCreated()
@@ -126,7 +125,6 @@ class TeamCrudTest extends TestCase
         $response = $this->actingAs($this->owner)
             ->putJson("/api/teams/{$this->team->uuid}", [
                 'name' => 'Nom modifié',
-                'visibility' => 'public',
             ]);
 
         $response->assertOk()

@@ -173,54 +173,111 @@
             </div>
           </div>
 
-          <!-- Section 4: Statut & Visibilité -->
+          <!-- Section 4: Statut -->
           <div class="space-y-4">
             <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
               <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
-              Statut & Visibilité
+              Statut
             </h3>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Statut
-                </label>
-                <div class="space-y-2">
-                  <label
-                    v-for="statut in statusOptions"
-                    :key="statut.value"
-                    class="relative flex items-center gap-3 p-3 border-2 rounded-3 cursor-pointer transition-all "
-                    :class="formData.status === statut.value
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                      : 'border-gray-300 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-700'"
-                  >
-                    <input
-                      type="radio"
-                      v-model="formData.status"
-                      :value="statut.value"
-                      class="sr-only"
-                    />
-                    <span
-                      :class="statut.color"
-                      class="w-3 h-3 rounded-full flex-shrink-0"
-                    ></span>
-                    <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                      {{ statut.label }}
-                    </span>
-                    <svg
-                      v-if="formData.status === statut.value"
-                      class="absolute right-3 w-5 h-5 text-blue-500"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                    </svg>
-                  </label>
-                </div>
+            <div class="space-y-2">
+              <label
+                v-for="statut in statusOptions"
+                :key="statut.value"
+                class="relative flex items-center gap-3 p-3 border-2 rounded-3 cursor-pointer transition-all"
+                :class="formData.status === statut.value
+                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                  : 'border-gray-300 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-700'"
+              >
+                <input
+                  type="radio"
+                  v-model="formData.status"
+                  :value="statut.value"
+                  class="sr-only"
+                />
+                <span :class="statut.color" class="w-3 h-3 rounded-full shrink-0"></span>
+                <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ statut.label }}</span>
+                <svg v-if="formData.status === statut.value" class="absolute right-3 w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+              </label>
+            </div>
+          </div>
+
+          <!-- Section 5: Intégration équipes -->
+          <div class="space-y-3">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Intégration équipes
+            </h3>
+
+            <!-- Toggle -->
+            <div
+              class="flex items-start gap-4 p-4 border-2 rounded-3 transition-all"
+              :class="formData.use_teams ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20' : 'border-gray-300 dark:border-gray-600'"
+            >
+              <div class="flex-1">
+                <p class="text-sm font-semibold text-gray-900 dark:text-white">Gérer les membres via des équipes</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  Les membres seront assignés en liant une ou plusieurs équipes. Les membres restent si une équipe est supprimée.
+                </p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                :aria-checked="formData.use_teams"
+                @click="formData.use_teams = !formData.use_teams"
+                class="relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors focus:outline-none"
+                :class="formData.use_teams ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-700'"
+              >
+                <span
+                  class="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform transition-transform"
+                  :class="formData.use_teams ? 'translate-x-5' : 'translate-x-0'"
+                />
+              </button>
+            </div>
+
+            <!-- Team picker (visible when use_teams is on) -->
+            <div v-if="formData.use_teams" class="border border-gray-200 dark:border-gray-700 rounded-3 overflow-hidden">
+              <div class="px-3 py-2 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <span class="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                  Équipes à lier
+                  <span v-if="selectedTeamIds.length" class="ml-1 text-indigo-600 dark:text-indigo-400">({{ selectedTeamIds.length }} sélectionnée{{ selectedTeamIds.length > 1 ? 's' : '' }})</span>
+                </span>
               </div>
 
+              <div v-if="loadingTeams" class="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                Chargement des équipes…
+              </div>
+              <div v-else-if="workspaceTeams.length === 0" class="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                Aucune équipe disponible dans ce workspace.
+              </div>
+              <div v-else class="divide-y divide-gray-100 dark:divide-gray-700 max-h-44 overflow-y-auto">
+                <label
+                  v-for="team in workspaceTeams"
+                  :key="team.id"
+                  class="flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  :class="selectedTeamIds.includes(team.id) ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''"
+                >
+                  <input
+                    type="checkbox"
+                    :checked="selectedTeamIds.includes(team.id)"
+                    @change="toggleTeamSelection(team.id)"
+                    class="w-4 h-4 text-indigo-600 rounded border-gray-300 dark:border-gray-600 focus:ring-indigo-500"
+                  />
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ team.name }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ team.members_count ?? team.members?.length ?? 0 }} membre{{ (team.members_count ?? 0) !== 1 ? 's' : '' }}</p>
+                  </div>
+                  <svg v-if="selectedTeamIds.includes(team.id)" class="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                  </svg>
+                </label>
+              </div>
             </div>
           </div>
         </form>
@@ -259,11 +316,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useProjets } from '@/composables/useProjets'
 import api from '@/api/axios'
-import { useWorkspace } from '@/composables/useWorkspace' // ✅ IMPORTANT
+import { useWorkspace } from '@/composables/useWorkspace'
 
 const props = defineProps({
   projet: {
@@ -288,6 +345,44 @@ const loading = ref(false)
 const users = ref([])
 const errorMessage = ref('')
 
+// ── Intégration équipes ───────────────────────────────────────────────────────
+const workspaceTeams = ref([])
+const loadingTeams = ref(false)
+const selectedTeamIds = ref([])
+
+const loadTeams = async () => {
+  const workspaceId = currentWorkspaceId.value
+  if (!workspaceId) { return }
+  loadingTeams.value = true
+  try {
+    const { data } = await api.get('/teams', { params: { workspace_id: workspaceId, per_page: 100 } })
+    // API retourne { success, teams: { data: [...] } }
+    workspaceTeams.value = data.teams?.data ?? data.teams ?? data.data ?? []
+  } catch {
+    workspaceTeams.value = []
+  } finally {
+    loadingTeams.value = false
+  }
+}
+
+const toggleTeamSelection = (teamId) => {
+  const idx = selectedTeamIds.value.indexOf(teamId)
+  if (idx === -1) {
+    selectedTeamIds.value.push(teamId)
+  } else {
+    selectedTeamIds.value.splice(idx, 1)
+  }
+}
+
+watch(() => formData.value.use_teams, (enabled) => {
+  if (enabled && workspaceTeams.value.length === 0) {
+    loadTeams()
+  }
+  if (!enabled) {
+    selectedTeamIds.value = []
+  }
+})
+
 const statusOptions = [
   { value: 'active', label: 'Actif', color: 'bg-green-500' },
   { value: 'completed', label: 'Terminé', color: 'bg-blue-500' },
@@ -308,17 +403,13 @@ const formData = ref({
 })
 
 const loadUsers = async () => {
+  const workspaceId = currentWorkspaceId.value
+  if (!workspaceId) { return }
   try {
-    const workspaceId = currentWorkspaceId.value
-    if (workspaceId) {
-      const { data } = await api.get(`/workspaces/${workspaceId}/users`)
-      users.value = data.data || data || []
-    } else {
-      const { data } = await api.get('/users')
-      users.value = data.data || []
-    }
+    const { data } = await api.get(`/workspaces/${workspaceId}/users`)
+    users.value = data.data || data || []
   } catch (error) {
-    console.error('Error loading users:', error)
+    console.error('Erreur lors du chargement des utilisateurs:', error)
   }
 }
 
@@ -342,7 +433,15 @@ const handleSubmit = async () => {
     if (props.projet) {
       await updateProjet(props.projet.id, formData.value)
     } else {
-      await createProjet(formData.value)
+      const created = await createProjet(formData.value)
+      // Lier les équipes sélectionnées après création
+      if (formData.value.use_teams && selectedTeamIds.value.length && created?.id) {
+        await Promise.all(
+          selectedTeamIds.value.map((teamId) =>
+            api.post(`/projets/${created.id}/teams`, { team_id: teamId }).catch(() => {})
+          )
+        )
+      }
     }
     emit('saved')
   } catch (error) {

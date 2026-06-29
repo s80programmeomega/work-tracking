@@ -43,7 +43,6 @@ class TacheResponsableTest extends TestCase
         $this->projet = Projet::factory()->create([
             'workspace_id' => $this->workspace->id,
             'responsable_id' => $this->owner->id,
-            'visibility' => 'public',
         ]);
 
         $this->activite = Activite::factory()->create([

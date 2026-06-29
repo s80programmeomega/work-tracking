@@ -41,7 +41,6 @@ class ProjetStatsTest extends TestCase
         $this->projet = Projet::factory()->create([
             'workspace_id' => $this->workspace->id,
             'responsable_id' => $this->owner->id,
-            'visibility' => 'public',
         ]);
     }
 
@@ -85,10 +84,9 @@ class ProjetStatsTest extends TestCase
         $privateProjet = Projet::factory()->create([
             'workspace_id' => $this->workspace->id,
             'responsable_id' => $this->owner->id,
-            'visibility' => 'private',
         ]);
 
-        $outsider = $this->makeWsMember('collaborateur');
+        $outsider = User::factory()->create();
 
         $this->actingAs($outsider)
             ->getJson("/api/projets/{$privateProjet->id}/activites")
@@ -126,10 +124,9 @@ class ProjetStatsTest extends TestCase
         $privateProjet = Projet::factory()->create([
             'workspace_id' => $this->workspace->id,
             'responsable_id' => $this->owner->id,
-            'visibility' => 'private',
         ]);
 
-        $outsider = $this->makeWsMember('collaborateur');
+        $outsider = User::factory()->create();
 
         $this->actingAs($outsider)
             ->getJson("/api/projets/{$privateProjet->id}/taches")
@@ -156,10 +153,9 @@ class ProjetStatsTest extends TestCase
         $privateProjet = Projet::factory()->create([
             'workspace_id' => $this->workspace->id,
             'responsable_id' => $this->owner->id,
-            'visibility' => 'private',
         ]);
 
-        $outsider = $this->makeWsMember('collaborateur');
+        $outsider = User::factory()->create();
 
         $this->actingAs($outsider)
             ->getJson("/api/projets/{$privateProjet->id}/statistics")
@@ -212,10 +208,9 @@ class ProjetStatsTest extends TestCase
         $privateProjet = Projet::factory()->create([
             'workspace_id' => $this->workspace->id,
             'responsable_id' => $this->owner->id,
-            'visibility' => 'private',
         ]);
 
-        $outsider = $this->makeWsMember('collaborateur');
+        $outsider = User::factory()->create();
 
         $this->actingAs($outsider)
             ->getJson("/api/projets/{$privateProjet->id}/performance-report")
@@ -245,10 +240,9 @@ class ProjetStatsTest extends TestCase
         $privateProjet = Projet::factory()->create([
             'workspace_id' => $this->workspace->id,
             'responsable_id' => $this->owner->id,
-            'visibility' => 'private',
         ]);
 
-        $outsider = $this->makeWsMember('collaborateur');
+        $outsider = User::factory()->create();
 
         $this->actingAs($outsider)
             ->getJson("/api/projets/{$privateProjet->id}/accessible-tasks")

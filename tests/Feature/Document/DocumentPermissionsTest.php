@@ -44,7 +44,6 @@ class DocumentPermissionsTest extends TestCase
 
         $this->document = Document::factory()->forProjet($projet)->create([
             'user_id' => $this->owner->id,
-            'visibility' => 'private',
         ]);
     }
 

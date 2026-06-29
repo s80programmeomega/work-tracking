@@ -16,11 +16,12 @@ class StoreTeamMessageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'content' => 'required|string|max:5000',
-            'mentions' => 'sometimes|array',
-            'mentions.*' => 'integer|exists:users,id',
+            'content' => 'sometimes|nullable|string|max:5000',
+            'mentions' => 'sometimes|nullable|string',
+            'mention_everyone' => 'sometimes|nullable|string',
             'reply_to_id' => 'sometimes|nullable|integer|exists:team_messages,id',
             'attachment' => 'sometimes|nullable|file|max:10240|mimes:jpeg,png,gif,webp,pdf,doc,docx,xls,xlsx,txt',
+            'attachments_json' => 'sometimes|nullable|string',
         ];
     }
 

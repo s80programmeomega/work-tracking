@@ -36,7 +36,6 @@ class ProjetCrudTest extends TestCase
         $this->projet = Projet::factory()->create([
             'workspace_id' => $this->workspace->id,
             'responsable_id' => $this->owner->id,
-            'visibility' => 'public',
             'status' => 'active',
         ]);
     }
@@ -57,7 +56,6 @@ class ProjetCrudTest extends TestCase
             'date_debut' => now()->toDateString(),
             'date_fin' => now()->addMonths(3)->toDateString(),
             'responsable_id' => $this->owner->id,
-            'visibility' => 'public',
         ], $overrides);
     }
 

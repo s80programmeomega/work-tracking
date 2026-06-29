@@ -124,7 +124,32 @@
     "platform_dashboard": "Platform Dashboard",
     "plans": "Plans",
     "roles_permissions": "Rôles & Permissions",
-    "search": "Recherche"
+    "search": "Recherche",
+    "workspace_chat": "Chat Workspace"
+  },
+  "chat": {
+    "workspace_chat": "Chat Workspace",
+    "global": "Global",
+    "global_desc": "Canal ouvert à tous les membres du workspace",
+    "responsibles": "Responsables",
+    "responsibles_desc": "Canal réservé aux directeurs, managers et cadres",
+    "teams": "Équipes",
+    "view_teams": "Voir les équipes",
+    "no_messages": "Aucun message pour l'instant. Soyez le premier à écrire !",
+    "type_message": "Écrire un message… (Entrée pour envoyer, Maj+Entrée pour une nouvelle ligne)",
+    "edited": "(modifié)",
+    "pinned": "Épinglé",
+    "pin": "Épingler",
+    "unpin": "Désépingler",
+    "reply": "Répondre",
+    "typing": "est en train d'écrire",
+    "editing_message": "Modification du message — appuyez sur Entrée pour valider, Échap pour annuler",
+    "confirm_delete": "Supprimer ce message ?",
+    "you": "Vous",
+    "reaction_limit": "Maximum 3 réactions différentes par message",
+    "reactions_used": "réactions utilisées",
+    "mention_everyone_hint": "Notifier tous les membres",
+    "attach_photo": "Joindre une photo"
   },
   "sidebar": {
     "my_workspace": "Mon Workspace",

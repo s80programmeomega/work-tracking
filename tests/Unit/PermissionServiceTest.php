@@ -262,7 +262,6 @@ class PermissionServiceTest extends TestCase
             'responsable_id' => $this->directeur->id,
             'date_debut' => now(),
             'date_fin' => now()->addMonth(),
-            'visibility' => 'team',
         ]);
     }
 

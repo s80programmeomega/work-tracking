@@ -72,8 +72,9 @@ export function useTeamPresence() {
       clearInterval(intervalId)
       intervalId = null
     }
-    // Marquer comme offline lors de la déconnexion
-    updateStatus(teamUuid, 'offline').catch(console.error)
+    if (teamUuid) {
+      updateStatus(teamUuid, 'offline').catch(console.error)
+    }
   }
 
   /**

@@ -70,12 +70,18 @@ class WebPushChannel
                     'subscription_id' => $sub->id,
                     'error' => $e->getMessage(),
                 ]);
+                // Désactiver la souscription corrompue pour éviter de réessayer
+                $sub->deactivate();
             }
         }
 
         // Flush — envoi en parallèle de tous les pushes mis en file.
-        foreach ($webPush->flush() as $report) {
-            $this->handleReport($report, $payload['title'] ?? '');
+        try {
+            foreach ($webPush->flush() as $report) {
+                $this->handleReport($report, $payload['title'] ?? '');
+            }
+        } catch (\Throwable $e) {
+            Log::warning('WebPush: flush échoué', ['error' => $e->getMessage()]);
         }
     }
 

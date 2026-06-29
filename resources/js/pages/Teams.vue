@@ -32,7 +32,7 @@
           <button
             @click="showCreateModal = true"
             dusk="open-create-team-btn"
-            class="px-5 py-2.5 text-white rounded-3 font-medium transition-all transform flex items-center gap-2"
+            class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-3 font-medium transition-all transform flex items-center gap-2"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -62,7 +62,7 @@
         </p>
         <button
           @click="fetchMyTeams()"
-          class="px-6 py-3 text-white rounded-3 font-medium transition-all inline-flex items-center gap-2"
+          class="px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-3 font-medium transition-all inline-flex items-center gap-2"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -86,7 +86,7 @@
         </p>
         <button
           @click="showCreateModal = true"
-          class="px-6 py-3 text-white rounded-3 font-medium transition-all inline-flex items-center gap-2"
+          class="px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-3 font-medium transition-all inline-flex items-center gap-2"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -249,7 +249,7 @@
             @click="createTeam"
             :disabled="creating || !newTeam.name"
             dusk="team-form-submit"
-            class="px-5 py-2.5 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             <svg v-if="creating" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -264,10 +264,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useTeams } from '@/composables/useTeams'
+import { useWorkspace } from '@/composables/useWorkspace'
 import { useStagger } from '@/composables/useAnimations'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
@@ -275,6 +276,7 @@ import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 const { t } = useI18n()
 const router = useRouter()
 const { teams, loading, error, fetchMyTeams, createTeam: createTeamApi } = useTeams()
+const { currentWorkspaceId } = useWorkspace()
 const { staggerRef: gridRef, applyStagger } = useStagger(55)
 
 const searchQuery = ref('')
@@ -319,7 +321,7 @@ const createTeam = async () => {
   creating.value = true
   createError.value = ''
   try {
-    const team = await createTeamApi(newTeam.value)
+    const team = await createTeamApi({ ...newTeam.value, workspace_id: currentWorkspaceId.value })
     showCreateModal.value = false
     createError.value = ''
     newTeam.value = { name: '', description: '' }
@@ -332,17 +334,14 @@ const createTeam = async () => {
   }
 }
 
-onMounted(async () => {
-  console.log('Teams page mounted')
-  console.log('Token:', localStorage.getItem('auth_token') ? 'Present' : 'Missing')
-  console.log('Loading before fetch:', loading.value)
+watch(currentWorkspaceId, (wsId) => {
+  if (wsId) fetchMyTeams(wsId).then(() => applyStagger()).catch(() => {})
+})
 
+onMounted(async () => {
   try {
-    console.log('Fetching teams...')
-    const result = await fetchMyTeams()
+    await fetchMyTeams(currentWorkspaceId.value)
     applyStagger()
-    console.log('Teams fetched successfully:', result)
-    console.log('Loading after fetch:', loading.value)
   } catch (error) {
     console.error('Erreur lors du chargement des équipes:', error)
     console.error('Error details:', error.response?.data || error.message)

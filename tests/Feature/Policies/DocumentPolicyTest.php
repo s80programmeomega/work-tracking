@@ -42,7 +42,6 @@ class DocumentPolicyTest extends TestCase
         $this->projet = Projet::factory()->create([
             'workspace_id' => $this->workspace->id,
             'responsable_id' => $this->owner->id,
-            'visibility' => 'public',
         ]);
     }
 
@@ -54,7 +53,7 @@ class DocumentPolicyTest extends TestCase
         return $user;
     }
 
-    private function makeDocument(User $uploader, string $visibility = 'team'): Document
+    private function makeDocument(User $uploader, string $ignored = ''): Document
     {
         return Document::create([
             'workspace_id' => $this->workspace->id,
@@ -68,7 +67,6 @@ class DocumentPolicyTest extends TestCase
             'chemin' => 'documents/test.pdf',
             'disk' => 'local',
             'user_id' => $uploader->id,
-            'visibility' => $visibility,
         ]);
     }
 
@@ -87,14 +85,14 @@ class DocumentPolicyTest extends TestCase
     }
 
     /** @test */
-    public function public_document_is_viewable_by_anyone(): void
+    public function outsider_without_explicit_permission_cannot_view_document(): void
     {
         $uploader = $this->makeWsMember('collaborateur');
-        $document = $this->makeDocument($uploader, 'public');
+        $document = $this->makeDocument($uploader);
         $outsider = User::factory()->create();
 
-        // raccourci visibilité publique
-        $this->assertTrue($outsider->can('view', $document));
+        // Sans permission explicite ni rôle workspace → accès refusé
+        $this->assertFalse($outsider->can('view', $document));
     }
 
     /** @test */

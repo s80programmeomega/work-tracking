@@ -120,121 +120,156 @@
                 </div>
 
                 <!-- Message rows -->
-                <div ref="chatMessagesRef">
+                <div ref="chatMessagesRef" class="flex flex-col gap-3 px-2">
                   <div
                     v-for="message in messages"
                     :key="message.uuid || message.id"
                     :data-message-uuid="message.uuid"
-                    class="stagger-item group flex gap-3 py-1 rounded transition-all duration-300"
-                    :class="{ 'opacity-60': message._pending }"
+                    class="stagger-item group flex gap-2"
+                    :class="isOwn(message) ? 'flex-row-reverse' : 'flex-row'"
                     dusk="chat-message"
                   >
                     <!-- Avatar -->
-                    <div class="flex-shrink-0">
-                      <div class="w-9 h-9 rounded-full bg-brand-500 flex items-center justify-center text-white font-bold text-xs">
+                    <div class="shrink-0 mt-1">
+                      <img
+                        v-if="message.user?.avatar"
+                        :src="message.user.avatar"
+                        :alt="message.user.nom"
+                        class="w-8 h-8 rounded-full object-cover"
+                      />
+                      <div
+                        v-else
+                        class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold"
+                        :class="isOwn(message) ? 'bg-blue-600 text-white' : colorFor(message.user?.id).avatar"
+                      >
                         {{ getUserInitials(message.user) }}
                       </div>
                     </div>
 
-                    <!-- Content -->
-                    <div class="flex-1 min-w-0">
-                      <div class="flex items-baseline gap-2 mb-0.5">
-                        <span class="font-semibold text-sm text-gray-900 dark:text-white">{{ message.user?.nom || 'Utilisateur' }}</span>
+                    <!-- Bulle -->
+                    <div class="flex flex-col max-w-[70%]" :class="isOwn(message) ? 'items-end' : 'items-start'">
+                      <!-- Nom + heure -->
+                      <div
+                        class="flex items-baseline gap-2 mb-1 px-1"
+                        :class="isOwn(message) ? 'flex-row-reverse' : 'flex-row'"
+                      >
+                        <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                          {{ isOwn(message) ? $t('chat.you') : (message.user?.nom ?? 'Utilisateur') }}
+                        </span>
                         <span class="text-xs text-gray-400 dark:text-gray-500">{{ formatDate(message.created_at) }}</span>
                         <span v-if="message.is_edited" class="text-xs text-gray-400 italic">{{ $t('team_show.message_edited') }}</span>
                         <span v-if="message._pending" class="text-xs text-gray-400 animate-pulse">…</span>
                       </div>
 
                       <!-- Reply-to quote -->
-                      <div v-if="message.reply_to" class="mb-1 border-l-2 border-gray-300 dark:border-gray-600 pl-2 text-xs text-gray-500 dark:text-gray-400 truncate">
+                      <div
+                        v-if="message.reply_to"
+                        class="mb-1 px-3 py-1.5 rounded-lg text-xs border-l-2 border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 max-w-full"
+                      >
                         <span class="font-medium">{{ message.reply_to.user_nom }}</span>: {{ message.reply_to.content_snippet }}
                       </div>
 
-                      <!-- Inline edit OR read mode -->
-                      <div v-if="editingUuid === message.uuid">
+                      <!-- Inline edit OR texte -->
+                      <div v-if="editingUuid === message.uuid" class="w-full">
                         <textarea
                           v-model="editContent"
                           rows="2"
-                          class="w-full px-3 py-2 text-sm border border-blue-400 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none resize-none"
+                          class="w-full px-3 py-2 text-sm border border-blue-400 rounded-2xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none resize-none"
                           @keydown.enter.exact.prevent="confirmEdit(message.uuid)"
                           @keydown.esc="cancelEdit"
                         />
-                        <div class="flex gap-2 mt-1">
-                          <button @click="confirmEdit(message.uuid)" class="px-3 py-1 text-xs bg-blue-600 text-white rounded-3 hover:bg-blue-700">{{ $t('common.save') }}</button>
-                          <button @click="cancelEdit" class="px-3 py-1 text-xs border border-gray-300 rounded-3 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800">{{ $t('common.cancel') }}</button>
+                        <div class="flex gap-2 mt-1" :class="isOwn(message) ? 'justify-end' : 'justify-start'">
+                          <button @click="confirmEdit(message.uuid)" class="px-3 py-1 text-xs bg-blue-600 text-white rounded-full hover:bg-blue-700">{{ $t('common.save') }}</button>
+                          <button @click="cancelEdit" class="px-3 py-1 text-xs border border-gray-300 rounded-full text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800">{{ $t('common.cancel') }}</button>
                         </div>
                       </div>
 
-                      <div v-else class="bg-white dark:bg-gray-800 rounded-3 px-3 py-2 border border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-300">
+                      <div
+                        v-else
+                        class="px-3 py-2 rounded-2xl text-sm break-words whitespace-pre-wrap leading-relaxed"
+                        :class="isOwn(message)
+                          ? 'bg-blue-600 text-white rounded-tr-sm'
+                          : [colorFor(message.user?.id).bg, colorFor(message.user?.id).text, 'rounded-tl-sm']"
+                        :style="message._pending ? 'opacity: 0.65' : ''"
+                      >
                         {{ message.content }}
-                        <!-- Attachment -->
-                        <div v-if="message.attachments && message.attachments.length" class="mt-2 flex flex-wrap gap-2">
-                          <a
-                            v-for="att in message.attachments"
-                            :key="att.url"
-                            :href="att.url"
-                            target="_blank"
-                            class="inline-flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:underline"
-                          >
-                            📎 {{ att.name }}
-                          </a>
+                        <!-- Pièces jointes -->
+                        <div v-if="message.attachments?.length" class="mt-2 flex flex-wrap gap-2">
+                          <template v-for="att in message.attachments" :key="att.url">
+                            <a v-if="att.type === 'image'" :href="att.url" target="_blank" rel="noopener" class="block">
+                              <img :src="att.url" :alt="att.name ?? 'photo'" class="max-h-48 max-w-xs rounded-xl object-cover border border-white/20 hover:opacity-90 transition-opacity cursor-zoom-in" />
+                            </a>
+                            <a
+                              v-else
+                              :href="att.url"
+                              target="_blank"
+                              rel="noopener"
+                              class="inline-flex items-center gap-1 text-xs hover:underline opacity-80"
+                            >
+                              📎 {{ att.name }}
+                            </a>
+                          </template>
                         </div>
                       </div>
 
-                      <!-- Reactions row -->
-                      <div class="flex flex-wrap gap-1 mt-1">
+                      <!-- Réactions -->
+                      <div v-if="(message.reactions || []).length" class="flex flex-wrap gap-1 mt-1.5 px-1">
                         <button
                           v-for="reaction in (message.reactions || [])"
                           :key="reaction.emoji"
+                          :disabled="!canPickEmoji(message, reaction.emoji)"
+                          class="inline-flex items-center gap-1 text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 hover:border-blue-400 rounded-full px-2 py-0.5 transition-colors shadow-sm"
+                          :class="reaction.did_react ? 'border-blue-400 ring-1 ring-blue-300' : ''"
                           @click="toggleReaction(message.uuid, reaction.emoji, reaction.did_react)"
-                          :class="[
-                            'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs transition-colors',
-                            reaction.did_react
-                              ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-300 dark:border-blue-700'
-                              : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                          ]"
                         >
                           {{ reaction.emoji }} {{ reaction.count }}
                         </button>
+                      </div>
 
-                        <!-- Quick emoji picker (shown on hover) -->
-                        <div class="hidden group-hover:flex items-center gap-1 ml-1">
+                      <!-- Actions au survol -->
+                      <div
+                        v-if="!message._pending"
+                        class="mt-1 px-1 flex items-center gap-2 transition-opacity opacity-0 group-hover:opacity-100"
+                        :class="isOwn(message) ? 'flex-row-reverse' : 'flex-row'"
+                      >
+                        <!-- Quick emoji picker -->
+                        <div class="flex items-center gap-0.5">
                           <button
                             v-for="emoji in quickEmojis"
                             :key="emoji"
-                            @click="addReaction(message.uuid, emoji)"
-                            class="text-sm opacity-50 hover:opacity-100 transition-opacity"
+                            :disabled="!canPickEmoji(message, emoji)"
+                            class="text-sm transition-transform rounded-full w-6 h-6 flex items-center justify-center"
+                            :class="[
+                              isReactedByMe(message, emoji) ? 'bg-blue-100 dark:bg-blue-900/40 ring-1 ring-blue-400' : '',
+                              canPickEmoji(message, emoji) ? 'hover:scale-125' : 'opacity-30 cursor-not-allowed',
+                            ]"
+                            @click="canPickEmoji(message, emoji) && pickQuickEmoji(message, emoji)"
                           >{{ emoji }}</button>
+                          <span class="text-xs text-gray-400 dark:text-gray-500 pl-0.5 whitespace-nowrap">{{ userReactionCount(message) }}/3</span>
                         </div>
+                        <!-- Répondre -->
+                        <button
+                          @click="startReply(message)"
+                          class="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                          :title="$t('team_show.reply_to')"
+                        >↩</button>
+                        <!-- Modifier (propres messages) -->
+                        <button
+                          v-if="isOwn(message)"
+                          dusk="message-edit-btn"
+                          @click="startEdit(message)"
+                          class="text-xs text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                          :title="$t('team_show.edit_message')"
+                        >{{ $t('common.edit') }}</button>
+                        <!-- Supprimer (propres messages ou propriétaire) -->
+                        <button
+                          v-if="isOwn(message) || isTeamOwner"
+                          dusk="message-delete-btn"
+                          @click="confirmDeleteMessage(message.uuid)"
+                          class="text-xs text-gray-400 hover:text-red-500 transition-colors"
+                          :title="$t('team_show.delete_message')"
+                        >{{ $t('common.delete') }}</button>
                       </div>
-                    </div>
-
-                    <!-- Per-message actions (hover) -->
-                    <div class="hidden group-hover:flex items-start gap-1 flex-shrink-0 pt-1" v-if="!message._pending">
-                      <!-- Reply -->
-                      <button @click="startReply(message)" class="p-1 rounded text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" :title="$t('team_show.reply_to')">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
-                      </button>
-                      <!-- Edit (own messages only) -->
-                      <button
-                        v-if="message.user?.id === authStore.currentUser?.id"
-                        dusk="message-edit-btn"
-                        @click="startEdit(message)"
-                        class="p-1 rounded text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                        :title="$t('team_show.edit_message')"
-                      >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                      </button>
-                      <!-- Delete (own messages or team owner) -->
-                      <button
-                        v-if="message.user?.id === authStore.currentUser?.id || isTeamOwner"
-                        dusk="message-delete-btn"
-                        @click="confirmDeleteMessage(message.uuid)"
-                        class="p-1 rounded text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                        :title="$t('team_show.delete_message')"
-                      >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                      </button>
                     </div>
                   </div>
                 </div>
@@ -256,7 +291,46 @@
                 </button>
               </div>
 
-              <!-- Attachment preview -->
+              <!-- Suggestions @mention -->
+              <div
+                v-if="mentionSuggestions.length"
+                class="mb-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden"
+              >
+                <button
+                  v-for="member in mentionSuggestions"
+                  :key="member.id"
+                  type="button"
+                  class="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left"
+                  :class="member._isEveryone ? 'text-amber-700 dark:text-amber-300' : 'text-gray-800 dark:text-gray-200'"
+                  @mousedown.prevent="insertMention(member)"
+                >
+                  <div
+                    class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium shrink-0"
+                    :class="member._isEveryone ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'"
+                  >
+                    {{ member._isEveryone ? '📢' : (member.nom ?? '?').charAt(0).toUpperCase() }}
+                  </div>
+                  <span class="font-medium">@{{ member.nom }}</span>
+                  <span v-if="member._isEveryone" class="text-xs text-gray-400">{{ $t('chat.mention_everyone_hint') }}</span>
+                  <span v-else class="text-gray-400 text-xs">{{ member.fonction }}</span>
+                </button>
+              </div>
+
+              <!-- Photo preview strip -->
+              <div v-if="pendingPhotos.length" class="flex flex-wrap gap-2 px-1 py-1">
+                <div v-for="(photo, idx) in pendingPhotos" :key="idx" class="relative">
+                  <img :src="photo.url" class="h-20 w-20 rounded-xl object-cover border border-gray-200 dark:border-gray-700" />
+                  <div v-if="photo._uploading" class="absolute inset-0 flex items-center justify-center bg-black/30 rounded-xl">
+                    <svg class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    </svg>
+                  </div>
+                  <button v-else @click="pendingPhotos.splice(idx, 1)" class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-gray-700 text-white text-xs flex items-center justify-center hover:bg-red-600">✕</button>
+                </div>
+              </div>
+
+              <!-- Attachment preview (non-image) -->
               <div v-if="attachmentFile" class="flex items-center gap-2 px-3 py-1 text-xs text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-3">
                 📎 {{ attachmentFile.name }}
                 <button @click="attachmentFile = null; attachmentInputRef && (attachmentInputRef.value = '')" class="text-gray-400 hover:text-red-500 ml-auto">✕</button>
@@ -264,24 +338,33 @@
 
               <!-- Message Input -->
               <form @submit.prevent="sendMessage" class="mt-2 flex gap-2 items-end">
+                <!-- Photo button -->
+                <label class="flex-shrink-0 cursor-pointer p-2 text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-3 transition-colors" :title="$t('chat.attach_photo')">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                  <input ref="photoInputRef" type="file" class="sr-only" accept="image/jpeg,image/png,image/webp,image/gif" multiple @change="onPhotoSelected" />
+                </label>
                 <!-- Attachment button -->
                 <label class="flex-shrink-0 cursor-pointer p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-3 transition-colors" :title="$t('team_show.attachment_btn')">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
-                  <input ref="attachmentInputRef" type="file" class="sr-only" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt" @change="onAttachmentChange" />
+                  <input ref="attachmentInputRef" type="file" class="sr-only" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt" @change="onAttachmentChange" />
                 </label>
 
-                <input
+                <textarea
+                  ref="chatInputRef"
                   v-model="newMessage"
-                  type="text"
+                  rows="1"
                   dusk="chat-input"
                   :placeholder="$t('team_show.message_placeholder')"
-                  class="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all text-sm"
+                  class="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-700 rounded-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all text-sm resize-none overflow-hidden"
+                  @input="onChatInput"
+                  @keydown.enter.exact.prevent="sendMessage"
+                  @keydown.enter.shift.exact="newMessage += '\n'"
                   @keydown="onChatKeydown"
                 />
                 <button
                   type="submit"
                   dusk="chat-send-btn"
-                  :disabled="!newMessage.trim() && !attachmentFile"
+                  :disabled="!newMessage.trim() && !attachmentFile && !pendingPhotos.some(p => !p._uploading)"
                   class="px-4 py-2.5 bg-brand-600 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:bg-brand-700 flex items-center gap-1.5 text-sm"
                 >
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -703,7 +786,7 @@
             {{ $t('team_show.cancel') }}
           </button>
           <button type="button" @click="updateTeam" :disabled="updating || !editForm.name"
-            class="px-5 py-2.5 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+            class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
             <svg v-if="updating" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor"
@@ -799,7 +882,7 @@
             {{ $t('team_show.cancel') }}
           </button>
           <button type="button" @click="addMember" :disabled="addingMember || !newMemberForm.user_id"
-            class="px-5 py-2.5 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+            class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
             <svg v-if="addingMember" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor"
@@ -875,7 +958,7 @@
             {{ $t('team_show.cancel') }}
           </button>
           <button type="button" @click="updateTeam" :disabled="updating || !editForm.name"
-            class="px-5 py-2.5 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+            class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
             <svg v-if="updating" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor"
@@ -971,7 +1054,7 @@
             {{ $t('team_show.cancel') }}
           </button>
           <button type="button" @click="addMember" :disabled="addingMember || !newMemberForm.user_id"
-            class="px-5 py-2.5 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+            class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
             <svg v-if="addingMember" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor"
@@ -1089,7 +1172,7 @@
           </button>
           <button type="button" @click="createNewAnnouncement"
             :disabled="creatingAnnouncement || !announcementForm.title || !announcementForm.content"
-            class="px-5 py-2.5 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+            class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
             <svg v-if="creatingAnnouncement" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor"
@@ -1197,7 +1280,7 @@
           </button>
           <button type="button" @click="createNewResource"
             :disabled="creatingResource || !resourceForm.title || !resourceForm.url"
-            class="px-5 py-2.5 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+            class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
             <svg v-if="creatingResource" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor"
@@ -1322,7 +1405,7 @@
           </button>
           <button type="button" @click="createNewEvent"
             :disabled="creatingEvent || !eventForm.title || !eventForm.start_date"
-            class="px-5 py-2.5 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+            class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-3 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
             <svg v-if="creatingEvent" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor"
@@ -1376,6 +1459,8 @@ const isTeamOwner = computed(() => {
   return authStore.user.is_super_admin || team.value.owner_id === authStore.user.id
 })
 
+const isOwn = (message) => message.user?.id === authStore.currentUser?.id
+
 const users = ref([])
 const fetchUsers = async () => {
   const workspaceId = authStore.currentWorkspaceId
@@ -1397,7 +1482,158 @@ const editingUuid = ref(null)
 const editContent = ref('')
 const attachmentFile = ref(null)
 const attachmentInputRef = ref(null)
+const photoInputRef = ref(null)
+const pendingPhotos = ref([])
+const chatInputRef = ref(null)
+
+// ── @mention ──────────────────────────────────────────────────────────────────
+const mentionSuggestions = ref([])
+const mentionedUserIds = ref([])
+const mentionEveryone = ref(false)
+let mentionSearchTimer = null
+
+const EVERYONE_ENTRY = { id: '__everyone__', nom: 'everyone', _isEveryone: true }
+
+const onChatInput = () => {
+  if (team.value?.id) { sendTyping(team.value.id) }
+
+  const el = chatInputRef.value
+  if (!el) { return }
+  const pos = el.selectionStart
+  const before = newMessage.value.slice(0, pos)
+  const match = before.match(/@(\w*)$/)
+
+  if (!match) {
+    mentionSuggestions.value = []
+    return
+  }
+
+  const query = match[1].toLowerCase()
+  clearTimeout(mentionSearchTimer)
+
+  if ('everyone'.startsWith(query) && query.length >= 1) {
+    mentionSuggestions.value = [EVERYONE_ENTRY]
+    return
+  }
+
+  if (query.length < 2) {
+    mentionSuggestions.value = []
+    return
+  }
+
+  mentionSearchTimer = setTimeout(() => {
+    const members = team.value?.members ?? []
+    mentionSuggestions.value = members
+      .filter((m) => m.nom?.toLowerCase().includes(query))
+      .slice(0, 5)
+  }, 100)
+}
+
+const insertMention = (member) => {
+  const el = chatInputRef.value
+  if (!el) { return }
+  const pos = el.selectionStart
+  const before = newMessage.value.slice(0, pos)
+  const after = newMessage.value.slice(pos)
+
+  if (member._isEveryone) {
+    const replaced = before.replace(/@(\w*)$/, '@everyone ')
+    newMessage.value = replaced + after
+    mentionEveryone.value = true
+    mentionSuggestions.value = []
+    nextTick(() => {
+      el.selectionStart = el.selectionEnd = replaced.length
+      el.focus()
+    })
+    return
+  }
+
+  const replaced = before.replace(/@(\w*)$/, `@${member.nom} `)
+  newMessage.value = replaced + after
+  mentionSuggestions.value = []
+  if (!mentionedUserIds.value.includes(member.id)) {
+    mentionedUserIds.value.push(member.id)
+  }
+  nextTick(() => {
+    el.selectionStart = el.selectionEnd = replaced.length
+    el.focus()
+  })
+}
 const quickEmojis = ['👍', '❤️', '😂', '😮', '👏', '🎉']
+
+// ── Couleurs par expéditeur (palette 50 entrées) ──────────────────────────────
+const BUBBLE_PALETTE = [
+  { bg: 'bg-emerald-100 dark:bg-emerald-900/40', text: 'text-emerald-900 dark:text-emerald-100', avatar: 'bg-emerald-500 text-white' },
+  { bg: 'bg-violet-100 dark:bg-violet-900/40', text: 'text-violet-900 dark:text-violet-100', avatar: 'bg-violet-500 text-white' },
+  { bg: 'bg-amber-100 dark:bg-amber-900/40', text: 'text-amber-900 dark:text-amber-100', avatar: 'bg-amber-500 text-white' },
+  { bg: 'bg-rose-100 dark:bg-rose-900/40', text: 'text-rose-900 dark:text-rose-100', avatar: 'bg-rose-500 text-white' },
+  { bg: 'bg-cyan-100 dark:bg-cyan-900/40', text: 'text-cyan-900 dark:text-cyan-100', avatar: 'bg-cyan-500 text-white' },
+  { bg: 'bg-orange-100 dark:bg-orange-900/40', text: 'text-orange-900 dark:text-orange-100', avatar: 'bg-orange-500 text-white' },
+  { bg: 'bg-teal-100 dark:bg-teal-900/40', text: 'text-teal-900 dark:text-teal-100', avatar: 'bg-teal-500 text-white' },
+  { bg: 'bg-pink-100 dark:bg-pink-900/40', text: 'text-pink-900 dark:text-pink-100', avatar: 'bg-pink-500 text-white' },
+  { bg: 'bg-indigo-100 dark:bg-indigo-900/40', text: 'text-indigo-900 dark:text-indigo-100', avatar: 'bg-indigo-500 text-white' },
+  { bg: 'bg-lime-100 dark:bg-lime-900/40', text: 'text-lime-900 dark:text-lime-100', avatar: 'bg-lime-600 text-white' },
+  { bg: 'bg-sky-100 dark:bg-sky-900/40', text: 'text-sky-900 dark:text-sky-100', avatar: 'bg-sky-500 text-white' },
+  { bg: 'bg-fuchsia-100 dark:bg-fuchsia-900/40', text: 'text-fuchsia-900 dark:text-fuchsia-100', avatar: 'bg-fuchsia-500 text-white' },
+  { bg: 'bg-red-100 dark:bg-red-900/40', text: 'text-red-900 dark:text-red-100', avatar: 'bg-red-500 text-white' },
+  { bg: 'bg-green-100 dark:bg-green-900/40', text: 'text-green-900 dark:text-green-100', avatar: 'bg-green-600 text-white' },
+  { bg: 'bg-yellow-100 dark:bg-yellow-900/40', text: 'text-yellow-900 dark:text-yellow-100', avatar: 'bg-yellow-500 text-white' },
+  { bg: 'bg-purple-100 dark:bg-purple-900/40', text: 'text-purple-900 dark:text-purple-100', avatar: 'bg-purple-500 text-white' },
+  { bg: 'bg-emerald-200 dark:bg-emerald-800/40', text: 'text-emerald-900 dark:text-emerald-100', avatar: 'bg-emerald-700 text-white' },
+  { bg: 'bg-violet-200 dark:bg-violet-800/40', text: 'text-violet-900 dark:text-violet-100', avatar: 'bg-violet-700 text-white' },
+  { bg: 'bg-amber-200 dark:bg-amber-800/40', text: 'text-amber-900 dark:text-amber-100', avatar: 'bg-amber-700 text-white' },
+  { bg: 'bg-rose-200 dark:bg-rose-800/40', text: 'text-rose-900 dark:text-rose-100', avatar: 'bg-rose-700 text-white' },
+  { bg: 'bg-cyan-200 dark:bg-cyan-800/40', text: 'text-cyan-900 dark:text-cyan-100', avatar: 'bg-cyan-700 text-white' },
+  { bg: 'bg-orange-200 dark:bg-orange-800/40', text: 'text-orange-900 dark:text-orange-100', avatar: 'bg-orange-700 text-white' },
+  { bg: 'bg-teal-200 dark:bg-teal-800/40', text: 'text-teal-900 dark:text-teal-100', avatar: 'bg-teal-700 text-white' },
+  { bg: 'bg-pink-200 dark:bg-pink-800/40', text: 'text-pink-900 dark:text-pink-100', avatar: 'bg-pink-700 text-white' },
+  { bg: 'bg-indigo-200 dark:bg-indigo-800/40', text: 'text-indigo-900 dark:text-indigo-100', avatar: 'bg-indigo-700 text-white' },
+  { bg: 'bg-lime-200 dark:bg-lime-800/40', text: 'text-lime-900 dark:text-lime-100', avatar: 'bg-lime-700 text-white' },
+  { bg: 'bg-sky-200 dark:bg-sky-800/40', text: 'text-sky-900 dark:text-sky-100', avatar: 'bg-sky-700 text-white' },
+  { bg: 'bg-fuchsia-200 dark:bg-fuchsia-800/40', text: 'text-fuchsia-900 dark:text-fuchsia-100', avatar: 'bg-fuchsia-700 text-white' },
+  { bg: 'bg-red-200 dark:bg-red-800/40', text: 'text-red-900 dark:text-red-100', avatar: 'bg-red-700 text-white' },
+  { bg: 'bg-green-200 dark:bg-green-800/40', text: 'text-green-900 dark:text-green-100', avatar: 'bg-green-700 text-white' },
+  { bg: 'bg-yellow-200 dark:bg-yellow-800/40', text: 'text-yellow-900 dark:text-yellow-100', avatar: 'bg-yellow-600 text-white' },
+  { bg: 'bg-purple-200 dark:bg-purple-800/40', text: 'text-purple-900 dark:text-purple-100', avatar: 'bg-purple-700 text-white' },
+  { bg: 'bg-emerald-50 dark:bg-emerald-950/60', text: 'text-emerald-900 dark:text-emerald-100', avatar: 'bg-emerald-400 text-white' },
+  { bg: 'bg-violet-50 dark:bg-violet-950/60', text: 'text-violet-900 dark:text-violet-100', avatar: 'bg-violet-400 text-white' },
+  { bg: 'bg-amber-50 dark:bg-amber-950/60', text: 'text-amber-900 dark:text-amber-100', avatar: 'bg-amber-400 text-white' },
+  { bg: 'bg-rose-50 dark:bg-rose-950/60', text: 'text-rose-900 dark:text-rose-100', avatar: 'bg-rose-400 text-white' },
+  { bg: 'bg-cyan-50 dark:bg-cyan-950/60', text: 'text-cyan-900 dark:text-cyan-100', avatar: 'bg-cyan-400 text-white' },
+  { bg: 'bg-orange-50 dark:bg-orange-950/60', text: 'text-orange-900 dark:text-orange-100', avatar: 'bg-orange-400 text-white' },
+  { bg: 'bg-teal-50 dark:bg-teal-950/60', text: 'text-teal-900 dark:text-teal-100', avatar: 'bg-teal-400 text-white' },
+  { bg: 'bg-pink-50 dark:bg-pink-950/60', text: 'text-pink-900 dark:text-pink-100', avatar: 'bg-pink-400 text-white' },
+  { bg: 'bg-indigo-50 dark:bg-indigo-950/60', text: 'text-indigo-900 dark:text-indigo-100', avatar: 'bg-indigo-400 text-white' },
+  { bg: 'bg-lime-50 dark:bg-lime-950/60', text: 'text-lime-900 dark:text-lime-100', avatar: 'bg-lime-500 text-white' },
+  { bg: 'bg-sky-50 dark:bg-sky-950/60', text: 'text-sky-900 dark:text-sky-100', avatar: 'bg-sky-400 text-white' },
+  { bg: 'bg-fuchsia-50 dark:bg-fuchsia-950/60', text: 'text-fuchsia-900 dark:text-fuchsia-100', avatar: 'bg-fuchsia-400 text-white' },
+  { bg: 'bg-red-50 dark:bg-red-950/60', text: 'text-red-900 dark:text-red-100', avatar: 'bg-red-400 text-white' },
+  { bg: 'bg-green-50 dark:bg-green-950/60', text: 'text-green-900 dark:text-green-100', avatar: 'bg-green-500 text-white' },
+  { bg: 'bg-yellow-50 dark:bg-yellow-950/60', text: 'text-yellow-900 dark:text-yellow-100', avatar: 'bg-yellow-400 text-white' },
+  { bg: 'bg-purple-50 dark:bg-purple-950/60', text: 'text-purple-900 dark:text-purple-100', avatar: 'bg-purple-400 text-white' },
+  { bg: 'bg-teal-300 dark:bg-teal-700/50', text: 'text-teal-900 dark:text-teal-100', avatar: 'bg-teal-600 text-white' },
+  { bg: 'bg-sky-300 dark:bg-sky-700/50', text: 'text-sky-900 dark:text-sky-100', avatar: 'bg-sky-600 text-white' },
+]
+const senderColorCache = new Map()
+const colorFor = (userId) => {
+  if (!senderColorCache.has(userId)) {
+    senderColorCache.set(userId, BUBBLE_PALETTE[senderColorCache.size % BUBBLE_PALETTE.length])
+  }
+  return senderColorCache.get(userId)
+}
+
+// ── Limite emoji : max 3 réactions différentes par utilisateur ────────────────
+const isReactedByMe = (message, emoji) =>
+  (message.reactions ?? []).some((r) => r.emoji === emoji && r.did_react)
+const userReactionCount = (message) =>
+  (message.reactions ?? []).filter((r) => r.did_react).length
+const canPickEmoji = (message, emoji) =>
+  isReactedByMe(message, emoji) || userReactionCount(message) < 3
+
+// ── Son de notification ───────────────────────────────────────────────────────
+const teamNotifAudio = new Audio('/sounds/notification.ogg')
+const teamInitialLoadDone = ref(false)
+let teamPrevMessageCount = 0
 const showAddMemberModal = ref(false)
 const showEditModal = ref(false)
 const showAnnouncementModal = ref(false)
@@ -1545,17 +1781,31 @@ const formatDate = (date) => {
 
 const sendMessage = async () => {
   const content = newMessage.value.trim()
-  if (!content && !attachmentFile.value) return
+  const readyPhotos = pendingPhotos.value.filter((p) => !p._uploading)
+  if (!content && !attachmentFile.value && !readyPhotos.length) { return }
+
+  const attachments = readyPhotos.map((p) => ({ url: p.url, name: p.name, type: 'image' }))
+
+  const capturedMentions = [...mentionedUserIds.value]
+  const capturedEveryone = mentionEveryone.value
 
   const data = new FormData()
   data.append('content', content)
-  if (replyingTo.value) data.append('reply_to_id', replyingTo.value.id ?? '')
-  if (attachmentFile.value) data.append('attachment', attachmentFile.value)
+  if (replyingTo.value) { data.append('reply_to_id', replyingTo.value.id ?? '') }
+  if (attachmentFile.value) { data.append('attachment', attachmentFile.value) }
+  if (attachments.length) { data.append('attachments_json', JSON.stringify(attachments)) }
+  if (capturedMentions.length) { data.append('mentions', JSON.stringify(capturedMentions)) }
+  if (capturedEveryone) { data.append('mention_everyone', '1') }
 
   newMessage.value = ''
   replyingTo.value = null
   attachmentFile.value = null
-  if (attachmentInputRef.value) attachmentInputRef.value.value = ''
+  pendingPhotos.value = []
+  mentionSuggestions.value = []
+  mentionedUserIds.value = []
+  mentionEveryone.value = false
+  if (attachmentInputRef.value) { attachmentInputRef.value.value = '' }
+  if (photoInputRef.value) { photoInputRef.value.value = '' }
 
   try {
     await sendMessageApi(route.params.uuid, data)
@@ -1565,6 +1815,32 @@ const sendMessage = async () => {
   } catch {
     /* erreur gérée dans le composable */
   }
+}
+
+// ── Upload de photos ──────────────────────────────────────────────────────────
+
+const onPhotoSelected = async (e) => {
+  const files = Array.from(e.target.files ?? [])
+  if (!files.length) { return }
+  const workspaceId = authStore.currentWorkspaceId
+  for (const file of files) {
+    const localUrl = URL.createObjectURL(file)
+    const entry = { url: localUrl, name: file.name, _uploading: true }
+    pendingPhotos.value.push(entry)
+    const form = new FormData()
+    form.append('photo', file)
+    try {
+      const { data } = await api.post(`/workspaces/${workspaceId}/chat/upload`, form)
+      const idx = pendingPhotos.value.indexOf(entry)
+      if (idx !== -1) {
+        pendingPhotos.value.splice(idx, 1, { url: data.url, name: data.name, type: 'image', _uploading: false })
+      }
+    } catch {
+      const idx = pendingPhotos.value.indexOf(entry)
+      if (idx !== -1) { pendingPhotos.value.splice(idx, 1) }
+    }
+  }
+  if (photoInputRef.value) { photoInputRef.value.value = '' }
 }
 
 // ── Édition inline ────────────────────────────────────────────────────────────
@@ -1606,7 +1882,19 @@ const startReply = (message) => {
 // ── Réactions ─────────────────────────────────────────────────────────────────
 
 const toggleReaction = (uuid, emoji, didReact) => {
-  didReact ? removeReaction(uuid, emoji) : addReaction(uuid, emoji)
+  const message = messages.value.find((m) => m.uuid === uuid)
+  if (!message) { return }
+  if (didReact) {
+    removeReaction(uuid, emoji)
+  } else if (canPickEmoji(message, emoji)) {
+    addReaction(uuid, emoji)
+  }
+}
+
+const pickQuickEmoji = (message, emoji) => {
+  if (canPickEmoji(message, emoji)) {
+    addReaction(message.uuid, emoji)
+  }
 }
 
 // ── Pièce jointe ──────────────────────────────────────────────────────────────
@@ -1617,8 +1905,8 @@ const onAttachmentChange = (e) => {
 
 // ── Indicateur de frappe ──────────────────────────────────────────────────────
 
-const onChatKeydown = () => {
-  if (team.value?.id) sendTyping(team.value.id)
+const onChatKeydown = (e) => {
+  if (e.key === 'Escape') { mentionSuggestions.value = [] }
 }
 
 const scrollToBottom = () => {
@@ -1819,8 +2107,9 @@ onMounted(async () => {
     }
 
     nextTick(() => {
+      teamInitialLoadDone.value = true
+      teamPrevMessageCount = messages.value.length
       scrollToBottom()
-      // Faire défiler jusqu'au message ciblé si ?message= est dans l'URL (depuis la recherche)
       if (route.query.message) {
         scrollToMessage(String(route.query.message))
       }
@@ -1828,6 +2117,18 @@ onMounted(async () => {
   } catch (error) {
     console.error('Erreur lors du chargement de l\'équipe:', error.response?.data || error.message)
   }
+})
+
+// Son sur nouveau message entrant (après chargement initial)
+watch(messages, (next) => {
+  if (teamInitialLoadDone.value && next.length > teamPrevMessageCount) {
+    const newest = next[next.length - 1]
+    if (newest && !newest._pending && newest.user?.id !== authStore.currentUser?.id) {
+      teamNotifAudio.currentTime = 0
+      teamNotifAudio.play().catch(() => {})
+    }
+  }
+  teamPrevMessageCount = next.length
 })
 
 onUnmounted(() => {

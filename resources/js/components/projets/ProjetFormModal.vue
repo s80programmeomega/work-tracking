@@ -238,6 +238,85 @@
               </div>
             </div>
 
+            <!-- Intégration équipes -->
+            <div class="space-y-3 pt-2 border-t border-gray-200 dark:border-gray-700">
+              <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Intégration équipes
+              </h3>
+
+              <!-- Toggle -->
+              <div
+                class="flex items-center gap-4 p-4 border-2 rounded-xl transition-all"
+                :class="form.use_teams ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' : 'border-gray-200 dark:border-gray-700'"
+              >
+                <div class="flex-1">
+                  <p class="text-sm font-medium text-gray-900 dark:text-white">Gérer les membres via des équipes</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    Les membres seront assignés en liant une ou plusieurs équipes au projet.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  :aria-checked="form.use_teams"
+                  @click="form.use_teams = !form.use_teams"
+                  class="relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                  :class="form.use_teams ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-700'"
+                >
+                  <span
+                    class="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform transition-transform duration-200"
+                    :class="form.use_teams ? 'translate-x-5' : 'translate-x-0'"
+                  />
+                </button>
+              </div>
+
+              <!-- Team picker -->
+              <div v-if="form.use_teams" class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                <div class="px-3 py-2 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                  <span class="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                    Équipes à lier
+                    <span v-if="selectedTeamIds.length" class="ml-1 text-indigo-600 dark:text-indigo-400">
+                      ({{ selectedTeamIds.length }} sélectionnée{{ selectedTeamIds.length > 1 ? 's' : '' }})
+                    </span>
+                  </span>
+                </div>
+
+                <div v-if="loadingTeams" class="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                  Chargement des équipes…
+                </div>
+                <div v-else-if="workspaceTeams.length === 0" class="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                  Aucune équipe disponible dans ce workspace.
+                </div>
+                <div v-else class="divide-y divide-gray-100 dark:divide-gray-800 max-h-48 overflow-y-auto">
+                  <label
+                    v-for="team in workspaceTeams"
+                    :key="team.id"
+                    class="flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    :class="selectedTeamIds.includes(team.id) ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''"
+                  >
+                    <input
+                      type="checkbox"
+                      :checked="selectedTeamIds.includes(team.id)"
+                      @change="toggleTeamSelection(team.id)"
+                      class="w-4 h-4 text-indigo-600 rounded border-gray-300 dark:border-gray-600 focus:ring-indigo-500"
+                    />
+                    <div class="flex-1 min-w-0">
+                      <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ team.name }}</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">
+                        {{ team.members_count ?? team.members?.length ?? 0 }} membre{{ (team.members_count ?? team.members?.length ?? 0) !== 1 ? 's' : '' }}
+                      </p>
+                    </div>
+                    <svg v-if="selectedTeamIds.includes(team.id)" class="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                  </label>
+                </div>
+              </div>
+            </div>
+
           </form>
         </div>
 
@@ -264,6 +343,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import api from '@/api/axios'
 import { useDraggable } from '@/composables/useDraggable'
 
 const { dialogRef, handleRef, dragStyle, attachHandle } = useDraggable()
@@ -301,6 +381,31 @@ const fieldErrors     = ref({ nom: '', date_debut: '', date_fin: '', responsable
 const presetColors = ['#3B82F6','#10B981','#8B5CF6','#F59E0B','#EF4444','#EC4899','#14B8A6','#F97316']
 const isEdit = computed(() => !!props.projet)
 
+// ── Intégration équipes ───────────────────────────────────────────────────────
+const workspaceTeams     = ref([])
+const loadingTeams       = ref(false)
+const selectedTeamIds    = ref([])
+
+const loadTeams = async (wsId) => {
+  if (!wsId) return
+  loadingTeams.value = true
+  try {
+    const { data } = await api.get('/teams', { params: { workspace_id: wsId, per_page: 100 } })
+    // API retourne { success, teams: { data: [...] } }
+    workspaceTeams.value = data.teams?.data ?? data.teams ?? data.data ?? []
+  } catch {
+    workspaceTeams.value = []
+  } finally {
+    loadingTeams.value = false
+  }
+}
+
+const toggleTeamSelection = (teamId) => {
+  const idx = selectedTeamIds.value.indexOf(teamId)
+  if (idx === -1) selectedTeamIds.value.push(teamId)
+  else selectedTeamIds.value.splice(idx, 1)
+}
+
 const form = ref({
   workspace_id: '',
   nom: '',
@@ -314,7 +419,15 @@ const form = ref({
   budget: null,
   objectifs: '',
   is_template: false,
-  is_favorite: false
+  is_favorite: false,
+  use_teams: false
+})
+
+watch(() => form.value.use_teams, (enabled) => {
+  if (enabled && workspaceTeams.value.length === 0) {
+    loadTeams(form.value.workspace_id || currentWorkspaceId.value)
+  }
+  if (!enabled) selectedTeamIds.value = []
 })
 
 // ── Helpers erreurs ───────────────────────────────────────────
@@ -389,6 +502,12 @@ watch(() => form.value.workspace_id, async (newId) => {
   if (!isEdit.value) {
     form.value.responsable_id = users.value.find(u => u.id === authStore.user?.id) ? authStore.user.id : ''
   }
+  // Recharger les équipes si le toggle est déjà actif
+  if (form.value.use_teams) {
+    workspaceTeams.value = []
+    selectedTeamIds.value = []
+    await loadTeams(newId)
+  }
 })
 
 // ── Soumission ────────────────────────────────────────────────
@@ -442,7 +561,15 @@ const handleSubmit = async () => {
       await updateProjet(props.projet.id, submitData)
       toast.success('✅ Projet mis à jour avec succès !', { position: 'top-right', timeout: 4000 })
     } else {
-      await createProjet(submitData)
+      const created = await createProjet(submitData)
+      // Lier les équipes sélectionnées après création
+      if (submitData.use_teams && selectedTeamIds.value.length && created?.id) {
+        await Promise.all(
+          selectedTeamIds.value.map((teamId) =>
+            api.post(`/projets/${created.id}/teams`, { team_id: teamId }).catch(() => {})
+          )
+        )
+      }
       toast.success('✅ Projet créé avec succès !', { position: 'top-right', timeout: 4000 })
     }
     emit('saved')

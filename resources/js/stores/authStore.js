@@ -432,7 +432,8 @@ export const useAuthStore = defineStore('auth', {
             const workspaces = this.userWorkspaces;
             const workspace = workspaces.find(w => w.id === workspaceId);
 
-            return workspace?.pivot?.role || null;
+            // L'API retourne user_role (non paginé) ou pivot.role (certains endpoints)
+            return workspace?.pivot?.role || workspace?.user_role || null;
         },
 
         /**

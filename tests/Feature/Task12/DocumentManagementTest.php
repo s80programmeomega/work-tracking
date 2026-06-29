@@ -75,7 +75,6 @@ class DocumentManagementTest extends TestCase
             'chemin' => 'documents/test-doc.pdf',
             'disk' => 'local',
             'user_id' => $this->owner->id,
-            'visibility' => 'team',
         ]);
     }
 

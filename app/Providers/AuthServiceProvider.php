@@ -11,12 +11,14 @@ use App\Models\SousTache;
 use App\Models\Tache;
 use App\Models\User;
 use App\Models\Workspace;
+use App\Models\WorkspaceMessage;
 use App\Permissions\ContextualPermissionGate;
 use App\Policies\ActivitePolicy;
 use App\Policies\DocumentPolicy;
 use App\Policies\ProjetPolicy;
 use App\Policies\SousTachePolicy;
 use App\Policies\TachePolicy;
+use App\Policies\WorkspaceMessagePolicy;
 use App\Policies\WorkspacePolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
@@ -30,6 +32,7 @@ class AuthServiceProvider extends ServiceProvider
         Tache::class => TachePolicy::class,
         SousTache::class => SousTachePolicy::class,
         Document::class => DocumentPolicy::class,
+        WorkspaceMessage::class => WorkspaceMessagePolicy::class,
     ];
 
     public function boot(): void

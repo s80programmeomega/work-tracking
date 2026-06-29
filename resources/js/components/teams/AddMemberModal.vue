@@ -151,7 +151,7 @@
             type="submit"
             @click="handleSubmit"
             :disabled="loading || !formData.user_id"
-            class="px-6 py-2.5 text-white font-semibold rounded-3 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            class="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-3 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             <span v-if="loading" class="flex items-center gap-2">
               <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
@@ -169,9 +169,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useDraggable } from '@/composables/useDraggable'
 import api from '@/api/axios'
+import { useWorkspace } from '@/composables/useWorkspace'
 
 // Modale déplaçable par son en-tête.
 const { dialogRef, handleRef, dragStyle, attachHandle } = useDraggable()
@@ -188,6 +189,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close', 'saved'])
+
+const { currentWorkspaceId } = useWorkspace()
 
 const loading = ref(false)
 const errorMessage = ref('')
@@ -225,11 +228,13 @@ const availableUsers = computed(() => {
 })
 
 const loadUsers = async () => {
+  const workspaceId = currentWorkspaceId.value
+  if (!workspaceId) { return }
   try {
-    const { data } = await api.get('/users')
-    allUsers.value = data.data || []
+    const { data } = await api.get(`/workspaces/${workspaceId}/users`)
+    allUsers.value = data.data || data || []
   } catch (error) {
-    console.error('Error loading users:', error)
+    console.error('Erreur lors du chargement des utilisateurs:', error)
   }
 }
 

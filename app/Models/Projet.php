@@ -558,7 +558,7 @@ class Projet extends Model
 
         return $this->taches()->where(function ($query) use ($user) {
             $query->whereHas('assignees', fn ($q) => $q->where('user_id', $user->id))
-                ->orWhere('responsable_id', $user->id);
+                ->orWhere('taches.responsable_id', $user->id);
         });
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Projet;
 use App\Models\Team;
 use App\Models\TeamActivity;
 use App\Models\TeamMember;
@@ -24,6 +25,10 @@ class TeamService
 
         if (isset($filters['is_active'])) {
             $query->where('is_active', $filters['is_active']);
+        }
+
+        if (isset($filters['workspace_id'])) {
+            $query->where('workspace_id', $filters['workspace_id']);
         }
 
         if (isset($filters['project_id'])) {
@@ -56,13 +61,18 @@ class TeamService
     /**
      * Get teams for a user
      */
-    public function getUserTeams(User $user)
+    public function getUserTeams(User $user, ?int $workspaceId = null)
     {
-        return $user->teams()
+        $query = $user->teams()
             ->withCount('members')
             ->with(['owner', 'project'])
-            ->orderBy('created_at', 'desc')
-            ->get();
+            ->orderBy('created_at', 'desc');
+
+        if ($workspaceId) {
+            $query->where('teams.workspace_id', $workspaceId);
+        }
+
+        return $query->get();
     }
 
     /**
@@ -75,6 +85,7 @@ class TeamService
                 'name' => $data['name'],
                 'description' => $data['description'] ?? null,
                 'owner_id' => $owner->id,
+                'workspace_id' => $data['workspace_id'] ?? null,
                 'project_id' => $data['project_id'] ?? null,
                 'settings' => $data['settings'] ?? [],
                 'is_active' => true,
@@ -152,12 +163,30 @@ class TeamService
     }
 
     /**
-     * Delete team
+     * Delete team.
+     *
+     * Members already synced to linked projects are kept (not removed).
+     * Projects that had this as their last linked team auto-disable use_teams.
      */
     public function deleteTeam(Team $team): bool
     {
-        // Log activity before deletion
         TeamActivity::log($team, auth()->user(), 'team_deleted');
+
+        // Le projet lié à cette équipe (via teams.project_id)
+        $linkedProjetId = $team->project_id;
+
+        // Délier l'équipe du projet sans déclencher l'observer TeamProjectObserver
+        // (les membres synchro restent intentionnellement dans le projet).
+        if ($linkedProjetId !== null) {
+            $team->project_id = null;
+            $team->saveQuietly();
+
+            // Si ce projet n'a plus d'autre équipe liée, désactiver use_teams
+            $hasOtherTeams = Team::where('project_id', $linkedProjetId)->exists();
+            if (! $hasOtherTeams) {
+                Projet::where('id', $linkedProjetId)->update(['use_teams' => false]);
+            }
+        }
 
         return $team->delete();
     }

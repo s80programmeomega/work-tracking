@@ -18,7 +18,7 @@
 
 **Date:** 2026-06-28
 **Branch:** `feature/visibility-teams-chat`
-**Status:** 🔄 In progress — Phase 2 (team integration) Steps 2.1–2.6 complete. Step 2.7 (tests) deferred to end of plan.
+**Status:** ✅ Chat polish complete — notification system audit done, team chat centralized. Ready to commit and merge into `jonas`.
 
 ---
 
@@ -84,22 +84,40 @@
 
 ## Current Task
 
-**Phase 2 complete** (Steps 2.1–2.6 done; 2.7 tests deferred to end of plan).
+Feature branch `feature/visibility-teams-chat` is fully complete, including post-phase chat polish. Awaiting commit and merge into `jonas`.
+
+**What was done (chat polish session — 2026-06-28):**
+
+### Sound on reload fix (WorkspaceChat.vue)
+- Added `initialLoadDone = ref(false)`, reset + set in `loadChannel()`, gated sound watcher on it.
+- `prevMessageCount` reset on channel switch to avoid false-positive count after load.
+
+### Responsibles tab access fix (WorkspaceChat.vue)
+- `userRole` computed now uses `authStore.getWorkspaceRole(workspaceId.value)` instead of `authStore.user?.workspace_role` (which doesn't exist).
+- `canAccessResponsibles` and `canPin` now resolve correctly for all roles.
+
+### Notification system audit (App.vue + NotificationMenu.vue)
+- Extended title extraction in `App.vue` `onNotification` to cover `document_nom`, `team_name`, `projet_nom`, `workspace_name` keys.
+- `NotificationMenu.vue` now subscribes to `useLiveNotifications.onNotification` → `safeFetchUnread()` on every broadcast notification (was only refreshing on resultat/pending events + 60s poll).
+
+### Team chat centralization (Teams/Show.vue + TeamMessageController.php)
+- Added 50-entry `BUBBLE_PALETTE` and `colorFor(userId)` → avatar and bubble backgrounds now per-user and deterministic.
+- Added `isReactedByMe`, `userReactionCount`, `canPickEmoji` → max 3 different emoji reactions per user enforced.
+- `toggleReaction` and new `pickQuickEmoji` helper both check the limit before acting.
+- Added `teamNotifAudio`, `teamInitialLoadDone`, `teamPrevMessageCount`, sound watcher with same guard pattern as workspace chat.
+- Added `pendingPhotos`, `photoInputRef`, `onPhotoSelected()`: photos upload via `/workspaces/{id}/chat/upload`, show inline preview strip before send.
+- `sendMessage` passes uploaded photo URLs as `attachments_json` (JSON string in FormData).
+- `TeamMessageController::store()` now merges `attachments_json` decoded photos into `data['attachments']`.
+- Photo preview in existing messages now renders `<img>` for `type === 'image'` attachments.
+- Bubble colors applied to both avatar and message bubble; own messages stay `bg-blue-600`.
+
+**Pre-commit gates:** Pint clean (2 unrelated files auto-fixed), Larastan 0 errors.
 
 ---
 
 ## Next Task
 
-**Phase 3 — Multi-Type Chat** (from plan):
-1. Migrations: `workspace_channels`, `workspace_messages`, `workspace_message_reactions`, `workspace_channel_reads`.
-2. Models + service: `WorkspaceChannel`, `WorkspaceMessage` (Searchable), `WorkspaceMessageReaction`, `WorkspaceMessageService`.
-3. Artisan command `workspace:seed-channels` for existing workspaces.
-4. Broadcast events + channel auth.
-5. API controller + routes.
-6. Frontend: `useWorkspaceMessages.js`, `WorkspaceChat.vue`, sidebar changes.
-7. Notifications: `WorkspaceMessageMentionNotification`.
-
-Read `docs/WORKING_GUIDELINES.md` before starting Phase 3.
+Commit `feature/visibility-teams-chat` and merge into `jonas`, then push to both remotes (with explicit per-push approval for `jonas`).
 
 ---
 

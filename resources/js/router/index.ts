@@ -648,6 +648,19 @@ const router = createRouter({
         requiresAuth: true,
       },
     },
+    // ==========================================
+    // WORKSPACE CHAT (Phase 3)
+    // ==========================================
+    {
+      path: '/workspace/chat',
+      name: 'workspace.chat',
+      component: () => import('../pages/workspace/WorkspaceChat.vue'),
+      meta: {
+        title: 'Chat Workspace',
+        requiresAuth: true,
+      },
+    },
+
     {
       path: '/teams',
       name: 'teams.index',

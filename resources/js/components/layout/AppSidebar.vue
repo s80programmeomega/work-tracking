@@ -484,14 +484,25 @@ const {
     isDirecteur,
 } = useWorkspacePermissions(currentWorkspace);
 
-// Badge de messages non lus dans les équipes
+// Badge de messages non lus (équipes + canaux workspace)
 const totalUnreadChat = ref(0)
+const workspaceUnreadChat = ref(0)
 const fetchUnreadChat = async () => {
     try {
         const { data } = await api.get('/teams/unread-total')
         totalUnreadChat.value = data.total ?? 0
     } catch {
         totalUnreadChat.value = 0
+    }
+}
+const fetchWorkspaceUnread = async () => {
+    try {
+        const wsId = authStore.currentWorkspaceId
+        if (!wsId) return
+        const { data } = await api.get(`/workspaces/${wsId}/chat/unread`)
+        workspaceUnreadChat.value = data.total ?? 0
+    } catch {
+        workspaceUnreadChat.value = 0
     }
 }
 
@@ -710,6 +721,13 @@ const menuGroups = computed(() => [
     {
         title: t('sidebar.workspace_management'),
         items: [
+            {
+                icon: ChatIcon,
+                name: t('navigation.workspace_chat'),
+                path: "/workspace/chat",
+                badge: workspaceUnreadChat.value > 0 ? String(workspaceUnreadChat.value > 99 ? '99+' : workspaceUnreadChat.value) : '',
+                superAdminHidden: true,
+            },
             {
                 icon: ChatIcon,
                 name: t('navigation.teams'),
@@ -950,8 +968,9 @@ onMounted(async () => {
 
         syncOpenSubmenuFromRoute();
 
-        // Non-blocking — don't delay render for unread badge
-        fetchUnreadChat();
+        // Non-blocking — don't delay render for unread badges
+        fetchUnreadChat()
+        fetchWorkspaceUnread()
     } catch (error) {
         console.error("❌ Erreur lors de l'initialisation du sidebar:", error);
     }

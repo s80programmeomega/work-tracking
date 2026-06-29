@@ -484,12 +484,15 @@ class DashboardController extends Controller
     public function personalStats(Request $request)
     {
         $user = $request->user();
+        $workspaceId = $request->input('workspace_id') ?? $user->current_workspace_id;
 
-        // Tasks assigned to user
-        $myTasks = Tache::assignedTo($user->id)->get();
+        $myTasks = Tache::assignedTo($user->id)
+            ->whereHas('activite.projet', fn ($q) => $q->where('workspace_id', $workspaceId))
+            ->get();
 
-        // Projects where user is responsable
-        $myProjects = Projet::where('responsable_id', $user->id)->get();
+        $myProjects = Projet::where('responsable_id', $user->id)
+            ->where('workspace_id', $workspaceId)
+            ->get();
 
         return response()->json([
             'my_tasks' => [
@@ -503,8 +506,8 @@ class DashboardController extends Controller
                 'actifs' => $myProjects->where('status', 'active')->count(),
                 'completion_moyenne' => $myProjects->avg('progression'),
             ],
-            'recent_activity' => $this->getRecentActivity($user),
-            'upcoming_deadlines' => $this->getUpcomingDeadlines($user),
+            'recent_activity' => $this->getRecentActivity($user, $workspaceId),
+            'upcoming_deadlines' => $this->getUpcomingDeadlines($user, $workspaceId),
         ]);
     }
 
@@ -545,47 +548,49 @@ class DashboardController extends Controller
     /**
      * Get recent activity for user
      */
-    private function getRecentActivity($user)
+    private function getRecentActivity($user, ?int $workspaceId = null)
     {
-        // This would integrate with activity log
-        // For now, return recent task updates
         return Tache::assignedTo($user->id)
+            ->when($workspaceId, fn ($q) => $q->whereHas(
+                'activite.projet',
+                fn ($pq) => $pq->where('workspace_id', $workspaceId)
+            ))
             ->orderBy('updated_at', 'desc')
             ->take(10)
             ->get()
-            ->map(function ($tache) {
-                return [
-                    'id' => $tache->id,
-                    'type' => 'task_update',
-                    'title' => $tache->titre,
-                    'description' => 'Tâche mise à jour',
-                    'timestamp' => $tache->updated_at->diffForHumans(),
-                ];
-            });
+            ->map(fn ($tache) => [
+                'id' => $tache->id,
+                'type' => 'task_update',
+                'title' => $tache->titre,
+                'description' => 'Tâche mise à jour',
+                'timestamp' => $tache->updated_at->diffForHumans(),
+            ]);
     }
 
     /**
      * Get upcoming deadlines for user
      */
-    private function getUpcomingDeadlines($user)
+    private function getUpcomingDeadlines($user, ?int $workspaceId = null)
     {
         return Tache::assignedTo($user->id)
+            ->when($workspaceId, fn ($q) => $q->whereHas(
+                'activite.projet',
+                fn ($pq) => $pq->where('workspace_id', $workspaceId)
+            ))
             ->where('statut', '!=', TacheStatut::TERMINE->value)
             ->whereNotNull('echeance')
             ->where('echeance', '>=', now())
             ->where('echeance', '<=', now()->addDays(14))
             ->orderBy('echeance')
             ->get()
-            ->map(function ($tache) {
-                return [
-                    'id' => $tache->id,
-                    'title' => $tache->titre,
-                    'code' => $tache->code,
-                    'due_date' => $tache->echeance->format('Y-m-d'),
-                    'days_remaining' => now()->diffInDays($tache->echeance),
-                    'priority' => $tache->priorite->value,
-                    'project' => $tache->activite->projet->nom,
-                ];
-            });
+            ->map(fn ($tache) => [
+                'id' => $tache->id,
+                'title' => $tache->titre,
+                'code' => $tache->code,
+                'due_date' => $tache->echeance->format('Y-m-d'),
+                'days_remaining' => now()->diffInDays($tache->echeance),
+                'priority' => $tache->priorite->value,
+                'project' => $tache->activite->projet->nom,
+            ]);
     }
 }

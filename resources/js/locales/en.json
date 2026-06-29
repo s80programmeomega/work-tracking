@@ -124,7 +124,32 @@
     "platform_dashboard": "Platform Dashboard",
     "plans": "Plans",
     "roles_permissions": "Roles & Permissions",
-    "search": "Search"
+    "search": "Search",
+    "workspace_chat": "Workspace Chat"
+  },
+  "chat": {
+    "workspace_chat": "Workspace Chat",
+    "global": "Global",
+    "global_desc": "Open channel for all workspace members",
+    "responsibles": "Responsibles",
+    "responsibles_desc": "Channel for directors, managers and senior staff",
+    "teams": "Teams",
+    "view_teams": "View teams",
+    "no_messages": "No messages yet. Be the first to write!",
+    "type_message": "Write a message… (Enter to send, Shift+Enter for new line)",
+    "edited": "(edited)",
+    "pinned": "Pinned",
+    "pin": "Pin",
+    "unpin": "Unpin",
+    "reply": "Reply",
+    "typing": "is typing",
+    "editing_message": "Editing message — press Enter to save, Esc to cancel",
+    "confirm_delete": "Delete this message?",
+    "you": "You",
+    "reaction_limit": "Maximum 3 different reactions per message",
+    "reactions_used": "reactions used",
+    "mention_everyone_hint": "Notify all members",
+    "attach_photo": "Attach a photo"
   },
   "sidebar": {
     "my_workspace": "My Workspace",

@@ -847,7 +847,7 @@ const confirmBulkDelete = async () => {
 }
 
 const goToActiveProjects = () => {
-  router.push({ name: 'projets.mes-projets' })
+  router.push({ name: 'projets.my' })
 }
 
 // Utility methods

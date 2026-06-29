@@ -28,6 +28,7 @@ class TeamController extends Controller
         try {
             $filters = [
                 'is_active' => $request->input('is_active', true),
+                'workspace_id' => $request->input('workspace_id'),
                 'project_id' => $request->input('project_id'),
                 'search' => $request->input('search'),
                 'per_page' => $request->input('per_page', 15),
@@ -54,7 +55,11 @@ class TeamController extends Controller
     public function myTeams(Request $request): JsonResponse
     {
         try {
-            $teams = $this->teamService->getUserTeams($request->user());
+            $workspaceId = $request->input('workspace_id')
+                ? (int) $request->input('workspace_id')
+                : $request->user()->current_workspace_id;
+
+            $teams = $this->teamService->getUserTeams($request->user(), $workspaceId);
 
             return response()->json([
                 'success' => true,
@@ -102,6 +107,7 @@ class TeamController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'workspace_id' => 'nullable|exists:workspaces,id',
             'project_id' => 'nullable|exists:projets,id',
             'settings' => 'nullable|array',
         ]);
@@ -114,7 +120,12 @@ class TeamController extends Controller
         }
 
         try {
-            $team = $this->teamService->createTeam($request->user(), $validator->validated());
+            $data = $validator->validated();
+            // Résoudre le workspace : priorité au champ envoyé, sinon workspace courant de l'utilisateur
+            if (empty($data['workspace_id'])) {
+                $data['workspace_id'] = $request->user()->current_workspace_id;
+            }
+            $team = $this->teamService->createTeam($request->user(), $data);
 
             return response()->json([
                 'success' => true,

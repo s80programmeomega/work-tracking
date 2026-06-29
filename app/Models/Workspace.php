@@ -187,6 +187,11 @@ class Workspace extends Model
         return $this->hasMany(WorkspaceInvitation::class);
     }
 
+    public function channels(): HasMany
+    {
+        return $this->hasMany(WorkspaceChannel::class);
+    }
+
     /**
      * Accesseur pour obtenir une valeur de setting
      */
