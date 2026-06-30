@@ -364,6 +364,7 @@ Route::middleware(['auth:sanctum', 'subscription.status'])->group(function () {
         Route::get('/projets-accessibles', [ProjetController::class, 'accessible']);
 
         // CRUD de base
+        Route::get('/', [ProjetController::class, 'index']);
         Route::post('/', [ProjetController::class, 'store']);
         Route::get('/{projet}', [ProjetController::class, 'show']);
         Route::put('/{projet}', [ProjetController::class, 'update']);

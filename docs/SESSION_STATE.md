@@ -17,8 +17,36 @@
 ## Current Session
 
 **Date:** 2026-06-30
-**Branch:** `feature/visibility-teams-chat`
-**Status:** ✅ Pre-merge regression sweep complete — 5 failing tests found and fixed (full suite was never run before this session). Ready to merge into `jonas`.
+**Branch:** `jonas` (merged from `feature/visibility-teams-chat`)
+**Status:** ✅ Merged and pushed to both remotes. Post-merge bug report fixed (see below). 913 tests passing, Pint clean, Larastan 0 errors.
+
+### Post-merge bug report fix (2026-06-30)
+
+User report: workspace owner (`manager@worktracking.com`) redirected to `/unauthorized` visiting `/activites/all/activity`. Root cause was **pre-existing on `jonas`, not introduced by today's merge** — commit `8d9f169` (2026-06-26, superadmin scoping) stubbed `ActiviteController::index()` to `abort(403)` unconditionally ("superadmin no longer has unscoped access") but never wired a scoped replacement, while the sidebar link (`canViewAllActivities` = directeur/manager) and frontend store still called the route. Fixed by restoring `index()` using the existing `ActiviteService::getAccessibleActivites()` (workspace-scoped via `Projet::scopeAccessibleBy`, already includes workspace owner/manager) — same pattern the equivalent `ProjetController` methods use elsewhere. Verified 200 OK via direct HTTP call with the affected user's token.
+
+**Follow-up found the same bug's twin:** `ProjetController::index()` had the identical `abort(403)` stub from the same commit, but worse — `GET /api/projets` (the bare path `projetStore.js` calls for the "all projects" sidebar page) wasn't registered in `routes/api.php` at all, so the SPA's catch-all route returned the HTML shell (200) instead of JSON, silently breaking `Projets.vue` without any error redirect (that's why it wasn't reported the same way). Fixed by registering `Route::get('/', [ProjetController::class, 'index'])` and restoring `index()` to mirror `myProjets()`, using `ProjetService::getUserProjets()` (scoped via `Projet::scopeVisibleTo`, includes workspace owner/manager). Verified 200 OK + proper paginated JSON via direct HTTP call.
+
+No tests previously covered either endpoint. Both fixes scoped-Larastan clean; full suite re-run after both fixes: 913 passed, 6 skipped, 0 failed. Pint clean.
+
+### Temp admin lifecycle fix — suspend/reactivate grant loss (2026-06-30)
+
+User report: when a temp admin account's expiry action is `suspend`, reactivating it afterward doesn't restore workspace access or assigned rights. Root cause: `AdminController::terminate()` and `ExpireSuperAdminAccounts` **deleted** the `temporary_access` and `is_temp_access` `workspace_members` rows unconditionally on suspend (only `delete`-action accounts should lose grants) — `reactivateTempAdmin()` had a comment admitting it couldn't restore them ("on ne peut pas deviner lesquels recréer"). Fixed: grants are now only deleted for the `delete` action; for `suspend`, `is_active=false` (already blocks login at `AuthService::login`) plus token revocation is sufficient to lock the account out without destroying the grant data. `reactivateTempAdmin()` now also re-anchors `admin_expires_at` and all `temporary_access.expires_at` rows to a fresh expiry window (same original duration), since the old absolute timestamps would otherwise still read as expired post-reactivation.
+
+**Also added (explicitly requested):** both `terminate()` and `ExpireSuperAdminAccounts` now `broadcast(new SessionsAllRevoked($user))` after token revocation, reusing the existing realtime session-kill mechanism (`useLiveNotifications.js` → `authStore.logout()`) so suspension/revocation takes effect immediately in any open tab, no page reload needed.
+
+4 new regression tests in `TempAdminTest` (broadcast + suspend-keeps-grants + delete-removes-grants + reactivate-restores-access) + new `ExpireSuperAdminAccountsTest` (4 tests: suspend, delete, broadcast, dry-run). Larastan clean.
+
+### Critical fix — temp admin privilege escalation via `isSuperAdmin()` (2026-06-30)
+
+User report: created a temp admin (`jonny@…`) with `observateur` role; the account could still create workspace activities despite `observateur` having no such permission — even after the superadmin explicitly stripped activity permissions from the `observateur` role.
+
+Root cause, much broader than the one report: `User::isSuperAdmin()` returned `true` for **any** temp admin account, because `createTempAdmin()` sets `is_super_admin=true` on the underlying user row (implementation reuses the Spatie `super_admin` role + flag; the actual scoping lives in `temporary_access`/`workspace_members.role_id`). Swept the codebase: **105 occurrences across 23 files** use `$user->isSuperAdmin()` as a bypass-all-checks shortcut (`ActiviteController` alone has 20+), including `SuperAdminMiddleware` itself — meaning a temp admin observateur could already reach `/api/admin/*` platform routes (workspace suspend, role sync, audit log) before today's fix, not just the activity-creation bug reported.
+
+The frontend (`authStore.js`) already had the correct fix applied months ago — `isSuperAdmin` getter explicitly excludes accounts with `admin_expires_at` set, with a comment stating the intent — but the backend method was never updated to match, and `WorkspaceController::getUserWorkspaces()` even had a comment claiming `isSuperAdmin()` "already" excluded temp admins (it didn't).
+
+**Fix:** `User::isSuperAdmin()` now returns `false` when `isTempAdmin()` (new helper: `is_super_admin && admin_expires_at !== null`). This single change correctly closes all 105 call sites at once, since they were all unconditional "treat as full admin" bypasses. Two call sites had inverted assumptions and needed explicit updates to use the new `isTempAdmin()` helper instead (they were checking "is the *target* user a temp admin", which broke once `isSuperAdmin()` stopped self-reporting `true` for temp admins): `AdminController::terminate()`, `AdminController::sendTempAdminCredentials()`, and `AdminAuditService::resolveActorType()` (was mislabeling temp admin audit log entries as `'directeur'`).
+
+Regression test added: `ActiviteCrudTest::temp_admin_with_observateur_grant_cannot_create_activite` — reproduces the exact reported scenario (temp admin + observateur workspace grant → 403 on activity creation). All other previously-passing suites re-verified individually (`TempAdminTest`, `ExpireSuperAdminAccountsTest`, `AdminAuditLogTest`, `PermissionServiceTest`) — all green. **Full repo-wide `php artisan test` was not re-run after this change** (skipped per user request — time constraints) — only the directly affected test files were verified. Recommend a full suite run before the next push given the size of this change's blast radius.
 
 ### Pre-merge regression fixes (2026-06-30)
 
@@ -127,7 +155,7 @@ Feature branch `feature/visibility-teams-chat` is fully complete, including post
 
 ## Next Task
 
-Merge `feature/visibility-teams-chat` into `jonas`, then push to both remotes (with explicit per-push approval for `jonas`).
+Pick the next task from `docs/PROGRESSION.md`. Suggested candidate: **Phase 7 — Help Center** (`feature/phase7-help-center`) — committed `92c482a` but never pushed or merged. Resume, test, push, merge.
 
 ---
 
@@ -148,5 +176,6 @@ Merge `feature/visibility-teams-chat` into `jonas`, then push to both remotes (w
 | Branch | Status |
 |---|---|
 | `feature/superadmin-scoping` | Merged into `jonas` 2026-06-27. Still exists as working branch. |
-| `jonas` | Up to date — pushed to both `origin` and `client` 2026-06-27. |
+| `feature/visibility-teams-chat` | Merged into `jonas` 2026-06-30. Still exists as working branch. |
+| `jonas` | Up to date — pushed to both `origin` and `client` 2026-06-30. |
 | `main` | Never touched (hard rule). |

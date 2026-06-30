@@ -29,11 +29,31 @@ class ActiviteController extends Controller
     ) {}
 
     /**
-     * Endpoint removed — superadmin no longer has unscoped access to all activities.
+     * Display a listing of activities accessible to the authenticated user
+     * (projects they're responsable/member of, or workspaces they own/manage).
      */
-    public function index(): never
+    public function index(Request $request): AnonymousResourceCollection
     {
-        abort(403, 'Accès non autorisé.');
+        $filters = $request->only([
+            'search',
+            'projet_id',
+            'responsable_id',
+            'status',
+            'is_overdue',
+            'per_page',
+            'workspace_id',
+            'date_from',
+            'date_to',
+        ]);
+
+        $workspaceId = $filters['workspace_id'] ?? $request->user()->current_workspace_id;
+        if ($workspaceId) {
+            $filters['workspace_id'] = $workspaceId;
+        }
+
+        $activites = $this->activiteService->getAccessibleActivites($request->user(), $filters);
+
+        return ActiviteResource::collection($activites);
     }
 
     /**

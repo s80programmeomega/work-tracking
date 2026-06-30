@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Tests\Feature\SuperAdmin;
 
+use App\Events\Realtime\SessionsAllRevoked;
 use App\Models\User;
 use App\Models\Workspace;
 use App\Notifications\TempAdminAccessGrantedNotification;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
@@ -329,6 +332,113 @@ class TempAdminTest extends TestCase
 
         $this->actingAs($this->directeur, 'sanctum')
             ->postJson("/api/admin/temp-admins/{$regular->id}/send-credentials")
+            ->assertUnprocessable();
+    }
+
+    // =========================================================================
+    // POST /api/admin/superadmins/{user}/terminate + /reactivate — suspend/restore
+    // =========================================================================
+
+    /** @test */
+    public function terminating_broadcasts_session_revocation_for_realtime_logout(): void
+    {
+        Event::fake([SessionsAllRevoked::class]);
+        $tempAdmin = $this->makeTempAdmin();
+
+        $this->actingAs($this->directeur, 'sanctum')
+            ->postJson("/api/admin/superadmins/{$tempAdmin->id}/terminate")
+            ->assertOk();
+
+        Event::assertDispatched(SessionsAllRevoked::class, fn ($e) => $e->user->is($tempAdmin));
+    }
+
+    /** @test */
+    public function terminating_with_suspend_action_deactivates_but_keeps_grants(): void
+    {
+        $tempAdmin = $this->makeTempAdmin();
+
+        $this->actingAs($this->directeur, 'sanctum')
+            ->postJson("/api/admin/superadmins/{$tempAdmin->id}/terminate")
+            ->assertOk();
+
+        $tempAdmin->refresh();
+        $this->assertFalse($tempAdmin->is_active);
+        $this->assertFalse($tempAdmin->is_super_admin);
+
+        // Le compte n'est pas supprimé et le grant workspace est conservé pour la réactivation.
+        $this->assertDatabaseHas('users', ['id' => $tempAdmin->id]);
+        $this->assertDatabaseHas('temporary_access', [
+            'user_id' => $tempAdmin->id,
+            'accessible_id' => $this->workspace->id,
+        ]);
+    }
+
+    /** @test */
+    public function terminating_with_delete_action_removes_grants_and_account(): void
+    {
+        $tempAdmin = User::factory()->create([
+            'is_super_admin' => true,
+            'admin_expires_at' => now()->addDays(7),
+            'admin_expiry_action' => 'delete',
+            'created_by' => $this->directeur->id,
+        ]);
+        $tempAdmin->syncRoles(['super_admin']);
+
+        DB::table('temporary_access')->insert([
+            'user_id' => $tempAdmin->id,
+            'accessible_type' => Workspace::class,
+            'accessible_id' => $this->workspace->id,
+            'role' => 'observateur',
+            'created_by' => $this->directeur->id,
+            'expires_at' => now()->addDays(7),
+            'created_at' => now(),
+        ]);
+
+        $this->actingAs($this->directeur, 'sanctum')
+            ->postJson("/api/admin/superadmins/{$tempAdmin->id}/terminate")
+            ->assertOk();
+
+        $this->assertDatabaseMissing('users', ['id' => $tempAdmin->id]);
+        $this->assertDatabaseMissing('temporary_access', ['user_id' => $tempAdmin->id]);
+    }
+
+    /** @test */
+    public function reactivating_a_suspended_temp_admin_restores_workspace_access(): void
+    {
+        $tempAdmin = $this->makeTempAdmin();
+
+        $this->actingAs($this->directeur, 'sanctum')
+            ->postJson("/api/admin/superadmins/{$tempAdmin->id}/terminate")
+            ->assertOk();
+
+        $response = $this->actingAs($this->directeur, 'sanctum')
+            ->postJson("/api/admin/superadmins/{$tempAdmin->id}/reactivate");
+
+        $response->assertOk();
+
+        $tempAdmin->refresh();
+        $this->assertTrue($tempAdmin->is_active);
+        $this->assertTrue($tempAdmin->is_super_admin);
+        $this->assertTrue($tempAdmin->hasRole('super_admin'));
+
+        // Le grant workspace doit être restauré avec une expiration dans le futur,
+        // sinon WorkspaceController rejette toujours l'accès malgré le compte actif.
+        $grant = DB::table('temporary_access')
+            ->where('user_id', $tempAdmin->id)
+            ->where('accessible_id', $this->workspace->id)
+            ->first();
+
+        $this->assertNotNull($grant);
+        $this->assertTrue(Carbon::parse($grant->expires_at)->isFuture());
+    }
+
+    /** @test */
+    public function cannot_reactivate_an_active_account(): void
+    {
+        $tempAdmin = $this->makeTempAdmin();
+
+        $this->actingAs($this->directeur, 'sanctum')
+            ->postJson("/api/admin/superadmins/{$tempAdmin->id}/reactivate")
             ->assertUnprocessable();
     }
 }

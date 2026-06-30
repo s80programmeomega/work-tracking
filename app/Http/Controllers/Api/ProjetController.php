@@ -26,11 +26,32 @@ class ProjetController extends Controller
     ) {}
 
     /**
-     * Endpoint removed — superadmin no longer has unscoped access to all projects.
+     * Display a listing of projects accessible to the authenticated user
+     * (responsable/member of the project, or owner/manager of its workspace).
      */
-    public function index(): never
+    public function index(Request $request): AnonymousResourceCollection
     {
-        abort(403, 'Accès non autorisé.');
+        $filters = $request->only([
+            'search',
+            'status',
+            'tags',
+            'is_template',
+            'is_favorite',
+            'is_overdue',
+            'per_page',
+        ]);
+
+        $workspaceId = $request->input('workspace_id') ?? $request->user()->current_workspace_id;
+
+        if (! $workspaceId) {
+            return ProjetResource::collection([]);
+        }
+
+        $filters['workspace_id'] = $workspaceId;
+
+        $projets = $this->projetService->getUserProjets($request->user(), $filters);
+
+        return ProjetResource::collection($projets);
     }
 
     /**

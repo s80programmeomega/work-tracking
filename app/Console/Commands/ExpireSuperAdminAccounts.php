@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Events\Realtime\SessionsAllRevoked;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -40,26 +41,32 @@ class ExpireSuperAdminAccounts extends Command
                 continue;
             }
 
-            // Révoquer les accès temporaires : grants et memberships provisionnées.
-            $user->getConnection()->table('temporary_access')
-                ->where('user_id', $user->id)
-                ->delete();
-            $user->getConnection()->table('workspace_members')
-                ->where('user_id', $user->id)
-                ->where('is_temp_access', true)
-                ->delete();
-
-            // Invalider toutes les sessions actives immédiatement.
+            // Invalider toutes les sessions actives immédiatement, y compris en temps réel
+            // (sans ça, une session déjà ouverte reste utilisable jusqu'au prochain rechargement).
             $user->tokens()->delete();
+            broadcast(new SessionsAllRevoked($user));
 
             // Désactiver dans tous les cas avant l'action finale.
+            // is_active=false bloque déjà la connexion : suffisant pour verrouiller l'accès
+            // sans détruire les grants nécessaires à une réactivation (action 'suspend').
             $user->update(['is_active' => false, 'is_super_admin' => false]);
             $user->syncRoles([]);
 
             if ($action === 'delete') {
+                // Suppression définitive : les grants n'ont plus de raison d'exister.
+                $user->getConnection()->table('temporary_access')
+                    ->where('user_id', $user->id)
+                    ->delete();
+                $user->getConnection()->table('workspace_members')
+                    ->where('user_id', $user->id)
+                    ->where('is_temp_access', true)
+                    ->delete();
+
                 Log::info('Compte superadmin expiré supprimé', ['user_id' => $user->id, 'email' => $user->email]);
                 $user->forceDelete();
             } else {
+                // Suspension : les grants temporary_access et workspace_members sont conservés
+                // pour que reactivateTempAdmin() puisse restaurer l'accès workspace + droits.
                 Log::info('Compte superadmin expiré suspendu', ['user_id' => $user->id, 'email' => $user->email]);
                 $this->line("Suspendu : {$user->email}");
             }

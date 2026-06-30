@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api;
 
 use App\Enums\Role as RoleEnum;
+use App\Events\Realtime\SessionsAllRevoked;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ValidationAuditLogResource;
 use App\Models\Activite;
@@ -490,7 +491,7 @@ class AdminController extends Controller
             abort(403, 'Compte système protégé — modification impossible.');
         }
 
-        if (! $user->isSuperAdmin() || $user->admin_expires_at === null) {
+        if (! $user->isTempAdmin()) {
             abort(422, 'Ce compte n\'est pas un superadmin temporaire.');
         }
 
@@ -499,24 +500,30 @@ class AdminController extends Controller
             abort(403, 'Vous ne pouvez terminer que les comptes que vous avez créés.');
         }
 
-        // Révoquer les accès temporaires : supprimer les grants et les memberships provisionnées.
-        DB::table('temporary_access')->where('user_id', $user->id)->delete();
-        DB::table('workspace_members')
-            ->where('user_id', $user->id)
-            ->where('is_temp_access', true)
-            ->delete();
-
-        // Invalider toutes les sessions actives immédiatement.
+        // Invalider toutes les sessions actives immédiatement, y compris en temps réel
+        // (sans ça, une session déjà ouverte reste utilisable jusqu'au prochain rechargement).
         $user->tokens()->delete();
+        broadcast(new SessionsAllRevoked($user));
 
         // Désactiver le compte dans tous les cas avant l'action finale.
+        // is_active=false bloque déjà la connexion (AuthService::login) : suffisant pour
+        // verrouiller l'accès sans détruire les grants nécessaires à une réactivation.
         $user->update(['is_active' => false, 'is_super_admin' => false]);
         $user->syncRoles([]);
 
         if ($user->admin_expiry_action === 'delete') {
+            // Suppression définitive : les grants n'ont plus de raison d'exister.
+            DB::table('temporary_access')->where('user_id', $user->id)->delete();
+            DB::table('workspace_members')
+                ->where('user_id', $user->id)
+                ->where('is_temp_access', true)
+                ->delete();
+
             AdminAuditService::log($actor, 'superadmin.terminated', $user, ['expiry_action' => 'delete']);
             $user->forceDelete();
         } else {
+            // Suspension : les grants temporary_access et workspace_members sont conservés
+            // pour que reactivateTempAdmin() puisse restaurer l'accès workspace + droits.
             AdminAuditService::log($actor, 'superadmin.terminated', $user, ['expiry_action' => 'suspend']);
         }
 
@@ -546,13 +553,20 @@ class AdminController extends Controller
         }
 
         // Réactiver le compte et restaurer le rôle Spatie.
-        $user->update(['is_active' => true, 'is_super_admin' => true]);
+        // Recalcule une nouvelle expiration sur la même durée que celle accordée initialement,
+        // ré-ancrée à maintenant (sinon le compte serait immédiatement re-marqué comme expiré).
+        $originalDuration = $user->created_at->diffInSeconds($user->admin_expires_at);
+        $newExpiresAt = Carbon::now()->addSeconds(max($originalDuration, 0));
+
+        $user->update(['is_active' => true, 'is_super_admin' => true, 'admin_expires_at' => $newExpiresAt]);
         $user->syncRoles(['super_admin']);
 
-        // Restaurer les grants temporary_access si tous ont été supprimés.
-        // Sans grants, le compte ne peut accéder à aucun workspace : on ne peut pas deviner
-        // lesquels recréer — la réactivation restaure uniquement le statut du compte.
-        // Le directeur devra recréer les accès workspace via l'interface si nécessaire.
+        // Restaurer les grants workspace conservés lors de la suspension (terminate()/
+        // ExpireSuperAdminAccounts ne suppriment plus temporary_access pour l'action 'suspend').
+        // On ré-ancre leur expiration sur la même durée que le compte pour qu'ils redeviennent actifs.
+        DB::table('temporary_access')
+            ->where('user_id', $user->id)
+            ->update(['expires_at' => $newExpiresAt]);
 
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
@@ -676,7 +690,7 @@ class AdminController extends Controller
     {
         $actor = $request->user();
 
-        if (! $user->isSuperAdmin() || $user->admin_expires_at === null) {
+        if (! $user->isTempAdmin()) {
             abort(422, 'Ce compte n\'est pas un compte admin temporaire.');
         }
 

@@ -410,9 +410,21 @@ class User extends Authenticatable
 
     /**
      * Vérifie si l'utilisateur est super_admin ou system owner.
+     *
+     * Exclut volontairement les admins temporaires (admin_expires_at présent) :
+     * un compte temp admin porte is_super_admin=true en base pour des raisons
+     * d'implémentation (réutilise le rôle Spatie super_admin), mais son accès réel
+     * doit rester strictement scopé aux workspaces/rôles accordés via temporary_access.
+     * Le traiter comme un vrai super_admin ici ouvrirait un contournement de
+     * permission sur les ~100 points d'appel qui utilisent isSuperAdmin() comme
+     * bypass (policies, contrôleurs, le middleware super_admin lui-même).
      */
     public function isSuperAdmin(): bool
     {
+        if ($this->isTempAdmin()) {
+            return false;
+        }
+
         if ($this->is_system_owner) {
             return true;
         }
@@ -422,6 +434,15 @@ class User extends Authenticatable
         }
 
         return $this->hasRole('super_admin');
+    }
+
+    /**
+     * Vérifie si l'utilisateur est un compte admin temporaire (superadmin scopé,
+     * avec expiration). Distinct d'un vrai super_admin plateforme.
+     */
+    public function isTempAdmin(): bool
+    {
+        return $this->is_super_admin && $this->admin_expires_at !== null;
     }
 
     /**

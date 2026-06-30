@@ -110,6 +110,27 @@ class ActiviteCrudTest extends TestCase
             ->assertJsonValidationErrors(['responsable_id']);
     }
 
+    /** @test */
+    public function temp_admin_with_observateur_grant_cannot_create_activite(): void
+    {
+        // Compte admin temporaire (is_super_admin=true + admin_expires_at) — la membership
+        // workspace_members 'observateur' est auto-provisionnée au premier switch en réalité,
+        // on la simule directement ici (cf. WorkspaceController::switch()).
+        $tempAdmin = User::factory()->create([
+            'is_super_admin' => true,
+            'admin_expires_at' => now()->addDays(7),
+            'admin_expiry_action' => 'suspend',
+        ]);
+        $tempAdmin->syncRoles(['super_admin']);
+        $this->workspace->addMember($tempAdmin, 'observateur');
+
+        $this->actingAs($tempAdmin)
+            ->postJson('/api/activites', $this->storePayload(['responsable_id' => $tempAdmin->id]))
+            ->assertForbidden();
+
+        $this->assertDatabaseMissing('activites', ['responsable_id' => $tempAdmin->id]);
+    }
+
     // =========================================================================
     // SHOW
     // =========================================================================

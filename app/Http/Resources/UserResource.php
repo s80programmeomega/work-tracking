@@ -40,7 +40,7 @@ class UserResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $isTempAdmin = $this->resource->is_super_admin && $this->resource->admin_expires_at !== null;
+        $isTempAdmin = $this->resource->isTempAdmin();
 
         return [
             'id' => $this->id,

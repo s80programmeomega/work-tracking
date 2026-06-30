@@ -34,7 +34,7 @@ class AdminAuditService
             return 'system_owner';
         }
 
-        if ($actor->isSuperAdmin() && $actor->admin_expires_at !== null) {
+        if ($actor->isTempAdmin()) {
             return 'temporary_superadmin';
         }
 
