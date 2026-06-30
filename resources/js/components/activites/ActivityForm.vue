@@ -222,6 +222,8 @@
 
 <script setup>
 import { ref, reactive, watch, nextTick } from 'vue'
+import api from '@/api/axios'
+import { useWorkspace } from '@/composables/useWorkspace'
 import {
   Calendar,
   Play,
@@ -264,6 +266,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close', 'created', 'updated'])
+
+const { currentWorkspaceId } = useWorkspace()
 
 const loading = ref(false)
 const users = ref([])
@@ -311,10 +315,11 @@ const loadFormData = () => {
 }
 
 const fetchUsers = async () => {
+  const workspaceId = currentWorkspaceId.value
+  if (!workspaceId) { return }
   try {
-    // TODO: Replace with actual API call
-    const response = await userApi.getAll()
-    users.value = response.data.data
+    const { data } = await api.get(`/workspaces/${workspaceId}/users`)
+    users.value = data.data || data || []
   } catch (error) {
     console.error('Erreur lors du chargement des utilisateurs:', error)
   }

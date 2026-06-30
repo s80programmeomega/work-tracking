@@ -1,13 +1,9 @@
 <!-- resources/js/pages/admin/AdminSupport.vue -->
 <!-- Vue de gestion des tickets de support — super-admin uniquement. -->
 <template>
+  <AdminLayout>
+    <PageBreadcrumb :pageTitle="$t('support.admin.page_title')" />
   <div class="space-y-6">
-    <!-- En-tête -->
-    <div class="rounded-3 border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
-      <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('support.admin.page_title') }}</h1>
-      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ $t('support.page_subtitle') }}</p>
-    </div>
-
     <!-- Filtres -->
     <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
       <div class="relative flex-1 min-w-48">
@@ -184,6 +180,7 @@
       </div>
     </div>
   </div>
+  </AdminLayout>
 </template>
 
 <script setup>
@@ -192,6 +189,8 @@ import { useI18n } from 'vue-i18n'
 import { MagnifyingGlassIcon, PaperClipIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import { useStagger } from '@/composables/useAnimations'
 import api from '@/api/axios'
+import AdminLayout from '@/components/layout/AdminLayout.vue'
+import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 
 const { t } = useI18n()
 const { staggerRef: ticketsRef, applyStagger: staggerTickets } = useStagger(40)

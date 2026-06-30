@@ -58,7 +58,6 @@ class DocumentNotificationShapeTest extends TestCase
             'chemin' => 'documents/plan-strategique.pdf',
             'disk' => 'local',
             'user_id' => $this->actor->id,
-            'visibility' => 'team',
         ]);
     }
 

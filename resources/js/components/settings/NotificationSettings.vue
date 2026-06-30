@@ -251,7 +251,7 @@ const onPushToggleChange = async () => {
 const saveSettings = async () => {
     saving.value = true
     try {
-        await api.patch('/notification-preferences', {
+        await api.put('/notification-preferences', {
             email_enabled: settings.emailNotifications,
             push_enabled: settings.pushNotifications,
             in_app_enabled: settings.inAppNotifications,

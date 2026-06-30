@@ -116,7 +116,6 @@ class DocumentService
                 'chemin' => $path,
                 'disk' => $disk,
                 'description' => $options['description'] ?? null,
-                'visibility' => $options['visibility'] ?? 'private',
                 'hash_sha256' => hash_file('sha256', $file->getRealPath()),
                 'user_id' => $user->id,
                 'version' => 1,
@@ -200,7 +199,6 @@ class DocumentService
                 $user,
                 [
                     'description' => $document->description,
-                    'visibility' => $document->visibility,
                     'disk' => $document->disk,
                 ]
             );

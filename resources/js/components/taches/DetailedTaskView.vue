@@ -492,10 +492,6 @@
           <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Modifié le</p>
           <p class="text-sm text-gray-900 dark:text-white">{{ formatDate(localTache.updated_at) }}</p>
         </div>
-        <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded-3">
-          <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Visibilité</p>
-          <p class="text-sm text-gray-900 dark:text-white capitalize">{{ tache.visibility || 'Public' }}</p>
-        </div>
       </div>
     </div>
   </div>

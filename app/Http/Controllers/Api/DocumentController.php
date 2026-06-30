@@ -155,7 +155,6 @@ class DocumentController extends Controller
             'files' => 'required|array|min:1',
             'files.*' => 'file|max:'.config('documents.max_file_size', 10240),
             'description' => 'sometimes|string|max:1000',
-            'visibility' => 'sometimes|in:private,team,public',
             'disk' => 'sometimes|string',
             'allow_duplicates' => 'sometimes|boolean',
             'custom_metadata' => 'sometimes|array',
@@ -165,7 +164,6 @@ class DocumentController extends Controller
             'files.*.file' => 'Le fichier ":attribute" n\'est pas un fichier valide.',
             'files.*.max' => "Le fichier \":attribute\" dépasse la taille maximale de {$maxMB} MB.",
             'description.max' => 'La description ne peut pas dépasser 1000 caractères.',
-            'visibility.in' => 'La visibilité doit être "privé", "équipe" ou "public".',
         ]);
 
         $user = $request->user();
@@ -182,7 +180,6 @@ class DocumentController extends Controller
 
             $options = [
                 'description' => $request->description,
-                'visibility' => $request->visibility ?? 'private',
                 'disk' => $request->disk ?? config('documents.default_disk', 'public'),
                 'allow_duplicates' => $request->boolean('allow_duplicates', false),
                 'custom_metadata' => $request->custom_metadata ?? [],
@@ -278,13 +275,12 @@ class DocumentController extends Controller
         $request->validate([
             'nom' => 'sometimes|string|max:255',
             'description' => 'sometimes|string|max:1000',
-            'visibility' => 'sometimes|in:private,team,public',
         ]);
 
         try {
             $this->authorize('update', $document);
 
-            $document->update($request->only(['nom', 'description', 'visibility']));
+            $document->update($request->only(['nom', 'description']));
 
             activity()
                 ->causedBy($request->user())

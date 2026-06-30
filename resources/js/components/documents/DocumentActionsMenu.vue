@@ -315,12 +315,13 @@ const loadPermissions = async () => {
 }
 
 const loadAvailableUsers = async () => {
+  const workspaceId = props.document?.workspace_id
+  if (!workspaceId) return
   try {
-    // Fetch users from workspace/project
-    const response = await api.get('/users') // Adjust endpoint
-    availableUsers.value = response.data.data
+    const response = await api.get(`/workspaces/${workspaceId}/users`)
+    availableUsers.value = response.data.data || response.data || []
   } catch (error) {
-    console.error('Error loading users:', error)
+    console.error('Erreur lors du chargement des utilisateurs:', error)
   }
 }
 

@@ -180,19 +180,6 @@
 
                                 <div class="space-y-6">
                                     <!-- Visibilité par défaut des projets -->
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                            Visibilité par défaut des projets
-                                        </label>
-                                        <select v-model="form.settings.default_project_visibility"
-                                            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
-                                            <option value="public">Public - Visible par tous les membres</option>
-                                            <option value="team">Équipe - Visible par les membres du workspace</option>
-                                            <option value="private">Privé - Visible uniquement par les membres du projet
-                                            </option>
-                                        </select>
-                                    </div>
-
                                     <!-- Permissions -->
                                     <div class="space-y-4">
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -374,7 +361,6 @@ const form = ref({
     logo: null as File | null,
     is_active: true,
     settings: {
-        default_project_visibility: 'team',
         members_can_create_projects: true,
         members_can_invite: false,
         require_task_validation: true,
@@ -421,7 +407,6 @@ const loadWorkspace = async () => {
 
         // ✅ Fusion des settings avec les valeurs par défaut
         const defaultSettings = {
-            default_project_visibility: 'team',
             members_can_create_projects: true,
             members_can_invite: false,
             require_task_validation: true,

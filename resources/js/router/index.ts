@@ -60,6 +60,12 @@ const router = createRouter({
       component: () => import('../pages/help/HelpArticle.vue'),
       meta: { title: 'Article d\'aide', requiresAuth: true },
     },
+    {
+      path: '/admin/support',
+      name: 'admin.support',
+      component: () => import('../pages/admin/AdminSupport.vue'),
+      meta: { title: 'Support tickets', requiresAuth: true },
+    },
     // Gestion des articles (owner/directeur + super_admin) — gardée côté API.
     {
       path: '/admin/help-articles',
@@ -529,6 +535,7 @@ const router = createRouter({
       component: () => import('../pages/FichesEvaluation.vue'),
       meta: {
         title: 'Fiches d\'évaluation',
+        requiresAuth: true,
         breadcrumb: [
           { label: 'Accueil', to: '/' },
           { label: 'Évaluations', to: '/evaluations/dashboard' },
@@ -606,16 +613,6 @@ const router = createRouter({
       },
     },
 
-    // Phase 11E — Gestion des utilisateurs du workspace (owner/directeur/manager)
-    {
-      path: '/workspace/users',
-      name: 'workspace.users',
-      component: () => import('../pages/workspace/WorkspaceUsers.vue'),
-      meta: {
-        title: 'Membres du workspace',
-        requiresAuth: true,
-      },
-    },
 
     // Gestion des membres du workspace (propriétaire uniquement — ban/unban/invite)
     {
@@ -648,6 +645,19 @@ const router = createRouter({
         requiresAuth: true,
       },
     },
+    // ==========================================
+    // WORKSPACE CHAT (Phase 3)
+    // ==========================================
+    {
+      path: '/workspace/chat',
+      name: 'workspace.chat',
+      component: () => import('../pages/workspace/WorkspaceChat.vue'),
+      meta: {
+        title: 'Chat Workspace',
+        requiresAuth: true,
+      },
+    },
+
     {
       path: '/teams',
       name: 'teams.index',

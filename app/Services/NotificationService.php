@@ -108,6 +108,7 @@ class NotificationService
             'support_ticket_new', 'support_ticket_status_changed',
             'support_ticket_reply',
             'chat_mention',
+            'workspace_chat_mention',
             'workspace_member_banned', 'workspace_member_unbanned',
             'workspace_invitation_accepted' => true,
 
@@ -252,6 +253,7 @@ class NotificationService
             'support_ticket_new', 'support_ticket_status_changed',
             'support_ticket_reply',
             'chat_mention',
+            'workspace_chat_mention',
             'workspace_member_banned', 'workspace_member_unbanned',
             'workspace_invitation_accepted' => true,
             'approuve_n0', 'score_updated' => false,

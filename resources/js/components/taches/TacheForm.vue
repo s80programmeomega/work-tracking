@@ -599,33 +599,7 @@
                 </p>
               </div>
             </div> -->
-
-            <!-- Section Visibilité -->
-            <div class="space-y-5">
-              <div class="flex items-center gap-3 pb-3 border-b-2 border-gray-200 dark:border-gray-700">
-                <div class="p-2 rounded-3">
-                  <EyeIcon class="w-5 h-5 text-white" />
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Visibilité</h3>
-              </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <label v-for="visibility in visibilityOptions" :key="visibility.value"
-                  class="relative flex flex-col items-center gap-3 p-5 border-2 rounded-3 cursor-pointer transition-all text-center"
-                  :class="formData.visibility === visibility.value
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 '
-                    : 'border-gray-300 dark:border-gray-600 hover:border-blue-300'">
-                  <input type="radio" v-model="formData.visibility" :value="visibility.value" class="sr-only" />
-                  <span class="text-3xl">{{ visibility.icon }}</span>
-                  <div>
-                    <span class="block text-sm font-bold text-gray-900 dark:text-white">{{ visibility.label }}</span>
-                    <span class="block text-xs text-gray-600 dark:text-gray-400 mt-1">{{ visibility.description
-                    }}</span>
-                  </div>
-                </label>
-              </div>
-            </div>
-          </div>
+  </div>
 
           <!-- Onglet 3: Fichiers & Ressources -->
           <div v-if="activeTab === 'fichiers'" class="space-y-8">
@@ -1025,7 +999,6 @@ const formData = ref({
   commentaire: '',
   assignee_ids: [],
   label_ids: [],
-  visibility: 'members_only'
 })
 
 const statutOptions = [
@@ -1039,12 +1012,6 @@ const prioriteOptions = [
   { value: 'moyenne', label: 'Moyenne', icon: '🟡' },
   { value: 'elevee', label: 'Élevée', icon: '🟠' },
   { value: 'critique', label: 'Critique', icon: '🔴' }
-]
-
-const visibilityOptions = [
-  { value: 'public', label: 'Public', icon: '👁️', description: 'Tous les membres du projet' },
-  { value: 'members_only', label: 'Membres', icon: '👥', description: 'Membres de l\'activité' },
-  { value: 'private', label: 'Privé', icon: '🔒', description: 'Seulement les assignés' }
 ]
 
 // ==================== MÉTHODES FICHIERS & LIENS ====================
@@ -1308,7 +1275,6 @@ const handleSubmit = async () => {
 
     formDataObj.append('couleur', formData.value.couleur || '#3B82F6')
     formDataObj.append('commentaire', formData.value.commentaire || '')
-    formDataObj.append('visibility', formData.value.visibility || 'members_only')
 
     if (formData.value.assignee_ids && formData.value.assignee_ids.length > 0) {
       formData.value.assignee_ids.forEach(id => {
@@ -1530,7 +1496,6 @@ onMounted(async () => {
         commentaire: props.tache.commentaire || '',
         assignee_ids: props.tache.assignees?.map(a => a.id) || [],
         label_ids: props.tache.labels?.map(l => l.id) || [],
-        visibility: props.tache.visibility || 'members_only'
       }
 
       if (props.tache.external_links) {

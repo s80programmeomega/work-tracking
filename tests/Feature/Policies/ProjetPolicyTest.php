@@ -46,7 +46,6 @@ class ProjetPolicyTest extends TestCase
         return Projet::factory()->create([
             'workspace_id' => $this->workspace->id,
             'responsable_id' => $responsable?->id ?? $this->owner->id,
-            'visibility' => 'public',
         ]);
     }
 
@@ -87,7 +86,6 @@ class ProjetPolicyTest extends TestCase
         $projet = Projet::factory()->create([
             'workspace_id' => $this->workspace->id,
             'responsable_id' => $this->owner->id,
-            'visibility' => 'team',
         ]);
         $this->attachWithRole($projet->members(), $collaborateur->id, 'collaborateur');
 
@@ -95,17 +93,16 @@ class ProjetPolicyTest extends TestCase
     }
 
     /** @test */
-    public function cadre_workspace_member_without_project_membership_cannot_view_private_projet(): void
+    public function cadre_workspace_member_can_view_any_projet_in_workspace(): void
     {
         $cadre = $this->makeWsMember('cadre');
         $projet = Projet::factory()->create([
             'workspace_id' => $this->workspace->id,
             'responsable_id' => $this->owner->id,
-            'visibility' => 'private',
         ]);
 
-        // cadre a projets.view mais est en-dessous du seuil de visibilité manager
-        $this->assertFalse($cadre->can('view', $projet));
+        // cadre a projets.view via son rôle workspace → peut voir sans être membre du projet
+        $this->assertTrue($cadre->can('view', $projet));
     }
 
     /** @test */

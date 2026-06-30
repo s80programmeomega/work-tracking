@@ -38,7 +38,6 @@ class ProjetMembersTest extends TestCase
         $this->projet = Projet::factory()->create([
             'workspace_id' => $this->workspace->id,
             'responsable_id' => $this->owner->id,
-            'visibility' => 'public',
         ]);
     }
 

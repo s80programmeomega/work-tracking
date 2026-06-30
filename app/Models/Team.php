@@ -22,7 +22,6 @@ class Team extends Model
         'owner_id',
         'project_id',
         'workspace_id',
-        'visibility',
         'avatar',
         'settings',
         'is_active',
@@ -159,10 +158,6 @@ class Team extends Model
     /**
      * Scope for public teams
      */
-    public function scopePublic($query)
-    {
-        return $query->where('visibility', 'public');
-    }
 
     /**
      * Check if user is a member

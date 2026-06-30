@@ -47,7 +47,6 @@ class DocumentAccessResolverTest extends TestCase
         $this->projet = Projet::factory()->create([
             'workspace_id' => $this->workspace->id,
             'responsable_id' => $this->owner->id,
-            'visibility' => 'public',
         ]);
     }
 
@@ -55,7 +54,6 @@ class DocumentAccessResolverTest extends TestCase
     {
         return Document::factory()->forProjet($this->projet)->create([
             'user_id' => $uploader->id,
-            'visibility' => 'private',
         ]);
     }
 
@@ -72,19 +70,7 @@ class DocumentAccessResolverTest extends TestCase
     }
 
     /** @test */
-    public function public_document_is_viewable_by_anyone(): void
-    {
-        $doc = Document::factory()->forProjet($this->projet)->public()->create([
-            'user_id' => $this->owner->id,
-        ]);
-
-        $outsider = User::factory()->create();
-
-        $this->assertTrue($this->resolver->canView($outsider, $doc));
-    }
-
-    /** @test */
-    public function private_document_is_not_viewable_by_outsider(): void
+    public function outsider_without_explicit_permission_cannot_view_document(): void
     {
         $doc = $this->makePrivateDocument($this->owner);
         $outsider = User::factory()->create();
@@ -106,7 +92,6 @@ class DocumentAccessResolverTest extends TestCase
     {
         $doc = Document::factory()->forProjet($this->projet)->create([
             'user_id' => User::factory()->create()->id,
-            'visibility' => 'team',
         ]);
 
         $this->assertTrue($this->resolver->canView($this->owner, $doc));

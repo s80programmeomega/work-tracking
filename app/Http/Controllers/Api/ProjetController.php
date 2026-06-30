@@ -42,7 +42,6 @@ class ProjetController extends Controller
         $filters = $request->only([
             'search',
             'status',
-            'visibility',
             'tags',
             'is_template',
             'is_favorite',
@@ -169,7 +168,7 @@ class ProjetController extends Controller
             },
             'tags',
             'workspace',
-            'teams:id,uuid,name,visibility,project_id',
+            'teams:id,uuid,name,project_id',
             'activites' => function ($query) use ($userId, $user, $projet) {
                 // ✅ FILTRE : Uniquement les activités où l'utilisateur est impliqué
                 // SAUF si super admin OU responsable du projet

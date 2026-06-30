@@ -70,7 +70,6 @@ class Document extends Model
         'user_id',
         'download_count',
         'last_downloaded_at',
-        'visibility',
         'allow_duplicates',
     ];
 
@@ -103,7 +102,7 @@ class Document extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['nom', 'description', 'visibility'])
+            ->logOnly(['nom', 'description'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
     }
@@ -284,11 +283,7 @@ class Document extends Model
     public function scopeAccessibleBy($query, User $user)
     {
         return $query->where(function ($q) use ($user) {
-            // Public documents
-            $q->where('visibility', 'public')
-                // Or owned by user
-                ->orWhere('user_id', $user->id)
-                // Or has specific permissions
+            $q->where('user_id', $user->id)
                 ->orWhereHas('permissions', function ($permQuery) use ($user) {
                     $permQuery->where('permissionable_type', User::class)
                         ->where('permissionable_id', $user->id)
@@ -311,17 +306,10 @@ class Document extends Model
      */
     public function canBeViewedBy(User $user): bool
     {
-        // Owner can always view
         if ($this->user_id === $user->id) {
             return true;
         }
 
-        // Public documents
-        if ($this->visibility === 'public') {
-            return true;
-        }
-
-        // Check specific permissions
         $permission = $this->permissions()
             ->where('permissionable_type', User::class)
             ->where('permissionable_id', $user->id)

@@ -130,6 +130,9 @@
                       {{ $t('workspace_members.col_joined') }}
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                      {{ $t('workspace_users.col_last_login') }}
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                       {{ $t('workspace_members.col_status') }}
                     </th>
                     <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
@@ -172,6 +175,9 @@
                     <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                       {{ formatDate(member.joined_at) }}
                     </td>
+                    <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                      {{ member.last_login_at ? formatDate(member.last_login_at) : $t('workspace_users.never_logged_in') }}
+                    </td>
                     <td class="px-6 py-4">
                       <span
                         v-if="member.is_banned"
@@ -190,6 +196,28 @@
                     </td>
                     <td class="px-6 py-4 text-right">
                       <div class="flex items-center justify-end gap-2">
+                        <button
+                          v-if="member.workspace_role !== 'owner'"
+                          @click="openRoleModal(member)"
+                          class="inline-flex items-center gap-1 rounded-3 border border-blue-300 bg-white px-3 py-1.5 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 dark:border-blue-700 dark:bg-transparent dark:text-blue-400 dark:hover:bg-blue-900/20"
+                        >
+                          <PencilIcon class="h-3.5 w-3.5" />
+                          {{ $t('workspace_users.btn_change_role') }}
+                        </button>
+                        <button
+                          @click="openActivityModal(member)"
+                          class="inline-flex items-center gap-1 rounded-3 border border-purple-300 bg-white px-3 py-1.5 text-xs font-medium text-purple-600 transition-colors hover:bg-purple-50 dark:border-purple-700 dark:bg-transparent dark:text-purple-400 dark:hover:bg-purple-900/20"
+                        >
+                          <ClockIcon class="h-3.5 w-3.5" />
+                          {{ $t('admin.users.btn_activity') }}
+                        </button>
+                        <button
+                          @click="openProfileModal(member)"
+                          class="inline-flex items-center gap-1 rounded-3 border border-teal-300 bg-white px-3 py-1.5 text-xs font-medium text-teal-600 transition-colors hover:bg-teal-50 dark:border-teal-700 dark:bg-transparent dark:text-teal-400 dark:hover:bg-teal-900/20"
+                        >
+                          <UserCircleIcon class="h-3.5 w-3.5" />
+                          {{ $t('admin.users.btn_view_profile') }}
+                        </button>
                         <button
                           v-if="!member.is_banned && member.workspace_role !== 'owner'"
                           @click="openBanModal(member)"
@@ -379,6 +407,91 @@
       </div>
     </div>
 
+    <!-- Modal changement de rôle -->
+    <div
+      v-if="roleModal.open"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      @click.self="roleModal.open = false"
+    >
+      <div class="w-full max-w-md rounded-3 bg-white shadow-xl dark:bg-gray-800">
+        <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700">
+          <h3 class="text-base font-semibold text-gray-900 dark:text-white">
+            {{ $t('workspace_users.change_role_title') }}
+          </h3>
+          <button @click="roleModal.open = false" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+            <XMarkIcon class="h-5 w-5" />
+          </button>
+        </div>
+        <div class="space-y-4 px-6 py-4">
+          <p class="text-sm text-gray-600 dark:text-gray-400">
+            {{ $t('workspace_users.change_role_desc', { name: roleModal.member?.nom_complet }) }}
+          </p>
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              {{ $t('workspace_members.col_role') }}
+            </label>
+            <select
+              v-model="roleModal.role"
+              class="w-full rounded-3 border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            >
+              <option v-for="r in workspaceRoles" :key="r.value" :value="r.value">{{ r.label }}</option>
+            </select>
+          </div>
+          <div v-if="roleModal.error" class="text-sm text-red-600 dark:text-red-400">{{ roleModal.error }}</div>
+        </div>
+        <div class="flex justify-end gap-3 border-t border-gray-200 px-6 py-4 dark:border-gray-700">
+          <button
+            @click="roleModal.open = false"
+            class="rounded-3 border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+          >
+            {{ $t('common.cancel') }}
+          </button>
+          <button
+            @click="saveRole"
+            :disabled="roleModal.saving"
+            class="inline-flex items-center gap-2 rounded-3 bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          >
+            <span v-if="roleModal.saving" class="h-4 w-4 animate-spin rounded-full border-b-2 border-white"></span>
+            {{ $t('common.save') }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal activité -->
+    <div
+      v-if="activityModal.open"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      @click.self="activityModal.open = false"
+    >
+      <div class="flex max-h-[90vh] w-full max-w-5xl flex-col rounded-3 bg-white shadow-xl dark:bg-gray-800">
+        <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+            {{ $t('admin.users.activity_modal_title', { name: activityModal.member?.nom_complet }) }}
+          </h3>
+          <button @click="activityModal.open = false" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+            <XMarkIcon class="h-5 w-5" />
+          </button>
+        </div>
+        <div class="flex-1 overflow-y-auto">
+          <ActivityLogTab
+            v-if="activityModal.open"
+            :fixed-causer-id="activityModal.member?.id"
+            :fixed-causer-label="activityModal.member?.nom_complet"
+            :log-endpoint="`/workspaces/${workspaceId}/member-activity-log`"
+            causer-search-endpoint=""
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal profil -->
+    <UserProfileModal
+      v-if="profileModal.open"
+      :user-id="profileModal.userId"
+      @close="profileModal.open = false"
+    />
+
     <!-- Modal invitation -->
     <InviteMemberModal
       v-if="showInviteModal"
@@ -394,6 +507,8 @@ import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import InviteMemberModal from '@/components/workspaces/InviteMemberModal.vue'
+import ActivityLogTab from '@/components/admin/logs/ActivityLogTab.vue'
+import UserProfileModal from '@/components/admin/UserProfileModal.vue'
 import {
   UserPlusIcon,
   MagnifyingGlassIcon,
@@ -403,6 +518,9 @@ import {
   XMarkIcon,
   EnvelopeIcon,
   PaperAirplaneIcon,
+  PencilIcon,
+  ClockIcon,
+  UserCircleIcon,
 } from '@heroicons/vue/24/outline'
 import api from '@/api/axios'
 import { useAuthStore } from '@/stores/auth'
@@ -434,11 +552,18 @@ const lastPage = ref(1)
 const processingId = ref(null)
 const showInviteModal = ref(false)
 
-const banModal = ref({
-  open: false,
-  member: null,
-  reason: '',
-})
+const banModal = ref({ open: false, member: null, reason: '' })
+const roleModal = ref({ open: false, member: null, role: '', saving: false, error: null })
+const activityModal = ref({ open: false, member: null })
+const profileModal = ref({ open: false, userId: null })
+
+const workspaceRoles = [
+  { value: 'manager', label: t('workspace_users.role_manager') },
+  { value: 'cadre', label: t('workspace_users.role_cadre') },
+  { value: 'collaborateur', label: t('workspace_users.role_collaborateur') },
+  { value: 'stagiaire', label: t('workspace_users.role_stagiaire') },
+  { value: 'observateur', label: t('workspace_users.role_observateur') },
+]
 
 const filteredMembers = computed(() => {
   if (!filterBanned.value) return members.value
@@ -516,6 +641,37 @@ const unban = async (member) => {
   }
 }
 
+const openRoleModal = (member) => {
+  roleModal.value = { open: true, member, role: member.workspace_role ?? 'collaborateur', saving: false, error: null }
+}
+
+const saveRole = async () => {
+  if (!workspaceId.value || !roleModal.value.member) return
+  roleModal.value.saving = true
+  roleModal.value.error = null
+  try {
+    await api.put(`/workspaces/${workspaceId.value}/members/${roleModal.value.member.id}`, { role: roleModal.value.role })
+    const idx = members.value.findIndex((m) => m.id === roleModal.value.member.id)
+    if (idx !== -1) {
+      members.value[idx] = { ...members.value[idx], workspace_role: roleModal.value.role }
+    }
+    roleModal.value.open = false
+    showSuccess(t('workspace_members.role_success', { name: roleModal.value.member.nom_complet }))
+  } catch (e) {
+    roleModal.value.error = e.response?.data?.message ?? t('workspace_users.role_save_error')
+  } finally {
+    roleModal.value.saving = false
+  }
+}
+
+const openActivityModal = (member) => {
+  activityModal.value = { open: true, member }
+}
+
+const openProfileModal = (member) => {
+  profileModal.value = { open: true, userId: member.id }
+}
+
 // --- Invitations ---
 const invitations = ref([])
 const invitationsLoading = ref(false)
@@ -574,9 +730,7 @@ const onInvited = () => {
 // --- Utilitaires ---
 const showSuccess = (msg) => {
   successMessage.value = msg
-  setTimeout(() => {
-    successMessage.value = ''
-  }, 4000)
+  setTimeout(() => { successMessage.value = '' }, 4000)
 }
 
 const initials = (member) => {

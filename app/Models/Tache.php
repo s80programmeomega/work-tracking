@@ -54,7 +54,6 @@ use Spatie\Permission\Models\Role;
  * @property string|null $archive_status
  * @property Carbon|null $archived_at
  * @property int|null $created_by
- * @property string $visibility
  * @property int|null $week_number
  * @property int|null $year
  * @property bool $is_overdue computed accessor
@@ -134,7 +133,6 @@ class Tache extends Model
         'archive_status',
         'archived_at',
         'created_by',
-        'visibility',
         'week_number',
         'year',
     ];
@@ -155,7 +153,6 @@ class Tache extends Model
         'estimated_hours' => 'decimal:2',
         'actual_hours' => 'decimal:2',
         'archived_at' => 'datetime',
-        'visibility' => 'string',
         'week_number' => 'integer',
         'year' => 'integer',
     ];

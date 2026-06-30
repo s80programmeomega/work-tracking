@@ -41,15 +41,13 @@ class DocumentCrudTest extends TestCase
         $this->projet = Projet::factory()->create([
             'workspace_id' => $this->workspace->id,
             'responsable_id' => $this->owner->id,
-            'visibility' => 'public',
         ]);
     }
 
-    private function makeDocument(string $visibility = 'private'): Document
+    private function makeDocument(string $ignored = ''): Document
     {
         return Document::factory()->forProjet($this->projet)->create([
             'user_id' => $this->owner->id,
-            'visibility' => $visibility,
         ]);
     }
 
@@ -69,7 +67,6 @@ class DocumentCrudTest extends TestCase
                 'documentable_type' => Projet::class,
                 'documentable_id' => $this->projet->id,
                 'files' => [$file],
-                'visibility' => 'team',
             ]);
 
         $response->assertCreated()
@@ -158,13 +155,12 @@ class DocumentCrudTest extends TestCase
     // =========================================================================
 
     /** @test */
-    public function owner_can_update_document_visibility(): void
+    public function owner_can_update_document(): void
     {
-        $doc = $this->makeDocument('private');
+        $doc = $this->makeDocument();
 
         $response = $this->actingAs($this->owner)
             ->putJson("/api/documents/{$doc->id}", [
-                'visibility' => 'public',
             ]);
 
         $response->assertOk()
@@ -172,7 +168,6 @@ class DocumentCrudTest extends TestCase
 
         $this->assertDatabaseHas('documents', [
             'id' => $doc->id,
-            'visibility' => 'public',
         ]);
     }
 
@@ -184,7 +179,6 @@ class DocumentCrudTest extends TestCase
 
         $this->actingAs($outsider)
             ->putJson("/api/documents/{$doc->id}", [
-                'visibility' => 'private',
             ])
             ->assertForbidden();
     }

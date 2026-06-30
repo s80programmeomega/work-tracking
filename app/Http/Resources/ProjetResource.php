@@ -33,7 +33,6 @@ class ProjetResource extends JsonResource
      * @responseField responsable_id integer Responsible user ID.
      * @responseField responsable UserResource|null Responsible user (when loaded).
      * @responseField status string Status enum: active | completed | archived | on_hold.
-     * @responseField visibility string Visibility enum: public | private | team.
      * @responseField couleur string|null Hex color code.
      * @responseField budget number|null Budget amount.
      * @responseField progression integer Auto-calculated completion percentage (0-100).
@@ -81,7 +80,6 @@ class ProjetResource extends JsonResource
             'responsable_id' => $this->responsable_id,
             'responsable' => new UserResource($this->whenLoaded('responsable')),
             'status' => $this->status,
-            'visibility' => $this->visibility,
             'couleur' => $this->couleur,
             'budget' => $this->budget,
 
@@ -92,6 +90,7 @@ class ProjetResource extends JsonResource
 
             'is_template' => $this->is_template,
             'is_favorite' => $this->is_favorite,
+            'use_teams' => $this->use_teams,
             'objectifs' => $this->objectifs,
             'metadata' => $this->metadata,
             'archived_at' => $this->archived_at?->format('Y-m-d H:i:s'),
@@ -159,7 +158,6 @@ class ProjetResource extends JsonResource
                 'id' => $t->id,
                 'uuid' => $t->uuid,
                 'name' => $t->name,
-                'visibility' => $t->visibility,
             ])),
 
             // Gate-computed permissions for this user on this project
@@ -170,9 +168,11 @@ class ProjetResource extends JsonResource
 
                 return [
                     'can_view' => $gate->userCan($user, Permission::PROJETS_VIEW, $projet),
+                    'can_view_all' => $gate->userCan($user, Permission::PROJETS_VIEW_ALL, $projet),
                     'can_edit' => $gate->userCan($user, Permission::PROJETS_EDIT, $projet),
                     'can_delete' => $gate->userCan($user, Permission::PROJETS_DELETE, $projet),
                     'can_manage_members' => $gate->userCan($user, Permission::PROJETS_MANAGE_MEMBERS, $projet),
+                    'can_manage_teams' => $gate->userCan($user, Permission::PROJETS_MANAGE_TEAMS, $projet),
                     'can_create_activity' => $gate->userCan($user, Permission::ACTIVITES_CREATE_TASK, $projet),
                     'can_view_documents' => $gate->userCan($user, Permission::DOCUMENTS_VIEW, $projet),
                     'can_upload_documents' => $gate->userCan($user, Permission::DOCUMENTS_UPLOAD, $projet),

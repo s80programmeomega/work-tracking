@@ -21,7 +21,6 @@
         </router-link>
       </div>
 
-      <!-- Activity Modal -->
       <!-- Profile Modal -->
       <UserProfileModal
         v-if="profileModal.open"
@@ -29,6 +28,7 @@
         @close="profileModal.open = false"
       />
 
+      <!-- Activity Modal -->
       <div v-if="activityModal.open" dusk="ws-activity-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 rounded-3 shadow-xl w-full max-w-5xl max-h-[90vh] flex flex-col">
           <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
@@ -50,6 +50,56 @@
               :fixed-causer-id="activityModal.user?.id"
               :fixed-causer-label="activityModal.user?.nom"
             />
+          </div>
+        </div>
+      </div>
+
+      <!-- Change Role Modal -->
+      <div v-if="roleModal.open" dusk="role-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-3 shadow-xl w-full max-w-md mx-4">
+          <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+              {{ $t('workspace_users.change_role_title') }}
+            </h3>
+            <button @click="roleModal.open = false" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div class="px-6 py-4 space-y-4">
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              {{ $t('workspace_users.change_role_desc', { name: roleModal.user?.nom }) }}
+            </p>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                {{ $t('workspace_users.col_role') }}
+              </label>
+              <select
+                v-model="roleModal.role"
+                dusk="role-select"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              >
+                <option v-for="r in workspaceRoles" :key="r.value" :value="r.value">{{ r.label }}</option>
+              </select>
+            </div>
+            <div v-if="roleModal.error" class="text-sm text-red-600 dark:text-red-400">{{ roleModal.error }}</div>
+          </div>
+          <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
+            <button
+              @click="roleModal.open = false"
+              class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-3 hover:bg-gray-50 dark:hover:bg-gray-700"
+            >
+              {{ $t('common.cancel') }}
+            </button>
+            <button
+              @click="saveRole"
+              :disabled="roleModal.saving"
+              dusk="save-role-button"
+              class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-3 hover:bg-blue-700 disabled:opacity-50"
+            >
+              {{ roleModal.saving ? $t('common.saving') : $t('common.save') }}
+            </button>
           </div>
         </div>
       </div>
@@ -114,23 +164,34 @@
                 <td class="px-4 py-3 text-gray-500 dark:text-gray-400">
                   {{ user.last_login_at ? formatDate(user.last_login_at) : $t('workspace_users.never_logged_in') }}
                 </td>
-                <td class="px-4 py-3 flex gap-2">
-                  <button
-                    dusk="ws-view-activity-button"
-                    @click="openActivityModal(user)"
-                    class="text-xs px-2 py-1 bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 rounded hover:bg-purple-200 transition-colors"
-                    :title="$t('admin.users.btn_activity')"
-                  >
-                    <i class="fas fa-history mr-1"></i>{{ $t('admin.users.btn_activity') }}
-                  </button>
-                  <button
-                    dusk="ws-view-profile-button"
-                    @click="openProfileModal(user)"
-                    class="text-xs px-2 py-1 bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400 rounded hover:bg-teal-200 transition-colors"
-                    :title="$t('admin.users.btn_view_profile')"
-                  >
-                    <i class="fas fa-user mr-1"></i>{{ $t('admin.users.btn_view_profile') }}
-                  </button>
+                <td class="px-4 py-3">
+                  <div class="flex gap-2">
+                    <button
+                      v-if="user.workspace_role !== 'owner'"
+                      dusk="ws-change-role-button"
+                      @click="openRoleModal(user)"
+                      class="text-xs px-2 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded hover:bg-blue-200 transition-colors"
+                      :title="$t('workspace_users.btn_change_role')"
+                    >
+                      <i class="fas fa-user-tag mr-1"></i>{{ $t('workspace_users.btn_change_role') }}
+                    </button>
+                    <button
+                      dusk="ws-view-activity-button"
+                      @click="openActivityModal(user)"
+                      class="text-xs px-2 py-1 bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 rounded hover:bg-purple-200 transition-colors"
+                      :title="$t('admin.users.btn_activity')"
+                    >
+                      <i class="fas fa-history mr-1"></i>{{ $t('admin.users.btn_activity') }}
+                    </button>
+                    <button
+                      dusk="ws-view-profile-button"
+                      @click="openProfileModal(user)"
+                      class="text-xs px-2 py-1 bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400 rounded hover:bg-teal-200 transition-colors"
+                      :title="$t('admin.users.btn_view_profile')"
+                    >
+                      <i class="fas fa-user mr-1"></i>{{ $t('admin.users.btn_view_profile') }}
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -140,7 +201,7 @@
         <!-- Pagination -->
         <div v-if="pagination && pagination.last_page > 1" class="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-700">
           <p class="text-sm text-gray-500 dark:text-gray-400">
-            {{ $t('common.page') }} {{ pagination.current_page }} / {{ pagination.last_page }}
+            {{ pagination.current_page }} / {{ pagination.last_page }}
           </p>
           <div class="flex gap-2">
             <button
@@ -185,6 +246,15 @@ const { staggerRef: tbodyRef, applyStagger } = useStagger(40)
 
 const activityModal = ref({ open: false, user: null })
 const profileModal = ref({ open: false, userId: null })
+const roleModal = ref({ open: false, user: null, role: '', saving: false, error: null })
+
+const workspaceRoles = [
+  { value: 'manager', label: t('workspace_users.role_manager') },
+  { value: 'cadre', label: t('workspace_users.role_cadre') },
+  { value: 'collaborateur', label: t('workspace_users.role_collaborateur') },
+  { value: 'stagiaire', label: t('workspace_users.role_stagiaire') },
+  { value: 'observateur', label: t('workspace_users.role_observateur') },
+]
 
 const openActivityModal = (user) => {
   activityModal.value = { open: true, user }
@@ -192,6 +262,30 @@ const openActivityModal = (user) => {
 
 const openProfileModal = (user) => {
   profileModal.value = { open: true, userId: user.id }
+}
+
+const openRoleModal = (user) => {
+  roleModal.value = { open: true, user, role: user.workspace_role ?? 'collaborateur', saving: false, error: null }
+}
+
+const saveRole = async () => {
+  const workspaceId = authStore.currentWorkspaceId
+  if (!workspaceId || !roleModal.value.user) { return }
+
+  roleModal.value.saving = true
+  roleModal.value.error = null
+  try {
+    await api.put(`/workspaces/${workspaceId}/members/${roleModal.value.user.id}`, { role: roleModal.value.role })
+    const idx = users.value.findIndex((u) => u.id === roleModal.value.user.id)
+    if (idx !== -1) {
+      users.value[idx] = { ...users.value[idx], workspace_role: roleModal.value.role }
+    }
+    roleModal.value.open = false
+  } catch (e) {
+    roleModal.value.error = e.response?.data?.message ?? t('workspace_users.role_save_error')
+  } finally {
+    roleModal.value.saving = false
+  }
 }
 
 const formatDate = (iso) => iso ? new Date(iso).toLocaleDateString() : '—'

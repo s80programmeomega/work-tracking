@@ -14,7 +14,7 @@ class TacheUpdatedNotification extends Notification implements ShouldQueue
 
     protected array $changes;
 
-    public function __construct(public Tache $tache, public User $updatedBy, array $changes = []) 
+    public function __construct(public Tache $tache, public User $updatedBy, array $changes = [])
     {
         $this->changes = $changes;
     }
@@ -30,28 +30,28 @@ class TacheUpdatedNotification extends Notification implements ShouldQueue
             'type' => 'task_updated',
             'tache_id' => $this->tache->id,
             'activite_id' => $this->tache->activite_id,
-            'title' => "Tâche mise à jour",
+            'title' => 'Tâche mise à jour',
             'message' => $this->buildMessage(),
-            
+
             // Informations de la tâche
             'tache_titre' => $this->tache->titre,
             'tache_statut' => $this->tache->statut,
             'tache_priorite' => $this->tache->priorite,
             'tache_echeance' => $this->tache->echeance?->format('Y-m-d H:i:s'),
-            
+
             // Modifications effectuées
             'changes' => $this->formatChanges(),
             'changes_count' => count($this->changes),
-            
+
             // Informations de l'utilisateur
             'updated_by_id' => $this->updatedBy->id,
             'updated_by_nom' => $this->updatedBy->nom,
             'updated_by_avatar' => $this->updatedBy->avatar,
-            
+
             // Informations de l'activité/projet
             'activite_nom' => $this->tache->activite->nom ?? null,
             'projet_nom' => $this->tache->activite->projet->nom ?? null,
-            
+
             // URLs d'accès
             'url' => "/taches/{$this->tache->id}",
             'action_url' => "/taches/{$this->tache->id}?tab=activity",
@@ -68,6 +68,7 @@ class TacheUpdatedNotification extends Notification implements ShouldQueue
         }
 
         $changesText = $this->getMainChangesText();
+
         return "{$this->updatedBy->nom} a modifié {$changesText} de la tâche \"{$this->tache->titre}\"";
     }
 
@@ -80,7 +81,7 @@ class TacheUpdatedNotification extends Notification implements ShouldQueue
         $count = count($fields);
 
         if ($count === 0) {
-            return "des détails";
+            return 'des détails';
         }
 
         $fieldLabels = [
@@ -101,9 +102,10 @@ class TacheUpdatedNotification extends Notification implements ShouldQueue
             return $label;
         } elseif ($count === 2) {
             $label2 = $fieldLabels[$fields[1]] ?? $fields[1];
+
             return "{$label} et {$label2}";
         } else {
-            return "{$label} et " . ($count - 1) . " autre(s) champ(s)";
+            return "{$label} et ".($count - 1).' autre(s) champ(s)';
         }
     }
 
@@ -140,7 +142,6 @@ class TacheUpdatedNotification extends Notification implements ShouldQueue
             'date_debut' => 'Date de début',
             'estimated_hours' => 'Durée estimée',
             'taux_realisation' => 'Taux de réalisation',
-            'visibility' => 'Visibilité',
         ];
 
         return $labels[$field] ?? ucfirst($field);

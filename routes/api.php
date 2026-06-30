@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\PaymentWebhookController;
 use App\Http\Controllers\Api\ProjetController;
 use App\Http\Controllers\Api\ProjetInvitationController;
+use App\Http\Controllers\Api\ProjetTeamController;
 use App\Http\Controllers\Api\PushSubscriptionController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\SocialAuthController;
@@ -23,6 +24,7 @@ use App\Http\Controllers\Api\SupportTicketController;
 use App\Http\Controllers\Api\TacheController;
 use App\Http\Controllers\Api\TacheResultatController;
 use App\Http\Controllers\Api\TwoFactorManagementController;
+use App\Http\Controllers\Api\WorkspaceChatController;
 use App\Http\Controllers\Api\WorkspaceController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\CommentController;
@@ -294,6 +296,7 @@ Route::middleware(['auth:sanctum', 'subscription.status'])->group(function () {
 
         // Phase 11E: Liste des membres avec métadonnées (owner/directeur/manager)
         Route::get('/{workspace}/users', [WorkspaceController::class, 'workspaceUsers'])->name('workspaces.users');
+        Route::get('/{workspace}/member-activity-log', [WorkspaceController::class, 'memberActivityLog'])->name('workspaces.member-activity-log');
 
         // ========================================  MEMBRE REMOVAL WITH TRANSFER  ========================================
         Route::prefix('/{workspace}')->group(function () {
@@ -318,6 +321,32 @@ Route::middleware(['auth:sanctum', 'subscription.status'])->group(function () {
             Route::delete('members/{user}', [WorkspaceController::class, 'removeMember'])
                 ->name('workspaces.members.remove');
         });
+
+        // ── Chat workspace (canaux responsibles + global) ───────────────
+        Route::get('/{workspace}/chat/channels', [WorkspaceChatController::class, 'channels'])
+            ->name('workspaces.chat.channels');
+        Route::get('/{workspace}/chat/channels/{channelType}/messages', [WorkspaceChatController::class, 'messages'])
+            ->name('workspaces.chat.messages');
+        Route::post('/{workspace}/chat/channels/{channelType}/messages', [WorkspaceChatController::class, 'send'])
+            ->name('workspaces.chat.send');
+        Route::patch('/{workspace}/chat/messages/{uuid}', [WorkspaceChatController::class, 'update'])
+            ->name('workspaces.chat.update');
+        Route::delete('/{workspace}/chat/messages/{uuid}', [WorkspaceChatController::class, 'destroy'])
+            ->name('workspaces.chat.destroy');
+        Route::post('/{workspace}/chat/channels/{channelType}/read', [WorkspaceChatController::class, 'markRead'])
+            ->name('workspaces.chat.mark-read');
+        Route::post('/{workspace}/chat/messages/{uuid}/pin', [WorkspaceChatController::class, 'pin'])
+            ->name('workspaces.chat.pin');
+        Route::delete('/{workspace}/chat/messages/{uuid}/pin', [WorkspaceChatController::class, 'unpin'])
+            ->name('workspaces.chat.unpin');
+        Route::post('/{workspace}/chat/upload', [WorkspaceChatController::class, 'uploadPhoto'])
+            ->name('workspaces.chat.upload');
+        Route::post('/{workspace}/chat/messages/{uuid}/reactions', [WorkspaceChatController::class, 'addReaction'])
+            ->name('workspaces.chat.react');
+        Route::delete('/{workspace}/chat/messages/{uuid}/reactions', [WorkspaceChatController::class, 'removeReaction'])
+            ->name('workspaces.chat.unreact');
+        Route::get('/{workspace}/chat/unread', [WorkspaceChatController::class, 'unread'])
+            ->name('workspaces.chat.unread');
     });
 
     // Task 10: Vue globale des tâches du workspace (owner/directeur uniquement)
@@ -373,6 +402,13 @@ Route::middleware(['auth:sanctum', 'subscription.status'])->group(function () {
 
         Route::get('/{projet}/members/{user}/removal-impact', [ProjetController::class, 'getMemberRemovalImpact']);
         Route::delete('/{projet}/members/{user}/remove', [ProjetController::class, 'removeMemberWithTransfer']);
+
+        // Team integration (Phase 2)
+        Route::get('/{projet}/teams', [ProjetTeamController::class, 'index'])->name('projets.teams.index');
+        Route::post('/{projet}/teams', [ProjetTeamController::class, 'link'])->name('projets.teams.link');
+        Route::delete('/{projet}/teams/{team}', [ProjetTeamController::class, 'unlink'])->name('projets.teams.unlink');
+        Route::patch('/{projet}/use-teams', [ProjetTeamController::class, 'toggleUseTeams'])->name('projets.use-teams.toggle');
+        Route::get('/{projet}/candidates', [ProjetTeamController::class, 'candidates'])->name('projets.candidates');
 
     });
 

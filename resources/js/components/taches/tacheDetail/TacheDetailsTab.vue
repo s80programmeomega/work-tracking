@@ -360,10 +360,6 @@
           <span class="text-gray-600 dark:text-gray-400">Dernière mise à jour:</span>
           <span class="ml-2 text-gray-900 dark:text-white">{{ formatDate(localTache.updated_at) }}</span>
         </div>
-        <div v-if="localTache.visibility">
-          <span class="text-gray-600 dark:text-gray-400">Visibilité:</span>
-          <span class="ml-2 text-gray-900 dark:text-white">{{ localTache.visibility }}</span>
-        </div>
       </div>
     </div>
   </div>

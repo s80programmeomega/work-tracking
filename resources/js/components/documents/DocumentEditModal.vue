@@ -77,22 +77,6 @@
                   </div>
 
                   <!-- Visibility -->
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Visibilité
-                    </label>
-                    <select
-                      v-model="form.visibility"
-                      class="mt-1 block w-full rounded-3 border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                    >
-                      <option value="private">Privé (propriétaire uniquement)</option>
-                      <option value="team">Équipe (membres de l'entité)</option>
-                      <option value="public">Public (tous les utilisateurs)</option>
-                    </select>
-                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                      Définissez qui peut voir ce document
-                    </p>
-                  </div>
                 </div>
 
                 <!-- Error Message -->
@@ -168,7 +152,6 @@ const { updateDocument, loading, error } = useDocuments()
 const form = reactive({
   nom: props.document.nom,
   description: props.document.description || '',
-  visibility: props.document.visibility
 })
 
 const handleSubmit = async () => {

@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Workspace;
 use App\Permissions\ContextualPermissionGate;
 use App\Permissions\Permission;
+use App\Services\PermissionService;
 
 class WorkspacePolicy
 {
@@ -15,6 +16,10 @@ class WorkspacePolicy
 
     public function view(User $user, Workspace $workspace): bool
     {
+        if ($user->isSuperAdmin() && $user->admin_expires_at === null) {
+            return true;
+        }
+
         return $this->gate->userCan($user, Permission::WORKSPACES_VIEW, $workspace);
     }
 
@@ -57,5 +62,13 @@ class WorkspacePolicy
     public function viewMembers(User $user, Workspace $workspace): bool
     {
         return $this->gate->userCan($user, Permission::WORKSPACES_VIEW_MEMBERS, $workspace);
+    }
+
+    /** Accès au canal responsibles : directeur, manager, cadre du workspace. */
+    public function accessResponsibles(User $user, Workspace $workspace): bool
+    {
+        $roleName = app(PermissionService::class)->getWorkspaceRoleName($user, $workspace);
+
+        return in_array($roleName, ['owner', 'manager', 'cadre'], true);
     }
 }

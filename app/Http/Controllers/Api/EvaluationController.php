@@ -649,6 +649,23 @@ class EvaluationController extends Controller
     public function pendingValidations(Request $request): JsonResponse
     {
         $user = $request->user();
+        $workspace = $user->currentWorkspace;
+
+        if (! $workspace) {
+            return response()->json([
+                'success' => false,
+                'message' => __('evaluation.errors.no_workspace'),
+            ], 403);
+        }
+
+        $gate = app(ContextualPermissionGate::class);
+
+        abort_unless(
+            $gate->userCan($user, Permission::EVALUATIONS_VIEW_PENDING, $workspace),
+            403,
+            __('evaluation.errors.cannot_view_pending')
+        );
+
         $dateFrom = $request->input('date_from');
         $dateTo = $request->input('date_to');
 
@@ -1371,9 +1388,26 @@ class EvaluationController extends Controller
             'year' => 'nullable|integer|min:1990',
         ]);
 
+        $user = $request->user();
+        $workspace = $user->currentWorkspace;
+
+        if (! $workspace) {
+            return response()->json([
+                'success' => false,
+                'message' => __('evaluation.errors.no_workspace'),
+            ], 403);
+        }
+
+        $gate = app(ContextualPermissionGate::class);
+
+        abort_unless(
+            $gate->userCan($user, Permission::EVALUATIONS_VIEW_FICHE, $workspace),
+            403,
+            __('evaluation.errors.cannot_view_fiche')
+        );
+
         $weekNumber = $validated['week_number'] ?? now()->weekOfYear;
         $year = $validated['year'] ?? now()->year;
-        $user = $request->user();
 
         // Dates de la semaine sélectionnée
         $weekStart = $this->getWeekStartDate($year, $weekNumber);
@@ -2200,8 +2234,7 @@ class EvaluationController extends Controller
         $gate = app(ContextualPermissionGate::class);
         $workspace = $user->currentWorkspace;
 
-        if (! $user->isSuperAdmin()
-            && (! $workspace || ! $gate->userCan($user, Permission::EVALUATIONS_VIEW_DASHBOARD, $workspace))) {
+        if (! $workspace || ! $gate->userCan($user, Permission::EVALUATIONS_VIEW_DASHBOARD, $workspace)) {
             Log::warning('Accès refusé au tableau de bord évaluations', [
                 'user_id' => $user->id,
                 'workspace_id' => $workspace?->id,
@@ -2224,9 +2257,9 @@ class EvaluationController extends Controller
 
         Log::info('Tableau de bord évaluations consulté', [
             'user_id' => $user->id,
-            'workspace_id' => $workspace?->id,
+            'workspace_id' => $workspace->id,
             'periode' => "{$periodeStart->toDateString()} → {$periodeEnd->toDateString()}",
-            'scope' => $user->isSuperAdmin() ? 'super_admin' : ($workspace?->owner_id === $user->id ? 'owner' : 'scoped'),
+            'scope' => $workspace->owner_id === $user->id ? 'owner' : 'scoped',
         ]);
 
         // Résolution du scope : quels user_ids sont visibles par cet acteur ?
@@ -2252,7 +2285,7 @@ class EvaluationController extends Controller
 
         // Alertes : membres avec escalades_abusives actif dans ce workspace.
         $escaladeAlerts = Tache::query()
-            ->whereHas('activite.projet', fn ($q) => $q->where('workspace_id', $workspace?->id))
+            ->whereHas('activite.projet', fn ($q) => $q->where('workspace_id', $workspace->id))
             ->whereHas('assignees', function ($q) use ($scopedUserIds) {
                 $q->whereIn('users.id', $scopedUserIds)
                     ->where('tache_user.escalades_abusives', true);

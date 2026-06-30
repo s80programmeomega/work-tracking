@@ -5,7 +5,9 @@ namespace App\Providers;
 use App\Models\Document;
 use App\Models\SousTache;
 use App\Models\User;
+use App\Models\Workspace;
 use App\Observers\SousTacheObserver;
+use App\Observers\WorkspaceObserver;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\URL;
@@ -29,6 +31,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         SousTache::observe(SousTacheObserver::class);
+        Workspace::observe(WorkspaceObserver::class);
 
         // Forcer url() à utiliser l'URL du frontend SPA pour les e-mails et notifications.
         // APP_FRONTEND_URL = adresse réseau du frontend (ex: http://10.175.13.27:5173).

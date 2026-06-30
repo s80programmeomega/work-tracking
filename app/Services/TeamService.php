@@ -2,9 +2,10 @@
 
 namespace App\Services;
 
+use App\Models\Projet;
 use App\Models\Team;
-use App\Models\TeamMember;
 use App\Models\TeamActivity;
+use App\Models\TeamMember;
 use App\Models\TeamPresence;
 use App\Models\User;
 use App\Notifications\TeamMemberAddedNotification;
@@ -22,12 +23,12 @@ class TeamService
         $query = Team::with(['owner', 'project', 'members'])
             ->withCount('members');
 
-        if (isset($filters['visibility'])) {
-            $query->where('visibility', $filters['visibility']);
-        }
-
         if (isset($filters['is_active'])) {
             $query->where('is_active', $filters['is_active']);
+        }
+
+        if (isset($filters['workspace_id'])) {
+            $query->where('workspace_id', $filters['workspace_id']);
         }
 
         if (isset($filters['project_id'])) {
@@ -37,11 +38,12 @@ class TeamService
         if (isset($filters['search'])) {
             $query->where(function ($q) use ($filters) {
                 $q->where('name', 'LIKE', "%{$filters['search']}%")
-                  ->orWhere('description', 'LIKE', "%{$filters['search']}%");
+                    ->orWhere('description', 'LIKE', "%{$filters['search']}%");
             });
         }
 
         $perPage = $filters['per_page'] ?? 15;
+
         return $query->orderBy('created_at', 'desc')->paginate($perPage);
     }
 
@@ -59,13 +61,18 @@ class TeamService
     /**
      * Get teams for a user
      */
-    public function getUserTeams(User $user)
+    public function getUserTeams(User $user, ?int $workspaceId = null)
     {
-        return $user->teams()
+        $query = $user->teams()
             ->withCount('members')
             ->with(['owner', 'project'])
-            ->orderBy('created_at', 'desc')
-            ->get();
+            ->orderBy('created_at', 'desc');
+
+        if ($workspaceId) {
+            $query->where('teams.workspace_id', $workspaceId);
+        }
+
+        return $query->get();
     }
 
     /**
@@ -78,8 +85,8 @@ class TeamService
                 'name' => $data['name'],
                 'description' => $data['description'] ?? null,
                 'owner_id' => $owner->id,
+                'workspace_id' => $data['workspace_id'] ?? null,
                 'project_id' => $data['project_id'] ?? null,
-                'visibility' => $data['visibility'] ?? 'private',
                 'settings' => $data['settings'] ?? [],
                 'is_active' => true,
             ]);
@@ -114,7 +121,6 @@ class TeamService
         $team->update([
             'name' => $data['name'] ?? $team->name,
             'description' => $data['description'] ?? $team->description,
-            'visibility' => $data['visibility'] ?? $team->visibility,
             'settings' => $data['settings'] ?? $team->settings,
         ]);
 
@@ -157,12 +163,30 @@ class TeamService
     }
 
     /**
-     * Delete team
+     * Delete team.
+     *
+     * Members already synced to linked projects are kept (not removed).
+     * Projects that had this as their last linked team auto-disable use_teams.
      */
     public function deleteTeam(Team $team): bool
     {
-        // Log activity before deletion
         TeamActivity::log($team, auth()->user(), 'team_deleted');
+
+        // Le projet lié à cette équipe (via teams.project_id)
+        $linkedProjetId = $team->project_id;
+
+        // Délier l'équipe du projet sans déclencher l'observer TeamProjectObserver
+        // (les membres synchro restent intentionnellement dans le projet).
+        if ($linkedProjetId !== null) {
+            $team->project_id = null;
+            $team->saveQuietly();
+
+            // Si ce projet n'a plus d'autre équipe liée, désactiver use_teams
+            $hasOtherTeams = Team::where('project_id', $linkedProjetId)->exists();
+            if (! $hasOtherTeams) {
+                Projet::where('id', $linkedProjetId)->update(['use_teams' => false]);
+            }
+        }
 
         return $team->delete();
     }

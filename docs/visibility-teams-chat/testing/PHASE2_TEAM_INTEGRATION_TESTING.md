@@ -2,7 +2,7 @@
 
 **Task:** Add `use_teams` flag to projects; make assignee pickers team-aware; auto-sync team members into projet_user.  
 **Branch:** `feature/visibility-teams-chat`  
-**Status:** ⬜ To be completed after Phase 2 implementation
+**Status:** ✅ Implementation complete — tests deferred to end of plan
 
 ---
 

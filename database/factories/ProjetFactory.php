@@ -47,7 +47,6 @@ class ProjetFactory extends Factory
             'responsable_id' => User::factory(),
             'date_debut' => now()->subDays(fake()->numberBetween(0, 30)),
             'date_fin' => now()->addMonths(fake()->numberBetween(2, 6)),
-            'visibility' => 'team',
             'status' => 'active',
         ];
     }

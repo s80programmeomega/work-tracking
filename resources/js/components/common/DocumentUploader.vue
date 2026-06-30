@@ -112,14 +112,6 @@
                     ></textarea>
                 </div>
 
-                <div class="form-group">
-                    <label for="visibility">Visibilité</label>
-                    <select id="visibility" v-model="visibility" class="form-control">
-                        <option value="private">Privé (seulement moi)</option>
-                        <option value="team">Équipe (membres du projet)</option>
-                        <option value="public">Public</option>
-                    </select>
-                </div>
             </div>
 
             <!-- Upload Button -->
@@ -187,7 +179,7 @@ const selectedFiles = ref([]);
 const isDragging = ref(false);
 const error = ref(null);
 const description = ref('');
-const visibility = ref('team');
+
 
 const maxSizeMB = computed(() => Math.round(props.maxSize / 1024));
 const allowedFormats = computed(() => {
@@ -266,7 +258,6 @@ const uploadFiles = async () => {
             props.documentableId,
             {
                 description: description.value,
-                visibility: visibility.value,
             }
         );
 

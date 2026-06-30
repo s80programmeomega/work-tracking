@@ -112,19 +112,6 @@
               </h2>
 
               <div class="space-y-6">
-                <!-- Visibilité par défaut des projets -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {{ $t('ws_create.label_visibility') }}
-                  </label>
-                  <select v-model="form.settings.default_project_visibility"
-                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-3 focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
-                    <option value="public">{{ $t('ws_create.vis_public') }}</option>
-                    <option value="team">{{ $t('ws_create.vis_team') }}</option>
-                    <option value="private">{{ $t('ws_create.vis_private') }}</option>
-                  </select>
-                </div>
-
                 <!-- Permissions -->
                 <div class="space-y-4">
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -211,7 +198,6 @@ const form = ref({
   description: '',
   logo: null as File | null,
   settings: {
-    default_project_visibility: 'team',
     members_can_create_projects: true,
     members_can_invite: false,
     require_task_validation: true,

@@ -50,7 +50,6 @@ class Projet extends Model
         'date_fin',
         'responsable_id',
         'status',
-        'visibility',
         'couleur',
         'budget',
         'progression',
@@ -60,6 +59,7 @@ class Projet extends Model
         'metadata',
         'archived_at',
         'created_by',
+        'use_teams',
     ];
 
     protected $casts = [
@@ -69,6 +69,7 @@ class Projet extends Model
         'progression' => 'integer',
         'is_template' => 'boolean',
         'is_favorite' => 'boolean',
+        'use_teams' => 'boolean',
         'metadata' => 'array',
         'archived_at' => 'datetime',
     ];
@@ -240,60 +241,31 @@ class Projet extends Model
         return $query->where('status', 'completed');
     }
 
-    public function scopePublic($query)
-    {
-        return $query->where('visibility', 'public');
-    }
-
-    public function scopePrivate($query)
-    {
-        return $query->where('visibility', 'private');
-    }
-
-    public function scopeTeam($query)
-    {
-        return $query->where('visibility', 'team');
-    }
-
     /**
-     * Filtre les projets visibles par l'utilisateur selon la règle de visibilité :
-     * public → tout membre du workspace
-     * team  → membres du projet ou membres d'une équipe liée au projet
-     * private → rôle manager ou supérieur + membre du workspace
+     * Filtre les projets visibles selon le rôle : manager+ voit tout, les autres
+     * voient uniquement les projets dont ils sont membres ou responsables.
      */
     public function scopeVisibleTo(Builder $query, User $user): void
     {
-        $query->where(function (Builder $q) use ($user) {
+        if ($user->isSuperAdmin()) {
+            return;
+        }
+
+        $managerRoleIds = Role::whereIn('name', ['owner', 'manager'])->pluck('id');
+
+        $query->where(function (Builder $q) use ($user, $managerRoleIds) {
             // Propriétaire du workspace : accès total
             $q->whereHas('workspace', fn (Builder $w) => $w->where('owner_id', $user->id))
-                // Responsable du projet : accès garanti quelle que soit la visibilité
+                // Responsable du projet : accès garanti
                 ->orWhere('responsable_id', $user->id)
-                // public : tout membre du workspace
-                ->orWhere(function (Builder $pub) use ($user) {
-                    $pub->where('visibility', 'public')
-                        ->whereHas('workspace.members', fn (Builder $m) => $m->where('user_id', $user->id));
-                })
-                // team : membre du projet OU membre d'une équipe liée au projet
-                ->orWhere(function (Builder $team) use ($user) {
-                    $team->where('visibility', 'team')
-                        ->where(function (Builder $access) use ($user) {
-                            $access->whereHas('members', fn (Builder $m) => $m->where('user_id', $user->id))
-                                ->orWhereHas('teams', fn (Builder $t) => $t->whereHas(
-                                    'members',
-                                    fn (Builder $m) => $m->where('user_id', $user->id)
-                                ));
-                        });
-                });
-
-            // manager et supérieur dans le workspace : voient tous les projets (team + private)
-            if ($user->hasRoleLevel('manager')) {
-                $managerRoleIds = Role::whereIn('name', ['owner', 'manager', 'directeur', 'super_admin'])
-                    ->pluck('id');
-                $q->orWhereHas('workspace', function (Builder $w) use ($user, $managerRoleIds) {
-                    $w->whereHas('members', fn (Builder $m) => $m->where('user_id', $user->id)
-                        ->whereIn('role_id', $managerRoleIds));
-                });
-            }
+                // Membre direct du projet
+                ->orWhereHas('members', fn (Builder $m) => $m->where('user_id', $user->id))
+                // Manager ou owner dans le workspace (PROJETS_VIEW_ALL)
+                ->orWhereHas('workspace', fn (Builder $w) => $w->whereHas(
+                    'members',
+                    fn (Builder $m) => $m->where('user_id', $user->id)
+                        ->whereIn('role_id', $managerRoleIds)
+                ));
         });
     }
 
@@ -580,11 +552,13 @@ class Projet extends Model
      */
     public function accessibleTachesFor(User $user)
     {
+        if ($user->isSuperAdmin()) {
+            return $this->taches();
+        }
+
         return $this->taches()->where(function ($query) use ($user) {
-            $query->whereHas('assignees', function ($q) use ($user) {
-                $q->where('user_id', $user->id);
-            })
-                ->orWhere('visibility', 'public');
+            $query->whereHas('assignees', fn ($q) => $q->where('user_id', $user->id))
+                ->orWhere('taches.responsable_id', $user->id);
         });
     }
 

@@ -44,9 +44,19 @@ class TeamMessageController extends Controller
         $team = $this->teamService->getTeamByUuid($teamUuid);
         $data = $request->validated();
 
-        // Gérer la pièce jointe si présente
+        // Normaliser mention_everyone en booléen
+        $data['mention_everyone'] = filter_var($request->input('mention_everyone', false), FILTER_VALIDATE_BOOLEAN);
+
+        // Gérer la pièce jointe fichier si présente
         if ($request->hasFile('attachment')) {
             $data['attachments'] = [$this->messageService->uploadAttachment($request->file('attachment'))];
+        }
+
+        // Gérer les photos pré-uploadées transmises en JSON
+        if ($request->filled('attachments_json')) {
+            $photos = json_decode($request->input('attachments_json'), true) ?? [];
+            $existing = $data['attachments'] ?? [];
+            $data['attachments'] = array_merge($existing, $photos);
         }
 
         $message = $this->messageService->sendMessage($team, $request->user(), $data);

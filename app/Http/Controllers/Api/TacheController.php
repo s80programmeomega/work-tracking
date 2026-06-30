@@ -547,7 +547,6 @@ class TacheController extends Controller
             'taux_realisation' => 'nullable|integer|min:0|max:100',
             'couleur' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
             'commentaire' => 'nullable|string',
-            'visibility' => 'nullable|in:public,private,members_only',
 
             // ✅ Booléens
             'validation_n1_required' => 'nullable|boolean',
@@ -865,7 +864,6 @@ class TacheController extends Controller
             'actual_hours' => 'nullable|numeric|min:0|max:999.99',
             'couleur' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
             'commentaire' => 'nullable|string',
-            'visibility' => 'nullable|in:public,private,members_only',
 
             // Booléens
             'validation_n1_required' => 'nullable|boolean',

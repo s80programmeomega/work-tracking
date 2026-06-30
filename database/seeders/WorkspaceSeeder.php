@@ -65,7 +65,7 @@ class WorkspaceSeeder extends Seeder
             'Espace de travail principal de la direction. Regroupe les projets stratégiques.',
             'CERD-WS-001',
             $directeur,
-            ['default_project_visibility' => 'team', 'require_task_validation' => true]
+            ['require_task_validation' => true]
         );
         if ($freePlan) {
             $ws1->plan_id = $freePlan->id;
@@ -458,7 +458,7 @@ class WorkspaceSeeder extends Seeder
             'Espace de l\'équipe technique pour les projets infrastructure et innovation.',
             'CERD-WS-002',
             $eric,
-            ['default_project_visibility' => 'team', 'members_can_create_projects' => true]
+            ['members_can_create_projects' => true]
         );
         if ($freePlan) {
             $ws2->plan_id = $freePlan->id;
@@ -765,7 +765,7 @@ class WorkspaceSeeder extends Seeder
             'Espace dédié aux expérimentations et projets d\'innovation interne.',
             'CERD-WS-003',
             $aicha,
-            ['default_project_visibility' => 'team', 'members_can_create_projects' => true]
+            ['members_can_create_projects' => true]
         );
         if ($freePlan) {
             $ws3->plan_id = $freePlan->id;
@@ -1026,7 +1026,6 @@ class WorkspaceSeeder extends Seeder
             'responsable_id' => $responsable->id,
             'date_debut' => $debut,
             'date_fin' => $fin,
-            'visibility' => 'team',
             'status' => $status,
         ]);
     }

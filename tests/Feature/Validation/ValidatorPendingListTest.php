@@ -31,9 +31,9 @@ class ValidatorPendingListTest extends TestCase
         $this->refreshRoleIdCache();
     }
 
-    private function makeContext(User $n1Validator, User $n2Validator, User $author): TacheResultat
+    private function makeContext(User $n1Validator, User $n2Validator, User $author, ?Workspace $workspace = null): TacheResultat
     {
-        $workspace = Workspace::factory()->create();
+        $workspace ??= Workspace::factory()->create();
         $projet = Projet::factory()->create([
             'workspace_id' => $workspace->id,
             'responsable_id' => $n2Validator->id,
@@ -70,7 +70,7 @@ class ValidatorPendingListTest extends TestCase
         $n2->update(['current_workspace_id' => $workspace->id]);
         $n1a->update(['current_workspace_id' => $workspace->id]);
 
-        $this->makeContext($n1a, $n2, $author);
+        $this->makeContext($n1a, $n2, $author, $workspace);
         $this->makeContext($n1b, $n2, $author);  // n1a should NOT see this one
 
         $response = $this->actingAs($n1a)
@@ -94,7 +94,8 @@ class ValidatorPendingListTest extends TestCase
         $n1a->update(['current_workspace_id' => $workspace->id]);
         $n1b->update(['current_workspace_id' => $workspace->id]);
 
-        $resultatForN1b = $this->makeContext($n1b, $n2, $author);
+        $this->makeContext($n1a, $n2, $author, $workspace);
+        $resultatForN1b = $this->makeContext($n1b, $n2, $author, $workspace);
 
         $response = $this->actingAs($n1a)
             ->getJson('/api/evaluations/resultats/en-attente');

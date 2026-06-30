@@ -111,21 +111,6 @@
                 </div>
               </div>
 
-              <!-- Visibility -->
-              <div class="flex items-center gap-3">
-                <div class="p-2 bg-gray-100 dark:bg-gray-700 rounded-3">
-                  <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                </div>
-                <div>
-                  <div class="text-xs text-gray-500 dark:text-gray-400">Visibilité</div>
-                  <span :class="['inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium', projetVisibilityClasses(projet.visibility)]">
-                    {{ projetVisibilityLabel(projet.visibility) }}
-                  </span>
-                </div>
-              </div>
             </div>
 
             <!-- Linked teams -->
@@ -250,6 +235,86 @@
                     {{ formatCurrency(projet.budget) }} XAF
                   </span>
                 </div>
+              </div>
+
+              <!-- Intégration équipes (managers uniquement) -->
+              <div v-if="canManageTeams" class="border border-gray-200 dark:border-gray-700 rounded-3 p-4 space-y-4">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h4 class="text-sm font-semibold text-gray-900 dark:text-white">
+                      Intégration équipes
+                    </h4>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      Restreint les assignations aux membres des équipes liées.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    @click="toggleUseTeams"
+                    :class="[
+                      'relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none',
+                      projet.use_teams ? 'bg-brand-600' : 'bg-gray-200 dark:bg-gray-700'
+                    ]"
+                  >
+                    <span
+                      :class="[
+                        'inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform',
+                        projet.use_teams ? 'translate-x-6' : 'translate-x-1'
+                      ]"
+                    />
+                  </button>
+                </div>
+
+                <template v-if="projet.use_teams">
+                  <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs font-medium text-gray-600 dark:text-gray-400">
+                        Équipes liées ({{ linkedTeams.length }})
+                      </span>
+                      <button
+                        @click="showTeamPicker = !showTeamPicker"
+                        class="text-xs text-brand-600 dark:text-brand-400 hover:underline"
+                      >
+                        + Lier une équipe
+                      </button>
+                    </div>
+
+                    <!-- Picker équipes disponibles -->
+                    <div v-if="showTeamPicker" class="border border-gray-200 dark:border-gray-600 rounded-2 bg-white dark:bg-gray-800 shadow-sm max-h-40 overflow-y-auto">
+                      <div v-if="loadingTeams" class="p-3 text-xs text-gray-500 text-center">Chargement…</div>
+                      <div v-else-if="availableTeams.length === 0" class="p-3 text-xs text-gray-500 text-center">Aucune équipe disponible.</div>
+                      <button
+                        v-for="team in availableTeams"
+                        :key="team.id"
+                        @click="linkTeam(team)"
+                        class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                      >
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        {{ team.name }}
+                        <span class="ml-auto text-xs text-gray-400">{{ team.members_count ?? team.members?.length ?? 0 }} membres</span>
+                      </button>
+                    </div>
+
+                    <!-- Liste des équipes liées -->
+                    <div v-for="team in linkedTeams" :key="team.id"
+                      class="flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-gray-700/50 rounded-2">
+                      <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ team.name }}</span>
+                        <span class="text-xs text-gray-400">({{ team.members_count ?? team.members?.length ?? 0 }} membres)</span>
+                      </div>
+                      <button @click="unlinkTeam(team)" class="text-red-500 hover:text-red-700 dark:hover:text-red-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </template>
               </div>
             </div>
 
@@ -861,6 +926,8 @@ import { useActivites } from '@/composables/useActivites'
 import { useActivityPermissions } from '@/composables/useActivityPermissions'
 import { useAuthStore } from '@/stores/authStore'
 import { useProjetInvitations } from '@/composables/useProjetInvitations'
+import { useProjetPermissions } from '@/composables/useProjetPermissions'
+import api from '@/api/axios'
 import EditMemberPermissionsModal from '@/components/activites/EditMemberPermissionsModal.vue'
 import { useStagger } from '@/composables/useAnimations'
 
@@ -914,6 +981,15 @@ const projectStats = ref({})
 const activities = ref([])
 const members = ref([])
 const showAllActivities = ref(false)
+
+const { canManageTeams } = useProjetPermissions(projet)
+
+// État gestion équipes
+const linkedTeams = ref([])
+const workspaceTeams = ref([])
+const loadingTeams = ref(false)
+const showTeamPicker = ref(false)
+const toastTeam = useToast()
 
 // ✅ CORRECTION 4: États pour la gestion des activités
 const selectedActivity = ref(null)
@@ -1487,14 +1563,6 @@ const getActivityStatusLabel = (status) => {
   return labels[status] || status
 }
 
-const projetVisibilityLabel = (v) => ({ public: 'Public', team: 'Équipe', private: 'Privé' }[v] ?? v)
-
-const projetVisibilityClasses = (v) => ({
-  public: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  team: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  private: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-}[v] ?? 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400')
-
 const getStatusColor = (status) => {
   const colors = {
     active: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
@@ -1697,6 +1765,79 @@ watch(activeTab, async (tab) => {
   if (tab === 'invitations') {
     await loadInvitations()
   }
+})
+
+// ==================== GESTION DES ÉQUIPES ====================
+
+const loadLinkedTeams = async () => {
+  if (!projet.value?.id) return
+  try {
+    const { data } = await api.get(`/projets/${projet.value.id}/teams`)
+    linkedTeams.value = data.data || data || []
+  } catch {
+    // Silencieux — l'absence d'équipes n'est pas une erreur
+  }
+}
+
+const loadWorkspaceTeams = async () => {
+  loadingTeams.value = true
+  try {
+    const { data } = await api.get('/teams')
+    workspaceTeams.value = data.data || data || []
+  } catch {
+    workspaceTeams.value = []
+  } finally {
+    loadingTeams.value = false
+  }
+}
+
+const toggleUseTeams = async () => {
+  if (!projet.value?.id) return
+  try {
+    const { data } = await api.patch(`/projets/${projet.value.id}/use-teams`, {
+      use_teams: !projet.value.use_teams,
+    })
+    projet.value.use_teams = data.use_teams
+    if (data.use_teams) await loadLinkedTeams()
+    toastTeam.success(data.message)
+  } catch (e) {
+    toastTeam.error(e?.response?.data?.message ?? 'Erreur lors de la mise à jour.')
+  }
+}
+
+const linkTeam = async (team) => {
+  if (!projet.value?.id) return
+  try {
+    await api.post(`/projets/${projet.value.id}/teams`, { team_id: team.id })
+    showTeamPicker.value = false
+    await loadLinkedTeams()
+    toastTeam.success(`Équipe « ${team.name} » liée au projet.`)
+  } catch (e) {
+    toastTeam.error(e?.response?.data?.message ?? 'Erreur lors de la liaison.')
+  }
+}
+
+const unlinkTeam = async (team) => {
+  if (!projet.value?.id) return
+  try {
+    await api.delete(`/projets/${projet.value.id}/teams/${team.id}`)
+    linkedTeams.value = linkedTeams.value.filter(t => t.id !== team.id)
+    toastTeam.success(`Équipe « ${team.name} » déliée.`)
+  } catch (e) {
+    toastTeam.error(e?.response?.data?.message ?? 'Erreur lors de la déliaison.')
+  }
+}
+
+const availableTeams = computed(() =>
+  workspaceTeams.value.filter(t => !linkedTeams.value.some(lt => lt.id === t.id))
+)
+
+watch(showTeamPicker, (val) => {
+  if (val) loadWorkspaceTeams()
+})
+
+watch(() => projet.value?.id, (id) => {
+  if (id) loadLinkedTeams()
 })
 
 

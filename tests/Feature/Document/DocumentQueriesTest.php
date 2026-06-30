@@ -40,15 +40,13 @@ class DocumentQueriesTest extends TestCase
         $this->projet = Projet::factory()->create([
             'workspace_id' => $this->workspace->id,
             'responsable_id' => $this->owner->id,
-            'visibility' => 'public',
         ]);
     }
 
-    private function makeDocument(string $visibility = 'private'): Document
+    private function makeDocument(): Document
     {
         return Document::factory()->forProjet($this->projet)->create([
             'user_id' => $this->owner->id,
-            'visibility' => $visibility,
         ]);
     }
 
@@ -154,7 +152,6 @@ class DocumentQueriesTest extends TestCase
         Document::factory()->forProjet($this->projet)->create([
             'user_id' => $this->owner->id,
             'nom' => 'rapport-annuel.pdf',
-            'visibility' => 'public',
         ]);
 
         $response = $this->actingAs($this->owner)

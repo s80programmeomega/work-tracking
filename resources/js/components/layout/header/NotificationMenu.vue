@@ -124,6 +124,7 @@ import NotificationItem from './NotificationItem.vue'
 import NotificationDetailModal from './NotificationDetailModal.vue'
 import ResultatDetailModal from '@/components/taches/resultats/ResultatDetailModal.vue'
 import { useRealtimeRefresh } from '@/composables/useRealtimeRefresh'
+import { useLiveNotifications } from '@/composables/useLiveNotifications'
 import api from '@/api/axios'
 
 const router = useRouter()
@@ -248,6 +249,10 @@ useRealtimeRefresh({
   onResultatChanged: () => safeFetchUnread(),
   onPendingChanged: () => safeFetchUnread(),
 })
+
+// Refresh badge on any broadcast notification (covers document, workspace, team events, etc.)
+const { onNotification } = useLiveNotifications()
+onNotification(() => safeFetchUnread())
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)

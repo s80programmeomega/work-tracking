@@ -22,18 +22,15 @@ export function useTeams() {
     }
   }
 
-  const fetchMyTeams = async () => {
+  const fetchMyTeams = async (workspaceId = null) => {
     loading.value = true
     error.value = null
     try {
-      const response = await api.get('/teams/my-teams')
-      console.log('API Response:', response)
-      console.log('Response data:', response.data)
-      console.log('Teams from response:', response.data.teams)
+      const params = workspaceId ? { workspace_id: workspaceId } : {}
+      const response = await api.get('/teams/my-teams', { params })
       teams.value = response.data.teams || []
       return response.data.teams || []
     } catch (err) {
-      console.error('Fetch error:', err)
       error.value = err.response?.data?.message || 'Erreur lors de la récupération de vos équipes'
       throw err
     } finally {

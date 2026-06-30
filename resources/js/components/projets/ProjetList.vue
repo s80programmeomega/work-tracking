@@ -49,17 +49,6 @@
           <option value="archived">Archivés</option>
         </select>
 
-        <!-- Filtre Visibilité -->
-        <select
-          v-model="filters.visibility"
-          class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-brand-500"
-        >
-          <option value="all">Toutes visibilités</option>
-          <option value="public">Public</option>
-          <option value="team">Équipe</option>
-          <option value="private">Privé</option>
-        </select>
-
         <!-- Filtre Favoris -->
         <button
           @click="filters.favorites = !filters.favorites"
@@ -174,12 +163,6 @@
                 ></div>
                 <span class="text-xs font-medium text-gray-500 dark:text-gray-400">
                   {{ projet.code }}
-                </span>
-                <span
-                  class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
-                  :class="visibilityClasses(projet.visibility)"
-                >
-                  {{ visibilityLabel(projet.visibility) }}
                 </span>
               </div>
               <h3
@@ -407,10 +390,6 @@
                   </div>
                   <div class="flex items-center gap-2 mt-0.5">
                     <span class="text-xs text-gray-500 dark:text-gray-400">{{ projet.code }}</span>
-                    <span
-                      class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium"
-                      :class="visibilityClasses(projet.visibility)"
-                    >{{ visibilityLabel(projet.visibility) }}</span>
                   </div>
                 </div>
                 <StarIcon
@@ -590,7 +569,6 @@ const projetToDelete = ref(null)
 
 const filters = ref({
   status: 'all',
-  visibility: 'all',
   favorites: false,
   overdue: false
 })
@@ -598,7 +576,6 @@ const filters = ref({
 // Computed
 const hasActiveFilters = computed(() => {
   return filters.value.status !== 'all' ||
-    filters.value.visibility !== 'all' ||
     filters.value.favorites ||
     filters.value.overdue
 })
@@ -619,11 +596,6 @@ const filteredProjets = computed(() => {
   // Status filter
   if (filters.value.status !== 'all') {
     result = result.filter(p => p.status === filters.value.status)
-  }
-
-  // Visibility filter
-  if (filters.value.visibility !== 'all') {
-    result = result.filter(p => p.visibility === filters.value.visibility)
   }
 
   // Favorites filter
@@ -751,20 +723,11 @@ const toggleMenu = (projetId) => {
 const resetFilters = () => {
   filters.value = {
     status: 'all',
-    visibility: 'all',
     favorites: false,
     overdue: false
   }
   searchTerm.value = ''
 }
-
-const visibilityLabel = (v) => ({ public: 'Public', team: 'Équipe', private: 'Privé' }[v] ?? v)
-
-const visibilityClasses = (v) => ({
-  public: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  team: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  private: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-}[v] ?? 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400')
 
 const getStatusColor = (status) => {
   const colors = {

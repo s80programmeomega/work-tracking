@@ -19,6 +19,9 @@ export function useTeamMessages() {
 
   // ── Abonnement au canal privé de l'équipe ────────────────────────────────────
 
+  // UUIDs des messages envoyés par cet utilisateur et déjà gérés de façon optimiste
+  const ownSentUuids = new Set()
+
   const subscribeToTeam = (teamId) => {
     const echo = useEcho().echo
     if (!echo || !teamId) return
@@ -28,10 +31,14 @@ export function useTeamMessages() {
     // Nouveau message envoyé par un autre membre
     teamChannel.listen('.message.sent', (event) => {
       const msg = event.message
-      // Ignorer si déjà présent (envoi optimiste du même utilisateur)
-      if (!messages.value.some((m) => m.uuid === msg.uuid)) {
-        messages.value.push(msg)
+      // Ignorer si déjà présent (optimiste ou broadcast en double)
+      if (messages.value.some((m) => m.uuid === msg.uuid)) return
+      // Ignorer le broadcast du propre message de l'utilisateur (déjà géré de façon optimiste)
+      if (ownSentUuids.has(msg.uuid)) {
+        ownSentUuids.delete(msg.uuid)
+        return
       }
+      messages.value.push(msg)
       // Marquer automatiquement comme lu si l'onglet est actif
       if (document.visibilityState === 'visible') {
         markRead(currentTeamUuid.value)
@@ -86,7 +93,7 @@ export function useTeamMessages() {
   }
 
   const unsubscribeFromTeam = (teamId) => {
-    if (teamId) getEcho()?.leave(`team.${teamId}`)
+    if (teamId) useEcho().echo?.leave(`team.${teamId}`)
     teamChannel = null
     typingUsers.value = []
   }
@@ -103,7 +110,10 @@ export function useTeamMessages() {
     try {
       const response = await api.get(`/teams/${teamUuid}/messages`, { params: filters })
       const raw = response.data
-      messages.value = raw.data ?? (Array.isArray(raw.messages) ? raw.messages : [])
+      const payload = raw.data
+      messages.value = Array.isArray(payload)
+        ? payload
+        : (Array.isArray(payload?.data) ? payload.data : (Array.isArray(raw.messages) ? raw.messages : []))
       return messages.value
     } catch (err) {
       error.value = err.response?.data?.message || 'Erreur lors de la récupération des messages'
@@ -138,11 +148,14 @@ export function useTeamMessages() {
       const response = await api.post(`/teams/${teamUuid}/messages`, data)
       const saved = response.data.data ?? response.data.message
 
+      // Enregistrer l'UUID réel pour que le broadcast soit ignoré
+      if (saved?.uuid) ownSentUuids.add(saved.uuid)
+
       // Remplacer l'entrée temporaire par le message persisté
       const idx = messages.value.findIndex((m) => m.uuid === tempUuid)
       if (idx !== -1) {
         messages.value.splice(idx, 1, { ...saved, _pending: false })
-      } else {
+      } else if (!messages.value.some((m) => m.uuid === saved.uuid)) {
         messages.value.push(saved)
       }
 

@@ -102,19 +102,6 @@
                       placeholder="Ajoutez une description pour ces documents..."></textarea>
                   </div>
 
-                  <!-- Visibility -->
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Visibilité
-                    </label>
-                    <select v-model="visibility"
-                      class="mt-1 block w-full rounded-3 border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
-                      <option value="private">Privé (propriétaire uniquement)</option>
-                      <option value="team">Équipe (membres de l'entité)</option>
-                      <option value="public">Public (tous les utilisateurs)</option>
-                    </select>
-                  </div>
-
                   <!-- Allow Duplicates -->
                   <div class="flex items-center">
                     <input v-model="allowDuplicates" type="checkbox" id="allowDuplicates"
@@ -218,7 +205,6 @@ const fileInput = ref(null)
 const selectedFiles = ref([])
 const isDragging = ref(false)
 const description = ref('')
-const visibility = ref('private')
 const allowDuplicates = ref(false)
 const maxSizeMB = ref(2)
 
@@ -267,7 +253,6 @@ const handleUpload = async () => {
       props.documentableId,
       {
         description: description.value,
-        visibility: visibility.value,
         allow_duplicates: allowDuplicatesValue
       }
     )

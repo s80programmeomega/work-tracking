@@ -157,7 +157,6 @@ class WorkspaceCrudTest extends TestCase
         Projet::factory()->count(2)->create([
             'workspace_id' => $this->workspace->id,
             'responsable_id' => $this->owner->id,
-            'visibility' => 'public',
         ]);
 
         $response = $this->actingAs($this->owner)

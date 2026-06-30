@@ -42,7 +42,6 @@ class TacheAttachmentsTest extends TestCase
         $projet = Projet::factory()->create([
             'workspace_id' => $this->workspace->id,
             'responsable_id' => $this->owner->id,
-            'visibility' => 'public',
         ]);
 
         $activite = Activite::factory()->create([

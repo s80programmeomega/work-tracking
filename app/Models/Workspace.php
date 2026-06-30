@@ -106,7 +106,6 @@ class Workspace extends Model
             'notify_on_deadline_approaching' => true,
             'require_task_validation' => true,
             'require_approval_for_time_off' => true,
-            'default_project_visibility' => 'team',
             'validation_timeout_hours' => 48, // R8: 24–168h, default 48h
         ];
     }
@@ -186,6 +185,11 @@ class Workspace extends Model
     public function invitations(): HasMany
     {
         return $this->hasMany(WorkspaceInvitation::class);
+    }
+
+    public function channels(): HasMany
+    {
+        return $this->hasMany(WorkspaceChannel::class);
     }
 
     /**

@@ -2,14 +2,14 @@
 
 namespace Database\Seeders;
 
-use App\Models\Team;
-use App\Models\User;
 use App\Models\Projet;
+use App\Models\Team;
 use App\Models\TeamActivity;
-use App\Models\TeamPresence;
-use App\Models\TeamMessage;
 use App\Models\TeamAnnouncement;
+use App\Models\TeamMessage;
+use App\Models\TeamPresence;
 use App\Models\TeamResource;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -36,7 +36,6 @@ class TeamSeeder extends Seeder
                 'description' => 'Équipe en charge du développement des applications web et mobile. Nous travaillons avec les dernières technologies pour créer des solutions innovantes.',
                 'owner_id' => $admin->id,
                 'project_id' => $projets->count() > 0 ? $projets[0]->id : null,
-                'visibility' => 'private',
                 'settings' => json_encode([
                     'allow_member_invite' => true,
                     'require_approval' => false,
@@ -50,7 +49,6 @@ class TeamSeeder extends Seeder
                 'description' => 'Équipe dédiée au support technique, maintenance et résolution des incidents. Disponible 24/7 pour garantir la qualité de service.',
                 'owner_id' => $manager->id ?? $admin->id,
                 'project_id' => $projets->count() > 1 ? $projets[1]->id : null,
-                'visibility' => 'public',
                 'settings' => json_encode([
                     'allow_member_invite' => true,
                     'require_approval' => true,
@@ -64,7 +62,6 @@ class TeamSeeder extends Seeder
                 'description' => 'Équipe marketing et communication digitale. Création de contenu, stratégie social media et campagnes publicitaires.',
                 'owner_id' => $responsable1->id ?? $admin->id,
                 'project_id' => $projets->count() > 2 ? $projets[2]->id : null,
-                'visibility' => 'private',
                 'settings' => json_encode([
                     'allow_member_invite' => false,
                     'require_approval' => true,
@@ -78,7 +75,6 @@ class TeamSeeder extends Seeder
                 'description' => 'Recherche et développement de nouvelles technologies. Veille technologique et prototypage de solutions innovantes.',
                 'owner_id' => $responsable2->id ?? $admin->id,
                 'project_id' => null,
-                'visibility' => 'secret',
                 'settings' => json_encode([
                     'allow_member_invite' => false,
                     'require_approval' => true,
@@ -116,7 +112,6 @@ class TeamSeeder extends Seeder
                 'subject_id' => $team->id,
                 'metadata' => json_encode([
                     'team_name' => $team->name,
-                    'visibility' => $team->visibility,
                 ]),
             ]);
 
@@ -140,7 +135,9 @@ class TeamSeeder extends Seeder
             }
 
             foreach ($additionalMembers as $memberData) {
-                if (!$memberData['user']) continue;
+                if (! $memberData['user']) {
+                    continue;
+                }
 
                 $team->members()->attach($memberData['user']->id, [
                     'role' => $memberData['role'],

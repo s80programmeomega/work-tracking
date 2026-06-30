@@ -2,7 +2,7 @@
 
 **Task:** Drop `visibility` columns from projets/taches/documents/teams; replace all access rules with ContextualPermissionGate checks.  
 **Branch:** `feature/visibility-teams-chat`  
-**Status:** ⬜ To be completed after Phase 1 implementation
+**Status:** ✅ Implementation complete (Steps 1.1–1.6). Tests deferred to end of plan.
 
 ---
 

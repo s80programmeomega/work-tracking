@@ -75,8 +75,17 @@ class TeamMessageService
 
         TeamActivity::log($team, $user, 'message_sent', $message);
 
-        // Notifier les utilisateurs mentionnés dans le message
-        if (! empty($data['mentions'])) {
+        // Notifier tous les membres si @everyone, sinon les mentionnés individuels
+        if (! empty($data['mention_everyone'])) {
+            $recipients = $team->members()->where('users.id', '!=', $user->id)->get();
+            foreach ($recipients as $recipient) {
+                $this->notificationService->sendUnlessSelf(
+                    $recipient,
+                    $user,
+                    new ChatMentionNotification($message, $user)
+                );
+            }
+        } elseif (! empty($data['mentions'])) {
             $mentioned = User::whereIn('id', $data['mentions'])->get();
             foreach ($mentioned as $recipient) {
                 $this->notificationService->sendUnlessSelf(
