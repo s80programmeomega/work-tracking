@@ -44,11 +44,6 @@ class TeamMessageController extends Controller
         $team = $this->teamService->getTeamByUuid($teamUuid);
         $data = $request->validated();
 
-        // Décoder les mentions envoyées en JSON string via FormData
-        if (isset($data['mentions']) && is_string($data['mentions'])) {
-            $data['mentions'] = json_decode($data['mentions'], true) ?? [];
-        }
-
         // Normaliser mention_everyone en booléen
         $data['mention_everyone'] = filter_var($request->input('mention_everyone', false), FILTER_VALIDATE_BOOLEAN);
 

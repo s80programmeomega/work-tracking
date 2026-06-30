@@ -16,9 +16,19 @@
 
 ## Current Session
 
-**Date:** 2026-06-28
+**Date:** 2026-06-30
 **Branch:** `feature/visibility-teams-chat`
-**Status:** ✅ Chat polish complete — notification system audit done, team chat centralized. Ready to commit and merge into `jonas`.
+**Status:** ✅ Pre-merge regression sweep complete — 5 failing tests found and fixed (full suite was never run before this session). Ready to merge into `jonas`.
+
+### Pre-merge regression fixes (2026-06-30)
+
+Full `php artisan test` had never been run on this branch before merge — it surfaced 5 failures, all traced to commits already on the branch:
+
+- **`ValidatorPendingListTest` (2 tests)** — not a bug in app code. `3a0b29d` (SA isolation) correctly added a previously-missing `EVALUATIONS_VIEW_PENDING` gate to `EvaluationController::pendingValidations()`. The test's `makeContext()` helper created its own throwaway workspace and attached the N1 validator there, while the validator's `current_workspace_id` pointed at a *different* outer workspace it was never a member of — so the new gate correctly 403'd. Fixed by threading the outer `$workspace` into `makeContext()` so membership matches `current_workspace_id`.
+- **`TeamMessagesTest::store_validates_required_content`** — 500 instead of 422. The Chat Polish session's `attachments_json` change weakened `StoreTeamMessageRequest::content` from `required` to `sometimes|nullable`, so an empty payload passed validation and blew up downstream with no content and no attachment. Fixed: `content` is now conditionally required unless a file attachment or `attachments_json` is present.
+- **`TeamChatBroadcastTest` mention tests (2 tests)** — 422 instead of 201. Same change switched `mentions` validation from `array` to `string` to support the browser's FormData JSON-encoding, breaking JSON API callers that send a real array. Fixed via `prepareForValidation()` normalizing a JSON-string `mentions` into an array before the `array`/`mentions.*` rules run — supports both calling conventions. Removed the now-redundant manual decode in `TeamMessageController::store()`.
+
+**Full suite: 912 passed, 6 skipped, 1 flaky-unrelated failure (`PlatformDashboardTest` — passes standalone, pre-existing test-order pollution, file unchanged on this branch).** Pint clean, Larastan 0 errors.
 
 ---
 
@@ -117,7 +127,7 @@ Feature branch `feature/visibility-teams-chat` is fully complete, including post
 
 ## Next Task
 
-Commit `feature/visibility-teams-chat` and merge into `jonas`, then push to both remotes (with explicit per-push approval for `jonas`).
+Merge `feature/visibility-teams-chat` into `jonas`, then push to both remotes (with explicit per-push approval for `jonas`).
 
 ---
 
