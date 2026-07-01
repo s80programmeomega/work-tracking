@@ -303,6 +303,26 @@ class User extends Authenticatable
         return $this->hasMany(PushSubscription::class);
     }
 
+    public function schoolBackgrounds(): HasMany
+    {
+        return $this->hasMany(SchoolBackground::class)->orderBy('ordre');
+    }
+
+    public function certificates(): HasMany
+    {
+        return $this->hasMany(Certificate::class)->orderBy('ordre');
+    }
+
+    public function qualifications(): HasMany
+    {
+        return $this->hasMany(Qualification::class)->orderBy('ordre');
+    }
+
+    public function responsibilities(): HasMany
+    {
+        return $this->hasMany(Responsibility::class)->orderByDesc('date_debut');
+    }
+
     /**
      * Get or create notification preferences
      */

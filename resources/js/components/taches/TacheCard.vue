@@ -183,7 +183,7 @@
       </span>
     </div>
 
-    <!-- Indicateur de sous-tâches (badge ST + barre de progression mini) -->
+    <!-- Indicateur d'opérations (badge OP + barre de progression mini) -->
     <div
       v-if="tache.sous_taches_count > 0"
       dusk="st-badge-wrapper"

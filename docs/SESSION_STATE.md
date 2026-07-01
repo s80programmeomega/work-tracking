@@ -16,7 +16,37 @@
 
 ## Current Session
 
-**Date:** 2026-06-30
+**Date:** 2026-07-01
+**Branch:** `feature/role-label-centralization`
+**Status:** 🔄 Parts A + B complete and clean. Part C.1–C.2+C.4+C.5 complete (4 CRUD profile sections). Part C.3 (CV upload) not yet started. Not yet committed or pushed.
+
+### feature/role-label-centralization — summary (2026-07-01)
+
+**Part A — Role label centralization:** `app/Permissions/RoleLabel.php` + `lang/fr/roles.php` + `lang/en/roles.php` created. `Role::label()` delegates to `RoleLabel`. 6 PHP Notification classes fixed (were emitting wrong vocabulary — 'Gestionnaire'/'admin' for strings that don't exist in this app). `Permission.js` `RoleLabels` + `getRoleLabel()` extended to all 10 roles (locale-aware). `useWorkspace.js` updated as the cascade fix point for ~14 Vue components.
+
+**Part B — Rename "Sous-tâche" → "Opération":** All French display text updated in `lang/fr/sous_taches.php`, `lang/fr/evaluation.php`, `lang/fr/circuit_validation.php`, `resources/js/locales/fr.json`, `app/Exports/WorkspaceTachesExport.php`. Hardcoded-text leak closed in `SousTacheList.vue`, `SousTacheForm.vue`, `TacheDetailModal.vue`, `TacheCardResponsable.vue`, `ValidationTaskCard.vue`. Internal identifiers (DB table, model, routes, permission strings) untouched.
+
+**Part C — Profile Sections (C.1/C.2/C.4/C.5 done):**
+- 4 new tables: `school_backgrounds`, `certificates`, `qualifications`, `responsibilities` (all migrated)
+- Models + factories + `User` hasMany relations
+- Form Requests in `app/Http/Requests/Profile/`
+- 4 controllers in `app/Http/Controllers/Api/` with ownership enforcement
+- 16 routes under `/api/users/profile/{section}`
+- `UserController::profileView()` + `UserResource` extended to expose all 4 sections
+- 4 Vue section components (`SchoolBackgroundSection.vue`, `CertificateSection.vue`, `QualificationSection.vue`, `ResponsibilitySection.vue`) — `readonly`+`initialData` dual-use pattern, stagger applied
+- `UserProfile.vue` new "Profil professionnel" tab (editable); `UserProfileModal.vue` read-only display
+- i18n: `profile_sections.*` block in both `fr.json` + `en.json`
+- 19 tests, 45 assertions — all passing (`tests/Feature/Profile/ProfileSectionsTest.php`)
+- Pint clean, Larastan `[OK] No errors`
+
+**Part C.3 — CV upload: NOT YET STARTED.** Requires: making `documents.workspace_id` nullable, extending `DocumentService`/`DocumentAccessResolver` for `User::class` entity type, new `ProfileCvController`. Highest-risk piece (touches shared Document code).
+
+**Testing docs:** `docs/naming-aliasing-profile-sections/testing/PART_A_ROLE_LABELS_TESTING.md`, `PART_B_SUBTASK_RENAME_TESTING.md`, `PART_C_PROFILE_SECTIONS_TESTING.md` — all written.
+
+---
+
+## Previous Session (2026-06-30)
+
 **Branch:** `jonas` (merged from `feature/visibility-teams-chat`)
 **Status:** ✅ Merged and pushed to both remotes. Post-merge bug report fixed (see below). 913 tests passing, Pint clean, Larastan 0 errors.
 

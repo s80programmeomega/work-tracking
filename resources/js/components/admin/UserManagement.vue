@@ -29,12 +29,12 @@
                   <label>Filtrer par rôle:</label>
                   <select v-model="filters.role" class="form-control">
                     <option value="">Tous les rôles</option>
-                    <option value="super_admin">Super Admin</option>
-                    <option value="manager">Manager</option>
+                    <option value="super_admin">{{ getRoleLabel('super_admin') }}</option>
+                    <option value="manager">{{ getRoleLabel('manager') }}</option>
                     <option value="responsable_n1">Responsable N1</option>
                     <option value="responsable_n2">Responsable N2</option>
-                    <option value="cadre">Cadre</option>
-                    <option value="stagiaire">Stagiaire</option>
+                    <option value="cadre">{{ getRoleLabel('cadre') }}</option>
+                    <option value="stagiaire">{{ getRoleLabel('stagiaire') }}</option>
                   </select>
                 </div>
               </div>
@@ -216,6 +216,7 @@
 <script>
 import UserModal from './UserModal.vue'
 import { useAuthStore } from '@/stores/authStore'
+import { getRoleLabel } from '@/permissions/Permission'
 
 export default {
   name: 'UserManagement',
@@ -311,6 +312,7 @@ export default {
     await this.fetchData()
   },
   methods: {
+    getRoleLabel,
     async fetchData() {
       try {
         this.loading = true

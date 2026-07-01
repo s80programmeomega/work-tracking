@@ -4,7 +4,7 @@
     <div class="flex items-center justify-between">
       <h3 class="text-base font-semibold text-gray-900 dark:text-white flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-brand-600"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
-        Sous-tâches
+        {{ $t('taches.subtasks.title') }}
         <span dusk="soustache-count" class="px-2 py-0.5 rounded-full text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium">
           {{ sousTaches.length }}
         </span>
@@ -52,17 +52,17 @@
       <!-- Empty state -->
       <div v-if="sousTaches.length === 0 && !showForm" class="text-center py-8 text-gray-500 dark:text-gray-400">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 mb-2 opacity-30"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
-        <p class="text-sm">Aucune sous-tâche pour l'instant.</p>
+        <p class="text-sm">{{ $t('taches.subtasks.empty') }}</p>
         <button
           v-if="canCreate"
           @click="showForm = true"
           class="mt-3 text-xs text-brand-600 hover:underline"
         >
-          Créer la première sous-tâche
+          {{ $t('taches.subtasks.create_first') }}
         </button>
       </div>
 
-      <!-- Sous-tâche items -->
+      <!-- Opération items -->
       <div ref="listRef" class="space-y-2">
         <div
           v-for="st in orderedSousTaches"
@@ -465,7 +465,7 @@ const saveInlineEdit = async (st) => {
         await updateSousTache(st.id, { [field]: apiValue })
         emit('updated')
     } catch (err) {
-        console.error('Erreur mise à jour sous-tâche:', err)
+        console.error('Erreur mise à jour opération:', err)
     }
 }
 
@@ -571,7 +571,7 @@ const handleCreate = async (payload) => {
 
 const confirmDelete = async (st) => {
     openMenuId.value = null
-    if (!confirm(`Supprimer la sous-tâche "${st.titre}" ?`)) return
+    if (!confirm(`Supprimer l'opération "${st.titre}" ?`)) return
     await deleteSousTache(st.id)
     emit('updated')
 }

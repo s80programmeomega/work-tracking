@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Models\Projet;
 use App\Models\User;
+use App\Permissions\RoleLabel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -18,8 +19,7 @@ class ProjetMemberAddedNotification extends Notification implements ShouldQueue
         public User $addedBy,
         public string $role,
         public array $permissions = []
-    ) {
-    }
+    ) {}
 
     public function via(object $notifiable): array
     {
@@ -28,21 +28,15 @@ class ProjetMemberAddedNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $roleLabels = [
-            'admin' => 'Administrateur',
-            'member' => 'Membre',
-            'viewer' => 'Observateur',
-        ];
-
         return (new MailMessage)
             ->subject("Vous avez été ajouté au projet : {$this->projet->nom}")
             ->greeting("Bonjour {$notifiable->prenom},")
             ->line("{$this->addedBy->nom} vous a ajouté au projet **{$this->projet->nom}**.")
-            ->line("**Rôle attribué** : " . ($roleLabels[$this->role] ?? $this->role))
+            ->line('**Rôle attribué** : '.RoleLabel::label($this->role))
             ->when($this->projet->description, function ($mail) {
                 return $mail->line("**Description** : {$this->projet->description}");
             })
-            ->line("**Vos permissions** :")
+            ->line('**Vos permissions** :')
             ->line($this->formatPermissions())
             ->action('Voir le projet', url("/projets/{$this->projet->id}"))
             ->line("Vous pouvez maintenant accéder au projet et commencer à collaborer avec l'équipe.");
@@ -82,8 +76,8 @@ class ProjetMemberAddedNotification extends Notification implements ShouldQueue
             }
         }
 
-        return $activePermissions 
-            ? '  - ' . implode("\n  - ", $activePermissions)
+        return $activePermissions
+            ? '  - '.implode("\n  - ", $activePermissions)
             : '  - Lecture seule';
     }
 }

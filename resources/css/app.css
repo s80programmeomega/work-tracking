@@ -800,36 +800,35 @@ body {
     opacity: 0;
 }
 
-/* Cursor reset — placé hors de toute @layer pour garantir la priorité maximale.
-   Empêche le curseur texte (I-beam) sur les éléments non éditables.
-   user-select:none est le seul moyen fiable d'empêcher le I-beam navigateur
-   sur les nœuds texte non éditables (cursor seul ne suffit pas). */
-body, body * {
-    cursor: default !important;
-    user-select: none !important;
+/* Cursor & sélection — empêche le curseur I-beam sur les éléments non éditables.
+   On n'utilise PAS !important sur cursor:default pour que les classes Tailwind
+   cursor-pointer restent fonctionnelles sur tous les éléments cliquables. */
+body * {
+    user-select: none;
 }
 a, button, [role="button"], [role="link"], select,
-label[for], summary {
-    cursor: pointer !important;
-}
+label[for], summary,
 a *, button *, [role="button"] *, [role="link"] * {
-    cursor: pointer !important;
+    cursor: pointer;
 }
 input:not([type="range"]):not([type="checkbox"]):not([type="radio"]):not([readonly]):not([disabled]),
 textarea:not([readonly]):not([disabled]),
 [contenteditable="true"],
 [contenteditable=""] {
-    cursor: text !important;
-    user-select: text !important;
+    cursor: text;
+    user-select: text;
 }
 input[type="range"] {
-    cursor: grab !important;
-    user-select: none !important;
+    cursor: grab;
 }
 [disabled], [aria-disabled="true"] {
     cursor: not-allowed !important;
 }
 /* Restore text selection where needed */
 p, h1, h2, h3, h4, h5, h6, span, li, td, th, pre, code, blockquote {
-    user-select: text !important;
+    user-select: text;
+}
+/* Tailwind cursor-pointer always wins — explicit class beats cascade */
+.cursor-pointer, .cursor-pointer * {
+    cursor: pointer !important;
 }

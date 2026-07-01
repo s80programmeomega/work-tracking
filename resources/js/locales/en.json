@@ -716,6 +716,8 @@
     "subtasks": {
       "title": "Subtasks",
       "add": "Add",
+      "new_operation": "New subtask",
+      "title_placeholder": "Subtask title…",
       "create_first": "Create the first subtask",
       "empty": "No subtasks yet.",
       "weighted_progress": "Weighted progress",
@@ -1082,7 +1084,8 @@
     "mention_notification_subject": "You were mentioned in a discussion",
     "message_required": "Message is required.",
     "message_too_long": "Message cannot exceed 5000 characters.",
-    "attachment_too_large": "Attachment cannot exceed 10 MB."
+    "attachment_too_large": "Attachment cannot exceed 10 MB.",
+    "members_count": "{count} member(s)"
   },
   "users_index": {
     "title": "Users",
@@ -1419,6 +1422,7 @@
     "cancel": "Cancel",
     "confirm_delete": "Confirm deletion",
     "tab_profile": "Profile",
+    "tab_cv": "Professional profile",
     "tab_security": "Security",
     "tab_notifications": "Notifications",
     "tab_preferences": "Preferences",
@@ -2583,6 +2587,64 @@
       "pending": "Pending payment",
       "lapsed": "Expired",
       "locked": "Locked"
+    }
+  },
+  "profile_sections": {
+    "add": "Add",
+    "edit": "Edit",
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "description": "Description",
+    "date_debut": "Start date",
+    "date_fin": "End date",
+    "present": "Present",
+    "empty": "No entries.",
+    "confirm_delete": "Delete this entry?",
+    "school": {
+      "title": "Education",
+      "add_title": "Add education",
+      "etablissement": "Institution",
+      "diplome": "Degree",
+      "domaine": "Field of study",
+      "empty_editable": "No education added yet. Click Add to get started."
+    },
+    "certificates": {
+      "title": "Certifications",
+      "add_title": "Add certification",
+      "titre": "Title",
+      "organisme": "Issuing organization",
+      "date_obtention": "Issued on",
+      "date_expiration": "Expires on",
+      "obtained": "Issued",
+      "expires": "Expires",
+      "credential_id": "Credential ID",
+      "credential_url": "Credential URL",
+      "verify": "Verify",
+      "empty_editable": "No certifications added yet. Click Add to get started."
+    },
+    "qualifications": {
+      "title": "Qualifications",
+      "add_title": "Add qualification",
+      "titre": "Title",
+      "date_obtention": "Date obtained",
+      "empty_editable": "No qualifications added yet. Click Add to get started."
+    },
+    "responsibilities": {
+      "title": "Missions & Responsibilities",
+      "add_title": "Add mission",
+      "titre": "Job title",
+      "organisation": "Organization",
+      "empty_editable": "No missions added yet. Click Add to get started."
+    },
+    "cv": {
+      "title": "CV / Documents",
+      "upload": "Upload CV",
+      "uploading": "Uploading…",
+      "download": "Download",
+      "empty_editable": "No CV uploaded yet. Accepted formats: PDF, DOC, DOCX (max 10 MB).",
+      "empty_readonly": "No CV available.",
+      "upload_error": "Upload failed."
     }
   },
   "user_profile_modal": {

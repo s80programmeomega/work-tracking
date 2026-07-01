@@ -85,12 +85,12 @@
                     id="role"
                     required>
                     <option value="">Sélectionnez un rôle</option>
-                    <option value="super_admin">Super Admin</option>
-                    <option value="manager">Manager</option>
+                    <option value="super_admin">{{ getRoleLabel('super_admin') }}</option>
+                    <option value="manager">{{ getRoleLabel('manager') }}</option>
                     <option value="responsable_n1">Responsable N1</option>
                     <option value="responsable_n2">Responsable N2</option>
-                    <option value="cadre">Cadre</option>
-                    <option value="stagiaire">Stagiaire</option>
+                    <option value="cadre">{{ getRoleLabel('cadre') }}</option>
+                    <option value="stagiaire">{{ getRoleLabel('stagiaire') }}</option>
                   </select>
                   <div v-if="errors.role" class="invalid-feedback">
                     {{ errors.role[0] }}
@@ -182,6 +182,8 @@
 </template>
 
 <script>
+import { getRoleLabel } from '@/permissions/Permission'
+
 export default {
   name: 'UserModal',
   props: {
@@ -226,6 +228,7 @@ export default {
     }
   },
   methods: {
+    getRoleLabel,
     initForm() {
       if (this.isEdit && this.user) {
         this.form = {

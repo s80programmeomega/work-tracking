@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Models\Activite;
 use App\Models\User;
+use App\Permissions\RoleLabel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -14,8 +15,11 @@ class ActiviteMemberPermissionsUpdated extends Notification implements ShouldQue
     use Queueable;
 
     protected $activite;
+
     protected $updatedBy;
+
     protected $oldPermissions;
+
     protected $newPermissions;
 
     public function __construct(Activite $activite, User $updatedBy, array $oldPermissions, array $newPermissions)
@@ -44,22 +48,22 @@ class ActiviteMemberPermissionsUpdated extends Notification implements ShouldQue
 
         // Afficher le changement de rôle
         if ($roleChanged) {
-            $oldRoleLabel = $this->getRoleLabel($this->oldPermissions['role']);
-            $newRoleLabel = $this->getRoleLabel($this->newPermissions['role']);
+            $oldRoleLabel = RoleLabel::label($this->oldPermissions['role']);
+            $newRoleLabel = RoleLabel::label($this->newPermissions['role']);
             $mail->line("**Nouveau rôle:** {$newRoleLabel} (était: {$oldRoleLabel})");
         } else {
-            $mail->line("**Rôle:** " . $this->getRoleLabel($this->newPermissions['role']));
+            $mail->line('**Rôle:** '.RoleLabel::label($this->newPermissions['role']));
         }
 
         // Afficher les changements de permissions
         $permissionChanges = $this->getPermissionChanges();
-        if (!empty($permissionChanges)) {
-            $mail->line("**Changements de permissions:**")
-                 ->line($this->formatPermissionChanges($permissionChanges));
+        if (! empty($permissionChanges)) {
+            $mail->line('**Changements de permissions:**')
+                ->line($this->formatPermissionChanges($permissionChanges));
         }
 
         $mail->action('Voir l\'activité', $url)
-             ->line('Merci de votre collaboration !');
+            ->line('Merci de votre collaboration !');
 
         return $mail;
     }
@@ -78,7 +82,7 @@ class ActiviteMemberPermissionsUpdated extends Notification implements ShouldQue
             'old_permissions' => $this->oldPermissions,
             'new_permissions' => $this->newPermissions,
             'url' => "/activites/{$this->activite->id}",
-            'message' => $this->getNotificationMessage()
+            'message' => $this->getNotificationMessage(),
         ];
     }
 
@@ -102,7 +106,7 @@ class ActiviteMemberPermissionsUpdated extends Notification implements ShouldQue
                 $changes[] = [
                     'permission' => $label,
                     'old' => $oldValue,
-                    'new' => $newValue
+                    'new' => $newValue,
                 ];
             }
         }
@@ -122,26 +126,16 @@ class ActiviteMemberPermissionsUpdated extends Notification implements ShouldQue
         return implode("\n", $lines);
     }
 
-    private function getRoleLabel(string $role): string
-    {
-        return match($role) {
-            'responsable' => 'Responsable',
-            'collaborator' => 'Collaborateur',
-            'viewer' => 'Observateur',
-            default => ucfirst($role)
-        };
-    }
-
     private function getNotificationMessage(): string
     {
         $roleChanged = $this->oldPermissions['role'] !== $this->newPermissions['role'];
         $permissionChanges = $this->getPermissionChanges();
 
-        if ($roleChanged && !empty($permissionChanges)) {
+        if ($roleChanged && ! empty($permissionChanges)) {
             return "{$this->updatedBy->nom} a modifié votre rôle et vos permissions pour l'activité {$this->activite->nom}";
         } elseif ($roleChanged) {
             return "{$this->updatedBy->nom} a modifié votre rôle pour l'activité {$this->activite->nom}";
-        } elseif (!empty($permissionChanges)) {
+        } elseif (! empty($permissionChanges)) {
             return "{$this->updatedBy->nom} a modifié vos permissions pour l'activité {$this->activite->nom}";
         }
 

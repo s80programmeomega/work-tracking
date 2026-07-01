@@ -952,6 +952,7 @@ import ManageMembersModal from '@/components/activites/ManageMembersModal.vue'
 // ✅ CORRECTION 3: Import du composant AddMemberModal
 import AddMemberModal from '@/components/activites/AddMemberModal.vue'
 import { useToast } from "vue-toastification"
+import { getRoleLabel } from '@/permissions/Permission'
 
 
 const props = defineProps({
@@ -1709,15 +1710,6 @@ const getRoleColor = (role) => {
   return colors[role] || colors.viewer
 }
 
-const getRoleLabel = (role) => {
-  const labels = {
-    owner: 'Propriétaire',
-    admin: 'Administrateur',
-    member: 'Membre',
-    viewer: 'Observateur'
-  }
-  return labels[role] || role
-}
 
 const formatDate = (date) => {
   if (!date) return '-'

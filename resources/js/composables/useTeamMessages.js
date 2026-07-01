@@ -19,30 +19,37 @@ export function useTeamMessages() {
 
   // ── Abonnement au canal privé de l'équipe ────────────────────────────────────
 
-  // UUIDs des messages envoyés par cet utilisateur et déjà gérés de façon optimiste
-  const ownSentUuids = new Set()
-
   const subscribeToTeam = (teamId) => {
     const echo = useEcho().echo
     if (!echo || !teamId) return
 
     teamChannel = echo.private(`team.${teamId}`)
 
-    // Nouveau message envoyé par un autre membre
     teamChannel.listen('.message.sent', (event) => {
       const msg = event.message
-      // Ignorer si déjà présent (optimiste ou broadcast en double)
-      if (messages.value.some((m) => m.uuid === msg.uuid)) return
-      // Ignorer le broadcast du propre message de l'utilisateur (déjà géré de façon optimiste)
-      if (ownSentUuids.has(msg.uuid)) {
-        ownSentUuids.delete(msg.uuid)
+
+      // Déjà présent par UUID réel → ignorer
+      if (messages.value.some((m) => m.uuid === msg.uuid)) {
+        if (document.visibilityState === 'visible') markRead(currentTeamUuid.value)
         return
       }
-      messages.value.push(msg)
-      // Marquer automatiquement comme lu si l'onglet est actif
-      if (document.visibilityState === 'visible') {
-        markRead(currentTeamUuid.value)
+
+      // Message optimiste en attente du même expéditeur → remplacer plutôt que dupliquer
+      const arr = messages.value
+      let pendingIdx = -1
+      for (let i = arr.length - 1; i >= 0; i--) {
+        if (arr[i]._pending && arr[i].user?.id === msg.user?.id && arr[i].content === msg.content) {
+          pendingIdx = i
+          break
+        }
       }
+      if (pendingIdx !== -1) {
+        messages.value.splice(pendingIdx, 1, { ...msg, _pending: false })
+      } else {
+        messages.value.push(msg)
+      }
+
+      if (document.visibilityState === 'visible') markRead(currentTeamUuid.value)
     })
 
     // Message modifié
@@ -125,22 +132,23 @@ export function useTeamMessages() {
 
   // ── Envoi optimiste ───────────────────────────────────────────────────────────
 
-  const sendMessage = async (teamUuid, data) => {
+  const sendMessage = async (teamUuid, data, optimisticAttachments = []) => {
     const authStore = useAuthStore()
 
-    // Ajouter immédiatement un message temporaire pour un ressenti instantané
     const tempUuid = `temp-${Date.now()}`
+    const isFormData = typeof FormData !== 'undefined' && data instanceof FormData
     const tempMessage = {
       uuid: tempUuid,
-      content: data.content ?? data.get?.('content') ?? '',
+      content: isFormData ? (data.get('content') ?? '') : (data.content ?? ''),
       user: { id: authStore.currentUser?.id, nom: authStore.currentUser?.nom, email: authStore.currentUser?.email },
       created_at: new Date().toISOString(),
       is_pinned: false,
       is_edited: false,
       reactions: [],
-      attachments: [],
+      attachments: optimisticAttachments,
       mentions: data.mentions ?? [],
       _pending: true,
+      _tempUuid: tempUuid,
     }
     messages.value.push(tempMessage)
 
@@ -148,21 +156,22 @@ export function useTeamMessages() {
       const response = await api.post(`/teams/${teamUuid}/messages`, data)
       const saved = response.data.data ?? response.data.message
 
-      // Enregistrer l'UUID réel pour que le broadcast soit ignoré
-      if (saved?.uuid) ownSentUuids.add(saved.uuid)
+      // Le broadcast a peut-être déjà remplacé l'optimiste par l'UUID réel
+      if (messages.value.some((m) => m.uuid === saved.uuid)) {
+        messages.value = messages.value.filter((m) => m._tempUuid !== tempUuid)
+        return saved
+      }
 
-      // Remplacer l'entrée temporaire par le message persisté
-      const idx = messages.value.findIndex((m) => m.uuid === tempUuid)
+      const idx = messages.value.findIndex((m) => m._tempUuid === tempUuid)
       if (idx !== -1) {
         messages.value.splice(idx, 1, { ...saved, _pending: false })
-      } else if (!messages.value.some((m) => m.uuid === saved.uuid)) {
-        messages.value.push(saved)
+      } else {
+        messages.value.push({ ...saved, _pending: false })
       }
 
       return saved
     } catch (err) {
-      // Retirer l'entrée temporaire en cas d'erreur
-      messages.value = messages.value.filter((m) => m.uuid !== tempUuid)
+      messages.value = messages.value.filter((m) => m._tempUuid !== tempUuid)
       error.value = err.response?.data?.message || "Erreur lors de l'envoi du message"
       throw err
     }

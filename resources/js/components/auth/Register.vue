@@ -55,12 +55,12 @@
                 required
               >
                 <option value="">Sélectionner un rôle</option>
-                <option value="stagiaire">Stagiaire</option>
-                <option value="cadre">Cadre</option>
+                <option value="stagiaire">{{ getRoleLabel('stagiaire') }}</option>
+                <option value="cadre">{{ getRoleLabel('cadre') }}</option>
                 <option value="responsable_n2">Responsable N2</option>
                 <option value="responsable_n1">Responsable N1</option>
-                <option value="manager">Manager</option>
-                <option value="super_admin">Super Admin</option>
+                <option value="manager">{{ getRoleLabel('manager') }}</option>
+                <option value="super_admin">{{ getRoleLabel('super_admin') }}</option>
               </select>
               <div class="input-group-append">
                 <div class="input-group-text">
@@ -165,6 +165,7 @@
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
+import { getRoleLabel } from '@/permissions/Permission'
 
 export default {
   name: 'Register',
@@ -216,7 +217,8 @@ export default {
       form,
       loading,
       errors,
-      register
+      register,
+      getRoleLabel
     }
   }
 }

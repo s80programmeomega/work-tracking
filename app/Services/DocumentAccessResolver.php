@@ -168,6 +168,9 @@ class DocumentAccessResolver
             case TacheResultat::class:
                 return $this->canUploadToResultat($user, $entityId);
 
+            case User::class:
+                return $this->canUploadUserCv($user, $entityId);
+
             default:
                 return false;
         }
@@ -227,6 +230,10 @@ class DocumentAccessResolver
             case TacheResultat::class:
                 /** @var TacheResultat $entity */
                 return $this->checkResultatAccess($user, $entity, $action);
+
+            case User::class:
+                /** @var User $entity */
+                return $this->checkUserCvAccess($user, $entity, $action);
 
             default:
                 return false;
@@ -448,6 +455,65 @@ class DocumentAccessResolver
      * UPLOAD : Qui peut uploader des documents ?
      * ===================================================================
      */
+    protected function canUploadUserCv(User $uploader, int $targetUserId): bool
+    {
+        // Seul le propriétaire ou un directeur/manager partageant un workspace peut uploader
+        if ($uploader->id === $targetUserId) {
+            return true;
+        }
+
+        if ($uploader->isSuperAdmin()) {
+            return true;
+        }
+
+        $target = User::find($targetUserId);
+        if (! $target) {
+            return false;
+        }
+
+        $sharedWorkspace = Workspace::whereHas('members', fn ($q) => $q->where('users.id', $uploader->id))
+            ->whereHas('members', fn ($q) => $q->where('users.id', $targetUserId))
+            ->first();
+
+        if (! $sharedWorkspace) {
+            return false;
+        }
+
+        $roleName = $sharedWorkspace->getMemberRole($uploader);
+
+        return in_array($roleName, ['owner', 'manager']);
+    }
+
+    protected function checkUserCvAccess(User $viewer, User $owner, string $action): bool
+    {
+        // Le propriétaire du CV a tous les droits
+        if ($viewer->id === $owner->id) {
+            return true;
+        }
+
+        // Super admin a tous les droits
+        if ($viewer->isSuperAdmin()) {
+            return true;
+        }
+
+        // Directeur/manager partageant un workspace : lecture + téléchargement uniquement
+        $sharedWorkspace = Workspace::whereHas('members', fn ($q) => $q->where('users.id', $viewer->id))
+            ->whereHas('members', fn ($q) => $q->where('users.id', $owner->id))
+            ->first();
+
+        if (! $sharedWorkspace) {
+            return false;
+        }
+
+        $roleName = $sharedWorkspace->getMemberRole($viewer);
+
+        if (! in_array($roleName, ['owner', 'manager'])) {
+            return false;
+        }
+
+        return in_array($action, ['view', 'download']);
+    }
+
     protected function canUploadToWorkspace(User $user, int $workspaceId): bool
     {
         $workspace = Workspace::find($workspaceId);

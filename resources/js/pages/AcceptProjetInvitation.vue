@@ -314,6 +314,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import FullScreenLayout from '@/components/layout/FullScreenLayout.vue'
 import api from '@/api/axios'
+import { getRoleLabel } from '@/permissions/Permission'
 
 const route = useRoute()
 const router = useRouter()
@@ -333,14 +334,6 @@ const form = ref({
   password_confirmation: ''
 })
 
-const getRoleLabel = (role) => {
-  const labels = {
-    admin: 'Administrateur',
-    member: 'Membre',
-    viewer: 'Observateur'
-  }
-  return labels[role] || role
-}
 
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('fr-FR', {

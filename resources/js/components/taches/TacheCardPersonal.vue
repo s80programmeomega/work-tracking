@@ -240,7 +240,7 @@
       </button>
     </div>
 
-    <!-- Sous-tâches indicator -->
+    <!-- Opérations indicator -->
     <div
       v-if="tache.sous_taches_count > 0"
       class="mt-2 flex items-center gap-2"

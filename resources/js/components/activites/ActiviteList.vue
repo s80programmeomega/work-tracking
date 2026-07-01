@@ -1,20 +1,8 @@
 <!-- resources/js/components/activites/ActiviteList.vue -->
 <template>
   <div class="space-y-6">
-    <!-- Vue détail d'activité -->
-    <div v-if="selectedActivity" class="mb-6">
-      <ActiviteDetail
-        :activite="selectedActivity"
-        :taches="selectedActivityTaches"
-        @go-back="selectedActivity = null"
-        @edit-activite="editActivite"
-        @view-tasks="viewActivityTasks"
-        @create-task="createActivityTask"
-      />
-    </div>
 
-    <!-- Liste des activités (masquée quand une activité est sélectionnée) -->
-    <div v-else>
+    <div>
       <!-- Header -->
       <div class="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <div>
@@ -264,13 +252,14 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useActivites } from '@/composables/useActivites'
 import { useStagger } from '@/composables/useAnimations'
-import ActiviteDetail from '@/pages/ActiviteDetail.vue'
 import ActiviteForm from './ActiviteForm.vue'
 import DateRangeFilter from '@/components/common/DateRangeFilter.vue'
 
-const { fetchActivites, activites, loading, deleteActivite: deleteAct, pagination, getStatusLabel,getStatusClass ,fetchActiviteTaches } = useActivites()
+const router = useRouter()
+const { fetchActivites, activites, loading, deleteActivite: deleteAct, pagination, getStatusLabel, getStatusClass } = useActivites()
 const { staggerRef: tbodyRef, applyStagger } = useStagger(40)
 
 const filters = ref({
@@ -285,41 +274,8 @@ const showCreateForm = ref(false)
 const showEditForm = ref(false)
 const editingActivite = ref(null)
 
-// États pour la gestion des détails d'activité
-const selectedActivity = ref(null)
-const selectedActivityTaches = ref([])
-
-// ✅ NOUVEAU : Afficher les détails d'une activité
-const viewActivityDetail = async (activite) => {
-  try {
-    console.log('Viewing activity details:', activite)
-    selectedActivity.value = activite
-    
-    // Charger les tâches de l'activité
-    if (activite.id) {
-      const taches = await fetchActiviteTaches(activite.id)
-      selectedActivityTaches.value = taches || []
-      console.log('Loaded tasks:', selectedActivityTaches.value)
-    }
-  } catch (error) {
-    console.error('Error loading activity details:', error)
-    selectedActivityTaches.value = []
-  }
-}
-
-// ✅ NOUVEAU : Voir les tâches d'une activité
-const viewActivityTasks = (activityId) => {
-  console.log('View tasks for activity:', activityId)
-  // Vous pouvez naviguer vers une vue de tâches ou ouvrir un modal
-  // Pour l'instant, on log simplement
-  alert(`Voir les tâches de l'activité ${activityId}`)
-}
-
-// ✅ NOUVEAU : Créer une tâche pour une activité
-const createActivityTask = (activityId) => {
-  console.log('Create task for activity:', activityId)
-  // Ouvrir un modal de création de tâche
-  alert(`Créer une tâche pour l'activité ${activityId}`)
+const viewActivityDetail = (activite) => {
+  router.push({ name: 'activites.show', params: { id: activite.id } })
 }
 
 // ✅ NOUVEAU : Obtenir les initiales d'un nom

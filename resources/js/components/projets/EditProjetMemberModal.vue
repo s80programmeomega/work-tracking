@@ -451,6 +451,7 @@ const { dialogRef, handleRef, dragStyle, attachHandle } = useDraggable()
 onMounted(attachHandle)
 import { XIcon } from '@/icons'
 import api from '@/api/axios'
+import { getRoleLabel } from '@/permissions/Permission'
 
 const props = defineProps({
   membre: {
@@ -536,17 +537,6 @@ const getInitials = (name) => {
     .slice(0, 2)
 }
 
-const getRoleLabel = (role) => {
-  const labels = {
-    owner: 'Propriétaire',
-    manager: 'Manager',
-    cadre: 'Cadre',
-    collaborateur: 'Collaborateur',
-    stagiaire: 'Stagiaire',
-    observateur: 'Observateur'
-  }
-  return labels[role] || role
-}
 
 const getRoleBadgeClass = (role) => {
   const classes = {

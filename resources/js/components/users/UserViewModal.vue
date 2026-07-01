@@ -204,6 +204,7 @@
 <script setup>
 import { onMounted } from 'vue'
 import { useDraggable } from '@/composables/useDraggable'
+import { getRoleLabel } from '@/permissions/Permission'
 
 const { dialogRef, handleRef, dragStyle, attachHandle } = useDraggable()
 onMounted(attachHandle)
@@ -217,17 +218,6 @@ const props = defineProps({
 
 defineEmits(['close'])
 
-const getRoleLabel = (role) => {
-  const labels = {
-    super_admin: 'Super Admin',
-    manager: 'Manager',
-    responsable_n1: 'Responsable N1',
-    responsable_n2: 'Responsable N2',
-    cadre: 'Cadre',
-    stagiaire: 'Stagiaire',
-  }
-  return labels[role] || role
-}
 
 const getRoleBadgeClass = (role) => {
   const classes = {

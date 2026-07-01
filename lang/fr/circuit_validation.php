@@ -16,7 +16,7 @@ return [
         'invalid_statut' => 'Le résultat n\'est pas dans le bon état pour cette action.',
         'motif_too_short' => 'Le motif du bypass doit contenir au moins 50 caractères.',
         'bypass_already_used' => 'Le bypass a déjà été utilisé pour cette soumission.',
-        'mandatory_subtasks_not_done' => 'Certaines sous-tâches obligatoires ne sont pas encore terminées. Veuillez les compléter avant de soumettre votre résultat.',
+        'mandatory_subtasks_not_done' => 'Certaines opérations obligatoires ne sont pas encore terminées. Veuillez les compléter avant de soumettre votre résultat.',
     ],
     'success' => [
         'approuve_n0' => 'Résultat approuvé et transmis au N1.',

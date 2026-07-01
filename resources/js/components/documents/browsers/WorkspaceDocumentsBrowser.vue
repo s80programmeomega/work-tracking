@@ -121,6 +121,7 @@ import { useI18n } from 'vue-i18n'
 import { useStagger } from '@/composables/useAnimations'
 import { FolderIcon, MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
 import { useWorkspace } from '@/composables/useWorkspace'
+import { getRoleLabel } from '@/permissions/Permission'
 
 defineEmits(['select'])
 
@@ -140,10 +141,6 @@ const filteredWorkspaces = computed(() => {
   )
 })
 
-const getRoleLabel = (role) => {
-  const key = `documents_page.workspace_browser.role_${role}`
-  return t(key, role)
-}
 
 const getRoleBadgeClass = (role) => {
   const classes = {

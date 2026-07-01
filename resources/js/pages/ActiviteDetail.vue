@@ -781,6 +781,7 @@ import TacheDetailModal from '@/components/taches/TacheDetailModal.vue'
 import KanbanBoard from '@/components/taches/KanbanBoardSimple.vue'
 import { useTaches } from '@/composables/useTaches'
 import DocumentManager from '@/components/documents/DocumentManager.vue'
+import { getRoleLabel } from '@/permissions/Permission'
 
 
 const { t } = useI18n()
@@ -956,14 +957,6 @@ const getRoleBadgeClass = (role) => {
   return classes[role] || 'bg-gray-100 text-gray-800 dark:text-gray-100'
 }
 
-const getRoleLabel = (role) => {
-  const labels = {
-    'responsable': t('activite_detail.role_responsable'),
-    'collaborator': t('activite_detail.role_collaborator'),
-    'viewer': t('activite_detail.role_viewer')
-  }
-  return labels[role] || role
-}
 
 const formatDate = (dateString) => {
   if (!dateString) return t('activite_detail.date_undefined')

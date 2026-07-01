@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Http\Requests\UpdateUserRequest;
+use App\Http\Resources\DocumentResource;
 use App\Http\Resources\UserResource;
 use App\Models\Activite;
 use App\Models\Document;
@@ -174,7 +175,7 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user): JsonResponse
     {
-        abort_unless(auth()->user()->isSuperAdmin() || auth()->id() === $user->id, 403);
+        abort_unless(auth()->id() === $user->id, 403);
 
         $user = $this->userService->updateUser($user, $request->validated());
 
@@ -296,13 +297,28 @@ class UserController extends Controller
 
         abort_unless($isSelf || $isSuperAdmin || $canViewAsManager, 403, 'Accès non autorisé');
 
-        $user->load(['roles', 'permissions']);
+        $user->load([
+            'roles',
+            'permissions',
+            'schoolBackgrounds',
+            'certificates',
+            'qualifications',
+            'responsibilities',
+        ]);
+
+        $cvDocuments = Document::where('documentable_type', User::class)
+            ->where('documentable_id', $user->id)
+            ->latest()
+            ->get();
+
         $stats = $this->userService->getUserStats($user);
 
         return response()->json([
             'success' => true,
-            'can_edit' => $isSelf || $isSuperAdmin,
+            'can_edit' => $isSelf,
+            'can_edit_responsibilities' => $isSelf || $canViewAsManager,
             'data' => new UserResource($user->setAttribute('stats', $stats)),
+            'cv_documents' => DocumentResource::collection($cvDocuments),
         ]);
     }
 

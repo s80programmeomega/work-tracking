@@ -64,10 +64,10 @@ class DocumentService
             throw new \Exception('Entité non trouvée');
         }
 
-        // Vérifier le workspace
+        // Vérifier le workspace (null autorisé pour les CVs utilisateur)
         $workspace = $this->getWorkspaceFromEntity($entity, $entityType);
 
-        if (! $workspace) {
+        if (! $workspace && $entityType !== User::class) {
             throw new \Exception('Workspace non trouvé');
         }
 
@@ -93,7 +93,9 @@ class DocumentService
 
             // Définir le chemin de stockage (organisé par workspace et type)
             $disk = $options['disk'] ?? config('documents.default_disk', 'private');
-            $basePath = $this->getStoragePath($workspace, $entityType, $entityId);
+            $basePath = $workspace
+                ? $this->getStoragePath($workspace, $entityType, $entityId)
+                : $this->getUserCvStoragePath($entityId);
             $storagePath = $basePath.'/'.$storageName;
 
             // Uploader le fichier
@@ -105,7 +107,7 @@ class DocumentService
 
             // Créer le document
             $document = Document::create([
-                'workspace_id' => $workspace->id,
+                'workspace_id' => $workspace?->id,
                 'documentable_type' => $entityType,
                 'documentable_id' => $entityId,
                 'nom' => $originalName,
@@ -135,7 +137,7 @@ class DocumentService
                 ->withProperties([
                     'entity_type' => $entityType,
                     'entity_id' => $entityId,
-                    'workspace_id' => $workspace->id,
+                    'workspace_id' => $workspace?->id,
                 ])
                 ->log('Document uploadé');
 
@@ -554,6 +556,7 @@ class DocumentService
             Activite::class => Activite::find($id),
             Tache::class => Tache::find($id),
             TacheResultat::class => TacheResultat::find($id),
+            User::class => User::find($id),
             default => null,
         };
     }
@@ -573,8 +576,14 @@ class DocumentService
             Activite::class => $entity->projet?->workspace,
             Tache::class => $entity->activite?->projet?->workspace,
             TacheResultat::class => $entity->tache?->activite?->projet?->workspace,
+            User::class => null,
             default => null,
         };
+    }
+
+    protected function getUserCvStoragePath(int $userId): string
+    {
+        return "users/{$userId}/cv";
     }
 
     /**

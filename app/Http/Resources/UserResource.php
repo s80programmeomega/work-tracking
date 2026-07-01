@@ -89,6 +89,12 @@ class UserResource extends JsonResource
                 isset($this->stats),
                 fn () => $this->stats
             ),
+
+            // Sections profil étendues
+            'school_backgrounds' => $this->whenLoaded('schoolBackgrounds'),
+            'certificates' => $this->whenLoaded('certificates'),
+            'qualifications' => $this->whenLoaded('qualifications'),
+            'responsibilities' => $this->whenLoaded('responsibilities'),
         ];
     }
 }

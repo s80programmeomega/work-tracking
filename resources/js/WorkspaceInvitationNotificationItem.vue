@@ -148,6 +148,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
+import { getRoleLabel } from '@/permissions/Permission'
 
 const props = defineProps({
   notification: {
@@ -173,16 +174,6 @@ const getInitials = (name) => {
     .slice(0, 2) || 'W'
 }
 
-const getRoleLabel = (role) => {
-  const labels = {
-    owner: 'Propriétaire',
-    admin: 'Administrateur',
-    manager: 'Gestionnaire',
-    member: 'Membre',
-    viewer: 'Observateur'
-  }
-  return labels[role] || role
-}
 
 const formatExpirationDate = (dateString) => {
   const date = new Date(dateString)

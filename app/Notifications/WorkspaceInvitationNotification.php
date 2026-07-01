@@ -2,7 +2,9 @@
 
 namespace App\Notifications;
 
+use App\Models\User;
 use App\Models\WorkspaceInvitation;
+use App\Permissions\RoleLabel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -32,35 +34,35 @@ class WorkspaceInvitationNotification extends Notification implements ShouldQueu
      */
     public function toMail($notifiable): MailMessage
     {
-        $url = url('/accept-invitation/' . $this->invitation->token);
+        $url = url('/accept-invitation/'.$this->invitation->token);
         $workspaceName = $this->invitation->workspace->nom;
         $inviterName = $this->invitation->invitedBy->nom;
-        $role = $this->getRoleLabel($this->invitation->role);
+        $role = RoleLabel::label($this->invitation->role);
 
         // Vérifier si l'utilisateur existe déjà
-        $userExists = $notifiable instanceof \App\Models\User;
+        $userExists = $notifiable instanceof User;
 
         $mail = (new MailMessage)
             ->subject("Invitation à rejoindre le workspace {$workspaceName}")
-            ->greeting("Bonjour !")
+            ->greeting('Bonjour !')
             ->line("{$inviterName} vous invite à rejoindre le workspace **{$workspaceName}**.")
             ->line("Rôle assigné : **{$role}**");
 
         if ($this->invitation->message) {
             $mail->line("Message de l'inviteur :")
-                 ->line("> " . $this->invitation->message);
+                ->line('> '.$this->invitation->message);
         }
 
         if ($userExists) {
-            $mail->line("Vous avez déjà un compte sur notre plateforme. Connectez-vous pour accepter cette invitation.");
+            $mail->line('Vous avez déjà un compte sur notre plateforme. Connectez-vous pour accepter cette invitation.');
         } else {
             $mail->line("Vous n'avez pas encore de compte. Vous pourrez en créer un en acceptant cette invitation.");
         }
 
         $mail->action('Accepter l\'invitation', $url)
             ->line("Cette invitation expire le {$this->invitation->expires_at->format('d/m/Y à H:i')}.")
-            ->line("Si vous ne souhaitez pas accepter cette invitation, vous pouvez ignorer cet email.")
-            ->salutation("Cordialement,\nL'équipe " . config('app.name'));
+            ->line('Si vous ne souhaitez pas accepter cette invitation, vous pouvez ignorer cet email.')
+            ->salutation("Cordialement,\nL'équipe ".config('app.name'));
 
         return $mail;
     }
@@ -70,7 +72,7 @@ class WorkspaceInvitationNotification extends Notification implements ShouldQueu
      */
     public function toArray($notifiable): array
     {
-           return [
+        return [
             'type' => 'workspace_invitation',
             'title' => 'Nouvelle invitation workspace',
             'message' => "{$this->invitation->invitedBy->nom} vous invite à rejoindre {$this->invitation->workspace->nom}",
@@ -84,23 +86,8 @@ class WorkspaceInvitationNotification extends Notification implements ShouldQueu
             'invitation_token' => $this->invitation->token,
             'invitation_message' => $this->invitation->message,
             'expires_at' => $this->invitation->expires_at->toISOString(),
-            'action_url' => '/accept-invitation/' . $this->invitation->token,
+            'action_url' => '/accept-invitation/'.$this->invitation->token,
             'is_pending' => $this->invitation->status === 'pending',
         ];
-    }
-
-    /**
-     * Get role label in French
-     */
-    private function getRoleLabel(string $role): string
-    {
-        return match($role) {
-            'owner' => 'Propriétaire',
-            'admin' => 'Administrateur',
-            'manager' => 'Gestionnaire',
-            'member' => 'Membre',
-            'viewer' => 'Observateur',
-            default => ucfirst($role),
-        };
     }
 }

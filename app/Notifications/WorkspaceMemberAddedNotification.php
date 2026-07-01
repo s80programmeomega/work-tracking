@@ -2,8 +2,9 @@
 
 namespace App\Notifications;
 
-use App\Models\Workspace;
 use App\Models\User;
+use App\Models\Workspace;
+use App\Permissions\RoleLabel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -14,7 +15,9 @@ class WorkspaceMemberAddedNotification extends Notification implements ShouldQue
     use Queueable;
 
     protected $workspace;
+
     protected $inviter;
+
     protected $role;
 
     public function __construct(Workspace $workspace, User $inviter, string $role)
@@ -37,10 +40,10 @@ class WorkspaceMemberAddedNotification extends Notification implements ShouldQue
      */
     public function toMail($notifiable): MailMessage
     {
-        $url = url('/workspaces/' . $this->workspace->id);
+        $url = url('/workspaces/'.$this->workspace->id);
         $workspaceName = $this->workspace->nom;
         $inviterName = $this->inviter->nom;
-        $role = $this->getRoleLabel($this->role);
+        $role = RoleLabel::label($this->role);
 
         return (new MailMessage)
             ->subject("Vous avez été ajouté au workspace {$workspaceName}")
@@ -48,8 +51,8 @@ class WorkspaceMemberAddedNotification extends Notification implements ShouldQue
             ->line("{$inviterName} vous a ajouté au workspace **{$workspaceName}**.")
             ->line("Votre rôle : **{$role}**")
             ->action('Accéder au workspace', $url)
-            ->line("Vous pouvez maintenant collaborer avec votre équipe et accéder aux projets du workspace.")
-            ->salutation("Cordialement,\nL'équipe " . config('app.name'));
+            ->line('Vous pouvez maintenant collaborer avec votre équipe et accéder aux projets du workspace.')
+            ->salutation("Cordialement,\nL'équipe ".config('app.name'));
     }
 
     /**
@@ -65,22 +68,7 @@ class WorkspaceMemberAddedNotification extends Notification implements ShouldQue
             'workspace_name' => $this->workspace->nom,
             'inviter_name' => $this->inviter->nom,
             'role' => $this->role,
-            'action_url' => url('/workspaces/' . $this->workspace->id),
+            'action_url' => url('/workspaces/'.$this->workspace->id),
         ];
-    }
-
-    /**
-     * Get role label in French
-     */
-    private function getRoleLabel(string $role): string
-    {
-        return match($role) {
-            'owner' => 'Propriétaire',
-            'admin' => 'Administrateur',
-            'manager' => 'Gestionnaire',
-            'member' => 'Membre',
-            'viewer' => 'Observateur',
-            default => ucfirst($role),
-        };
     }
 }

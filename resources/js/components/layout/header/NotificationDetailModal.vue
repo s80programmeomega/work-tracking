@@ -331,6 +331,7 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useDraggable } from '@/composables/useDraggable';
 import { useNotifications } from '@/composables/useNotifications';
+import { getRoleLabel } from '@/permissions/Permission';
 
 const { dialogRef, handleRef, dragStyle, attachHandle, detachHandle } = useDraggable();
 
@@ -629,13 +630,7 @@ const STATUT_CLASSES = {
 const statutLabel = (s) => STATUT_LABELS[s] || s;
 const statutBadgeClass = (s) => STATUT_CLASSES[s] || 'bg-gray-100 text-gray-700';
 
-const ROLE_LABELS = {
-  owner: 'Propriétaire', admin: 'Administrateur', manager: 'Gestionnaire',
-  member: 'Membre', viewer: 'Observateur',
-  responsable_n1: 'Responsable N1', responsable_n2: 'Responsable N2',
-  cadre: 'Cadre', stagiaire: 'Stagiaire',
-};
-const roleLabel = (r) => ROLE_LABELS[r] || r;
+const roleLabel = (r) => getRoleLabel(r);
 
 const initials = (name) => name?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'W';
 

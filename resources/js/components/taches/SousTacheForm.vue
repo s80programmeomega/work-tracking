@@ -2,7 +2,7 @@
   <div class="bg-gray-50 dark:bg-gray-800 rounded-3 p-4 border border-dashed border-gray-300 dark:border-gray-600">
     <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-brand-600"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
-      Nouvelle sous-tâche
+      {{ $t('taches.subtasks.new_operation') }}
     </h4>
 
     <form @submit.prevent="handleSubmit" class="space-y-3">
@@ -13,7 +13,7 @@
           type="text"
           required
           dusk="soustache-form-titre"
-          placeholder="Titre de la sous-tâche…"
+          :placeholder="$t('taches.subtasks.title_placeholder')"
           class="w-full px-3 py-2 text-sm rounded-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
         />
         <p v-if="errors.titre" class="mt-1 text-xs text-red-600">{{ errors.titre[0] }}</p>

@@ -134,10 +134,10 @@
                         <select v-model="memberPermissions[member.id].role" @change="handleRoleChange(member.id)"
                           @click.stop
                           class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500">
-                          <option value="cadre">Cadre</option>
-                          <option value="collaborateur">Collaborateur</option>
-                          <option value="stagiaire">Stagiaire</option>
-                          <option value="observateur">Observateur</option>
+                          <option value="cadre">{{ getRoleLabel('cadre') }}</option>
+                          <option value="collaborateur">{{ getRoleLabel('collaborateur') }}</option>
+                          <option value="stagiaire">{{ getRoleLabel('stagiaire') }}</option>
+                          <option value="observateur">{{ getRoleLabel('observateur') }}</option>
                         </select>
                       </div>
                       
@@ -243,6 +243,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { useDraggable } from '@/composables/useDraggable'
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
 import api from '@/api/axios'
+import { getRoleLabel } from '@/permissions/Permission'
 
 // Modale déplaçable par son en-tête (panneau Headless UI).
 const { dialogRef, handleRef, dragStyle, attachHandle } = useDraggable()
