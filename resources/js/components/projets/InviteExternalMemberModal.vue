@@ -572,6 +572,7 @@ import { useProjetInvitations } from '@/composables/useProjetInvitations'
 import { useToast } from "vue-toastification"
 import { XIcon, SearchIcon, UsersIcon, MailIcon } from '@/icons'
 import api from '@/api/axios'
+import { getRoleLabel } from '@/permissions/Permission'
 
 const props = defineProps({
   projetId: {
@@ -739,15 +740,6 @@ const handleClose = () => {
   emit('close')
 }
 
-const getRoleLabel = (role) => {
-  const labels = {
-    owner: 'Propriétaire',
-    admin: 'Administrateur',
-    member: 'Membre',
-    viewer: 'Observateur'
-  }
-  return labels[role] || role
-}
 
 const resendInvitation = async (invitationId, email) => {
   try {

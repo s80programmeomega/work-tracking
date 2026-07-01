@@ -6,16 +6,21 @@ use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AdminHelpController;
 use App\Http\Controllers\Api\AdminPlanController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CertificateController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\EvaluationController;
 use App\Http\Controllers\Api\HelpController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\PaymentWebhookController;
+use App\Http\Controllers\Api\ProfileCvController;
 use App\Http\Controllers\Api\ProjetController;
 use App\Http\Controllers\Api\ProjetInvitationController;
 use App\Http\Controllers\Api\ProjetTeamController;
 use App\Http\Controllers\Api\PushSubscriptionController;
+use App\Http\Controllers\Api\QualificationController;
+use App\Http\Controllers\Api\ResponsibilityController;
+use App\Http\Controllers\Api\SchoolBackgroundController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\SocialAuthController;
 use App\Http\Controllers\Api\SousTacheController;
@@ -825,6 +830,25 @@ Route::middleware(['auth:sanctum', 'subscription.status'])->group(function () {
         Route::get('/sessions', [UserController::class, 'sessions']);
         Route::get('/profile-stats', [UserController::class, 'profileStats']);
         Route::get('/{user}/profile-view', [UserController::class, 'profileView']);
+
+        // Profile sections (owned by authenticated user)
+        Route::prefix('profile')->group(function () {
+            Route::apiResource('school-backgrounds', SchoolBackgroundController::class)->except(['show']);
+            Route::apiResource('certificates', CertificateController::class)->except(['show']);
+            Route::apiResource('qualifications', QualificationController::class)->except(['show']);
+            Route::apiResource('responsibilities', ResponsibilityController::class)->except(['show']);
+            Route::get('cv', [ProfileCvController::class, 'index']);
+            Route::post('cv', [ProfileCvController::class, 'store']);
+            Route::delete('cv/{document}', [ProfileCvController::class, 'destroy']);
+        });
+
+        // CV d'un autre utilisateur (directeur/manager/superadmin)
+        Route::get('/{user}/profile/cv', [ProfileCvController::class, 'indexFor']);
+
+        // Responsabilités gérées par un directeur/manager pour un autre utilisateur
+        Route::post('/{user}/profile/responsibilities', [ResponsibilityController::class, 'storeFor']);
+        Route::put('/{user}/profile/responsibilities/{responsibility}', [ResponsibilityController::class, 'updateFor']);
+        Route::delete('/{user}/profile/responsibilities/{responsibility}', [ResponsibilityController::class, 'destroyFor']);
 
         // User CRUD
         Route::post('/', [UserController::class, 'store']);

@@ -46,6 +46,15 @@
             <address-card :user="profileData" @refresh="loadProfile" />
           </div>
 
+          <!-- CV & Profil professionnel Tab -->
+          <div v-if="activeTab === 'cv'" class="space-y-6">
+            <profile-cv-section />
+            <school-background-section />
+            <certificate-section />
+            <qualification-section />
+            <responsibility-section :readonly="!canEditResponsibilities" />
+          </div>
+
           <!-- Sécurité Tab -->
           <div v-if="activeTab === 'security'" class="space-y-6">
             <session-settings />
@@ -158,6 +167,11 @@ import TwoFactorSettings from '@/components/auth/TwoFactorSettings.vue'
 import NotificationSettings from '@/components/settings/NotificationSettings.vue'
 import ActivityLog from '@/components/profile/ActivityLog.vue'
 import ChangePasswordModal from '@/components/profile/ChangePasswordModal.vue'
+import ProfileCvSection from '@/components/profile/ProfileCvSection.vue'
+import SchoolBackgroundSection from '@/components/profile/SchoolBackgroundSection.vue'
+import CertificateSection from '@/components/profile/CertificateSection.vue'
+import QualificationSection from '@/components/profile/QualificationSection.vue'
+import ResponsibilitySection from '@/components/profile/ResponsibilitySection.vue'
 import { useUsers } from '@/composables/useUsers'
 import api from '@/api/axios'
 import { useAuthStore } from '@/stores/authStore'
@@ -169,7 +183,8 @@ import {
   UserIcon,
   ShieldCheckIcon,
   BellIcon,
-  ClockIcon
+  ClockIcon,
+  BriefcaseIcon
 } from '@heroicons/vue/24/outline'
 
 const { t } = useI18n()
@@ -177,6 +192,12 @@ const authStore = useAuthStore()
 const router = useRouter()
 
 const currentPageTitle = computed(() => t('user_profile.page_title'))
+
+const canEditResponsibilities = computed(() => {
+    if (authStore.isSuperAdmin) { return true }
+    const role = authStore.getWorkspaceRole(authStore.user?.current_workspace_id)
+    return role === 'owner' || role === 'manager'
+})
 const profileData = ref(null)
 const loading = ref(false)
 const error = ref(null)
@@ -191,6 +212,7 @@ const showChangePasswordModal = ref(false)
 
 const tabs = computed(() => [
   { id: 'profile', name: t('user_profile.tab_profile'), icon: UserIcon },
+  { id: 'cv', name: t('user_profile.tab_cv'), icon: BriefcaseIcon },
   { id: 'security', name: t('user_profile.tab_security'), icon: ShieldCheckIcon },
   { id: 'notifications', name: t('user_profile.tab_notifications'), icon: BellIcon },
   { id: 'activity', name: t('user_profile.tab_activity'), icon: ClockIcon }

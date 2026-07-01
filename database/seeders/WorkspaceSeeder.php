@@ -33,9 +33,23 @@ class WorkspaceSeeder extends Seeder
             ->pluck('id', 'name')
             ->all();
 
-        // ── Users ──────────────────────────────────────────────────────────────
-        $superAdmin = User::where('email', 'superadmin@worktracking.com')->firstOrFail();
-        $directeur = User::where('email', 'directeur@worktracking.com')->firstOrFail();
+        // ── Comptes de base (créés ici pour que WorkspaceSeeder soit autonome) ───
+        $superAdmin = User::firstOrCreate(
+            ['email' => 'superadmin@worktracking.com'],
+            [
+                'nom' => 'Admin',
+                'prenom' => 'Super',
+                'nom_complet' => 'Super Admin',
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+                'is_active' => true,
+                'is_super_admin' => true,
+            ]
+        );
+        $superAdmin->update(['is_super_admin' => true]);
+        $superAdmin->syncRoles([Role::SUPER_ADMIN->value]);
+
+        $directeur = $this->ensureUser('Directeur', 'Test', 'directeur@worktracking.com', Role::DIRECTEUR);
 
         // Core test accounts
         $eric = $this->ensureUser('Kouassi', 'Éric', 'manager@worktracking.com', Role::UTILISATEUR, 'manager');

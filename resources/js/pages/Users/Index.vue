@@ -309,6 +309,7 @@ import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import UserModal from '@/components/users/UserModal.vue'
 import UserViewModal from '@/components/users/UserViewModal.vue'
+import { getRoleLabel } from '@/permissions/Permission'
 
 const {
   users,
@@ -404,17 +405,6 @@ const confirmDelete = async (user) => {
   }
 }
 
-const getRoleLabel = (role) => {
-  const labels = {
-    super_admin: 'Super Admin',
-    manager: 'Manager',
-    responsable_n1: 'Responsable N1',
-    responsable_n2: 'Responsable N2',
-    cadre: 'Cadre',
-    stagiaire: 'Stagiaire',
-  }
-  return labels[role] || role
-}
 
 const getRoleBadgeClass = (role) => {
   const classes = {

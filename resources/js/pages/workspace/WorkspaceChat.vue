@@ -135,8 +135,9 @@
                 <span class="font-medium">{{ msg.reply_to.user_nom }}</span>: {{ msg.reply_to.content_snippet }}
               </div>
 
-              <!-- Texte -->
+              <!-- Texte (masqué si vide et des pièces jointes sont présentes) -->
               <div
+                v-if="msg.content || !msg.attachments?.length"
                 class="px-3 py-2 rounded-2xl text-sm break-words whitespace-pre-wrap leading-relaxed"
                 :class="isOwn(msg)
                   ? 'bg-blue-600 text-white rounded-tr-sm'

@@ -209,6 +209,41 @@
             </div>
             <p v-if="saveError" class="text-sm text-red-500 dark:text-red-400">{{ saveError }}</p>
           </template>
+
+          <!-- Sections profil professionnel (pliables) -->
+          <div class="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+            <div v-for="section in profileSections" :key="section.key" class="border border-gray-200 dark:border-gray-700 rounded-3 overflow-hidden">
+              <button
+                type="button"
+                class="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                @click="toggleSection(section.key)"
+              >
+                <span class="flex items-center gap-2">
+                  <span>{{ section.label }}</span>
+                  <span
+                    v-if="section.count > 0"
+                    class="px-1.5 py-0.5 text-xs rounded-full bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400"
+                  >{{ section.count }}</span>
+                </span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-4 h-4 transition-transform duration-200"
+                  :class="openSections[section.key] ? 'rotate-180' : ''"
+                  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                </svg>
+              </button>
+              <div v-show="openSections[section.key]" class="border-t border-gray-200 dark:border-gray-700">
+                <component
+                  :is="section.component"
+                  :readonly="section.readonly"
+                  :initial-data="section.data"
+                  :target-user-id="section.targetUserId"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -247,6 +282,11 @@ import { useI18n } from 'vue-i18n'
 import { PencilIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import api from '@/api/axios'
 import { useNotifications } from '@/composables/useNotifications'
+import ProfileCvSection from '@/components/profile/ProfileCvSection.vue'
+import SchoolBackgroundSection from '@/components/profile/SchoolBackgroundSection.vue'
+import CertificateSection from '@/components/profile/CertificateSection.vue'
+import QualificationSection from '@/components/profile/QualificationSection.vue'
+import ResponsibilitySection from '@/components/profile/ResponsibilitySection.vue'
 
 const props = defineProps({
   userId: { type: [Number, String], required: true },
@@ -263,7 +303,63 @@ const saving = ref(false)
 const saveError = ref(null)
 const profileData = ref(null)
 const canEdit = ref(false)
+const canEditResponsibilities = ref(false)
 const editMode = ref(false)
+
+const cvDocuments = ref([])
+const openSections = ref({ cv: false, school: false, certificates: false, qualifications: false, responsibilities: false })
+const toggleSection = (key) => { openSections.value[key] = !openSections.value[key] }
+
+const profileSections = computed(() => {
+  if (!profileData.value) { return [] }
+  return [
+    {
+      key: 'cv',
+      label: t('profile_sections.cv.title'),
+      component: ProfileCvSection,
+      data: cvDocuments.value,
+      count: cvDocuments.value.length,
+      readonly: true,
+      targetUserId: null,
+    },
+    {
+      key: 'school',
+      label: t('profile_sections.school.title'),
+      component: SchoolBackgroundSection,
+      data: profileData.value.school_backgrounds ?? [],
+      count: (profileData.value.school_backgrounds ?? []).length,
+      readonly: true,
+      targetUserId: null,
+    },
+    {
+      key: 'certificates',
+      label: t('profile_sections.certificates.title'),
+      component: CertificateSection,
+      data: profileData.value.certificates ?? [],
+      count: (profileData.value.certificates ?? []).length,
+      readonly: true,
+      targetUserId: null,
+    },
+    {
+      key: 'qualifications',
+      label: t('profile_sections.qualifications.title'),
+      component: QualificationSection,
+      data: profileData.value.qualifications ?? [],
+      count: (profileData.value.qualifications ?? []).length,
+      readonly: true,
+      targetUserId: null,
+    },
+    {
+      key: 'responsibilities',
+      label: t('profile_sections.responsibilities.title'),
+      component: ResponsibilitySection,
+      data: profileData.value.responsibilities ?? [],
+      count: (profileData.value.responsibilities ?? []).length,
+      readonly: !canEditResponsibilities.value,
+      targetUserId: canEditResponsibilities.value ? props.userId : null,
+    },
+  ]
+})
 
 const editForm = ref({
   nom: '',
@@ -294,7 +390,9 @@ const loadProfile = async () => {
   try {
     const res = await api.get(`/users/${props.userId}/profile-view`)
     profileData.value = res.data.data
+    cvDocuments.value = res.data.cv_documents?.data ?? res.data.cv_documents ?? []
     canEdit.value = res.data.can_edit === true
+    canEditResponsibilities.value = res.data.can_edit_responsibilities === true
     // Pré-remplir le formulaire d'édition
     editForm.value = {
       nom: profileData.value.nom ?? '',

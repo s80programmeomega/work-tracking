@@ -73,10 +73,10 @@
                     @click.stop
                     class="w-full rounded-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 py-2.5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
-                    <option value="cadre">Cadre</option>
-                    <option value="collaborateur">Collaborateur</option>
-                    <option value="stagiaire">Stagiaire</option>
-                    <option value="observateur">Observateur</option>
+                    <option value="cadre">{{ getRoleLabel('cadre') }}</option>
+                    <option value="collaborateur">{{ getRoleLabel('collaborateur') }}</option>
+                    <option value="stagiaire">{{ getRoleLabel('stagiaire') }}</option>
+                    <option value="observateur">{{ getRoleLabel('observateur') }}</option>
                   </select>
                   <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                     <span v-if="form.role === 'observateur'">⚠️ Les observateurs ne peuvent que consulter</span>
@@ -228,6 +228,7 @@ import { ref, onMounted, watch } from 'vue'
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
 import api from '@/api/axios'
 import { useDraggable } from '@/composables/useDraggable'
+import { getRoleLabel } from '@/permissions/Permission'
 
 // Modale déplaçable par son en-tête (panneau Headless UI).
 const { dialogRef, handleRef, dragStyle, attachHandle } = useDraggable()

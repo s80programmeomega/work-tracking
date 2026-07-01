@@ -709,10 +709,12 @@
   },
   "taches": {
     "subtasks": {
-      "title": "Sous-tâches",
+      "title": "Opérations",
       "add": "Ajouter",
-      "create_first": "Créer la première sous-tâche",
-      "empty": "Aucune sous-tâche pour l'instant.",
+      "new_operation": "Nouvelle opération",
+      "title_placeholder": "Titre de l'opération…",
+      "create_first": "Créer la première opération",
+      "empty": "Aucune opération pour l'instant.",
       "weighted_progress": "Progression pondérée",
       "total_weight": "Poids total alloué: {weight}% / 100%",
       "mark_complete": "Marquer comme terminé",
@@ -852,9 +854,9 @@
   },
   "agent_sheet_sections": {
     "directed_tasks": "Tâches dirigées",
-    "directed_subtasks": "Sous-tâches dirigées",
+    "directed_subtasks": "Opérations dirigées",
     "assignee_tasks": "Tâches assignées",
-    "assignee_subtasks": "Sous-tâches assignées",
+    "assignee_subtasks": "Opérations assignées",
     "submitted_results": "Résultats soumis"
   },
   "mes_taches": {
@@ -1103,7 +1105,8 @@
     "mention_notification_subject": "Vous avez été mentionné dans une discussion",
     "message_required": "Le message est requis.",
     "message_too_long": "Le message ne peut pas dépasser 5000 caractères.",
-    "attachment_too_large": "La pièce jointe ne peut pas dépasser 10 Mo."
+    "attachment_too_large": "La pièce jointe ne peut pas dépasser 10 Mo.",
+    "members_count": "{count} membre(s)"
   },
   "users_index": {
     "title": "Utilisateurs",
@@ -1175,7 +1178,7 @@
     "add_deadline": "+ Échéance",
     "tabs": {
       "details": "Détails",
-      "subtasks": "Sous-tâches",
+      "subtasks": "Opérations",
       "assignees": "Assignés",
       "attachments": "Fichiers",
       "documents": "Documents",
@@ -1405,6 +1408,7 @@
     "cancel": "Annuler",
     "confirm_delete": "Confirmer la suppression",
     "tab_profile": "Profil",
+    "tab_cv": "Profil professionnel",
     "tab_security": "Sécurité",
     "tab_notifications": "Notifications",
     "tab_preferences": "Préférences",
@@ -2380,7 +2384,7 @@
     "event_commented": "Commenté sur",
     "event_uploaded": "Chargé",
     "subject_task": "Tâche",
-    "subject_subtask": "Sous-tâche",
+    "subject_subtask": "Opération",
     "subject_result": "Résultat",
     "subject_project": "Projet",
     "subject_activity": "Activité",
@@ -2408,7 +2412,7 @@
     "type_users": "Membres",
     "hint_navigate": "↑↓ pour naviguer · Entrée pour ouvrir",
     "see_all": "Voir tous les résultats pour",
-    "type_sous_taches": "Sous-tâches",
+    "type_sous_taches": "Opérations",
     "type_messages": "Messages",
     "type_notifications": "Notifications",
     "type_help_articles": "Articles d'aide",
@@ -2426,7 +2430,7 @@
     "type_documents": "Documents",
     "type_users": "Membres",
     "type_messages": "Messages",
-    "type_sous_taches": "Sous-tâches",
+    "type_sous_taches": "Opérations",
     "no_results": "Aucun résultat pour cette recherche.",
     "hint": "Saisissez un terme de recherche et appuyez sur Entrée.",
     "total_results": "résultat(s)",
@@ -2565,6 +2569,64 @@
       "pending": "En attente de paiement",
       "lapsed": "Expiré",
       "locked": "Verrouillé"
+    }
+  },
+  "profile_sections": {
+    "add": "Ajouter",
+    "edit": "Modifier",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "cancel": "Annuler",
+    "description": "Description",
+    "date_debut": "Date de début",
+    "date_fin": "Date de fin",
+    "present": "Présent",
+    "empty": "Aucune entrée.",
+    "confirm_delete": "Supprimer cette entrée ?",
+    "school": {
+      "title": "Formation",
+      "add_title": "Ajouter une formation",
+      "etablissement": "Établissement",
+      "diplome": "Diplôme",
+      "domaine": "Domaine",
+      "empty_editable": "Aucune formation ajoutée. Cliquez sur Ajouter pour commencer."
+    },
+    "certificates": {
+      "title": "Certifications",
+      "add_title": "Ajouter une certification",
+      "titre": "Intitulé",
+      "organisme": "Organisme émetteur",
+      "date_obtention": "Obtenu le",
+      "date_expiration": "Expire le",
+      "obtained": "Obtenu",
+      "expires": "Expire",
+      "credential_id": "ID de certification",
+      "credential_url": "Lien de vérification",
+      "verify": "Vérifier",
+      "empty_editable": "Aucune certification ajoutée. Cliquez sur Ajouter pour commencer."
+    },
+    "qualifications": {
+      "title": "Qualifications",
+      "add_title": "Ajouter une qualification",
+      "titre": "Intitulé",
+      "date_obtention": "Date d'obtention",
+      "empty_editable": "Aucune qualification ajoutée. Cliquez sur Ajouter pour commencer."
+    },
+    "responsibilities": {
+      "title": "Missions & Responsabilités",
+      "add_title": "Ajouter une mission",
+      "titre": "Intitulé du poste",
+      "organisation": "Organisation",
+      "empty_editable": "Aucune mission ajoutée. Cliquez sur Ajouter pour commencer."
+    },
+    "cv": {
+      "title": "CV / Documents",
+      "upload": "Ajouter un CV",
+      "uploading": "Téléversement en cours…",
+      "download": "Télécharger",
+      "empty_editable": "Aucun CV déposé. Formats acceptés : PDF, DOC, DOCX (max 10 Mo).",
+      "empty_readonly": "Aucun CV disponible.",
+      "upload_error": "Erreur lors du téléversement."
     }
   },
   "user_profile_modal": {
@@ -2771,15 +2833,15 @@
       "taches_edit": "Modifier les tâches",
       "taches_delete": "Supprimer les tâches",
       "taches_comment": "Commenter les tâches",
-      "taches_create_subtask": "Créer des sous-tâches",
+      "taches_create_subtask": "Créer des opérations",
       "taches_inline_edit": "Modification en ligne",
       "taches_validate_n1": "Valider les tâches (N1)",
       "taches_validate_n2": "Valider les tâches (N2)",
       "taches_submit_result": "Soumettre des résultats",
-      "sous_taches_view": "Voir les sous-tâches",
-      "sous_taches_edit": "Modifier les sous-tâches",
-      "sous_taches_delete": "Supprimer les sous-tâches",
-      "sous_taches_assign": "Assigner des sous-tâches",
+      "sous_taches_view": "Voir les opérations",
+      "sous_taches_edit": "Modifier les opérations",
+      "sous_taches_delete": "Supprimer les opérations",
+      "sous_taches_assign": "Assigner des opérations",
       "documents_view": "Voir les documents",
       "documents_upload": "Uploader des documents",
       "documents_delete": "Supprimer des documents",
@@ -2800,7 +2862,7 @@
       "projects": "Projets",
       "activities": "Activités",
       "tasks": "Tâches",
-      "subtasks": "Sous-tâches",
+      "subtasks": "Opérations",
       "documents": "Documents",
       "reports": "Rapports",
       "evaluations": "Évaluations",

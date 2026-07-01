@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
+use App\Permissions\RoleLabel;
+
 enum Role: string
 {
     case SUPER_ADMIN = 'super_admin';
@@ -12,11 +14,7 @@ enum Role: string
 
     public function label(): string
     {
-        return match ($this) {
-            self::SUPER_ADMIN => 'Super Administrateur',
-            self::DIRECTEUR => 'Directeur',
-            self::UTILISATEUR => 'Utilisateur',
-        };
+        return RoleLabel::label($this->value);
     }
 
     public function permissions(): array

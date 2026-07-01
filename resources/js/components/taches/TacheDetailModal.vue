@@ -262,8 +262,8 @@
                 </p>
               </SectionCollapsible>
 
-              <!-- Sous-tâches -->
-              <SectionCollapsible title="Sous-tâches" :default-open="true">
+              <!-- Opérations -->
+              <SectionCollapsible title="Opérations" :default-open="true">
                 <SousTacheList
                   :tache-id="localTache.id"
                   :parent-echeance="localTache.echeance"
@@ -446,7 +446,7 @@
             <DetailedTaskView :tache="localTache" @refresh="refreshTask" />
           </div>
 
-          <!-- Onglet Sous-tâches -->
+          <!-- Onglet Opérations -->
           <div v-show="activeTab === 'sous-taches'">
             <SousTacheList
               :tache-id="localTache.id"
@@ -572,7 +572,7 @@ const modalSizeClass = computed(() =>
 
 const tabs = computed(() => [
   { id: 'details', label: 'Détails' },
-  { id: 'sous-taches', label: 'Sous-tâches' },
+  { id: 'sous-taches', label: 'Opérations' },
   { id: 'documents', label: 'Documents de resultat', count: localTache.value.documents_count || 0 },
 ])
 

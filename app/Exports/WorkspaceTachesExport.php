@@ -37,7 +37,7 @@ class WorkspaceTachesExport implements FromCollection, ShouldAutoSize, WithHeadi
             'Intervenants',
             'Avancement (%)',
             'Échéance',
-            'Sous-tâches',
+            'Opérations',
         ];
     }
 

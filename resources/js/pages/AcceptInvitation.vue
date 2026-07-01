@@ -217,6 +217,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import FullScreenLayout from '@/components/layout/FullScreenLayout.vue'
 import api from '@/api/axios'
+import { getRoleLabel } from '@/permissions/Permission'
 
 const route = useRoute()
 const router = useRouter()
@@ -245,16 +246,6 @@ const getInitials = (name) => {
     .slice(0, 2) || 'W'
 }
 
-const getRoleLabel = (role) => {
-  const labels = {
-    owner: 'Propriétaire',
-    admin: 'Administrateur',
-    manager: 'Gestionnaire',
-    member: 'Membre',
-    viewer: 'Observateur'
-  }
-  return labels[role] || role
-}
 
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('fr-FR', {

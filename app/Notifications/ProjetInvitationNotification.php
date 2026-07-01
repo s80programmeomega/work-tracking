@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\ProjetInvitation;
+use App\Permissions\RoleLabel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -32,17 +33,17 @@ class ProjetInvitationNotification extends Notification implements ShouldQueue
 
         return (new MailMessage)
             ->subject("Invitation au projet : {$projet->nom}")
-            ->greeting("Bonjour,")
+            ->greeting('Bonjour,')
             ->line("{$inviter->nom} vous invite à rejoindre le projet **{$projet->nom}**.")
-            ->line("**Rôle attribué :** " . $this->getRoleLabel($this->invitation->role))
+            ->line('**Rôle attribué :** '.RoleLabel::label($this->invitation->role))
             ->when($this->invitation->message, function ($mail) {
-                return $mail->line("**Message personnel :**")
+                return $mail->line('**Message personnel :**')
                     ->line("_{$this->invitation->message}_");
             })
             ->action('Accepter l\'invitation', $acceptUrl)
             ->line("Cette invitation expire le {$this->invitation->expires_at->format('d/m/Y à H:i')}.")
-            ->line("Si vous ne souhaitez pas rejoindre ce projet, ignorez simplement cet email.")
-            ->salutation("Cordialement,\nL'équipe " . config('app.name'));
+            ->line('Si vous ne souhaitez pas rejoindre ce projet, ignorez simplement cet email.')
+            ->salutation("Cordialement,\nL'équipe ".config('app.name'));
     }
 
     public function toArray($notifiable): array
@@ -56,15 +57,5 @@ class ProjetInvitationNotification extends Notification implements ShouldQueue
             'token' => $this->invitation->token,
             'expires_at' => $this->invitation->expires_at->toISOString(),
         ];
-    }
-
-    private function getRoleLabel(string $role): string
-    {
-        return match($role) {
-            'admin' => 'Administrateur',
-            'member' => 'Membre',
-            'viewer' => 'Observateur',
-            default => $role,
-        };
     }
 }

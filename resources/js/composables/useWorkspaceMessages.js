@@ -37,9 +37,15 @@ export function useWorkspaceMessages() {
       }
 
       // Message optimiste en attente du même expéditeur → remplacer plutôt que dupliquer
-      const pendingIdx = messages.value.findIndex(
-        (m) => m._pending && m.user?.id === msg.user?.id && m.content === msg.content,
-      )
+      // On cherche le message en attente le plus récent du même expéditeur avec le même contenu
+      const arr = messages.value
+      let pendingIdx = -1
+      for (let i = arr.length - 1; i >= 0; i--) {
+        if (arr[i]._pending && arr[i].user?.id === msg.user?.id && arr[i].content === msg.content) {
+          pendingIdx = i
+          break
+        }
+      }
       if (pendingIdx !== -1) {
         messages.value.splice(pendingIdx, 1, { ...msg, _pending: false })
       } else {
@@ -157,10 +163,12 @@ export function useWorkspaceMessages() {
       is_pinned: false,
       is_edited: false,
       reactions: [],
-      attachments: [],
+      // Afficher les pièces jointes dès l'envoi optimiste
+      attachments: data.attachments ?? [],
       mentions: data.mentions ?? [],
       reply_to: null,
       _pending: true,
+      _tempUuid: tempUuid,
     }
     messages.value.push(tempMessage)
 
@@ -172,13 +180,13 @@ export function useWorkspaceMessages() {
       const saved = response.data.message ?? response.data
 
       // Le broadcast peut être arrivé avant la réponse HTTP et avoir déjà remplacé
-      // le message optimiste par l'UUID réel — dans ce cas on ne fait rien.
+      // le message optimiste (repéré par _tempUuid) par l'UUID réel.
       if (messages.value.some((m) => m.uuid === saved.uuid)) {
-        messages.value = messages.value.filter((m) => m.uuid !== tempUuid)
+        messages.value = messages.value.filter((m) => m._tempUuid !== tempUuid)
         return saved
       }
 
-      const idx = messages.value.findIndex((m) => m.uuid === tempUuid)
+      const idx = messages.value.findIndex((m) => m._tempUuid === tempUuid)
       if (idx !== -1) {
         messages.value.splice(idx, 1, { ...saved, _pending: false })
       } else {
@@ -187,7 +195,7 @@ export function useWorkspaceMessages() {
 
       return saved
     } catch (err) {
-      messages.value = messages.value.filter((m) => m.uuid !== tempUuid)
+      messages.value = messages.value.filter((m) => m._tempUuid !== tempUuid)
       error.value = err.response?.data?.message || "Erreur lors de l'envoi du message"
       throw err
     }

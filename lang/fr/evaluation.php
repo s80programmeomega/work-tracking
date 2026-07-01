@@ -35,9 +35,9 @@ return [
         'period_label' => 'Période',
         'sections' => [
             'directed_tasks' => 'Tâches dirigées',
-            'directed_subtasks' => 'Sous-tâches dirigées',
+            'directed_subtasks' => 'Opérations dirigées',
             'assignee_tasks' => 'Tâches assignées',
-            'assignee_subtasks' => 'Sous-tâches assignées',
+            'assignee_subtasks' => 'Opérations assignées',
             'submitted_results' => 'Résultats soumis',
         ],
         'filters' => [
@@ -61,7 +61,7 @@ return [
         'weight_label' => 'Poids',
         'raw_label' => 'Valeur',
         'weighted_label' => 'Pondéré',
-        'subtask_coefficient_note' => 'Les sous-tâches contribuent au score à coefficient 0.5.',
+        'subtask_coefficient_note' => 'Les opérations contribuent au score à coefficient 0.5.',
         'empty' => 'Aucun élément dans cette section sur la période.',
     ],
 
@@ -148,7 +148,7 @@ return [
             'assignees' => 'Assignés',
             'projet' => 'Projet',
             'activite' => 'Activité',
-            'sous_taches' => 'Sous-tâches',
+            'sous_taches' => 'Opérations',
         ],
         'no_tasks' => 'Aucune tâche trouvée pour ces critères.',
     ],

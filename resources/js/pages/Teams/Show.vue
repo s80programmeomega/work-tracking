@@ -184,8 +184,9 @@
                         </div>
                       </div>
 
+                      <!-- Texte (masqué si vide et des pièces jointes sont présentes) -->
                       <div
-                        v-else
+                        v-else-if="message.content || !message.attachments?.length"
                         class="px-3 py-2 rounded-2xl text-sm break-words whitespace-pre-wrap leading-relaxed"
                         :class="isOwn(message)
                           ? 'bg-blue-600 text-white rounded-tr-sm'
@@ -193,23 +194,24 @@
                         :style="message._pending ? 'opacity: 0.65' : ''"
                       >
                         {{ message.content }}
-                        <!-- Pièces jointes -->
-                        <div v-if="message.attachments?.length" class="mt-2 flex flex-wrap gap-2">
-                          <template v-for="att in message.attachments" :key="att.url">
-                            <a v-if="att.type === 'image'" :href="att.url" target="_blank" rel="noopener" class="block">
-                              <img :src="att.url" :alt="att.name ?? 'photo'" class="max-h-48 max-w-xs rounded-xl object-cover border border-white/20 hover:opacity-90 transition-opacity cursor-zoom-in" />
-                            </a>
-                            <a
-                              v-else
-                              :href="att.url"
-                              target="_blank"
-                              rel="noopener"
-                              class="inline-flex items-center gap-1 text-xs hover:underline opacity-80"
-                            >
-                              📎 {{ att.name }}
-                            </a>
-                          </template>
-                        </div>
+                      </div>
+
+                      <!-- Pièces jointes -->
+                      <div v-if="message.attachments?.length" class="mt-1.5 flex flex-wrap gap-1.5">
+                        <template v-for="att in message.attachments" :key="att.url">
+                          <a v-if="att.type === 'image'" :href="att.url" target="_blank" rel="noopener" class="block">
+                            <img :src="att.url" :alt="att.name ?? 'photo'" class="max-h-48 max-w-xs rounded-xl object-cover border border-gray-200 dark:border-gray-600 hover:opacity-90 transition-opacity cursor-zoom-in" />
+                          </a>
+                          <a
+                            v-else
+                            :href="att.url"
+                            target="_blank"
+                            rel="noopener"
+                            class="inline-flex items-center gap-1 text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded hover:underline text-gray-700 dark:text-gray-300"
+                          >
+                            📎 {{ att.name }}
+                          </a>
+                        </template>
                       </div>
 
                       <!-- Réactions -->
@@ -1433,6 +1435,7 @@ import { useTeamPresence } from '@/composables/useTeamPresence'
 import { useTeamCalendar } from '@/composables/useTeamCalendar'
 import { useAuthStore } from '@/stores/authStore'
 import api from '@/api/axios'
+import { getRoleLabel } from '@/permissions/Permission'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 
@@ -1757,15 +1760,6 @@ const getUserInitials = (user) => {
   return user?.nom ? getInitials(user.nom) : '??'
 }
 
-const getRoleLabel = (role) => {
-  const labels = {
-    owner: t('team_show.role_owner'),
-    admin: t('team_show.role_admin'),
-    moderator: t('team_show.role_moderator'),
-    member: t('team_show.role_member'),
-  }
-  return labels[role] || role
-}
 
 const formatDate = (date) => {
   if (!date) return ''
@@ -1808,7 +1802,7 @@ const sendMessage = async () => {
   if (photoInputRef.value) { photoInputRef.value.value = '' }
 
   try {
-    await sendMessageApi(route.params.uuid, data)
+    await sendMessageApi(route.params.uuid, data, attachments)
     await nextTick()
     scrollToBottom()
     markRead(route.params.uuid)

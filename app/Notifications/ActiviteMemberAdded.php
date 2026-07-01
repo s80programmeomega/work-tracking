@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Models\Activite;
 use App\Models\User;
+use App\Permissions\RoleLabel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -14,8 +15,11 @@ class ActiviteMemberAdded extends Notification implements ShouldQueue
     use Queueable;
 
     protected $activite;
+
     protected $addedBy;
+
     protected $role;
+
     protected $permissions;
 
     public function __construct(Activite $activite, User $addedBy, string $role, array $permissions)
@@ -33,7 +37,7 @@ class ActiviteMemberAdded extends Notification implements ShouldQueue
 
     public function toMail($notifiable)
     {
-        $roleLabel = $this->getRoleLabel();
+        $roleLabel = RoleLabel::label($this->role);
         $url = url("/activites/{$this->activite->id}");
 
         return (new MailMessage)
@@ -42,7 +46,7 @@ class ActiviteMemberAdded extends Notification implements ShouldQueue
             ->line("{$this->addedBy->nom} vous a ajouté à l'activité **{$this->activite->nom}**.")
             ->line("**Projet:** {$this->activite->projet->nom}")
             ->line("**Votre rôle:** {$roleLabel}")
-            ->line("**Vos permissions:**")
+            ->line('**Vos permissions:**')
             ->line($this->formatPermissions())
             ->action('Voir l\'activité', $url)
             ->line('Merci de votre collaboration !');
@@ -62,14 +66,14 @@ class ActiviteMemberAdded extends Notification implements ShouldQueue
             'role' => $this->role,
             'permissions' => $this->permissions,
             'url' => "/activites/{$this->activite->id}",
-            'message' => "{$this->addedBy->nom} vous a ajouté à l'activité {$this->activite->nom}"
+            'message' => "{$this->addedBy->nom} vous a ajouté à l'activité {$this->activite->nom}",
         ];
     }
 
     private function formatPermissions(): string
     {
         $permissions = [];
-        
+
         if ($this->permissions['can_create_tasks'] ?? false) {
             $permissions[] = '✓ Créer des tâches';
         }
@@ -86,18 +90,8 @@ class ActiviteMemberAdded extends Notification implements ShouldQueue
             $permissions[] = '✓ Assigner des membres';
         }
 
-        return empty($permissions) 
-            ? '- Aucune permission spéciale' 
+        return empty($permissions)
+            ? '- Aucune permission spéciale'
             : implode("\n", $permissions);
-    }
-
-    private function getRoleLabel(): string
-    {
-        return match($this->role) {
-            'responsable' => 'Responsable',
-            'collaborator' => 'Collaborateur',
-            'viewer' => 'Observateur',
-            default => ucfirst($this->role)
-        };
     }
 }

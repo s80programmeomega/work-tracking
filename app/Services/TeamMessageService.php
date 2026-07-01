@@ -67,7 +67,7 @@ class TeamMessageService
         $message = TeamMessage::create([
             'team_id' => $team->id,
             'user_id' => $user->id,
-            'content' => $data['content'],
+            'content' => $data['content'] ?? '',
             'mentions' => $data['mentions'] ?? [],
             'attachments' => $data['attachments'] ?? [],
             'reply_to_id' => $data['reply_to_id'] ?? null,

@@ -12,6 +12,8 @@
  * from API responses. These constants are provided for reference and for the
  * future admin UI (Task 14) that writes to role_has_permissions.
  */
+import { i18n } from '@/locales'
+
 export const Permission = Object.freeze({
     // Workspace
     WORKSPACES_VIEW:            'workspaces.view',
@@ -109,17 +111,58 @@ export const Permission = Object.freeze({
 })
 
 /**
- * Human-readable labels for each contextual role.
- * Used in the admin UI role picker and member management modals.
+ * Human-readable labels for every role in the app (3 global Spatie roles +
+ * 7 contextual roles stored via role_id on pivot tables), by locale.
+ *
+ * Role identifier strings ('manager', 'cadre', etc.) are the permanent
+ * internal contract used everywhere in gating logic — they never change.
+ * Only these labels change when the displayed name needs to change.
+ *
+ * Mirror of app/Permissions/RoleLabel.php + lang/{fr,en}/roles.php — keep in sync.
  */
-export const RoleLabels = Object.freeze({
-    owner:         'Propriétaire',
-    manager:       'Manager',
-    cadre:         'Cadre',
-    collaborateur: 'Collaborateur',
-    stagiaire:     'Stagiaire',
-    observateur:   'Observateur',
+const RoleLabelsByLocale = Object.freeze({
+    fr: {
+        super_admin:      'Super Administrateur',
+        directeur:        'Directeur',
+        utilisateur:      'Utilisateur',
+        owner:            'Propriétaire',
+        manager:          'Manager',
+        cadre:            'Cadre',
+        task_responsable: 'Responsable de tâche',
+        collaborateur:    'Collaborateur',
+        stagiaire:        'Stagiaire',
+        observateur:      'Observateur',
+    },
+    en: {
+        super_admin:      'Super Admin',
+        directeur:        'Director',
+        utilisateur:      'User',
+        owner:            'Owner',
+        manager:          'Manager',
+        cadre:            'Team Lead',
+        task_responsable: 'Task Owner',
+        collaborateur:    'Collaborator',
+        stagiaire:        'Intern',
+        observateur:      'Observer',
+    },
 })
+
+/**
+ * French-only labels for contextual roles, kept for call sites that don't
+ * need locale awareness. Prefer getRoleLabel() for new code.
+ */
+export const RoleLabels = Object.freeze(RoleLabelsByLocale.fr)
+
+/**
+ * Resolve a role's display label for the given locale (defaults to the
+ * active app locale). Falls back to French, then to the raw role string.
+ */
+export function getRoleLabel(role, locale) {
+    const activeLocale = locale ?? i18n.global.locale.value
+    return RoleLabelsByLocale[activeLocale]?.[role]
+        ?? RoleLabelsByLocale.fr[role]
+        ?? role
+}
 
 /**
  * Ordered list of contextual roles (highest to lowest privilege).
@@ -128,6 +171,7 @@ export const RoleHierarchy = [
     'owner',
     'manager',
     'cadre',
+    'task_responsable',
     'collaborateur',
     'stagiaire',
     'observateur',

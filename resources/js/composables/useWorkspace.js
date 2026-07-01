@@ -13,6 +13,7 @@ import { computed, ref } from 'vue';
 import api from '@/api/axios';
 import { useAuthStore } from '@/stores/authStore';
 import { useToast } from 'vue-toastification';
+import { getRoleLabel as resolveRoleLabel } from '@/permissions/Permission';
 
 const toast = useToast();
 
@@ -500,21 +501,14 @@ export function useWorkspace() {
 
     /** Available contextual roles for workspace membership */
     const getAvailableRoles = () => [
-        { value: 'manager',       label: 'Manager',       description: 'N2 validator, sees all projects' },
-        { value: 'cadre',         label: 'Cadre',         description: 'N1 validator, manages activities' },
-        { value: 'collaborateur', label: 'Collaborateur', description: 'Executes tasks' },
-        { value: 'stagiaire',     label: 'Stagiaire',     description: 'Intern, limited access' },
-        { value: 'observateur',   label: 'Observateur',   description: 'Read-only' },
+        { value: 'manager',       label: resolveRoleLabel('manager'),       description: 'N2 validator, sees all projects' },
+        { value: 'cadre',         label: resolveRoleLabel('cadre'),         description: 'N1 validator, manages activities' },
+        { value: 'collaborateur', label: resolveRoleLabel('collaborateur'), description: 'Executes tasks' },
+        { value: 'stagiaire',     label: resolveRoleLabel('stagiaire'),     description: 'Intern, limited access' },
+        { value: 'observateur',   label: resolveRoleLabel('observateur'),   description: 'Read-only' },
     ];
 
-    const getRoleLabel = (role) => ({
-        owner:         'Propriétaire',
-        manager:       'Manager',
-        cadre:         'Cadre',
-        collaborateur: 'Collaborateur',
-        stagiaire:     'Stagiaire',
-        observateur:   'Observateur',
-    }[role] || role);
+    const getRoleLabel = (role) => resolveRoleLabel(role);
 
     const getRoleColor = (role) => ({
         owner:         'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
